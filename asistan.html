@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yapay Zekâ Asistanı — MatRota</title>
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600&f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <main class="main">
+    <div class="mobile-top" data-shell="mobile-top"></div>
+    <div class="page-head">
+      <div>
+        <div class="crumbs"><a href="panel.html">6. Sınıf</a><span>›</span><span>Asistan</span></div>
+        <h1>Sokratik alıştırma</h1>
+      </div>
+      <div class="row"><span class="chip chip-warning">Demo: kurallı simülasyon</span><span class="chip">Günlük hak: 41/60</span></div>
+    </div>
+
+    <div class="tutor">
+      <aside class="stack">
+        <div class="card stack-sm">
+          <p class="xs muted" style="font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:var(--space-2)">Kazanım seç</p>
+          <button class="topic-btn active" data-topic="asal"><strong>Asal çarpanlara ayırma</strong><small>MAT.6.1 · 84'ü birlikte ayıralım</small></button>
+          <button class="topic-btn" data-topic="ekok"><strong>Ortak kat problemi</strong><small>MAT.6.1 · otobüs problemi</small></button>
+          <button class="topic-btn" data-topic="bolun"><strong>Bölünebilme kuralı</strong><small>MAT.6.1 · 9 ile bölünebilme</small></button>
+        </div>
+        <div class="card">
+          <p class="xs muted" style="font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:var(--space-3)">Asistanın kuralları</p>
+          <ul class="guard">
+            <li>Cevabı doğrudan vermez; önce sorar, ipucu verir.</li>
+            <li>Yalnızca seçili kazanım ve ön koşulları kapsamında kalır.</li>
+            <li>İki yanlış denemeden sonra adımı açıklar ve tekrar listesine işler.</li>
+            <li>Her matematiksel ifade bir doğrulayıcıdan (CAS) geçer; model yalnız başına "doğru" diyemez.</li>
+            <li>Konuşmalar veli ve öğretmen tarafından görülebilir.</li>
+          </ul>
+        </div>
+        <div class="notice notice-warning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+          <p>Bu demoda yanıtlar kurallı bir senaryo motorundan geliyor. Üretimde: LLM + müfredat RAG + sembolik doğrulayıcı. Detay: <a href="mimari.html#ai" style="text-decoration:underline">mimari sayfası</a>.</p>
+        </div>
+      </aside>
+
+      <section class="card chat">
+        <div class="chat-head">
+          <div class="row"><span class="avatar alt" style="background:var(--color-primary)">∑</span><div><strong id="ttitle">Asal çarpanlara ayırma</strong><br><span class="xs muted" id="tsub">Adım 1 / 7</span></div></div>
+          <div class="row"><button class="btn btn-ghost btn-sm" id="restart">Baştan</button><button class="btn btn-soft btn-sm" id="hintbtn">İpucu</button></div>
+        </div>
+        <div class="chat-body" id="body"></div>
+        <form class="chat-input" id="form">
+          <input type="text" id="inp" placeholder="Cevabını yaz… (ör. 2)" autocomplete="off" aria-label="Cevabın">
+          <button class="btn btn-primary" type="submit">Gönder</button>
+        </form>
+      </section>
+    </div>
+  </main>
+</div>
+<nav class="tabbar" data-shell="tabbar" aria-label="Alt menü"></nav>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const nums = s => (s.match(/\d+/g) || []).map(Number);
+  const has = (s, ...w) => w.some(x => s.toLowerCase().includes(x));
+  const yes = s => has(s, 'evet', 'asal', 'asaldır', 'doğru');
+
+  const T = {
+    asal: {
+      title: 'Asal çarpanlara ayırma', intro: 'Birlikte 84 sayısını asal çarpanlarına ayıracağız. Ben soracağım, sen cevaplayacaksın; takılırsan "ipucu" yaz.',
+      steps: [
+        { q: '84 ile başlıyoruz. Merdiven yönteminde ilk denediğimiz asal hangisi olmalı? Sayının çift mi tek mi olduğuna bak.', ok: s => nums(s)[0] === 2, h: ['84 çift bir sayı. Çift sayılar hangi asala kesin bölünür?', 'En küçük asal sayı 2\'dir ve 84 çift olduğu için 2 ile başlamalıyız.'], r: 'İlk asal: 2.' },
+        { q: 'Doğru, 2. Peki 84 ÷ 2 kaç eder?', ok: s => nums(s)[0] === 42, h: ['80 ÷ 2 = 40, 4 ÷ 2 = 2. Topla.', '84 ÷ 2 = 42.'], r: '84 ÷ 2 = 42.' },
+        { q: '42 hâlâ çift. Yine 2\'ye bölelim: 42 ÷ 2 = ?', ok: s => nums(s)[0] === 21, h: ['40 ÷ 2 = 20, 2 ÷ 2 = 1.', '42 ÷ 2 = 21.'], r: '42 ÷ 2 = 21.' },
+        { q: '21 tek, 2 artık bölmez. 21\'i bölen en küçük asal hangisi? Rakamları toplamayı dene.', ok: s => nums(s)[0] === 3, h: ['2 + 1 = 3. Rakamları toplamı 3\'ün katıysa sayı 3\'e bölünür.', 'Rakamları toplamı 3 olduğu için 21, 3\'e bölünür.'], r: '21, 3\'e bölünür.' },
+        { q: 'Evet, 3. Şimdi 21 ÷ 3 = ?', ok: s => nums(s)[0] === 7, h: ['3 × 7 = ?', '21 ÷ 3 = 7.'], r: '21 ÷ 3 = 7.' },
+        { q: '7\'ye geldik. 7 asal mı? Neden?', ok: s => yes(s) && !has(s, 'değil', 'hayır'), h: ['7\'nin çarpanlarını say: 1 ve … başka var mı?', '7\'nin yalnızca iki çarpanı var (1 ve 7), yani asaldır. 7 ÷ 7 = 1 ile merdiven biter.'], r: '7 asaldır; 7 ÷ 7 = 1, merdiven bitti.' },
+        { q: 'Harika, merdiven bitti. Kullandığımız asallar: 2, 2, 3, 7. Şimdi 84\'ü üslü biçimde yaz (ör. "2^2 . 3 . 7" gibi yazabilirsin).', ok: s => { const n = nums(s.replace(/²/g, '^2')); const c = s.replace(/\s/g, ''); return (/2\^2|2²|2\*2|2\.2|2·2|2x2/.test(c) || n.filter(x => x === 2).length >= 2) && n.includes(3) && n.includes(7); }, h: ['2 iki kez geçiyor; iki kez çarpılan sayı üs olarak nasıl yazılır?', '2 · 2 = 2². Sonra 3 ve 7 bir kez: 2² · 3 · 7.'], r: '84 = 2² · 3 · 7.' }
+      ],
+      done: 'Kazanım tamamlandı: 84 = 2² · 3 · 7. Kontrol: 4 · 3 · 7 = 84. ✓\n\nİstersen aynı yöntemi 180 ile tekrar deneyelim ya da soldan başka bir kazanım seç.'
+    },
+    ekok: {
+      title: 'Ortak kat problemi', intro: 'Problem: Bir otobüs 12 dakikada bir, diğeri 18 dakikada bir kalkıyor. İkisi 09:00\'da birlikte kalktı. Bir sonraki birlikte kalkış saati nedir? Adım adım gidelim.',
+      steps: [
+        { q: 'Önce kavramı seçelim: Bu problemde ortak bölen mi, ortak kat mı arıyoruz? Neden?', ok: s => has(s, 'kat', 'ekok'), h: ['Otobüsler 12, 24, 36… ve 18, 36, 54… dakikalarda kalkar. Bu sayılar 12 ve 18\'in neleri?', 'Kalkış zamanları 12 ve 18\'in katları; ikisinin ilk ortak zamanı en küçük ortak kattır (EKOK).'], r: 'Ortak kat (EKOK) arıyoruz.' },
+        { q: 'Doğru, ortak kat. 12\'nin asal çarpanları neler?', ok: s => { const n = nums(s); return n.filter(x => x === 2).length >= 2 && n.includes(3) || /2\^2|2²/.test(s) && n.includes(3); }, h: ['12 → 2 → 6 → 2 → 3 → 3 → 1', '12 = 2 · 2 · 3 = 2² · 3.'], r: '12 = 2² · 3.' },
+        { q: 'Şimdi 18\'in asal çarpanları?', ok: s => { const n = nums(s); return n.includes(2) && (n.filter(x => x === 3).length >= 2 || /3\^2|3²/.test(s)); }, h: ['18 → 2 → 9 → 3 → 3 → 3 → 1', '18 = 2 · 3 · 3 = 2 · 3².'], r: '18 = 2 · 3².' },
+        { q: 'EKOK için tüm asalları en büyük üsleriyle alıyoruz. EKOK(12, 18) kaç?', ok: s => nums(s).includes(36), h: ['2\'nin en büyük üssü 2² (12\'den), 3\'ün en büyük üssü 3² (18\'den). Çarp.', '2² · 3² = 4 · 9 = 36.'], r: 'EKOK = 36.' },
+        { q: '36 dakika sonra birlikte kalkarlar. 09:00 + 36 dakika = ?', ok: s => /9[:.]?36/.test(s.replace(/\s/g, '')), h: ['09:00\'a 36 dakika ekle; saat değişmez.', '09:36.'], r: '09:36.' }
+      ],
+      done: 'Cevap: 09:36. Mantık zinciri: "birlikte kalkış" → ortak kat → asal çarpanlar → en büyük üsler → 36 dk.\n\nBenzer bir problemde sayılar 15 ve 20 olsaydı ne değişirdi? İstersen deneyelim.'
+    },
+    bolun: {
+      title: 'Bölünebilme kuralı', intro: 'Soru: 5A3 üç basamaklı sayısı 9 ile kalansız bölünüyorsa A kaçtır? Önce kuralı hatırlayalım.',
+      steps: [
+        { q: 'Bir sayının 9 ile bölünüp bölünmediğini nasıl anlarız?', ok: s => has(s, 'toplam', 'rakam'), h: ['3 ile bölünebilme kuralına çok benzer.', 'Rakamları toplamı 9\'un katı ise sayı 9\'a bölünür.'], r: 'Rakamları toplamı 9\'un katı olmalı.' },
+        { q: 'Doğru. 5A3 sayısının rakamları toplamını A cinsinden yaz.', ok: s => { const c = s.replace(/\s/g, '').toLowerCase(); return /8\+a|a\+8/.test(c) || (nums(s).includes(8) && c.includes('a')); }, h: ['5 + A + 3 — sayıları topla, A\'yı yanında bırak.', '5 + 3 = 8, yani toplam 8 + A.'], r: 'Toplam = 8 + A.' },
+        { q: '8 + A, 9\'un katı olacak. A bir rakam (0-9) olduğuna göre A kaç olabilir?', ok: s => { const n = nums(s); return n.includes(1) && !n.includes(10); }, h: ['8 + A, 9 veya 18 olabilir. Hangisi A\'yı rakam yapar?', '8 + A = 9 → A = 1. (8 + A = 18 için A = 10 olur, rakam değil.)'], r: 'A = 1.' }
+      ],
+      done: 'A = 1. Kontrol: 513 ÷ 9 = 57. ✓\n\nDikkat edilen nokta: A\'nın bir rakam olması, 18 seçeneğini eledi. Bu "tanım kısıtını kontrol et" alışkanlığı çok soruda işine yarayacak.'
+    }
+  };
+
+  let topic = 'asal', step = 0, tries = 0, finished = false;
+  const body = $('body');
+  function add(kind, html, tag) { const d = document.createElement('div'); d.className = 'bubble ' + kind; d.innerHTML = (tag ? `<span class="tag">${tag}</span><br>` : '') + html; body.appendChild(d); body.scrollTop = body.scrollHeight; }
+  function bot(html, tag) { const t = document.createElement('div'); t.className = 'typing'; t.innerHTML = '<i></i><i></i><i></i>'; body.appendChild(t); body.scrollTop = body.scrollHeight; setTimeout(() => { t.remove(); add('bot', html, tag); }, 550 + Math.min(900, html.length * 6)); }
+  function status() { $('ttitle').textContent = T[topic].title; $('tsub').textContent = finished ? 'Tamamlandı' : `Adım ${step + 1} / ${T[topic].steps.length}`; }
+  function startTopic(t) {
+    topic = t; step = 0; tries = 0; finished = false; body.innerHTML = '';
+    document.querySelectorAll('.topic-btn').forEach(b => b.classList.toggle('active', b.dataset.topic === t));
+    status();
+    add('bot', T[t].intro, 'Asistan');
+    bot(T[t].steps[0].q);
+  }
+  function hint() {
+    if (finished) return;
+    const st = T[topic].steps[step];
+    if (tries === 0) { tries = 1; bot(st.h[0], 'İpucu 1'); }
+    else if (tries === 1) { tries = 2; bot(st.h[1], 'İpucu 2'); }
+    else reveal();
+  }
+  function reveal() {
+    const st = T[topic].steps[step];
+    bot(`${st.r}\n\nBu adımı açıkladım; tekrar listene işlendi. Devam edelim.`, 'Açıklama');
+    setTimeout(advance, 1600);
+  }
+  function advance() {
+    step++; tries = 0;
+    if (step >= T[topic].steps.length) { finished = true; status(); bot(T[topic].done, 'Kazanım tamamlandı'); return; }
+    status(); bot(T[topic].steps[step].q);
+  }
+  $('form').addEventListener('submit', e => {
+    e.preventDefault(); const v = $('inp').value.trim(); if (!v) return; $('inp').value = ''; add('user', v.replace(/</g, '&lt;'));
+    if (finished) { if (has(v, '180')) { bot('180 için aynı yolu izle: çift → 2 ile başla. 180 ÷ 2 = ? (Bu kısım demoda serbest bırakıldı; üretimde yeni oturum açılır.)'); } else bot('Bu kazanımı bitirdin. Soldan yeni bir kazanım seç ya da "Baştan" ile tekrar et.'); return; }
+    if (has(v, 'cevab', 'söyle', 'direkt', 'direk')) { bot('Cevabı doğrudan vermiyorum; birlikte bulacağız. Önce şunu dene:', 'Kural'); setTimeout(hint, 900); return; }
+    if (has(v, 'ipucu', 'yardım', 'bilmiyorum')) { hint(); return; }
+    const st = T[topic].steps[step];
+    if (st.ok(v)) { const praise = ['Doğru.', 'Evet.', 'Tam olarak.', 'Doğru, devam.'][step % 4]; add('bot', praise, 'Doğrulandı ✓'); setTimeout(advance, 500); }
+    else { tries++; if (tries >= 3) reveal(); else bot(`Tam değil. ${st.h[tries - 1]}`, tries === 1 ? 'Dene' : 'Son ipucu'); }
+  });
+  $('hintbtn').addEventListener('click', hint);
+  $('restart').addEventListener('click', () => startTopic(topic));
+  document.querySelectorAll('.topic-btn').forEach(b => b.addEventListener('click', () => startTopic(b.dataset.topic)));
+  startTopic('asal');
+})();
+</script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://perplexity.localhost","http://localhost:1420","http://127.0.0.1:1420","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  const DEFAULT_LINE_HEIGHT = 16;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  const PICK_CAPABILITIES = ["pick"];
+  const PICK_CHAIN_LENGTH = 4;
+  const PICK_MAX_TEXT_CHARS = 120;
+  const PICK_MAX_HTML_CHARS = 300;
+
+  function truncate(value, maxChars) {
+    return value.length > maxChars ? value.slice(0, maxChars - 1) + "…" : value;
+  }
+
+  function isPickableElement(element) {
+    return (
+      element instanceof Element &&
+      element !== document.documentElement &&
+      element !== document.body
+    );
+  }
+
+  function resolvePickTarget(x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    const element = document.elementFromPoint(x, y);
+    return isPickableElement(element) ? element.closest("svg") || element : null;
+  }
+
+  function pickLabel(element) {
+    if (element.id) return element.localName + "#" + element.id;
+    return [element.localName].concat(Array.from(element.classList).slice(0, 2)).join(".");
+  }
+
+  // Only attributes that help find the element in source. data-* values and URL
+  // query strings or fragments can carry tokens.
+  const PICK_ATTRIBUTES = new Set([
+    "id",
+    "class",
+    "name",
+    "type",
+    "role",
+    "alt",
+    "aria-label",
+    "href",
+    "src",
+  ]);
+
+  function pickAttributeValue(attribute) {
+    return attribute.name === "href" || attribute.name === "src"
+      ? attribute.value.split(/[?#]/)[0]
+      : attribute.value;
+  }
+
+  function describePickElement(element) {
+    const chain = [];
+    for (
+      let current = element;
+      isPickableElement(current) && chain.length < PICK_CHAIN_LENGTH;
+      current = current.parentElement
+    ) {
+      chain.unshift(current);
+    }
+    const attributes = Array.from(element.attributes)
+      .filter((attribute) => PICK_ATTRIBUTES.has(attribute.name))
+      .map((attribute) => ` ${attribute.name}="${pickAttributeValue(attribute).replace(/"/g, "&quot;")}"`)
+      .join("");
+    const text = (element.innerText || element.textContent || "").replace(/\s+/g, " ").trim();
+    return {
+      chain: chain.map(pickLabel),
+      html: truncate(`<${element.localName}${attributes}>`, PICK_MAX_HTML_CHARS),
+      text: text ? truncate(text, PICK_MAX_TEXT_CHARS) : undefined,
+    };
+  }
+
+  // Hover asks once per frame, and innerText on a large section forces layout,
+  // so only the rect is re-read while the pointer stays on the same element.
+  // Clicks ask for fresh details since the page may have changed the element.
+  let lastPick = null;
+
+  function describePickTarget(element, fresh) {
+    if (fresh || lastPick?.element !== element) {
+      lastPick = { element, details: describePickElement(element) };
+    }
+    const rect = element.getBoundingClientRect();
+    return {
+      rect: { x: rect.left, y: rect.top, width: rect.width, height: rect.height },
+      ...lastPick.details,
+    };
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      capabilities: PICK_CAPABILITIES,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_PICK") {
+      const element = resolvePickTarget(event.data.x, event.data.y);
+      postToTrustedTop({
+        type: "INLINE_EDIT_PICK_RESULT",
+        seq: event.data.seq,
+        target: element ? describePickTarget(element, event.data.fresh === true) : null,
+      });
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_BY") {
+      const { deltaX, deltaY, deltaMode } = event.data;
+      if (!scrollForwarding || !Number.isFinite(deltaX) || !Number.isFinite(deltaY)) return;
+      if (deltaMode !== 0 && deltaMode !== 1 && deltaMode !== 2) return;
+      const lineHeight =
+        parseFloat(getComputedStyle(document.documentElement).lineHeight) || DEFAULT_LINE_HEIGHT;
+      const scaleX = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerWidth : 1;
+      const scaleY = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerHeight : 1;
+      // The selection overlay receives the wheel event instead of this iframe.
+      // Instant scrolling preserves trackpad deltas even on smooth-scroll sites.
+      window.scrollBy({ left: deltaX * scaleX, top: deltaY * scaleY, behavior: "instant" });
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>
