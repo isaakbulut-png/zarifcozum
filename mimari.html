@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mimari ve İş Akışı — MatRota</title>
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600&f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .doc { max-width: 960px; }
+  .doc section { margin-bottom: var(--space-10); }
+  .doc h2 { font-family: var(--font-display); font-size: var(--text-xl); margin-bottom: var(--space-4); letter-spacing: -0.02em; }
+  .doc p + p { margin-top: var(--space-3); }
+  .doc a.ref { color: var(--color-primary); text-decoration: underline; text-underline-offset: 2px; }
+  .finding { border-left: 3px solid var(--color-error); padding: var(--space-3) var(--space-4); background: #fff7f7; border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+  .finding + .finding { margin-top: var(--space-3); }
+  .finding strong { display: block; margin-bottom: 2px; }
+  .finding p { font-size: var(--text-sm); color: var(--color-text-muted); max-width: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <main class="main">
+    <div class="mobile-top" data-shell="mobile-top"></div>
+    <div class="page-head">
+      <div>
+        <div class="crumbs"><span>Teknik doküman</span><span>·</span><span>23 Ekim 2026</span></div>
+        <h1>Mimari ve iş akışı</h1>
+      </div>
+      <div class="row"><span class="conf k">[Kesin]</span><span class="conf m">[Muhtemel]</span><span class="conf t">[Tahmin]</span><span class="xs muted">güven etiketleri</span></div>
+    </div>
+
+    <div class="doc">
+      <section id="bulgular">
+        <h2>Önce can sıkıcı bulgular</h2>
+        <div class="finding"><strong>1. "İçerik doğrudan MEB'den çekilsin" varsayımı çalışmaz. <span class="conf k">[Kesin]</span></strong><p>OGM Materyal test sayfaları "tüm yayın hakları MEB'e aittir, hiçbir şekilde ticari amaçla kullanılamaz veya kullandırılamaz; aykırılık FSEK 36'ya göre suçtur" ibaresi taşıyor (<a class="ref" href="https://ogmmateryal.eba.gov.tr/dort-dortluk-konu-pekistirme-testleri">OGM Materyal</a>). EBA uygulamalarının kullanım şartları da içeriğin yazılı izin olmadan çoğaltılmasını yasaklıyor (<a class="ref" href="https://diyalekt.eba.gov.tr/terms-and-conditions">EBA</a>). FSEK 33-34'teki eğitim istisnası kazanç amacı gütmeyen kullanım içindir; ücretli platform bunun dışında kalır. Çözüm: müfredat <em>yapısını</em> (tema, öğrenme çıktısı kodları, saat dağılımı) MEB programından referans al — bunlar korunan eser değil, kamu düzenlemesi — ama anlatım ve soruları özgün üret ya da lisansla. MEB ÖDSGM'nin ücretli yayım izni mekanizması var; sözleşmede 3 yıllık süre ve zorunlu telif ibaresi yer alıyor (<a class="ref" href="https://odsgm.meb.gov.tr/meb_iys_dosyalar/2016_05/25093041_internet_sozlesmesi.pdf">ÖDSGM sözleşme örneği</a>). "Telifsiz platform" alternatifi de pratikte yok: Türkçe, Maarif Modeli'ne hizalı, ticari kullanıma açık (CC BY) bir matematik havuzu bulamadım <span class="conf m">[Muhtemel]</span>.</p></div>
+        <div class="finding"><strong>2. "5-11. sınıf, Maarif Modeli" kapsamı 8. sınıfta kırılıyor. <span class="conf k">[Kesin]</span></strong><p>2026-27'de Maarif Modeli 5, 6, 7 ve hazırlık, 9, 10, 11'de uygulanıyor; 8 ve 12. sınıflar önceki programla devam ediyor ve 2027 LGS/YKS'ye eski programla giriyor (<a class="ref" href="https://www.bbc.com/turkce/articles/c5yej7v0nz9o">BBC Türkçe</a>, <a class="ref" href="https://ogm.meb.gov.tr/www/2026-2027-egitim-ogretim-yili-turkiye-yuzyili-maarif-modeli-taslak-cerceve-planlar-yayimlandi/icerik/2633/tr">MEB OGM</a>). Bakan Tekin'e göre 2027-28'de tüm kademeler modele geçecek (<a class="ref" href="https://www.aa.com.tr/tr/gundem/canli-milli-egitim-bakani-tekin-aa-editor-masasina-konuk-oluyor/4057321">AA</a>). Sonuç: 8. sınıf için bu yıl eski programa göre ayrı bir içerik ağacı gerekir ve bu içeriğin ömrü tek yıldır. Öneri: 8. sınıfı ya 2027-28'e ertele ya da LGS odaklı ayrı bir ürün olarak konumlandır.</p></div>
+        <div class="finding"><strong>3. "Zoom gibi" ile "Zoom'un kendisi" maliyet ve deneyim olarak farklı. <span class="conf k">[Kesin]</span></strong><p>Zoom Video SDK (markasız, platform içine gömülü) katılımcı-dakika başına 0,0035 USD, ayda 10.000 dakika ücretsiz; kayıt dakikası 0,01 USD ayrı (<a class="ref" href="https://zoom.us/pricing/developer">Zoom developer pricing</a>, <a class="ref" href="https://trtc.io/blog/details/zoom-video-sdk-pricing-2026">rate tablosu</a>). Meeting SDK ise Zoom arayüzünü gömer, Zoom hesabı/host lisansı ister (<a class="ref" href="https://support.zoom.com/hc/en/article?id=zm_kb&sysparm_article=KB0064689">Zoom karşılaştırma</a>). Eğitim platformu için doğru seçim Video SDK; alternatif olarak LiveKit (self-host mümkün) veya Daily. Demo bu kararı yansıtır.</p></div>
+        <div class="finding"><strong>4. Yapay zekâ asistanı tek başına LLM ile güvenilir olmaz. <span class="conf m">[Muhtemel]</span></strong><p>Matematikte LLM'ler akıcı ama yanlış doğrulama yapabilir. Üretimde her hesaplama adımı sembolik doğrulayıcıdan (SymPy/CAS) geçmeli; model yalnızca pedagojik dili üretmeli. Ayrıca 18 yaş altı kullanıcı için veli onayı, sohbet kaydı ve "model eğitiminde kullanılmaz" sözleşme maddesi şart (KVKK).</p></div>
+      </section>
+
+      <section id="katmanlar">
+        <h2>Katmanlı mimari</h2>
+        <div class="arch">
+          <div class="layer"><div class="lname">İstemciler<small>web + mobil + tablet</small></div><div class="items"><span>Next.js / React (PWA)</span><span>Capacitor kabuğu → iOS/Android mağaza</span><span>Responsive tasarım (bu demo)</span><span>Offline önbellek: ders metni + son testler</span></div></div>
+          <div class="layer"><div class="lname">API katmanı<small>BFF</small></div><div class="items"><span>Node/NestJS veya FastAPI</span><span>REST + WebSocket</span><span>Rol: öğrenci / veli / öğretmen / admin</span><span>Oran sınırlama (asistan kotası)</span></div></div>
+          <div class="layer"><div class="lname">Kimlik & ödeme<small>abonelik</small></div><div class="items"><span>Auth: e-posta/telefon OTP, veli onayı akışı</span><span class="ext">iyzico veya PayTR (TL, taksit, abonelik)</span><span>e-Fatura/e-Arşiv entegrasyonu</span><span>Deneme süresi, kardeş indirimi, iptal</span></div></div>
+          <div class="layer"><div class="lname">İçerik & müfredat<small>LMS çekirdeği</small></div><div class="items"><span>Müfredat grafı: sınıf → tema → öğrenme çıktısı</span><span>Ders (MDX + video) · Soru bankası (JSON, KaTeX)</span><span>Sürümleme ve editör onay akışı</span><span>Yanlış-tekrar algoritması (aralıklı tekrar)</span></div></div>
+          <div class="layer"><div class="lname">Canlı ders<small>gerçek zamanlı</small></div><div class="items"><span class="ext">Zoom Video SDK (web + native)</span><span>Oturum sunucusu: JWT üretimi, webhooks</span><span>Tahta, anket, söz sırası (kendi UI)</span><span>Kayıt → S3 uyumlu depolama → HLS</span></div></div>
+          <div class="layer"><div class="lname">Yapay zekâ asistanı<small>Sokratik</small></div><div class="items"><span class="ext">LLM API (fonksiyon çağrısı destekli)</span><span>RAG: yalnız seçili kazanımın ders metni</span><span>Sembolik doğrulayıcı (SymPy) — her adım</span><span>Politika katmanı: "cevabı verme", kapsam dışı reddi</span><span>Denetim günlüğü → veli/öğretmen</span></div></div>
+          <div class="layer"><div class="lname">Veri & analitik<small></small></div><div class="items"><span>PostgreSQL (ana veri)</span><span>Redis (oturum, kota)</span><span>Olay akışı: ders görüntüleme, test, asistan</span><span>Veli raporu (haftalık iş)</span></div></div>
+          <div class="layer"><div class="lname">Altyapı & uyum<small></small></div><div class="items"><span>Türkiye bölgesi/veri yerleşimi (KVKK)</span><span>Yedekleme, günlükler, WAF</span><span>VERBİS kaydı, aydınlatma metinleri</span><span>Erişilebilirlik (WCAG AA)</span></div></div>
+        </div>
+      </section>
+
+      <section id="icerik">
+        <h2>İçerik üretim iş akışı</h2>
+        <p class="muted small" style="margin-bottom:var(--space-4)">Telif sorunu olmadan ölçeklenebilir tek yol. Müfredat yapısı MEB programından, içerik platformun kendisinden.</p>
+        <div class="flow">
+          <div><strong>1. Müfredat haritası</strong>tymm.meb.gov.tr'den tema ve öğrenme çıktısı kodları (ör. MAT.6.1) ve ders saati dağılımı alınır; veritabanına "kazanım düğümü" olarak işlenir.</div>
+          <div><strong>2. Ders yazımı</strong>Matematik öğretmeni her kazanım için 8-12 dk'lık ders yazar (MDX şablonu: tanım, çözümlü örnek, kendini dene, sık hata).</div>
+          <div><strong>3. Soru üretimi</strong>Kazanım başına ≥30 özgün soru; zorluk ve çeldirici açıklaması zorunlu. LLM taslak üretir, öğretmen onaylar, CAS doğrular.</div>
+          <div><strong>4. Pedagojik inceleme</strong>İkinci öğretmen kontrolü + çocuk-uygunluk kontrol listesi. Sürüm etiketi ve yayın tarihi.</div>
+          <div><strong>5. Yayın & ölçüm</strong>Yayınlanır; soru bazlı doğru oranı ve ayırt edicilik izlenir, zayıf sorular geri çağrılır.</div>
+        </div>
+        <div class="table-wrap" style="margin-top:var(--space-6)"><table class="table">
+          <thead><tr><th>Kapsam (ilk yıl)</th><th>Adet</th><th>Üretim tahmini</th><th>Güven</th></tr></thead>
+          <tbody>
+            <tr><td>Sınıf (5, 6, 7, 9, 10, 11)</td><td class="mono">6</td><td>—</td><td><span class="conf k">[Kesin]</span></td></tr>
+            <tr><td>Öğrenme çıktısı (kazanım) toplamı</td><td class="mono">≈ 180–240</td><td>Sınıf başına 30-40</td><td><span class="conf t">[Tahmin]</span></td></tr>
+            <tr><td>Ders videosu (8-12 dk)</td><td class="mono">≈ 200</td><td>Öğretmen başına haftada 4-5 ders</td><td><span class="conf t">[Tahmin]</span></td></tr>
+            <tr><td>Soru bankası</td><td class="mono">≈ 6.000–7.000</td><td>Kazanım başına 30; 3 öğretmen, 6 ay</td><td><span class="conf t">[Tahmin]</span></td></tr>
+          </tbody>
+        </table></div>
+        <p class="small muted" style="margin-top:var(--space-3)">Alternatif kısayol: ÖDSGM'den çıkmış sınav sorularını ücretli lisanslamak. Sözleşme 3 yıl süreli ve yayım biçimi başına ayrı ücret içeriyor; eski program sorularının Maarif Modeli'ne uyumu ayrıca kontrol edilmeli.</p>
+      </section>
+
+      <section id="canli">
+        <h2>Canlı ders akışı</h2>
+        <div class="flow">
+          <div><strong>Planlama</strong>Öğretmen takvimden oturum açar; grup, kazanım ve kapasite seçer. Sunucu Zoom Video SDK oturum adı üretir.</div>
+          <div><strong>Hatırlatma</strong>T-24s ve T-15dk bildirim (push + e-posta). Veliye de kopya.</div>
+          <div><strong>Katılım</strong>Öğrenci "Katıl"a basar; sunucu kısa ömürlü JWT verir, SDK web bileşeni odaya bağlanır. Yoklama otomatik.</div>
+          <div><strong>Ders</strong>Öğretmen ekran paylaşır/tahta kullanır; anket ve söz sırası platform UI'ında; sohbet öğretmen onaylı.</div>
+          <div><strong>Sonrası</strong>Kayıt webhook'u → depolama → HLS; anket sonuçları kazanım takibine işlenir; ders özeti veli raporuna.</div>
+        </div>
+        <div class="table-wrap" style="margin-top:var(--space-6)"><table class="table">
+          <thead><tr><th>Senaryo</th><th>Hesap</th><th>Aylık maliyet (USD)</th><th>Güven</th></tr></thead>
+          <tbody>
+            <tr><td>200 öğrenci · haftada 2 ders · 50 dk · 15 kişilik gruplar</td><td class="mono">200 × 2 × 50 × 4,3 = 86.000 kat.-dk</td><td class="mono">(86.000 − 10.000) × 0,0035 ≈ 266 + kayıt ≈ 70</td><td><span class="conf m">[Muhtemel]</span></td></tr>
+            <tr><td>1.000 öğrenci, aynı yoğunluk</td><td class="mono">430.000 kat.-dk</td><td class="mono">≈ 1.470 + kayıt ≈ 350</td><td><span class="conf m">[Muhtemel]</span></td></tr>
+          </tbody>
+        </table></div>
+        <p class="small muted" style="margin-top:var(--space-3)">Birim fiyatlar Zoom'un yayımladığı oranlardır; Zoom katılımcı başına dakika sayar ve kesirli dakikayı yukarı yuvarlar. Öğrenci başına ≈ 1,3-1,8 USD/ay; abonelik fiyatının içinde taşınabilir.</p>
+      </section>
+
+      <section id="ai">
+        <h2>Yapay zekâ asistanı tasarımı</h2>
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>İstek akışı</h3>
+            <ol class="stack-sm small muted" style="margin-top:var(--space-3);list-style:decimal;padding-left:var(--space-5)">
+              <li>Öğrenci kazanım seçer; bağlam yalnızca o kazanımın ders metni + ön koşullarıyla sınırlanır (RAG).</li>
+              <li>Politika katmanı: "cevabı doğrudan verme", kapsam dışı soruyu nazikçe reddet, kişisel veri isteme.</li>
+              <li>Model Sokratik soru üretir; öğrenci cevaplar.</li>
+              <li>Cevap, sembolik doğrulayıcıya (SymPy) gider; model yalnızca doğrulayıcı sonucunu yorumlar.</li>
+              <li>2 yanlış denemeden sonra açıklama; olay "tekrar listesi" ve veli raporuna yazılır.</li>
+            </ol>
+          </div>
+          <div class="card">
+            <h3>Maliyet ve kota</h3>
+            <p class="small muted" style="margin-top:var(--space-3)">Öğrenci başına günde 60 mesaj sınırı; ortalama 1.500 token/mesaj varsayımıyla aylık öğrenci başı ≈ 0,5-2 USD <span class="conf t">[Tahmin]</span> — model seçimine çok bağlı. Küçük/hızlı model + doğrulayıcı kombinasyonu hem ucuz hem daha güvenli.</p>
+            <p class="small muted">Ölçüm: adım başına doğrulama oranı, "cevabı söyle" isteklerinin reddi, kazanım tamamlama süresi.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="odeme">
+        <h2>Ödeme, KVKK ve çocuk kullanıcılar</h2>
+        <ul class="stack-sm small muted" style="list-style:disc;padding-left:var(--space-5)">
+          <li>Hesap veli tarafından açılır; öğrenci profili veli onayıyla etkinleşir. 18 yaş altı için açık rıza velide.</li>
+          <li>Ödeme: iyzico/PayTR abonelik (tekrarlayan tahsilat), e-Arşiv fatura otomatik. Mağaza uygulamasında dijital içerik satışı Apple/Google komisyonuna tabidir; web'de satış, uygulamada giriş modeli tercih edilmeli <span class="conf m">[Muhtemel]</span>.</li>
+          <li>Veri Türkiye'de tutulur; VERBİS kaydı, aydınlatma metni, çerez politikası. Sohbet kayıtları şifreli, 1 yıl saklama, model eğitiminde kullanılmaz.</li>
+          <li>Mesafeli satış ve cayma hakkı: dijital içerikte anında ifa onayı alınır.</li>
+        </ul>
+      </section>
+
+      <section id="yol">
+        <h2>Yol haritası ve bu demonun kapsamı</h2>
+        <div class="table-wrap"><table class="table">
+          <thead><tr><th>Faz</th><th>Kapsam</th><th>Çıktı</th></tr></thead>
+          <tbody>
+            <tr><td><strong>0 · Bu demo</strong></td><td>Statik, tıklanabilir prototip: panel, konu, test, canlı ders odası (simüle), asistan (kurallı), mimari</td><td>Akış ve arayüz kararlarını revize etmek için</td></tr>
+            <tr><td><strong>1 · MVP (8-10 hafta)</strong></td><td>Tek sınıf (6), 1 tema tam içerik, gerçek LLM+doğrulayıcı, Zoom Video SDK, iyzico deneme aboneliği, veli onayı</td><td>50 öğrencilik pilot</td></tr>
+            <tr><td><strong>2 · Ölçek</strong></td><td>5-7 ve 9-11 tüm temalar, mağaza uygulamaları, öğretmen paneli, veli raporu, kayıt arşivi</td><td>Ücretli lansman</td></tr>
+            <tr><td><strong>3 · 2027-28</strong></td><td>8 ve 12. sınıf Maarif Modeli'ne geçince kapsam genişletme</td><td>Tam K5-12 (matematik)</td></tr>
+          </tbody>
+        </table></div>
+        <div class="notice notice-info" style="margin-top:var(--space-5)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+          <p><strong>Demoda neler gerçek, neler simüle?</strong> Gerçek: tüm sayfa akışları, test motoru (puanlama, süre, inceleme), konu içi kontrol, Sokratik asistan mantığı (kurallı), responsive düzen. Simüle: video akışı, kullanıcı verileri, ödeme, LLM.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+<nav class="tabbar" data-shell="tabbar" aria-label="Alt menü"></nav>
+<script src="assets/app.js"></script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://perplexity.localhost","http://localhost:1420","http://127.0.0.1:1420","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  const DEFAULT_LINE_HEIGHT = 16;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  const PICK_CAPABILITIES = ["pick"];
+  const PICK_CHAIN_LENGTH = 4;
+  const PICK_MAX_TEXT_CHARS = 120;
+  const PICK_MAX_HTML_CHARS = 300;
+
+  function truncate(value, maxChars) {
+    return value.length > maxChars ? value.slice(0, maxChars - 1) + "…" : value;
+  }
+
+  function isPickableElement(element) {
+    return (
+      element instanceof Element &&
+      element !== document.documentElement &&
+      element !== document.body
+    );
+  }
+
+  function resolvePickTarget(x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    const element = document.elementFromPoint(x, y);
+    return isPickableElement(element) ? element.closest("svg") || element : null;
+  }
+
+  function pickLabel(element) {
+    if (element.id) return element.localName + "#" + element.id;
+    return [element.localName].concat(Array.from(element.classList).slice(0, 2)).join(".");
+  }
+
+  // Only attributes that help find the element in source. data-* values and URL
+  // query strings or fragments can carry tokens.
+  const PICK_ATTRIBUTES = new Set([
+    "id",
+    "class",
+    "name",
+    "type",
+    "role",
+    "alt",
+    "aria-label",
+    "href",
+    "src",
+  ]);
+
+  function pickAttributeValue(attribute) {
+    return attribute.name === "href" || attribute.name === "src"
+      ? attribute.value.split(/[?#]/)[0]
+      : attribute.value;
+  }
+
+  function describePickElement(element) {
+    const chain = [];
+    for (
+      let current = element;
+      isPickableElement(current) && chain.length < PICK_CHAIN_LENGTH;
+      current = current.parentElement
+    ) {
+      chain.unshift(current);
+    }
+    const attributes = Array.from(element.attributes)
+      .filter((attribute) => PICK_ATTRIBUTES.has(attribute.name))
+      .map((attribute) => ` ${attribute.name}="${pickAttributeValue(attribute).replace(/"/g, "&quot;")}"`)
+      .join("");
+    const text = (element.innerText || element.textContent || "").replace(/\s+/g, " ").trim();
+    return {
+      chain: chain.map(pickLabel),
+      html: truncate(`<${element.localName}${attributes}>`, PICK_MAX_HTML_CHARS),
+      text: text ? truncate(text, PICK_MAX_TEXT_CHARS) : undefined,
+    };
+  }
+
+  // Hover asks once per frame, and innerText on a large section forces layout,
+  // so only the rect is re-read while the pointer stays on the same element.
+  // Clicks ask for fresh details since the page may have changed the element.
+  let lastPick = null;
+
+  function describePickTarget(element, fresh) {
+    if (fresh || lastPick?.element !== element) {
+      lastPick = { element, details: describePickElement(element) };
+    }
+    const rect = element.getBoundingClientRect();
+    return {
+      rect: { x: rect.left, y: rect.top, width: rect.width, height: rect.height },
+      ...lastPick.details,
+    };
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      capabilities: PICK_CAPABILITIES,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_PICK") {
+      const element = resolvePickTarget(event.data.x, event.data.y);
+      postToTrustedTop({
+        type: "INLINE_EDIT_PICK_RESULT",
+        seq: event.data.seq,
+        target: element ? describePickTarget(element, event.data.fresh === true) : null,
+      });
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_BY") {
+      const { deltaX, deltaY, deltaMode } = event.data;
+      if (!scrollForwarding || !Number.isFinite(deltaX) || !Number.isFinite(deltaY)) return;
+      if (deltaMode !== 0 && deltaMode !== 1 && deltaMode !== 2) return;
+      const lineHeight =
+        parseFloat(getComputedStyle(document.documentElement).lineHeight) || DEFAULT_LINE_HEIGHT;
+      const scaleX = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerWidth : 1;
+      const scaleY = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerHeight : 1;
+      // The selection overlay receives the wheel event instead of this iframe.
+      // Instant scrolling preserves trackpad deltas even on smooth-scroll sites.
+      window.scrollBy({ left: deltaX * scaleX, top: deltaY * scaleY, behavior: "instant" });
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

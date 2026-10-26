@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Öğretmen Paneli | ZarifÇözüm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy-900:#0b1b3a; --navy-800:#10264f; --navy-700:#1a3566; --navy-100:#e6ebf5;
+  --orange:#f47a20; --orange-dark:#d9650f; --orange-soft:#fff1e6; --danger:#d93025; --ok:#1e8e5a;
+  --bg:#f4f6fb; --card:#fff; --text:#12213f; --muted:#5f6b85; --line:#d8dfec;
+  --head:'Sora','Segoe UI',system-ui,sans-serif; --body:'Inter','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.5}
+button,input,select{font:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+
+.bar{background:var(--navy-900);color:#fff;border-bottom:4px solid var(--orange)}
+.bar-in{max-width:1180px;margin:0 auto;padding:16px clamp(16px,3vw,32px);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.bar h1{font-family:var(--head);font-size:1.15rem;font-weight:600;flex:1;min-width:200px}
+.bar h1 small{display:block;font-family:var(--body);font-weight:400;font-size:.8rem;color:#9fb0d3}
+.bar select{background:var(--navy-800);color:#fff;border:1px solid var(--navy-700);border-radius:8px;padding:9px 12px;max-width:100%}
+
+.btn{border:0;border-radius:8px;padding:10px 18px;font-weight:600;background:var(--orange);color:#fff;transition:background .2s}
+.btn:hover{background:var(--orange-dark)}
+.btn.ghost{background:transparent;color:#fff;border:2px solid #4a6196}
+.btn.ghost:hover{border-color:var(--orange);color:var(--orange)}
+.btn.light{background:#fff;color:var(--navy-800);border:2px solid var(--line)}
+.btn.light:hover{border-color:var(--orange);color:var(--orange-dark)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:24px clamp(16px,3vw,32px) 64px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:20px}
+.card h2{font-family:var(--head);font-size:1.05rem;color:var(--navy-900);font-weight:600}
+.card .hint{color:var(--muted);font-size:.88rem;margin-top:2px}
+
+/* Giriş */
+.login{max-width:400px;margin:64px auto}
+.login label{display:block;font-weight:600;font-size:.9rem;margin:16px 0 6px}
+.login input{width:100%;padding:12px;border:2px solid var(--line);border-radius:8px}
+.login input:focus{border-color:var(--orange);outline:none}
+.login .btn{width:100%;margin-top:16px}
+.err{color:var(--danger);font-size:.9rem;margin-top:10px;min-height:1.4em}
+
+/* Özet kartları */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:20px}
+.stat{background:var(--navy-900);color:#fff;border-radius:14px;padding:16px 18px}
+.stat b{display:block;font-family:var(--head);font-size:1.7rem;color:var(--orange)}
+.stat span{font-size:.82rem;color:#b6c3df}
+
+/* Cevap anahtarı */
+details.card summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+details.card summary::-webkit-details-marker{display:none}
+details.card summary::after{content:"+";font-size:1.4rem;color:var(--orange);font-weight:600}
+details.card[open] summary::after{content:"–"}
+.keygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin:16px 0}
+.q{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.num{width:30px;height:30px;border-radius:7px;background:var(--navy-100);color:var(--navy-800);display:grid;place-items:center;font-family:var(--head);font-weight:600;font-size:.82rem;flex:none}
+.opts{display:flex;gap:6px;flex:1;justify-content:space-between}
+.opt{width:34px;height:34px;border-radius:50%;border:2px solid var(--navy-700);background:#fff;color:var(--navy-800);font-family:var(--head);font-weight:600;font-size:.82rem;transition:all .15s}
+.opt:hover{border-color:var(--orange)}
+.opt[aria-pressed="true"]{background:var(--orange);border-color:var(--orange);color:#fff}
+.keybar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.keybar .msg{color:var(--muted);font-size:.9rem}
+.keybar .msg.ok{color:var(--ok);font-weight:600}
+
+/* Soru analizi */
+.qa{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;margin-top:14px}
+.qc{border-radius:10px;padding:8px 4px;text-align:center;line-height:1.2}
+.qc b{display:block;font-family:var(--head);font-size:.8rem}
+.qc span{font-size:.8rem}
+.qc.hi{background:#e3f4ea;color:#14663f}
+.qc.mid{background:var(--orange-soft);color:var(--orange-dark)}
+.qc.lo{background:#fde8e6;color:#a3201a}
+
+/* Tablo */
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}
+.tools input,.tools select{padding:9px 12px;border:2px solid var(--line);border-radius:8px;background:#fff}
+.tools input{flex:1;min-width:180px}
+.tools .btn{margin-left:auto}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;min-width:640px;font-size:.92rem}
+th{background:var(--navy-900);color:#fff;text-align:left;padding:11px 12px;font-weight:600;font-size:.82rem;white-space:nowrap}
+td{padding:10px 12px;border-top:1px solid var(--line);white-space:nowrap}
+tbody tr:nth-child(even){background:#fafbfe}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+td.net{font-weight:700;color:var(--navy-900)}
+.del{background:none;border:0;color:var(--muted);font-size:1.1rem;padding:2px 8px;border-radius:6px}
+.del:hover{background:#fde8e6;color:var(--danger)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.notice{background:var(--orange-soft);border-left:4px solid var(--orange);padding:12px 16px;border-radius:8px;margin-bottom:20px;font-size:.92rem}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="bar-in">
+    <h1>Öğretmen Paneli<small>Tuğba Akbulut · ZarifÇözüm</small></h1>
+    <a class="btn ghost" href="ogrenci-paneli.html">Öğrenci paneli</a>
+    <a class="btn ghost" href="index.html">Ana sayfa</a>
+    <select id="sinav" aria-label="Sınav seçin" hidden></select>
+    <button class="btn ghost" id="cikis" type="button" hidden>Çıkış</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- Giriş -->
+  <section class="card login" id="giris">
+    <h2>Öğretmen girişi</h2>
+    <p class="hint">Sonuçları görmek için öğretmen şifresini girin.</p>
+    <form id="girisForm">
+      <label for="sifre">Şifre</label>
+      <input id="sifre" type="password" autocomplete="current-password" required>
+      <button class="btn" type="submit">Giriş yap</button>
+      <p class="err" id="girisHata" role="alert"></p>
+    </form>
+  </section>
+
+  <!-- Panel -->
+  <div id="panel" hidden>
+    <div class="notice" id="anahtarUyari" hidden>Bu sınav için <strong>cevap anahtarı</strong> girilmemiş. Aşağıdan anahtarı girip kaydedin; doğru, yanlış ve net sayıları otomatik hesaplanır.</div>
+
+    <section class="stats" id="stats"></section>
+
+    <details class="card" id="anahtarKutu">
+      <summary><div><h2>Cevap anahtarı</h2><p class="hint">Doğru şıkları işaretleyin. İptal edilen soruyu boş bırakın; hesaba katılmaz.</p></div></summary>
+      <div class="keygrid" id="anahtarGrid"></div>
+      <div class="keybar">
+        <button class="btn" id="anahtarKaydet" type="button">Anahtarı kaydet</button>
+        <span class="msg" id="anahtarDurum"></span>
+      </div>
+    </details>
+
+    <section class="card" id="analizKart" hidden>
+      <h2>Soru bazlı başarı</h2>
+      <p class="hint">Her sorunun doğru yapılma oranı. Kırmızı olanlar en çok zorlanılan konulardır.</p>
+      <div class="qa" id="analiz"></div>
+    </section>
+
+    <section class="card">
+      <h2>Öğrenci sonuçları</h2>
+      <div class="tools">
+        <input id="ara" type="search" placeholder="Öğrenci ara…" aria-label="Öğrenci ara">
+        <select id="sirala" aria-label="Sıralama">
+          <option value="net">Net (yüksekten düşüğe)</option>
+          <option value="tarih">Tarih (yeniden eskiye)</option>
+          <option value="ad">Ad (A–Z)</option>
+        </select>
+        <button class="btn light" id="csv" type="button">CSV indir</button>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>#</th><th>Öğrenci</th><th>Tarih</th><th class="n">Doğru</th><th class="n">Yanlış</th><th class="n">Boş</th><th class="n">Net</th><th class="n">Süre</th><th></th></tr></thead>
+          <tbody id="govde"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  const YANLIS_KATSAYI = 4;       // 4 yanlış 1 doğruyu götürür
+  const VARSAYILAN_SINAV = 'TYT Matematik Denemesi #8';
+  const API = location.protocol === 'file:' ? 'http://localhost:3000' : '';
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt = n => n.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const pad = n => String(n).padStart(2, '0');
+  const sure = s => `${pad(Math.floor(s / 60))}:${pad(Math.floor(s % 60))}`;
+  const tarih = d => new Date(d).toLocaleString('tr-TR', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
+
+  let sifre = sessionStorage.getItem('ogretmenSifre') || '';
+  let veri = {sonuclar: [], anahtarlar: {}};
+  let taslak = [];
+
+  // ---- Sunucu isteği (şifre başlıkta gider) ----
+  async function api(yol, ayar = {}) {
+    const r = await fetch(API + yol, {...ayar, headers: {'Content-Type': 'application/json', 'x-ogretmen-sifre': sifre}});
+    const d = await r.json().catch(() => ({}));
+    if (r.status === 401) { cikis(); throw new Error('Şifre hatalı'); }
+    if (!r.ok) throw new Error(d.mesaj || ('Sunucu hatası (' + r.status + ')'));
+    return d;
+  }
+
+  async function yukle() {
+    veri = await api('/api/ogretmen/veri');
+    sessionStorage.setItem('ogretmenSifre', sifre);
+    $('giris').hidden = true; $('panel').hidden = false;
+    $('sinav').hidden = false; $('cikis').hidden = false;
+    sinavListesi();
+    anahtarCiz();
+    ciz();
+  }
+
+  function cikis() {
+    sessionStorage.removeItem('ogretmenSifre'); sifre = '';
+    $('giris').hidden = false; $('panel').hidden = true;
+    $('sinav').hidden = true; $('cikis').hidden = true;
+  }
+
+  $('girisForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    sifre = $('sifre').value;
+    $('girisHata').textContent = '';
+    try { await yukle(); }
+    catch (err) { $('girisHata').textContent = err.message.includes('fetch') ? 'Sunucuya ulaşılamadı. node server.js çalışıyor mu?' : err.message; }
+  });
+  $('cikis').addEventListener('click', cikis);
+
+  // ---- Sınav seçici ----
+  function sinavListesi() {
+    const onceki = $('sinav').value;
+    const adlar = new Set([...veri.sonuclar.map(r => r.sinavAdi).filter(Boolean), ...Object.keys(veri.anahtarlar)]);
+    if (!adlar.size) adlar.add(VARSAYILAN_SINAV);
+    $('sinav').innerHTML = [...adlar].map(a => `<option>${esc(a)}</option>`).join('');
+    if (adlar.has(onceki)) $('sinav').value = onceki;
+  }
+  $('sinav').addEventListener('change', () => { anahtarCiz(); ciz(); });
+
+  const soruSayisi = sinav => Math.max(40,
+    ...veri.sonuclar.filter(r => r.sinavAdi === sinav).map(r => (r.cevaplar || []).length),
+    (veri.anahtarlar[sinav] || []).length);
+
+  // ---- Puan hesabı ----
+  function hesapla(r, key) {
+    let d = 0, y = 0, b = 0;
+    (r.cevaplar || []).forEach((a, i) => {
+      if (a === null) b++;
+      else if (key && key[i]) { a === key[i] ? d++ : y++; }
+    });
+    return key ? {d, y, b, net: d - y / YANLIS_KATSAYI} : {d: null, y: null, b, net: null};
+  }
+
+  // ---- Cevap anahtarı düzenleyici ----
+  function anahtarCiz() {
+    const sinav = $('sinav').value, n = soruSayisi(sinav), kayitli = veri.anahtarlar[sinav];
+    taslak = Array.from({length: n}, (_, i) => (kayitli && kayitli[i]) || null);
+    $('anahtarGrid').innerHTML = taslak.map((_, i) =>
+      `<div class="q"><div class="num">${i + 1}</div><div class="opts">${
+        'ABCDE'.split('').map(o => `<button type="button" class="opt" data-q="${i}" data-o="${o}" aria-pressed="false" aria-label="${i + 1}. soru ${o}">${o}</button>`).join('')
+      }</div></div>`).join('');
+    $('anahtarKutu').open = !kayitli;
+    $('anahtarDurum').textContent = ''; $('anahtarDurum').className = 'msg';
+    boya();
+  }
+  function boya() {
+    $('anahtarGrid').querySelectorAll('.opt').forEach(b => b.setAttribute('aria-pressed', String(taslak[+b.dataset.q] === b.dataset.o)));
+  }
+  $('anahtarGrid').addEventListener('click', e => {
+    const b = e.target.closest('.opt'); if (!b) return;
+    const q = +b.dataset.q;
+    taslak[q] = taslak[q] === b.dataset.o ? null : b.dataset.o;
+    boya();
+    $('anahtarDurum').className = 'msg';
+    $('anahtarDurum').textContent = taslak.filter(Boolean).length + ' / ' + taslak.length + ' soru işaretli (kaydedilmedi)';
+  });
+  $('anahtarKaydet').addEventListener('click', async () => {
+    const sinav = $('sinav').value, st = $('anahtarDurum');
+    st.className = 'msg'; st.textContent = 'Kaydediliyor…';
+    try {
+      await api('/api/ogretmen/anahtar', {method: 'PUT', body: JSON.stringify({sinavAdi: sinav, anahtar: taslak})});
+      veri.anahtarlar[sinav] = taslak.slice();
+      st.className = 'msg ok'; st.textContent = 'Anahtar kaydedildi ✓';
+      ciz();
+    } catch (err) { st.textContent = 'Kaydedilemedi: ' + err.message; }
+  });
+
+  // ---- Ekranı çiz ----
+  function ciz() {
+    const sinav = $('sinav').value, key = veri.anahtarlar[sinav];
+    const tum = veri.sonuclar.filter(r => r.sinavAdi === sinav).map(r => ({r, ...hesapla(r, key)}));
+    $('anahtarUyari').hidden = !!key;
+
+    // özet kartları
+    const netler = tum.map(k => k.net).filter(n => n !== null);
+    const ort = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+    const kart = (b, s) => `<div class="stat"><b>${b}</b><span>${s}</span></div>`;
+    $('stats').innerHTML =
+      kart(tum.length, 'Katılım') +
+      kart(netler.length ? fmt(ort(netler)) : '—', 'Ortalama net') +
+      kart(netler.length ? fmt(Math.max(...netler)) : '—', 'En yüksek net') +
+      kart(tum.length ? sure(ort(tum.map(k => k.r.harcananSure || 0))) : '—', 'Ortalama süre');
+
+    // soru bazlı başarı
+    $('analizKart').hidden = !(key && tum.length);
+    if (key && tum.length) {
+      $('analiz').innerHTML = key.map((k, i) => {
+        if (!k) return '';
+        const p = Math.round(tum.filter(t => (t.r.cevaplar || [])[i] === k).length / tum.length * 100);
+        return `<div class="qc ${p >= 70 ? 'hi' : p >= 40 ? 'mid' : 'lo'}"><b>${i + 1}</b><span>%${p}</span></div>`;
+      }).join('');
+    }
+
+    // tablo
+    const ara = $('ara').value.trim().toLocaleLowerCase('tr-TR');
+    let liste = tum.filter(k => !ara || String(k.r.ogrenciAdi).toLocaleLowerCase('tr-TR').includes(ara));
+    const s = $('sirala').value;
+    liste.sort((a, b) =>
+      s === 'net' ? (b.net ?? -999) - (a.net ?? -999)
+      : s === 'ad' ? String(a.r.ogrenciAdi).localeCompare(String(b.r.ogrenciAdi), 'tr')
+      : new Date(b.r.kayitTarihi) - new Date(a.r.kayitTarihi));
+    $('govde').innerHTML = liste.length ? liste.map((k, i) => `<tr>
+      <td>${i + 1}</td><td>${esc(k.r.ogrenciAdi)}</td><td>${tarih(k.r.kayitTarihi)}</td>
+      <td class="n">${k.d ?? '—'}</td><td class="n">${k.y ?? '—'}</td><td class="n">${k.b}</td>
+      <td class="n net">${k.net === null ? '—' : fmt(k.net)}</td><td class="n">${sure(k.r.harcananSure || 0)}</td>
+      <td><button class="del" type="button" data-id="${esc(k.r._id)}" aria-label="Kaydı sil" title="Kaydı sil">✕</button></td></tr>`).join('')
+      : `<tr><td colspan="9" class="empty">Bu sınav için kayıt bulunamadı.</td></tr>`;
+    $('govde')._liste = liste;
+  }
+  $('ara').addEventListener('input', ciz);
+  $('sirala').addEventListener('change', ciz);
+
+  // ---- Kayıt silme ----
+  $('govde').addEventListener('click', async e => {
+    const b = e.target.closest('.del'); if (!b) return;
+    if (!confirm('Bu sonuç kaydı kalıcı olarak silinecek. Emin misin?')) return;
+    try {
+      await api('/api/ogretmen/sonuc/' + encodeURIComponent(b.dataset.id), {method: 'DELETE'});
+      veri.sonuclar = veri.sonuclar.filter(r => String(r._id) !== b.dataset.id);
+      ciz();
+    } catch (err) { alert('Silinemedi: ' + err.message); }
+  });
+
+  // ---- CSV (Excel'de Türkçe karakterler ve ; ayracıyla açılır) ----
+  $('csv').addEventListener('click', () => {
+    const liste = $('govde')._liste || [];
+    const guvenli = v => { v = String(v ?? ''); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+    const satirlar = [['Öğrenci', 'Tarih', 'Doğru', 'Yanlış', 'Boş', 'Net', 'Süre']].concat(liste.map(k =>
+      [k.r.ogrenciAdi, tarih(k.r.kayitTarihi), k.d ?? '', k.y ?? '', k.b, k.net === null ? '' : fmt(k.net), sure(k.r.harcananSure || 0)]));
+    const metin = '\ufeff' + satirlar.map(s => s.map(guvenli).join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([metin], {type: 'text/csv;charset=utf-8'}));
+    a.download = ($('sinav').value || 'sonuclar').replace(/[^\wÇçĞğİıÖöŞşÜü#-]+/g, '_') + '.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  // Oturum açıksa otomatik giriş
+  if (sifre) yukle().catch(err => {
+    console.error('Öğretmen oturumu doğrulanamadı:', err);
+    $('girisHata').textContent = 'Oturum doğrulanamadı. Lütfen öğretmen şifrenizle yeniden giriş yapın.';
+  });
+})();
+</script>
+</body>
+</html>

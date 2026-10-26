@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canlı Ders — MatRota</title>
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600&f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" data-shell="sidebar"></aside>
+  <main class="main">
+    <div class="mobile-top" data-shell="mobile-top"></div>
+    <div class="page-head">
+      <div>
+        <div class="crumbs"><a href="panel.html">6-A grubu</a><span>›</span><span>Canlı ders</span></div>
+        <h1>Ortak Kat ve Ortak Bölen</h1>
+      </div>
+      <div class="row"><span class="chip chip-live">CANLI</span><span class="chip">Öğr. Mehmet K.</span><span class="chip">19:00 – 19:50</span><span class="chip" id="count">14 katılımcı</span></div>
+    </div>
+
+    <div class="notice notice-info" style="margin-bottom:var(--space-5)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+      <p><strong>Demo notu:</strong> Bu oda, üretimde Zoom Video SDK (web bileşeni) ile doldurulacak alanın birebir yerleşimidir. Video akışı simüle edilmiştir; tahta, anket, sohbet ve kontroller platformun kendi arayüzüdür — öğrenci Zoom hesabı açmaz, uygulama indirmez.</p>
+    </div>
+
+    <div class="live-grid">
+      <div class="room" id="room">
+                <div class="lobby" id="lobby">
+          <div class="inner">
+            <span class="avatar lg">EA</span>
+            <h2>Derse katılmaya hazır mısın?</h2>
+            <p>Kameran kapalı, mikrofonun sessizde başlayacak. Öğretmen söz verdiğinde mikrofonu açabilirsin. Ders kaydedilir ve 2 saat içinde kayıtlar bölümüne düşer.</p>
+            <div class="row" style="justify-content:center">
+              <label class="chip" style="cursor:pointer"><input type="checkbox" checked style="margin-right:6px">Kamera kapalı</label>
+              <label class="chip" style="cursor:pointer"><input type="checkbox" checked style="margin-right:6px">Mikrofon sessiz</label>
+            </div>
+            <button class="btn btn-primary btn-lg" id="join">Derse katıl</button>
+            <span class="xs" style="color:#8b93bd">Bağlantı testi: 42 ms · video 720p uygun</span>
+          </div>
+        </div>
+        <div class="room-top">
+          <span class="row" style="gap:var(--space-2)"><span class="chip chip-live">REC</span><span class="mono" id="clock">00:00</span><span style="color:#8b93bd">· MAT.6.1 · Ortak kat / ortak bölen</span></span>
+          <span class="row" style="gap:var(--space-2)"><span style="color:#8b93bd">Yoklama alındı · 19:02</span><span class="sdk-tag">&lt;zoom-video-sdk&gt;</span></span>
+        </div>
+        <div class="stage">
+          <div class="board" id="board">
+            <span class="pen">Öğretmen tahtası · paylaşılan ekran</span>
+            <div id="boardlines"></div>
+          </div>
+          <div class="tiles">
+            <div class="tile teacher"><span class="avatar alt">MK</span><span class="nm">Mehmet K. · öğretmen</span><span class="mic"><svg width="10" height="10" viewBox="0 0 24 24" fill="#fff"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0" stroke="#fff" stroke-width="2" fill="none"/></svg></span></div>
+            <div class="tile"><span class="avatar">EA</span><span class="nm">Elif A. (sen)</span><span class="mic off"><svg width="10" height="10" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" fill="none"><path d="M3 3l18 18M9 9v4a3 3 0 0 0 5 2M15 9V6a3 3 0 0 0-6 0"/></svg></span></div>
+            <div class="tile"><span class="avatar" style="background:#4a5590">AY</span><span class="nm">Ahmet Y.</span><span class="mic off"></span></div>
+            <div class="tile"><span class="avatar" style="background:#4a5590">+11</span><span class="nm">diğer katılımcılar</span></div>
+          </div>
+        </div>
+        <div class="controls">
+          <button class="ctl" id="micbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Mikrofon</span></button>
+          <button class="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg><span>Kamera</span></button>
+          <button class="ctl" id="hand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 13V5a1.5 1.5 0 0 1 3 0v6M11 11V4a1.5 1.5 0 0 1 3 0v7M14 11V5.5a1.5 1.5 0 0 1 3 0V13M8 13l-2-2a1.6 1.6 0 0 0-2.3 2.2L8 18c1.5 2 3 3 6 3 4 0 6-3 6-7v-1"/></svg><span>Söz iste</span></button>
+          <button class="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Sohbet</span></button>
+          <button class="ctl danger" id="leave"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a9 9 0 0 1 4 0l1 2a2 2 0 0 0 2 1l3-1a2 2 0 0 0 1-2 14 14 0 0 0-18 0 2 2 0 0 0 1 2l3 1a2 2 0 0 0 2-1z"/></svg><span>Ayrıl</span></button>
+        </div>
+      </div>
+
+      <div class="chat-side">
+        <div class="card">
+          <div class="card-head"><h3>Anlık anket</h3><span class="chip chip-primary" id="pollstate">Açık</span></div>
+          <p class="small" style="margin-bottom:var(--space-3)">24 ile 36'nın ortak bölenlerinin en büyüğü kaçtır?</p>
+          <div class="poll" id="poll">
+            <button data-v="6"><span class="bar"></span><span class="lbl"><span>6</span><span class="mono" data-c>—</span></span></button>
+            <button data-v="12" data-ok><span class="bar"></span><span class="lbl"><span>12</span><span class="mono" data-c>—</span></span></button>
+            <button data-v="18"><span class="bar"></span><span class="lbl"><span>18</span><span class="mono" data-c>—</span></span></button>
+            <button data-v="72"><span class="bar"></span><span class="lbl"><span>72</span><span class="mono" data-c>—</span></span></button>
+          </div>
+          <p class="xs muted" id="pollnote" style="margin-top:var(--space-2)">Cevabın ders notuna ve kazanım takibine işlenir.</p>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Sınıf sohbeti</h3><span class="xs muted">yalnızca öğretmen onaylı</span></div>
+          <div class="chat-log" id="log">
+            <div class="chat-msg"><span class="avatar alt">MK</span><div><div class="who">Mehmet K.</div>Herkese merhaba, 360'ı asal çarpanlarına ayırmayı hatırlayalım. Tahtaya yazıyorum.</div></div>
+            <div class="chat-msg"><span class="avatar" style="background:#4a5590">AY</span><div><div class="who">Ahmet Y.</div>Hocam EKOK'ta tüm asalları mı alıyoruz?</div></div>
+            <div class="chat-msg"><span class="avatar alt">MK</span><div><div class="who">Mehmet K.</div>Evet, hepsini ve en büyük üsleriyle. EBOB'da ise sadece ortak olanları, en küçük üsleriyle.</div></div>
+          </div>
+          <form class="row" id="chatform" style="margin-top:var(--space-3);flex-wrap:nowrap"><input type="text" id="chatin" placeholder="Soru yaz…" style="flex:1;padding:var(--space-2) var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-md);min-height:40px"><button class="btn btn-soft btn-sm" type="submit">Gönder</button></form>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:var(--space-2)">Ders akışı</h3>
+          <div class="stack-sm small">
+            <div class="row between"><span class="muted">Tekrar: asal çarpanlar</span><span class="chip chip-success">✓</span></div>
+            <div class="row between"><strong>EBOB — tanım ve 2 örnek</strong><span class="chip chip-primary">şimdi</span></div>
+            <div class="row between"><span class="muted">EKOK — otobüs problemi</span><span class="chip">—</span></div>
+            <div class="row between"><span class="muted">Mini test (5 soru, canlı)</span><span class="chip">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card" style="margin-top:var(--space-6)">
+      <div class="card-head"><div><h2>Yaklaşan ve geçmiş dersler</h2><p class="small muted">Kayıtlar 2 saat içinde düşer; 90 gün saklanır.</p></div></div>
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th>Tarih</th><th>Konu</th><th>Öğretmen</th><th>Durum</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="mono">23 Eki 19:00</td><td>Ortak Kat ve Ortak Bölen</td><td>Mehmet K.</td><td><span class="chip chip-live">Canlı</span></td><td><a href="#room" class="btn btn-sm btn-primary">Katıl</a></td></tr>
+          <tr><td class="mono">26 Eki 18:30</td><td>Soru çözüm saati (açık)</td><td>Mehmet K.</td><td><span class="chip">Planlandı</span></td><td><button class="btn btn-sm btn-ghost">Hatırlat</button></td></tr>
+          <tr><td class="mono">21 Eki 19:00</td><td>Asal Sayılar ve Asal Çarpanlar</td><td>Mehmet K.</td><td><span class="chip chip-success">Kayıt hazır · 48 dk</span></td><td><button class="btn btn-sm btn-ghost">İzle</button></td></tr>
+          <tr><td class="mono">16 Eki 19:00</td><td>Bölünebilme Kuralları</td><td>Mehmet K.</td><td><span class="chip chip-success">Kayıt hazır · 51 dk</span></td><td><button class="btn btn-sm btn-ghost">İzle</button></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+  </main>
+</div>
+<nav class="tabbar" data-shell="tabbar" aria-label="Alt menü"></nav>
+<script src="assets/app.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const lines = ['360 = 2³ · 3² · 5', '', 'EBOB(24, 36) = ?', '  24 = 2³ · 3', '  36 = 2² · 3²', '  ortak asallar, en küçük üs: 2² · 3 = 12', '', 'EKOK(12, 18) = ?', '  12 = 2² · 3', '  18 = 2 · 3²', '  tüm asallar, en büyük üs: 2² · 3² = 36'];
+  let sec = 0, t = null, joined = false, li = 0;
+  $('join').addEventListener('click', () => {
+    $('lobby').style.display = 'none'; joined = true;
+    t = setInterval(() => { sec++; $('clock').textContent = String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0'); }, 1000);
+    const b = $('boardlines');
+    const write = () => { if (li < lines.length) { b.innerHTML += (lines[li] || '&nbsp;') + '<br>'; li++; setTimeout(write, 900); } };
+    write();
+  });
+  $('leave').addEventListener('click', () => { clearInterval(t); $('lobby').style.display = 'grid'; $('lobby').querySelector('h2').textContent = 'Dersten ayrıldın'; $('join').textContent = 'Yeniden katıl'; });
+  $('hand').addEventListener('click', () => { $('hand').style.background = 'var(--color-warning)'; $('hand').querySelector('span').textContent = 'Sırada: 2'; });
+  $('micbtn').addEventListener('click', () => { alert('Demo: Öğretmen söz verene kadar mikrofon kapalı kalır (moderasyon kuralı).'); });
+  const base = { 6: 3, 12: 8, 18: 1, 72: 1 };
+  $('poll').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    const v = b.dataset.v; base[v]++; const tot = Object.values(base).reduce((a, c) => a + c, 0);
+    $('poll').querySelectorAll('button').forEach(x => { x.disabled = true; const c = base[x.dataset.v]; x.querySelector('[data-c]').textContent = c; x.querySelector('.bar').style.width = (100 * c / tot) + '%'; if (x.hasAttribute('data-ok')) x.style.borderColor = 'var(--color-success)'; });
+    $('pollstate').textContent = 'Kapandı'; $('pollstate').className = 'chip';
+    $('pollnote').textContent = b.hasAttribute('data-ok') ? 'Doğru. 13 kişiden 9\'u doğru cevapladı.' : 'Yanlış. Doğru cevap 12. Bu kazanım tekrar listene eklendi.';
+  }));
+  $('chatform').addEventListener('submit', e => {
+    e.preventDefault(); const v = $('chatin').value.trim(); if (!v) return;
+    $('log').insertAdjacentHTML('beforeend', `<div class="chat-msg"><span class="avatar">EA</span><div><div class="who">Elif A. <span class="xs muted">· onay bekliyor</span></div>${v.replace(/</g, '&lt;')}</div></div>`);
+    $('chatin').value = ''; $('log').scrollTop = 1e6;
+  });
+})();
+</script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://perplexity.localhost","http://localhost:1420","http://127.0.0.1:1420","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  const DEFAULT_LINE_HEIGHT = 16;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  const PICK_CAPABILITIES = ["pick"];
+  const PICK_CHAIN_LENGTH = 4;
+  const PICK_MAX_TEXT_CHARS = 120;
+  const PICK_MAX_HTML_CHARS = 300;
+
+  function truncate(value, maxChars) {
+    return value.length > maxChars ? value.slice(0, maxChars - 1) + "…" : value;
+  }
+
+  function isPickableElement(element) {
+    return (
+      element instanceof Element &&
+      element !== document.documentElement &&
+      element !== document.body
+    );
+  }
+
+  function resolvePickTarget(x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    const element = document.elementFromPoint(x, y);
+    return isPickableElement(element) ? element.closest("svg") || element : null;
+  }
+
+  function pickLabel(element) {
+    if (element.id) return element.localName + "#" + element.id;
+    return [element.localName].concat(Array.from(element.classList).slice(0, 2)).join(".");
+  }
+
+  // Only attributes that help find the element in source. data-* values and URL
+  // query strings or fragments can carry tokens.
+  const PICK_ATTRIBUTES = new Set([
+    "id",
+    "class",
+    "name",
+    "type",
+    "role",
+    "alt",
+    "aria-label",
+    "href",
+    "src",
+  ]);
+
+  function pickAttributeValue(attribute) {
+    return attribute.name === "href" || attribute.name === "src"
+      ? attribute.value.split(/[?#]/)[0]
+      : attribute.value;
+  }
+
+  function describePickElement(element) {
+    const chain = [];
+    for (
+      let current = element;
+      isPickableElement(current) && chain.length < PICK_CHAIN_LENGTH;
+      current = current.parentElement
+    ) {
+      chain.unshift(current);
+    }
+    const attributes = Array.from(element.attributes)
+      .filter((attribute) => PICK_ATTRIBUTES.has(attribute.name))
+      .map((attribute) => ` ${attribute.name}="${pickAttributeValue(attribute).replace(/"/g, "&quot;")}"`)
+      .join("");
+    const text = (element.innerText || element.textContent || "").replace(/\s+/g, " ").trim();
+    return {
+      chain: chain.map(pickLabel),
+      html: truncate(`<${element.localName}${attributes}>`, PICK_MAX_HTML_CHARS),
+      text: text ? truncate(text, PICK_MAX_TEXT_CHARS) : undefined,
+    };
+  }
+
+  // Hover asks once per frame, and innerText on a large section forces layout,
+  // so only the rect is re-read while the pointer stays on the same element.
+  // Clicks ask for fresh details since the page may have changed the element.
+  let lastPick = null;
+
+  function describePickTarget(element, fresh) {
+    if (fresh || lastPick?.element !== element) {
+      lastPick = { element, details: describePickElement(element) };
+    }
+    const rect = element.getBoundingClientRect();
+    return {
+      rect: { x: rect.left, y: rect.top, width: rect.width, height: rect.height },
+      ...lastPick.details,
+    };
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      capabilities: PICK_CAPABILITIES,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_PICK") {
+      const element = resolvePickTarget(event.data.x, event.data.y);
+      postToTrustedTop({
+        type: "INLINE_EDIT_PICK_RESULT",
+        seq: event.data.seq,
+        target: element ? describePickTarget(element, event.data.fresh === true) : null,
+      });
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_BY") {
+      const { deltaX, deltaY, deltaMode } = event.data;
+      if (!scrollForwarding || !Number.isFinite(deltaX) || !Number.isFinite(deltaY)) return;
+      if (deltaMode !== 0 && deltaMode !== 1 && deltaMode !== 2) return;
+      const lineHeight =
+        parseFloat(getComputedStyle(document.documentElement).lineHeight) || DEFAULT_LINE_HEIGHT;
+      const scaleX = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerWidth : 1;
+      const scaleY = deltaMode === 1 ? lineHeight : deltaMode === 2 ? window.innerHeight : 1;
+      // The selection overlay receives the wheel event instead of this iframe.
+      // Instant scrolling preserves trackpad deltas even on smooth-scroll sites.
+      window.scrollBy({ left: deltaX * scaleX, top: deltaY * scaleY, behavior: "instant" });
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

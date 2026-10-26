@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deneme Sınavı | Optik Form</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy-900:#0b1b3a; --navy-800:#10264f; --navy-700:#1a3566; --navy-100:#e6ebf5;
+  --orange:#f47a20; --orange-dark:#d9650f; --orange-soft:#fff1e6;
+  --danger:#d93025;
+  --bg:#f4f6fb; --card:#fff; --text:#12213f; --muted:#5f6b85; --line:#d8dfec;
+  --head:'Sora','Segoe UI',system-ui,sans-serif;
+  --body:'Inter','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.5}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+
+/* ---------- Üst çubuk: başlık + sayaç ---------- */
+.bar{position:sticky;top:0;z-index:10;background:var(--navy-900);color:#fff;box-shadow:0 4px 16px rgba(11,27,58,.25)}
+.bar-in{max-width:1100px;margin:0 auto;padding:14px clamp(16px,3vw,32px);display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.title{flex:1;min-width:180px}
+.title h1{font-family:var(--head);font-size:1.1rem;font-weight:600}
+.title p{font-size:.82rem;color:#9fb0d3}
+
+.timer{display:flex;align-items:center;gap:12px;background:var(--navy-800);border:1px solid var(--navy-700);border-radius:12px;padding:8px 16px}
+.timer svg{width:22px;height:22px;stroke:var(--orange);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.time{font-family:var(--head);font-weight:700;font-size:1.9rem;letter-spacing:.04em;font-variant-numeric:tabular-nums;min-width:4.2ch;text-align:center}
+.timer.warn .time{color:var(--orange)}
+.timer.danger{border-color:var(--danger)}
+.timer.danger .time{color:#ff6b5e}
+
+.btn{border:0;border-radius:10px;padding:11px 20px;font-weight:600;transition:background .2s}
+.btn-start{background:var(--orange);color:#fff}
+.btn-start:hover{background:var(--orange-dark)}
+.btn-finish{background:transparent;color:#fff;border:2px solid #4a6196}
+.btn-finish:hover{border-color:var(--orange);color:var(--orange)}
+.btn[hidden]{display:none}
+
+.progress{height:5px;background:var(--navy-700)}
+.progress i{display:block;height:100%;width:100%;background:var(--orange);transition:width .3s linear}
+
+/* ---------- Gövde ---------- */
+.wrap{max-width:1100px;margin:0 auto;padding:24px clamp(16px,3vw,32px) 64px}
+.status{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;margin-bottom:20px}
+.status p{color:var(--muted);font-size:.95rem}
+.count{font-weight:600;color:var(--navy-900)}
+.legend{display:flex;gap:16px;font-size:.85rem;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--navy-700)}
+.dot.on{background:var(--orange);border-color:var(--orange)}
+
+.notice{background:var(--orange-soft);border-left:4px solid var(--orange);padding:12px 16px;border-radius:8px;margin-bottom:20px;font-size:.92rem}
+.notice[hidden]{display:none}
+
+/* Sonuç kartı */
+.result{background:var(--navy-900);color:#fff;border-radius:16px;padding:24px;margin-bottom:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;align-items:center}
+.result[hidden]{display:none}
+.result h2{grid-column:1/-1;font-family:var(--head);font-size:1.2rem}
+.result div b{display:block;font-family:var(--head);font-size:1.8rem;color:var(--orange)}
+.result div span{font-size:.85rem;color:#b6c3df}
+
+/* Optik form */
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.q{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.q.done{border-color:var(--navy-700);background:#fbfcff}
+.num{width:34px;height:34px;border-radius:8px;background:var(--navy-100);color:var(--navy-800);display:grid;place-items:center;font-family:var(--head);font-weight:600;font-size:.9rem;flex:none}
+.q.done .num{background:var(--navy-900);color:#fff}
+.opts{display:flex;gap:8px;flex:1;justify-content:space-between}
+.opt{
+  width:38px;height:38px;border-radius:50%;
+  border:2px solid var(--navy-700);background:#fff;color:var(--navy-800);
+  font-family:var(--head);font-weight:600;font-size:.9rem;
+  transition:background .15s,color .15s,border-color .15s,transform .15s;
+}
+.opt:hover:not(:disabled){border-color:var(--orange);color:var(--orange-dark)}
+.opt[aria-pressed="true"]{background:var(--orange);border-color:var(--orange);color:#fff;transform:scale(1.08);box-shadow:0 3px 10px rgba(244,122,32,.4)}
+.opt:disabled{cursor:not-allowed;opacity:.45}
+.opt[aria-pressed="true"]:disabled{opacity:1}
+
+.notice input{display:block;width:100%;max-width:340px;margin:6px 0 10px;padding:10px 12px;border:2px solid var(--line);border-radius:8px;font:inherit;background:#fff;color:var(--text)}
+.notice input:focus{border-color:var(--orange);outline:none}
+.save-status{grid-column:1/-1;font-size:.92rem;color:#b6c3df;padding-top:12px;border-top:1px solid var(--navy-700)}
+.save-status.ok{color:#7ee0a1}
+.save-status.err{color:#ff9b90}
+.btn-retry{margin-left:8px;background:var(--orange);color:#fff;border:0;border-radius:8px;padding:6px 14px;font-weight:600}
+.btn-retry:hover{background:var(--orange-dark)}
+
+@media (max-width:520px){
+  .bar-in{gap:12px}
+  .timer{order:-1;width:100%;justify-content:center}
+  .opt{width:36px;height:36px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="bar-in">
+    <div class="title">
+      <h1>TYT Matematik Denemesi #8</h1>
+      <p id="subtitle">Sınav henüz başlamadı</p>
+    </div>
+
+    <div class="timer" id="timer" role="timer" aria-live="off">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>
+      <span class="time" id="time">40:00</span>
+    </div>
+
+    <button class="btn btn-start" id="startBtn" type="button">Sınavı Başlat</button>
+    <button class="btn btn-finish" id="finishBtn" type="button" hidden>Sınavı Bitir</button>
+  </div>
+  <div class="progress"><i id="bar"></i></div>
+</header>
+
+<main class="wrap">
+  <section class="result" id="result" hidden aria-live="polite"></section>
+
+  <div class="notice" id="notice">
+    <label for="adInput"><strong>Ad Soyad</strong></label>
+    <input id="adInput" type="text" maxlength="60" placeholder="Adını ve soyadını yaz" autocomplete="name">
+    <p>Adını yazıp <strong>Sınavı Başlat</strong> butonuna bas. Seçtiğin şıkka tekrar basarsan işaret kalkar.</p>
+  </div>
+
+  <div class="status">
+    <p><span class="count" id="answered">0</span> / <span id="total">40</span> soru işaretlendi</p>
+    <div class="legend">
+      <span><i class="dot"></i>Boş</span>
+      <span><i class="dot on"></i>İşaretli</span>
+    </div>
+  </div>
+
+  <section class="sheet" id="sheet" aria-label="Optik cevap formu"></section>
+</main>
+
+<script>
+(() => {
+  // ---- Ayarlar ----
+  const QUESTION_COUNT = 40;     // soru sayısı
+  const DURATION_MIN   = 40;     // süre (dakika)
+  const OPTIONS        = ['A','B','C','D','E'];
+  const OGRENCI_ADI    = 'İsa Ağbulut';                 // gerekirse değiştirin
+  const SINAV_ADI      = 'Soru Çözümü';
+  // Sayfa doğrudan dosyadan açılırsa (file://) sunucu adresi tam yazılır;
+  // http://localhost:3000 üzerinden açılırsa aynı adres kullanılır.
+  const API = location.protocol === 'file:' ? 'http://localhost:3000' : '';
+
+  const TOTAL_MS = DURATION_MIN * 60 * 1000;
+  const answers  = new Array(QUESTION_COUNT).fill(null);
+  let ogrenciAdi = '', endTime = 0, startTime = 0, ticker = null, state = 'idle'; // idle | running | finished
+
+  const $ = id => document.getElementById(id);
+  const sheet = $('sheet'), timeEl = $('time'), timerBox = $('timer'), barEl = $('bar');
+  $('total').textContent = QUESTION_COUNT;
+
+  // ---- Optik formu oluştur ----
+  answers.forEach((_, i) => {
+    const row = document.createElement('div');
+    row.className = 'q';
+    row.id = 'q' + i;
+    row.innerHTML = `<div class="num">${i + 1}</div>
+      <div class="opts" role="group" aria-label="${i + 1}. soru">
+        ${OPTIONS.map(o => `<button type="button" class="opt" data-q="${i}" data-o="${o}"
+           aria-pressed="false" aria-label="${i + 1}. soru, ${o} şıkkı" disabled>${o}</button>`).join('')}
+      </div>`;
+    sheet.appendChild(row);
+  });
+
+  // ---- Şık işaretleme (tekrar basınca kaldırır) ----
+  sheet.addEventListener('click', e => {
+    const btn = e.target.closest('.opt');
+    if (!btn || state !== 'running') return;
+    const q = +btn.dataset.q, o = btn.dataset.o;
+    answers[q] = answers[q] === o ? null : o;
+    paintQuestion(q);
+    $('answered').textContent = answers.filter(Boolean).length;
+  });
+
+  function paintQuestion(q) {
+    const row = $('q' + q);
+    row.classList.toggle('done', answers[q] !== null);
+    row.querySelectorAll('.opt').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.o === answers[q])));
+  }
+
+  function setOptionsDisabled(flag) {
+    sheet.querySelectorAll('.opt').forEach(b => b.disabled = flag);
+  }
+
+  // ---- Sayaç ----
+  const pad = n => String(n).padStart(2, '0');
+  function render(remaining) {
+    const sec = Math.ceil(remaining / 1000);
+    const text = `${pad(Math.floor(sec / 60))}:${pad(sec % 60)}`;
+    timeEl.textContent = text;
+    barEl.style.width = (remaining / TOTAL_MS * 100) + '%';
+    timerBox.classList.toggle('warn', sec <= 300 && sec > 60);
+    timerBox.classList.toggle('danger', sec <= 60);
+    if (state === 'running') document.title = `${text} | Deneme Sınavı`;
+  }
+
+  function tick() {
+    const remaining = Math.max(0, endTime - Date.now());
+    render(remaining);
+    if (remaining === 0) finish('Süre doldu');
+  }
+
+  function start() {
+    const ad = $('adInput').value.trim();
+    if (!ad) { $('adInput').focus(); $('adInput').style.borderColor = 'var(--danger)'; return; }
+    ogrenciAdi = ad;
+    state = 'running';
+    startTime = Date.now();
+    endTime = startTime + TOTAL_MS;      // Date.now ile hesaplandığı için sekme arka planda da sapmaz
+    $('startBtn').hidden = true;
+    $('finishBtn').hidden = false;
+    $('notice').hidden = true;
+    $('subtitle').textContent = `${QUESTION_COUNT} soru · ${DURATION_MIN} dakika`;
+    setOptionsDisabled(false);
+    tick();
+    ticker = setInterval(tick, 250);
+  }
+
+  function finish(reason) {
+    if (state !== 'running') return;
+    state = 'finished';
+    clearInterval(ticker);
+    setOptionsDisabled(true);
+    $('finishBtn').hidden = true;
+    $('subtitle').textContent = reason;
+    document.title = 'Sınav bitti | Deneme Sınavı';
+
+    const marked = answers.filter(Boolean).length;
+    const usedSec = Math.min(TOTAL_MS, Date.now() - startTime) / 1000;
+    const payload = {
+      ogrenciAdi: ogrenciAdi || OGRENCI_ADI,
+      sinavAdi: SINAV_ADI,
+      cevaplar: answers.slice(),                 // ['A', null, 'C', ...]  (null = boş)
+      isaretlenenSayisi: marked,
+      bosSayisi: QUESTION_COUNT - marked,
+      harcananSure: Math.floor(usedSec),         // saniye
+      bitisNedeni: reason
+    };
+    const res = $('result');
+    res.hidden = false;
+    res.innerHTML = `<h2>${reason}.</h2>
+      <div><b>${marked}</b><span>İşaretlenen</span></div>
+      <div><b>${QUESTION_COUNT - marked}</b><span>Boş</span></div>
+      <div><b>${pad(Math.floor(usedSec / 60))}:${pad(Math.floor(usedSec % 60))}</b><span>Kullanılan süre</span></div>
+      <p class="save-status" id="saveStatus"></p>`;
+    res.scrollIntoView({behavior: 'smooth', block: 'center'});
+    kaydet(payload);
+  }
+
+  // ---- Sonuçları köprü sunucusu üzerinden MongoDB'ye gönder ----
+  async function kaydet(payload) {
+    const st = $('saveStatus');
+    st.className = 'save-status';
+    st.textContent = 'Veritabanına kaydediliyor…';
+    try {
+      const r = await fetch(API + '/api/cevap-kaydet', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.mesaj || ('Sunucu hatası (' + r.status + ')'));
+      st.classList.add('ok');
+      st.textContent = 'Cevapların MongoDB\'ye kaydedildi ✓  Kayıt no: ' + data.id;
+    } catch (err) {
+      st.classList.add('err');
+      st.textContent = 'Kaydedilemedi: ' + err.message + ' ';
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn-retry'; b.textContent = 'Tekrar dene';
+      b.onclick = () => kaydet(payload);
+      st.appendChild(b);
+      console.error('Kayıt hatası:', err);
+    }
+  }
+
+  $('startBtn').addEventListener('click', start);
+  $('finishBtn').addEventListener('click', () => {
+    const blank = answers.filter(a => !a).length;
+    const msg = blank ? `${blank} soru boş. Sınavı bitirmek istiyor musun?` : 'Sınavı bitirmek istiyor musun?';
+    if (confirm(msg)) finish('Sınavı bitirdin');
+  });
+
+  render(TOTAL_MS);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "zarifcozum",
+  "version": "1.0.0",
+  "description": "ZarifÇözüm eğitim platformu ve sınav sistemi",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node static-server.js",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "mongodb": "^7.7.0",
+    "mongoose": "^9.11.3"
+  }
+}

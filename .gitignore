@@ -1,0 +1,10 @@
+node_modules/
+baglanti_adresi.env
+.env
+.env.*
+!.env.example
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+coverage/
+dist/
