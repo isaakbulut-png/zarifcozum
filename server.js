@@ -2,11 +2,11 @@
 // Çalıştır: npm start
 const fs = require('fs');
 const path = require('path');
-// ".env" ya da "baglanti_adresi.env" adlı dosyadan hangisi varsa onu okur
-const envDosyasi = ['.env', 'baglanti_adresi.env']
-  .map(f => path.join(__dirname, f))
-  .find(f => fs.existsSync(f));
-require('dotenv').config({ path: envDosyasi });
+// .env önceliklidir; eksik değişkenler baglanti_adresi.env dosyasından tamamlanır.
+for (const file of ['.env', 'baglanti_adresi.env']) {
+  const envPath = path.join(__dirname, file);
+  if (fs.existsSync(envPath)) require('dotenv').config({ path: envPath });
+}
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
@@ -15,6 +15,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const { MongoStore } = require('connect-mongo');
 const { router: authRouter, requireRole } = require('./routes/auth');
+const { createAIRouter } = require('./routes/ai');
 
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI;           // .env dosyasından okunur
@@ -91,6 +92,10 @@ let koleksiyon, anahtarKoleksiyon, canliDersKoleksiyonu;
 let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, duyuruKoleksiyonu;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
+app.use('/api/ai', createAIRouter({
+  getQuizCollection: () => quizKoleksiyonu,
+  requireRole
+}));
 
 // Sunucu ve veritabanı ayakta mı?
 app.get('/api/saglik', (req, res) => res.json({ mesaj: 'Sunucu çalışıyor', db: DB_ADI, koleksiyon: KOLEKSIYON }));
@@ -208,7 +213,8 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
     const [dersler, quizler, duyurular, sonuclar, aktifDers] = await Promise.all([
       planliDersKoleksiyonu.find({ startsAt: { $gte: new Date() } })
         .sort({ startsAt: 1 }).limit(50).toArray(),
-      quizKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(50).toArray(),
+      quizKoleksiyonu.find({ source: { $ne: 'ai' } })
+        .sort({ createdAt: -1 }).limit(50).toArray(),
       duyuruKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(20).toArray(),
       quizSonucKoleksiyonu.find({ studentId: req.session.user.id })
         .sort({ createdAt: -1 }).limit(100).toArray(),
@@ -248,6 +254,9 @@ app.post('/api/ogrenci/quiz/:id/teslim', ogrenciKontrol, async (req, res) => {
     if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz test numarası.' });
     const quiz = await quizKoleksiyonu.findOne({ _id: new ObjectId(req.params.id) });
     if (!quiz) return res.status(404).json({ mesaj: 'Test bulunamadı.' });
+    if (quiz.source === 'ai' && quiz.createdBy !== req.session.user.id) {
+      return res.status(404).json({ mesaj: 'Test bulunamadı.' });
+    }
     const answers = req.body?.answers;
     if (!Array.isArray(answers) || answers.length !== quiz.questions.length ||
         !answers.every((answer, index) => answer === null ||
@@ -276,7 +285,11 @@ app.post('/api/ogrenci/quiz/:id/teslim', ogrenciKontrol, async (req, res) => {
       id: result.insertedId,
       score,
       correctCount,
-      totalCount
+      totalCount,
+      review: quiz.questions.map(({ answer, explanation }) => ({
+        answer,
+        explanation: explanation || ''
+      }))
     });
   } catch (err) {
     console.error('❌ Öğrenci testi kaydedilemedi:', err);
@@ -288,7 +301,7 @@ app.get('/api/ogretmen/yonetim', ogretmenKontrol, async (req, res) => {
   try {
     const [dersler, quizler, duyurular, quizSonuclari, eskiSonuclar, anahtarlar] = await Promise.all([
       planliDersKoleksiyonu.find({}).sort({ startsAt: 1 }).limit(100).toArray(),
-      quizKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(100).toArray(),
+      quizKoleksiyonu.find({ source: { $ne: 'ai' } }).sort({ createdAt: -1 }).limit(100).toArray(),
       duyuruKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(50).toArray(),
       quizSonucKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(500).toArray(),
       koleksiyon.find().sort({ kayitTarihi: -1 }).limit(500).toArray(),

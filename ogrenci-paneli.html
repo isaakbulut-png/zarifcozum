@@ -167,6 +167,7 @@ button,select{font:inherit}
 .feed-status.ok{color:#1e8e5a;font-weight:600}
 .feed-card.is-live{border-color:var(--orange);box-shadow:0 6px 20px #f47a201c}
 .feed-card .btn-join{display:inline-block;margin-top:8px}
+.panel-view[hidden]{display:none!important}
 .logout-button{width:100%;margin-top:12px;padding:9px 12px;border:1px solid #53688f;border-radius:8px;background:transparent;color:#fff;text-align:left;font-weight:600}
 .logout-button:hover{border-color:var(--orange);color:#ffd2ad}
 .sidebar .feed-status{color:#ffd2ad;font-size:.8rem}
@@ -231,7 +232,7 @@ button,select{font:inherit}
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
           Canlı Ders</a></li>
         <li><a href="#schedule">Ders Programı</a></li>
-        <li><a href="#student-tasks">Ödevler / Görevler</a></li>
+        <li><a href="#student-tasks">Ödevler</a></li>
         <li><a href="#soru-sihirbazi">
           <svg viewBox="0 0 24 24"><path d="M5 19 17 7M14 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1zM19 12l.7 1.3L21 14l-1.3.7L19 16l-.7-1.3L17 14l1.3-.7z"/></svg>
           Soru Sihirbazı</a></li>
@@ -258,37 +259,56 @@ button,select{font:inherit}
 
   <!-- Ana içerik -->
   <main class="main">
-    <section class="greeting">
-      <h1 id="welcomeTitle">Hoş geldin</h1>
-      <p>Öğretmenlerinin derslerini, testlerini ve duyurularını buradan takip edebilirsin.</p>
-    </section>
     <p class="feed-status error" id="dashboardError" role="alert" hidden></p>
 
-    <div class="section-head" id="live-lessons"><h2>Canlı dersler ve aktif sınıflar</h2></div>
-    <section class="teacher-feed" id="lessonFeed" aria-live="polite"><p class="feed-status">Canlı dersler yükleniyor…</p></section>
-
-    <div class="section-head" id="schedule"><h2>Ders programı</h2></div>
-    <section class="teacher-feed" id="scheduleFeed" aria-live="polite"><p class="feed-status">Program yükleniyor…</p></section>
-
-    <div class="section-head" id="ogretmen-testleri"><h2>Öğretmen testleri</h2></div>
-    <section class="teacher-feed" id="quizFeed" aria-live="polite"><p class="feed-status">Testler yükleniyor…</p></section>
-    <section class="card" id="quizRunner" hidden>
-      <h2 id="activeQuizTitle"></h2>
-      <p class="hint" id="activeQuizDescription"></p>
-      <form id="quizAttemptForm"></form>
-      <p class="feed-status" id="quizAttemptStatus" role="status"></p>
+    <section class="panel-view" id="live-lessons" data-panel-view="live-lessons">
+      <section class="greeting">
+        <h1 id="welcomeTitle">Hoş geldin</h1>
+        <p>Öğretmenlerinin derslerini, testlerini ve duyurularını buradan takip edebilirsin.</p>
+      </section>
+      <div class="section-head"><h2>Canlı dersler ve aktif sınıflar</h2></div>
+      <section class="teacher-feed" id="lessonFeed" aria-live="polite"><p class="feed-status">Canlı dersler yükleniyor…</p></section>
     </section>
 
-    <div class="section-head" id="student-tasks"><h2>Ödevler ve görevler</h2></div>
-    <section class="teacher-feed" id="taskFeed" aria-live="polite"><p class="feed-status">Görevler yükleniyor…</p></section>
+    <section class="panel-view" id="schedule" data-panel-view="schedule">
+      <div class="section-head"><h2>Ders programı</h2></div>
+      <section class="teacher-feed" id="scheduleFeed" aria-live="polite"><p class="feed-status">Program yükleniyor…</p></section>
+    </section>
 
-    <div class="section-head" id="duyurular"><h2>Öğretmen duyuruları</h2></div>
-    <section class="teacher-feed" id="announcementFeed" aria-live="polite"><p class="feed-status">Duyurular yükleniyor…</p></section>
+    <section class="panel-view" id="student-tasks" data-panel-view="student-tasks">
+      <div class="section-head"><h2>Ödevler ve görevler</h2></div>
+      <section class="teacher-feed" id="taskFeed" aria-live="polite"><p class="feed-status">Görevler yükleniyor…</p></section>
+    </section>
 
-    <div class="section-head" id="test-sonuclarim"><h2>Test sonuçlarım</h2></div>
-    <section class="teacher-feed" id="studentResults" aria-live="polite"><p class="feed-status">Sonuçlar yükleniyor…</p></section>
+    <section class="panel-view" id="planli-dersler" data-panel-view="planli-dersler">
+      <div class="section-head"><h2>Planlı canlı dersler</h2></div>
+      <section class="teacher-feed" id="plannedLessonFeed" aria-live="polite"><p class="feed-status">Planlı dersler yükleniyor…</p></section>
+    </section>
 
-    <section class="ai-panel" id="soru-sihirbazi" aria-labelledby="ai-title">
+    <section class="panel-view" id="ogretmen-testleri" data-panel-view="ogretmen-testleri">
+      <div class="section-head"><h2>Öğretmen testleri</h2></div>
+      <section class="teacher-feed" id="quizFeed" aria-live="polite"><p class="feed-status">Testler yükleniyor…</p></section>
+      <section class="card" id="quizRunner" hidden>
+        <h2 id="activeQuizTitle"></h2>
+        <p class="hint" id="activeQuizDescription"></p>
+        <form id="quizAttemptForm"></form>
+        <p class="feed-status" id="quizAttemptStatus" role="status"></p>
+      </section>
+    </section>
+
+    <section class="panel-view" id="duyurular" data-panel-view="duyurular">
+      <div class="section-head"><h2>Öğretmen duyuruları</h2></div>
+      <section class="teacher-feed" id="announcementFeed" aria-live="polite"><p class="feed-status">Duyurular yükleniyor…</p></section>
+    </section>
+
+    <section class="panel-view" id="test-sonuclarim" data-panel-view="test-sonuclarim">
+      <div class="section-head"><h2>Test sonuçlarım</h2></div>
+      <section class="teacher-feed" id="studentResults" aria-live="polite"><p class="feed-status">Sonuçlar yükleniyor…</p></section>
+      <div id="quizReview"></div>
+    </section>
+
+    <section class="panel-view" id="soru-sihirbazi" data-panel-view="soru-sihirbazi">
+    <section class="ai-panel" aria-labelledby="ai-title">
       <div class="ai-copy">
         <h2 id="ai-title">Soru sihirbazı</h2>
         <p>Bu demo sürümünde yapay zekâ servisi henüz bağlı değil. Konu ve zorluk seçenekleri örnek arayüz olarak sunuluyor.</p>
@@ -341,14 +361,16 @@ button,select{font:inherit}
 
         <button class="btn-ai" id="uret" type="button">
           <svg viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg>
-          Yapay Zeka ile Soru Üret
+          <span>Yapay Zeka ile Soru Üret</span>
         </button>
 
         <div class="result" id="sonuc" role="status" aria-live="polite"></div>
       </form>
     </section>
+    </section>
 
-    <div class="section-head" id="denemeler">
+    <section class="panel-view" id="denemeler" data-panel-view="denemeler">
+    <div class="section-head">
       <h2>Yaklaşan deneme sınavları</h2>
       <a href="deneme-sinavi-optik.html">Tümünü gör</a>
     </div>
@@ -411,6 +433,7 @@ button,select{font:inherit}
         </div>
       </article>
     </section>
+    </section>
   </main>
 </div>
 
@@ -446,6 +469,42 @@ button,select{font:inherit}
       return `<p class="feed-status">${esc(message)}</p>`;
     }
 
+    const panelViews = [...document.querySelectorAll('[data-panel-view]')];
+    const panelLinks = [...document.querySelectorAll('.nav a[href^="#"]')];
+
+    function showPanel(viewId, updateHash = false) {
+      const selectedView = panelViews.find(view => view.dataset.panelView === viewId) || panelViews[0];
+      if (!selectedView) return;
+
+      panelViews.forEach(view => {
+        view.hidden = view !== selectedView;
+      });
+      panelLinks.forEach(link => {
+        if (link.hash === `#${selectedView.dataset.panelView}`) {
+          link.setAttribute('aria-current', 'page');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+
+      if (updateHash && location.hash !== `#${selectedView.dataset.panelView}`) {
+        history.pushState(null, '', `#${selectedView.dataset.panelView}`);
+      }
+      $('menu-toggle').checked = false;
+    }
+
+    showPanel(location.hash.slice(1));
+    window.addEventListener('hashchange', () => showPanel(location.hash.slice(1)));
+    window.addEventListener('popstate', () => showPanel(location.hash.slice(1)));
+    panelLinks.forEach(link => {
+      link.addEventListener('click', event => {
+        event.preventDefault();
+        const viewId = link.hash.slice(1);
+        showPanel(viewId, true);
+        window.scrollTo({top: 0, behavior: 'smooth'});
+      });
+    });
+
     function renderContent(content) {
       const activeLesson = content.aktifDers
         ? `<article class="feed-card is-live">
@@ -462,7 +521,13 @@ button,select{font:inherit}
           </article>`).join('');
       $('lessonFeed').innerHTML = activeLesson ||
         emptyMessage('Şu anda aktif canlı ders yok.');
-      $('scheduleFeed').innerHTML = plannedLessons ||
+      $('scheduleFeed').innerHTML = content.dersler.length
+        ? content.dersler.map(lesson => `<article class="feed-card">
+            <h3>${esc(lesson.title)}</h3>
+            <p>${new Date(lesson.startsAt).toLocaleString('tr-TR')}</p>
+          </article>`).join('')
+        : emptyMessage('Henüz yaklaşan ders programı yok.');
+      $('plannedLessonFeed').innerHTML = plannedLessons ||
         emptyMessage('Henüz yaklaşan ders programı yok.');
       $('quizFeed').innerHTML = content.quizler.length
         ? content.quizler.map(quiz => `<article class="feed-card">
@@ -533,26 +598,33 @@ button,select{font:inherit}
       }
     });
 
+    function renderQuiz(quiz) {
+      activeQuiz = quiz;
+      $('activeQuizTitle').textContent = quiz.title;
+      $('activeQuizDescription').textContent = quiz.description || `${quiz.questions.length} soru`;
+      $('quizAttemptForm').innerHTML = quiz.questions.map((question, index) => `
+        <fieldset class="quiz-question">
+          <legend>${index + 1}. ${esc(question.text)}</legend>
+          ${['A','B','C','D'].map(letter => `<label class="quiz-option">
+            <input type="radio" name="answer-${index}" value="${letter}">
+            <span><strong>${letter})</strong> ${esc(question.options[letter])}</span>
+          </label>`).join('')}
+        </fieldset>`).join('') + '<button class="btn-join" type="submit">Testi gönder</button>';
+      $('quizAttemptStatus').textContent = '';
+      $('quizAttemptStatus').className = 'feed-status';
+      $('quizReview').replaceChildren();
+      $('quizRunner').hidden = false;
+      showPanel('ogretmen-testleri', true);
+      $('quizRunner').scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
+
     function openQuiz(event) {
       const button = event.target.closest('[data-quiz-id]');
       if (!button) return;
-      activeQuiz = null;
-      api('/api/ogrenci/icerik').then(({quizler}) => {
-        activeQuiz = quizler.find(quiz => quiz.id === button.dataset.quizId);
-        if (!activeQuiz) throw new Error('Test artık kullanılamıyor.');
-        $('activeQuizTitle').textContent = activeQuiz.title;
-        $('activeQuizDescription').textContent = activeQuiz.description || `${activeQuiz.questions.length} soru`;
-        $('quizAttemptForm').innerHTML = activeQuiz.questions.map((question, index) => `
-          <fieldset class="quiz-question">
-            <legend>${index + 1}. ${esc(question.text)}</legend>
-            ${['A','B','C','D'].map(letter => `<label class="quiz-option">
-              <input type="radio" name="answer-${index}" value="${letter}">
-              <span><strong>${letter})</strong> ${esc(question.options[letter])}</span>
-            </label>`).join('')}
-          </fieldset>`).join('') + '<button class="btn-join" type="submit">Testi gönder</button>';
-        $('quizAttemptStatus').textContent = '';
-        $('quizRunner').hidden = false;
-        $('quizRunner').scrollIntoView({behavior: 'smooth', block: 'start'});
+      api('/api/student/dashboard').then(({quizler}) => {
+        const quiz = quizler.find(item => item.id === button.dataset.quizId);
+        if (!quiz) throw new Error('Test artık kullanılamıyor.');
+        renderQuiz(quiz);
       }).catch(error => {
         $('quizAttemptStatus').textContent = error.message;
         $('quizAttemptStatus').className = 'feed-status error';
@@ -576,7 +648,14 @@ button,select{font:inherit}
         });
         $('quizAttemptStatus').textContent = `Test tamamlandı: %${result.score} (${result.correctCount}/${result.totalCount} doğru).`;
         $('quizAttemptStatus').className = 'feed-status ok';
+        $('quizReview').innerHTML = result.review.map((item, index) => `
+          <article class="feed-card">
+            <h3>${index + 1}. soru · Doğru cevap: ${esc(item.answer)}</h3>
+            <p>${esc(item.explanation || 'Açıklama bulunmuyor.')}</p>
+          </article>`).join('');
         await loadContent();
+        showPanel('test-sonuclarim', true);
+        window.scrollTo({top: 0, behavior: 'smooth'});
       } catch (error) {
         $('quizAttemptStatus').textContent = `Test gönderilemedi: ${error.message}`;
         $('quizAttemptStatus').className = 'feed-status error';
@@ -584,9 +663,31 @@ button,select{font:inherit}
       }
     });
 
-    $('uret').addEventListener('click', () => {
+    $('uret').addEventListener('click', async event => {
+      const button = event.currentTarget;
+      const label = button.querySelector('span');
+      const originalLabel = label.textContent;
+      button.disabled = true;
+      label.textContent = 'Sorular hazırlanıyor…';
       $('sonuc').classList.add('show');
-      $('sonuc').innerHTML = '<strong>Soru üretimi henüz kullanıma açık değil</strong>Yapay zekâ servisi bağlandığında bu panelde sorular üretilebilecek.';
+      $('sonuc').textContent = 'Yapay zeka soruları hazırlanıyor…';
+      try {
+        const {quiz} = await api('/api/ai/questions', {
+          method: 'POST',
+          body: JSON.stringify({
+            topic: $('konu').value,
+            difficulty: $('zorluk').value,
+            count: Number.parseInt($('adet').value, 10)
+          })
+        });
+        $('sonuc').textContent = `${quiz.soruSayisi} soru hazırlandı. Testi çözmeye başlayabilirsin.`;
+        renderQuiz(quiz);
+      } catch (error) {
+        $('sonuc').textContent = error.message || 'Soru üretilemedi. Lütfen yeniden deneyin.';
+      } finally {
+        button.disabled = false;
+        label.textContent = originalLabel;
+      }
     });
     loadContent();
   })();
