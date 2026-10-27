@@ -12,6 +12,14 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/logo', express.static(path.join(__dirname, 'logo')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
+app.get('/robots.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'robots.txt'));
+});
+
+app.get('/sitemap.xml', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
