@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Zoom Canlı Ders | ZarifÇözüm</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; margin: 0; background: #101322; color: #fff; font: 16px system-ui, sans-serif; }
+  #status { position: fixed; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; }
+  #status[hidden] { display: none; }
+</style>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/react.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/react-dom.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/redux.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/redux-thunk.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/react-redux.min.js"></script>
+<script src="https://source.zoom.us/6.10.0/lib/vendor/lodash.min.js"></script>
+<script src="https://source.zoom.us/zoom-meeting-6.10.0.min.js"></script>
+</head>
+<body>
+<div id="status" role="status" aria-live="polite">Zoom canlı dersine bağlanılıyor…</div>
+<script>
+(() => {
+  const status = document.getElementById('status');
+  const isHost = new URLSearchParams(location.search).get('role') === 'host';
+  const api = async (path, options = {}) => {
+    const response = await fetch(path, options);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.mesaj || `Sunucu hatası (${response.status})`);
+    return data;
+  };
+  const sdkCall = (method, options) => new Promise((resolve, reject) => {
+    window.ZoomMtg[method]({
+      ...options,
+      success: resolve,
+      error: reject
+    });
+  });
+  const errorMessage = error => {
+    if (typeof error === 'string') return error;
+    if (typeof error?.reason === 'string') return error.reason;
+    if (typeof error?.message === 'string') return error.message;
+    return 'Zoom hizmetinde beklenmeyen bir hata oluştu.';
+  };
+
+  async function joinMeeting() {
+    if (!window.ZoomMtg) throw new Error('Zoom Meeting SDK yüklenemedi. Sayfayı yenileyip tekrar deneyin.');
+
+    const credentials = isHost
+      ? await api('/api/ogretmen/canli/katilim', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'x-ogretmen-sifre': sessionStorage.getItem('ogretmenSifre') || ''}
+        })
+      : await api('/api/canli/katilim');
+
+    window.ZoomMtg.setZoomJSLib('https://source.zoom.us/6.10.0/lib', '/av');
+    window.ZoomMtg.preLoadWasm();
+    window.ZoomMtg.prepareWebSDK();
+    await sdkCall('init', {
+      leaveUrl: `${location.origin}/canli.html`,
+      patchJsMedia: true,
+      leaveOnPageUnload: true
+    });
+    await sdkCall('join', {
+      signature: credentials.signature,
+      sdkKey: credentials.sdkKey,
+      meetingNumber: credentials.meetingNumber,
+      passWord: credentials.password,
+      userName: credentials.userName,
+      ...(credentials.zak ? { zak: credentials.zak } : {})
+    });
+    status.hidden = true;
+  }
+
+  joinMeeting().catch(error => {
+    status.textContent = `Canlı derse katılınamadı: ${errorMessage(error)}`;
+  });
+})();
+</script>
+</body>
+</html>

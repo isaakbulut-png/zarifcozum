@@ -18,132 +18,57 @@
     <div class="page-head">
       <div>
         <div class="crumbs"><a href="panel.html">6-A grubu</a><span>›</span><span>Canlı ders</span></div>
-        <h1>Ortak Kat ve Ortak Bölen</h1>
+        <h1>Canlı ders</h1>
       </div>
-      <div class="row"><span class="chip chip-live">CANLI</span><span class="chip">Öğr. Mehmet K.</span><span class="chip">19:00 – 19:50</span><span class="chip" id="count">14 katılımcı</span></div>
+      <div class="row">
+        <span class="chip chip-live">ZOOM MEETING</span>
+        <span class="chip" id="roomRole">Derse katıl</span>
+        <button class="btn btn-sm btn-ghost" id="finishMeeting" type="button" hidden>Dersi sonlandır</button>
+      </div>
     </div>
 
-    <div class="notice notice-info" style="margin-bottom:var(--space-5)">
+    <div class="notice notice-info" id="roomStatus" role="status" aria-live="polite" style="margin-bottom:var(--space-5)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
-      <p><strong>Demo notu:</strong> Bu oda, üretimde Zoom Video SDK (web bileşeni) ile doldurulacak alanın birebir yerleşimidir. Video akışı simüle edilmiştir; tahta, anket, sohbet ve kontroller platformun kendi arayüzüdür — öğrenci Zoom hesabı açmaz, uygulama indirmez.</p>
+      <p>Zoom canlı dersine bağlanılıyor. Tarayıcı kamera ve mikrofon izinleri isteyebilir.</p>
     </div>
 
-    <div class="live-grid">
-      <div class="room" id="room">
-                <div class="lobby" id="lobby">
-          <div class="inner">
-            <span class="avatar lg">EA</span>
-            <h2>Derse katılmaya hazır mısın?</h2>
-            <p>Kameran kapalı, mikrofonun sessizde başlayacak. Öğretmen söz verdiğinde mikrofonu açabilirsin. Ders kaydedilir ve 2 saat içinde kayıtlar bölümüne düşer.</p>
-            <div class="row" style="justify-content:center">
-              <label class="chip" style="cursor:pointer"><input type="checkbox" checked style="margin-right:6px">Kamera kapalı</label>
-              <label class="chip" style="cursor:pointer"><input type="checkbox" checked style="margin-right:6px">Mikrofon sessiz</label>
-            </div>
-            <button class="btn btn-primary btn-lg" id="join">Derse katıl</button>
-            <span class="xs" style="color:#8b93bd">Bağlantı testi: 42 ms · video 720p uygun</span>
-          </div>
-        </div>
-        <div class="room-top">
-          <span class="row" style="gap:var(--space-2)"><span class="chip chip-live">REC</span><span class="mono" id="clock">00:00</span><span style="color:#8b93bd">· MAT.6.1 · Ortak kat / ortak bölen</span></span>
-          <span class="row" style="gap:var(--space-2)"><span style="color:#8b93bd">Yoklama alındı · 19:02</span><span class="sdk-tag">&lt;zoom-video-sdk&gt;</span></span>
-        </div>
-        <div class="stage">
-          <div class="board" id="board">
-            <span class="pen">Öğretmen tahtası · paylaşılan ekran</span>
-            <div id="boardlines"></div>
-          </div>
-          <div class="tiles">
-            <div class="tile teacher"><span class="avatar alt">MK</span><span class="nm">Mehmet K. · öğretmen</span><span class="mic"><svg width="10" height="10" viewBox="0 0 24 24" fill="#fff"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0" stroke="#fff" stroke-width="2" fill="none"/></svg></span></div>
-            <div class="tile"><span class="avatar">EA</span><span class="nm">Elif A. (sen)</span><span class="mic off"><svg width="10" height="10" viewBox="0 0 24 24" stroke="#fff" stroke-width="2" fill="none"><path d="M3 3l18 18M9 9v4a3 3 0 0 0 5 2M15 9V6a3 3 0 0 0-6 0"/></svg></span></div>
-            <div class="tile"><span class="avatar" style="background:#4a5590">AY</span><span class="nm">Ahmet Y.</span><span class="mic off"></span></div>
-            <div class="tile"><span class="avatar" style="background:#4a5590">+11</span><span class="nm">diğer katılımcılar</span></div>
-          </div>
-        </div>
-        <div class="controls">
-          <button class="ctl" id="micbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Mikrofon</span></button>
-          <button class="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg><span>Kamera</span></button>
-          <button class="ctl" id="hand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 13V5a1.5 1.5 0 0 1 3 0v6M11 11V4a1.5 1.5 0 0 1 3 0v7M14 11V5.5a1.5 1.5 0 0 1 3 0V13M8 13l-2-2a1.6 1.6 0 0 0-2.3 2.2L8 18c1.5 2 3 3 6 3 4 0 6-3 6-7v-1"/></svg><span>Söz iste</span></button>
-          <button class="ctl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Sohbet</span></button>
-          <button class="ctl danger" id="leave"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a9 9 0 0 1 4 0l1 2a2 2 0 0 0 2 1l3-1a2 2 0 0 0 1-2 14 14 0 0 0-18 0 2 2 0 0 0 1 2l3 1a2 2 0 0 0 2-1z"/></svg><span>Ayrıl</span></button>
-        </div>
-      </div>
-
-      <div class="chat-side">
-        <div class="card">
-          <div class="card-head"><h3>Anlık anket</h3><span class="chip chip-primary" id="pollstate">Açık</span></div>
-          <p class="small" style="margin-bottom:var(--space-3)">24 ile 36'nın ortak bölenlerinin en büyüğü kaçtır?</p>
-          <div class="poll" id="poll">
-            <button data-v="6"><span class="bar"></span><span class="lbl"><span>6</span><span class="mono" data-c>—</span></span></button>
-            <button data-v="12" data-ok><span class="bar"></span><span class="lbl"><span>12</span><span class="mono" data-c>—</span></span></button>
-            <button data-v="18"><span class="bar"></span><span class="lbl"><span>18</span><span class="mono" data-c>—</span></span></button>
-            <button data-v="72"><span class="bar"></span><span class="lbl"><span>72</span><span class="mono" data-c>—</span></span></button>
-          </div>
-          <p class="xs muted" id="pollnote" style="margin-top:var(--space-2)">Cevabın ders notuna ve kazanım takibine işlenir.</p>
-        </div>
-        <div class="card">
-          <div class="card-head"><h3>Sınıf sohbeti</h3><span class="xs muted">yalnızca öğretmen onaylı</span></div>
-          <div class="chat-log" id="log">
-            <div class="chat-msg"><span class="avatar alt">MK</span><div><div class="who">Mehmet K.</div>Herkese merhaba, 360'ı asal çarpanlarına ayırmayı hatırlayalım. Tahtaya yazıyorum.</div></div>
-            <div class="chat-msg"><span class="avatar" style="background:#4a5590">AY</span><div><div class="who">Ahmet Y.</div>Hocam EKOK'ta tüm asalları mı alıyoruz?</div></div>
-            <div class="chat-msg"><span class="avatar alt">MK</span><div><div class="who">Mehmet K.</div>Evet, hepsini ve en büyük üsleriyle. EBOB'da ise sadece ortak olanları, en küçük üsleriyle.</div></div>
-          </div>
-          <form class="row" id="chatform" style="margin-top:var(--space-3);flex-wrap:nowrap"><input type="text" id="chatin" placeholder="Soru yaz…" style="flex:1;padding:var(--space-2) var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-md);min-height:40px"><button class="btn btn-soft btn-sm" type="submit">Gönder</button></form>
-        </div>
-        <div class="card">
-          <h3 style="margin-bottom:var(--space-2)">Ders akışı</h3>
-          <div class="stack-sm small">
-            <div class="row between"><span class="muted">Tekrar: asal çarpanlar</span><span class="chip chip-success">✓</span></div>
-            <div class="row between"><strong>EBOB — tanım ve 2 örnek</strong><span class="chip chip-primary">şimdi</span></div>
-            <div class="row between"><span class="muted">EKOK — otobüs problemi</span><span class="chip">—</span></div>
-            <div class="row between"><span class="muted">Mini test (5 soru, canlı)</span><span class="chip">—</span></div>
-          </div>
-        </div>
-      </div>
+    <div class="room" style="overflow:hidden">
+      <iframe id="zoomFrame" title="Zoom canlı ders" allow="camera; microphone; display-capture; fullscreen; autoplay" allowfullscreen style="display:block;width:100%;height:78vh;min-height:560px;border:0;background:#101322"></iframe>
     </div>
-
-    <section class="card" style="margin-top:var(--space-6)">
-      <div class="card-head"><div><h2>Yaklaşan ve geçmiş dersler</h2><p class="small muted">Kayıtlar 2 saat içinde düşer; 90 gün saklanır.</p></div></div>
-      <div class="table-wrap"><table class="table">
-        <thead><tr><th>Tarih</th><th>Konu</th><th>Öğretmen</th><th>Durum</th><th></th></tr></thead>
-        <tbody>
-          <tr><td class="mono">23 Eki 19:00</td><td>Ortak Kat ve Ortak Bölen</td><td>Mehmet K.</td><td><span class="chip chip-live">Canlı</span></td><td><a href="#room" class="btn btn-sm btn-primary">Katıl</a></td></tr>
-          <tr><td class="mono">26 Eki 18:30</td><td>Soru çözüm saati (açık)</td><td>Mehmet K.</td><td><span class="chip">Planlandı</span></td><td><button class="btn btn-sm btn-ghost">Hatırlat</button></td></tr>
-          <tr><td class="mono">21 Eki 19:00</td><td>Asal Sayılar ve Asal Çarpanlar</td><td>Mehmet K.</td><td><span class="chip chip-success">Kayıt hazır · 48 dk</span></td><td><button class="btn btn-sm btn-ghost">İzle</button></td></tr>
-          <tr><td class="mono">16 Eki 19:00</td><td>Bölünebilme Kuralları</td><td>Mehmet K.</td><td><span class="chip chip-success">Kayıt hazır · 51 dk</span></td><td><button class="btn btn-sm btn-ghost">İzle</button></td></tr>
-        </tbody>
-      </table></div>
-    </section>
   </main>
 </div>
 <nav class="tabbar" data-shell="tabbar" aria-label="Alt menü"></nav>
 <script src="assets/app.js"></script>
 <script>
 (function () {
-  const $ = id => document.getElementById(id);
-  const lines = ['360 = 2³ · 3² · 5', '', 'EBOB(24, 36) = ?', '  24 = 2³ · 3', '  36 = 2² · 3²', '  ortak asallar, en küçük üs: 2² · 3 = 12', '', 'EKOK(12, 18) = ?', '  12 = 2² · 3', '  18 = 2 · 3²', '  tüm asallar, en büyük üs: 2² · 3² = 36'];
-  let sec = 0, t = null, joined = false, li = 0;
-  $('join').addEventListener('click', () => {
-    $('lobby').style.display = 'none'; joined = true;
-    t = setInterval(() => { sec++; $('clock').textContent = String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0'); }, 1000);
-    const b = $('boardlines');
-    const write = () => { if (li < lines.length) { b.innerHTML += (lines[li] || '&nbsp;') + '<br>'; li++; setTimeout(write, 900); } };
-    write();
-  });
-  $('leave').addEventListener('click', () => { clearInterval(t); $('lobby').style.display = 'grid'; $('lobby').querySelector('h2').textContent = 'Dersten ayrıldın'; $('join').textContent = 'Yeniden katıl'; });
-  $('hand').addEventListener('click', () => { $('hand').style.background = 'var(--color-warning)'; $('hand').querySelector('span').textContent = 'Sırada: 2'; });
-  $('micbtn').addEventListener('click', () => { alert('Demo: Öğretmen söz verene kadar mikrofon kapalı kalır (moderasyon kuralı).'); });
-  const base = { 6: 3, 12: 8, 18: 1, 72: 1 };
-  $('poll').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-    const v = b.dataset.v; base[v]++; const tot = Object.values(base).reduce((a, c) => a + c, 0);
-    $('poll').querySelectorAll('button').forEach(x => { x.disabled = true; const c = base[x.dataset.v]; x.querySelector('[data-c]').textContent = c; x.querySelector('.bar').style.width = (100 * c / tot) + '%'; if (x.hasAttribute('data-ok')) x.style.borderColor = 'var(--color-success)'; });
-    $('pollstate').textContent = 'Kapandı'; $('pollstate').className = 'chip';
-    $('pollnote').textContent = b.hasAttribute('data-ok') ? 'Doğru. 13 kişiden 9\'u doğru cevapladı.' : 'Yanlış. Doğru cevap 12. Bu kazanım tekrar listene eklendi.';
-  }));
-  $('chatform').addEventListener('submit', e => {
-    e.preventDefault(); const v = $('chatin').value.trim(); if (!v) return;
-    $('log').insertAdjacentHTML('beforeend', `<div class="chat-msg"><span class="avatar">EA</span><div><div class="who">Elif A. <span class="xs muted">· onay bekliyor</span></div>${v.replace(/</g, '&lt;')}</div></div>`);
-    $('chatin').value = ''; $('log').scrollTop = 1e6;
-  });
+  const isHost = new URLSearchParams(location.search).get('host') === '1';
+  const iframe = document.getElementById('zoomFrame');
+  const finish = document.getElementById('finishMeeting');
+  const status = document.getElementById('roomStatus');
+  const password = sessionStorage.getItem('ogretmenSifre') || '';
+
+  document.getElementById('roomRole').textContent = isHost ? 'Öğretmen' : 'Öğrenci';
+  finish.hidden = !isHost;
+  iframe.src = isHost ? 'zoom-room.html?role=host' : 'zoom-room.html?role=student';
+
+  if (isHost) {
+    finish.addEventListener('click', async () => {
+      finish.disabled = true;
+      try {
+        const response = await fetch('/api/ogretmen/canli/sonlandir', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'x-ogretmen-sifre': password}
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.mesaj || `Sunucu hatası (${response.status})`);
+        iframe.src = 'about:blank';
+        status.querySelector('p').textContent = 'Canlı ders sonlandırıldı.';
+      } catch (error) {
+        status.querySelector('p').textContent = 'Ders sonlandırılamadı: ' + error.message;
+        finish.disabled = false;
+      }
+    });
+  }
 })();
 </script>
 <script data-pplx-inline-edit>

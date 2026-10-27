@@ -127,6 +127,16 @@ td.net{font-weight:700;color:var(--navy-900)}
   <div id="panel" hidden>
     <div class="notice" id="anahtarUyari" hidden>Bu sınav için <strong>cevap anahtarı</strong> girilmemiş. Aşağıdan anahtarı girip kaydedin; doğru, yanlış ve net sayıları otomatik hesaplanır.</div>
 
+    <section class="card">
+      <h2>Canlı ders</h2>
+      <p class="hint">Zoom toplantısı oluşturun ve öğretmen olarak derse katılın.</p>
+      <div class="tools">
+        <input id="canliKonu" type="text" maxlength="200" value="ZarifÇözüm Canlı Ders" aria-label="Canlı ders konusu">
+        <button class="btn" id="canliBaslat" type="button">Canlı dersi başlat</button>
+      </div>
+      <p class="err" id="canliDurum" role="status" aria-live="polite"></p>
+    </section>
+
     <section class="stats" id="stats"></section>
 
     <details class="card" id="anahtarKutu">
@@ -215,6 +225,23 @@ td.net{font-weight:700;color:var(--navy-900)}
     catch (err) { $('girisHata').textContent = err.message.includes('fetch') ? 'Sunucuya ulaşılamadı. node server.js çalışıyor mu?' : err.message; }
   });
   $('cikis').addEventListener('click', cikis);
+
+  $('canliBaslat').addEventListener('click', async () => {
+    const dugme = $('canliBaslat');
+    const durum = $('canliDurum');
+    dugme.disabled = true;
+    durum.textContent = 'Zoom toplantısı oluşturuluyor…';
+    try {
+      await api('/api/ogretmen/canli/baslat', {
+        method: 'POST',
+        body: JSON.stringify({topic: $('canliKonu').value})
+      });
+      location.href = 'canli.html?host=1';
+    } catch (err) {
+      durum.textContent = 'Canlı ders başlatılamadı: ' + err.message;
+      dugme.disabled = false;
+    }
+  });
 
   // ---- Sınav seçici ----
   function sinavListesi() {
