@@ -1,5 +1,5 @@
-// Kurulum:  npm install express cors mongodb dotenv
-// Çalıştır: node server.js
+// Kurulum:  npm install
+// Çalıştır: npm start
 const fs = require('fs');
 const path = require('path');
 // ".env" ya da "baglanti_adresi.env" adlı dosyadan hangisi varsa onu okur
@@ -11,11 +11,16 @@ const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
 const { MongoClient, ObjectId } = require('mongodb');
+const mongoose = require('mongoose');
+const session = require('express-session');
+const { MongoStore } = require('connect-mongo');
+const { router: authRouter, requireRole } = require('./routes/auth');
 
-const PORT        = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI;           // .env dosyasından okunur
 const DB_ADI      = process.env.DB_ADI || 'etut_merkezi';
 const KOLEKSIYON  = process.env.KOLEKSIYON || 'sinav_sonuclari';
+const SESSION_SECRET = String(process.env.SESSION_SECRET || '');
 const ZOOM_ACCOUNT_ID = String(process.env.ZOOM_ACCOUNT_ID || '').trim();
 const ZOOM_CLIENT_ID = String(process.env.ZOOM_CLIENT_ID || '').trim();
 const ZOOM_CLIENT_SECRET = String(process.env.ZOOM_CLIENT_SECRET || '').trim();
@@ -27,25 +32,64 @@ if (!MONGODB_URI) {
   console.error('❌ .env dosyasında MONGODB_URI bulunamadı.');
   process.exit(1);
 }
+if (SESSION_SECRET.length < 32) {
+  console.error('❌ SESSION_SECRET en az 32 karakter olmalıdır (.env dosyasına ekleyin).');
+  process.exit(1);
+}
 
 const app = express();
+if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 app.use(cors());                                       // file:// ile açılan sayfa da erişebilsin
 app.use(express.json({ limit: '1mb' }));
+app.use(session({
+  name: 'zarifcozum.sid',
+  secret: SESSION_SECRET,
+  store: MongoStore.create({
+    mongoUrl: MONGODB_URI,
+    dbName: DB_ADI,
+    collectionName: 'sessions',
+    ttl: 8 * 60 * 60
+  }),
+  resave: false,
+  saveUninitialized: false,
+  rolling: true,
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 8 * 60 * 60 * 1000
+  }
+}));
+app.use(authRouter);
 app.use(express.static(path.join(__dirname, 'public'))); // public/deneme-sinavi-optik.html
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/logo', express.static(path.join(__dirname, 'logo')));
 
 const sitePages = [
   'index.html', 'asistan.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html',
-  'ogrenci-paneli.html', 'ogretmen-paneli.html'
+  'ogrenci-paneli.html', 'ogretmen-paneli.html', 'kayit-giris.html'
 ];
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 sitePages.forEach(page => {
-  app.get(`/${page}`, (req, res) => res.sendFile(path.join(__dirname, page)));
+  app.get(`/${page}`, (req, res, next) => {
+    const role = page === 'ogrenci-paneli.html' ? 'student'
+      : page === 'ogretmen-paneli.html' ? 'teacher'
+      : null;
+    if (!role) return next();
+    if (!req.session.user) return res.redirect('/kayit-giris.html');
+    if (req.session.user.role !== role) {
+      return res.redirect(req.session.user.role === 'teacher'
+        ? '/ogretmen-paneli.html'
+        : '/ogrenci-paneli.html');
+    }
+    next();
+  }, (req, res) => res.sendFile(path.join(__dirname, page)));
 });
 app.get('/favicon.svg', (req, res) => res.sendFile(path.join(__dirname, 'favicon.svg')));
 
 let koleksiyon, anahtarKoleksiyon, canliDersKoleksiyonu;
+const ogrenciKontrol = requireRole('student');
+const ogretmenKontrol = requireRole('teacher');
 
 // Sunucu ve veritabanı ayakta mı?
 app.get('/api/saglik', (req, res) => res.json({ mesaj: 'Sunucu çalışıyor', db: DB_ADI, koleksiyon: KOLEKSIYON }));
@@ -141,7 +185,7 @@ async function aktifCanliDersiAl() {
   return ders;
 }
 
-app.get('/api/canli/katilim', async (req, res) => {
+app.get('/api/canli/katilim', ogrenciKontrol, async (req, res) => {
   try {
     const ders = await aktifCanliDersiAl();
     if (!ders) return res.status(404).json({ mesaj: 'Şu anda aktif bir canlı ders yok.' });
@@ -297,32 +341,7 @@ app.get('/api/sonuclar', ogretmenKontrol, async (req, res) => {
   }
 });
 
-// ---------- Öğretmen paneli (şifre korumalı) ----------
-const OGRETMEN_SIFRE = String(process.env.OGRETMEN_SIFRE || '').trim();
-
-function ogretmenKontrol(req, res, next) {
-  if (!OGRETMEN_SIFRE) {
-    return res.status(503).json({ mesaj: 'Sunucuda OGRETMEN_SIFRE tanımlı değil (.env dosyasına ekleyin)' });
-  }
-
-  const gelen = Buffer.from(String(req.get('x-ogretmen-sifre') || ''), 'utf8');
-  const dogru = Buffer.from(OGRETMEN_SIFRE, 'utf8');
-
-  if (gelen.length !== dogru.length) {
-    return res.status(401).json({ mesaj: 'Şifre hatalı' });
-  }
-
-  try {
-    if (!crypto.timingSafeEqual(gelen, dogru)) {
-      return res.status(401).json({ mesaj: 'Şifre hatalı' });
-    }
-  } catch (err) {
-    return res.status(401).json({ mesaj: 'Şifre hatalı' });
-  }
-
-  next();
-}
-
+// ---------- Öğretmen paneli (oturum ve rol korumalı) ----------
 app.get('/api/ogretmen/dogrula', ogretmenKontrol, (req, res) => res.json({ mesaj: 'Giriş başarılı' }));
 
 // Tüm sonuçlar + cevap anahtarları
@@ -368,14 +387,14 @@ app.delete('/api/ogretmen/sonuc/:id', ogretmenKontrol, async (req, res) => {
 });
 
 async function baslat() {
+  await mongoose.connect(MONGODB_URI, { dbName: DB_ADI });
   const client = new MongoClient(MONGODB_URI);
   await client.connect();
   koleksiyon = client.db(DB_ADI).collection(KOLEKSIYON);
   anahtarKoleksiyon = client.db(DB_ADI).collection('cevap_anahtarlari');
   canliDersKoleksiyonu = client.db(DB_ADI).collection('canli_dersler');
-  if (!OGRETMEN_SIFRE) console.warn('⚠️  OGRETMEN_SIFRE tanımlı değil: öğretmen paneli kapalı kalır.');
   console.log(`✅ MongoDB bağlantısı hazır → veritabanı: ${DB_ADI}, koleksiyon: ${KOLEKSIYON}`);
-  app.listen(PORT, () => console.log(`🚀 Sunucu aktif: http://localhost:${PORT}`));
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
 baslat().catch(err => {

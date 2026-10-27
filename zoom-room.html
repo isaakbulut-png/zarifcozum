@@ -50,8 +50,7 @@
 
     const credentials = isHost
       ? await api('/api/ogretmen/canli/katilim', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json', 'x-ogretmen-sifre': sessionStorage.getItem('ogretmenSifre') || ''}
+          method: 'POST'
         })
       : await api('/api/canli/katilim');
 

@@ -20,6 +20,10 @@ app.get('/sitemap.xml', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
 });
 
+app.get(['/ogrenci-paneli.html', '/ogretmen-paneli.html'], (req, res) => {
+  res.status(503).send('Bu paneller için kimlik doğrulaması gerekir. npm start komutuyla server.js sunucusunu başlatın.');
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
