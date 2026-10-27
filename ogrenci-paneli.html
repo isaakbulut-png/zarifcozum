@@ -60,10 +60,12 @@ button,select{font:inherit}
 .nav a[aria-current="page"]{background:var(--navy-700);color:#fff;border-left-color:var(--orange)}
 .nav svg{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .live-dot{margin-left:auto;font-size:.7rem;font-weight:600;background:var(--orange);color:#fff;padding:2px 8px;border-radius:999px}
+.home-link{display:block;margin:0 0 18px;padding:10px 12px;border:1px solid var(--navy-700);border-radius:9px;color:#fff;font-size:.9rem;font-weight:600}
+.home-link:hover{border-color:var(--orange);background:var(--navy-800)}
 
 .side-footer{margin-top:auto;padding:16px 12px;border-top:1px solid var(--navy-700);display:flex;align-items:center;gap:12px}
 .avatar{width:38px;height:38px;border-radius:50%;background:var(--navy-700);border:2px solid var(--orange);display:grid;place-items:center;font-weight:600;font-size:.85rem}
-.side-footer p{font-size:.85rem;font-weight:600;line-height:1.3}
+.side-footer p{font-size:.85rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
 .side-footer small{color:#9fb0d3;font-weight:400}
 
 /* ---------- Üst çubuk (mobil) ---------- */
@@ -152,6 +154,22 @@ button,select{font:inherit}
 .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
 .chip{background:var(--navy-100);color:var(--navy-800);font-size:.78rem;font-weight:500;padding:5px 10px;border-radius:999px}
 .chip.hot{background:var(--orange-soft);color:var(--orange-dark);font-weight:600}
+.teacher-feed{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;margin-bottom:26px}
+.feed-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.feed-card h3{font-family:var(--head);font-size:1rem;color:var(--navy-900)}
+.feed-card p{color:var(--muted);font-size:.9rem;margin:6px 0 12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.feed-card small{display:block;color:var(--muted);margin:8px 0}
+.quiz-question{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+.quiz-question legend{font-weight:600;color:var(--navy-900);padding:0 4px}
+.quiz-option{display:flex;gap:9px;align-items:flex-start;padding:8px 4px;color:var(--text)}
+.feed-status{min-height:1.5em;margin:10px 0;color:var(--muted)}
+.feed-status.error{color:#d93025}
+.feed-status.ok{color:#1e8e5a;font-weight:600}
+.feed-card.is-live{border-color:var(--orange);box-shadow:0 6px 20px #f47a201c}
+.feed-card .btn-join{display:inline-block;margin-top:8px}
+.logout-button{width:100%;margin-top:12px;padding:9px 12px;border:1px solid #53688f;border-radius:8px;background:transparent;color:#fff;text-align:left;font-weight:600}
+.logout-button:hover{border-color:var(--orange);color:#ffd2ad}
+.sidebar .feed-status{color:#ffd2ad;font-size:.8rem}
 
 /* ---------- Mobil ---------- */
 @media (max-width:960px){
@@ -205,18 +223,25 @@ button,select{font:inherit}
       <img class="brand-logo" src="logo/Zarif%20%C3%87%C3%B6z%C3%BCm%20Logo.png" alt="">
       <div class="brand-name">ZarifÇözüm<small>Öğrenci Paneli</small></div>
     </div>
+    <a class="home-link" href="index.html">← Ana Sayfaya Dön</a>
 
     <nav aria-label="Ana menü">
       <ul class="nav">
-        <li><a href="canli.html">
+        <li><a href="#live-lessons">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          Canlı Ders <span class="live-dot">Canlı</span></a></li>
+          Canlı Ders</a></li>
+        <li><a href="#schedule">Ders Programı</a></li>
+        <li><a href="#student-tasks">Ödevler / Görevler</a></li>
         <li><a href="#soru-sihirbazi">
           <svg viewBox="0 0 24 24"><path d="M5 19 17 7M14 4l1 2 2 1-2 1-1 2-1-2-2-1 2-1zM19 12l.7 1.3L21 14l-1.3.7L19 16l-.7-1.3L17 14l1.3-.7z"/></svg>
           Soru Sihirbazı</a></li>
         <li><a href="#denemeler">
           <svg viewBox="0 0 24 24"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M8 6H6a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2"/><path d="m9 14 2 2 4-4"/></svg>
           Deneme Sınavları</a></li>
+        <li><a href="#planli-dersler">Planlı Canlı Dersler</a></li>
+        <li><a href="#ogretmen-testleri">Öğretmen Testleri</a></li>
+        <li><a href="#duyurular">Duyurular</a></li>
+        <li><a href="#test-sonuclarim">Test Sonuçlarım</a></li>
         <li><a href="konu.html">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5z"/></svg>
           Video Dersler</a></li>
@@ -224,17 +249,44 @@ button,select{font:inherit}
     </nav>
 
     <div class="side-footer">
-      <div class="avatar">AY</div>
-      <p>Örnek Öğrenci<br><small>6. Sınıf · Demo hesabı</small></p>
+      <div class="avatar" id="studentAvatar">Ö</div>
+      <p><span id="studentName">Öğrenci</span><br><small id="studentEmail">Hesap bilgileri yükleniyor…</small></p>
     </div>
+    <button class="logout-button" id="logoutButton" type="button">Çıkış yap</button>
+    <p class="feed-status" id="logoutStatus" role="status" aria-live="polite"></p>
   </aside>
 
   <!-- Ana içerik -->
   <main class="main">
     <section class="greeting">
-      <h1>Merhaba, bugün hangi matematik konusuna çalışıyoruz?</h1>
-      <p>Bu hafta 3 canlı dersin ve 2 yaklaşan deneme sınavın var.</p>
+      <h1 id="welcomeTitle">Hoş geldin</h1>
+      <p>Öğretmenlerinin derslerini, testlerini ve duyurularını buradan takip edebilirsin.</p>
     </section>
+    <p class="feed-status error" id="dashboardError" role="alert" hidden></p>
+
+    <div class="section-head" id="live-lessons"><h2>Canlı dersler ve aktif sınıflar</h2></div>
+    <section class="teacher-feed" id="lessonFeed" aria-live="polite"><p class="feed-status">Canlı dersler yükleniyor…</p></section>
+
+    <div class="section-head" id="schedule"><h2>Ders programı</h2></div>
+    <section class="teacher-feed" id="scheduleFeed" aria-live="polite"><p class="feed-status">Program yükleniyor…</p></section>
+
+    <div class="section-head" id="ogretmen-testleri"><h2>Öğretmen testleri</h2></div>
+    <section class="teacher-feed" id="quizFeed" aria-live="polite"><p class="feed-status">Testler yükleniyor…</p></section>
+    <section class="card" id="quizRunner" hidden>
+      <h2 id="activeQuizTitle"></h2>
+      <p class="hint" id="activeQuizDescription"></p>
+      <form id="quizAttemptForm"></form>
+      <p class="feed-status" id="quizAttemptStatus" role="status"></p>
+    </section>
+
+    <div class="section-head" id="student-tasks"><h2>Ödevler ve görevler</h2></div>
+    <section class="teacher-feed" id="taskFeed" aria-live="polite"><p class="feed-status">Görevler yükleniyor…</p></section>
+
+    <div class="section-head" id="duyurular"><h2>Öğretmen duyuruları</h2></div>
+    <section class="teacher-feed" id="announcementFeed" aria-live="polite"><p class="feed-status">Duyurular yükleniyor…</p></section>
+
+    <div class="section-head" id="test-sonuclarim"><h2>Test sonuçlarım</h2></div>
+    <section class="teacher-feed" id="studentResults" aria-live="polite"><p class="feed-status">Sonuçlar yükleniyor…</p></section>
 
     <section class="ai-panel" id="soru-sihirbazi" aria-labelledby="ai-title">
       <div class="ai-copy">
@@ -363,14 +415,181 @@ button,select{font:inherit}
 </div>
 
 <script>
-  // Soru üretimi için henüz bir yapay zeka servisi bağlı değil.
-  const btn = document.getElementById('uret');
-  const konu = document.getElementById('konu');
-  const sonuc = document.getElementById('sonuc');
-  btn.addEventListener('click', () => {
-    sonuc.classList.add('show');
-    sonuc.innerHTML = '<strong>Soru üretimi henüz kullanıma açık değil</strong>Yapay zekâ servisi bağlandığında bu panelde sorular üretilebilecek.';
-  });
+  (() => {
+    const $ = id => document.getElementById(id);
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, char =>
+      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    let activeQuiz = null;
+
+    async function api(url, options = {}) {
+      if (window.location.protocol === 'file:') {
+        throw new Error('Paneli dosyaya çift tıklayarak değil, proje klasöründe npm start çalıştırdıktan sonra http://localhost:3000/ogrenci-paneli.html adresinden açın.');
+      }
+      const response = await fetch(url, {
+        ...options,
+        credentials: 'same-origin',
+        headers: {'Content-Type': 'application/json', ...(options.headers || {})}
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const message = response.status === 404
+          ? 'Öğrenci paneli API rotası bulunamadı (404). Güncel server.js sürümünü npm start ile çalıştırın ve sayfayı sunucu adresinden açın.'
+          : data.mesaj || `Sunucu hatası (${response.status})`;
+        const error = new Error(message);
+        error.status = response.status;
+        throw error;
+      }
+      return data;
+    }
+
+    function emptyMessage(message) {
+      return `<p class="feed-status">${esc(message)}</p>`;
+    }
+
+    function renderContent(content) {
+      const activeLesson = content.aktifDers
+        ? `<article class="feed-card is-live">
+            <span class="chip hot">CANLI</span>
+            <h3>${esc(content.aktifDers.title || 'Aktif canlı ders')}</h3>
+            <small>${new Date(content.aktifDers.startsAt).toLocaleString('tr-TR')}</small>
+            <a class="btn-join" href="${esc(content.aktifDers.link)}">Canlı derse katıl</a>
+          </article>`
+        : '';
+      const plannedLessons = content.dersler.map(lesson => `<article class="feed-card">
+            <h3>${esc(lesson.title)}</h3>
+            <small>${new Date(lesson.startsAt).toLocaleString('tr-TR')}</small>
+            <a class="btn-join" href="${esc(lesson.link)}" target="_blank" rel="noopener noreferrer">Derse katıl</a>
+          </article>`).join('');
+      $('lessonFeed').innerHTML = activeLesson ||
+        emptyMessage('Şu anda aktif canlı ders yok.');
+      $('scheduleFeed').innerHTML = plannedLessons ||
+        emptyMessage('Henüz yaklaşan ders programı yok.');
+      $('quizFeed').innerHTML = content.quizler.length
+        ? content.quizler.map(quiz => `<article class="feed-card">
+            <h3>${esc(quiz.title)}</h3>
+            <p>${esc(quiz.description || '')}</p>
+            <small>${quiz.soruSayisi} soru</small>
+            <button class="btn-join" type="button" data-quiz-id="${esc(quiz.id)}">${quiz.tamamlandi ? 'Tekrar çöz' : 'Teste başla'}</button>
+          </article>`).join('')
+        : emptyMessage('Henüz öğretmen testi yayınlanmadı.');
+      $('taskFeed').innerHTML = content.quizler.length
+        ? content.quizler.map(quiz => `<article class="feed-card">
+            <h3>${esc(quiz.title)}</h3>
+            <p>${esc(quiz.description || 'Öğretmen tarafından verilen test görevi.')}</p>
+            <small>${quiz.tamamlandi ? 'Tamamlandı' : 'Bekliyor'} · ${quiz.soruSayisi} soru</small>
+            <button class="btn-join" type="button" data-quiz-id="${esc(quiz.id)}">${quiz.tamamlandi ? 'Yeniden çöz' : 'Görevi yap'}</button>
+          </article>`).join('')
+        : emptyMessage('Şu anda tamamlanması gereken görev yok.');
+      $('announcementFeed').innerHTML = content.duyurular.length
+        ? content.duyurular.map(item => `<article class="feed-card">
+            <p>${esc(item.message)}</p>
+            <small>${new Date(item.createdAt).toLocaleString('tr-TR')}</small>
+          </article>`).join('')
+        : emptyMessage('Henüz duyuru yok.');
+      $('studentResults').innerHTML = content.sonuclar.length
+        ? content.sonuclar.map(result => `<article class="feed-card">
+            <h3>${esc(result.quizTitle)}</h3>
+            <p>Puan: <strong>%${result.score}</strong> · ${result.correctCount}/${result.totalCount} doğru</p>
+            <small>${new Date(result.createdAt).toLocaleString('tr-TR')}</small>
+          </article>`).join('')
+        : emptyMessage('Henüz tamamlanmış testin yok.');
+    }
+
+    async function loadContent() {
+      try {
+        const {user} = await api('/me');
+        if (user.role !== 'student') {
+          window.location.replace(user.role === 'teacher' ? 'ogretmen-paneli.html' : 'kayit-giris.html');
+          return;
+        }
+        $('studentName').textContent = user.name;
+        $('studentEmail').textContent = user.email;
+        $('studentAvatar').textContent = user.name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toLocaleUpperCase('tr-TR');
+        $('welcomeTitle').textContent = `Hoş geldin, ${user.name}`;
+        const content = await api('/api/student/dashboard');
+        renderContent(content);
+        $('dashboardError').hidden = true;
+      } catch (error) {
+        if (error.status === 401) {
+          const returnTo = encodeURIComponent(`${location.pathname}${location.search}${location.hash}`);
+          window.location.replace(`kayit-giris.html?returnTo=${returnTo}`);
+          return;
+        }
+        $('dashboardError').textContent = error.message;
+        $('dashboardError').hidden = false;
+      }
+    }
+
+    $('logoutButton').addEventListener('click', async () => {
+      const button = $('logoutButton');
+      button.disabled = true;
+      $('logoutStatus').textContent = 'Oturum kapatılıyor…';
+      try {
+        await api('/logout', {method: 'POST'});
+        window.location.replace('kayit-giris.html');
+      } catch (error) {
+        $('logoutStatus').textContent = `Çıkış yapılamadı: ${error.message}`;
+        button.disabled = false;
+      }
+    });
+
+    function openQuiz(event) {
+      const button = event.target.closest('[data-quiz-id]');
+      if (!button) return;
+      activeQuiz = null;
+      api('/api/ogrenci/icerik').then(({quizler}) => {
+        activeQuiz = quizler.find(quiz => quiz.id === button.dataset.quizId);
+        if (!activeQuiz) throw new Error('Test artık kullanılamıyor.');
+        $('activeQuizTitle').textContent = activeQuiz.title;
+        $('activeQuizDescription').textContent = activeQuiz.description || `${activeQuiz.questions.length} soru`;
+        $('quizAttemptForm').innerHTML = activeQuiz.questions.map((question, index) => `
+          <fieldset class="quiz-question">
+            <legend>${index + 1}. ${esc(question.text)}</legend>
+            ${['A','B','C','D'].map(letter => `<label class="quiz-option">
+              <input type="radio" name="answer-${index}" value="${letter}">
+              <span><strong>${letter})</strong> ${esc(question.options[letter])}</span>
+            </label>`).join('')}
+          </fieldset>`).join('') + '<button class="btn-join" type="submit">Testi gönder</button>';
+        $('quizAttemptStatus').textContent = '';
+        $('quizRunner').hidden = false;
+        $('quizRunner').scrollIntoView({behavior: 'smooth', block: 'start'});
+      }).catch(error => {
+        $('quizAttemptStatus').textContent = error.message;
+        $('quizAttemptStatus').className = 'feed-status error';
+      });
+    }
+    $('quizFeed').addEventListener('click', openQuiz);
+    $('taskFeed').addEventListener('click', openQuiz);
+
+    $('quizAttemptForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!activeQuiz) return;
+      const answers = activeQuiz.questions.map((_, index) =>
+        new FormData(event.currentTarget).get(`answer-${index}`) || null
+      );
+      const button = event.currentTarget.querySelector('button[type="submit"]');
+      button.disabled = true;
+      try {
+        const result = await api(`/api/ogrenci/quiz/${encodeURIComponent(activeQuiz.id)}/teslim`, {
+          method: 'POST',
+          body: JSON.stringify({answers})
+        });
+        $('quizAttemptStatus').textContent = `Test tamamlandı: %${result.score} (${result.correctCount}/${result.totalCount} doğru).`;
+        $('quizAttemptStatus').className = 'feed-status ok';
+        await loadContent();
+      } catch (error) {
+        $('quizAttemptStatus').textContent = `Test gönderilemedi: ${error.message}`;
+        $('quizAttemptStatus').className = 'feed-status error';
+        button.disabled = false;
+      }
+    });
+
+    $('uret').addEventListener('click', () => {
+      $('sonuc').classList.add('show');
+      $('sonuc').innerHTML = '<strong>Soru üretimi henüz kullanıma açık değil</strong>Yapay zekâ servisi bağlandığında bu panelde sorular üretilebilecek.';
+    });
+    loadContent();
+  })();
 </script>
 </body>
 </html>

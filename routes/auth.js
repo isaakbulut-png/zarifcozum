@@ -136,9 +136,29 @@ router.post('/login', loginLimiter, async (req, res) => {
   }
 });
 
-router.get('/me', (req, res) => {
-  if (!req.session.user) return res.status(401).json({ mesaj: 'Oturum açılmamış.' });
-  res.json({ user: req.session.user });
+router.get('/me', async (req, res) => {
+  if (!req.session.user?.id) return res.status(401).json({ mesaj: 'Oturum açılmamış.' });
+  try {
+    const user = await User.findById(req.session.user.id).select('name email role');
+    if (!user) {
+      req.session.destroy(error => {
+        if (error) return res.status(500).json({ mesaj: 'Oturum kapatılamadı.' });
+        res.status(401).json({ mesaj: 'Hesap bulunamadı. Yeniden giriş yapın.' });
+      });
+      return;
+    }
+    res.json({
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Oturum kullanıcısı alınamadı:', error);
+    res.status(500).json({ mesaj: 'Kullanıcı bilgileri alınamadı.' });
+  }
 });
 
 router.post('/logout', (req, res, next) => {

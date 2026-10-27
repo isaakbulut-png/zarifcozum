@@ -88,6 +88,7 @@ sitePages.forEach(page => {
 app.get('/favicon.svg', (req, res) => res.sendFile(path.join(__dirname, 'favicon.svg')));
 
 let koleksiyon, anahtarKoleksiyon, canliDersKoleksiyonu;
+let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, duyuruKoleksiyonu;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
 
@@ -202,6 +203,227 @@ app.get('/api/canli/katilim', ogrenciKontrol, async (req, res) => {
   }
 });
 
+app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async (req, res) => {
+  try {
+    const [dersler, quizler, duyurular, sonuclar, aktifDers] = await Promise.all([
+      planliDersKoleksiyonu.find({ startsAt: { $gte: new Date() } })
+        .sort({ startsAt: 1 }).limit(50).toArray(),
+      quizKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(50).toArray(),
+      duyuruKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(20).toArray(),
+      quizSonucKoleksiyonu.find({ studentId: req.session.user.id })
+        .sort({ createdAt: -1 }).limit(100).toArray(),
+      aktifCanliDersiAl()
+    ]);
+    const tamamlananQuizler = new Set(sonuclar.map(result => result.quizId.toString()));
+    res.json({
+      aktifDers: aktifDers ? {
+        title: aktifDers.topic,
+        startsAt: aktifDers.startedAt,
+        link: '/canli.html'
+      } : null,
+      dersler: dersler.map(({ _id, title, startsAt, link }) => ({
+        id: _id.toString(), title, startsAt, link
+      })),
+      quizler: quizler.map(({ _id, title, description, questions, createdAt }) => ({
+        id: _id.toString(), title, description,
+        soruSayisi: questions.length, createdAt,
+        tamamlandi: tamamlananQuizler.has(_id.toString()),
+        questions: questions.map(({ text, options }) => ({ text, options }))
+      })),
+      duyurular: duyurular.map(({ _id, message, createdAt }) => ({
+        id: _id.toString(), message, createdAt
+      })),
+      sonuclar: sonuclar.map(({ _id, quizId, quizTitle, score, correctCount, totalCount, createdAt }) => ({
+        id: _id.toString(), quizId: quizId.toString(), quizTitle, score, correctCount, totalCount, createdAt
+      }))
+    });
+  } catch (err) {
+    console.error('❌ Öğrenci içerikleri alınamadı:', err);
+    res.status(500).json({ mesaj: 'Öğrenci içerikleri alınamadı.' });
+  }
+});
+
+app.post('/api/ogrenci/quiz/:id/teslim', ogrenciKontrol, async (req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz test numarası.' });
+    const quiz = await quizKoleksiyonu.findOne({ _id: new ObjectId(req.params.id) });
+    if (!quiz) return res.status(404).json({ mesaj: 'Test bulunamadı.' });
+    const answers = req.body?.answers;
+    if (!Array.isArray(answers) || answers.length !== quiz.questions.length ||
+        !answers.every((answer, index) => answer === null ||
+          ['A', 'B', 'C', 'D'].includes(answer) && quiz.questions[index].options[answer])) {
+      return res.status(400).json({ mesaj: 'Test cevapları geçersiz.' });
+    }
+
+    const correctCount = answers.reduce(
+      (count, answer, index) => count + (answer === quiz.questions[index].answer ? 1 : 0), 0
+    );
+    const totalCount = quiz.questions.length;
+    const score = Math.round(correctCount * 100 / totalCount);
+    const result = await quizSonucKoleksiyonu.insertOne({
+      quizId: quiz._id,
+      quizTitle: quiz.title,
+      studentId: req.session.user.id,
+      studentName: req.session.user.name,
+      answers,
+      correctCount,
+      totalCount,
+      score,
+      createdAt: new Date()
+    });
+    res.status(201).json({
+      mesaj: 'Test sonucu kaydedildi.',
+      id: result.insertedId,
+      score,
+      correctCount,
+      totalCount
+    });
+  } catch (err) {
+    console.error('❌ Öğrenci testi kaydedilemedi:', err);
+    res.status(500).json({ mesaj: 'Test sonucu kaydedilemedi.' });
+  }
+});
+
+app.get('/api/ogretmen/yonetim', ogretmenKontrol, async (req, res) => {
+  try {
+    const [dersler, quizler, duyurular, quizSonuclari, eskiSonuclar, anahtarlar] = await Promise.all([
+      planliDersKoleksiyonu.find({}).sort({ startsAt: 1 }).limit(100).toArray(),
+      quizKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(100).toArray(),
+      duyuruKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(50).toArray(),
+      quizSonucKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(500).toArray(),
+      koleksiyon.find().sort({ kayitTarihi: -1 }).limit(500).toArray(),
+      anahtarKoleksiyon.find().toArray()
+    ]);
+    const keysByExam = new Map(anahtarlar.map(item => [item.sinavAdi, item.anahtar]));
+    const legacyResults = eskiSonuclar.map(item => {
+      const answerKey = keysByExam.get(item.sinavAdi) || [];
+      const scorable = answerKey.filter(Boolean).length;
+      const correctCount = (item.cevaplar || []).reduce(
+        (count, answer, index) => count + (answer && answer === answerKey[index] ? 1 : 0), 0
+      );
+      return {
+        id: item._id.toString(),
+        studentName: item.ogrenciAdi,
+        testTitle: item.sinavAdi || 'Deneme sınavı',
+        score: scorable ? Math.round(correctCount * 100 / scorable) : null,
+        createdAt: item.kayitTarihi,
+        type: 'legacy'
+      };
+    });
+    res.json({
+      dersler: dersler.map(({ _id, title, startsAt, link }) => ({
+        id: _id.toString(), title, startsAt, link
+      })),
+      quizler: quizler.map(({ _id, title, description, questions, createdAt }) => ({
+        id: _id.toString(), title, description, soruSayisi: questions.length, createdAt
+      })),
+      duyurular: duyurular.map(({ _id, message, createdAt }) => ({
+        id: _id.toString(), message, createdAt
+      })),
+      sonuclar: [
+        ...quizSonuclari.map(({ _id, studentName, quizTitle, score, createdAt }) => ({
+          id: _id.toString(), studentName, testTitle: quizTitle, score, createdAt, type: 'quiz'
+        })),
+        ...legacyResults
+      ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    });
+  } catch (err) {
+    console.error('❌ Öğretmen yönetim verisi alınamadı:', err);
+    res.status(500).json({ mesaj: 'Yönetim verileri alınamadı.' });
+  }
+});
+
+app.post('/api/ogretmen/dersler', ogretmenKontrol, async (req, res) => {
+  try {
+    const title = typeof req.body?.title === 'string' ? req.body.title.trim() : '';
+    const link = typeof req.body?.link === 'string' ? req.body.link.trim() : '';
+    const startsAt = new Date(req.body?.startsAt);
+    let parsedLink;
+    try { parsedLink = new URL(link); } catch { parsedLink = null; }
+    if (!title || title.length > 150 || !Number.isFinite(startsAt.getTime()) ||
+        !parsedLink || parsedLink.protocol !== 'https:') {
+      return res.status(400).json({ mesaj: 'Ders adı, geçerli tarih/saat ve HTTPS bağlantısı gereklidir.' });
+    }
+    const lesson = {
+      title,
+      startsAt,
+      link: parsedLink.toString(),
+      createdBy: req.session.user.id,
+      createdAt: new Date()
+    };
+    const result = await planliDersKoleksiyonu.insertOne(lesson);
+    res.status(201).json({ mesaj: 'Ders oluşturuldu.', ders: { id: result.insertedId.toString(), ...lesson } });
+  } catch (err) {
+    console.error('❌ Planlı ders kaydedilemedi:', err);
+    res.status(500).json({ mesaj: 'Ders kaydedilemedi.' });
+  }
+});
+
+app.post('/api/ogretmen/quizler', ogretmenKontrol, async (req, res) => {
+  try {
+    const title = typeof req.body?.title === 'string' ? req.body.title.trim() : '';
+    const description = typeof req.body?.description === 'string' ? req.body.description.trim() : '';
+    const questions = req.body?.questions;
+    if (!title || title.length > 150 || description.length > 500 ||
+        !Array.isArray(questions) || questions.length < 1 || questions.length > 50 ||
+        !questions.every(question =>
+          typeof question?.text === 'string' && question.text.trim().length > 0 &&
+          question.text.trim().length <= 1000 &&
+          question.options && ['A', 'B', 'C', 'D'].every(letter =>
+            typeof question.options[letter] === 'string' &&
+            question.options[letter].trim().length > 0 &&
+            question.options[letter].trim().length <= 300
+          ) &&
+          ['A', 'B', 'C', 'D'].includes(question.answer)
+        )) {
+      return res.status(400).json({ mesaj: 'Test başlığı ve 1–50 geçerli soru gereklidir.' });
+    }
+    const quiz = {
+      title,
+      description,
+      questions: questions.map(question => ({
+        text: question.text.trim(),
+        options: Object.fromEntries(['A', 'B', 'C', 'D'].map(letter =>
+          [letter, question.options[letter].trim()]
+        )),
+        answer: question.answer
+      })),
+      createdBy: req.session.user.id,
+      createdAt: new Date()
+    };
+    const result = await quizKoleksiyonu.insertOne(quiz);
+    res.status(201).json({
+      mesaj: 'Test yayınlandı.',
+      quiz: { id: result.insertedId.toString(), title, soruSayisi: quiz.questions.length }
+    });
+  } catch (err) {
+    console.error('❌ Test oluşturulamadı:', err);
+    res.status(500).json({ mesaj: 'Test oluşturulamadı.' });
+  }
+});
+
+app.post('/api/ogretmen/duyurular', ogretmenKontrol, async (req, res) => {
+  try {
+    const message = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+    if (!message || message.length > 1000) {
+      return res.status(400).json({ mesaj: 'Duyuru 1–1000 karakter arasında olmalıdır.' });
+    }
+    const announcement = {
+      message,
+      createdBy: req.session.user.id,
+      createdAt: new Date()
+    };
+    const result = await duyuruKoleksiyonu.insertOne(announcement);
+    res.status(201).json({
+      mesaj: 'Duyuru yayınlandı.',
+      duyuru: { id: result.insertedId.toString(), ...announcement }
+    });
+  } catch (err) {
+    console.error('❌ Duyuru kaydedilemedi:', err);
+    res.status(500).json({ mesaj: 'Duyuru yayınlanamadı.' });
+  }
+});
+
 app.post('/api/ogretmen/canli/baslat', ogretmenKontrol, async (req, res) => {
   try {
     zoomAyarlariniKontrolEt([{ ad: 'ZOOM_HOST_USER_ID', deger: ZOOM_HOST_USER_ID }]);
@@ -303,7 +525,7 @@ app.post('/api/ogretmen/canli/sonlandir', ogretmenKontrol, async (req, res) => {
 });
 
 // Sınav sonucunu kaydet
-app.post('/api/cevap-kaydet', async (req, res) => {
+app.post('/api/cevap-kaydet', ogrenciKontrol, async (req, res) => {
   try {
     const b = req.body || {};
     const gecerli = a => a === null || ['A', 'B', 'C', 'D', 'E'].includes(a);
@@ -312,7 +534,8 @@ app.post('/api/cevap-kaydet', async (req, res) => {
     }
 
     const belge = {
-      ogrenciAdi: String(b.ogrenciAdi || 'Bilinmiyor').slice(0, 100),
+      ogrenciAdi: req.session.user.name,
+      ogrenciId: req.session.user.id,
       sinavAdi: String(b.sinavAdi || '').slice(0, 150),
       cevaplar: b.cevaplar,
       isaretlenenSayisi: b.cevaplar.filter(Boolean).length,
@@ -393,6 +616,10 @@ async function baslat() {
   koleksiyon = client.db(DB_ADI).collection(KOLEKSIYON);
   anahtarKoleksiyon = client.db(DB_ADI).collection('cevap_anahtarlari');
   canliDersKoleksiyonu = client.db(DB_ADI).collection('canli_dersler');
+  planliDersKoleksiyonu = client.db(DB_ADI).collection('planli_dersler');
+  quizKoleksiyonu = client.db(DB_ADI).collection('quizler');
+  quizSonucKoleksiyonu = client.db(DB_ADI).collection('quiz_sonuclari');
+  duyuruKoleksiyonu = client.db(DB_ADI).collection('duyurular');
   console.log(`✅ MongoDB bağlantısı hazır → veritabanı: ${DB_ADI}, koleksiyon: ${KOLEKSIYON}`);
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }

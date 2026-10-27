@@ -36,4 +36,6 @@ npm start
 
 Uç noktalar: `POST /register`, `POST /login`, `POST /logout` ve oturum bilgisini döndüren `GET /me`. Oturum açan öğretmen, mevcut öğretmen API uç noktalarını da kullanabilir. Öğretmen panelleri artık eski `x-ogretmen-sifre` başlığıyla değil, oturum ve `teacher` rolüyle korunur.
 
+Öğretmen panelindeki planlı ders, test ve duyuru kayıtları sırasıyla `planli_dersler`, `quizler` ve `duyurular` koleksiyonlarında saklanır. Öğrenci paneli `GET /me` üzerinden güncel ad/e-posta/rolü, `GET /api/student/dashboard` (eski uyumluluk yolu: `/api/ogrenci/icerik`) üzerinden planlanmış dersleri, aktif Zoom dersini, görev/testleri, duyuruları ve öğrencinin kendi test sonuçlarını alır. Test gönderimleri sunucuda puanlanıp `quiz_sonuclari` koleksiyonuna yazılır. Öğrenci kimliği oturumdan alınır, istemcinin gönderdiği ad/puan güvenilir kabul edilmez. Ders bağlantısı HTTPS olmalıdır. Klasik optik sınav kayıt uç noktası da artık öğrenci oturumu gerektirir.
+
 Şifre en az 10, en fazla 72 UTF-8 bayt olmalıdır (bcrypt'in giriş uzunluğu sınırı). Öğretmen kaydı için `TEACHER_REGISTRATION_CODE` gereklidir. IP başına giriş denemeleri 15 dakikada 10, kayıt denemeleri saatte 5 istekle sınırlandırılır.
