@@ -68,11 +68,15 @@ app.use('/logo', express.static(path.join(__dirname, 'logo')));
 
 const sitePages = [
   'index.html', 'asistan.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html',
-  'ogrenci-paneli.html', 'ogretmen-paneli.html', 'kayit-giris.html'
+  'ogrenci-paneli.html', 'ogretmen-paneli.html', 'kayit-giris.html', 'hakkimizda.html',
+  'Platform Ayrıcalıkları.html', 'Paketler.html'
 ];
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 sitePages.forEach(page => {
-  app.get(`/${page}`, (req, res, next) => {
+  const route = page === 'Platform Ayrıcalıkları.html'
+    ? /^\/Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1\.html$/i
+    : `/${page}`;
+  app.get(route, (req, res, next) => {
     const role = page === 'ogrenci-paneli.html' ? 'student'
       : page === 'ogretmen-paneli.html' ? 'teacher'
       : null;
