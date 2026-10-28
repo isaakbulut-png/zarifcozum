@@ -67,7 +67,7 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/logo', express.static(path.join(__dirname, 'logo')));
 
 const sitePages = [
-  'index.html', 'asistan.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html',
+  'index.html', 'asistan.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html', 'yasal.html',
   'ogrenci-paneli.html', 'ogretmen-paneli.html', 'kayit-giris.html', 'hakkimizda.html',
   'Platform Ayrıcalıkları.html', 'Paketler.html'
 ];
