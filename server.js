@@ -213,7 +213,9 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
     const [dersler, quizler, duyurular, sonuclar, aktifDers] = await Promise.all([
       planliDersKoleksiyonu.find({ startsAt: { $gte: new Date() } })
         .sort({ startsAt: 1 }).limit(50).toArray(),
-      quizKoleksiyonu.find({ source: { $ne: 'ai' } })
+      quizKoleksiyonu.find({
+        $or: [{ source: { $ne: 'ai' } }, { source: 'ai', published: true }]
+      })
         .sort({ createdAt: -1 }).limit(50).toArray(),
       duyuruKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(20).toArray(),
       quizSonucKoleksiyonu.find({ studentId: req.session.user.id })
@@ -254,7 +256,7 @@ app.post('/api/ogrenci/quiz/:id/teslim', ogrenciKontrol, async (req, res) => {
     if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz test numarası.' });
     const quiz = await quizKoleksiyonu.findOne({ _id: new ObjectId(req.params.id) });
     if (!quiz) return res.status(404).json({ mesaj: 'Test bulunamadı.' });
-    if (quiz.source === 'ai' && quiz.createdBy !== req.session.user.id) {
+    if (quiz.source === 'ai' && quiz.published !== true) {
       return res.status(404).json({ mesaj: 'Test bulunamadı.' });
     }
     const answers = req.body?.answers;
@@ -301,7 +303,9 @@ app.get('/api/ogretmen/yonetim', ogretmenKontrol, async (req, res) => {
   try {
     const [dersler, quizler, duyurular, quizSonuclari, eskiSonuclar, anahtarlar] = await Promise.all([
       planliDersKoleksiyonu.find({}).sort({ startsAt: 1 }).limit(100).toArray(),
-      quizKoleksiyonu.find({ source: { $ne: 'ai' } }).sort({ createdAt: -1 }).limit(100).toArray(),
+      quizKoleksiyonu.find({
+        $or: [{ source: { $ne: 'ai' } }, { source: 'ai', published: true }]
+      }).sort({ createdAt: -1 }).limit(100).toArray(),
       duyuruKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(50).toArray(),
       quizSonucKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(500).toArray(),
       koleksiyon.find().sort({ kayitTarihi: -1 }).limit(500).toArray(),

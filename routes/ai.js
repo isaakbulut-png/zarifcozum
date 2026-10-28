@@ -89,7 +89,7 @@ function soruSemasi() {
 function createAIRouter({ getQuizCollection, requireRole }) {
   const router = express.Router();
 
-  router.post('/questions', soruUretmeSiniri, requireRole('student'), async (req, res) => {
+  router.post('/questions', requireRole('teacher'), soruUretmeSiniri, async (req, res) => {
     const topic = typeof req.body?.topic === 'string' ? req.body.topic.trim() : '';
     const difficulty = typeof req.body?.difficulty === 'string' ? req.body.difficulty : '';
     const count = Number(req.body?.count);
@@ -189,6 +189,8 @@ function createAIRouter({ getQuizCollection, requireRole }) {
     const quiz = {
       title: `${topic} — ${difficulty} seviye (Yapay zeka)`,
       description: `${count} soruluk yapay zeka destekli çalışma testi.`,
+      topic,
+      difficulty,
       questions: result.questions.map(question => ({
         text: question.text.trim(),
         options: Object.fromEntries(secenekler.map(letter => [
@@ -197,8 +199,50 @@ function createAIRouter({ getQuizCollection, requireRole }) {
         ])),
         answer: question.answer,
         explanation: (question.explanation || '').trim()
-      })),
+      }))
+    };
+
+    res.json({
+      quiz: {
+        title: quiz.title,
+        description: quiz.description,
+        topic: quiz.topic,
+        difficulty: quiz.difficulty,
+        soruSayisi: quiz.questions.length,
+        questions: quiz.questions
+      }
+    });
+  });
+
+  router.post('/questions/publish', requireRole('teacher'), async (req, res) => {
+    const topic = typeof req.body?.topic === 'string' ? req.body.topic.trim() : '';
+    const difficulty = typeof req.body?.difficulty === 'string' ? req.body.difficulty : '';
+    const title = typeof req.body?.title === 'string' ? req.body.title.trim() : '';
+    const description = typeof req.body?.description === 'string' ? req.body.description.trim() : '';
+    const question = req.body?.question;
+
+    if (!konular.has(topic) || !zorluklar.has(difficulty) ||
+        !title || title.length > 150 || description.length > 500 ||
+        !isValidQuestion(question)) {
+      return res.status(400).json({ mesaj: 'Test başlığı, konu, zorluk veya soru verileri geçersiz.' });
+    }
+
+    const quiz = {
+      title,
+      description,
+      topic,
+      difficulty,
+      questions: [{
+        text: question.text.trim(),
+        options: Object.fromEntries(secenekler.map(letter => [
+          letter,
+          question.options[letter].trim()
+        ])),
+        answer: question.answer,
+        explanation: (question.explanation || '').trim()
+      }],
       source: 'ai',
+      published: true,
       createdBy: req.session.user.id,
       createdAt: new Date()
     };
@@ -206,17 +250,12 @@ function createAIRouter({ getQuizCollection, requireRole }) {
     try {
       const inserted = await getQuizCollection().insertOne(quiz);
       res.status(201).json({
-        quiz: {
-          id: inserted.insertedId.toString(),
-          title: quiz.title,
-          description: quiz.description,
-          soruSayisi: quiz.questions.length,
-          questions: quiz.questions.map(({ text, options }) => ({ text, options }))
-        }
+        mesaj: 'Soru veritabanına eklendi ve öğrencilere yayınlandı.',
+        quiz: { id: inserted.insertedId.toString(), title: quiz.title, soruSayisi: 1 }
       });
     } catch (error) {
-      console.error('Yapay zeka testi kaydedilemedi:', error);
-      res.status(500).json({ mesaj: 'Üretilen test kaydedilemedi. Lütfen yeniden deneyin.' });
+      console.error('Yapay zeka sorusu yayınlanamadı:', error);
+      res.status(500).json({ mesaj: 'Soru yayınlanamadı. Lütfen yeniden deneyin.' });
     }
   });
 

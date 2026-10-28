@@ -156,6 +156,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     <a href="#overview">Genel bakış</a>
     <a href="#lessons">Canlı dersler</a>
     <a href="#quiz-builder">Test oluştur</a>
+    <a href="#ai-question-wizard">Yapay Zeka Soru Sihirbazı</a>
     <a href="#student-results">Öğrenci sonuçları</a>
     <a href="#announcements">Duyurular</a>
     <a href="#answer-key">Cevap anahtarı</a>
@@ -206,6 +207,71 @@ td.net{font-weight:700;color:var(--navy-900)}
         <p class="status" id="quizStatus" role="status"></p>
       </form>
       <div class="data-list" id="quizList"></div>
+    </section>
+
+    <section class="card" id="ai-question-wizard">
+      <div class="section-title"><div><h2>Yapay Zeka Soru Sihirbazı</h2><p class="hint">Soruları gözden geçirin; her soruyu ayrı ayrı onaylayıp öğrencilerle paylaşabilirsiniz.</p></div></div>
+      <form id="aiQuestionForm">
+        <div class="form-grid">
+          <div class="field">
+            <label for="aiTopic">Konu</label>
+            <select id="aiTopic" required>
+              <option value="">Konu seçin</option>
+              <option>Sayılar ve Problemler</option>
+              <option>Karmaşık Sayılar</option>
+              <option>Polinomlar</option>
+              <option>Üstel ve Logaritmik Fonksiyonlar</option>
+              <option>Diziler</option>
+              <option>Geometrik Şekiller ve Dönüşümler</option>
+              <option>Türev ve Uygulamaları</option>
+              <option>Katı Cisimler</option>
+              <option>Sayılar ve Sayı Kümeleri</option>
+              <option>Bölünebilme ve Asal Çarpanlar</option>
+              <option>Gerçek Sayılar ve Aralıklar</option>
+              <option>Üslü ve Köklü İfadeler</option>
+              <option>Mutlak Değer</option>
+              <option>Algoritma ve Bilişim</option>
+              <option>İstatistiksel Araştırma</option>
+              <option>Sayılar ve Cebirsel İşlemler</option>
+              <option>Sayma Yöntemleri</option>
+              <option>Çokgenler</option>
+              <option>Analitik Düşünme ve Matematiksel Modelleme</option>
+              <option>Denklemler ve Eşitsizlikler</option>
+              <option>Fonksiyonlar</option>
+              <option>Permütasyon ve Olasılık</option>
+              <option>Trigonometri</option>
+              <option>Logaritma</option>
+              <option>Limit ve Süreklilik</option>
+              <option>Türev</option>
+              <option>İntegral</option>
+              <option>Üçgenler</option>
+              <option>Çember ve Daire</option>
+              <option>Analitik Geometri</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="aiDifficulty">Zorluk</label>
+            <select id="aiDifficulty" required>
+              <option>Kolay</option>
+              <option selected>Orta</option>
+              <option>Zor</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="aiCount">Soru sayısı</label>
+            <select id="aiCount" required>
+              <option value="5">5 soru</option>
+              <option value="10" selected>10 soru</option>
+              <option value="20">20 soru</option>
+            </select>
+          </div>
+        </div>
+        <div class="button-row">
+          <button class="btn" id="generateAiQuestions" type="submit">Yapay Zeka ile Soru Üret</button>
+        </div>
+        <p class="status" id="aiQuestionStatus" role="status" aria-live="polite"></p>
+      </form>
+      <div class="question-list" id="aiQuestionList" aria-live="polite"></div>
     </section>
 
     <section class="card" id="student-results">
@@ -292,6 +358,7 @@ td.net{font-weight:700;color:var(--navy-900)}
   let veri = {sonuclar: [], anahtarlar: {}};
   let yonetim = {dersler: [], quizler: [], duyurular: [], sonuclar: []};
   let taslak = [];
+  let aiDraft = null;
 
   // ---- Oturumlu sunucu isteği ----
   async function api(yol, ayar = {}) {
@@ -472,6 +539,87 @@ td.net{font-weight:700;color:var(--navy-900)}
     } catch (error) {
       durumYaz('quizStatus', 'Test yayınlanamadı: ' + error.message, 'error');
     } finally {
+      button.disabled = false;
+    }
+  });
+
+  $('aiQuestionForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const button = $('generateAiQuestions');
+    button.disabled = true;
+    aiDraft = null;
+    $('aiQuestionList').replaceChildren();
+    durumYaz('aiQuestionStatus', 'Sorular hazırlanıyor…');
+
+    try {
+      const {quiz} = await api('/api/ai/questions', {
+        method: 'POST',
+        body: JSON.stringify({
+          topic: $('aiTopic').value,
+          difficulty: $('aiDifficulty').value,
+          count: Number($('aiCount').value)
+        })
+      });
+      aiDraft = quiz;
+      $('aiQuestionList').innerHTML = quiz.questions.map((question, index) => `
+        <article class="question-card" data-ai-question="${index}">
+          <div class="question-top">
+            <strong>Soru ${index + 1}</strong>
+            <button class="btn" type="button" data-ai-publish="${index}">Veritabanına Ekle / Yayınla</button>
+          </div>
+          <p>${esc(question.text)}</p>
+          <div class="question-options">
+            ${['A', 'B', 'C', 'D'].map(letter => `
+              <p><strong>${letter})</strong> ${esc(question.options[letter])}</p>
+            `).join('')}
+          </div>
+          <p><strong>Doğru cevap:</strong> ${esc(question.answer)}</p>
+          <p><strong>Açıklama:</strong> ${esc(question.explanation || 'Açıklama bulunmuyor.')}</p>
+          <p class="status ai-publish-status" role="status"></p>
+        </article>`).join('');
+      durumYaz('aiQuestionStatus', `${quiz.soruSayisi} soru hazır. Yayınlamadan önce her soruyu kontrol edin.`, 'ok');
+    } catch (error) {
+      durumYaz('aiQuestionStatus', 'Sorular üretilemedi: ' + error.message, 'error');
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  $('aiQuestionList').addEventListener('click', async event => {
+    const button = event.target.closest('[data-ai-publish]');
+    if (!button || !aiDraft) return;
+    const index = Number(button.dataset.aiPublish);
+    const question = aiDraft.questions[index];
+    if (!question) return;
+
+    button.disabled = true;
+    const status = button.closest('.question-card').querySelector('.ai-publish-status');
+    status.textContent = 'Soru yayınlanıyor…';
+    status.className = 'status ai-publish-status';
+    try {
+      const result = await api('/api/ai/questions/publish', {
+        method: 'POST',
+        body: JSON.stringify({
+          topic: aiDraft.topic,
+          difficulty: aiDraft.difficulty,
+          title: `${aiDraft.topic} · ${aiDraft.difficulty} · Soru ${index + 1}`,
+          description: `${aiDraft.topic} konusunda yapay zeka destekli ${aiDraft.difficulty.toLocaleLowerCase('tr-TR')} seviye soru.`,
+          question
+        })
+      });
+      button.textContent = 'Yayınlandı';
+      status.textContent = result.mesaj;
+      status.className = 'status ai-publish-status ok';
+      try {
+        yonetim = await api('/api/ogretmen/yonetim');
+        yonetimCiz();
+      } catch (error) {
+        status.textContent = `Soru yayınlandı; test listesi yenilenemedi: ${error.message}`;
+        status.className = 'status ai-publish-status error';
+      }
+    } catch (error) {
+      status.textContent = 'Soru yayınlanamadı: ' + error.message;
+      status.className = 'status ai-publish-status error';
       button.disabled = false;
     }
   });
