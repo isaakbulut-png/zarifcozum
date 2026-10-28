@@ -52,17 +52,72 @@
       <div class="hero-visual">
         <div class="device">
           <div class="device-screen">
-            <div class="mini-row"><span class="chip chip-live">CANLI</span><span class="xs muted">6-A · Çarpanlar ve Katlar · 19:00</span></div>
-            <div class="mini-row">
-              <div class="mini-tile">Bu hafta<strong>4 / 5</strong>hedef tamamlandı</div>
-              <div class="mini-tile">Test başarı<strong>%78</strong>son 10 test</div>
-              <div class="mini-tile">Seri<strong>12 gün</strong>kesintisiz</div>
-            </div>
-            <div class="mini-tile" style="display:grid;gap:6px">
-              <span class="xs muted">MAT.6.1 Sayılar ve Nicelikler (1)</span>
-              <div class="progress"><span style="width:72%"></span></div>
-              <span class="xs muted">MAT.6.6 Veriden Olasılığa</span>
-              <div class="progress"><span style="width:35%"></span></div>
+            <section class="home-carousel" data-home-carousel role="region" aria-roledescription="carousel" aria-label="Öğrenme panosu">
+              <div class="carousel-slides" aria-live="polite">
+                <article class="carousel-slide is-active" data-carousel-slide role="group" aria-roledescription="slayt" aria-label="1 / 4">
+                  <div class="mini-row"><span class="chip chip-live">CANLI</span><span class="xs muted">6-A · Çarpanlar ve Katlar · 19:00</span></div>
+                  <div class="mini-row">
+                    <div class="mini-tile">Bu hafta<strong>4 / 5</strong>hedef tamamlandı</div>
+                    <div class="mini-tile">Test başarısı<strong>%78</strong>son 10 test</div>
+                    <div class="mini-tile">Çalışma serisi<strong>12 gün</strong>devam ediyor</div>
+                  </div>
+                  <div class="mini-tile carousel-progress">
+                    <span class="xs muted">Bu haftaki öğrenme hedefin</span>
+                    <div class="progress"><span style="width:72%"></span></div>
+                    <span class="xs muted">Hedefinin %72'sini tamamladın.</span>
+                  </div>
+                </article>
+                <article class="carousel-slide" data-carousel-slide role="group" aria-roledescription="slayt" aria-label="2 / 4" aria-hidden="true">
+                  <div class="mini-row carousel-slide-heading"><span class="chip chip-primary">KONU TAKİBİ</span><span class="xs muted">6. sınıf matematik</span></div>
+                  <div class="carousel-topic">
+                    <span class="xs muted">MAT.6.1 · SAYILAR VE NİCELİKLER</span>
+                    <strong>Çarpanlar ve Katlar</strong>
+                    <div class="progress"><span style="width:72%"></span></div>
+                    <span class="xs muted">Konu çalışman devam ediyor</span>
+                  </div>
+                  <div class="mini-row">
+                    <div class="mini-tile">Sonraki adım<strong>Örnekleri çöz</strong></div>
+                    <div class="mini-tile">Öğrenme planı<strong>12 konu</strong>bu dönemde</div>
+                  </div>
+                </article>
+                <article class="carousel-slide" data-carousel-slide role="group" aria-roledescription="slayt" aria-label="3 / 4" aria-hidden="true">
+                  <div class="mini-row carousel-slide-heading"><span class="chip chip-success">TEST SONUCU</span><span class="xs muted">Kazanım kontrolü</span></div>
+                  <div class="carousel-score">
+                    <div><span class="xs muted">Çarpanlar ve Katlar</span><strong>8 <small>/ 10 doğru</small></strong></div>
+                    <div class="score-ring-small" aria-hidden="true">80<span>%</span></div>
+                  </div>
+                  <div class="mini-tile carousel-review">
+                    <strong>İlerlemeni gör</strong>
+                    <span class="xs muted">Yanlış yaptığın soruları tekrar çöz, konuyu pekiştir.</span>
+                  </div>
+                </article>
+                <article class="carousel-slide" data-carousel-slide role="group" aria-roledescription="slayt" aria-label="4 / 4" aria-hidden="true">
+                  <div class="mini-row carousel-slide-heading"><span class="chip chip-primary">ÖĞRENME ASİSTANI</span><span class="xs muted">Adım adım destek</span></div>
+                  <div class="carousel-question">
+                    <span class="xs muted">SORU</span>
+                    <strong>36'nın asal çarpanlarını bul.</strong>
+                  </div>
+                  <div class="carousel-hint">
+                    <span class="hint-mark" aria-hidden="true">?</span>
+                    <p><strong>Bir ipucu</strong><br>Önce en küçük asal sayıya bölmeyi dene.</p>
+                  </div>
+                </article>
+              </div>
+              <div class="carousel-controls">
+                <button class="carousel-arrow" type="button" data-carousel-prev aria-label="Önceki pano">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <div class="carousel-indicators" aria-label="Pano seçimi">
+                  <button type="button" data-carousel-to="0" aria-label="1. panoyu göster" aria-current="true"></button>
+                  <button type="button" data-carousel-to="1" aria-label="2. panoyu göster"></button>
+                  <button type="button" data-carousel-to="2" aria-label="3. panoyu göster"></button>
+                  <button type="button" data-carousel-to="3" aria-label="4. panoyu göster"></button>
+                </div>
+                <span class="carousel-count" data-carousel-count aria-live="off">01 / 04</span>
+                <button class="carousel-arrow" type="button" data-carousel-next aria-label="Sonraki pano">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -138,6 +193,7 @@
     <span>Müfredat referansı: tymm.meb.gov.tr · İçerik: özgün</span>
   </div>
 </footer>
+<script src="assets/home-carousel.js" defer></script>
 <script data-pplx-inline-edit>
 (function () {
   if (window === window.top) return;
