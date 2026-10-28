@@ -129,8 +129,7 @@ function createAIRouter({ getQuizCollection, requireRole }) {
             generationConfig: {
               responseMimeType: 'application/json',
               responseSchema: soruSemasi(),
-              maxOutputTokens: 8192,
-              temperature: 0.4
+              maxOutputTokens: 8192
             }
           }),
           signal: AbortSignal.timeout(60000)
@@ -147,11 +146,21 @@ function createAIRouter({ getQuizCollection, requireRole }) {
     if (!response.ok) {
       const errorBody = await response.text();
       console.error(`Gemini Hatası: HTTP ${response.status}`, errorBody);
+      let mesaj = 'Yapay zeka soruları şu anda üretemedi. Lütfen daha sonra tekrar deneyin.';
+      if (response.status === 429) {
+        mesaj = 'Yapay zeka hizmeti şu anda yoğun. Biraz sonra tekrar deneyin.';
+      } else if ([401, 403].includes(response.status)) {
+        mesaj = 'Yapay zeka API anahtarı geçersiz veya yetkisiz. Sunucudaki AI_API_KEY ayarını kontrol edin.';
+      } else if (response.status === 404) {
+        mesaj = 'Yapay zeka modeli bulunamadı. Sunucudaki model yapılandırmasını kontrol edin.';
+      } else if (response.status === 400) {
+        mesaj = 'Yapay zeka isteği reddedildi. Sunucu günlüklerindeki Gemini hatasını kontrol edin.';
+      } else if (response.status >= 500) {
+        mesaj = 'Yapay zeka sağlayıcısı şu anda yanıt veremiyor. Biraz sonra tekrar deneyin.';
+      }
       const status = response.status === 429 ? 503 : 502;
       return res.status(status).json({
-        mesaj: response.status === 429
-          ? 'Yapay zeka hizmeti şu anda yoğun. Biraz sonra tekrar deneyin.'
-          : 'Yapay zeka soruları şu anda üretemedi. Lütfen daha sonra tekrar deneyin.'
+        mesaj
       });
     }
 
