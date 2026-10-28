@@ -10,25 +10,40 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
+<script src="assets/site-nav.js" defer></script>
 </head>
-<body>
-<header class="site-header site-header-expanded">
+<body class="marketing-page">
+<header class="site-header">
   <div class="wrap">
     <a class="brand" href="index.html"><img class="brand-logo" src="logo/Zarif%20%C3%87%C3%B6z%C3%BCm%20Logo.png" alt="">ZarifÇözüm</a>
-    <nav class="site-nav" aria-label="Site">
-      <a href="#nasil">Nasıl çalışır</a>
-      <a href="#siniflar">Sınıflar</a>
-      <a href="#sss">SSS</a>
-      <a href="hakkimizda.html">Hakkımızda</a>
-      <a href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html">Platform Ayrıcalıkları</a>
+    <button class="site-menu-toggle" type="button" aria-expanded="false" aria-controls="siteNavigation" aria-label="Menüyü aç">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" id="siteNavigation" aria-label="Ana menü">
+      <a href="index.html#nasil">Nasıl çalışır</a>
+      <a href="index.html#siniflar">Sınıflar</a>
+      <a href="index.html#sss">SSS</a>
+      <a href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html">Platform</a>
       <a href="Paketler.html">Paketler</a>
+      <a href="hakkimizda.html">Hakkımızda</a>
       <a href="mimari.html">Mimari</a>
+      <div class="site-nav-actions">
+        <a href="kayit-giris.html?role=student">Öğrenci girişi</a>
+        <a href="kayit-giris.html?role=teacher">Öğretmen girişi</a>
+        <a href="panel.html">Demo</a>
+        <a class="btn btn-primary btn-sm" href="kayit-giris.html?mode=register">Ücretsiz başla</a>
+      </div>
     </nav>
-    <div class="row">
-      <a class="btn btn-ghost btn-sm" href="kayit-giris.html?role=student">Öğrenci Girişi</a>
-      <a class="btn btn-ghost btn-sm" href="kayit-giris.html?role=teacher">Öğretmen Girişi</a>
-      <a class="btn btn-primary btn-sm" href="kayit-giris.html?mode=register">Kayıt Ol</a>
-      <a class="btn btn-primary btn-sm" href="panel.html">Şimdi Dene</a>
+    <div class="header-actions row">
+      <details class="header-login">
+        <summary class="btn btn-ghost btn-sm">Giriş yap</summary>
+        <div class="header-login-menu">
+          <a href="kayit-giris.html?role=student">Öğrenci girişi</a>
+          <a href="kayit-giris.html?role=teacher">Öğretmen girişi</a>
+        </div>
+      </details>
+      <a class="btn btn-ghost btn-sm header-demo" href="panel.html">Demo</a>
+      <a class="btn btn-primary btn-sm" href="kayit-giris.html?mode=register">Ücretsiz başla</a>
     </div>
   </div>
 </header>
