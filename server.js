@@ -335,8 +335,9 @@ app.get('/api/ogretmen/yonetim', ogretmenKontrol, async (req, res) => {
       dersler: dersler.map(({ _id, title, startsAt, link }) => ({
         id: _id.toString(), title, startsAt, link
       })),
-      quizler: quizler.map(({ _id, title, description, questions, createdAt }) => ({
-        id: _id.toString(), title, description, soruSayisi: questions.length, createdAt
+      quizler: quizler.map(({ _id, title, description, questions, createdAt, source, published }) => ({
+        id: _id.toString(), title, description, soruSayisi: questions.length, createdAt,
+        aiYayin: source === 'ai' && published === true
       })),
       duyurular: duyurular.map(({ _id, message, createdAt }) => ({
         id: _id.toString(), message, createdAt

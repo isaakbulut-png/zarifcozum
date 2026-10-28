@@ -207,6 +207,7 @@ td.net{font-weight:700;color:var(--navy-900)}
         <p class="status" id="quizStatus" role="status"></p>
       </form>
       <div class="data-list" id="quizList"></div>
+      <p class="status" id="quizListStatus" role="status"></p>
     </section>
 
     <section class="card" id="ai-question-wizard">
@@ -426,6 +427,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     $('quizList').innerHTML = yonetim.quizler.length
       ? yonetim.quizler.map(quiz => `<article class="data-item">
           <div><strong>${esc(quiz.title)}</strong><p>${quiz.soruSayisi} soru · ${tarihSaat(quiz.createdAt)}</p></div>
+          ${quiz.aiYayin ? `<button class="btn light" type="button" data-delete-ai-quiz="${esc(quiz.id)}">Soruyu sil</button>` : ''}
         </article>`).join('')
       : '<p class="empty">Henüz yayınlanmış test yok.</p>';
     $('announcementList').innerHTML = yonetim.duyurular.length
@@ -442,6 +444,29 @@ td.net{font-weight:700;color:var(--navy-900)}
         </tr>`).join('')
       : '<tr><td colspan="4" class="empty">Henüz test sonucu yok.</td></tr>';
   }
+
+  $('quizList').addEventListener('click', async event => {
+    const button = event.target.closest('[data-delete-ai-quiz]');
+    if (!button) return;
+    const quizId = button.dataset.deleteAiQuiz;
+    const quiz = yonetim.quizler.find(item => item.id === quizId && item.aiYayin);
+    if (!quiz) return;
+    if (!confirm(`"${quiz.title}" öğrencilerin panelinden ve veritabanından kalıcı olarak silinecek. Devam edilsin mi?`)) return;
+
+    button.disabled = true;
+    button.textContent = 'Siliniyor…';
+    durumYaz('quizListStatus', '');
+    try {
+      const result = await api(`/api/ai/questions/${encodeURIComponent(quizId)}`, {method: 'DELETE'});
+      yonetim.quizler = yonetim.quizler.filter(item => item.id !== quizId);
+      yonetimCiz();
+      durumYaz('quizListStatus', result.mesaj, 'ok');
+    } catch (error) {
+      button.disabled = false;
+      button.textContent = 'Soruyu sil';
+      durumYaz('quizListStatus', 'Soru silinemedi: ' + error.message, 'error');
+    }
+  });
 
   $('lessonForm').addEventListener('submit', async event => {
     event.preventDefault();

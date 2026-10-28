@@ -1,5 +1,6 @@
 const express = require('express');
 const { rateLimit } = require('express-rate-limit');
+const { ObjectId } = require('mongodb');
 
 const konular = new Set([
   'Sayılar ve Problemler',
@@ -265,6 +266,27 @@ function createAIRouter({ getQuizCollection, requireRole }) {
     } catch (error) {
       console.error('Yapay zeka sorusu yayınlanamadı:', error);
       res.status(500).json({ mesaj: 'Soru yayınlanamadı. Lütfen yeniden deneyin.' });
+    }
+  });
+
+  router.delete('/questions/:id', requireRole('teacher'), async (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ mesaj: 'Geçersiz soru numarası.' });
+    }
+
+    try {
+      const result = await getQuizCollection().deleteOne({
+        _id: new ObjectId(req.params.id),
+        source: 'ai',
+        published: true
+      });
+      if (result.deletedCount === 0) {
+        return res.status(404).json({ mesaj: 'Yayınlanmış yapay zeka sorusu bulunamadı.' });
+      }
+      res.json({ mesaj: 'Soru veritabanından silindi.' });
+    } catch (error) {
+      console.error('Yapay zeka sorusu silinemedi:', error);
+      res.status(500).json({ mesaj: 'Soru silinemedi. Lütfen yeniden deneyin.' });
     }
   });
 
