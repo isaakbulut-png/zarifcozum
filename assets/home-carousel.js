@@ -3,6 +3,7 @@
   if (!carousel) return;
 
   const slides = Array.from(carousel.querySelectorAll('[data-carousel-slide]'));
+  const copySlides = Array.from(carousel.closest('.hero').querySelectorAll('[data-hero-copy]'));
   const indicators = Array.from(carousel.querySelectorAll('[data-carousel-to]'));
   const count = carousel.querySelector('[data-carousel-count]');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -13,6 +14,12 @@
     activeIndex = (index + slides.length) % slides.length;
 
     slides.forEach((slide, slideIndex) => {
+      const active = slideIndex === activeIndex;
+      slide.classList.toggle('is-active', active);
+      slide.setAttribute('aria-hidden', String(!active));
+    });
+
+    copySlides.forEach((slide, slideIndex) => {
       const active = slideIndex === activeIndex;
       slide.classList.toggle('is-active', active);
       slide.setAttribute('aria-hidden', String(!active));
@@ -39,16 +46,24 @@
     autoplayTimer = window.setInterval(() => showSlide(activeIndex + 1), 5000);
   }
 
+  function restartAutoplay() {
+    stopAutoplay();
+    startAutoplay();
+  }
+
   carousel.querySelector('[data-carousel-prev]').addEventListener('click', () => {
     showSlide(activeIndex - 1);
+    restartAutoplay();
   });
   carousel.querySelector('[data-carousel-next]').addEventListener('click', () => {
     showSlide(activeIndex + 1);
+    restartAutoplay();
   });
 
   indicators.forEach((indicator) => {
     indicator.addEventListener('click', () => {
       showSlide(Number(indicator.dataset.carouselTo));
+      restartAutoplay();
     });
   });
 
@@ -56,14 +71,14 @@
     if (event.key === 'ArrowLeft') {
       event.preventDefault();
       showSlide(activeIndex - 1);
+      restartAutoplay();
     } else if (event.key === 'ArrowRight') {
       event.preventDefault();
       showSlide(activeIndex + 1);
+      restartAutoplay();
     }
   });
 
-  carousel.addEventListener('mouseenter', stopAutoplay);
-  carousel.addEventListener('mouseleave', startAutoplay);
   carousel.addEventListener('focusin', stopAutoplay);
   carousel.addEventListener('focusout', (event) => {
     if (!carousel.contains(event.relatedTarget)) startAutoplay();
