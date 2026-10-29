@@ -8,9 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --navy-900:#0b1b3a; --navy-800:#10264f; --navy-700:#1a3566; --navy-100:#e6ebf5;
-  --orange:#f47a20; --orange-dark:#d9650f; --orange-soft:#fff1e6; --danger:#d93025; --ok:#1e8e5a;
-  --bg:#f4f6fb; --card:#fff; --text:#12213f; --muted:#5f6b85; --line:#d8dfec;
+  --navy-900:#12372a; --navy-800:#184d3b; --navy-700:#24634b; --navy-100:#e5eee7;
+  --orange:#267456; --orange-dark:#1f6249; --orange-soft:#e2f0e7; --danger:#d93025; --ok:#26734d;
+  --bg:#f7f5ef; --card:#fffefa; --text:#1d2d25; --muted:#58685e; --line:#d9d3c3;
   --head:'Sora','Segoe UI',system-ui,sans-serif; --body:'Inter','Segoe UI',system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -23,12 +23,12 @@ button{cursor:pointer}
 .bar{background:var(--navy-900);color:#fff;border-bottom:4px solid var(--orange)}
 .bar-in{max-width:1180px;margin:0 auto;padding:16px clamp(16px,3vw,32px);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .bar h1{font-family:var(--head);font-size:1.15rem;font-weight:600;flex:1;min-width:200px}
-.bar h1 small{display:block;font-family:var(--body);font-weight:400;font-size:.8rem;color:#9fb0d3}
+.bar h1 small{display:block;font-family:var(--body);font-weight:400;font-size:.8rem;color:#c5d6ca}
 .bar select{background:var(--navy-800);color:#fff;border:1px solid var(--navy-700);border-radius:8px;padding:9px 12px;max-width:100%}
 
 .btn{border:0;border-radius:8px;padding:10px 18px;font-weight:600;background:var(--orange);color:#fff;transition:background .2s}
 .btn:hover{background:var(--orange-dark)}
-.btn.ghost{background:transparent;color:#fff;border:2px solid #4a6196}
+.btn.ghost{background:transparent;color:#fff;border:2px solid #557966}
 .btn.ghost:hover{border-color:var(--orange);color:var(--orange)}
 .btn.light{background:#fff;color:var(--navy-800);border:2px solid var(--line)}
 .btn.light:hover{border-color:var(--orange);color:var(--orange-dark)}
@@ -50,7 +50,7 @@ button{cursor:pointer}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:20px}
 .stat{background:var(--navy-900);color:#fff;border-radius:14px;padding:16px 18px}
 .stat b{display:block;font-family:var(--head);font-size:1.7rem;color:var(--orange)}
-.stat span{font-size:.82rem;color:#b6c3df}
+.stat span{font-size:.82rem;color:#d5e4d9}
 
 /* Cevap anahtarı */
 details.card summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -73,7 +73,7 @@ details.card[open] summary::after{content:"–"}
 .qc{border-radius:10px;padding:8px 4px;text-align:center;line-height:1.2}
 .qc b{display:block;font-family:var(--head);font-size:.8rem}
 .qc span{font-size:.8rem}
-.qc.hi{background:#e3f4ea;color:#14663f}
+.qc.hi{background:#e0f0e5;color:#1f6249}
 .qc.mid{background:var(--orange-soft);color:var(--orange-dark)}
 .qc.lo{background:#fde8e6;color:#a3201a}
 
@@ -86,7 +86,7 @@ details.card[open] summary::after{content:"–"}
 table{width:100%;border-collapse:collapse;min-width:640px;font-size:.92rem}
 th{background:var(--navy-900);color:#fff;text-align:left;padding:11px 12px;font-weight:600;font-size:.82rem;white-space:nowrap}
 td{padding:10px 12px;border-top:1px solid var(--line);white-space:nowrap}
-tbody tr:nth-child(even){background:#fafbfe}
+tbody tr:nth-child(even){background:#f8f6f0}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 td.net{font-weight:700;color:var(--navy-900)}
 .del{background:none;border:0;color:var(--muted);font-size:1.1rem;padding:2px 8px;border-radius:6px}
@@ -101,7 +101,7 @@ td.net{font-weight:700;color:var(--navy-900)}
 .teacher-sidebar{position:sticky;top:18px;margin:24px 0 24px 20px;padding:18px 12px;background:var(--navy-900);border-radius:16px;color:#fff}
 .teacher-sidebar strong{display:block;padding:4px 10px 14px;font-family:var(--head);font-size:.92rem}
 .teacher-sidebar nav{display:grid;gap:5px}
-.teacher-sidebar a{padding:10px;border-radius:8px;color:#c3cfe8;text-decoration:none;font-size:.88rem}
+.teacher-sidebar a{padding:10px;border-radius:8px;color:#d5e4d9;text-decoration:none;font-size:.88rem}
 .teacher-sidebar a:hover,.teacher-sidebar a:focus-visible{background:var(--navy-700);color:#fff}
 .teacher-content{min-width:0}
 .dashboard-head{display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap;margin:4px 0 20px}
@@ -116,7 +116,7 @@ td.net{font-weight:700;color:var(--navy-900)}
 .section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .section-title h2{margin-bottom:3px}
 .question-list{display:grid;gap:14px;margin:18px 0}
-.question-card{padding:16px;border:1px solid var(--line);border-radius:12px;background:#fafbfe}
+.question-card{padding:16px;border:1px solid var(--line);border-radius:12px;background:#f8f6f0}
 .question-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .question-top strong{color:var(--navy-800)}
 .question-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -129,7 +129,7 @@ td.net{font-weight:700;color:var(--navy-900)}
 .data-item p{color:var(--muted);font-size:.86rem}
 .table-wrap{overflow:auto;margin-top:14px;border:1px solid var(--line);border-radius:10px}
 .management-table{width:100%;min-width:600px;border-collapse:collapse;font-size:.9rem}
-.management-table th{background:#f0f3f9;color:var(--navy-800)}
+.management-table th{background:#eeeade;color:var(--navy-800)}
 .management-table td,.management-table th{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line)}
 .score{font-weight:700;color:var(--navy-800)}
 .muted{color:var(--muted)}

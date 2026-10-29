@@ -27,6 +27,33 @@ const userSchema = new mongoose.Schema({
     enum: ['student', 'teacher'],
     required: true,
     default: 'student'
+  },
+  subscriptionStatus: {
+    type: String,
+    enum: ['free', 'active', 'expired'],
+    default: 'free',
+    index: true
+  },
+  subscriptionType: {
+    type: String,
+    enum: ['monthly', 'yearly', null],
+    default: null
+  },
+  expiresAt: {
+    type: Date,
+    default: null,
+    index: true
+  },
+  paymentGatewayCustomerId: {
+    type: String,
+    default: null,
+    select: false,
+    maxlength: 200
+  },
+  paymentGateway: {
+    type: String,
+    enum: ['iyzico', 'paytr', null],
+    default: null
   }
 }, { timestamps: true });
 

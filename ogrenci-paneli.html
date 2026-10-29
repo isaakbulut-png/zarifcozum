@@ -8,18 +8,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --navy-900:#0b1b3a;
-  --navy-800:#10264f;
-  --navy-700:#1a3566;
-  --navy-100:#e6ebf5;
-  --orange:#f47a20;
-  --orange-dark:#d9650f;
-  --orange-soft:#fff1e6;
-  --bg:#f4f6fb;
-  --card:#ffffff;
-  --text:#12213f;
-  --muted:#5f6b85;
-  --line:#e1e6f0;
+  --navy-900:#12372a;
+  --navy-800:#184d3b;
+  --navy-700:#24634b;
+  --navy-100:#e5eee7;
+  --orange:#267456;
+  --orange-dark:#1f6249;
+  --orange-soft:#e2f0e7;
+  --bg:#f7f5ef;
+  --card:#fffefa;
+  --text:#1d2d25;
+  --muted:#58685e;
+  --line:#d9d3c3;
   --radius:14px;
   --head:'Sora','Segoe UI',system-ui,sans-serif;
   --body:'Inter','Segoe UI',system-ui,sans-serif;
@@ -48,12 +48,12 @@ button,select{font:inherit}
   display:grid;place-items:center;font-family:var(--head);font-weight:700;font-size:1.25rem;color:#fff;
 }
 .brand-name{font-family:var(--head);font-weight:600;font-size:1rem;line-height:1.25}
-.brand-name small{display:block;font-family:var(--body);font-weight:400;font-size:.75rem;color:#9fb0d3}
+.brand-name small{display:block;font-family:var(--body);font-weight:400;font-size:.75rem;color:#c5d6ca}
 
 .nav{display:flex;flex-direction:column;gap:6px;list-style:none}
 .nav a{
   display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:10px;
-  color:#c3cfe8;font-weight:500;font-size:.95rem;
+  color:#d5e4d9;font-weight:500;font-size:.95rem;
   border-left:3px solid transparent;transition:background .2s,color .2s;
 }
 .nav a:hover{background:var(--navy-800);color:#fff}
@@ -66,7 +66,7 @@ button,select{font:inherit}
 .side-footer{margin-top:auto;padding:16px 12px;border-top:1px solid var(--navy-700);display:flex;align-items:center;gap:12px}
 .avatar{width:38px;height:38px;border-radius:50%;background:var(--navy-700);border:2px solid var(--orange);display:grid;place-items:center;font-weight:600;font-size:.85rem}
 .side-footer p{font-size:.85rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
-.side-footer small{color:#9fb0d3;font-weight:400}
+.side-footer small{color:#c5d6ca;font-weight:400}
 
 /* ---------- Üst çubuk (mobil) ---------- */
 .topbar{display:none}
@@ -113,18 +113,19 @@ button,select{font:inherit}
 .feed-card h3{font-family:var(--head);font-size:1rem;color:var(--navy-900)}
 .feed-card p{color:var(--muted);font-size:.9rem;margin:6px 0 12px;white-space:pre-wrap;overflow-wrap:anywhere}
 .feed-card small{display:block;color:var(--muted);margin:8px 0}
-.quiz-question{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+.quiz-question{background:#fffefa;border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
 .quiz-question legend{font-weight:600;color:var(--navy-900);padding:0 4px}
 .quiz-option{display:flex;gap:9px;align-items:flex-start;padding:8px 4px;color:var(--text)}
 .feed-status{min-height:1.5em;margin:10px 0;color:var(--muted)}
 .feed-status.error{color:#d93025}
-.feed-status.ok{color:#1e8e5a;font-weight:600}
-.feed-card.is-live{border-color:var(--orange);box-shadow:0 6px 20px #f47a201c}
+.feed-status.ok{color:#26734d;font-weight:600}
+.feed-card.is-live{border-color:var(--orange);box-shadow:0 6px 20px rgba(46,139,104,.12)}
 .feed-card .btn-join{display:inline-block;margin-top:8px}
+.payment-frame{display:block;width:100%;min-height:680px;margin-top:12px;border:0;border-radius:10px;background:#fffefa}
 .panel-view[hidden]{display:none!important}
-.logout-button{width:100%;margin-top:12px;padding:9px 12px;border:1px solid #53688f;border-radius:8px;background:transparent;color:#fff;text-align:left;font-weight:600}
-.logout-button:hover{border-color:var(--orange);color:#ffd2ad}
-.sidebar .feed-status{color:#ffd2ad;font-size:.8rem}
+.logout-button{width:100%;margin-top:12px;padding:9px 12px;border:1px solid #557966;border-radius:8px;background:transparent;color:#fff;text-align:left;font-weight:600}
+.logout-button:hover{border-color:var(--orange);color:#e8c987}
+.sidebar .feed-status{color:#e8c987;font-size:.8rem}
 
 /* ---------- Mobil ---------- */
 @media (max-width:960px){
@@ -147,7 +148,7 @@ button,select{font:inherit}
     transform:translateX(-100%);transition:transform .25s ease;
   }
   #menu-toggle:checked ~ .layout .sidebar{transform:none}
-  .scrim{position:fixed;inset:0;background:rgba(11,27,58,.55);z-index:25;display:none}
+  .scrim{position:fixed;inset:0;background:rgba(18,55,42,.55);z-index:25;display:none}
   #menu-toggle:checked ~ .scrim{display:block}
   .main{padding-top:24px}
 }
@@ -163,7 +164,7 @@ button,select{font:inherit}
 <input type="checkbox" id="menu-toggle" aria-label="Menüyü aç/kapat">
 
 <header class="topbar">
-  <a class="brand" href="index.html"><img class="brand-logo" src="logo/Zarif%20%C3%87%C3%B6z%C3%BCm%20Logo.png" alt=""><span class="brand-name">ZarifÇözüm</span></a>
+  <a class="brand" href="index.html"><img class="brand-logo" src="assets/brand-mark.png" alt=""><span class="brand-name">ZarifÇözüm</span></a>
   <label for="menu-toggle" class="burger" aria-label="Menüyü aç"><span></span></label>
 </header>
 <label for="menu-toggle" class="scrim"></label>
@@ -173,7 +174,7 @@ button,select{font:inherit}
   <!-- Sol menü -->
   <aside class="sidebar">
     <div class="brand">
-      <img class="brand-logo" src="logo/Zarif%20%C3%87%C3%B6z%C3%BCm%20Logo.png" alt="">
+      <img class="brand-logo" src="assets/brand-mark.png" alt="">
       <div class="brand-name">ZarifÇözüm<small>Öğrenci Paneli</small></div>
     </div>
     <a class="home-link" href="index.html">← Ana Sayfaya Dön</a>
@@ -184,6 +185,7 @@ button,select{font:inherit}
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
           Canlı Ders</a></li>
         <li><a href="#schedule">Ders Programı</a></li>
+        <li><a href="#membership">Üyelik ve paketler</a></li>
         <li><a href="#student-tasks">Ödevler</a></li>
         <li><a href="#denemeler">
           <svg viewBox="0 0 24 24"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M8 6H6a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2"/><path d="m9 14 2 2 4-4"/></svg>
@@ -222,6 +224,38 @@ button,select{font:inherit}
     <section class="panel-view" id="schedule" data-panel-view="schedule">
       <div class="section-head"><h2>Ders programı</h2></div>
       <section class="teacher-feed" id="scheduleFeed" aria-live="polite"><p class="feed-status">Program yükleniyor…</p></section>
+    </section>
+
+    <section class="panel-view" id="membership" data-panel-view="membership">
+      <div class="section-head"><h2>Üyelik ve paketler</h2></div>
+      <article class="feed-card">
+        <h3>Mevcut üyelik</h3>
+        <p id="subscriptionStatus" role="status">Üyelik bilgisi yükleniyor…</p>
+      </article>
+      <div class="section-head"><h2>PayTR sandbox denemesi</h2></div>
+      <p class="feed-status">Bu yalnızca test akışıdır. Paket fiyatları demo amaçlıdır; canlı tahsilat yapılmaz. Kart bilgilerini yalnızca PayTR'ın açtığı güvenli formda girin.</p>
+      <section class="teacher-feed" aria-label="Sandbox paketleri">
+        <article class="feed-card">
+          <h3>Temel · demo</h3>
+          <p>₺249 / ay</p>
+          <button class="btn-join" type="button" data-payment-plan="temel">Sandbox'ta dene</button>
+        </article>
+        <article class="feed-card">
+          <h3>Standart · demo</h3>
+          <p>₺499 / ay</p>
+          <button class="btn-join" type="button" data-payment-plan="standart">Sandbox'ta dene</button>
+        </article>
+        <article class="feed-card">
+          <h3>Yoğun · demo</h3>
+          <p>₺899 / ay</p>
+          <button class="btn-join" type="button" data-payment-plan="yogun">Sandbox'ta dene</button>
+        </article>
+      </section>
+      <p class="feed-status" id="paymentStatus" role="status" aria-live="polite"></p>
+      <section class="feed-card" id="paytrCheckout" hidden>
+        <h3>PayTR güvenli test ödeme formu</h3>
+        <iframe title="PayTR sandbox ödeme formu" id="paytrFrame" class="payment-frame"></iframe>
+      </section>
     </section>
 
     <section class="panel-view" id="student-tasks" data-panel-view="student-tasks">
@@ -460,6 +494,14 @@ button,select{font:inherit}
         $('welcomeTitle').textContent = `Hoş geldin, ${user.name}`;
         const content = await api('/api/student/dashboard');
         renderContent(content);
+        const subscription = await api('/api/payments/subscription');
+        const expiry = subscription.expiresAt
+          ? ` · Bitiş: ${new Date(subscription.expiresAt).toLocaleDateString('tr-TR')}`
+          : '';
+        const status = subscription.subscriptionStatus === 'active'
+          ? `Aktif${expiry}`
+          : subscription.subscriptionStatus === 'expired' ? 'Süresi dolmuş' : 'Ücretsiz';
+        $('subscriptionStatus').textContent = `${status}${subscription.subscriptionType ? ` · ${subscription.subscriptionType === 'monthly' ? 'aylık' : 'yıllık'}` : ''}`;
         $('dashboardError').hidden = true;
       } catch (error) {
         if (error.status === 401) {
@@ -471,6 +513,31 @@ button,select{font:inherit}
         $('dashboardError').hidden = false;
       }
     }
+
+    document.querySelectorAll('[data-payment-plan]').forEach(button => {
+      button.addEventListener('click', async () => {
+        const buttons = [...document.querySelectorAll('[data-payment-plan]')];
+        buttons.forEach(item => { item.disabled = true; });
+        $('paymentStatus').textContent = 'PayTR sandbox ödeme formu hazırlanıyor…';
+        $('paymentStatus').className = 'feed-status';
+        $('paytrCheckout').hidden = true;
+        try {
+          const checkout = await api('/api/payments/paytr/checkout', {
+            method: 'POST',
+            body: JSON.stringify({plan: button.dataset.paymentPlan})
+          });
+          $('paytrFrame').src = checkout.iframeUrl;
+          $('paytrCheckout').hidden = false;
+          $('paymentStatus').textContent = 'Test ödemesi tamamlandığında üyelik, PayTR’ın imzalı sunucu bildirimi doğrulanınca güncellenir.';
+          $('paymentStatus').className = 'feed-status';
+        } catch (error) {
+          $('paymentStatus').textContent = `Ödeme formu açılamadı: ${error.message}`;
+          $('paymentStatus').className = 'feed-status error';
+        } finally {
+          buttons.forEach(item => { item.disabled = false; });
+        }
+      });
+    });
 
     $('logoutButton').addEventListener('click', async () => {
       const button = $('logoutButton');

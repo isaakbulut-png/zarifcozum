@@ -16,6 +16,8 @@ const session = require('express-session');
 const { MongoStore } = require('connect-mongo');
 const { router: authRouter, requireRole } = require('./routes/auth');
 const { createAIRouter } = require('./routes/ai');
+const { createPaymentRouter } = require('./routes/payments');
+const { createWebhookRouter } = require('./routes/webhooks');
 
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI;           // .env dosyasından okunur
@@ -40,6 +42,7 @@ if (SESSION_SECRET.length < 32) {
 
 const app = express();
 if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
+app.use('/api/webhooks', createWebhookRouter());
 app.use(cors());                                       // file:// ile açılan sayfa da erişebilsin
 app.use(express.json({ limit: '1mb' }));
 app.use(session({
@@ -96,6 +99,7 @@ let koleksiyon, anahtarKoleksiyon, canliDersKoleksiyonu;
 let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, duyuruKoleksiyonu;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
+app.use('/api/payments', createPaymentRouter({ requireStudent: ogrenciKontrol }));
 app.use('/api/ai', createAIRouter({
   getQuizCollection: () => quizKoleksiyonu,
   requireRole

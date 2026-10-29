@@ -6,7 +6,7 @@
       <div class="site-footer-columns">
         <section class="site-footer-brand">
           <a class="brand" href="/index.html">
-            <img class="brand-logo" src="/logo/Zarif%20%C3%87%C3%B6z%C3%BCm%20Logo.png" alt="">
+            <img class="brand-logo" src="/assets/brand-mark-white.png" alt="">
             <span>ZarifÇözüm</span>
           </a>
           <p>Maarif Modeli matematik öğrenimi için konu, pratik ve öğrenci takibini tek platformda buluşturan eğitim deneyimi.</p>

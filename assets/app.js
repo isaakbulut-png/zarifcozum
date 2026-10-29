@@ -24,7 +24,7 @@
   const side = document.querySelector('[data-shell="sidebar"]');
   if (side) {
     side.innerHTML = `
-      <a class="brand" href="index.html"><img class="brand-logo" src="logo/Zarif%20%C3%87%C3%B6z%C3%BCm%20Logo.png" alt="">ZarifÇözüm</a>
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/brand-mark.png" alt="">ZarifÇözüm</a>
       <nav class="side-nav" aria-label="Uygulama">
         ${nav.map(n => `<a href="${n.href}" ${n.href === current ? 'aria-current="page"' : ''}>${icons[n.icon]}<span>${n.label}</span></a>`).join('')}
       </nav>
@@ -39,6 +39,6 @@
   }
   const top = document.querySelector('[data-shell="mobile-top"]');
   if (top) {
-    top.innerHTML = `<a class="brand" href="index.html"><img class="brand-logo" src="logo/Zarif%20%C3%87%C3%B6z%C3%BCm%20Logo.png" alt="">ZarifÇözüm</a><a href="mimari.html" class="chip">Mimari</a>`;
+    top.innerHTML = `<a class="brand" href="index.html"><img class="brand-logo" src="assets/brand-mark.png" alt="">ZarifÇözüm</a><a href="mimari.html" class="chip">Mimari</a>`;
   }
 })();

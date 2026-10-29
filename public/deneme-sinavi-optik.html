@@ -8,10 +8,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --navy-900:#0b1b3a; --navy-800:#10264f; --navy-700:#1a3566; --navy-100:#e6ebf5;
-  --orange:#f47a20; --orange-dark:#d9650f; --orange-soft:#fff1e6;
+  --navy-900:#12372a; --navy-800:#184d3b; --navy-700:#24634b; --navy-100:#e5eee7;
+  --orange:#267456; --orange-dark:#1f6249; --orange-soft:#e2f0e7;
   --danger:#d93025;
-  --bg:#f4f6fb; --card:#fff; --text:#12213f; --muted:#5f6b85; --line:#d8dfec;
+  --bg:#f7f5ef; --card:#fffefa; --text:#1d2d25; --muted:#58685e; --line:#d9d3c3;
   --head:'Sora','Segoe UI',system-ui,sans-serif;
   --body:'Inter','Segoe UI',system-ui,sans-serif;
 }
@@ -21,11 +21,11 @@ button{font:inherit;cursor:pointer}
 :focus-visible{outline:3px solid var(--orange);outline-offset:2px}
 
 /* ---------- Üst çubuk: başlık + sayaç ---------- */
-.bar{position:sticky;top:0;z-index:10;background:var(--navy-900);color:#fff;box-shadow:0 4px 16px rgba(11,27,58,.25)}
+.bar{position:sticky;top:0;z-index:10;background:var(--navy-900);color:#fff;box-shadow:0 4px 16px rgba(18,55,42,.2)}
 .bar-in{max-width:1100px;margin:0 auto;padding:14px clamp(16px,3vw,32px);display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .title{flex:1;min-width:180px}
 .title h1{font-family:var(--head);font-size:1.1rem;font-weight:600}
-.title p{font-size:.82rem;color:#9fb0d3}
+.title p{font-size:.82rem;color:#c5d6ca}
 
 .timer{display:flex;align-items:center;gap:12px;background:var(--navy-800);border:1px solid var(--navy-700);border-radius:12px;padding:8px 16px}
 .timer svg{width:22px;height:22px;stroke:var(--orange);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
@@ -37,7 +37,7 @@ button{font:inherit;cursor:pointer}
 .btn{border:0;border-radius:10px;padding:11px 20px;font-weight:600;transition:background .2s}
 .btn-start{background:var(--orange);color:#fff}
 .btn-start:hover{background:var(--orange-dark)}
-.btn-finish{background:transparent;color:#fff;border:2px solid #4a6196}
+.btn-finish{background:transparent;color:#fff;border:2px solid #557966}
 .btn-finish:hover{border-color:var(--orange);color:var(--orange)}
 .btn[hidden]{display:none}
 
@@ -62,12 +62,12 @@ button{font:inherit;cursor:pointer}
 .result[hidden]{display:none}
 .result h2{grid-column:1/-1;font-family:var(--head);font-size:1.2rem}
 .result div b{display:block;font-family:var(--head);font-size:1.8rem;color:var(--orange)}
-.result div span{font-size:.85rem;color:#b6c3df}
+.result div span{font-size:.85rem;color:#d5e4d9}
 
 /* Optik form */
 .sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
 .q{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
-.q.done{border-color:var(--navy-700);background:#fbfcff}
+.q.done{border-color:var(--navy-700);background:#f8f6f0}
 .num{width:34px;height:34px;border-radius:8px;background:var(--navy-100);color:var(--navy-800);display:grid;place-items:center;font-family:var(--head);font-weight:600;font-size:.9rem;flex:none}
 .q.done .num{background:var(--navy-900);color:#fff}
 .opts{display:flex;gap:8px;flex:1;justify-content:space-between}
@@ -78,13 +78,13 @@ button{font:inherit;cursor:pointer}
   transition:background .15s,color .15s,border-color .15s,transform .15s;
 }
 .opt:hover:not(:disabled){border-color:var(--orange);color:var(--orange-dark)}
-.opt[aria-pressed="true"]{background:var(--orange);border-color:var(--orange);color:#fff;transform:scale(1.08);box-shadow:0 3px 10px rgba(244,122,32,.4)}
+.opt[aria-pressed="true"]{background:var(--orange);border-color:var(--orange);color:#fff;transform:scale(1.08);box-shadow:0 3px 10px rgba(46,139,104,.3)}
 .opt:disabled{cursor:not-allowed;opacity:.45}
 .opt[aria-pressed="true"]:disabled{opacity:1}
 
 .notice input{display:block;width:100%;max-width:340px;margin:6px 0 10px;padding:10px 12px;border:2px solid var(--line);border-radius:8px;font:inherit;background:#fff;color:var(--text)}
 .notice input:focus{border-color:var(--orange);outline:none}
-.save-status{grid-column:1/-1;font-size:.92rem;color:#b6c3df;padding-top:12px;border-top:1px solid var(--navy-700)}
+.save-status{grid-column:1/-1;font-size:.92rem;color:#d5e4d9;padding-top:12px;border-top:1px solid var(--navy-700)}
 .save-status.ok{color:#7ee0a1}
 .save-status.err{color:#ff9b90}
 .btn-retry{margin-left:8px;background:var(--orange);color:#fff;border:0;border-radius:8px;padding:6px 14px;font-weight:600}
