@@ -2,10 +2,13 @@
   const carousel = document.querySelector('[data-home-carousel]');
   if (!carousel) return;
 
+  const hero = carousel.closest('.hero');
   const slides = Array.from(carousel.querySelectorAll('[data-carousel-slide]'));
-  const copySlides = Array.from(carousel.closest('.hero').querySelectorAll('[data-hero-copy]'));
+  const copySlides = Array.from(hero.querySelectorAll('[data-hero-copy]'));
   const indicators = Array.from(carousel.querySelectorAll('[data-carousel-to]'));
   const count = carousel.querySelector('[data-carousel-count]');
+  const previousButton = hero.querySelector('[data-carousel-prev]');
+  const nextButton = hero.querySelector('[data-carousel-next]');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let activeIndex = 0;
   let autoplayTimer;
@@ -51,11 +54,11 @@
     startAutoplay();
   }
 
-  carousel.querySelector('[data-carousel-prev]').addEventListener('click', () => {
+  previousButton.addEventListener('click', () => {
     showSlide(activeIndex - 1);
     restartAutoplay();
   });
-  carousel.querySelector('[data-carousel-next]').addEventListener('click', () => {
+  nextButton.addEventListener('click', () => {
     showSlide(activeIndex + 1);
     restartAutoplay();
   });
