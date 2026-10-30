@@ -86,6 +86,12 @@ sitePages.forEach(page => {
     const role = page === 'ogrenci-paneli.html' ? 'student'
       : page === 'ogretmen-paneli.html' ? 'teacher'
       : null;
+    // Giriş yapmış öğrenci/öğretmen giriş sayfasında yeniden giriş formu görmez; panele yönlenir.
+    if (page === 'kayit-giris.html' && req.query.mode !== 'register') {
+      const current = req.session.user?.role;
+      if (current === 'student') return res.redirect('/ogrenci-paneli.html');
+      if (current === 'teacher') return res.redirect('/ogretmen-paneli.html');
+    }
     if (!role) return next();
     if (!req.session.user) return res.redirect('/kayit-giris.html');
     if (req.session.user.role !== role) {

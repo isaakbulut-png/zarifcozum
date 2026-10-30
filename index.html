@@ -25,9 +25,10 @@
       <a href="mimari.html">Mimari</a>
     </nav>
     <div class="row">
-      <a class="btn btn-ghost btn-sm" href="kayit-giris.html?role=student">Öğrenci Girişi</a>
-      <a class="btn btn-ghost btn-sm" href="kayit-giris.html?role=teacher">Öğretmen Girişi</a>
-      <a class="btn btn-primary btn-sm" href="kayit-giris.html?mode=register">Kayıt Ol</a>
+      <a class="btn btn-ghost btn-sm" data-guest-only href="kayit-giris.html?role=student">Öğrenci Girişi</a>
+      <a class="btn btn-ghost btn-sm" data-guest-only href="kayit-giris.html?role=teacher">Öğretmen Girişi</a>
+      <a class="btn btn-primary btn-sm" data-guest-only href="kayit-giris.html?mode=register">Kayıt Ol</a>
+      <a class="btn btn-primary btn-sm" data-panel-link hidden href="ogrenci-paneli.html">Panelime Git</a>
       <a class="btn btn-primary btn-sm" href="panel.html">Şimdi Dene</a>
     </div>
   </div>
@@ -246,6 +247,7 @@
   </div>
 </footer>
 <script src="/assets/site-footer.js"></script>
+<script src="/assets/session-nav.js" defer></script>
 <script src="assets/home-carousel.js" defer></script>
 <script data-pplx-inline-edit>
 (function () {
