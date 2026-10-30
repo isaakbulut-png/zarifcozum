@@ -6,13 +6,16 @@
   "scripts": {
     "test": "node --test",
     "dev": "node server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "admin:create": "node scripts/create-admin.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
+    "@google/genai": "^2.32.0",
     "bcryptjs": "^3.0.3",
     "connect-mongo": "^6.0.0",
     "cors": "^2.8.6",
@@ -21,6 +24,7 @@
     "express-rate-limit": "^8.7.1",
     "express-session": "^1.19.0",
     "mongodb": "^7.7.0",
-    "mongoose": "^9.11.3"
+    "mongoose": "^9.11.3",
+    "openai": "^7.45.1"
   }
 }

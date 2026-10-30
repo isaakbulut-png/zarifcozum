@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light">
+  <title>Yönetici Girişi | ZarifÇözüm</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <style>
+    :root{font-family:Inter,"Segoe UI",sans-serif;color:#1d2d25;background:#12372a;font-synthesis:none}
+    *{box-sizing:border-box}
+    body{min-height:100vh;margin:0;display:grid;place-items:center;padding:24px;background:linear-gradient(160deg,#12372a,#1f6249)}
+    .card{width:min(100%,420px);padding:32px;background:#fffefa;border-radius:20px;box-shadow:0 24px 70px rgba(0,0,0,.3)}
+    .badge{display:inline-block;margin-bottom:12px;padding:4px 10px;border-radius:999px;background:#e2f0e7;color:#184d3b;font-size:.75rem;font-weight:700;letter-spacing:.06em}
+    h1{margin:0 0 6px;font-size:1.5rem;color:#12372a}
+    .intro{margin:0 0 20px;color:#58685e}
+    label{display:block;margin:15px 0 6px;font-size:.92rem;font-weight:600}
+    input{width:100%;padding:12px;border:1px solid #d9d3c3;border-radius:8px;background:#fffefa;color:inherit;font:inherit}
+    input:focus,button:focus-visible{outline:3px solid rgba(46,139,104,.3);border-color:#267456}
+    .primary{width:100%;margin-top:22px;padding:13px;border:0;border-radius:8px;background:#267456;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+    .primary:hover{background:#1f6249}
+    .primary:disabled{opacity:.6;cursor:wait}
+    .message{min-height:1.4em;margin:12px 0 0;color:#a3201a;font-size:.9rem}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <span class="badge">YÖNETİCİ</span>
+    <h1>ZarifÇözüm Yönetim</h1>
+    <p class="intro">Devam etmek için yönetici hesabınızla giriş yapın.</p>
+    <form id="adminForm" novalidate>
+      <label for="email">E-posta</label>
+      <input id="email" name="email" type="email" autocomplete="username" maxlength="254" required>
+      <label for="password">Şifre</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" maxlength="72" required>
+      <button class="primary" id="submitButton" type="submit">Giriş yap</button>
+      <p class="message" id="message" role="alert" aria-live="polite"></p>
+    </form>
+  </main>
+  <script>
+    (() => {
+      const form = document.getElementById('adminForm');
+      const button = document.getElementById('submitButton');
+      const message = document.getElementById('message');
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        button.disabled = true;
+        message.textContent = '';
+        try {
+          const response = await fetch('/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify(Object.fromEntries(new FormData(form)))
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.mesaj || 'İşlem tamamlanamadı.');
+          window.location.assign(result.redirectTo);
+        } catch (error) {
+          message.textContent = error.message || 'Sunucuya bağlanılamadı.';
+          button.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

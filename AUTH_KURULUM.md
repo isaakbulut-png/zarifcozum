@@ -45,6 +45,18 @@ Yapay Zeka Soru Sihirbazı için Google AI Studio'dan Gemini API anahtarı alıp
 
 Şifre en az 10, en fazla 72 UTF-8 bayt olmalıdır (bcrypt'in giriş uzunluğu sınırı). Öğretmen kaydı için `TEACHER_REGISTRATION_CODE` gereklidir. IP başına giriş denemeleri 15 dakikada 10, kayıt denemeleri saatte 5 istekle sınırlandırılır.
 
+## Yönetici paneli
+
+Yönetici hesabı arayüzden **açılamaz**; yalnızca sunucuda şu komutla oluşturulur (PowerShell):
+
+```powershell
+$env:ADMIN_EMAIL="ben@ornek.com"; $env:ADMIN_NAME="Yönetici"; $env:ADMIN_PASSWORD="en az 10 karakterlik şifre"; npm run admin:create
+```
+
+- Giriş adresi: `/yonetim` (ana sayfada bağlantısı yoktur, arama motorlarına kapalıdır). Yerelde: `http://localhost:3000/yonetim`
+- Yönetici hesapları yalnızca `/admin/login` ile giriş yapar; normal giriş sayfası yöneticileri kabul etmez.
+- Aktif bölümler: Genel Bakış, Kullanıcılar, Ödemeler, Duyurular. Diğer butonlar ilgili paneller hazır olana kadar pasiftir.
+
 ## Ödeme webhook güvenliği
 
 Kart numarası, CVV veya son kullanma tarihi uygulama sunucusuna gönderilmemeli ya da MongoDB'de saklanmamalıdır. Ödeme formu sağlayıcının barındırdığı sayfada açılmalıdır. API kimlik bilgilerini yalnızca hosting ortam değişkenlerinde tutun: iyzico için `IYZICO_API_KEY` ve `IYZICO_SECRET_KEY`; PayTR için `PAYTR_MERCHANT_KEY` ve `PAYTR_MERCHANT_SALT`. Bunları tarayıcı koduna, Git'e veya loglara koymayın.

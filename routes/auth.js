@@ -51,7 +51,16 @@ function publicUser(user) {
   };
 }
 
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { mesaj: 'Çok fazla giriş denemesi. Bir süre sonra tekrar deneyin.' }
+});
+
 function redirectForRole(role) {
+  if (role === 'admin') return '/admin-paneli.html';
   return role === 'teacher' ? '/ogretmen-paneli.html' : '/ogrenci-paneli.html';
 }
 
@@ -118,7 +127,8 @@ router.post('/login', loginLimiter, async (req, res) => {
 
   try {
     const user = await User.findOne({ email }).select('+passwordHash');
-    if (!user || !(await user.verifyPassword(password))) {
+    // Yönetici hesapları yalnızca /admin/login üzerinden giriş yapabilir.
+    if (!user || user.role === 'admin' || !(await user.verifyPassword(password))) {
       return res.status(401).json({ mesaj: 'E-posta veya şifre hatalı.' });
     }
 
@@ -132,6 +142,33 @@ router.post('/login', loginLimiter, async (req, res) => {
     });
   } catch (error) {
     console.error('Giriş işlemi başarısız:', error);
+    res.status(500).json({ mesaj: 'Giriş sırasında sunucu hatası oluştu.' });
+  }
+});
+
+router.post('/admin/login', adminLoginLimiter, async (req, res) => {
+  const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+  const password = req.body?.password;
+  if (!isValidEmail(email) || typeof password !== 'string' ||
+      Buffer.byteLength(password, 'utf8') > 72) {
+    return res.status(400).json({ mesaj: 'E-posta veya şifre biçimi geçersiz.' });
+  }
+
+  try {
+    const user = await User.findOne({ email }).select('+passwordHash');
+    const valid = user && user.role === 'admin' && await user.verifyPassword(password);
+    if (!valid) return res.status(401).json({ mesaj: 'E-posta veya şifre hatalı.' });
+
+    await regenerateSession(req);
+    req.session.user = { id: user._id.toString(), name: user.name, role: user.role };
+    await saveSession(req);
+    res.json({
+      mesaj: 'Giriş başarılı.',
+      user: publicUser(user),
+      redirectTo: redirectForRole(user.role)
+    });
+  } catch (error) {
+    console.error('Yönetici girişi başarısız:', error);
     res.status(500).json({ mesaj: 'Giriş sırasında sunucu hatası oluştu.' });
   }
 });

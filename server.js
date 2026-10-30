@@ -17,6 +17,9 @@ const { MongoStore } = require('connect-mongo');
 const { router: authRouter, requireRole } = require('./routes/auth');
 const { createAIRouter } = require('./routes/ai');
 const { createPaymentRouter } = require('./routes/payments');
+const { createAdminRouter } = require('./routes/admin');
+const User = require('./models/User');
+const Payment = require('./models/Payment');
 const { createWebhookRouter } = require('./routes/webhooks');
 
 const PORT = process.env.PORT || 3000;
@@ -86,19 +89,43 @@ sitePages.forEach(page => {
     if (!role) return next();
     if (!req.session.user) return res.redirect('/kayit-giris.html');
     if (req.session.user.role !== role) {
-      return res.redirect(req.session.user.role === 'teacher'
-        ? '/ogretmen-paneli.html'
-        : '/ogrenci-paneli.html');
+      return res.redirect(
+        req.session.user.role === 'admin' ? '/admin-paneli.html'
+          : req.session.user.role === 'teacher' ? '/ogretmen-paneli.html'
+          : '/ogrenci-paneli.html'
+      );
     }
     next();
   }, (req, res) => res.sendFile(path.join(__dirname, page)));
 });
+
+// Yönetici paneli: ana sayfada bağlantısı yoktur; yalnızca /yonetim adresinden ulaşılır.
+function adminSayfasiGonder(dosya) {
+  return (req, res) => {
+    res.set({ 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' });
+    res.sendFile(path.join(__dirname, dosya));
+  };
+}
+app.get(['/yonetim', '/admin-giris.html'], (req, res, next) => {
+  if (req.session.user?.role === 'admin') return res.redirect('/admin-paneli.html');
+  next();
+}, adminSayfasiGonder('admin-giris.html'));
+app.get('/admin-paneli.html', (req, res, next) => {
+  if (req.session.user?.role !== 'admin') return res.redirect('/yonetim');
+  next();
+}, adminSayfasiGonder('admin-paneli.html'));
 app.get('/favicon.svg', (req, res) => res.sendFile(path.join(__dirname, 'favicon.svg')));
 
 let koleksiyon, anahtarKoleksiyon, canliDersKoleksiyonu;
 let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, duyuruKoleksiyonu;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
+app.use('/api/admin', createAdminRouter({
+  requireAdmin: requireRole('admin'),
+  User,
+  Payment,
+  getAnnouncementCollection: () => duyuruKoleksiyonu
+}));
 app.use('/api/payments', createPaymentRouter({ requireStudent: ogrenciKontrol }));
 app.use('/api/ai', createAIRouter({
   getQuizCollection: () => quizKoleksiyonu,
