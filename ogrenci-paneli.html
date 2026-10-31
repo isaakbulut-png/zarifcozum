@@ -131,6 +131,25 @@ button,select{font:inherit}
 .logout-button{width:100%;margin-top:12px;padding:9px 12px;border:1px solid #557966;border-radius:8px;background:transparent;color:#fff;text-align:left;font-weight:600}
 .logout-button:hover{border-color:var(--orange);color:#e8c987}
 .sidebar .feed-status{color:#e8c987;font-size:.8rem}
+.student-link-card{margin-bottom:20px}
+.student-link-form{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:8px;margin-top:12px}
+.student-link-form label{grid-column:1/-1;font-size:.82rem;font-weight:600}
+.student-link-form input{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.linked-student-profiles{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.homework-card{display:grid;gap:10px}
+.homework-card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.homework-card-heading small{display:block;color:var(--muted);font-size:.78rem}
+.status-chip{display:inline-flex;align-items:center;padding:4px 9px;border-radius:999px;background:#edf0ec;color:#536057;font-size:.68rem;font-weight:700;white-space:nowrap}
+.homework-card .text-link{display:block;color:var(--orange-dark);font-size:.84rem;font-weight:600;text-decoration:underline}
+.homework-submit-form{display:grid;gap:10px;margin-top:6px;padding:13px;border:1px solid var(--line);border-radius:10px;background:#f8f6f0}
+.homework-submit-form label{display:grid;gap:5px;font-size:.8rem;font-weight:600}
+.homework-submit-form textarea,.homework-submit-form input[type=file]{width:100%;padding:9px;border:1px solid var(--line);border-radius:7px;background:#fff;font:inherit}
+.homework-submit-form textarea{resize:vertical}
+.task-assigned,.task-viewed{background:#eef2ff;color:#394f8c}
+.task-progress{background:#fff8df;color:#80620c}
+.task-submitted,.task-reviewed{background:#e7f4e9;color:#21643b}
+.task-late,.task-overdue{background:#fff0e7;color:#994c1c}
+.task-missing{background:#fde9e8;color:#a3201a}
 
 /* ---------- Mobil ---------- */
 @media (max-width:960px){
@@ -158,6 +177,9 @@ button,select{font:inherit}
   .main{padding-top:24px}
 }
 @media (max-width:480px){
+  .student-link-form{grid-template-columns:1fr}
+  .student-link-form label{grid-column:auto}
+  .homework-card-heading{flex-direction:column}
 }
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;scroll-behavior:auto!important}
@@ -265,6 +287,17 @@ button,select{font:inherit}
 
     <section class="panel-view" id="student-tasks" data-panel-view="student-tasks">
       <div class="section-head"><h2>Ödevler ve görevler</h2></div>
+      <article class="feed-card student-link-card">
+        <h3>Öğretmen bağlantısı</h3>
+        <p>Öğretmeninizin verdiği tek kullanımlık bağlantı kodunu girerek öğrenci profilinizi ve ödevlerinizi hesabınıza bağlayın.</p>
+        <form id="studentLinkForm" class="student-link-form">
+          <label for="studentInvitationCode">Davet kodu</label>
+          <input id="studentInvitationCode" name="invitationCode" maxlength="32" autocomplete="one-time-code" required>
+          <button class="btn-join" type="submit">Profili bağla</button>
+        </form>
+        <p class="feed-status" id="studentLinkStatus" role="status" aria-live="polite"></p>
+        <div id="linkedStudentProfiles" class="linked-student-profiles"></div>
+      </article>
       <section class="teacher-feed" id="taskFeed" aria-live="polite"><p class="feed-status">Görevler yükleniyor…</p></section>
     </section>
 
@@ -379,6 +412,7 @@ button,select{font:inherit}
     const esc = value => String(value ?? '').replace(/[&<>"']/g, char =>
       ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     let activeQuiz = null;
+    let activeHomeworkAssignmentId = null;
 
     async function api(url, options = {}) {
       if (window.location.protocol === 'file:') {
@@ -387,7 +421,10 @@ button,select{font:inherit}
       const response = await fetch(url, {
         ...options,
         credentials: 'same-origin',
-        headers: {'Content-Type': 'application/json', ...(options.headers || {})}
+        headers: {
+          ...(options.body instanceof FormData ? {} : {'Content-Type': 'application/json'}),
+          ...(options.headers || {})
+        }
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -473,14 +510,7 @@ button,select{font:inherit}
             <button class="btn-join" type="button" data-quiz-id="${esc(quiz.id)}">${quiz.tamamlandi ? 'Tekrar çöz' : 'Teste başla'}</button>
           </article>`).join('')
         : emptyMessage('Henüz öğretmen testi yayınlanmadı.');
-      $('taskFeed').innerHTML = content.quizler.length
-        ? content.quizler.map(quiz => `<article class="feed-card">
-            <h3>${esc(quiz.title)}</h3>
-            <p>${esc(quiz.description || 'Öğretmen tarafından verilen test görevi.')}</p>
-            <small>${quiz.tamamlandi ? 'Tamamlandı' : 'Bekliyor'} · ${quiz.soruSayisi} soru</small>
-            <button class="btn-join" type="button" data-quiz-id="${esc(quiz.id)}">${quiz.tamamlandi ? 'Yeniden çöz' : 'Görevi yap'}</button>
-          </article>`).join('')
-        : emptyMessage('Şu anda tamamlanması gereken görev yok.');
+      $('taskFeed').innerHTML = emptyMessage('Ödevler yükleniyor…');
       $('announcementFeed').innerHTML = content.duyurular.length
         ? content.duyurular.map(item => `<article class="feed-card">
             <p>${esc(item.message)}</p>
@@ -496,6 +526,66 @@ button,select{font:inherit}
         : emptyMessage('Henüz tamamlanmış testin yok.');
     }
 
+    function homeworkStatusClass(status) {
+      return ({
+        'Atandı': 'task-assigned',
+        'Görüntülendi': 'task-viewed',
+        'Devam ediyor': 'task-progress',
+        'Teslim edildi': 'task-submitted',
+        'Geç teslim': 'task-late',
+        'Kontrol edildi': 'task-reviewed',
+        'Eksik': 'task-missing',
+        'Teslim edilmedi': 'task-overdue'
+      })[status] || '';
+    }
+
+    async function loadStudentHomework() {
+      try {
+        const {students, homeworks} = await api('/api/student/homeworks');
+        $('linkedStudentProfiles').innerHTML = students.length
+          ? students.map(profile => `<span class="chip">${esc(profile.firstName)} · ${profile.grade}. sınıf / ${esc(profile.section)}</span>`).join('')
+          : '<p class="feed-status">Henüz öğretmen öğrenci profilinize bağlı değil.</p>';
+        $('taskFeed').innerHTML = homeworks.length ? homeworks.map(homework => {
+          const completed = ['Teslim edildi', 'Geç teslim', 'Kontrol edildi'].includes(homework.status);
+          const canSubmit = !completed;
+          const resourceLink = homework.hasResourceFile
+            ? `<a class="text-link" href="/api/student/homeworks/${encodeURIComponent(homework.assignmentId)}/resource">Ödev PDF dosyasını indir</a>`
+            : '';
+          const submittedFile = homework.hasFile
+            ? `<a class="text-link" href="/api/student/homeworks/${encodeURIComponent(homework.assignmentId)}/file">Gönderdiğim dosyayı görüntüle</a>`
+            : '';
+          const quizAction = homework.quizId && canSubmit
+            ? `<button class="btn-join" type="button" data-homework-quiz="${esc(homework.assignmentId)}" data-quiz-id="${esc(homework.quizId)}">Bağlı testi çöz</button>`
+            : '';
+          const startAction = !homework.quizId && canSubmit && ['Atandı', 'Görüntülendi', 'Teslim edilmedi', 'Eksik'].includes(homework.status)
+            ? `<button class="btn-join" type="button" data-homework-start="${esc(homework.assignmentId)}">Çalışmaya başla</button>`
+            : '';
+          const submitForm = canSubmit && !homework.quizId
+            ? `<form class="homework-submit-form" data-homework-submit="${esc(homework.assignmentId)}">
+                <label>Çalışma notu <textarea name="text" maxlength="10000" rows="3" placeholder="Çözümünüzü veya öğretmen notunuzu yazın"></textarea></label>
+                <label>Dosya ekle (PDF, PNG veya JPEG · en fazla 4 MB) <input name="file" type="file" accept="application/pdf,image/png,image/jpeg,.pdf,.png,.jpg,.jpeg"></label>
+                <button class="btn-join" type="submit">Ödevi teslim et</button>
+                <span class="feed-status" role="status"></span>
+              </form>`
+            : '';
+          return `<article class="feed-card homework-card">
+            <div class="homework-card-heading"><div><h3>${esc(homework.title)}</h3><small>${esc(homework.topic || 'Genel çalışma')} · ${homework.grade}. sınıf${homework.section ? ` / ${esc(homework.section)}` : ''}</small></div>
+              <span class="status-chip ${homeworkStatusClass(homework.status)}">${esc(homework.status)}</span></div>
+            <p>${esc(homework.description || 'Öğretmeniniz tarafından atanmış çalışma.')}</p>
+            <small>Son teslim: ${new Date(homework.dueAt).toLocaleString('tr-TR')}</small>
+            ${resourceLink}
+            ${homework.submissionText ? `<p><strong>Teslim notunuz:</strong> ${esc(homework.submissionText)}</p>` : ''}
+            ${homework.score === null ? '' : `<p><strong>Değerlendirme:</strong> %${homework.score}</p>`}
+            ${homework.feedback ? `<p><strong>Öğretmen geri bildirimi:</strong> ${esc(homework.feedback)}</p>` : ''}
+            ${submittedFile}
+            ${startAction}${quizAction}${submitForm}
+          </article>`;
+        }).join('') : emptyMessage('Şu anda size atanmış ödev yok.');
+      } catch (error) {
+        $('taskFeed').innerHTML = `<p class="feed-status error">Ödevler yüklenemedi: ${esc(error.message)}</p>`;
+      }
+    }
+
     async function loadContent() {
       try {
         const {user} = await api('/me');
@@ -509,6 +599,7 @@ button,select{font:inherit}
         $('welcomeTitle').textContent = `Hoş geldin, ${user.name}`;
         const content = await api('/api/student/dashboard');
         renderContent(content);
+        await loadStudentHomework();
         const subscription = await api('/api/payments/subscription');
         const expiry = subscription.expiresAt
           ? ` · Bitiş: ${new Date(subscription.expiresAt).toLocaleDateString('tr-TR')}`
@@ -567,8 +658,9 @@ button,select{font:inherit}
       }
     });
 
-    function renderQuiz(quiz) {
+    function renderQuiz(quiz, homeworkAssignmentId = null) {
       activeQuiz = quiz;
+      activeHomeworkAssignmentId = homeworkAssignmentId;
       $('activeQuizTitle').textContent = quiz.title;
       $('activeQuizDescription').textContent = quiz.description || `${quiz.questions.length} soru`;
       $('quizAttemptForm').innerHTML = quiz.questions.map((question, index) => `
@@ -590,17 +682,97 @@ button,select{font:inherit}
     function openQuiz(event) {
       const button = event.target.closest('[data-quiz-id]');
       if (!button) return;
-      api('/api/student/dashboard').then(({quizler}) => {
+      const homeworkId = button.dataset.homeworkQuiz || '';
+      const prepare = homeworkId
+        ? api(`/api/student/homeworks/${encodeURIComponent(homeworkId)}/start`, {method: 'POST'})
+        : Promise.resolve();
+      prepare.then(() => api('/api/student/dashboard')).then(({quizler}) => {
         const quiz = quizler.find(item => item.id === button.dataset.quizId);
         if (!quiz) throw new Error('Test artık kullanılamıyor.');
-        renderQuiz(quiz);
+        renderQuiz(quiz, homeworkId || null);
+        if (homeworkId) loadStudentHomework();
       }).catch(error => {
         $('quizAttemptStatus').textContent = error.message;
         $('quizAttemptStatus').className = 'feed-status error';
       });
     }
     $('quizFeed').addEventListener('click', openQuiz);
-    $('taskFeed').addEventListener('click', openQuiz);
+    $('taskFeed').addEventListener('click', async event => {
+      const startButton = event.target.closest('[data-homework-start]');
+      if (startButton) {
+        startButton.disabled = true;
+        try {
+          await api(`/api/student/homeworks/${encodeURIComponent(startButton.dataset.homeworkStart)}/start`, {method: 'POST'});
+          await loadStudentHomework();
+        } catch (error) {
+          startButton.disabled = false;
+          startButton.insertAdjacentHTML('afterend', `<span class="feed-status error">${esc(error.message)}</span>`);
+        }
+        return;
+      }
+      openQuiz(event);
+    });
+
+    $('studentLinkForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const button = form.querySelector('button[type="submit"]');
+      const status = $('studentLinkStatus');
+      button.disabled = true;
+      status.textContent = 'Öğrenci profili bağlanıyor…';
+      status.className = 'feed-status';
+      try {
+        const result = await api('/api/student/profile/link', {
+          method: 'POST',
+          body: JSON.stringify({invitationCode: $('studentInvitationCode').value.trim()})
+        });
+        form.reset();
+        status.textContent = result.mesaj;
+        status.className = 'feed-status ok';
+        await loadStudentHomework();
+      } catch (error) {
+        status.textContent = `Profil bağlanamadı: ${error.message}`;
+        status.className = 'feed-status error';
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    $('taskFeed').addEventListener('submit', async event => {
+      const form = event.target.closest('[data-homework-submit]');
+      if (!form) return;
+      event.preventDefault();
+      const button = form.querySelector('button[type="submit"]');
+      const status = form.querySelector('[role="status"]');
+      const file = form.elements.file.files[0];
+      const text = form.elements.text.value.trim();
+      if (!text && !file) {
+        status.textContent = 'Çalışma notu yazın veya dosya ekleyin.';
+        status.className = 'feed-status error';
+        return;
+      }
+      if (file && file.size > 4 * 1024 * 1024) {
+        status.textContent = 'Teslim dosyası en fazla 4 MB olabilir.';
+        status.className = 'feed-status error';
+        return;
+      }
+      button.disabled = true;
+      status.textContent = 'Ödev teslim ediliyor…';
+      status.className = 'feed-status';
+      try {
+        const response = await api(`/api/student/homeworks/${encodeURIComponent(form.dataset.homeworkSubmit)}/submissions`, {
+          method: 'POST',
+          body: new FormData(form)
+        });
+        status.textContent = `Çalışmanız alındı: ${response.status}.`;
+        status.className = 'feed-status ok';
+        await loadStudentHomework();
+      } catch (error) {
+        status.textContent = `Teslim edilemedi: ${error.message}`;
+        status.className = 'feed-status error';
+        button.disabled = false;
+      }
+    });
 
     $('quizAttemptForm').addEventListener('submit', async event => {
       event.preventDefault();
@@ -615,7 +787,15 @@ button,select{font:inherit}
           method: 'POST',
           body: JSON.stringify({answers})
         });
-        $('quizAttemptStatus').textContent = `Test tamamlandı: %${result.score} (${result.correctCount}/${result.totalCount} doğru).`;
+        let homeworkResult = null;
+        if (activeHomeworkAssignmentId) {
+          homeworkResult = await api(`/api/student/homeworks/${encodeURIComponent(activeHomeworkAssignmentId)}/quiz-submission`, {
+            method: 'POST',
+            body: JSON.stringify({quizId: activeQuiz.id, answers})
+          });
+          activeHomeworkAssignmentId = null;
+        }
+        $('quizAttemptStatus').textContent = `Test tamamlandı: %${result.score} (${result.correctCount}/${result.totalCount} doğru).${homeworkResult ? ` Ödev durumu: ${homeworkResult.status}.` : ''}`;
         $('quizAttemptStatus').className = 'feed-status ok';
         $('quizReview').innerHTML = result.review.map((item, index) => `
           <article class="feed-card">
