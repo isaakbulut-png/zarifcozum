@@ -420,16 +420,20 @@ td.net{font-weight:700;color:var(--navy-900)}
   async function yukle() {
     const oturum = await api('/me');
     if (oturum.user.role !== 'teacher') throw new Error('Bu panel için öğretmen hesabı gerekir.');
-    veri = await api('/api/ogretmen/veri');
-    yonetim = await api('/api/ogretmen/yonetim');
     $('teacherSidebar').hidden = false;
     document.querySelector('.teacher-layout').classList.add('authenticated');
     $('giris').hidden = true; $('panel').hidden = false;
     $('sinav').hidden = false; $('cikis').hidden = false;
-    sinavListesi();
-    anahtarCiz();
-    ciz();
-    yonetimCiz();
+    try {
+      veri = await api('/api/ogretmen/veri');
+      yonetim = await api('/api/ogretmen/yonetim');
+      sinavListesi();
+      anahtarCiz();
+      ciz();
+      yonetimCiz();
+    } catch (error) {
+      console.error('Panel verileri alınamadı:', error);
+    }
     resimliSorulariYukle().catch(error => console.error('Resimli sorular alınamadı:', error));
     denemeleriYukle().catch(error => console.error('Denemeler alınamadı:', error));
   }
