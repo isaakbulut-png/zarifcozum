@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "ZarifÇözüm eğitim platformu ve sınav sistemi",
   "main": "server.js",
-  "scripts": {
+    "scripts": {
+    "start": "node server.js",
+    "test-hazirla": "node scripts/test-hazirla.js",
     "test": "node --test",
     "dev": "node server.js",
-    "start": "node server.js",
     "admin:create": "node scripts/create-admin.js"
   },
   "keywords": [],
