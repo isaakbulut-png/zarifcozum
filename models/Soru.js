@@ -6,6 +6,8 @@ const soruSchema = new mongoose.Schema({
   imageFile: { type: String, required: true, trim: true, maxlength: 200 },
   ders: { type: String, default: 'genel', trim: true, lowercase: true, maxlength: 60, index: true },
   siraNo: { type: Number, default: null },
+  // Cloudinary'e yüklenen resimlerde dolu; klasörden taranan kayıtlarda hiç yazılmaz (sparse indeks).
+  cloudinaryPublicId: { type: String, maxlength: 200, index: { unique: true, sparse: true } },
   answer: { type: String, enum: ['A', 'B', 'C', 'D', 'E', null], default: null },
   createdBy: { type: String, default: 'script', maxlength: 60 }
 }, { timestamps: true, collection: 'sorular' });

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "ZarifÇözüm eğitim platformu ve sınav sistemi",
   "main": "server.js",
-    "scripts": {
+  "scripts": {
     "start": "node server.js",
     "test-hazirla": "node scripts/test-hazirla.js",
     "test": "node --test",
@@ -18,6 +18,7 @@
     "@anthropic-ai/sdk": "^1.3.0",
     "@google/genai": "^2.32.0",
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
     "connect-mongo": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^18.0.9",
@@ -26,6 +27,7 @@
     "express-session": "^1.19.0",
     "mongodb": "^7.7.0",
     "mongoose": "^9.11.3",
+    "multer": "^2.5.0",
     "openai": "^7.45.1"
   }
 }
