@@ -18,6 +18,7 @@ const { router: authRouter, requireRole } = require('./routes/auth');
 const { createAIRouter } = require('./routes/ai');
 const { createPaymentRouter } = require('./routes/payments');
 const { createAdminRouter } = require('./routes/admin');
+const { createSorularRouter } = require('./routes/sorular');
 const User = require('./models/User');
 const Payment = require('./models/Payment');
 const { createWebhookRouter } = require('./routes/webhooks');
@@ -130,6 +131,7 @@ let koleksiyon, anahtarKoleksiyon, canliDersKoleksiyonu;
 let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, duyuruKoleksiyonu;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
+app.use('/api/sorular', createSorularRouter({ requireStaff: requireRole('teacher', 'admin') }));
 app.use('/api/admin', createAdminRouter({
   requireAdmin: requireRole('admin'),
   User,

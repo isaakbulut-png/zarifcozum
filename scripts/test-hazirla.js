@@ -1,54 +1,34 @@
+// Kullanım:  npm run test-hazirla            (public/images/sorular içindeki yeni resimleri MongoDB'ye ekler)
+//            npm run test-hazirla -- --kuru  (veritabanına yazmadan ne ekleneceğini gösterir)
 const fs = require('fs');
 const path = require('path');
+for (const file of ['.env', 'baglanti_adresi.env']) {
+  const envPath = path.join(__dirname, '..', file);
+  if (fs.existsSync(envPath)) require('dotenv').config({ path: envPath, quiet: true });
+}
 const mongoose = require('mongoose');
-// Kendi modelinizin yolunu buraya ekleyin (Örn: models klasöründeki Soru şeması)
-const Soru = require('../models/Soru'); 
+const { sorulariSenkronla, RESIM_KLASORU } = require('../lib/soru-senkron');
 
-// 1. MongoDB Atlas Bağlantısı (Buraya kendi MongoDB Bağlantı Linkinizi Yapıştırın)
-const MONGO_URI = "mongodb+srv://kullanici:sifre@cluster0.xxxxx.mongodb.net/zarifcozum";
+async function main() {
+  if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI tanımlı değil.');
+  const kuru = process.argv.includes('--kuru');
+  await mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.DB_ADI || 'etut_merkezi' });
+  console.log(`📂 Taranan klasör: ${RESIM_KLASORU}`);
+  console.log(`🗄️  Veritabanı: ${mongoose.connection.name}${kuru ? ' (kuru çalıştırma, yazılmayacak)' : ''}`);
 
-async function otomatikSorulariYukle() {
-    try {
-        await mongoose.connect(MONGO_URI);
-        console.log("MongoDB Atlas bağlantısı başarılı!");
-
-        const sorularKlasoru = path.join(__dirname, '../public/images/sorular');
-        const dosyalar = fs.readdirSync(sorularKlasoru);
-
-        const eklenecekSorular = [];
-
-        dosyalar.forEach((dosya) => {
-            if (dosya.endsWith('.png') || dosya.endsWith('.jpg') || dosya.endsWith('.jpeg')) {
-                // Dosya adından soru adını ve dersi tahmin et (Örn: matematik-soru1.png -> Matematik)
-                const dosyaAdi = path.parse(dosya).name;
-                const dersAdi = dosyaAdi.split('-')[0]; 
-
-                // Resmin internet adresi
-                const resimUrl = `https://zarifcozum.com{dosya}`;
-
-                eklenecekSorular.push({
-                    ders: dersAdi.charAt(0).toUpperCase() + dersAdi.slice(1),
-                    soruMetni: `${dosyaAdi} için soruyu çözünüz.`,
-                    gorselUrl: resimUrl,
-                    secenekler: ["A", "B", "C", "D", "E"], // Şablon seçenekler
-                    dogruCevap: "A" // Varsayılan doğru cevap (Siz panelden güncelleyebilirsiniz)
-                });
-            }
-        });
-
-        if (eklenecekSorular.length > 0) {
-            // Veri tabanına toplu ekleme yap (Aynı soruların tekrar eklenmesini önlemek için mantık kurulabilir)
-            await Soru.insertMany(eklenecekSorular);
-            console.log(`🚀 Başarılı! ${eklenecekSorular.length} adet soru otomatik olarak MongoDB Atlas'a yüklendi.`);
-        } else {
-            console.log("Klasörde yüklenecek yeni resim bulunamadı.");
-        }
-
-    } catch (hata) {
-        console.error("Hata oluştu:", hata);
-    } finally {
-        mongoose.connection.close();
-    }
+  const sonuc = await sorulariSenkronla({ kuru });
+  if (!sonuc.toplam) {
+    console.log('⚠️  Klasörde .png/.jpg/.jpeg/.webp resim bulunamadı.');
+    return;
+  }
+  sonuc.eklenen.forEach(dosya => console.log(`  ${kuru ? '+ eklenecek' : '✅ eklendi'}: ${dosya}`));
+  sonuc.atlanan.forEach(dosya => console.log(`  ⏭️  zaten kayıtlı: ${dosya}`));
+  console.log(`Özet: ${sonuc.toplam} resim, ${sonuc.eklenen.length} yeni, ${sonuc.atlanan.length} mevcut.`);
 }
 
-otomatikSorulariYukle();
+main()
+  .catch(error => {
+    console.error('❌', error.message);
+    process.exitCode = 1;
+  })
+  .finally(() => mongoose.disconnect());
