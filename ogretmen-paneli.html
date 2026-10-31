@@ -650,8 +650,9 @@ td.net{font-weight:700;color:var(--navy-900)}
     const {denemeler} = await api('/api/denemeler');
     $('examList').innerHTML = denemeler.length
       ? denemeler.map(deneme => `<article class="data-item">
-          <div><strong>${esc(deneme.title)}</strong><p>${deneme.soruSayisi} soru · ${deneme.published ? 'Yayında' : 'Yayında değil'} · ${tarihSaat(deneme.createdAt)}</p></div>
+          <div><strong>${esc(deneme.title)}</strong><p>${deneme.soruSayisi} soru · ${deneme.published ? 'Yayında' : 'Yayında değil'}${deneme.herkeseAcik ? ' · <b>Şimdi Dene (herkese açık)</b>' : ''} · ${tarihSaat(deneme.createdAt)}</p></div>
           <div class="button-row" style="margin:0">
+            <button class="btn light" type="button" data-exam-public="${esc(deneme.id)}" data-open="${deneme.herkeseAcik}">${deneme.herkeseAcik ? 'Herkese açıktan çıkar' : 'Şimdi Dene için aç'}</button>
             <button class="btn light" type="button" data-exam-toggle="${esc(deneme.id)}" data-published="${deneme.published}">${deneme.published ? 'Yayından kaldır' : 'Yayınla'}</button>
             <button class="btn light" type="button" data-exam-delete="${esc(deneme.id)}">Sil</button>
           </div>
@@ -705,9 +706,14 @@ td.net{font-weight:700;color:var(--navy-900)}
 
   $('examList').addEventListener('click', async event => {
     const yayinDugmesi = event.target.closest('[data-exam-toggle]');
+    const acikDugmesi = event.target.closest('[data-exam-public]');
     const sil = event.target.closest('[data-exam-delete]');
     try {
-      if (yayinDugmesi) {
+      if (acikDugmesi) {
+        await api(`/api/denemeler/${encodeURIComponent(acikDugmesi.dataset.examPublic)}`, {
+          method: 'PATCH', body: JSON.stringify({herkeseAcik: acikDugmesi.dataset.open !== 'true'})
+        });
+      } else if (yayinDugmesi) {
         await api(`/api/denemeler/${encodeURIComponent(yayinDugmesi.dataset.examToggle)}`, {
           method: 'PATCH', body: JSON.stringify({published: yayinDugmesi.dataset.published !== 'true'})
         });

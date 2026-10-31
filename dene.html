@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Şimdi Dene — ZarifÇözüm</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .dene{max-width:820px;margin:0 auto;padding:var(--space-8) var(--space-4)}
+  .dene img{max-width:100%;border:1px solid var(--color-divider);border-radius:10px;background:#fff}
+  .dene .soru{margin:var(--space-6) 0}
+  .dene .secenekler{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .dene .secenekler label{border:1px solid var(--color-divider);border-radius:8px;padding:8px 16px;cursor:pointer;font-weight:600}
+  .dene .secenekler input{margin-right:6px}
+  .dene .sonuc{padding:var(--space-4);border-radius:10px;background:var(--color-surface);border:1px solid var(--color-divider);margin:var(--space-6) 0}
+  .dene .dogru{color:#1a7f37}.dene .yanlis{color:#c0392b}
+</style>
+</head>
+<body>
+<main class="dene">
+  <h1 id="baslik">Deneme yükleniyor…</h1>
+  <p class="muted" id="aciklama"></p>
+  <p class="muted">Bu bir deneme sürümüdür: sonucunuz kaydedilmez. Tüm özellikler için <a href="kayit-giris.html?mode=register" style="text-decoration:underline">kayıt olun</a>.</p>
+  <form id="form" hidden>
+    <div id="sorular"></div>
+    <button class="btn btn-primary" type="submit">Sonucu gör</button>
+  </form>
+  <div id="sonuc" class="sonuc" hidden></div>
+  <p id="hata" class="muted" role="alert"></p>
+</main>
+<script>
+(async () => {
+  const $ = id => document.getElementById(id);
+  const form = $('form');
+  let veri;
+  try {
+    const r = await fetch('/api/acik-deneme');
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.mesaj || 'Deneme açılamadı.');
+    veri = d;
+  } catch (e) {
+    $('baslik').textContent = 'Şimdi Dene';
+    $('hata').textContent = e.message || 'Şu an herkese açık deneme yok.';
+    return;
+  }
+  $('baslik').textContent = veri.title;
+  $('aciklama').textContent = veri.description || '';
+  veri.sorular.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'soru';
+    const h = document.createElement('strong');
+    h.textContent = s.no + '. soru';
+    const img = document.createElement('img');
+    img.src = s.imageUrl; img.alt = s.no + '. soru görseli'; img.loading = 'lazy';
+    const sec = document.createElement('div');
+    sec.className = 'secenekler';
+    veri.secenekler.forEach(harf => {
+      const l = document.createElement('label');
+      const i = document.createElement('input');
+      i.type = 'radio'; i.name = 'q' + s.no; i.value = harf;
+      l.append(i, harf);
+      sec.append(l);
+    });
+    div.append(h, img, sec);
+    $('sorular').append(div);
+  });
+  form.hidden = false;
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const answers = veri.sorular.map(s => (form.querySelector(`input[name="q${s.no}"]:checked`) || {}).value || null);
+    $('hata').textContent = '';
+    try {
+      const r = await fetch('/api/acik-deneme/kontrol', {
+        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({answers})
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.mesaj || 'Sonuç hesaplanamadı.');
+      const kutu = $('sonuc');
+      kutu.hidden = false;
+      kutu.innerHTML = '';
+      const ozet = document.createElement('h2');
+      ozet.textContent = `${d.correctCount} / ${d.totalCount} doğru (%${d.score})`;
+      const liste = document.createElement('ul');
+      d.review.forEach(x => {
+        const li = document.createElement('li');
+        const ok = x.secilen === x.dogru;
+        li.className = ok ? 'dogru' : 'yanlis';
+        li.textContent = `${x.no}. soru: ${x.secilen || 'Boş'} — doğru cevap ${x.dogru}`;
+        liste.append(li);
+      });
+      kutu.append(ozet, liste);
+      kutu.scrollIntoView({behavior: 'smooth'});
+    } catch (err) {
+      $('hata').textContent = err.message;
+    }
+  });
+})();
+</script>
+<script src="/assets/breadcrumb.js"></script>
+</body>
+</html>

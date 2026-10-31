@@ -21,8 +21,8 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
     try {
       const denemeler = await Deneme.find({}).sort({ createdAt: -1 }).limit(100).lean();
       res.json({
-        denemeler: denemeler.map(({ _id, title, description, soruIds, published, createdAt }) => ({
-          id: _id.toString(), title, description, soruSayisi: soruIds.length, published, createdAt
+        denemeler: denemeler.map(({ _id, title, description, soruIds, published, herkeseAcik, createdAt }) => ({
+          id: _id.toString(), title, description, soruSayisi: soruIds.length, published, herkeseAcik: Boolean(herkeseAcik), createdAt
         }))
       });
     } catch (err) {
@@ -59,12 +59,26 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
 
   staff.patch('/:id', async (req, res) => {
     try {
-      if (!OBJECT_ID.test(req.params.id) || typeof req.body?.published !== 'boolean') {
+      const { published, herkeseAcik } = req.body || {};
+      const guncelleme = {};
+      if (typeof published === 'boolean') guncelleme.published = published;
+      if (typeof herkeseAcik === 'boolean') guncelleme.herkeseAcik = herkeseAcik;
+      if (!OBJECT_ID.test(req.params.id) || !Object.keys(guncelleme).length) {
         return res.status(400).json({ mesaj: 'Geçersiz istek.' });
       }
-      const deneme = await Deneme.findByIdAndUpdate(req.params.id, { $set: { published: req.body.published } }, { new: true }).lean();
+      // Ana sayfadaki "Şimdi Dene" tek bir denemeye bağlıdır.
+      if (herkeseAcik === true) {
+        await Deneme.updateMany({ _id: { $ne: req.params.id }, herkeseAcik: true }, { $set: { herkeseAcik: false } });
+      }
+      const deneme = await Deneme.findByIdAndUpdate(req.params.id, { $set: guncelleme }, { new: true }).lean();
       if (!deneme) return res.status(404).json({ mesaj: 'Deneme bulunamadı.' });
-      res.json({ mesaj: deneme.published ? 'Deneme yayınlandı.' : 'Deneme yayından kaldırıldı.', published: deneme.published });
+      res.json({
+        mesaj: typeof herkeseAcik === 'boolean'
+          ? (deneme.herkeseAcik ? 'Deneme "Şimdi Dene" için herkese açıldı.' : 'Deneme herkese açık olmaktan çıkarıldı.')
+          : (deneme.published ? 'Deneme yayınlandı.' : 'Deneme yayından kaldırıldı.'),
+        published: deneme.published,
+        herkeseAcik: Boolean(deneme.herkeseAcik)
+      });
     } catch (err) {
       console.error('❌ Deneme güncellenemedi:', err);
       res.status(500).json({ mesaj: 'Deneme güncellenemedi.' });
@@ -172,7 +186,67 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
     }
   });
 
-  return { staff, student };
+  // Girişsiz "Şimdi Dene": yalnızca öğretmenin işaretlediği tek deneme; sonuç kaydedilmez.
+  const acik = express.Router();
+  const istekler = new Map();
+  acik.use((req, res, next) => {
+    const simdi = Date.now();
+    const kayit = (istekler.get(req.ip) || []).filter(t => simdi - t < 60_000);
+    if (kayit.length >= 60) return res.status(429).json({ mesaj: 'Çok fazla istek. Biraz sonra tekrar deneyin.' });
+    kayit.push(simdi);
+    istekler.set(req.ip, kayit);
+    if (istekler.size > 5000) istekler.clear();
+    next();
+  });
+
+  async function acikDeneme() {
+    const deneme = await Deneme.findOne({ herkeseAcik: true, published: true }).lean();
+    if (!deneme) return null;
+    const sorular = await denemeSorulari(deneme);
+    return sorular.length ? { deneme, sorular } : null;
+  }
+
+  acik.get('/', async (req, res) => {
+    try {
+      const bulunan = await acikDeneme();
+      if (!bulunan) return res.status(404).json({ mesaj: 'Şu an herkese açık deneme yok.' });
+      const { deneme, sorular } = bulunan;
+      res.json({
+        title: deneme.title,
+        description: deneme.description,
+        secenekler: HARFLER,
+        sorular: sorular.map((soru, index) => ({ no: index + 1, imageUrl: soru.imageUrl }))
+      });
+    } catch (err) {
+      console.error('❌ Açık deneme alınamadı:', err);
+      res.status(500).json({ mesaj: 'Deneme açılamadı.' });
+    }
+  });
+
+  acik.post('/kontrol', async (req, res) => {
+    try {
+      const bulunan = await acikDeneme();
+      if (!bulunan) return res.status(404).json({ mesaj: 'Şu an herkese açık deneme yok.' });
+      const { sorular } = bulunan;
+      const answers = req.body?.answers;
+      if (!Array.isArray(answers) || answers.length !== sorular.length ||
+          !answers.every(answer => answer === null || HARFLER.includes(answer))) {
+        return res.status(400).json({ mesaj: 'Deneme cevapları geçersiz.' });
+      }
+      const correctCount = answers.reduce((sayi, answer, i) => sayi + (answer === sorular[i].answer ? 1 : 0), 0);
+      res.json({
+        score: Math.round(correctCount * 100 / sorular.length),
+        correctCount,
+        totalCount: sorular.length,
+        review: sorular.map((soru, i) => ({ no: i + 1, secilen: answers[i], dogru: soru.answer }))
+      });
+    } catch (err) {
+      console.error('❌ Açık deneme kontrol edilemedi:', err);
+      res.status(500).json({ mesaj: 'Sonuç hesaplanamadı.' });
+    }
+  });
+
+  return { staff, student, acik };
 }
 
 module.exports = { createDenemelerRouters };

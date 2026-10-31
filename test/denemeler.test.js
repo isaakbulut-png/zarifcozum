@@ -30,7 +30,7 @@ function sahteSonucKoleksiyonu() {
 }
 
 function withServer(user, callback, { sonuclar = sahteSonucKoleksiyonu() } = {}) {
-  const { staff, student } = createDenemelerRouters({
+  const { staff, student, acik } = createDenemelerRouters({
     requireStaff: requireRole('teacher', 'admin'),
     requireStudent: requireRole('student'),
     getResultCollection: () => sonuclar
@@ -40,6 +40,7 @@ function withServer(user, callback, { sonuclar = sahteSonucKoleksiyonu() } = {})
   app.use((req, res, next) => { req.session = { user }; next(); });
   app.use('/api/denemeler', staff);
   app.use('/api/ogrenci/denemeler', student);
+  app.use('/api/acik-deneme', acik);
   const server = app.listen(0);
   return new Promise((resolve, reject) => {
     server.once('listening', async () => {
@@ -131,4 +132,40 @@ test('teslim puanlanır, kaydedilir ve ikinci teslim 409 döner', async () => {
       assert.equal((await fetch(`${base}/api/ogrenci/denemeler/${DENEME_ID}/teslim`, json({ answers: ['A', 'C'] }))).status, 409);
     });
   } finally { geriDeneme(); geriSoru(); }
+});
+
+test('herkese açık deneme girişsiz açılır, cevap sızdırmaz, puanlanır ama kaydedilmez', async () => {
+  const geriDeneme = stub(Deneme, 'findOne', () => lean({ _id: DENEME_ID, title: 'Açık', description: '', soruIds: [ID1, ID2] }));
+  const geriSoru = stub(Soru, 'find', () => lean([
+    { _id: ID1, imageUrl: 'https://res.cloudinary.com/a.png', answer: 'A' },
+    { _id: ID2, imageUrl: 'https://res.cloudinary.com/b.png', answer: 'C' }
+  ]));
+  try {
+    await withServer(undefined, async (base, sonuclar) => {
+      const r = await fetch(`${base}/api/acik-deneme`);
+      assert.equal(r.status, 200);
+      const govde = await r.json();
+      assert.equal(govde.sorular.length, 2);
+      assert.ok(!JSON.stringify(govde).includes('"answer"'));
+      const k = await fetch(`${base}/api/acik-deneme/kontrol`, json({ answers: ['A', 'B'] }));
+      assert.equal(k.status, 200);
+      assert.equal((await k.json()).correctCount, 1);
+      assert.equal(sonuclar.kayitlar.length, 0);
+      assert.equal((await fetch(`${base}/api/acik-deneme/kontrol`, json({ answers: ['A'] }))).status, 400);
+    });
+  } finally { geriDeneme(); geriSoru(); }
+});
+
+test('öğretmen bir denemeyi herkese açık yapınca diğerleri kapatılır', async () => {
+  let kapatma;
+  const geriMany = stub(Deneme, 'updateMany', async (filtre, guncelle) => { kapatma = { filtre, guncelle }; });
+  const geriUpdate = stub(Deneme, 'findByIdAndUpdate', () => lean({ published: true, herkeseAcik: true }));
+  try {
+    await withServer({ id: 't1', role: 'teacher' }, async base => {
+      const r = await fetch(`${base}/api/denemeler/${DENEME_ID}`, json({ herkeseAcik: true }, 'PATCH'));
+      assert.equal(r.status, 200);
+      assert.equal((await r.json()).herkeseAcik, true);
+      assert.deepEqual(kapatma.guncelle, { $set: { herkeseAcik: false } });
+    });
+  } finally { geriMany(); geriUpdate(); }
 });

@@ -75,7 +75,7 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/logo', express.static(path.join(__dirname, 'logo')));
 
 const sitePages = [
-  'index.html', 'asistan.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html', 'yasal.html',
+  'index.html', 'dene.html', 'asistan.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html', 'yasal.html',
   'ogrenci-paneli.html', 'ogretmen-paneli.html', 'kayit-giris.html', 'hakkimizda.html',
   'Platform Ayrıcalıkları.html', 'Paketler.html'
 ];
@@ -141,6 +141,7 @@ const denemeRouters = createDenemelerRouters({
 });
 app.use('/api/denemeler', denemeRouters.staff);
 app.use('/api/ogrenci/denemeler', denemeRouters.student);
+app.use('/api/acik-deneme', denemeRouters.acik);
 app.use('/api/admin', createAdminRouter({
   requireAdmin: requireRole('admin'),
   User,
