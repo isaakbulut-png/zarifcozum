@@ -141,6 +141,10 @@ td.net{font-weight:700;color:var(--navy-900)}
 .image-card{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;font-size:.82rem}
 .image-card img{display:block;width:100%;height:110px;object-fit:cover;background:#eeeade}
 .image-card div{padding:8px 10px}
+.image-card label{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.image-card select{width:100%;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.exam-create{margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.exam-create h3{font-family:var(--head);font-size:1rem;color:var(--navy-900)}
 @media(max-width:900px){.teacher-layout{grid-template-columns:1fr}.teacher-sidebar{position:static;margin:16px 16px 0}.teacher-sidebar nav{display:flex;overflow:auto}.teacher-sidebar a{white-space:nowrap}.teacher-content{padding-top:0}}
 @media(max-width:560px){.form-grid,.question-options{grid-template-columns:1fr}.field.full{grid-column:auto}.data-item{align-items:flex-start;flex-direction:column}}
 </style>
@@ -233,6 +237,18 @@ td.net{font-weight:700;color:var(--navy-900)}
         <p class="status" id="imageUploadStatus" role="status"></p>
       </form>
       <div class="image-grid" id="imageQuestionList"></div>
+
+      <div class="exam-create">
+        <h3>Seçili sorulardan deneme oluştur</h3>
+        <p class="hint">Soruların üstündeki kutuları işaretleyin ve her sorunun doğru cevabını seçin. Yayınlanan deneme öğrenci panelinde "Deneme Sınavları" bölümünde görünür; öğrenciler denemeyi bir kez çözebilir.</p>
+        <div class="form-grid">
+          <div class="field"><label for="examTitle">Deneme adı</label><input id="examTitle" maxlength="150" placeholder="Örn. Matematik Denemesi 1"></div>
+          <div class="field"><label for="examDescription">Açıklama</label><input id="examDescription" maxlength="500" placeholder="Kısa açıklama (isteğe bağlı)"></div>
+        </div>
+        <div class="button-row"><button class="btn" id="createExam" type="button">Seçili sorulardan deneme yayınla</button></div>
+        <p class="status" id="examStatus" role="status"></p>
+        <div class="data-list" id="examList"></div>
+      </div>
     </section>
 
     <section class="card" id="ai-question-wizard">
@@ -415,6 +431,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     ciz();
     yonetimCiz();
     resimliSorulariYukle().catch(error => console.error('Resimli sorular alınamadı:', error));
+    denemeleriYukle().catch(error => console.error('Denemeler alınamadı:', error));
   }
 
   async function cikis() {
@@ -606,16 +623,100 @@ td.net{font-weight:700;color:var(--navy-900)}
     ).join('');
   }
 
+  const seciliSorular = new Set();
+
   async function resimliSorulariYukle() {
     const {sorular} = await api('/api/sorular');
     $('imageQuestionList').innerHTML = sorular.length
       ? sorular.map(soru => `<figure class="image-card">
           <img src="${esc(soru.imageUrl)}" alt="${esc(soru.ders)} sorusu" loading="lazy">
-          <div><strong>${esc(soru.ders)}${soru.siraNo ? ' · ' + soru.siraNo : ''}</strong><br>
-          <span class="muted">Cevap: ${soru.answer ? esc(soru.answer) : '—'}</span></div>
+          <div>
+            <label><input type="checkbox" data-deneme-soru="${esc(soru.id)}"${seciliSorular.has(soru.id) ? ' checked' : ''}>
+            <strong>${esc(soru.ders)}${soru.siraNo ? ' · ' + soru.siraNo : ''}</strong></label>
+            <select data-cevap-soru="${esc(soru.id)}" aria-label="Doğru cevap">
+              <option value="">Cevap yok</option>
+              ${['A', 'B', 'C', 'D', 'E'].map(harf => `<option value="${harf}"${soru.answer === harf ? ' selected' : ''}>${harf}</option>`).join('')}
+            </select>
+          </div>
         </figure>`).join('')
       : '<p class="empty">Henüz yüklenmiş resimli soru yok.</p>';
   }
+
+  async function denemeleriYukle() {
+    const {denemeler} = await api('/api/denemeler');
+    $('examList').innerHTML = denemeler.length
+      ? denemeler.map(deneme => `<article class="data-item">
+          <div><strong>${esc(deneme.title)}</strong><p>${deneme.soruSayisi} soru · ${deneme.published ? 'Yayında' : 'Yayında değil'} · ${tarihSaat(deneme.createdAt)}</p></div>
+          <div class="button-row" style="margin:0">
+            <button class="btn light" type="button" data-exam-toggle="${esc(deneme.id)}" data-published="${deneme.published}">${deneme.published ? 'Yayından kaldır' : 'Yayınla'}</button>
+            <button class="btn light" type="button" data-exam-delete="${esc(deneme.id)}">Sil</button>
+          </div>
+        </article>`).join('')
+      : '<p class="empty">Henüz deneme oluşturulmadı.</p>';
+  }
+
+  $('imageQuestionList').addEventListener('change', async event => {
+    const kutu = event.target.closest('[data-deneme-soru]');
+    if (kutu) {
+      kutu.checked ? seciliSorular.add(kutu.dataset.denemeSoru) : seciliSorular.delete(kutu.dataset.denemeSoru);
+      return;
+    }
+    const secim = event.target.closest('[data-cevap-soru]');
+    if (!secim) return;
+    try {
+      await api(`/api/sorular/${encodeURIComponent(secim.dataset.cevapSoru)}/cevap`, {
+        method: 'PUT', body: JSON.stringify({answer: secim.value || null})
+      });
+      durumYaz('examStatus', 'Cevap kaydedildi.', 'ok');
+    } catch (error) {
+      durumYaz('examStatus', 'Cevap kaydedilemedi: ' + error.message, 'error');
+    }
+  });
+
+  $('createExam').addEventListener('click', async event => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    durumYaz('examStatus', 'Deneme yayınlanıyor…');
+    try {
+      const sonuc = await api('/api/denemeler', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: $('examTitle').value,
+          description: $('examDescription').value,
+          soruIds: [...$('imageQuestionList').querySelectorAll('[data-deneme-soru]')]
+            .filter(kutu => kutu.checked).map(kutu => kutu.dataset.denemeSoru)
+        })
+      });
+      seciliSorular.clear();
+      $('examTitle').value = '';
+      $('examDescription').value = '';
+      await Promise.all([resimliSorulariYukle(), denemeleriYukle()]);
+      durumYaz('examStatus', `${sonuc.deneme.title}: ${sonuc.deneme.soruSayisi} soruluk deneme yayınlandı.`, 'ok');
+    } catch (error) {
+      durumYaz('examStatus', 'Deneme oluşturulamadı: ' + error.message, 'error');
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  $('examList').addEventListener('click', async event => {
+    const yayinDugmesi = event.target.closest('[data-exam-toggle]');
+    const sil = event.target.closest('[data-exam-delete]');
+    try {
+      if (yayinDugmesi) {
+        await api(`/api/denemeler/${encodeURIComponent(yayinDugmesi.dataset.examToggle)}`, {
+          method: 'PATCH', body: JSON.stringify({published: yayinDugmesi.dataset.published !== 'true'})
+        });
+      } else if (sil) {
+        if (!confirm('Deneme silinecek; öğrenci sonuçları korunur. Devam edilsin mi?')) return;
+        await api(`/api/denemeler/${encodeURIComponent(sil.dataset.examDelete)}`, {method: 'DELETE'});
+      } else return;
+      await denemeleriYukle();
+      durumYaz('examStatus', 'Deneme güncellendi.', 'ok');
+    } catch (error) {
+      durumYaz('examStatus', 'İşlem başarısız: ' + error.message, 'error');
+    }
+  });
 
   async function resimGonder(dosya, ders, siraNo, answer) {
     const form = new FormData();
