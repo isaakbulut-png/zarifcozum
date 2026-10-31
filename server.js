@@ -20,6 +20,7 @@ const { createPaymentRouter } = require('./routes/payments');
 const { createAdminRouter } = require('./routes/admin');
 const { createSorularRouter } = require('./routes/sorular');
 const { createDenemelerRouters } = require('./routes/denemeler');
+const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
 const User = require('./models/User');
 const Payment = require('./models/Payment');
 const { createWebhookRouter } = require('./routes/webhooks');
@@ -131,6 +132,7 @@ app.get('/favicon.svg', (req, res) => res.sendFile(path.join(__dirname, 'favicon
 
 let koleksiyon, anahtarKoleksiyon, canliDersKoleksiyonu;
 let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, duyuruKoleksiyonu;
+let studentProfiles, homeworks, homeworkAssignments, homeworkAudits;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
 app.use('/api/sorular', createSorularRouter({ requireStaff: requireRole('teacher', 'admin') }));
@@ -153,6 +155,19 @@ app.use('/api/ai', createAIRouter({
   getQuizCollection: () => quizKoleksiyonu,
   requireRole
 }));
+const teacherStudentHomeworkRouters = createTeacherStudentHomeworkRouters({
+  requireTeacher: requireRole('teacher', 'admin'),
+  requireStudent: ogrenciKontrol,
+  UserModel: User,
+  getStudentCollection: () => studentProfiles,
+  getHomeworkCollection: () => homeworks,
+  getAssignmentCollection: () => homeworkAssignments,
+  getAuditCollection: () => homeworkAudits,
+  getQuizCollection: () => quizKoleksiyonu,
+  getStudentQuizResultsCollection: () => quizSonucKoleksiyonu
+});
+app.use('/api/ogretmen', teacherStudentHomeworkRouters.teacher);
+app.use('/api/student', teacherStudentHomeworkRouters.student);
 
 // Sunucu ve veritabanı ayakta mı?
 app.get('/api/saglik', (req, res) => res.json({ mesaj: 'Sunucu çalışıyor', db: DB_ADI, koleksiyon: KOLEKSIYON }));
@@ -695,6 +710,18 @@ async function baslat() {
   quizKoleksiyonu = client.db(DB_ADI).collection('quizler');
   quizSonucKoleksiyonu = client.db(DB_ADI).collection('quiz_sonuclari');
   duyuruKoleksiyonu = client.db(DB_ADI).collection('duyurular');
+  studentProfiles = client.db(DB_ADI).collection('ogrenci_profilleri');
+  homeworks = client.db(DB_ADI).collection('odevler');
+  homeworkAssignments = client.db(DB_ADI).collection('odev_atamalari');
+  homeworkAudits = client.db(DB_ADI).collection('ogrenci_odev_islem_gecmisi');
+  await Promise.all([
+    studentProfiles.createIndex({teacherId: 1, studentNumber: 1}, {unique: true, name: 'uniq_teacher_student_number'}),
+    studentProfiles.createIndex({linkedUserId: 1}, {name: 'student_profile_linked_user'}),
+    homeworks.createIndex({teacherId: 1, createdAt: -1}, {name: 'teacher_homework_history'}),
+    homeworkAssignments.createIndex({homeworkId: 1, studentProfileId: 1}, {unique: true, name: 'uniq_homework_student_assignment'}),
+    homeworkAssignments.createIndex({studentUserId: 1, status: 1, dueAt: 1}, {name: 'student_homework_status'}),
+    homeworkAudits.createIndex({teacherId: 1, createdAt: -1}, {name: 'teacher_student_homework_audit'})
+  ]);
   console.log(`✅ MongoDB bağlantısı hazır → veritabanı: ${DB_ADI}, koleksiyon: ${KOLEKSIYON}`);
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
