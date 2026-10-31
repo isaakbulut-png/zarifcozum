@@ -154,7 +154,6 @@ td.net{font-weight:700;color:var(--navy-900)}
 <header class="bar">
   <div class="bar-in">
     <h1>Öğretmen Paneli<small>Tuğba Akbulut · ZarifÇözüm</small></h1>
-    <a class="btn ghost" href="ogrenci-paneli.html">Öğrenci paneli</a>
     <a class="btn ghost" href="index.html">Ana sayfa</a>
     <select id="sinav" aria-label="Sınav seçin" hidden></select>
     <button class="btn ghost" id="cikis" type="button" hidden>Çıkış</button>
@@ -424,7 +423,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     $('teacherSidebar').hidden = false;
     document.querySelector('.teacher-layout').classList.add('authenticated');
     $('giris').hidden = true; $('panel').hidden = false;
-    $('sinav').hidden = false; $('cikis').hidden = false;
+    $('cikis').hidden = false;
     try {
       veri = await api('/api/ogretmen/veri');
       yonetim = await api('/api/ogretmen/yonetim');
