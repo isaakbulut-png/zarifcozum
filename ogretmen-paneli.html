@@ -419,7 +419,7 @@ td.net{font-weight:700;color:var(--navy-900)}
 
   async function yukle() {
     const oturum = await api('/me');
-    if (oturum.user.role !== 'teacher') throw new Error('Bu panel için öğretmen hesabı gerekir.');
+    if (!['teacher', 'admin'].includes(oturum.user.role)) throw new Error('Bu panel için öğretmen hesabı gerekir.');
     $('teacherSidebar').hidden = false;
     document.querySelector('.teacher-layout').classList.add('authenticated');
     $('giris').hidden = true; $('panel').hidden = false;

@@ -100,7 +100,8 @@ sitePages.forEach(page => {
     }
     if (!role) return next();
     if (!req.session.user) return res.redirect('/kayit-giris.html');
-    if (req.session.user.role !== role) {
+    const adminOgretmenPaneli = role === 'teacher' && req.session.user.role === 'admin';
+    if (req.session.user.role !== role && !adminOgretmenPaneli) {
       return res.redirect(
         req.session.user.role === 'admin' ? '/admin-paneli.html'
           : req.session.user.role === 'teacher' ? '/ogretmen-paneli.html'
