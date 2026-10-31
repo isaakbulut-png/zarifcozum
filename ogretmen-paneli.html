@@ -133,6 +133,14 @@ td.net{font-weight:700;color:var(--navy-900)}
 .management-table td,.management-table th{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line)}
 .score{font-weight:700;color:var(--navy-800)}
 .muted{color:var(--muted)}
+.image-picks{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px;font-size:.88rem}
+.image-picks li{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#f8f6f0}
+.image-picks li.ok{border-color:var(--ok)}
+.image-picks li.error{border-color:var(--danger);color:var(--danger)}
+.image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px}
+.image-card{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;font-size:.82rem}
+.image-card img{display:block;width:100%;height:110px;object-fit:cover;background:#eeeade}
+.image-card div{padding:8px 10px}
 @media(max-width:900px){.teacher-layout{grid-template-columns:1fr}.teacher-sidebar{position:static;margin:16px 16px 0}.teacher-sidebar nav{display:flex;overflow:auto}.teacher-sidebar a{white-space:nowrap}.teacher-content{padding-top:0}}
 @media(max-width:560px){.form-grid,.question-options{grid-template-columns:1fr}.field.full{grid-column:auto}.data-item{align-items:flex-start;flex-direction:column}}
 </style>
@@ -156,6 +164,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     <a href="#overview">Genel bakış</a>
     <a href="#lessons">Canlı dersler</a>
     <a href="#quiz-builder">Test oluştur</a>
+    <a href="#image-questions">Resimli sorular</a>
     <a href="#ai-question-wizard">Yapay Zeka Soru Sihirbazı</a>
     <a href="#student-results">Öğrenci sonuçları</a>
     <a href="#announcements">Duyurular</a>
@@ -207,7 +216,23 @@ td.net{font-weight:700;color:var(--navy-900)}
         <p class="status" id="quizStatus" role="status"></p>
       </form>
       <div class="data-list" id="quizList"></div>
-      <p class="status" id="quizListStatus" role="status"></p>
+    </section>
+
+    <section class="card" id="image-questions">
+      <div class="section-title"><div><h2>Resimli deneme sınavı soruları</h2><p class="hint">Soru resimlerini bilgisayarınızdan seçin; her biri bulut depolamaya (Cloudinary) yüklenir ve soru olarak kaydedilir. PNG, JPG veya WEBP, en fazla 5 MB.</p></div></div>
+      <form id="imageQuestionForm" method="post" action="/api/sorular/yukle" enctype="multipart/form-data">
+        <div class="form-grid">
+          <div class="field full"><label for="imageFiles">Soru resimleri</label><input id="imageFiles" type="file" name="gorsel" accept="image/png,image/jpeg,image/webp" multiple required></div>
+          <div class="field"><label for="imageDers">Ders</label><input id="imageDers" name="ders" maxlength="60" value="matematik" placeholder="Örn. matematik"></div>
+          <div class="field"><label for="imageAnswers">Doğru cevaplar (isteğe bağlı)</label><input id="imageAnswers" name="cevaplar" maxlength="50" placeholder="Dosya sırasıyla, örn. ABCDA"></div>
+        </div>
+        <ul class="image-picks" id="imagePicks"></ul>
+        <div class="button-row">
+          <button class="btn" type="submit">Testi Oluştur</button>
+        </div>
+        <p class="status" id="imageUploadStatus" role="status"></p>
+      </form>
+      <div class="image-grid" id="imageQuestionList"></div>
     </section>
 
     <section class="card" id="ai-question-wizard">
@@ -389,6 +414,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     anahtarCiz();
     ciz();
     yonetimCiz();
+    resimliSorulariYukle().catch(error => console.error('Resimli sorular alınamadı:', error));
   }
 
   async function cikis() {
@@ -563,6 +589,100 @@ td.net{font-weight:700;color:var(--navy-900)}
       durumYaz('quizStatus', 'Test yayınlandı; öğrenciler panelinde görebilir.', 'ok');
     } catch (error) {
       durumYaz('quizStatus', 'Test yayınlanamadı: ' + error.message, 'error');
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  // ---- Resimli sorular: dosyalar sırayla multer'lı /api/sorular/yukle yoluna gönderilir ----
+  const IZINLI_RESIMLER = ['image/png', 'image/jpeg', 'image/webp'];
+  const MAKS_RESIM_BOYUTU = 5 * 1024 * 1024;
+  const seciliResimler = () => [...$('imageFiles').files]
+    .sort((a, b) => a.name.localeCompare(b.name, 'tr', {numeric: true}));
+
+  function resimListesiCiz() {
+    $('imagePicks').innerHTML = seciliResimler().map(file =>
+      `<li><span>${esc(file.name)}</span><span>${Math.max(1, Math.round(file.size / 1024))} KB</span></li>`
+    ).join('');
+  }
+
+  async function resimliSorulariYukle() {
+    const {sorular} = await api('/api/sorular');
+    $('imageQuestionList').innerHTML = sorular.length
+      ? sorular.map(soru => `<figure class="image-card">
+          <img src="${esc(soru.imageUrl)}" alt="${esc(soru.ders)} sorusu" loading="lazy">
+          <div><strong>${esc(soru.ders)}${soru.siraNo ? ' · ' + soru.siraNo : ''}</strong><br>
+          <span class="muted">Cevap: ${soru.answer ? esc(soru.answer) : '—'}</span></div>
+        </figure>`).join('')
+      : '<p class="empty">Henüz yüklenmiş resimli soru yok.</p>';
+  }
+
+  async function resimGonder(dosya, ders, siraNo, answer) {
+    const form = new FormData();
+    form.append('resim', dosya);
+    form.append('ders', ders);
+    if (siraNo) form.append('siraNo', String(siraNo));
+    if (answer) form.append('answer', answer);
+    const response = await fetch(API + '/api/sorular/yukle', {method: 'POST', body: form, credentials: 'same-origin'});
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401 || response.status === 403) {
+      cikis();
+      throw new Error('Öğretmen oturumu geçersiz. Yeniden giriş yapın.');
+    }
+    return {status: response.status, mesaj: data.mesaj};
+  }
+
+  $('imageFiles').addEventListener('change', () => {
+    resimListesiCiz();
+    durumYaz('imageUploadStatus', '');
+  });
+
+  $('imageQuestionForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const button = event.currentTarget.querySelector('button[type="submit"]');
+    const dosyalar = seciliResimler();
+    const ders = $('imageDers').value.trim() || 'genel';
+    const cevaplar = $('imageAnswers').value.replace(/\s+/g, '').toUpperCase();
+    if (!dosyalar.length) return durumYaz('imageUploadStatus', 'En az bir resim seçin.', 'error');
+    if (dosyalar.length > 50) return durumYaz('imageUploadStatus', 'Tek seferde en fazla 50 resim yüklenebilir.', 'error');
+    if (cevaplar && (!/^[A-E]+$/.test(cevaplar) || cevaplar.length !== dosyalar.length)) {
+      return durumYaz('imageUploadStatus', `Doğru cevaplar A–E harflerinden oluşmalı ve ${dosyalar.length} resimle aynı sayıda olmalı.`, 'error');
+    }
+
+    button.disabled = true;
+    resimListesiCiz();
+    const satirlar = [...$('imagePicks').children];
+    let yuklenen = 0, atlanan = 0, hatali = 0;
+    try {
+      for (const [index, dosya] of dosyalar.entries()) {
+        durumYaz('imageUploadStatus', `Yükleniyor… ${index + 1}/${dosyalar.length}`);
+        if (!IZINLI_RESIMLER.includes(dosya.type) || dosya.size > MAKS_RESIM_BOYUTU) {
+          hatali++;
+          satirlar[index].className = 'error';
+          satirlar[index].lastElementChild.textContent = 'PNG/JPG/WEBP ve en fazla 5 MB olmalı';
+          continue;
+        }
+        const siraNo = Number((/(\d+)\.[a-z0-9]+$/i.exec(dosya.name) || [])[1]) || index + 1;
+        const sonuc = await resimGonder(dosya, ders, siraNo, cevaplar[index] || '');
+        if (sonuc.status === 201) {
+          yuklenen++;
+          satirlar[index].className = 'ok';
+          satirlar[index].lastElementChild.textContent = 'Yüklendi';
+        } else if (sonuc.status === 409) {
+          atlanan++;
+          satirlar[index].lastElementChild.textContent = 'Zaten yüklü';
+        } else {
+          hatali++;
+          satirlar[index].className = 'error';
+          satirlar[index].lastElementChild.textContent = sonuc.mesaj || 'Yüklenemedi';
+        }
+      }
+      await resimliSorulariYukle();
+      durumYaz('imageUploadStatus',
+        `${yuklenen} yüklendi, ${atlanan} zaten kayıtlıydı, ${hatali} hatalı.`, hatali ? 'error' : 'ok');
+      if (!hatali) { $('imageFiles').value = ''; }
+    } catch (error) {
+      durumYaz('imageUploadStatus', 'Yükleme durdu: ' + error.message, 'error');
     } finally {
       button.disabled = false;
     }
