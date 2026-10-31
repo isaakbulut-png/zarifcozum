@@ -216,6 +216,7 @@ td.net{font-weight:700;color:var(--navy-900)}
         <div class="button-row">
           <button class="btn light" id="addQuestion" type="button">+ Soru ekle</button>
           <button class="btn" type="submit">Testi Yayınla</button>
+          <a class="btn light" href="#image-questions" style="text-decoration:none">📷 Resim yükle (resimli soru)</a>
         </div>
         <p class="status" id="quizStatus" role="status"></p>
       </form>
@@ -223,7 +224,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     </section>
 
     <section class="card" id="image-questions">
-      <div class="section-title"><div><h2>Resimli deneme sınavı soruları</h2><p class="hint">Soru resimlerini bilgisayarınızdan seçin; her biri bulut depolamaya (Cloudinary) yüklenir ve soru olarak kaydedilir. PNG, JPG veya WEBP, en fazla 5 MB.</p></div></div>
+      <div class="section-title"><div><h2>Soru ekle / Resim yükle (resimli deneme)</h2><p class="hint">Soru resimlerini bilgisayarınızdan seçin; her biri bulut depolamaya (Cloudinary) yüklenir ve soru olarak kaydedilir. PNG, JPG veya WEBP, en fazla 5 MB.</p></div></div>
       <form id="imageQuestionForm" method="post" action="/api/sorular/yukle" enctype="multipart/form-data">
         <div class="form-grid">
           <div class="field full"><label for="imageFiles">Soru resimleri</label><input id="imageFiles" type="file" name="gorsel" accept="image/png,image/jpeg,image/webp" multiple required></div>
