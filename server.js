@@ -1,4 +1,4 @@
-// Kurulum:  npm install
+cons// Kurulum:  npm install
 // Çalıştır: npm start
 const fs = require('fs');
 const path = require('path');
