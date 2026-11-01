@@ -21,6 +21,7 @@ const { createAdminRouter } = require('./routes/admin');
 const { createSorularRouter } = require('./routes/sorular');
 const { createDenemelerRouters } = require('./routes/denemeler');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
+const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
 const User = require('./models/User');
 const Payment = require('./models/Payment');
 const { createWebhookRouter } = require('./routes/webhooks');
@@ -78,6 +79,8 @@ app.get('/planli-calisma.html', (req, res) => {
 app.get('/basari-odakli-sistem.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'basari-odakli-sistem.html'));
 });
+// panel.html eski demo panelidir; içeriği gerçek verilerle öğrenci paneline taşındı.
+app.get('/panel.html', (req, res) => res.redirect(301, '/ogrenci-paneli.html'));
 app.use(authRouter);
 app.use(express.static(path.join(__dirname, 'public'))); // public/deneme-sinavi-optik.html
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
@@ -141,6 +144,7 @@ app.get('/favicon.svg', (req, res) => res.sendFile(path.join(__dirname, 'favicon
 let koleksiyon, anahtarKoleksiyon, canliDersKoleksiyonu;
 let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, duyuruKoleksiyonu;
 let studentProfiles, homeworks, homeworkAssignments, homeworkAudits;
+let calismaKayitlari, ogrenciHedefleri, kazanimIlerleme, ogretmenYorumlari, takvimOlaylari;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
 app.use('/api/sorular', createSorularRouter({ requireStaff: requireRole('teacher', 'admin') }));
@@ -174,6 +178,22 @@ const teacherStudentHomeworkRouters = createTeacherStudentHomeworkRouters({
   getQuizCollection: () => quizKoleksiyonu,
   getStudentQuizResultsCollection: () => quizSonucKoleksiyonu
 });
+const gelisimRouters = createGelisimRouters({
+  requireTeacher: requireRole('teacher', 'admin'),
+  requireStudent: ogrenciKontrol,
+  getStudentCollection: () => studentProfiles,
+  getAssignmentCollection: () => homeworkAssignments,
+  getHomeworkCollection: () => homeworks,
+  getResultCollection: () => quizSonucKoleksiyonu,
+  getPlannedLessonCollection: () => planliDersKoleksiyonu,
+  getStudyLogCollection: () => calismaKayitlari,
+  getGoalCollection: () => ogrenciHedefleri,
+  getProgressCollection: () => kazanimIlerleme,
+  getCommentCollection: () => ogretmenYorumlari,
+  getEventCollection: () => takvimOlaylari
+});
+app.use('/api/ogretmen/gelisim', gelisimRouters.teacher);
+app.use('/api/student/gelisim', gelisimRouters.student);
 app.use('/api/ogretmen', teacherStudentHomeworkRouters.teacher);
 app.use('/api/student', teacherStudentHomeworkRouters.student);
 
@@ -722,7 +742,17 @@ async function baslat() {
   homeworks = client.db(DB_ADI).collection('odevler');
   homeworkAssignments = client.db(DB_ADI).collection('odev_atamalari');
   homeworkAudits = client.db(DB_ADI).collection('ogrenci_odev_islem_gecmisi');
+  calismaKayitlari = client.db(DB_ADI).collection('calisma_kayitlari');
+  ogrenciHedefleri = client.db(DB_ADI).collection('ogrenci_hedefleri');
+  kazanimIlerleme = client.db(DB_ADI).collection('kazanim_ilerleme');
+  ogretmenYorumlari = client.db(DB_ADI).collection('ogretmen_yorumlari');
+  takvimOlaylari = client.db(DB_ADI).collection('takvim_olaylari');
   await Promise.all([
+    calismaKayitlari.createIndex({studentUserId: 1, day: -1}, {name: 'student_study_days'}),
+    ogrenciHedefleri.createIndex({studentUserId: 1}, {unique: true, name: 'uniq_student_goal'}),
+    kazanimIlerleme.createIndex({studentUserId: 1, grade: 1, unit: 1, topic: 1}, {unique: true, name: 'uniq_student_outcome'}),
+    ogretmenYorumlari.createIndex({studentUserId: 1, createdAt: -1}, {name: 'student_teacher_comments'}),
+    takvimOlaylari.createIndex({studentUserId: 1, startsAt: 1}, {name: 'student_calendar'}),
     studentProfiles.createIndex({teacherId: 1, studentNumber: 1}, {unique: true, name: 'uniq_teacher_student_number'}),
     studentProfiles.createIndex({linkedUserId: 1}, {name: 'student_profile_linked_user'}),
     homeworks.createIndex({teacherId: 1, createdAt: -1}, {name: 'teacher_homework_history'}),

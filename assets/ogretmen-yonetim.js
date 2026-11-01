@@ -509,8 +509,10 @@
         <button class="btn light" type="button" data-student-homework="${escapeHtml(student.id)}">Bu öğrenciye ödev ata</button>
       </form>
       <div><h4>Ödev geçmişi</h4><div class="student-history-list">${detail.homework.length ? detail.homework.map(item => `<article class="history-row"><div><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.topic || 'Genel çalışma')} · Son tarih ${new Date(item.dueAt).toLocaleDateString('tr-TR')}</small></div><span class="status-chip ${statusClass(item.status)}">${escapeHtml(item.status)}</span>${item.score === null ? '' : `<b>%${item.score}</b>`}</article>`).join('') : '<p class="dashboard-empty">Henüz ödev geçmişi yok.</p>'}</div>
-      <h4>Test sonuçları</h4><div class="student-history-list">${detail.quizResults.length ? detail.quizResults.map(item => `<article class="history-row"><div><strong>${escapeHtml(item.title)}</strong><small>${new Date(item.createdAt).toLocaleDateString('tr-TR')}</small></div><b>${item.score === null ? '—' : `%${item.score}`}</b></article>`).join('') : '<p class="dashboard-empty">Öğretmen test sonucu bulunamadı.</p>'}</div></div></div>`;
-  }
+      <h4>Test sonuçları</h4><div class="student-history-list">${detail.quizResults.length ? detail.quizResults.map(item => `<article class="history-row"><div><strong>${escapeHtml(item.title)}</strong><small>${new Date(item.createdAt).toLocaleDateString('tr-TR')}</small></div><b>${item.score === null ? '—' : `%${item.score}`}</b></article>`).join('') :       '<p class="dashboard-empty">Öğretmen test sonucu bulunamadı.</p>'}</div></div></div><section data-gelisim-mount></section>`;
+          const mount = panel.querySelector('[data-gelisim-mount]');
+          if (window.ZarifGelisim && mount) window.ZarifGelisim.mountTeacher(mount, student.id);
+        }
 
   function statusClass(status) {
     return ({

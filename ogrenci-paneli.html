@@ -185,6 +185,7 @@ button,select{font:inherit}
   *{transition:none!important;scroll-behavior:auto!important}
 }
 </style>
+<link rel="stylesheet" href="/assets/ogrenci-gelisim.css">
 </head>
 <body>
 
@@ -208,12 +209,31 @@ button,select{font:inherit}
 
     <nav aria-label="Ana menü">
       <ul class="nav">
+        <li class="gz-side-label">Gelişim merkezi</li>
+        <li><a href="#genel-durum">
+          <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+          Genel Durum</a></li>
+        <li><a href="#kazanim-takibi">
+          <svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m8 15 3-4 3 2 5-6"/></svg>
+          Konu ve Kazanım</a></li>
+        <li><a href="#student-tasks">
+          <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h9"/></svg>
+          Ödevlerim</a></li>
+        <li><a href="#testlerim">
+          <svg viewBox="0 0 24 24"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M8 6H6a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2"/></svg>
+          Sınav ve Testlerim</a></li>
+        <li><a href="#ders-takvimim">
+          <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+          Ders Takvimim</a></li>
+        <li><a href="#basari-raporlarim">
+          <svg viewBox="0 0 24 24"><path d="M5 21V10M12 21V4M19 21v-8"/></svg>
+          Başarı Raporlarım</a></li>
+        <li class="gz-side-label">Dersler ve içerik</li>
         <li><a href="#live-lessons">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
           Canlı Ders</a></li>
         <li><a href="#schedule">Ders Programı</a></li>
         <li><a href="#membership">Üyelik ve paketler</a></li>
-        <li><a href="#student-tasks">Ödevler</a></li>
         <li><a href="#denemeler">
           <svg viewBox="0 0 24 24"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M8 6H6a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2"/><path d="m9 14 2 2 4-4"/></svg>
           Deneme Sınavları</a></li>
@@ -239,11 +259,82 @@ button,select{font:inherit}
   <main class="main">
     <p class="feed-status error" id="dashboardError" role="alert" hidden></p>
 
-    <section class="panel-view" id="live-lessons" data-panel-view="live-lessons">
+    <div id="gzStudentRoot" class="gz">
+    <section class="panel-view" id="genel-durum" data-panel-view="genel-durum">
       <section class="greeting">
         <h1 id="welcomeTitle">Hoş geldin</h1>
-        <p>Öğretmenlerinin derslerini, testlerini ve duyurularını buradan takip edebilirsin.</p>
+        <p>Çalışma durumunu, hedeflerini ve yaklaşan etkinliklerini buradan takip edebilirsin. Ayrıntılar için soldaki menüyü kullan.</p>
       </section>
+      <div class="section-head"><h2>Genel durum</h2></div>
+      <div id="gzKpis"><p class="feed-status">Gelişim verileri yükleniyor…</p></div>
+      <div class="gz-grid">
+        <article class="feed-card">
+          <h3>Bu hafta çalışma süresi</h3>
+          <div id="gzWeek"></div>
+          <form id="gzGoalForm" class="gz-inline">
+            <label>Haftalık hedef (dakika)<input id="gzGoalMinutes" type="number" min="30" max="4200" step="5" required placeholder="Örn. 300"></label>
+            <button class="gz-btn" type="submit">Hedefi kaydet</button>
+          </form>
+          <p class="gz-status" id="gzGoalStatus" role="status"></p>
+        </article>
+        <article class="feed-card">
+          <h3>Bugünkü çalışmanı kaydet</h3>
+          <form id="gzStudyForm" class="gz-inline">
+            <label>Süre (dakika)<input name="minutes" type="number" min="1" max="600" required placeholder="Örn. 45"></label>
+            <label>Konu (isteğe bağlı)<input name="topic" maxlength="200" placeholder="Örn. Bölünebilme kuralları"></label>
+            <label>Gün<input name="day" type="date"></label>
+            <button class="gz-btn" type="submit">Kaydet</button>
+          </form>
+          <p class="gz-status" id="gzStudyStatus" role="status"></p>
+          <div id="gzLogs"></div>
+        </article>
+        <article class="feed-card">
+          <h3>Sıradaki etkinlikler</h3>
+          <div id="gzUpcoming"></div>
+          <h3 style="margin-top:16px">Ödev durumu</h3>
+          <div id="gzHomework"></div>
+        </article>
+        <article class="feed-card">
+          <h3>Öğretmen yorumu</h3>
+          <div id="gzLatestComment"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel-view" id="kazanim-takibi" data-panel-view="kazanim-takibi">
+      <div class="section-head"><h2>Konu ve kazanım takibi</h2></div>
+      <p class="feed-status">Her kazanım için durumunu işaretle; öğretmenin de işaretleyebilir. Eksik kazanımlar listenin başında görünür.</p>
+      <div class="gz-inline"><label>Sınıf müfredatı<select id="gzGrade"></select></label></div>
+      <p class="gz-status" id="gzKazanimStatus" role="status"></p>
+      <div id="gzKazanim"></div>
+    </section>
+
+    <section class="panel-view" id="testlerim" data-panel-view="testlerim">
+      <div class="section-head"><h2>Sınav ve testlerim</h2></div>
+      <div id="gzTestler"><p class="feed-status">Yükleniyor…</p></div>
+      <p class="feed-status">Yeni test çözmek için <a href="#ogretmen-testleri" style="text-decoration:underline">Öğretmen Testleri</a> veya <a href="#denemeler" style="text-decoration:underline">Deneme Sınavları</a> bölümüne git.</p>
+    </section>
+
+    <section class="panel-view" id="ders-takvimim" data-panel-view="ders-takvimim">
+      <div class="section-head"><h2>Ders takvimim</h2></div>
+      <p class="feed-status">Canlı dersler, ödev teslim tarihleri, öğretmen görüşmeleri, sınavlar ve kendi hatırlatıcıların.</p>
+      <form id="gzReminderForm" class="gz-inline">
+        <label>Hatırlatıcı<input name="title" maxlength="150" required placeholder="Örn. Kesirler tekrarı"></label>
+        <label>Tarih ve saat<input name="startsAt" type="datetime-local" required></label>
+        <label>Not<input name="note" maxlength="500"></label>
+        <button class="gz-btn" type="submit">Hatırlatıcı ekle</button>
+      </form>
+      <p class="gz-status" id="gzReminderStatus" role="status"></p>
+      <div id="gzTakvim"></div>
+    </section>
+
+    <section class="panel-view" id="basari-raporlarim" data-panel-view="basari-raporlarim">
+      <div class="section-head"><h2>Başarı raporlarım</h2></div>
+      <div id="gzRapor"><p class="feed-status">Yükleniyor…</p></div>
+    </section>
+    </div>
+
+    <section class="panel-view" id="live-lessons" data-panel-view="live-lessons">
       <div class="section-head"><h2>Canlı dersler ve aktif sınıflar</h2></div>
       <section class="teacher-feed" id="lessonFeed" aria-live="polite"><p class="feed-status">Canlı dersler yükleniyor…</p></section>
     </section>
@@ -344,64 +435,7 @@ button,select{font:inherit}
       <a href="deneme-sinavi-optik.html">Tümünü gör</a>
     </div>
 
-    <section class="exam-grid" aria-label="Yaklaşan deneme sınavları">
-      <article class="exam">
-        <div class="exam-top">
-          <div class="date">
-            <div class="date-box"><span>EKİ</span><b>25</b></div>
-            <small>Pazar<br>10:00</small>
-          </div>
-          <a class="btn-join" href="deneme-sinavi-optik.html">Sınava Katıl</a>
-        </div>
-        <div>
-          <h3>TYT Matematik Denemesi</h3>
-          <p>Temel matematik, tüm konular</p>
-        </div>
-        <div class="meta">
-          <span class="chip">40 soru</span>
-          <span class="chip">40 dk</span>
-          <span class="chip hot">3 gün kaldı</span>
-        </div>
-      </article>
-
-      <article class="exam">
-        <div class="exam-top">
-          <div class="date">
-            <div class="date-box"><span>KAS</span><b>01</b></div>
-            <small>Pazar<br>10:00</small>
-          </div>
-          <button class="btn-join" type="button" disabled title="Bu sınavın bağlantısı henüz eklenmedi">Yakında</button>
-        </div>
-        <div>
-          <h3>AYT Matematik Denemesi #5</h3>
-          <p>Türev, integral ve limit ağırlıklı</p>
-        </div>
-        <div class="meta">
-          <span class="chip">40 soru</span>
-          <span class="chip">100 dk</span>
-          <span class="chip">10 gün kaldı</span>
-        </div>
-      </article>
-
-      <article class="exam">
-        <div class="exam-top">
-          <div class="date">
-            <div class="date-box"><span>KAS</span><b>08</b></div>
-            <small>Pazar<br>14:00</small>
-          </div>
-          <button class="btn-join" type="button" disabled title="Bu sınavın bağlantısı henüz eklenmedi">Yakında</button>
-        </div>
-        <div>
-          <h3>Geometri Konu Denemesi</h3>
-          <p>Üçgenler, çember ve analitik geometri</p>
-        </div>
-        <div class="meta">
-          <span class="chip">30 soru</span>
-          <span class="chip">60 dk</span>
-          <span class="chip">17 gün kaldı</span>
-        </div>
-      </article>
-    </section>
+    <p class="feed-status">Öğretmeninin planladığı sınav tarihleri <a href="#ders-takvimim" style="text-decoration:underline">Ders Takvimim</a> bölümünde görünür. Çözdüğün denemeler <a href="#testlerim" style="text-decoration:underline">Sınav ve Testlerim</a> bölümünde listelenir.</p>
     </section>
   </main>
 </div>
@@ -894,6 +928,8 @@ button,select{font:inherit}
     loadImageExams().catch(() => {});
   })();
 </script>
+<script src="/assets/matematik-mufredati.js"></script>
+<script src="/assets/ogrenci-gelisim.js"></script>
 <script src="/assets/site-footer.js"></script>
 <script src="/assets/breadcrumb.js"></script>
 </body>
