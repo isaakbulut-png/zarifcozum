@@ -70,6 +70,14 @@ app.use(session({
     maxAge: 8 * 60 * 60 * 1000
   }
 }));
+// app.use(authRouter); satırının hemen ÜSTÜNE ekleyin:
+app.get('/planli-calisma.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'planli-calisma.html'));
+});
+
+app.get('/basari-odakli-sistem.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'basari-odakli-sistem.html'));
+});
 app.use(authRouter);
 app.use(express.static(path.join(__dirname, 'public'))); // public/deneme-sinavi-optik.html
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
