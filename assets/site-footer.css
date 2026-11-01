@@ -8,6 +8,8 @@
 
 .site-footer-rich .wrap {
   display: block;
+  width: min(100% - 2rem, 1180px);
+  margin-inline: auto;
 }
 
 .site-footer-columns {
@@ -19,7 +21,14 @@
 }
 
 .site-footer-rich .site-footer-brand .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0;
   color: #fff;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .site-footer-rich .site-footer-brand .brand-logo {
