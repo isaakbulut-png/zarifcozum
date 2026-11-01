@@ -1,0 +1,33 @@
+.zp{--zp-ana:#7a4a2b;--zp-ana-koyu:#5b3519;--zp-zemin:#fffaf3;--zp-cizgi:#e6d6c3;--zp-yazi:#2b2118;--zp-yesil:#2f7d4f;--zp-kirmizi:#b3382c;font-family:inherit;color:var(--zp-yazi);margin:16px auto;max-width:960px}
+.zp *{box-sizing:border-box}
+.zp-kart{background:var(--zp-zemin);border:1px solid var(--zp-cizgi);border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(91,53,25,.07)}
+.zp h3{margin:0 0 10px;color:var(--zp-ana-koyu)}
+.zp h4{margin:14px 0 6px;color:var(--zp-ana)}
+.zp-kucuk{font-size:.9rem;color:#6b5a4a}
+.zp-serit{background:#f4e8d8;border-radius:8px;padding:8px 12px;margin:0 0 12px;font-size:.92rem}
+.zp-serit.zp-uye{background:#dff1e6;color:#1e5a37}
+.zp-siniflar{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+.zp-sinif,.zp-konu,.zp-secenek{font:inherit;cursor:pointer;border:1px solid var(--zp-cizgi);background:#fff;border-radius:10px;padding:8px 14px;color:var(--zp-yazi)}
+.zp-sinif.aktif{background:var(--zp-ana);border-color:var(--zp-ana);color:#fff}
+.zp-konular{display:flex;flex-wrap:wrap;gap:8px}
+.zp-konu:hover,.zp-secenek:hover{border-color:var(--zp-ana)}
+.zp-konu.kilitli{opacity:.6}
+.zp-unite{margin-bottom:14px}
+.zp-btn{display:inline-block;font:inherit;cursor:pointer;text-decoration:none;border:0;border-radius:10px;padding:10px 18px;background:var(--zp-ana);color:#fff;margin:6px 8px 0 0}
+.zp-btn:hover{background:var(--zp-ana-koyu)}
+.zp-ikincil{background:#fff;color:var(--zp-ana);border:1px solid var(--zp-ana)}
+.zp-ikincil:hover{background:#f4e8d8}
+.zp-aksiyon{margin-top:12px}
+.zp-secenekler{display:grid;gap:8px;margin:10px 0}
+.zp-secenek{text-align:left;width:100%}
+.zp-secenek.secili{border-color:var(--zp-ana);background:#f4e8d8}
+.zp-secenek.dogru{border-color:var(--zp-yesil);background:#dff1e6}
+.zp-secenek.yanlis{border-color:var(--zp-kirmizi);background:#f9dfdb}
+.zp-soru{font-weight:600;white-space:pre-wrap}
+.zp-cozum{white-space:pre-wrap;background:#f4e8d8;border-radius:8px;padding:10px 12px}
+.zp-hata{color:var(--zp-kirmizi)}
+.zp-dogru-mesaj{color:var(--zp-yesil);font-weight:600}
+.zp-puan{font-size:1.2rem;font-weight:700}
+.zp-inceleme{border-top:1px solid var(--zp-cizgi);padding-top:12px;margin-top:12px}
+.zp-paywall{text-align:center}
+.zp-yukleniyor{text-align:center;color:#6b5a4a}

@@ -129,7 +129,6 @@ button,select{font:inherit}
 .feed-status.ok{color:#26734d;font-weight:600}
 .feed-card.is-live{border-color:var(--orange);box-shadow:0 6px 20px rgba(46,139,104,.12)}
 .feed-card .btn-join{display:inline-block;margin-top:8px}
-.payment-frame{display:block;width:100%;min-height:680px;margin-top:12px;border:0;border-radius:10px;background:#fffefa}
 .panel-view[hidden]{display:none!important}
 .logout-button{width:100%;margin-top:12px;padding:9px 12px;border:1px solid #557966;border-radius:8px;background:transparent;color:#fff;text-align:left;font-weight:600}
 .logout-button:hover{border-color:var(--orange);color:#e8c987}
@@ -189,6 +188,7 @@ button,select{font:inherit}
 }
 </style>
 <link rel="stylesheet" href="/assets/ogrenci-gelisim.css">
+<link rel="stylesheet" href="/assets/pratik.css">
 </head>
 <body>
 
@@ -231,12 +231,16 @@ button,select{font:inherit}
         <li><a href="#basari-raporlarim">
           <svg viewBox="0 0 24 24"><path d="M5 21V10M12 21V4M19 21v-8"/></svg>
           Başarı Raporlarım</a></li>
+        <li class="gz-side-label">Çalışma merkezi</li>
+        <li><a href="#konu-anlatimlari">Konu Anlatımları</a></li>
+        <li><a href="#test-coz">Test Çöz</a></li>
+        <li><a href="#kazanim-testi">Kazanım Testi</a></li>
+        <li><a href="#asistan-coz">Asistanla Soru Çöz</a></li>
         <li class="gz-side-label">Dersler ve içerik</li>
         <li><a href="#live-lessons">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
           Canlı Ders</a></li>
         <li><a href="#schedule">Ders Programı</a></li>
-        <li><a href="#membership">Üyelik ve paketler</a></li>
         <li><a href="#denemeler">
           <svg viewBox="0 0 24 24"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M8 6H6a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2"/><path d="m9 14 2 2 4-4"/></svg>
           Deneme Sınavları</a></li>
@@ -347,36 +351,24 @@ button,select{font:inherit}
       <section class="teacher-feed" id="scheduleFeed" aria-live="polite"><p class="feed-status">Program yükleniyor…</p></section>
     </section>
 
-    <section class="panel-view" id="membership" data-panel-view="membership">
-      <div class="section-head"><h2>Üyelik ve paketler</h2></div>
-      <article class="feed-card">
-        <h3>Mevcut üyelik</h3>
-        <p id="subscriptionStatus" role="status">Üyelik bilgisi yükleniyor…</p>
-      </article>
-      <div class="section-head"><h2>PayTR sandbox denemesi</h2></div>
-      <p class="feed-status">Bu yalnızca test akışıdır. Paket fiyatları demo amaçlıdır; canlı tahsilat yapılmaz. Kart bilgilerini yalnızca PayTR'ın açtığı güvenli formda girin.</p>
-      <section class="teacher-feed" aria-label="Sandbox paketleri">
-        <article class="feed-card">
-          <h3>Temel · demo</h3>
-          <p>₺249 / ay</p>
-          <button class="btn-join" type="button" data-payment-plan="temel">Sandbox'ta dene</button>
-        </article>
-        <article class="feed-card">
-          <h3>Standart · demo</h3>
-          <p>₺499 / ay</p>
-          <button class="btn-join" type="button" data-payment-plan="standart">Sandbox'ta dene</button>
-        </article>
-        <article class="feed-card">
-          <h3>Yoğun · demo</h3>
-          <p>₺899 / ay</p>
-          <button class="btn-join" type="button" data-payment-plan="yogun">Sandbox'ta dene</button>
-        </article>
-      </section>
-      <p class="feed-status" id="paymentStatus" role="status" aria-live="polite"></p>
-      <section class="feed-card" id="paytrCheckout" hidden>
-        <h3>PayTR güvenli test ödeme formu</h3>
-        <iframe title="PayTR sandbox ödeme formu" id="paytrFrame" class="payment-frame"></iframe>
-      </section>
+    <section class="panel-view" id="konu-anlatimlari" data-panel-view="konu-anlatimlari">
+      <div class="section-head"><h2>Konu anlatımları</h2></div>
+      <div id="pratik-konu"></div>
+    </section>
+
+    <section class="panel-view" id="test-coz" data-panel-view="test-coz">
+      <div class="section-head"><h2>Test çöz</h2></div>
+      <div id="pratik-test"></div>
+    </section>
+
+    <section class="panel-view" id="kazanim-testi" data-panel-view="kazanim-testi">
+      <div class="section-head"><h2>Kazanım testi</h2></div>
+      <div id="pratik-kazanim"></div>
+    </section>
+
+    <section class="panel-view" id="asistan-coz" data-panel-view="asistan-coz">
+      <div class="section-head"><h2>Asistanla soru çöz</h2></div>
+      <div id="pratik-asistan"></div>
     </section>
 
     <section class="panel-view" id="student-tasks" data-panel-view="student-tasks">
@@ -637,14 +629,6 @@ button,select{font:inherit}
         const content = await api('/api/student/dashboard');
         renderContent(content);
         await loadStudentHomework();
-        const subscription = await api('/api/payments/subscription');
-        const expiry = subscription.expiresAt
-          ? ` · Bitiş: ${new Date(subscription.expiresAt).toLocaleDateString('tr-TR')}`
-          : '';
-        const status = subscription.subscriptionStatus === 'active'
-          ? `Aktif${expiry}`
-          : subscription.subscriptionStatus === 'expired' ? 'Süresi dolmuş' : 'Ücretsiz';
-        $('subscriptionStatus').textContent = `${status}${subscription.subscriptionType ? ` · ${subscription.subscriptionType === 'monthly' ? 'aylık' : 'yıllık'}` : ''}`;
         $('dashboardError').hidden = true;
       } catch (error) {
         if (error.status === 401) {
@@ -656,31 +640,6 @@ button,select{font:inherit}
         $('dashboardError').hidden = false;
       }
     }
-
-    document.querySelectorAll('[data-payment-plan]').forEach(button => {
-      button.addEventListener('click', async () => {
-        const buttons = [...document.querySelectorAll('[data-payment-plan]')];
-        buttons.forEach(item => { item.disabled = true; });
-        $('paymentStatus').textContent = 'PayTR sandbox ödeme formu hazırlanıyor…';
-        $('paymentStatus').className = 'feed-status';
-        $('paytrCheckout').hidden = true;
-        try {
-          const checkout = await api('/api/payments/paytr/checkout', {
-            method: 'POST',
-            body: JSON.stringify({plan: button.dataset.paymentPlan})
-          });
-          $('paytrFrame').src = checkout.iframeUrl;
-          $('paytrCheckout').hidden = false;
-          $('paymentStatus').textContent = 'Test ödemesi tamamlandığında üyelik, PayTR’ın imzalı sunucu bildirimi doğrulanınca güncellenir.';
-          $('paymentStatus').className = 'feed-status';
-        } catch (error) {
-          $('paymentStatus').textContent = `Ödeme formu açılamadı: ${error.message}`;
-          $('paymentStatus').className = 'feed-status error';
-        } finally {
-          buttons.forEach(item => { item.disabled = false; });
-        }
-      });
-    });
 
     $('logoutButton').addEventListener('click', async () => {
       const button = $('logoutButton');
@@ -933,6 +892,12 @@ button,select{font:inherit}
 </script>
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/ogrenci-gelisim.js"></script>
+<script src="/assets/pratik.js"></script>
+<script>
+  [["konu", "konu"], ["test", "test"], ["kazanim", "kazanim"], ["asistan", "asistan"]].forEach(([id, mod]) => {
+    ZarifPratik.mount(document.getElementById("pratik-" + id), {mod});
+  });
+</script>
 <script src="/assets/site-footer.js"></script>
 <script src="/assets/breadcrumb.js"></script>
 </body>

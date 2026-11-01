@@ -64,7 +64,7 @@
             <li class="no">Canlı ders</li>
             <li class="no">Yapay zekâ asistanı</li>
           </ul>
-          <a class="btn btn-ghost" href="panel.html">Demo sayfasını aç</a>
+          <button class="btn btn-ghost" type="button" data-plan="temel">Üye ol (test ödemesi)</button>
         </article>
         <article class="card plan featured">
           <div class="row between"><span class="chip chip-primary">Standart · örnek</span><span class="xs muted">Taslakta öne çıkan</span></div>
@@ -76,7 +76,7 @@
             <li>Canlı ders kayıtlarına erişim</li>
             <li class="no">Birebir etüt</li>
           </ul>
-          <a class="btn btn-primary" href="panel.html">Demo sayfasını aç</a>
+          <button class="btn btn-primary" type="button" data-plan="standart">Üye ol (test ödemesi)</button>
         </article>
         <article class="card plan">
           <div><span class="chip">Yoğun · örnek</span></div>
@@ -88,8 +88,12 @@
             <li>Öğretmen geri bildirimli deneme</li>
             <li>Kardeş indirimi %30</li>
           </ul>
-          <a class="btn btn-ghost" href="panel.html">Demo sayfasını aç</a>
+          <button class="btn btn-ghost" type="button" data-plan="yogun">Üye ol (test ödemesi)</button>
         </article>
+      </div>
+      <p class="small" id="odemeDurum" role="status" aria-live="polite" style="margin-top:var(--space-4)"></p>
+      <div id="odemeKutu" hidden style="margin-top:var(--space-4)">
+        <iframe title="PayTR sandbox ödeme formu" id="odemeFrame" style="display:block;width:100%;min-height:680px;border:0;border-radius:10px;background:#fffefa"></iframe>
       </div>
     </div>
   </section>
@@ -113,6 +117,45 @@
     <div class="row"><a href="index.html">Ana sayfa</a><a href="hakkimizda.html">Hakkımızda</a><a href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html">Platform Ayrıcalıkları</a></div>
   </div>
 </footer>
+<script>
+(function () {
+  var durum = document.getElementById('odemeDurum');
+  var butonlar = [].slice.call(document.querySelectorAll('[data-plan]'));
+  function bildir(metin, hata) { durum.textContent = metin; durum.style.color = hata ? '#b3382c' : ''; }
+  butonlar.forEach(function (dugme) {
+    dugme.addEventListener('click', async function () {
+      butonlar.forEach(function (b) { b.disabled = true; });
+      bildir('Hazırlanıyor…');
+      try {
+        var oturum = await fetch('/me', { credentials: 'same-origin' });
+        if (oturum.status === 401) {
+          location.href = '/kayit-giris.html?mode=register&returnTo=' + encodeURIComponent('/Paketler.html');
+          return;
+        }
+        var kullanici = await oturum.json();
+        if ((kullanici.user || kullanici).role !== 'student') {
+          bildir('Üyelik satın alma yalnızca öğrenci hesaplarında kullanılabilir.', true);
+          return;
+        }
+        var yanit = await fetch('/api/payments/paytr/checkout', {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan: dugme.dataset.plan })
+        });
+        var veri = await yanit.json().catch(function () { return {}; });
+        if (!yanit.ok) throw new Error(veri.message || veri.mesaj || veri.error || 'Ödeme formu açılamadı.');
+        document.getElementById('odemeFrame').src = veri.iframeUrl;
+        document.getElementById('odemeKutu').hidden = false;
+        bildir('Test ödemesi tamamlandığında üyelik, PayTR bildirimi doğrulanınca etkinleşir. Kart bilgilerini yalnızca PayTR formunda gir.');
+      } catch (hata) {
+        bildir(hata.message, true);
+      } finally {
+        butonlar.forEach(function (b) { b.disabled = false; });
+      }
+    });
+  });
+})();
+</script>
 <script src="/assets/site-footer.js"></script>
 <script src="/assets/breadcrumb.js"></script>
 </body>

@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/anasayfa.css">
 </head>
 <body class="homepage">
 <header class="site-header site-header-expanded">
@@ -62,7 +63,7 @@
           <h1>Her denemede <em>bir adım ileri.</em></h1>
           <p class="lead">Optik deneme sınavını çöz, doğru ve yanlışlarını gör; tekrar etmen gereken konuları belirle.</p>
           <div class="cta">
-            <a class="btn btn-primary btn-lg" href="deneme-sinavi-optik.html">Denemeye başla</a>
+            <a class="btn btn-primary btn-lg" href="deneme-sinavi-optik.html">Test Çöz</a>
             <a class="btn btn-ghost btn-lg" href="panel.html">İlerlemeni takip et</a>
           </div>
           <p class="small muted hero-footnote">Sonuçlarını gör, tekrarını planla, gelişimini izle.</p>
@@ -195,6 +196,87 @@
 
     </div>
 </nav>
+
+  <section class="home-section grade-section" id="sinif-sec" aria-labelledby="sinif-sec-title">
+    <div class="wrap">
+      <header class="section-head">
+        <h2 id="sinif-sec-title">Sınıfını Seç, Öğrenmeye Başla</h2>
+        <p>İhtiyacın olan matematik konularına kolayca ulaş.</p>
+      </header>
+      <div class="grade-grid">
+        <a class="grade-tile" href="konu.html?sinif=5"><strong>5</strong><span>Sınıf</span></a>
+        <a class="grade-tile" href="konu.html?sinif=6"><strong>6</strong><span>Sınıf</span></a>
+        <a class="grade-tile" href="konu.html?sinif=7"><strong>7</strong><span>Sınıf</span></a>
+        <a class="grade-tile" href="konu.html?sinif=8"><strong>8</strong><span>Sınıf</span></a>
+        <a class="grade-tile" href="konu.html?sinif=9"><strong>9</strong><span>Sınıf</span></a>
+        <a class="grade-tile" href="konu.html?sinif=10"><strong>10</strong><span>Sınıf</span></a>
+        <a class="grade-tile" href="konu.html?sinif=11"><strong>11</strong><span>Sınıf</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-section why-section" aria-labelledby="neden-title">
+    <div class="wrap">
+      <header class="section-head">
+        <h2 id="neden-title">Neden Zarif Çözüm?</h2>
+        <p>Öğrenmeyi kolaylaştıran ayrıcalıklı eğitim deneyimi.</p>
+      </header>
+      <div class="why-grid">
+        <a class="why-card" href="konu.html">
+          <span class="why-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-1.8-1.3-4-2-7-2v14c3 0 5.2.7 7 2 1.8-1.3 4-2 7-2V4c-3 0-5.2.7-7 2z"/><path d="M12 6v14"/></svg></span>
+          <strong>Konu Anlatımları</strong><small>Adım adım öğrenme</small>
+        </a>
+        <a class="why-card" href="asistan.html">
+          <span class="why-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/><path d="M15 15l5 5M20 15l-5 5"/></svg></span>
+          <strong>Çözümlü Sorular</strong><small>Örneklerle pekiştirme</small>
+        </a>
+        <a class="why-card" href="test.html">
+          <span class="why-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9z"/><path d="M9 12l2 2 4-4"/><path d="M9 17h6"/></svg></span>
+          <strong>Test ve Etkinlikler</strong><small>Bilgini ölçme</small>
+        </a>
+        <a class="why-card" href="basari-odakli-sistem.html">
+          <span class="why-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V12M12 20V6M19 20V10"/><path d="M3 20h18"/></svg></span>
+          <strong>Başarı Takibi</strong><small>Gelişimini izleme</small>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-section band-section" aria-label="Örnek soru ve keşfet">
+    <div class="wrap band-grid">
+      <article class="band-card example-card">
+        <div class="example-text">
+          <h3>Örnek Soru: Geometrik Şekiller</h3>
+          <p>Bir üçgenin iç açılarının ölçüleri 60°, 70° ve x olduğuna göre, x kaç derecedir?</p>
+          <button type="button" class="btn btn-primary btn-sm" id="ornek-cozum-btn" aria-expanded="false" aria-controls="ornek-cozum">Çözümü Gör</button>
+          <p class="example-answer" id="ornek-cozum" hidden>Üçgenin iç açıları toplamı 180°'dir: x = 180° − (60° + 70°) = 50°.</p>
+        </div>
+        <svg class="example-svg" viewBox="0 0 220 140" role="img" aria-label="İç açıları 60°, 70° ve x olan üçgen">
+          <polygon points="110,12 12,122 208,122" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+          <text x="110" y="34" text-anchor="middle" font-size="16" fill="currentColor">x</text>
+          <text x="36" y="116" font-size="14" fill="currentColor">60°</text>
+          <text x="160" y="116" font-size="14" fill="currentColor">70°</text>
+        </svg>
+      </article>
+      <article class="band-card cta-card">
+        <h3>Zarif Çözüm ile Matematikte Yeni Bir Başlangıç Yap.</h3>
+        <p>Kendi sınıfını seç ve öğrenme yolculuğuna katıl.</p>
+        <a class="btn btn-primary btn-sm" href="#sinif-sec">Hemen Keşfet</a>
+      </article>
+    </div>
+  </section>
+  <script>
+    (function () {
+      var b = document.getElementById("ornek-cozum-btn");
+      var a = document.getElementById("ornek-cozum");
+      if (!b || !a) return;
+      b.addEventListener("click", function () {
+        var open = a.hidden;
+        a.hidden = !open;
+        b.setAttribute("aria-expanded", String(open));
+      });
+    })();
+  </script>
 
   <section class="block" id="nasil" style="background:var(--color-surface);border-block:1px solid var(--color-divider)">
     <div class="wrap">

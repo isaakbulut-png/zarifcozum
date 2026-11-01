@@ -97,13 +97,14 @@ button{font:inherit;cursor:pointer}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<link rel="stylesheet" href="/assets/pratik.css">
 </head>
 <body data-breadcrumb="Deneme Sınavı">
 
 <header class="bar">
   <div class="bar-in">
     <div class="title">
-      <h1>TYT Matematik Denemesi #8</h1>
+      <h1>Matematik testi çöz</h1>
       <p id="subtitle">Sınav henüz başlamadı</p>
     </div>
 
@@ -119,6 +120,7 @@ button{font:inherit;cursor:pointer}
 </header>
 
 <main class="wrap">
+  <div id="pratik-mount"></div>
   <section class="result" id="result" hidden aria-live="polite"></section>
 
   <div class="notice" id="notice">
@@ -293,6 +295,9 @@ button{font:inherit;cursor:pointer}
   render(TOTAL_MS);
 })();
 </script>
+<script src="/assets/matematik-mufredati.js"></script>
+<script src="/assets/pratik.js"></script>
+<script>ZarifPratik.mount(document.getElementById("pratik-mount"),{mod:"test",sinif:new URLSearchParams(location.search).get("sinif")});</script>
 <script src="/assets/site-footer.js"></script>
 <script src="/assets/breadcrumb.js"></script>
 </body>

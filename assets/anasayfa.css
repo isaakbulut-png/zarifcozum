@@ -1,0 +1,224 @@
+/* Ana sayfa: sıcak krem + çikolata kahvesi teması (yalnızca body.homepage) */
+body.homepage {
+  --color-bg: #fbf1e8;
+  --color-surface: #fffaf5;
+  --color-surface-2: #f8ebdd;
+  --color-surface-offset: #f3e1cf;
+  --color-border: #e2cbb4;
+  --color-divider: #ecd9c6;
+  --color-text: #3a2618;
+  --color-text-muted: #6a5242;
+  --color-text-faint: #8b7260;
+  --color-primary: #7a4f2d;
+  --color-primary-hover: #6b4a2f;
+  --color-primary-active: #523520;
+  --color-primary-bright: #8a5a34;
+  --color-primary-highlight: #f3e1cf;
+  --color-accent: #c9955c;
+  --color-ink: #4a2e1a;
+  --color-success: #5c6b2f;
+  --color-success-highlight: #eef0d8;
+  --color-warning: #7a4f10;
+  --color-warning-highlight: #f6e5c4;
+  --radius-md: 0.9rem;
+  --radius-lg: 1.1rem;
+  --shadow-sm: 0 1px 2px rgba(90, 55, 30, 0.08);
+  --shadow-md: 0 8px 22px rgba(90, 55, 30, 0.12);
+  --shadow-lg: 0 18px 44px rgba(90, 55, 30, 0.16);
+  --font-display: Georgia, "Playfair Display", "Times New Roman", serif;
+  --serif: Georgia, "Playfair Display", "Times New Roman", serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+body.homepage h1,
+body.homepage h2,
+body.homepage h3 {
+  font-family: var(--serif);
+}
+
+/* Düğmeler */
+body.homepage .btn { border-radius: 9999px; }
+body.homepage .btn-primary {
+  background: linear-gradient(135deg, #8a5a34, #6b4a2f);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(90, 55, 30, 0.25);
+}
+body.homepage .btn-primary:hover { background: linear-gradient(135deg, #7a4f2d, #5a3a22); }
+body.homepage .btn-ghost {
+  background: rgba(255, 250, 245, 0.85);
+  border-color: #b98a62;
+  color: #4a2e1a;
+}
+body.homepage .btn-ghost:hover { background: #f3e1cf; }
+body.homepage .site-header { background: rgba(251, 241, 232, 0.94); border-bottom-color: var(--color-divider); }
+
+/* Hero */
+body.homepage .hero {
+  position: relative;
+  isolation: isolate;
+}
+body.homepage .hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(50% - 50vw);
+  background:
+    radial-gradient(circle at 78% 30%, rgba(201, 149, 92, 0.28), transparent 55%),
+    linear-gradient(110deg, #fdf4ec 0%, #f6e3d1 55%, #ecd2b8 100%);
+}
+body.homepage .hero h1 {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 1.4rem + 3.6vw, 4.2rem);
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  color: #3a2618;
+  max-width: 15ch;
+}
+body.homepage .hero h1 em { color: #7a4f2d; }
+body.homepage .hero .lead { color: #5a4231; }
+body.homepage .hero .chip {
+  background: #f6e3d1;
+  border: 1px solid #d9b996;
+  color: #5a3a22;
+  letter-spacing: 0.04em;
+}
+
+/* Avantaj şeridi */
+body.homepage .home-benefits { background: #4a2e1a; color: #fff; }
+
+/* Ortak bölüm */
+body.homepage .home-section { padding-block: clamp(2rem, 4vw, 3.25rem); }
+body.homepage .section-head { text-align: center; margin-bottom: 1.5rem; }
+body.homepage .section-head h2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
+  font-weight: 700;
+  color: #3a2618;
+}
+body.homepage .grade-section .section-head h2::before,
+body.homepage .grade-section .section-head h2::after {
+  content: "";
+  flex: 0 1 90px;
+  height: 1px;
+  background: #c9a27c;
+}
+body.homepage .section-head p { color: var(--color-text-muted); margin-top: 0.35rem; }
+
+/* Sınıf kutuları */
+body.homepage .grade-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+body.homepage .grade-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 84px;
+  padding: 0.75rem;
+  border: 1px solid #ead3bd;
+  border-radius: 0.9rem;
+  background: linear-gradient(180deg, #f7e6d5, #f1dcc7);
+  color: #3a2618;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+body.homepage .grade-tile:hover,
+body.homepage .grade-tile:focus-visible { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+body.homepage .grade-tile strong { font-family: var(--serif); font-size: 1.9rem; line-height: 1; }
+body.homepage .grade-tile span { font-size: 0.85rem; color: #6a5242; margin-top: 0.2rem; }
+
+/* Neden Zarif Çözüm */
+body.homepage .why-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+body.homepage .why-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 1.1rem 0.75rem;
+  text-align: center;
+  text-decoration: none;
+  color: #3a2618;
+  background: #fffaf5;
+  border: 1px solid #ecd9c6;
+  border-radius: 0.9rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+body.homepage .why-card:hover,
+body.homepage .why-card:focus-visible { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+body.homepage .why-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 0.3rem;
+  border-radius: 50%;
+  background: #f3e1cf;
+  color: #6b4a2f;
+}
+body.homepage .why-icon svg { width: 24px; height: 24px; }
+body.homepage .why-card small { color: var(--color-text-muted); font-size: 0.85rem; }
+
+/* Soru + CTA bandı */
+body.homepage .band-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 1rem;
+}
+body.homepage .band-card {
+  border: 1px solid #ead3bd;
+  border-radius: 1.1rem;
+  padding: 1.5rem;
+  background: linear-gradient(120deg, #f8e8d8, #f1dcc7);
+  box-shadow: var(--shadow-sm);
+}
+body.homepage .band-card h3 { font-size: 1.2rem; margin-bottom: 0.5rem; color: #3a2618; }
+body.homepage .band-card p { color: #4d3727; margin-bottom: 0.9rem; }
+body.homepage .example-card { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+body.homepage .example-text { flex: 1 1 55%; min-width: 0; }
+body.homepage .example-svg { flex: 0 1 200px; width: 200px; max-width: 40%; color: #6b4a2f; }
+body.homepage .example-answer {
+  margin: 0.9rem 0 0;
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid #8a5a34;
+  background: #fffaf5;
+  border-radius: 0.5rem;
+  font-weight: 600;
+}
+body.homepage .example-answer[hidden] { display: none; }
+body.homepage .cta-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  background: linear-gradient(120deg, #f1dcc7, #e8cbb0);
+}
+body.homepage .cta-card h3 { font-size: 1.35rem; }
+
+@media (max-width: 900px) {
+  body.homepage .grade-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  body.homepage .why-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  body.homepage .band-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  body.homepage .grade-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+  body.homepage .grade-section .section-head h2::before,
+  body.homepage .grade-section .section-head h2::after { display: none; }
+  body.homepage .example-card { flex-direction: column; align-items: flex-start; }
+  body.homepage .example-svg { width: 100%; max-width: 220px; align-self: center; }
+}
+@media (max-width: 400px) {
+  body.homepage .why-grid { grid-template-columns: 1fr; }
+}

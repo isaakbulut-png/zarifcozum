@@ -22,6 +22,9 @@ const { createSorularRouter } = require('./routes/sorular');
 const { createDenemelerRouters } = require('./routes/denemeler');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
+const { createPratikRouter } = require('./routes/pratik');
+const { uretSorular, uretKonuAnlatimi } = require('./lib/ai-icerik');
+const { mufredatiYukle } = require('./lib/mufredat');
 const User = require('./models/User');
 const Payment = require('./models/Payment');
 const { createWebhookRouter } = require('./routes/webhooks');
@@ -145,6 +148,7 @@ let koleksiyon, anahtarKoleksiyon, canliDersKoleksiyonu;
 let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, duyuruKoleksiyonu;
 let studentProfiles, homeworks, homeworkAssignments, homeworkAudits;
 let calismaKayitlari, ogrenciHedefleri, kazanimIlerleme, ogretmenYorumlari, takvimOlaylari;
+let pratikKullanim, pratikIcerik;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
 app.use('/api/sorular', createSorularRouter({ requireStaff: requireRole('teacher', 'admin') }));
@@ -192,6 +196,19 @@ const gelisimRouters = createGelisimRouters({
   getCommentCollection: () => ogretmenYorumlari,
   getEventCollection: () => takvimOlaylari
 });
+app.use('/api/pratik', createPratikRouter({
+  getUsageCollection: () => pratikKullanim,
+  getContentCollection: () => pratikIcerik,
+  mufredat: mufredatiYukle(),
+  uyeMi: async kullanici => {
+    if (!kullanici) return false;
+    if (kullanici.role === 'teacher' || kullanici.role === 'admin') return true;
+    const kayit = await User.findById(kullanici.id).select('subscriptionStatus expiresAt').lean();
+    return Boolean(kayit && kayit.subscriptionStatus === 'active' && (!kayit.expiresAt || kayit.expiresAt > new Date()));
+  },
+  soruUret: uretSorular,
+  konuUret: uretKonuAnlatimi
+}));
 app.use('/api/ogretmen/gelisim', gelisimRouters.teacher);
 app.use('/api/student/gelisim', gelisimRouters.student);
 app.use('/api/ogretmen', teacherStudentHomeworkRouters.teacher);
@@ -747,7 +764,11 @@ async function baslat() {
   kazanimIlerleme = client.db(DB_ADI).collection('kazanim_ilerleme');
   ogretmenYorumlari = client.db(DB_ADI).collection('ogretmen_yorumlari');
   takvimOlaylari = client.db(DB_ADI).collection('takvim_olaylari');
+  pratikKullanim = client.db(DB_ADI).collection('pratik_kullanim');
+  pratikIcerik = client.db(DB_ADI).collection('pratik_icerik');
   await Promise.all([
+    pratikKullanim.createIndex({key: 1, ozellik: 1}, {unique: true, name: 'uniq_pratik_usage'}),
+    pratikIcerik.createIndex({tur: 1, sinif: 1, konu: 1, adet: 1}, {unique: true, name: 'uniq_pratik_content'}),
     calismaKayitlari.createIndex({studentUserId: 1, day: -1}, {name: 'student_study_days'}),
     ogrenciHedefleri.createIndex({studentUserId: 1}, {unique: true, name: 'uniq_student_goal'}),
     kazanimIlerleme.createIndex({studentUserId: 1, grade: 1, unit: 1, topic: 1}, {unique: true, name: 'uniq_student_outcome'}),

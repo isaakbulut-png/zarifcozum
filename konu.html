@@ -9,12 +9,14 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="/assets/pratik.css">
 </head>
 <body>
 <div class="app">
   <aside class="sidebar" data-shell="sidebar"></aside>
   <main class="main">
     <div class="mobile-top" data-shell="mobile-top"></div>
+    <div id="pratik-mount"></div>
     <div class="page-head">
       <div>
         <div class="crumbs"><a href="panel.html">6. Sınıf</a><span>›</span><span>MAT.6.1 Sayılar ve Nicelikler (1)</span><span>›</span><span>Ders 3/6</span></div>
@@ -128,6 +130,9 @@
 </div>
 <nav class="tabbar" data-shell="tabbar" aria-label="Alt menü"></nav>
 <script src="assets/app.js"></script>
+<script src="/assets/matematik-mufredati.js"></script>
+<script src="/assets/pratik.js"></script>
+<script>ZarifPratik.mount(document.getElementById("pratik-mount"),{mod:"konu",sinif:new URLSearchParams(location.search).get("sinif")});</script>
 <script>
   (function () {
     const opts = document.querySelectorAll('#check .option');
