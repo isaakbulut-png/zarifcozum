@@ -1,8 +1,8 @@
 .site-footer.site-footer-rich {
   padding-block: 3rem 1.25rem;
   border-top: 0;
-  background: #12372a;
-  color: #c5d6ca;
+  background: #4a2e1a;
+  color: #d5cdc6;
   font-size: 0.9rem;
 }
 
@@ -40,7 +40,7 @@
 .site-footer-brand > p {
   max-width: 29ch;
   margin-top: 0.8rem;
-  color: #c5d6ca;
+  color: #d5cdc6;
   font-size: 0.9rem;
   line-height: 1.7;
 }
@@ -60,7 +60,7 @@
 }
 
 .site-footer-rich a:not(.brand) {
-  color: #c5d6ca;
+  color: #d5cdc6;
   font-size: 0.88rem;
   line-height: 1.5;
   text-decoration: none;
@@ -77,8 +77,8 @@
   justify-content: space-between;
   gap: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(197, 214, 202, 0.2);
-  color: #a9c1b0;
+  border-top: 1px solid rgba(213, 205, 198, 0.2);
+  color: #c0b4aa;
   font-size: 0.82rem;
 }
 
