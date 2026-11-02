@@ -96,7 +96,7 @@ function createAIRouter({ getQuizCollection, requireRole }) {
     const count = Number(req.body?.count);
 
     if (!konular.has(topic) || !zorluklar.has(difficulty) ||
-        ![5, 10, 20].includes(count)) {
+        ![1, 5, 10, 15, 20].includes(count)) {
       return res.status(400).json({ mesaj: 'Konu, zorluk veya soru sayısı seçimi geçersiz.' });
     }
 
