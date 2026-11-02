@@ -1,4 +1,4 @@
-# Kayıt ve giriş kurulumu
+﻿# Kayıt ve giriş kurulumu
 
 Kimlik doğrulama, Express oturumlarını MongoDB'de saklar. Şifreler bcrypt ile hash'lenir; tarayıcıya yalnızca `httpOnly` oturum çerezi verilir. Öğretmen kayıtlarının öğrenci tarafından kendiliğinden açılmaması için davet kodu zorunludur.
 
@@ -9,7 +9,7 @@ Sunucu `.env` dosyasını öncelikli okur; orada bulunmayan değişkenleri `bagl
 ```env
 SESSION_SECRET=32-karakterden-uzun-rastgele-bir-deger
 TEACHER_REGISTRATION_CODE=ogretmenlere-guvenli-kanaldan-verilecek-kod
-AI_API_KEY=google-ai-studio-gemini-api-anahtari
+GEMINI_API_KEY=google-ai-studio-gemini-api-anahtari
 ```
 
 Güçlü bir `SESSION_SECRET` üretmek için:
@@ -41,7 +41,7 @@ Uç noktalar: `POST /register`, `POST /login`, `POST /logout` ve oturum bilgisin
 
 Öğrenci panelindeki sol menü bölümleri aynı sayfada sekme gibi açılır; URL parçası (ör. `#duyurular`) sekme durumunu korur. Planlı dersler, öğretmen testleri ve duyurular `GET /api/student/dashboard` isteğiyle MongoDB'den yüklenir. Test gönderildiğinde sonuç `POST /api/ogrenci/quiz/:id/teslim` üzerinden kaydedilir ve sonuçlar sekmesinde yeniden yüklenir.
 
-Yapay Zeka Soru Sihirbazı için Google AI Studio'dan Gemini API anahtarı alıp `AI_API_KEY` olarak sunucu ortamına ekleyin; anahtarı tarayıcı koduna veya Git'e koymayın. Ek npm paketi gerekmez. Yalnızca öğretmen oturumuyla kullanılabilen `POST /api/ai/questions` konu, zorluk ve 5/10/20 soru sayısını alır; Gemini yanıtını doğrular ve soruları veritabanına kaydetmeden öğretmene taslak olarak döndürür. Öğretmen her soruyu kontrol edip `POST /api/ai/questions/publish` üzerinden ayrı ayrı onaylayabilir. Onaylanan sorular birer soruluk testler olarak `quizler` koleksiyonuna kaydedilir ve `GET /api/student/dashboard` yanıtındaki öğretmen testleri listesine eklenir. Öğretmen panelindeki yayınlanmış yapay zeka soruları listesinden "Soruyu sil" ile onaylanan AI kaydı veritabanından kalıcı olarak silinebilir. Öğrenciler testleri mevcut `POST /api/ogrenci/quiz/:id/teslim` uç noktasından çözer; cevap ve çözüm açıklamaları teslimden sonra gösterilir. Soru üretimi IP başına 15 dakikada 5 istekle sınırlandırılmıştır.
+Yapay Zeka Soru Sihirbazı için Google AI Studio'dan Gemini API anahtarı alıp `GEMINI_API_KEY` olarak sunucu ortamına ekleyin; anahtarı tarayıcı koduna veya Git'e koymayın. Ek npm paketi gerekmez. Yalnızca öğretmen oturumuyla kullanılabilen `POST /api/ai/questions` konu, zorluk ve 5/10/20 soru sayısını alır; Gemini yanıtını doğrular ve soruları veritabanına kaydetmeden öğretmene taslak olarak döndürür. Öğretmen her soruyu kontrol edip `POST /api/ai/questions/publish` üzerinden ayrı ayrı onaylayabilir. Onaylanan sorular birer soruluk testler olarak `quizler` koleksiyonuna kaydedilir ve `GET /api/student/dashboard` yanıtındaki öğretmen testleri listesine eklenir. Öğretmen panelindeki yayınlanmış yapay zeka soruları listesinden "Soruyu sil" ile onaylanan AI kaydı veritabanından kalıcı olarak silinebilir. Öğrenciler testleri mevcut `POST /api/ogrenci/quiz/:id/teslim` uç noktasından çözer; cevap ve çözüm açıklamaları teslimden sonra gösterilir. Soru üretimi IP başına 15 dakikada 5 istekle sınırlandırılmıştır.
 
 Şifre en az 10, en fazla 72 UTF-8 bayt olmalıdır (bcrypt'in giriş uzunluğu sınırı). Öğretmen kaydı için `TEACHER_REGISTRATION_CODE` gereklidir. IP başına giriş denemeleri 15 dakikada 10, kayıt denemeleri saatte 5 istekle sınırlandırılır.
 

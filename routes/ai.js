@@ -109,10 +109,10 @@ function createAIRouter({ getQuizCollection, requireRole }) {
       return res.status(400).json({ mesaj: 'Sınıf, konu, zorluk veya soru sayısı seçimi geçersiz.' });
     }
 
-    const apiKey = String(process.env.AI_API_KEY || '').trim();
+    const apiKey = String(process.env.GEMINI_API_KEY || process.env.AI_API_KEY || '').trim();
     if (!apiKey) {
-      console.error('AI_API_KEY eksik. Kullanılan ortam değişkenleri dosyasına veya hosting ayarlarına AI_API_KEY ekleyin.');
-      return res.status(503).json({ mesaj: 'Yapay zeka hizmeti henüz yapılandırılmamış. AI_API_KEY değerini sunucu ortamına ekleyin.' });
+      console.error('GEMINI_API_KEY eksik. Ortam değişkenleri dosyasına veya hosting ayarlarına GEMINI_API_KEY ekleyin.');
+      return res.status(503).json({ mesaj: 'Yapay zeka hizmeti henüz yapılandırılmamış. GEMINI_API_KEY değerini sunucu ortamına ekleyin.' });
     }
 
     const prompt = [
@@ -161,7 +161,7 @@ function createAIRouter({ getQuizCollection, requireRole }) {
       if (response.status === 429) {
         mesaj = 'Yapay zeka hizmeti şu anda yoğun. Biraz sonra tekrar deneyin.';
       } else if ([401, 403].includes(response.status)) {
-        mesaj = 'Yapay zeka API anahtarı geçersiz veya yetkisiz. Sunucudaki AI_API_KEY ayarını kontrol edin.';
+        mesaj = 'Yapay zeka API anahtarı geçersiz veya yetkisiz. Sunucudaki GEMINI_API_KEY ayarını kontrol edin.';
       } else if (response.status === 404) {
         mesaj = 'Yapay zeka modeli bulunamadı. Sunucudaki model yapılandırmasını kontrol edin.';
       } else if (response.status === 400) {
