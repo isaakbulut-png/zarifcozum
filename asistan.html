@@ -10,6 +10,15 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="/assets/pratik.css">
+<style>
+.ai-chat-btn { padding: var(--space-4) var(--space-5); border: 2px solid var(--color-primary); background: var(--color-primary); color: #fff; font-size: var(--text-base); box-shadow: 0 6px 18px rgba(0,0,0,.14); }
+.ai-chat-btn:hover { background: var(--color-primary); filter: brightness(1.08); }
+.ai-chat-btn small { color: rgba(255,255,255,.85); }
+.ai-chat-btn:not(.active) { background: var(--color-surface); color: var(--color-primary); box-shadow: none; }
+.ai-chat-btn:not(.active):hover { background: var(--color-primary-highlight); filter: none; }
+.ai-chat-btn:not(.active) small { color: var(--color-text-muted); }
+.ai-ornekler { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
 </head>
@@ -29,12 +38,15 @@
 
     <div class="tutor">
       <aside class="stack">
+        <button class="topic-btn ai-chat-btn active" data-topic="ai" type="button">
+          <strong>🤖 AI Mentör ile Serbest Sohbet</strong>
+          <small>İstediğin matematik sorusunu yaz, cevabı birlikte bulalım</small>
+        </button>
         <div class="card stack-sm">
-          <p class="xs muted" style="font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:var(--space-2)">Kazanım seç</p>
-          <button class="topic-btn active" data-topic="asal"><strong>Asal çarpanlara ayırma</strong><small>MAT.6.1 · 84'ü birlikte ayıralım</small></button>
+          <p class="xs muted" style="font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:var(--space-2)">Ya da kazanım seç (adım adım)</p>
+          <button class="topic-btn" data-topic="asal"><strong>Asal çarpanlara ayırma</strong><small>MAT.6.1 · 84'ü birlikte ayıralım</small></button>
           <button class="topic-btn" data-topic="ekok"><strong>Ortak kat problemi</strong><small>MAT.6.1 · otobüs problemi</small></button>
           <button class="topic-btn" data-topic="bolun"><strong>Bölünebilme kuralı</strong><small>MAT.6.1 · 9 ile bölünebilme</small></button>
-          <button class="topic-btn" data-topic="ai"><strong>AI Mentör (serbest sohbet)</strong><small>MEB kazanımlarına göre canlı yanıt</small></button>
         </div>
         <div class="card">
           <p class="xs muted" style="font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:var(--space-3)">Asistanın kuralları</p>
@@ -48,18 +60,18 @@
         </div>
         <div class="notice notice-warning">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-          <p>Bu demoda yanıtlar kurallı bir senaryo motorundan geliyor. Üretimde: LLM + müfredat RAG + sembolik doğrulayıcı. Detay: <a href="mimari.html#ai" style="text-decoration:underline">mimari sayfası</a>.</p>
+          <p>Serbest sohbet canlı yapay zekâya (MEB müfredat RAG) bağlıdır. Soldaki hazır kazanım adımları ise kurallı bir demo senaryosudur. Detay: <a href="mimari.html#ai" style="text-decoration:underline">mimari sayfası</a>.</p>
         </div>
       </aside>
 
       <section class="card chat">
         <div class="chat-head">
-          <div class="row"><span class="avatar alt" style="background:var(--color-primary)">∑</span><div><strong id="ttitle">Asal çarpanlara ayırma</strong><br><span class="xs muted" id="tsub">Adım 1 / 7</span></div></div>
-          <div class="row"><button class="btn btn-ghost btn-sm" id="restart">Baştan</button><button class="btn btn-soft btn-sm" id="hintbtn">İpucu</button></div>
+          <div class="row"><span class="avatar alt" style="background:var(--color-primary)" id="tavatar">🤖</span><div><strong id="ttitle">AI Mentör</strong><br><span class="xs muted" id="tsub">Serbest sohbet</span></div></div>
+          <div class="row"><button class="btn btn-ghost btn-sm" id="restart">Baştan</button><button class="btn btn-soft btn-sm" id="hintbtn" style="display:none">İpucu</button></div>
         </div>
         <div class="chat-body" id="body"></div>
         <form class="chat-input" id="form">
-          <input type="text" id="inp" placeholder="Cevabını yaz… (ör. 2)" autocomplete="off" aria-label="Cevabın">
+          <input type="text" id="inp" placeholder="Matematik sorunu buraya yaz…" autocomplete="off" aria-label="Mesajın">
           <button class="btn btn-primary" type="submit">Gönder</button>
         </form>
       </section>
@@ -117,18 +129,34 @@
   let topic = 'asal', step = 0, tries = 0, finished = false;
   const body = $('body');
   const AI_TOPIC = 'ai';
-  let gorevTuru = null, bekliyor = false;
-  function add(kind, html, tag) { const d = document.createElement('div'); d.className = 'bubble ' + kind; d.innerHTML = (tag ? `<span class="tag">${tag}</span><br>` : '') + html; body.appendChild(d); body.scrollTop = body.scrollHeight; }
+  let bekliyor = false;
+  function add(kind, html, tag) { const d = document.createElement('div'); d.className = 'bubble ' + kind; d.innerHTML = (tag ? `<span class="tag">${tag}</span><br>` : '') + html; body.appendChild(d); body.scrollTop = body.scrollHeight; return d; }
   function bot(html, tag) { const t = document.createElement('div'); t.className = 'typing'; t.innerHTML = '<i></i><i></i><i></i>'; body.appendChild(t); body.scrollTop = body.scrollHeight; setTimeout(() => { t.remove(); add('bot', html, tag); }, 550 + Math.min(900, html.length * 6)); }
   function status() {
-    if (topic === AI_TOPIC) { $('ttitle').textContent = 'AI Mentör'; $('tsub').textContent = 'Serbest sohbet'; return; }
+    const ai = topic === AI_TOPIC;
+    $('hintbtn').style.display = ai ? 'none' : '';
+    $('tavatar').textContent = ai ? '🤖' : '∑';
+    $('inp').placeholder = ai ? 'Matematik sorunu buraya yaz…' : 'Cevabını yaz… (ör. 2)';
+    if (ai) { $('ttitle').textContent = 'AI Mentör'; $('tsub').textContent = 'Serbest sohbet'; return; }
     $('ttitle').textContent = T[topic].title; $('tsub').textContent = finished ? 'Tamamlandı' : `Adım ${step + 1} / ${T[topic].steps.length}`;
   }
+  const ORNEK_SORULAR = ['3-4-5 üçgeninde sin A kaçtır?', '2x + 6 = 14 denklemini nasıl çözerim?', 'EBOB ile EKOK arasındaki fark nedir?'];
   function startTopic(t) {
     topic = t; step = 0; tries = 0; finished = false; body.innerHTML = '';
     document.querySelectorAll('.topic-btn').forEach(b => b.classList.toggle('active', b.dataset.topic === t));
     status();
-    if (t === AI_TOPIC) { add('bot', 'Merhaba! Matematikle ilgili sorunu yaz; cevabı doğrudan vermeden birlikte çözelim.', 'AI Mentör'); return; }
+    if (t === AI_TOPIC) {
+      add('bot', 'Merhaba! Ben AI Mentörün. Matematikle ilgili aklına takılan her şeyi sorabilirsin. Cevabı doğrudan vermem; hatanı bulman için ipuçları veririm.', 'AI Mentör');
+      const ornek = add('bot', '<div class="ai-ornekler"></div>', 'Örnek sorular');
+      ORNEK_SORULAR.forEach(q => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'btn btn-soft btn-sm'; b.textContent = q;
+        b.addEventListener('click', () => { ornek.remove(); add('user', escapeHtml(q)); aiyaSor(q); });
+        ornek.querySelector('.ai-ornekler').appendChild(b);
+      });
+      $('inp').focus();
+      return;
+    }
     add('bot', T[t].intro, 'Asistan');
     bot(T[t].steps[0].q);
   }
@@ -173,16 +201,6 @@
     return html + duz(metin.slice(son));
   }
 
-  // Öğretmen/yönetici soru üretir, öğrenci mentörlük alır
-  async function gorevTuruBul() {
-    if (gorevTuru) return gorevTuru;
-    try {
-      const r = await fetch('/me', { credentials: 'same-origin' });
-      if (r.ok) { const { user } = await r.json(); gorevTuru = user.role === 'student' ? 'ai_mentor' : 'soru_uretme'; }
-    } catch (_) { /* oturum bilgisi alınamazsa varsayılan kullanılır */ }
-    return gorevTuru || 'ai_mentor';
-  }
-
   async function aiyaSor(mesaj) {
     if (bekliyor) return;
     bekliyor = true;
@@ -194,7 +212,7 @@
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ogrenciMesaji: mesaj, gorevTuru: await gorevTuruBul() })
+        body: JSON.stringify({ ogrenciMesaji: mesaj, gorevTuru: 'ai_mentor' })
       });
       const data = await response.json().catch(() => ({}));
       if (response.status === 401) metin = 'AI Mentör\'ü kullanmak için lütfen giriş yapın.';
@@ -222,7 +240,7 @@
   $('hintbtn').addEventListener('click', hint);
   $('restart').addEventListener('click', () => startTopic(topic));
   document.querySelectorAll('.topic-btn').forEach(b => b.addEventListener('click', () => startTopic(b.dataset.topic)));
-  startTopic('asal');
+  startTopic(AI_TOPIC);
 })();
 </script>
 <script data-pplx-inline-edit>
