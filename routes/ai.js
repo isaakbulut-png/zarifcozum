@@ -2,7 +2,10 @@ const express = require('express');
 const { rateLimit } = require('express-rate-limit');
 const { ObjectId } = require('mongodb');
 
-const konular = new Set([
+const { SINIF_KONULARI, TUM_KONULAR } = require('../lib/konu-haritasi');
+
+// Eski taslak/kayıtlar bozulmasın diye önceki serbest konu adları da geçerli sayılır.
+const eskiKonular = [
   'Sayılar ve Problemler',
   'Karmaşık Sayılar',
   'Polinomlar',
@@ -33,7 +36,8 @@ const konular = new Set([
   'Üçgenler',
   'Çember ve Daire',
   'Analitik Geometri'
-]);
+];
+const konular = new Set([...eskiKonular, ...TUM_KONULAR]);
 const zorluklar = new Set(['Kolay', 'Orta', 'Zor']);
 const secenekler = ['A', 'B', 'C', 'D'];
 const soruUretmeSiniri = rateLimit({
@@ -90,14 +94,19 @@ function soruSemasi() {
 function createAIRouter({ getQuizCollection, requireRole }) {
   const router = express.Router();
 
+  router.get('/konular', requireRole('teacher'), (req, res) => {
+    res.json({ konular: SINIF_KONULARI });
+  });
+
   router.post('/questions', requireRole('teacher'), soruUretmeSiniri, async (req, res) => {
     const topic = typeof req.body?.topic === 'string' ? req.body.topic.trim() : '';
     const difficulty = typeof req.body?.difficulty === 'string' ? req.body.difficulty : '';
     const count = Number(req.body?.count);
+    const grade = Number(req.body?.grade);
 
-    if (!konular.has(topic) || !zorluklar.has(difficulty) ||
+    if (!SINIF_KONULARI[grade]?.includes(topic) || !zorluklar.has(difficulty) ||
         ![1, 5, 10, 15, 20].includes(count)) {
-      return res.status(400).json({ mesaj: 'Konu, zorluk veya soru sayısı seçimi geçersiz.' });
+      return res.status(400).json({ mesaj: 'Sınıf, konu, zorluk veya soru sayısı seçimi geçersiz.' });
     }
 
     const apiKey = String(process.env.AI_API_KEY || '').trim();
@@ -108,7 +117,8 @@ function createAIRouter({ getQuizCollection, requireRole }) {
 
     const prompt = [
       'Türkçe eğitim platformu için özgün, pedagojik olarak doğru matematik soruları hazırla.',
-      `Konu: ${topic}. Zorluk: ${difficulty}. Tam olarak ${count} soru üret.`,
+      `Sınıf düzeyi: ${grade}. sınıf (MEB Türkiye Yüzyılı Maarif Modeli). Konu: ${topic}. Zorluk: ${difficulty}. Tam olarak ${count} soru üret.`,
+      `Sorular yalnızca ${grade}. sınıf kazanımları ve ön koşulları içinde kalsın; üst sınıf konu veya formüllerini kullanma.`,
       'Her soru dört seçenekli (A, B, C, D) olsun ve yalnızca bir doğru cevap içersin.',
       'Sayıları, işlemleri ve doğru seçeneği dikkatle doğrula; belirsiz veya birden fazla doğru cevabı olan soru yazma.',
       'Açıklama alanında çözümün kısa ve anlaşılır adımlarını ver.',
@@ -200,6 +210,7 @@ function createAIRouter({ getQuizCollection, requireRole }) {
       title: `${topic} — ${difficulty} seviye (Yapay zeka)`,
       description: `${count} soruluk yapay zeka destekli çalışma testi.`,
       topic,
+      grade,
       difficulty,
       questions: result.questions.map(question => ({
         text: question.text.trim(),
@@ -217,6 +228,7 @@ function createAIRouter({ getQuizCollection, requireRole }) {
         title: quiz.title,
         description: quiz.description,
         topic: quiz.topic,
+        grade: quiz.grade,
         difficulty: quiz.difficulty,
         soruSayisi: quiz.questions.length,
         questions: quiz.questions
@@ -230,8 +242,10 @@ function createAIRouter({ getQuizCollection, requireRole }) {
     const title = typeof req.body?.title === 'string' ? req.body.title.trim() : '';
     const description = typeof req.body?.description === 'string' ? req.body.description.trim() : '';
     const question = req.body?.question;
+    const grade = req.body?.grade === undefined ? null : Number(req.body.grade);
 
     if (!konular.has(topic) || !zorluklar.has(difficulty) ||
+        (grade !== null && !SINIF_KONULARI[grade]) ||
         !title || title.length > 150 || description.length > 500 ||
         !isValidQuestion(question)) {
       return res.status(400).json({ mesaj: 'Test başlığı, konu, zorluk veya soru verileri geçersiz.' });
@@ -241,6 +255,7 @@ function createAIRouter({ getQuizCollection, requireRole }) {
       title,
       description,
       topic,
+      ...(grade !== null && { grade }),
       difficulty,
       questions: [{
         text: question.text.trim(),

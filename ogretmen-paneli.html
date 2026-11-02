@@ -429,39 +429,23 @@ td.net{font-weight:700;color:var(--navy-900)}
       <form id="aiQuestionForm">
         <div class="form-grid">
           <div class="field">
+            <label for="aiGrade">Sınıf</label>
+            <select id="aiGrade" required>
+              <option value="">Sınıf seçin</option>
+              <option value="5">5. Sınıf</option>
+              <option value="6">6. Sınıf</option>
+              <option value="7">7. Sınıf</option>
+              <option value="8">8. Sınıf</option>
+              <option value="9">9. Sınıf</option>
+              <option value="10">10. Sınıf</option>
+              <option value="11">11. Sınıf</option>
+              <option value="12">12. Sınıf</option>
+            </select>
+          </div>
+          <div class="field">
             <label for="aiTopic">Konu</label>
-            <select id="aiTopic" required>
-              <option value="">Konu seçin</option>
-              <option>Sayılar ve Problemler</option>
-              <option>Karmaşık Sayılar</option>
-              <option>Polinomlar</option>
-              <option>Üstel ve Logaritmik Fonksiyonlar</option>
-              <option>Diziler</option>
-              <option>Geometrik Şekiller ve Dönüşümler</option>
-              <option>Türev ve Uygulamaları</option>
-              <option>Katı Cisimler</option>
-              <option>Sayılar ve Sayı Kümeleri</option>
-              <option>Bölünebilme ve Asal Çarpanlar</option>
-              <option>Gerçek Sayılar ve Aralıklar</option>
-              <option>Üslü ve Köklü İfadeler</option>
-              <option>Mutlak Değer</option>
-              <option>Algoritma ve Bilişim</option>
-              <option>İstatistiksel Araştırma</option>
-              <option>Sayılar ve Cebirsel İşlemler</option>
-              <option>Sayma Yöntemleri</option>
-              <option>Çokgenler</option>
-              <option>Analitik Düşünme ve Matematiksel Modelleme</option>
-              <option>Denklemler ve Eşitsizlikler</option>
-              <option>Fonksiyonlar</option>
-              <option>Permütasyon ve Olasılık</option>
-              <option>Trigonometri</option>
-              <option>Logaritma</option>
-              <option>Limit ve Süreklilik</option>
-              <option>Türev</option>
-              <option>İntegral</option>
-              <option>Üçgenler</option>
-              <option>Çember ve Daire</option>
-              <option>Analitik Geometri</option>
+            <select id="aiTopic" required disabled>
+              <option value="">Önce sınıf seçin</option>
             </select>
           </div>
           <div class="field">
@@ -978,6 +962,22 @@ td.net{font-weight:700;color:var(--navy-900)}
     }
   });
 
+  // Sınıf → konu bağımlı menüsü; konu haritası sunucudan (müfredat JSON'larından) gelir
+  async function aiKonulariYukle() {
+    try {
+      const {konular} = await api('/api/ai/konular');
+      $('aiGrade').addEventListener('change', () => {
+        const liste = konular[$('aiGrade').value] || [];
+        $('aiTopic').replaceChildren(new Option(liste.length ? 'Konu seçin' : 'Önce sınıf seçin', ''),
+          ...liste.map(konu => new Option(konu, konu)));
+        $('aiTopic').disabled = !liste.length;
+      });
+    } catch (error) {
+      durumYaz('aiQuestionStatus', 'Konu listesi yüklenemedi: ' + error.message, 'error');
+    }
+  }
+  aiKonulariYukle();
+
   $('aiQuestionForm').addEventListener('submit', async event => {
     event.preventDefault();
     const button = $('generateAiQuestions');
@@ -991,6 +991,7 @@ td.net{font-weight:700;color:var(--navy-900)}
         method: 'POST',
         body: JSON.stringify({
           topic: $('aiTopic').value,
+          grade: Number($('aiGrade').value),
           difficulty: $('aiDifficulty').value,
           count: Number($('aiCount').value)
         })
@@ -1036,8 +1037,9 @@ td.net{font-weight:700;color:var(--navy-900)}
         method: 'POST',
         body: JSON.stringify({
           topic: aiDraft.topic,
+          grade: aiDraft.grade,
           difficulty: aiDraft.difficulty,
-          title: `${aiDraft.topic} · ${aiDraft.difficulty} · Soru ${index + 1}`,
+          title: `${aiDraft.grade}. Sınıf · ${aiDraft.topic} · ${aiDraft.difficulty} · Soru ${index + 1}`,
           description: `${aiDraft.topic} konusunda yapay zeka destekli ${aiDraft.difficulty.toLocaleLowerCase('tr-TR')} seviye soru.`,
           question
         })

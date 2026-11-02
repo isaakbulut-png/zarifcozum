@@ -41,7 +41,7 @@ function buildConstraintText(metadata = {}) {
 /**
  * Öğrenci mesajına göre Pinecone'dan ilgili MEB kazanım sınırını bulan fonksiyon (RAG)
  */
-async function getMebConstraints(ogrenciMesaji) {
+async function getMebConstraints(ogrenciMesaji, grade) {
   try {
     // Mesajı sayısal vektöre çeviriyoruz
     const embeddingResponse = await aiClient.models.embedContent({
@@ -56,6 +56,8 @@ async function getMebConstraints(ogrenciMesaji) {
       vector: queryVector,
       topK: 1,
       includeMetadata: true,
+      // Sınıf verilmişse yalnızca o sınıfın kazanımları aranır (üst sınıf sorusu riskini engeller)
+      ...(Number.isInteger(grade) && { filter: { grade: { $eq: grade } } }),
     });
 
     if (searchResults.matches && searchResults.matches.length > 0) {
@@ -73,9 +75,9 @@ async function getMebConstraints(ogrenciMesaji) {
  * @param {string} ogrenciMesaji - Kullanıcının chat mesajı veya soru üretme isteği
  * @param {string} gorevTuru - 'ai_mentor' veya 'soru_uretme'
  */
-export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor') {
+export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor', grade) {
   // 1. Adım: Pinecone'dan müfredat sınırını çek
-  const mebSiniri = await getMebConstraints(ogrenciMesaji);
+  const mebSiniri = await getMebConstraints(ogrenciMesaji, grade);
 
   let systemInstruction = "";
   let selectedModel = "gemini-4-argon"; // Ücretli hattımızın en zeki akıl yürütme modeli

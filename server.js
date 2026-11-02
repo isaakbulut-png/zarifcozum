@@ -91,12 +91,16 @@ const chatLimiter = rateLimit({
 // aiService.mjs ES Module olduğundan CommonJS içinden dinamik import ile yüklenir
 app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, async (req, res) => {
   try {
-    const { ogrenciMesaji, gorevTuru } = req.body || {};
+    const { ogrenciMesaji, gorevTuru, grade } = req.body || {};
     if (typeof ogrenciMesaji !== 'string' || !ogrenciMesaji.trim()) {
       return res.status(400).json({ success: false, error: 'ogrenciMesaji gerekli.' });
     }
+    const sinif = grade === undefined || grade === null || grade === '' ? undefined : Number(grade);
+    if (sinif !== undefined && !(Number.isInteger(sinif) && sinif >= 5 && sinif <= 12)) {
+      return res.status(400).json({ success: false, error: 'grade 5 ile 12 arasında bir tam sayı olmalı.' });
+    }
     const { zarifCozumAIServisi } = await import('./aiService.mjs');
-    const yanit = await zarifCozumAIServisi(ogrenciMesaji, gorevTuru || 'ai_mentor');
+    const yanit = await zarifCozumAIServisi(ogrenciMesaji, gorevTuru || 'ai_mentor', sinif);
     res.json({ success: true, yanit });
   } catch (error) {
     console.error('/api/chat hatası:', error);
