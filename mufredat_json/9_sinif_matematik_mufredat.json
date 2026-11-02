@@ -1,0 +1,513 @@
+{
+  "schema_version": "1.0",
+  "language": "tr",
+  "grade": 9,
+  "course": "Matematik",
+  "program_version": "Türkiye Yüzyılı Maarif Modeli (2026)",
+  "as_of": "2026-11-02",
+  "implementation_status": "2026-2027 öğretim yılında TYMM uygulanır.",
+  "implementation_source": "https://tymm.meb.gov.tr/taslak-cerceve-planlari/ortaogretim",
+  "record_count": 20,
+  "records": [
+    {
+      "outcome_code": "MAT.9.1.1",
+      "grade": 9,
+      "unit_topic": "Sayılar",
+      "official_description": "Gerçek sayıların üslü ve köklü gösterimleriyle yapılan işlemlere dair muhakeme yapabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 44
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.1.2",
+      "grade": 9,
+      "unit_topic": "Sayılar",
+      "official_description": "Gerçek sayı aralıklarının gösteriminde ve aralıklarla ilgili işlemlerde küme sembol ve işlemlerinden yararlanabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 44
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.1.3",
+      "grade": 9,
+      "unit_topic": "Sayılar",
+      "official_description": "Farklı sayı kümelerinin özellikleri hakkında muhakeme yapabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 44
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.1.4",
+      "grade": 9,
+      "unit_topic": "Sayılar",
+      "official_description": "Gerçek sayıların işlem özelliklerini cebirsel olarak ifade etmede analojik akıl yürütebilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 44
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.2.3",
+      "grade": 9,
+      "unit_topic": "Nicelikler ve Değişimler",
+      "official_description": "Doğrusal fonksiyonlarla ifade edilebilen denklem ve eşitsizlikler içeren prob - lem çözebilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 50
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.2.1",
+      "grade": 9,
+      "unit_topic": "Nicelikler ve Değişimler",
+      "official_description": "Gerçek sayılarda f(x) = x şeklinde tanımlı doğrusal referans fonksiyonun nitel özellikleri ile bu fonksiyondan türetilen g(x) = a ∙ f(x ± r) ± k, (a, r, k ∈ ℝ, a ≠ 0) doğrusal fonksiyonların nitel özelliklerine ilişkin matematiksel muhakeme yapabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 50
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.2.2",
+      "grade": 9,
+      "unit_topic": "Nicelikler ve Değişimler",
+      "official_description": "Gerçek sayılarda m(x) = ± |ax ± b| ± c (a, b, c ∈ℝ, a ≠ 0) şeklinde tanımlı mutlak değer fonksiyonlarının nitel özelliklerini incelemek için doğrusal fonksiyonlara bağlı analojik akıl yürütebilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 50
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.3.1",
+      "grade": 9,
+      "unit_topic": "Geometrik Şekiller",
+      "official_description": "Üçgende açı ve kenarla ilgili özellikleri, üçgenin açıları ve kenarları arasındaki ilişkileri doğrulayabilme veya ispatlayabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 57
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.4.1",
+      "grade": 9,
+      "unit_topic": "Eşlik ve Benzerlik",
+      "official_description": "Geometrik dönüşümlerle ilgili çıkarım yapabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 61
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.4.2",
+      "grade": 9,
+      "unit_topic": "Eşlik ve Benzerlik",
+      "official_description": "İki üçgenin eş veya benzer olması için gerekli olan asgari koşullarla ilgili çıka - rım yapabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 61
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.4.3",
+      "grade": 9,
+      "unit_topic": "Eşlik ve Benzerlik",
+      "official_description": "Bir üçgenden hareketle ona benzer üçgenler oluşturma ile ilgili yansıtma ya - pabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 61
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.4.4",
+      "grade": 9,
+      "unit_topic": "Eşlik ve Benzerlik",
+      "official_description": "Tales, Öklid ve Pisagor teoremlerini ispatlayabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 61
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.4.5",
+      "grade": 9,
+      "unit_topic": "Eşlik ve Benzerlik",
+      "official_description": "Eşlik ve benzerlikle ilgili çıkarım ve teoremleri içeren problemleri çözebilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 61
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.5.1",
+      "grade": 9,
+      "unit_topic": "Algoritma ve Bilişim",
+      "official_description": "Algoritma temelli yaklaşımlarla problem çözebilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 68
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.5.2",
+      "grade": 9,
+      "unit_topic": "Algoritma ve Bilişim",
+      "official_description": "Algoritmik yapılar içerisindeki mantık bağlaçlarını ve niceleyicileri çözümleye - bilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 68
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.5.3",
+      "grade": 9,
+      "unit_topic": "Algoritma ve Bilişim",
+      "official_description": "Mantık bağlaçları ve niceleyicilerin algoritmalarda kullanımına yönelik edindiği deneyimi farklı matematiksel görev ve problemlere yansıtabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 68
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.6.1",
+      "grade": 9,
+      "unit_topic": "İstatistiksel Araştırma Süreci",
+      "official_description": "Tek nicel değişkenli veri dağılımları ile çalışabilme ve tek nicel değişken içeren veriye dayalı karar verebilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.6.2",
+      "grade": 9,
+      "unit_topic": "İstatistiksel Araştırma Süreci",
+      "official_description": "Başkaları tarafından oluşturulan tek nicel değişkenli veri dağılımlarına ilişkin istatistiksel sonuç veya yorumları tartışabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.7.1",
+      "grade": 9,
+      "unit_topic": "Veriden Olasılığa",
+      "official_description": "Olayların olasılığını gözleme dayalı tahmin edebilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 80
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.9.7.2",
+      "grade": 9,
+      "unit_topic": "Veriden Olasılığa",
+      "official_description": "Olayların olasılığına ilişkin tümevarımsal akıl yürütebilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 80
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/41/matematik-9sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "Matematik 9. Sınıf Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/42/matematik-9sinif-ders-kitabi-2kitap"
+        }
+      ]
+    }
+  ]
+}

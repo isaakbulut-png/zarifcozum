@@ -9,6 +9,7 @@ for (const file of ['.env', 'baglanti_adresi.env']) {
 }
 const express = require('express');
 const cors = require('cors');
+const { rateLimit } = require('express-rate-limit');
 const crypto = require('crypto');
 const { MongoClient, ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
@@ -74,6 +75,34 @@ app.use(session({
     maxAge: 8 * 60 * 60 * 1000
   }
 }));
+// Ücretli Gemini kotasını korur: yalnızca giriş yapmış kullanıcılar, kullanıcı başına sınırlı istek.
+// Yerel testler (localhost) limitten muaftır.
+const LOOPBACK_IPLER = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+const chatLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  limit: 20,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  keyGenerator: (req) => `user:${req.session.user.id}`,
+  skip: (req) => LOOPBACK_IPLER.has(req.ip),
+  message: { success: false, error: 'Çok fazla istek gönderdiniz. Lütfen birkaç dakika sonra tekrar deneyin.' }
+});
+
+// aiService.mjs ES Module olduğundan CommonJS içinden dinamik import ile yüklenir
+app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, async (req, res) => {
+  try {
+    const { ogrenciMesaji, gorevTuru } = req.body || {};
+    if (typeof ogrenciMesaji !== 'string' || !ogrenciMesaji.trim()) {
+      return res.status(400).json({ success: false, error: 'ogrenciMesaji gerekli.' });
+    }
+    const { zarifCozumAIServisi } = await import('./aiService.mjs');
+    const yanit = await zarifCozumAIServisi(ogrenciMesaji, gorevTuru || 'ai_mentor');
+    res.json({ success: true, yanit });
+  } catch (error) {
+    console.error('/api/chat hatası:', error);
+    res.status(500).json({ success: false, error: 'Sunucu hatası oluştu.' });
+  }
+});
 // app.use(authRouter); satırının hemen ÜSTÜNE ekleyin:
 app.get('/planli-calisma.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'planli-calisma.html'));

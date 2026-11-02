@@ -1,0 +1,328 @@
+{
+  "schema_version": "1.0",
+  "language": "tr",
+  "grade": 11,
+  "course": "Matematik",
+  "program_version": "Türkiye Yüzyılı Maarif Modeli (2026)",
+  "as_of": "2026-11-02",
+  "implementation_status": "2026-2027 öğretim yılında TYMM uygulanır.",
+  "implementation_source": "https://tymm.meb.gov.tr/taslak-cerceve-planlari/ortaogretim",
+  "record_count": 15,
+  "records": [
+    {
+      "outcome_code": "MAT.11.1.1",
+      "grade": 11,
+      "unit_topic": "İstatistiksel Araştırma Süreci",
+      "official_description": "İki nicel değişkenli veri ile çalışabilme ve iki nicel değişken arasındaki ilişkililiğe dayalı karar verebilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 129
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.1.2",
+      "grade": 11,
+      "unit_topic": "İstatistiksel Araştırma Süreci",
+      "official_description": "Başkaları tarafından oluşturulan iki nicel değişkenli verilerin ilişkililiğine dayalı istatistiksel sonuç veya yorumları tartışabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 129
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.2.1",
+      "grade": 11,
+      "unit_topic": "Geometrik Şekiller",
+      "official_description": "Üçgenlerde açı, benzerlik ve alan özelliklerinden yola çıkarak dörtgenlerin açı, kenar, köşegen, simetri ve alan özelliklerine ilişkin muhakeme yapabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 135
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.2.2",
+      "grade": 11,
+      "unit_topic": "Geometrik Şekiller",
+      "official_description": "Özel dörtgenlerin kenar, açı, köşegen ve simetri özelliklerinden hareketle aralarındaki ilişkileri yapılandırabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 135
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.2.3",
+      "grade": 11,
+      "unit_topic": "Geometrik Şekiller",
+      "official_description": "Çokgenleri içbükey veya dışbükey olarak sınıflandırabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 135
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.2.4",
+      "grade": 11,
+      "unit_topic": "Geometrik Şekiller",
+      "official_description": "Dışbükey çokgenlerin kenar, açı, köşegen, simetri ve alan özelliklerine dair çı - karım yapabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 135
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.2.5",
+      "grade": 11,
+      "unit_topic": "Geometrik Şekiller",
+      "official_description": "Çokgenlerin kenar, açı, köşegen, simetri ve alan özelliklerini içeren problemler çözebilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 135
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.3.1",
+      "grade": 11,
+      "unit_topic": "Nicelikler ve Değişimler",
+      "official_description": "f (x) = sinx (x ∈ ℝ), f (x) = cosx (x ∈ ℝ), f (x) = tanx (x ∈ ℝ, x ≠ π 2 + kπ, k ∈ ℤ ) ve f (x) = cotx (x ∈ ℝ, x ≠ kπ, k ∈ ℤ) şeklinde tanımlı trigonometrik referans fonksiyonların nitel özellikleri ile bu fonksiyonlardan türetilen [g(x) = k ∙ f (mx ± r) ± s (k, m, r, s ∈ ℝ, k ≠ 0, m ≠ 0)] trigonometrik fonksiyonların nitel özelliklerine ilişkin matematiksel muhakeme yapabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 142
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.3.2",
+      "grade": 11,
+      "unit_topic": "Nicelikler ve Değişimler",
+      "official_description": "Trigonometrik fonksiyonlarla ifade edilebilen denklemleri içeren problemleri çözebilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 142
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.3.3",
+      "grade": 11,
+      "unit_topic": "Nicelikler ve Değişimler",
+      "official_description": "Gerçek sayılarda f(x) = ax (a > 0, a ≠ 1) şeklinde tanımlı üstel referans fonksiyonun nitel özellikleri ile bu fonksiyondan türetilen [g(x) = k ∙ f (mx ± r) ± s (k, m, r, s ∈ ℝ, k ≠ 0, m ≠ 0)] üstel fonksiyonların nitel özelliklerine ilişkin matematiksel muhakeme yapabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 149
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.3.4",
+      "grade": 11,
+      "unit_topic": "Nicelikler ve Değişimler",
+      "official_description": "Üstel fonksiyonların ters fonksiyonlarını inceleyerek logaritmik fonksiyona dair çıkarım yapabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 149
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.3.5",
+      "grade": 11,
+      "unit_topic": "Nicelikler ve Değişimler",
+      "official_description": "f (x) = loga x (a > 0, a ≠ 1, x > 0 ) şeklinde tanımlı logaritmik referans fonksi - yonun nitel özellikleri ile bu fonksiyondan türetilen [ g(x) = k ∙ f (mx ± r) ± s (k, m, r, s ∈ ℝ, k ≠ 0, m ≠ 0)] logaritmik fonksiyonların nitel özelliklerine ilişkin matematiksel muhakeme yapabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 149
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.3.6",
+      "grade": 11,
+      "unit_topic": "Nicelikler ve Değişimler",
+      "official_description": "Gerçek yaşam durumlarında üstel ve logaritmik fonksiyonlarla ifade edilen denklem ve eşitsizlikleri içeren problemler çözebilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 150
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.3.7",
+      "grade": 11,
+      "unit_topic": "Nicelikler ve Değişimler",
+      "official_description": "Fonksiyonların bileşkelerine ilişkin muhakeme yapabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 157
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.11.3.8",
+      "grade": 11,
+      "unit_topic": "Nicelikler ve Değişimler",
+      "official_description": "Fonksiyonlarda dört işlem özelliklerini yorumlayabilme",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı (Hazırlık, 9-12), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/2026518151640408-mated%C3%B6p.pdf",
+        "pdf_page": 157
+      },
+      "textbook_sources": [
+        {
+          "title": "Matematik 11. Sınıf Ders Kitabı",
+          "url": "https://tymm.meb.gov.tr/kitap/418/matematik-dersi-11sinif-ders-kitabi"
+        }
+      ]
+    }
+  ]
+}

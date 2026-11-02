@@ -1,0 +1,1220 @@
+{
+  "schema_version": "1.0",
+  "language": "tr",
+  "grade": 8,
+  "course": "Matematik",
+  "program_version": "Matematik Dersi Öğretim Programı (2018)",
+  "as_of": "2026-11-02",
+  "implementation_status": "2026-2027 öğretim yılı uygulama durumu esas alınmıştır.",
+  "record_count": 52,
+  "records": [
+    {
+      "outcome_code": "M.8.1.1.1",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Çarpanlar ve Katlar",
+      "official_description": "Verilen pozitif tam sayıların pozitif tam sayı çarpanlarını bulur, pozitif tam sayıların pozitif tam sayı çarpanlarını üslü ifadelerin çarpımı şeklinde yazar",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 73
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.1.2",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Çarpanlar ve Katlar",
+      "official_description": "İki doğal sayının en büyük ortak bölenini (EBOB) ve en küçük ortak katını (EKOK) hesaplar, ilgili problemleri çözer",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "Alan ve hacim hesaplamayı gerektiren problemlere girilmez",
+          "source_page": 73
+        }
+      ],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 73
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.1.3",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Çarpanlar ve Katlar",
+      "official_description": "Verilen iki doğal sayının aralarında asal olup olmadığını belirler",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 73
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.2.1",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Üslü İfadeler",
+      "official_description": "Tam sayıların, tam sayı kuvvetlerini hesaplar",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 73
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.2.2",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Üslü İfadeler",
+      "official_description": "Üslü ifadelerle ilgili temel kuralları anlar, birbirine denk ifadeler oluşturur",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 73
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.2.3",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Üslü İfadeler",
+      "official_description": "Sayıların ondalık gösterimlerini 10’un tam sayı kuvvetlerini kullanarak çözümler",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 73
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.2.4",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Üslü İfadeler",
+      "official_description": "Verilen bir sayıyı 10’un farklı tam sayı kuvvetlerini kullanarak ifade eder",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 73
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.2.5",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Üslü İfadeler",
+      "official_description": "Çok büyük ve çok küçük sayıları bilimsel gösterimle ifade eder ve karşılaştırır",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "“bilimsel gösterim”dir. a’nın pozitif olduğu durumlarla sınırlı kalınır",
+          "source_page": 73
+        }
+      ],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 73
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.3.1",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Kareköklü İfadeler",
+      "official_description": "Tam kare pozitif tam sayılarla bu sayıların karekökleri arasındaki ilişkiyi belirler",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 73
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.3.2",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Kareköklü İfadeler",
+      "official_description": "Tam kare olmayan kareköklü bir sayının hangi iki doğal sayı arasında olduğunu belirler",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.3.3",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Kareköklü İfadeler",
+      "official_description": "Kareköklü bir ifadeyi a b şeklinde yazar ve a b şeklindeki ifadede katsayıyı kök içine alır",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.3.4",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Kareköklü İfadeler",
+      "official_description": "Kareköklü ifadelerde çarpma ve bölme işlemlerini yapar",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "Paydasında a ± c veya a ± b gibi birden fazla terim bulunan ifadelerle işlemlere girilmez",
+          "source_page": 74
+        }
+      ],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.3.5",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Kareköklü İfadeler",
+      "official_description": "Kareköklü ifadelerde toplama ve çıkarma işlemlerini yapar",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "Paydasında a ± c veya a ± b gibi birden fazla terim bulunan ifadelerle işlemlere girilmez",
+          "source_page": 74
+        }
+      ],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.3.6",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Kareköklü İfadeler",
+      "official_description": "Kareköklü bir ifade ile çarpıldığında, sonucu bir doğal sayı yapan çarpanlara örnek verir",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.3.7",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Kareköklü İfadeler",
+      "official_description": "Ondalık ifadelerin kareköklerini belirler",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.1.3.8",
+      "grade": 8,
+      "unit_topic": "Sayılar ve İşlemler / Kareköklü İfadeler",
+      "official_description": "Gerçek sayıları tanır, rasyonel ve irrasyonel sayılarla ilişkilendirir",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.1.1",
+      "grade": 8,
+      "unit_topic": "Cebir / Cebirsel İfadeler ve Özdeşlikler",
+      "official_description": "Basit cebirsel ifadeleri anlar ve farklı biçimlerde yazar",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.1.2",
+      "grade": 8,
+      "unit_topic": "Cebir / Cebirsel İfadeler ve Özdeşlikler",
+      "official_description": "Cebirsel ifadelerin çarpımını yapar",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.1.3",
+      "grade": 8,
+      "unit_topic": "Cebir / Cebirsel İfadeler ve Özdeşlikler",
+      "official_description": "Özdeşlikleri modellerle açıklar",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "a) (a ± b)² = a² ± 2ab + b² ve a² - b² = (a-b)(a+b) özdeşlikleriyle sınırlı kalınır",
+          "source_page": 74
+        }
+      ],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.1.4",
+      "grade": 8,
+      "unit_topic": "Cebir / Cebirsel İfadeler ve Özdeşlikler",
+      "official_description": "Cebirsel ifadeleri çarpanlara ayırır",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "c) Gruplandırarak çarpanlarına ayırma yöntemine girilmez",
+          "source_page": 74
+        },
+        {
+          "statement": "ç) Tam kare olmayan ikinci dereceden ifadelerin çarpanlara ayrılma işlemlerine girilmez",
+          "source_page": 74
+        }
+      ],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.2.1",
+      "grade": 8,
+      "unit_topic": "Cebir / Doğrusal Denklemler",
+      "official_description": "Birinci dereceden bir bilinmeyenli denklemleri çözer",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 75
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.2.2",
+      "grade": 8,
+      "unit_topic": "Cebir / Doğrusal Denklemler",
+      "official_description": "Koordinat sistemini özellikleriyle tanır ve sıralı ikilileri gösterir",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 75
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.2.3",
+      "grade": 8,
+      "unit_topic": "Cebir / Doğrusal Denklemler",
+      "official_description": "Aralarında doğrusal ilişki bulunan iki değişkenden birinin diğerine bağlı olarak nasıl değiştiğini tablo ve denklem ile ifade eder",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 75
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.2.4",
+      "grade": 8,
+      "unit_topic": "Cebir / Doğrusal Denklemler",
+      "official_description": "Doğrusal denklemlerin grafiğini çizer",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 75
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.2.5",
+      "grade": 8,
+      "unit_topic": "Cebir / Doğrusal Denklemler",
+      "official_description": "Doğrusal ilişki içeren gerçek hayat durumlarına ait denklem, tablo ve grafiği oluşturur ve yorumlar",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 75
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.2.6",
+      "grade": 8,
+      "unit_topic": "Cebir / Doğrusal Denklemler",
+      "official_description": "Doğrunun eğimini modellerle açıklar, doğrusal denklemleri ve grafiklerini eğimle ilişkilendirir",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 75
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.3.1",
+      "grade": 8,
+      "unit_topic": "Cebir / Eşitsizlikler",
+      "official_description": "Birinci dereceden bir bilinmeyenli eşitsizlik içeren günlük hayat durumlarına uygun matematik cümleleri yazar",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 75
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.3.2",
+      "grade": 8,
+      "unit_topic": "Cebir / Eşitsizlikler",
+      "official_description": "Birinci dereceden bir bilinmeyenli eşitsizlikleri sayı doğrusunda gösterir",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 75
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.2.3.3",
+      "grade": 8,
+      "unit_topic": "Cebir / Eşitsizlikler",
+      "official_description": "Birinci dereceden bir bilinmeyenli eşitsizlikleri çözer",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 75
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.1.1",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Üçgenler",
+      "official_description": "Üçgende kenarortay, açıortay ve yüksekliği inşa eder",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 76
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.1.2",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Üçgenler",
+      "official_description": "Üçgenin iki kenar uzunluğunun toplamı veya farkı ile üçüncü kenarının uzunluğunu ilişkilendirir",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 76
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.1.3",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Üçgenler",
+      "official_description": "Üçgenin kenar uzunlukları ile bu kenarların karşısındaki açıların ölçülerini ilişkilendirir",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 76
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.1.4",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Üçgenler",
+      "official_description": "Yeterli sayıda elemanının ölçüleri verilen bir üçgeni çizer",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 76
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.1.5",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Üçgenler",
+      "official_description": "Pisagor bağıntısını oluşturur, ilgili problemleri çözer",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 76
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.2.1",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Dönüşüm Geometrisi",
+      "official_description": "Nokta, doğru parçası ve diğer şekillerin öteleme sonucundaki görüntülerini çizer",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 76
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.2.2",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Dönüşüm Geometrisi",
+      "official_description": "Nokta, doğru parçası ve diğer şekillerin yansıma sonucu oluşan görüntüsünü oluşturur",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 76
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.2.3",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Dönüşüm Geometrisi",
+      "official_description": "Çokgenlerin öteleme ve yansımalar sonucunda ortaya çıkan görüntüsünü oluşturur",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 77
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.3.1",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Eşlik ve Benzerlik",
+      "official_description": "Eşlik ve benzerliği ilişkilendirir, eş ve benzer şekillerin kenar ve açı ilişkilerini belirler",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 77
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.3.2",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Eşlik ve Benzerlik",
+      "official_description": "Benzer çokgenlerin benzerlik oranını belirler, bir çokgene eş ve benzer çokgenler oluşturur",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "c) Çokgenlerde benzerlik problemlerine girilmez",
+          "source_page": 77
+        }
+      ],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 77
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.4.1",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Geometrik Cisimler",
+      "official_description": "Dik prizmaları tanır, temel elemanlarını belirler, inşa eder ve açınımını çizer",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 77
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.4.2",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Geometrik Cisimler",
+      "official_description": "Dik dairesel silindirin temel elemanlarını belirler, inşa eder ve açınımını çizer",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 77
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.4.3",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Geometrik Cisimler",
+      "official_description": "Dik dairesel silindirin yüzey alanı bağıntısını oluşturur, ilgili problemleri çözer",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 77
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.4.4",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Geometrik Cisimler",
+      "official_description": "Dik dairesel silindirin hacim bağıntısını oluşturur; ilgili problemleri çözer",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 77
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.4.5",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Geometrik Cisimler",
+      "official_description": "Dik piramidi tanır, temel elemanlarını belirler, inşa eder ve açınımını çizer",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "c) Alan ve hacim problemlerine girilmez",
+          "source_page": 78
+        }
+      ],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 78
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.3.4.6",
+      "grade": 8,
+      "unit_topic": "Geometri ve Ölçme / Geometrik Cisimler",
+      "official_description": "Dik koniyi tanır, temel elemanlarını belirler, inşa eder ve açınımını çizer",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "c) Alan ve hacim problemlerine girilmez",
+          "source_page": 78
+        }
+      ],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 78
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.4.1.1",
+      "grade": 8,
+      "unit_topic": "Veri İşleme / Veri Analizi",
+      "official_description": "En fazla üç veri grubuna ait çizgi ve sütun grafiklerini yorumlar",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 78
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.4.1.2",
+      "grade": 8,
+      "unit_topic": "Veri İşleme / Veri Analizi",
+      "official_description": "Verileri sütun, daire veya çizgi grafiği ile gösterir ve bu gösterimler arasında uygun olan dönüşümleri yapar",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 78
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.5.1.1",
+      "grade": 8,
+      "unit_topic": "Olasılık / Basit Olayların Olma Olasılığı",
+      "official_description": "Bir olaya ait olası durumları belirler",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "sayısının 8 olduğu ifade edilir . Birden fazla olayın olası durumları ele alınmaz",
+          "source_page": 78
+        }
+      ],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 78
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.5.1.2",
+      "grade": 8,
+      "unit_topic": "Olasılık / Basit Olayların Olma Olasılığı",
+      "official_description": "“Daha fazla”, “eşit”, “daha az” olasılıklı olayları ayırt eder, örnek verir",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 78
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.5.1.3",
+      "grade": 8,
+      "unit_topic": "Olasılık / Basit Olayların Olma Olasılığı",
+      "official_description": "Eşit şansa sahip olan olaylarda her bir çıktının olasılık değerinin eşit olduğunu ve bu değerin 1/n olduğunu açıklar",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 78
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.5.1.4",
+      "grade": 8,
+      "unit_topic": "Olasılık / Basit Olayların Olma Olasılığı",
+      "official_description": "Olasılık değerinin 0 ile 1 arasında (0 ve 1 dâhil) olduğunu anlar",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 78
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    },
+    {
+      "outcome_code": "M.8.5.1.5",
+      "grade": 8,
+      "unit_topic": "Olasılık / Basit Olayların Olma Olasılığı",
+      "official_description": "Basit bir olayın olma olasılığını hesaplar",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "b) Ayrık olan ve olmayan, bağımlı ve bağımsız olayların olasılığına girilmez",
+          "source_page": 78
+        },
+        {
+          "statement": "c) Birden fazla olayın olma olasılığı ele alınmaz",
+          "source_page": 78
+        }
+      ],
+      "editorial_cautions": [
+        "Bu kayıt 2018 öğretim programındaki kazanım kodunu korur; 2026-27 uygulamasında 8. sınıf için eski program yürürlüktedir. Kazanım açıklamalarındaki sınırlamalar resmi sınırdır; ayrıca listelenmeyen yasaklar çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Matematik Dersi Öğretim Programı, 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201813017165445-MATEMAT%C4%B0K%20%C3%96%C4%9ERET%C4%B0M%20PROGRAMI%202018v.pdf?v=1.0.23",
+        "pdf_page": 78
+      },
+      "textbook_sources": [
+        {
+          "title": "EBA II. Kademe Ders Kitapları kataloğu (Matematik Ders Kitabı II. Kademe)",
+          "url": "https://prod.eba.gov.tr/2-kademe"
+        }
+      ]
+    }
+  ],
+  "implementation_source": "https://tymm.meb.gov.tr/taslak-cerceve-planlari/temel-egitim"
+}

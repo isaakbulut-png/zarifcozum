@@ -1,0 +1,798 @@
+{
+  "schema_version": "1.0",
+  "language": "tr",
+  "grade": 7,
+  "course": "Matematik",
+  "program_version": "Türkiye Yüzyılı Maarif Modeli (2026)",
+  "as_of": "2026-11-02",
+  "implementation_status": "2026-2027 öğretim yılı uygulama durumu esas alınmıştır.",
+  "record_count": 30,
+  "records": [
+    {
+      "outcome_code": "MAT.7.1.1",
+      "grade": 7,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Gerçek yaşam ya da matematiksel durumlarda doğal sayı, tam sayı ve rasyonel sayıları yorumlayabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 116
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.1.2",
+      "grade": 7,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Gerçek yaşam durumlarında rasyonel sayıların ondalık gösterimlerini yansıtabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 116
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.1.3",
+      "grade": 7,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Rasyonel sayıların karşılaştırma ve sıralama ilişkilerini yorumlayabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 116
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.1.4",
+      "grade": 7,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Rasyonel sayılar ve işlemler içeren gerçek yaşam problemlerini çözebilme",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "Örneklerin seçiminde en fazla üç adımla sınırlı kalınır.",
+          "source_page": 120
+        }
+      ],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 116
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.1.5",
+      "grade": 7,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Gerçek yaşam durumları üzerinden oran ilişkileri hakkında muhakeme yapa - bilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 123
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.1.6",
+      "grade": 7,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Gerçek yaşam durumları üzerinden orantılı durumları yorumlayabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 123
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.1.7",
+      "grade": 7,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Gerçek yaşam durumları üzerinden doğru orantılı durumlara ilişkin problemleri çözebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 123
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.2.1",
+      "grade": 7,
+      "unit_topic": "İşlemlerle Cebirsel Düşünme ve Değişimler",
+      "official_description": "Gerçek yaşam durumları ya da matematiksel durumlar üzerinden cebirsel ifa - delerle toplama, çıkarma ve bir rasyonel sayıyla çarpma işlemlerini yorumla - yabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 131
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.2.2",
+      "grade": 7,
+      "unit_topic": "İşlemlerle Cebirsel Düşünme ve Değişimler",
+      "official_description": "Birinci dereceden bir bilinmeyenli denklem ve birinci dereceden bir bilinme - yenli eşitsizlik içeren gerçek yaşam problemlerini çözebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 131
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.2.3",
+      "grade": 7,
+      "unit_topic": "İşlemlerle Cebirsel Düşünme ve Değişimler",
+      "official_description": "Sayılar ve özelliklerini içeren ispatlara ilişkin matematiksel muhakeme yapa - bilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 131
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.2.4",
+      "grade": 7,
+      "unit_topic": "İşlemlerle Cebirsel Düşünme ve Değişimler",
+      "official_description": "Temel aritmetik ve cebirsel ifadelerle işlem içeren durumlardaki süreci algorit - ma ifade yöntemlerini kullanarak yapılandırabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 131
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.3.1",
+      "grade": 7,
+      "unit_topic": "Dönüşüm",
+      "official_description": "Şekillerin yansıma dönüşümü altındaki görüntülerinin oluşturulmasına dair çı - karım yapabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 138
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.3.2",
+      "grade": 7,
+      "unit_topic": "Dönüşüm",
+      "official_description": "Yansıma dönüşümündeki deneyimlerini orta dikme ve açıortay inşasına yan - sıtabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 138
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.4.1",
+      "grade": 7,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Eş küplerle oluşturulan yapılar ile görünümleri arasındaki ilişkiyi çözümleye - bilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 143
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.4.2",
+      "grade": 7,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Dikdörtgenler prizmasının yüzey alanını yorumlayabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 143
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.4.3",
+      "grade": 7,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Dikdörtgenler prizmasının hacmini eş nesneler aracılığıyla yorumlayabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 143
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.4.4",
+      "grade": 7,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Dikdörtgenler prizmasının hacim bağıntısını değerlendirebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 143
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.4.5",
+      "grade": 7,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Hacim ölçme birimleri arasındaki ilişkileri değerlendirebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 143
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.4.6",
+      "grade": 7,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Günlük hayat durumlarında dikdörtgenler prizmaları ile modellenen cisimlerin yüzey alanı ve hacmine yönelik problem çözebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 143
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.4.7",
+      "grade": 7,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Dikdörtgenin, paralelkenarın alanına ve çemberin uzunluğuna ilişkin deneyim - lerini dairenin alan bağıntısına yansıtabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 151
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.4.8",
+      "grade": 7,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Çemberde merkez açı ve gördüğü yay uzunluğu arasındaki ilişkiden yola çı - karak daire ve daire diliminin alanları arasındaki ilişkiye yönelik analojik akıl yürütebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 151
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.4.9",
+      "grade": 7,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Eşkenar dörtgen ve yamuğun alan bağıntılarına dair çıkarım yapabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 151
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.4.10",
+      "grade": 7,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Günlük hayat durumlarında daire, daire dilimi, eşkenar dörtgen ve yamuğun alanına ilişkin problem çözebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 151
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.5.1",
+      "grade": 7,
+      "unit_topic": "Geometrik Şekiller",
+      "official_description": "Matematiksel araç ve teknolojiden yararlanarak üçgende kenarortayı, açıortayı ve yüksekliği çözümleyebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 157
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.5.2",
+      "grade": 7,
+      "unit_topic": "Geometrik Şekiller",
+      "official_description": "Orta dikme inşasına yönelik deneyimlerini üçgende kenarortay inşasına yan - sıtabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 157
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.6.1",
+      "grade": 7,
+      "unit_topic": "İstatistiksel Araştırma Süreci",
+      "official_description": "Kategorik veya nicel (sürekli) veri ile çalışabilme ve veriye dayalı karar verebil - me",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 161
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.6.2",
+      "grade": 7,
+      "unit_topic": "İstatistiksel Araştırma Süreci",
+      "official_description": "Başkaları tarafından oluşturulan kategorik veya nicel (sürekli) veriye dayalı is - tatistiksel sonuç veya yorumları tartışabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 161
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.7.1",
+      "grade": 7,
+      "unit_topic": "Veriden Olasılığa",
+      "official_description": "Bir olayın ve tümleyeninin olasılığına ilişkin tümevarımsal akıl yürütebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 169
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.7.2",
+      "grade": 7,
+      "unit_topic": "Veriden Olasılığa",
+      "official_description": "Aynı deneye ait olayların eşit olasılıklı olma durumlarını değerlendirebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 169
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.7.7.3",
+      "grade": 7,
+      "unit_topic": "Veriden Olasılığa",
+      "official_description": "Olayları ayrık olma ve ayrık olmama durumlarına göre sınıflandırabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 169
+      },
+      "textbook_sources": [
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/280/matematik-7sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "7. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/281/matematik-7sinif-ders-kitabi-2kitap"
+        }
+      ]
+    }
+  ],
+  "implementation_source": "https://tymm.meb.gov.tr/taslak-cerceve-planlari/temel-egitim"
+}

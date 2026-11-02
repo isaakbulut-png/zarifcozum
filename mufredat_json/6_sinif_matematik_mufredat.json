@@ -1,0 +1,652 @@
+{
+  "schema_version": "1.0",
+  "language": "tr",
+  "grade": 6,
+  "course": "Matematik",
+  "program_version": "Türkiye Yüzyılı Maarif Modeli (2026)",
+  "as_of": "2026-11-02",
+  "implementation_status": "2026-2027 öğretim yılı uygulama durumu esas alınmıştır.",
+  "record_count": 24,
+  "records": [
+    {
+      "outcome_code": "MAT.6.1.1",
+      "grade": 6,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Karşılaştığı problem durumlarında bir doğal sayının çarpan ve katlarına yönelik muhakeme yapabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 67
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.1.2",
+      "grade": 6,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Bir doğal sayının 2, 3, 4, 5, 6, 9 ve 10 ile tam bölünebilme kriterlerine ilişkin çıka - rım yapabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 67
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.1.3",
+      "grade": 6,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Bir doğal sayının asal olma durumunu ve asal çarpanlarını çözümleyebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 67
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.1.4",
+      "grade": 6,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Günlük hayat problemleri ya da matematiksel durumlar üzerinden ortak kat ve ortak böleni yorumlayabilme",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "Bu süreçte en büyük ortak bölen (EBOB) ve en küçük ortak kat (EKOK) kavramlarına değinilmez.",
+          "source_page": 71
+        }
+      ],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 67
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.1.5",
+      "grade": 6,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Gerçek yaşam durumlarında ondalık gösterimlerin basamak değerlerini kesir - lerden yararlanarak yorumlayabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.1.6",
+      "grade": 6,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Kesir ve bölme işlemi arasındaki ilişkiye yönelik tümevarımsal akıl yürütebilme",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "Devirli ondalık gösterimlerin kesir gösterimine dönüştürüldüğü çalışmalara yer verilmez.",
+          "source_page": 77
+        }
+      ],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.1.7",
+      "grade": 6,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Gerçek yaşam durumlarında karşılaşılan kesir, ondalık ve yüzde gösterimleri ile ilgili dört işlem gerektiren problemleri çözebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.1.8",
+      "grade": 6,
+      "unit_topic": "Sayılar ve Nicelikler",
+      "official_description": "Karşılaştığı günlük hayat ya da matematiksel durumlarda standart uzunluk ölçme birimlerini değerlendirebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 74
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.2.1",
+      "grade": 6,
+      "unit_topic": "İşlemlerle Cebirsel Düşünme ve Değişimler",
+      "official_description": "Gerçek yaşam durumlarında bilinen niceliklerden bilinmeyen niceliklere ilişkin muhakeme yapabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 83
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.2.2",
+      "grade": 6,
+      "unit_topic": "İşlemlerle Cebirsel Düşünme ve Değişimler",
+      "official_description": "Sayı ve şekil örüntülerini yorumlayabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 83
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.2.3",
+      "grade": 6,
+      "unit_topic": "İşlemlerle Cebirsel Düşünme ve Değişimler",
+      "official_description": "Cebirsel ifadeler içeren durumlardaki algoritmaları yorumlayabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 83
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.3.1",
+      "grade": 6,
+      "unit_topic": "Geometrik Şekiller",
+      "official_description": "Düzlemde iki paralel doğru ve bir kesen ile oluşan açıları sınıflandırabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 89
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.3.2",
+      "grade": 6,
+      "unit_topic": "Geometrik Şekiller",
+      "official_description": "Matematiksel araç ve teknolojiden yararlanarak iki paralel doğrunun iki kesenle oluşturduğu şekillerin özelliklerine dair çıkarım yapabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 89
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.3.3",
+      "grade": 6,
+      "unit_topic": "Geometrik Şekiller",
+      "official_description": "Matematiksel araç ve teknolojiden yararlanarak birbirlerini ortalayan doğru parçalarını köşegen kabul eden dörtgenlere yönelik çıkarım yapabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 89
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.3.4",
+      "grade": 6,
+      "unit_topic": "Geometrik Şekiller",
+      "official_description": "Üçgen, yamuk, paralelkenar, eşkenar dörtgen, dikdörtgen ve karenin açıları ile ilgili problemleri çözebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 89
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.4.1",
+      "grade": 6,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Uzunluk ve alan ölçme birimleri arasındaki ilişkilerle ilgili analojik akıl yürüte - bilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 96
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.4.2",
+      "grade": 6,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Dikdörtgenin alan bağıntısına yönelik deneyimlerini paralelkenar ve üçgenin alan bağıntılarına yansıtabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 96
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.4.3",
+      "grade": 6,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Geometrik şekillerin alanları ile modellenen gerçek yaşam durumlarına yöne - lik problem çözebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 96
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.4.4",
+      "grade": 6,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Çemberin uzunluğu ile çap uzunluğu arasındaki ilişkiye yönelik çıkarım yapa - bilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 96
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.4.5",
+      "grade": 6,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Çap veya yarıçap uzunluğu verilen bir çemberin uzunluğu ile ilgili problemleri çözebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 96
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.4.6",
+      "grade": 6,
+      "unit_topic": "Geometrik Nicelikler",
+      "official_description": "Çemberde merkez açının ölçüsü ile gördüğü yayın uzunluğu arasındaki ilişki - ye dair tümevarımsal akıl yürütebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 97
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.5.1",
+      "grade": 6,
+      "unit_topic": "İstatistiksel Araştırma Süreci",
+      "official_description": "Kategorik veya nicel (kesikli) veri ile çalışabilme ve veriye dayalı karar verebilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 105
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.5.2",
+      "grade": 6,
+      "unit_topic": "İstatistiksel Araştırma Süreci",
+      "official_description": "Başkaları tarafından oluşturulan kategorik veya nicel (kesikli) veriye dayalı ista - tistiksel sonuç veya yorumları tartışabilme",
+      "process_components": [],
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 105
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    },
+    {
+      "outcome_code": "MAT.6.6.1",
+      "grade": 6,
+      "unit_topic": "Veriden Olasılığa",
+      "official_description": "Bir olayın olasılığını gözleme dayalı tahmin edebilme",
+      "process_components": [],
+      "official_boundaries": [
+        {
+          "statement": "Bu temada iki veya daha fazla olaylı deneylere girilmez.",
+          "source_page": 113
+        }
+      ],
+      "editorial_cautions": [
+        "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaokul Matematik Dersi Öğretim Programı (5-8), Türkiye Yüzyılı Maarif Modeli, 2026",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/202681491243620-Matematik%20(5-8)%20D%C3%96P.pdf",
+        "pdf_page": 112
+      },
+      "textbook_sources": [
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (1. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/54/matematik-6sinif-ders-kitabi-1kitap"
+        },
+        {
+          "title": "6. Sınıf Matematik Ders Kitabı (2. Kitap)",
+          "url": "https://tymm.meb.gov.tr/kitap/55/matematik-6sinif-ders-kitabi-2kitap"
+        }
+      ]
+    }
+  ],
+  "implementation_source": "https://tymm.meb.gov.tr/taslak-cerceve-planlari/temel-egitim"
+}

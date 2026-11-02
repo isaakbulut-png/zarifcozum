@@ -1,0 +1,755 @@
+{
+  "schema_version": "1.0",
+  "language": "tr",
+  "grade": 12,
+  "course": "Matematik",
+  "program_version": "Matematik Dersi Öğretim Programı (2018)",
+  "as_of": "2026-11-02",
+  "implementation_status": "2026-2027 öğretim yılında önceki program uygulanır.",
+  "implementation_source": "https://tymm.meb.gov.tr/taslak-cerceve-planlari/ortaogretim",
+  "record_count": 34,
+  "records": [
+    {
+      "outcome_code": "12.1.1.1",
+      "grade": 12,
+      "unit_topic": "Üstel Fonksiyon",
+      "official_description": "Üstel fonksiyonu açıklar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 37
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.1.2.1",
+      "grade": 12,
+      "unit_topic": "Logaritma Fonksiyonu",
+      "official_description": "Logaritma fonksiyonu ile üstel fonksiyonu ilişkilendirerek problemler çözer",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 37
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.1.2.2",
+      "grade": 12,
+      "unit_topic": "Logaritma Fonksiyonu",
+      "official_description": "10 ve e tabanında logaritma fonksiyonunu tanımlayarak problemler çözer",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 37
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.1.2.3",
+      "grade": 12,
+      "unit_topic": "Logaritma Fonksiyonu",
+      "official_description": "Logaritma fonksiyonunun özelliklerini kullanarak işlemler yapar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 37
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.1.3.1",
+      "grade": 12,
+      "unit_topic": "Üstel, Logaritmik Denklemler ve Eşitsizlikler",
+      "official_description": "Üstel, logaritmik denklemlerin ve eşitsizliklerin çözüm kümelerini bulur",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 37
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.1.3.2",
+      "grade": 12,
+      "unit_topic": "Üstel, Logaritmik Denklemler ve Eşitsizlikler",
+      "official_description": "Üstel ve logaritmik fonksiyonları gerçek hayat durumlarını modellemede kullanır",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 37
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.2.1.1",
+      "grade": 12,
+      "unit_topic": "Gerçek Sayı Dizileri",
+      "official_description": "Dizi kavramını fonksiyon kavramıyla ilişkilendirerek açıklar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 38
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.2.1.2",
+      "grade": 12,
+      "unit_topic": "Gerçek Sayı Dizileri",
+      "official_description": "Genel terimi veya indirgeme bağıntısı verilen bir sayı dizisinin terimlerini bulur",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 38
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.2.1.3",
+      "grade": 12,
+      "unit_topic": "Gerçek Sayı Dizileri",
+      "official_description": "Aritmetik ve geometrik dizilerin özelliklerini kullanarak işlemler yapar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 38
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.2.1.4",
+      "grade": 12,
+      "unit_topic": "Gerçek Sayı Dizileri",
+      "official_description": "Diziler yardımıyla gerçek hayat durumları ile ilgili problemler çözer",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 38
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.3.1.1",
+      "grade": 12,
+      "unit_topic": "Toplam-Fark ve İki kat Açı Formülleri",
+      "official_description": "İki açının ölçüleri toplamının ve farkının trigonometrik değerlerine ait formülleri oluşturarak işlemler yapar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 38
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.3.1.2",
+      "grade": 12,
+      "unit_topic": "Toplam-Fark ve İki kat Açı Formülleri",
+      "official_description": "İki kat açı formüllerini oluşturarak işlemler yapar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 38
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.3.2.1",
+      "grade": 12,
+      "unit_topic": "Trigonometrik Denklemler",
+      "official_description": "Trigonometrik denklemlerin çözüm kümelerini bulur",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 38
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.4.1.1",
+      "grade": 12,
+      "unit_topic": "Analitik Düzlemde Temel Dönüşümler",
+      "official_description": "Analitik düzlemde koordinatları verilen bir noktanın öteleme, dönme ve simetri dönüşümleri altındaki görüntüsünün koordinatlarını bulur",
+      "official_boundaries": [
+        {
+          "statement": "simetrileri vurgulanır. Doğrunun doğruya göre simetrilerine yer verilmez",
+          "source_page": 38
+        }
+      ],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 38
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.4.1.2",
+      "grade": 12,
+      "unit_topic": "Analitik Düzlemde Temel Dönüşümler",
+      "official_description": "Temel dönüşümler ve bileşkeleriyle ilgili problem çözer",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 39
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.5.1.1",
+      "grade": 12,
+      "unit_topic": "Limit ve Süreklilik",
+      "official_description": "Bir fonksiyonun bir noktadaki limiti, soldan limit ve sağdan limit kavramlarını açıklar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 39
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.5.1.2",
+      "grade": 12,
+      "unit_topic": "Limit ve Süreklilik",
+      "official_description": "Limit ile ilgili özellikleri belirterek uygulamalar yapar",
+      "official_boundaries": [
+        {
+          "statement": "sonucu ± ∞ olan limit durumlarına girilmez",
+          "source_page": 39
+        },
+        {
+          "statement": "b) Sadece pay ve paydası çarpanlarına ayrılarak belirsizliğin kaldırılabileceği limit örneklerine yer verilir",
+          "source_page": 39
+        }
+      ],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 39
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.5.1.3",
+      "grade": 12,
+      "unit_topic": "Limit ve Süreklilik",
+      "official_description": "Bir fonksiyonun bir noktadaki sürekliliğini açıklar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 39
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.5.2.1",
+      "grade": 12,
+      "unit_topic": "Anlık Değişim Oranı ve Türev",
+      "official_description": "Türev kavramını açıklayarak işlemler yapar",
+      "official_boundaries": [
+        {
+          "statement": "fonksiyonların (kapalı ve parametrik fonksiyonlar dâhil) türev kurallarına yer verilmez",
+          "source_page": 39
+        }
+      ],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 39
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.5.2.2",
+      "grade": 12,
+      "unit_topic": "Anlık Değişim Oranı ve Türev",
+      "official_description": "Bir fonksiyonun bir noktada ve bir aralıkta türevlenebilirliğini değerlendirir",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 40
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.5.2.3",
+      "grade": 12,
+      "unit_topic": "Anlık Değişim Oranı ve Türev",
+      "official_description": "Türevlenebilen iki fonksiyonun toplamı, farkı, çarpımı ve bölümünün türevine ait kurallar yardımıyla işlemler yapar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 40
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.5.2.4",
+      "grade": 12,
+      "unit_topic": "Anlık Değişim Oranı ve Türev",
+      "official_description": "İki fonksiyonun bileşkesinin türevine ait kuralı (zincir kuralı) oluşturularak türev hesabı yapar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 40
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.5.3.1",
+      "grade": 12,
+      "unit_topic": "Türevin Uygulamaları",
+      "official_description": "Bir fonksiyonun artan veya azalan olduğu aralıkları türev yardımıyla belirler",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 40
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.5.3.2",
+      "grade": 12,
+      "unit_topic": "Türevin Uygulamaları",
+      "official_description": "Bir fonksiyonun mutlak maksimum ve mutla k minimum, yerel maksimum, yerel minimum noktalarını belirler",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 40
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.5.3.3",
+      "grade": 12,
+      "unit_topic": "Türevin Uygulamaları",
+      "official_description": "Türevi yardımıyla bir fonksiyonun grafiğini çizer",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 40
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.5.3.4",
+      "grade": 12,
+      "unit_topic": "Türevin Uygulamaları",
+      "official_description": "Maksimum ve minimum problemlerini türev yardımıyla çözer",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 40
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.6.1.1",
+      "grade": 12,
+      "unit_topic": "Belirsiz İntegral",
+      "official_description": "Bir fonksiyonun belirsiz integralini açıklayarak integral alma kurallarını oluşturur",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 40
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.6.1.2",
+      "grade": 12,
+      "unit_topic": "Belirsiz İntegral",
+      "official_description": "Değişken değiştirme yoluyla integral alma işlemleri yapar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 40
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.6.2.1",
+      "grade": 12,
+      "unit_topic": "Belirli İntegral ve Uygulamaları",
+      "official_description": "Bir fonksiyonun grafiği ile x ekseni arasında kalan sınırlı bölgenin alanını Riemann toplamı yardımıyla yaklaşık olarak hesaplar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 41
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.6.2.2",
+      "grade": 12,
+      "unit_topic": "Belirli İntegral ve Uygulamaları",
+      "official_description": "Bir fonksiyonun belirli ve belirsiz integralleri arasındaki ilişkiyi açıklayarak işlemler yapar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 41
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.6.2.3",
+      "grade": 12,
+      "unit_topic": "Belirli İntegral ve Uygulamaları",
+      "official_description": "Belirli integralin özelliklerini kullanarak işlemler yapar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 41
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.6.2.4",
+      "grade": 12,
+      "unit_topic": "Belirli İntegral ve Uygulamaları",
+      "official_description": "Belirli integral ile alan hesabı yapar",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 41
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.7.1.1",
+      "grade": 12,
+      "unit_topic": "Çemberin Analitik İncelenmesi",
+      "official_description": "Merkezi ve yarıçapı verilen çemberin denklemini oluşturur",
+      "official_boundaries": [],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 41
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    },
+    {
+      "outcome_code": "12.7.1.2",
+      "grade": 12,
+      "unit_topic": "Çemberin Analitik İncelenmesi",
+      "official_description": "Denklemleri verilen doğru ile çemberin birbirine göre durumlarını belirleyerek işlemler yapar",
+      "official_boundaries": [
+        {
+          "statement": "Çap, yay, teğet, kiriş, kavramları verilir ancak bu kavramların özelliklerine girilmez",
+          "source_page": 41
+        },
+        {
+          "statement": "Sadece merkez ve çevre açı verilir",
+          "source_page": 41
+        }
+      ],
+      "editorial_cautions": [
+        "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 41
+      },
+      "textbook_sources": [
+        {
+          "title": "OGM Materyal resmi lise ders kitapları ve materyalleri kataloğu",
+          "url": "https://ogmmateryal.eba.gov.tr/"
+        }
+      ]
+    }
+  ]
+}
