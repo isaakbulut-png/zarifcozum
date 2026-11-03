@@ -95,6 +95,12 @@ td.net{font-weight:700;color:var(--navy-900)}
 .del:hover{background:#fde8e6;color:var(--danger)}
 .empty{padding:28px;text-align:center;color:var(--muted)}
 .notice{background:var(--orange-soft);border-left:4px solid var(--orange);padding:12px 16px;border-radius:8px;margin-bottom:20px;font-size:.92rem}
+.password-dialog{width:min(calc(100% - 32px),440px);padding:24px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);box-shadow:0 20px 60px rgba(49,36,24,.25)}
+.password-dialog::backdrop{background:rgba(16,30,42,.55)}
+.password-dialog h2{margin-bottom:6px;color:var(--navy-900)}
+.password-dialog p{color:var(--muted);font-size:.9rem}
+.password-dialog .field{margin-top:14px}
+.password-dialog .button-row{justify-content:flex-end;margin-top:18px}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -158,6 +164,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     <h1>Eğitim Yönetim Paneli<small>Öğretmen çalışma alanı · ZarifÇözüm</small></h1>
     <a class="btn ghost" href="index.html">Ana sayfa</a>
     <select id="sinav" aria-label="Sınav seçin" hidden></select>
+    <button class="btn ghost" id="changePasswordButton" type="button" hidden>Şifre değiştir</button>
     <button class="btn ghost" id="cikis" type="button" hidden>Çıkış</button>
   </div>
 </header>
@@ -188,7 +195,7 @@ td.net{font-weight:700;color:var(--navy-900)}
   <section class="card login" id="giris">
     <h2>Öğretmen girişi</h2>
     <p class="hint">Öğretmen paneli için öğretmen hesabınızla giriş yapın.</p>
-    <a class="btn" href="kayit-giris.html">Giriş yap</a>
+    <a class="btn" href="kayit-giris.html?role=teacher">Giriş yap / Üye ol</a>
     <p class="err" id="girisHata" role="alert"></p>
   </section>
 
@@ -544,6 +551,18 @@ td.net{font-weight:700;color:var(--navy-900)}
 </main>
 </div>
 
+<dialog class="password-dialog" id="changePasswordDialog" aria-labelledby="changePasswordTitle">
+  <form id="changePasswordForm">
+    <h2 id="changePasswordTitle">Şifre değiştir</h2>
+    <p>Hesabınızın güvenliği için yeni şifreniz en az 10 karakter olmalıdır.</p>
+    <div class="field"><label for="currentPassword">Mevcut şifre</label><input id="currentPassword" name="currentPassword" type="password" autocomplete="current-password"></div>
+    <div class="field"><label for="newPassword">Yeni şifre</label><input id="newPassword" name="password" type="password" autocomplete="new-password" minlength="10" maxlength="72" required></div>
+    <div class="field"><label for="newPasswordConfirmation">Yeni şifreyi tekrar girin</label><input id="newPasswordConfirmation" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" required></div>
+    <p class="status" id="changePasswordStatus" role="status" aria-live="polite"></p>
+    <div class="button-row"><button class="btn light" type="button" id="cancelPasswordChange">Vazgeç</button><button class="btn" type="submit">Şifreyi güncelle</button></div>
+  </form>
+</dialog>
+
 <script src="assets/matematik-mufredati.js"></script>
 <script src="assets/ogretmen-yonetim.js"></script>
 <script src="assets/ogrenci-gelisim.js"></script>
@@ -587,6 +606,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     document.querySelector('.teacher-layout').classList.add('authenticated');
     $('giris').hidden = true; $('panel').hidden = false;
     $('cikis').hidden = false;
+    $('changePasswordButton').hidden = false;
     try {
       veri = await api('/api/ogretmen/veri');
       yonetim = await api('/api/ogretmen/yonetim');
@@ -604,6 +624,7 @@ td.net{font-weight:700;color:var(--navy-900)}
   async function cikis() {
     $('giris').hidden = false; $('panel').hidden = true;
     $('sinav').hidden = true; $('cikis').hidden = true;
+    $('changePasswordButton').hidden = true;
     $('teacherSidebar').hidden = true;
     document.querySelector('.teacher-layout').classList.remove('authenticated');
   }
@@ -612,6 +633,25 @@ td.net{font-weight:700;color:var(--navy-900)}
     try { await api('/logout', {method: 'POST'}); }
     catch (err) { console.error('Oturum kapatılamadı:', err); }
     location.replace('kayit-giris.html');
+  });
+  $('changePasswordButton').addEventListener('click', () => $('changePasswordDialog').showModal());
+  $('cancelPasswordChange').addEventListener('click', () => $('changePasswordDialog').close());
+  $('changePasswordForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const button = event.currentTarget.querySelector('button[type="submit"]');
+    const status = $('changePasswordStatus');
+    button.disabled = true;
+    status.textContent = 'Şifre güncelleniyor…';
+    try {
+      const body = Object.fromEntries(new FormData(event.currentTarget));
+      const result = await api('/change-password', {method: 'POST', body: JSON.stringify(body)});
+      status.textContent = result.mesaj;
+      event.currentTarget.reset();
+    } catch (error) {
+      status.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
   });
 
   function durumYaz(id, message, kind = '') {

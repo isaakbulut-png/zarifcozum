@@ -9,7 +9,14 @@ Sunucu `.env` dosyasını öncelikli okur; orada bulunmayan değişkenleri `bagl
 ```env
 SESSION_SECRET=32-karakterden-uzun-rastgele-bir-deger
 TEACHER_REGISTRATION_CODE=ogretmenlere-guvenli-kanaldan-verilecek-kod
+GOOGLE_CLIENT_ID=google-oauth-web-istemci-kimligi
 GEMINI_API_KEY=google-ai-studio-gemini-api-anahtari
+SMTP_HOST=smtp.ornek.com
+SMTP_PORT=587
+SMTP_USER=uygulama-e-posta-kullanici-adi
+SMTP_PASSWORD=uygulama-e-posta-sifresi
+SMTP_FROM=ZarifCozum <noreply@ornek.com>
+APP_BASE_URL=https://zarifcozum.com
 ```
 
 Güçlü bir `SESSION_SECRET` üretmek için:
@@ -18,7 +25,7 @@ Güçlü bir `SESSION_SECRET` üretmek için:
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-Gerçek değerleri Git'e eklemeyin. Öğretmen davet kodunu yalnızca yetkili öğretmenlerle paylaşın. Üretimde HTTPS kullanın; sunucu `NODE_ENV=production` olduğunda oturum çerezini `secure` olarak ayarlar.
+Gerçek değerleri Git'e eklemeyin. Öğretmen davet kodunu yalnızca yetkili öğretmenlerle paylaşın. Google Cloud Console'da bir **Web application** OAuth istemcisi oluşturup üretim alan adınızı ve `http://localhost:3000` adresini yetkili JavaScript kaynaklarına ekleyin; istemci kimliğini `GOOGLE_CLIENT_ID` olarak ayarlayın. Google girişinde yeni öğretmen hesabı açmak için de öğretmen davet kodu gerekir. Parola sıfırlama e-postaları için `SMTP_*` değerlerini e-posta sağlayıcınızın SMTP bilgileriyle, `APP_BASE_URL` değerini uygulamanın herkese açık kök adresiyle yapılandırın. Geliştirmede `APP_BASE_URL` belirtilmezse `http://localhost:3000` kullanılır; üretimde bu değişken zorunludur. Üretimde HTTPS kullanın; sunucu `NODE_ENV=production` olduğunda oturum çerezini `secure` olarak ayarlar.
 
 ## 2. Bağımlılıklar ve başlatma
 
@@ -33,9 +40,9 @@ npm start
 
 ## 3. Kullanım
 
-`http://localhost:3000/kayit-giris.html` adresinden kayıt veya giriş yapın. Öğrenciler doğrudan öğrenci paneline, davet koduyla kayıtlı öğretmenler öğretmen paneline yönlendirilir.
+`http://localhost:3000/kayit-giris.html` adresinden kayıt veya giriş yapın. Öğrenciler doğrudan öğrenci paneline, davet koduyla kayıtlı öğretmenler öğretmen paneline yönlendirilir. Google ile devam et seçeneği e-posta adresi Google tarafından doğrulanmış hesapları kabul eder; yeni kullanıcılar kayıt görünümünde seçilen rol ve öğretmen davet koduyla oluşturulur. `Şifremi unuttum` bağlantısı, 30 dakika geçerli ve tek kullanımlık bir bağlantıyı e-posta ile gönderir. Öğretmen ve öğrenci panellerindeki `Şifre değiştir` düğmesi oturum açmış kullanıcının şifresini günceller; Google ile açılan ve henüz şifresi olmayan hesapta mevcut şifre boş bırakılabilir.
 
-Uç noktalar: `POST /register`, `POST /login`, `POST /logout` ve oturum bilgisini döndüren `GET /me`. Oturum açan öğretmen, mevcut öğretmen API uç noktalarını da kullanabilir. Öğretmen panelleri artık eski `x-ogretmen-sifre` başlığıyla değil, oturum ve `teacher` rolüyle korunur.
+Uç noktalar: `POST /register`, `POST /login`, `POST /auth/google`, `POST /forgot-password`, `POST /reset-password`, oturum gerektiren `POST /change-password`, `POST /logout` ve oturum bilgisini döndüren `GET /me`. `GET /auth/config` tarayıcıya yalnızca herkese açık Google istemci kimliğini döndürür. Oturum açan öğretmen, mevcut öğretmen API uç noktalarını da kullanabilir. Öğretmen panelleri artık eski `x-ogretmen-sifre` başlığıyla değil, oturum ve `teacher` rolüyle korunur.
 
 Öğretmen panelindeki planlı ders, test ve duyuru kayıtları sırasıyla `planli_dersler`, `quizler` ve `duyurular` koleksiyonlarında saklanır. Öğrenci paneli `GET /me` üzerinden güncel ad/e-posta/rolü, `GET /api/student/dashboard` (eski uyumluluk yolu: `/api/ogrenci/icerik`) üzerinden planlanmış dersleri, aktif Zoom dersini, görev/testleri, duyuruları ve öğrencinin kendi test sonuçlarını alır. Test gönderimleri sunucuda puanlanıp `quiz_sonuclari` koleksiyonuna yazılır. Öğrenci kimliği oturumdan alınır, istemcinin gönderdiği ad/puan güvenilir kabul edilmez. Ders bağlantısı HTTPS olmalıdır. Klasik optik sınav kayıt uç noktası da artık öğrenci oturumu gerektirir.
 
@@ -43,7 +50,7 @@ Uç noktalar: `POST /register`, `POST /login`, `POST /logout` ve oturum bilgisin
 
 Yapay Zeka Soru Sihirbazı için Google AI Studio'dan Gemini API anahtarı alıp `GEMINI_API_KEY` olarak sunucu ortamına ekleyin; anahtarı tarayıcı koduna veya Git'e koymayın. Ek npm paketi gerekmez. Yalnızca öğretmen oturumuyla kullanılabilen `POST /api/ai/questions` konu, zorluk ve 5/10/20 soru sayısını alır; Gemini yanıtını doğrular ve soruları veritabanına kaydetmeden öğretmene taslak olarak döndürür. Öğretmen her soruyu kontrol edip `POST /api/ai/questions/publish` üzerinden ayrı ayrı onaylayabilir. Onaylanan sorular birer soruluk testler olarak `quizler` koleksiyonuna kaydedilir ve `GET /api/student/dashboard` yanıtındaki öğretmen testleri listesine eklenir. Öğretmen panelindeki yayınlanmış yapay zeka soruları listesinden "Soruyu sil" ile onaylanan AI kaydı veritabanından kalıcı olarak silinebilir. Öğrenciler testleri mevcut `POST /api/ogrenci/quiz/:id/teslim` uç noktasından çözer; cevap ve çözüm açıklamaları teslimden sonra gösterilir. Soru üretimi IP başına 15 dakikada 5 istekle sınırlandırılmıştır.
 
-Şifre en az 10, en fazla 72 UTF-8 bayt olmalıdır (bcrypt'in giriş uzunluğu sınırı). Öğretmen kaydı için `TEACHER_REGISTRATION_CODE` gereklidir. IP başına giriş denemeleri 15 dakikada 10, kayıt denemeleri saatte 5 istekle sınırlandırılır.
+Şifre en az 10, en fazla 72 UTF-8 bayt olmalıdır (bcrypt'in giriş uzunluğu sınırı). Öğretmen kaydı için `TEACHER_REGISTRATION_CODE` gereklidir. IP başına giriş ve şifre değiştirme denemeleri 15 dakikada 10, kayıt denemeleri saatte 5, şifre sıfırlama denemeleri 15 dakikada 5 istekle sınırlandırılır. Google oturumları OAuth istemci kimliği ve doğrulanmış Google ID belirteciyle sunucuda doğrulanır; admin hesapları Google girişi kullanamaz.
 
 ## Yönetici paneli
 

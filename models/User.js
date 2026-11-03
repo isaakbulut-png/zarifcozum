@@ -19,7 +19,21 @@ const userSchema = new mongoose.Schema({
   },
   passwordHash: {
     type: String,
-    required: true,
+    default: undefined,
+    select: false
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true,
+    select: false
+  },
+  resetPasswordToken: {
+    type: String,
+    select: false
+  },
+  resetPasswordExpires: {
+    type: Date,
     select: false
   },
   role: {
@@ -58,12 +72,20 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 userSchema.statics.createWithPassword = async function (userData, password) {
-  const passwordHash = await bcrypt.hash(password, 12);
+  const passwordHash = await this.hashPassword(password);
   return this.create({ ...userData, passwordHash });
 };
 
+userSchema.statics.hashPassword = function (password) {
+  return bcrypt.hash(password, 12);
+};
+
 userSchema.methods.verifyPassword = function (password) {
-  return bcrypt.compare(password, this.passwordHash);
+  return Boolean(this.passwordHash) && bcrypt.compare(password, this.passwordHash);
+};
+
+userSchema.methods.setPassword = async function (password) {
+  this.passwordHash = await this.constructor.hashPassword(password);
 };
 
 module.exports = mongoose.models.User || mongoose.model('User', userSchema);
