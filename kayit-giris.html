@@ -6,189 +6,111 @@
   <meta name="color-scheme" content="light">
   <title>Giriş / Kayıt | ZarifÇözüm</title>
   <style>
-    :root{font-family:Inter,"Segoe UI",sans-serif;color:#17334e;background:#f2efe8;font-synthesis:none}
+    :root{font-family:Inter,"Segoe UI",sans-serif;color:#3a2618;background:#fbf1e8;font-synthesis:none}
     *{box-sizing:border-box}
-    body{min-height:100vh;margin:0;display:grid;place-items:center;padding:24px}
-    button,input,select{font:inherit}
-    button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid rgba(201,153,58,.55);outline-offset:2px}
-    .auth-layout{width:min(100%,1440px);min-height:min(850px,calc(100vh - 48px));display:grid;grid-template-columns:minmax(320px,.82fr) minmax(0,1.18fr);overflow:hidden;border:1px solid #e6e1d8;border-radius:22px;background:#f8f6f1;box-shadow:0 24px 70px rgba(25,41,54,.15)}
-    .visual{display:flex;flex-direction:column;justify-content:space-between;padding:40px clamp(28px,5vw,64px);background:linear-gradient(145deg,#244561,#112b43 72%);color:#fff}
-    .brand{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.01em}
-    .brand-mark{display:grid;place-items:center;width:42px;height:42px;border:1px solid #d5ad5d;border-radius:12px;color:#e3bd6c;font-size:1.3rem}
-    .brand small{display:block;color:#cad5df;font-size:.73rem;font-weight:400}
-    .visual-copy{max-width:440px;margin:50px 0}
-    .visual-copy h1{font-size:clamp(2rem,4vw,3rem);line-height:1.15;letter-spacing:-.04em}
-    .visual-copy p{color:#d7e0e8;line-height:1.7}
-    .steps{display:grid;gap:14px;margin:32px 0 0;padding:0;list-style:none}
-    .steps li{display:flex;align-items:center;gap:12px;color:#d7e0e8}
-    .step-number{display:grid;place-items:center;width:34px;height:34px;flex:none;border:1px solid #71869a;border-radius:50%;font-weight:700}
-    .step-number.active{border-color:#e4bd6a;background:#fbf6eb;color:#17334e}
-    .stats{display:flex;gap:clamp(14px,3vw,42px);padding-top:22px;border-top:1px solid rgba(255,255,255,.16)}
-    .stats strong{display:block;color:#e4bd6a;font-size:1.25rem}
-    .stats small{color:#c6d1dc;font-size:.72rem}
-    .form-side{display:flex;align-items:center;justify-content:center;padding:48px clamp(24px,6vw,80px)}
-    .form-wrap{width:min(100%,540px)}
-    .back{display:inline-flex;align-items:center;gap:8px;margin-bottom:26px;padding:8px 12px;border:1px solid #aeb9c4;border-radius:9px;color:#17334e;text-decoration:none;font-size:.86rem;font-weight:600}
-    .eyebrow{margin:0 0 6px;color:#b4862f;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
-    h2{margin:0;color:#17334e;font-size:clamp(1.7rem,3vw,2.1rem);letter-spacing:-.035em}
-    .intro{margin:8px 0 22px;color:#647487;font-size:.92rem;line-height:1.55}
-    .google-wrap{min-height:42px;display:grid;place-items:center;margin-bottom:20px}
-    #googleButton{width:100%;display:flex;justify-content:center}
-    .google-disabled{color:#788797;font-size:.82rem;text-align:center}
-    .divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:#9aa7b3;font-size:.78rem}
-    .divider:before,.divider:after{content:"";height:1px;flex:1;background:#e4dfd6}
-    .switch{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:0 0 18px;padding:5px;border-radius:10px;background:#ece9e1}
-    .switch button{padding:10px;border:0;border-radius:7px;background:transparent;color:#647487;font-weight:600;cursor:pointer}
-    .switch button[aria-pressed=true]{background:#fff;color:#17334e;box-shadow:0 1px 5px rgba(25,41,54,.12)}
-    label{display:block;margin:14px 0 6px;color:#536579;font-size:.82rem;font-weight:600}
-    input,select{width:100%;padding:12px;border:1px solid #d5dce1;border-radius:9px;background:#fff;color:#17334e}
-    input::placeholder{color:#a8b3bd}
-    .name-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    body{min-height:100vh;margin:0;display:flex;flex-direction:column}
+    body>main.card{margin:48px auto;max-width:calc(100% - 32px)}
+    body>.site-footer{width:100%;margin-top:auto}
+    .card{width:min(100%,440px);padding:32px;background:#fffaf5;border:1px solid #d9d3c3;border-radius:20px;box-shadow:0 20px 60px rgba(49, 36, 24,.12)}
+    .brand{margin:0 0 6px;font-size:1.55rem;color:#4a2e1a}
+    .intro{margin:0 0 24px;color:#6a5242}
+    .switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px;padding:5px;border-radius:10px;background:#f3e1cf}
+    .switch button{padding:10px;border:0;border-radius:7px;background:transparent;color:#6a5242;font:inherit;font-weight:600;cursor:pointer}
+    .switch button[aria-pressed=true]{background:#fffaf5;color:#523520;box-shadow:0 1px 5px rgba(49, 36, 24,.12)}
+    label{display:block;margin:15px 0 6px;font-size:.92rem;font-weight:600}
+    input,select{width:100%;padding:12px;border:1px solid #d9d3c3;border-radius:8px;background:#fffaf5;color:inherit;font:inherit}
+    input:focus,select:focus,button:focus-visible{outline:3px solid rgba(125, 90, 60,.3);border-color:#7a4f2d}
+    .primary{width:100%;margin-top:22px;padding:13px;border:0;border-radius:8px;background:#7a4f2d;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+    .primary:hover{background:#6b4a2f}
+    .message{min-height:1.4em;margin:12px 0 0;color:#a3201a;font-size:.9rem}
+    .back{display:block;margin-top:18px;text-align:center;color:#6a5242;text-decoration:none}
+    .google-wrap{margin-bottom:6px}
+    #googleButton{display:flex;justify-content:center}
+    .google-disabled{margin:0;color:#6a5242;font-size:.85rem;text-align:center}
+    .divider{display:flex;align-items:center;gap:12px;margin:16px 0 4px;color:#8b7565;font-size:.85rem}
+    .divider:before,.divider:after{content:"";height:1px;flex:1;background:#e5d9c8}
     .forgot-row{display:flex;justify-content:flex-end;margin-top:10px}
-    .text-button{padding:0;border:0;background:none;color:#315b7d;font-size:.84rem;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
-    .primary{width:100%;margin-top:20px;padding:13px;border:0;border-radius:9px;background:#173b5b;color:#fff;font-weight:700;cursor:pointer}
-    .primary:hover{background:#102e49}
-    .primary:disabled{opacity:.65;cursor:wait}
-    .message{min-height:1.4em;margin:12px 0 0;color:#a3201a;font-size:.88rem}
+    .text-button{padding:0;border:0;background:none;color:#7a4f2d;font:inherit;font-size:.88rem;font-weight:600;text-decoration:underline;cursor:pointer}
     .message.success{color:#37674c}
-    .back-link{display:block;margin-top:20px;color:#536579;text-align:center;font-size:.86rem}
-    .back-link button{border:0;background:none;color:#173b5b;font-weight:700;cursor:pointer}
+    .back-link{display:block;margin-top:14px;text-align:center}
     [hidden]{display:none!important}
-    @media(max-width:820px){body{padding:14px}.auth-layout{min-height:calc(100vh - 28px);grid-template-columns:1fr}.visual{display:none}.form-side{padding:28px 22px}}
-    @media(max-width:420px){.name-grid{grid-template-columns:1fr;gap:0}}
   </style>
 </head>
 <body>
-  <main class="auth-layout">
-    <aside class="visual" aria-label="ZarifÇözüm tanıtımı">
-      <div class="brand"><span class="brand-mark" aria-hidden="true">Z</span><span>ZarifÇözüm<small>Öğren, geliş, hedeflerine ulaş.</small></span></div>
-      <div class="visual-copy">
-        <h1>Hedeflerine giden yolda bugün başla.</h1>
-        <p>Öğretmen ve öğrenci çalışma alanlarına güvenle eriş, gelişimini tek yerden takip et.</p>
-        <ol class="steps">
-          <li><span class="step-number active">1</span><span><strong>Hesabını oluştur</strong><br><small>Öğrenci veya öğretmen olarak katıl</small></span></li>
-          <li><span class="step-number">2</span><span><strong>Çalışma alanına geç</strong><br><small>Sana özel panelini kullan</small></span></li>
-          <li><span class="step-number">3</span><span><strong>Gelişimini takip et</strong><br><small>Hedeflerine adım adım yaklaş</small></span></li>
-        </ol>
+  <main class="card">
+    <h1 class="brand">ZarifÇözüm</h1>
+    <p class="intro" id="intro">Hesabınıza giriş yapın veya yeni hesap oluşturun.</p>
+    <div id="authOptions">
+    <div class="google-wrap"><div id="googleButton"></div><p class="google-disabled" id="googleDisabled" hidden>Google ile giriş bu sitede henüz etkinleştirilmedi.</p></div>
+    <div class="divider"><span>veya e-posta ile</span></div>
+    <div class="switch" aria-label="İşlem seçin">
+      <button id="loginMode" type="button" aria-pressed="true">Giriş yap</button>
+      <button id="registerMode" type="button" aria-pressed="false">Kayıt ol</button>
+    </div>
+    <form id="authForm" action="/login" method="post">
+      <div id="nameField" hidden>
+        <label for="name">Ad soyad</label>
+        <input id="name" name="name" autocomplete="name" maxlength="100" disabled>
       </div>
-      <div class="stats" aria-label="ZarifÇözüm istatistikleri">
-        <div><strong>7/24</strong><small>öğrenme desteği</small></div>
-        <div><strong>1 yer</strong><small>tüm çalışma araçların</small></div>
-        <div><strong>Senin</strong><small>hedeflerin, senin hızın</small></div>
+      <label for="email">E-posta</label>
+      <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required>
+      <div id="phoneField" hidden>
+        <label for="phone">Telefon numarası</label>
+        <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" maxlength="20" disabled>
       </div>
-    </aside>
-    <section class="form-side">
-      <div class="form-wrap">
-        <a class="back" href="index.html">← Siteye dön</a>
-        <p class="eyebrow" id="eyebrow">Hesabına eriş</p>
-        <h2 id="heading">Giriş yap</h2>
-        <p class="intro" id="intro">Çalışma alanına devam etmek için hesabına giriş yap.</p>
-
-        <div id="authOptions">
-          <div class="google-wrap"><div id="googleButton"></div><p class="google-disabled" id="googleDisabled" hidden>Google ile giriş bu sitede henüz etkinleştirilmedi.</p></div>
-          <div class="divider"><span>veya e-posta ile</span></div>
-          <div class="switch" aria-label="İşlem seçin">
-            <button id="loginMode" type="button" aria-pressed="true">Giriş yap</button>
-            <button id="registerMode" type="button" aria-pressed="false">Üye ol</button>
-          </div>
-          <form id="authForm">
-            <div id="nameField" hidden>
-              <label for="name">Ad soyad</label>
-              <input id="name" name="name" autocomplete="name" maxlength="100" disabled>
-            </div>
-            <label for="email">E-posta</label>
-            <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required>
-            <div id="roleField" hidden>
-              <label for="role">Hesap türü</label>
-              <select id="role" name="role" disabled>
-                <option value="student">Öğrenci</option>
-                <option value="teacher">Öğretmen</option>
-              </select>
-            </div>
-            <div id="teacherCodeField" hidden>
-              <label for="teacherCode">Öğretmen davet kodu</label>
-              <input id="teacherCode" name="teacherCode" type="password" autocomplete="off" disabled>
-            </div>
-            <label for="password">Şifre</label>
-            <input id="password" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="72" required>
-            <div id="confirmField" hidden>
-              <label for="passwordConfirmation">Şifreyi tekrar girin</label>
-              <input id="passwordConfirmation" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" disabled>
-            </div>
-            <div class="forgot-row" id="forgotRow"><button class="text-button" id="forgotLink" type="button">Şifremi unuttum</button></div>
-            <button class="primary" id="submitButton" type="submit">Giriş yap</button>
-            <p class="message" id="message" role="alert" aria-live="polite"></p>
-          </form>
-          <p class="back-link" id="accountPrompt">Hesabın yok mu? <button id="registerLink" type="button">Üye ol</button></p>
-        </div>
-
-        <form id="forgotForm" hidden>
-          <label for="forgotEmail">E-posta</label>
-          <input id="forgotEmail" type="email" autocomplete="email" maxlength="254" required>
-          <button class="primary" type="submit">Sıfırlama bağlantısı gönder</button>
-          <p class="message" id="forgotMessage" role="status" aria-live="polite"></p>
-          <p class="back-link"><button type="button" data-mode="login">Girişe dön</button></p>
-        </form>
-
-        <form id="resetForm" hidden>
-          <label for="resetEmail">E-posta</label>
-          <input id="resetEmail" type="email" autocomplete="email" readonly required>
-          <label for="resetPassword">Yeni şifre</label>
-          <input id="resetPassword" type="password" autocomplete="new-password" minlength="10" maxlength="72" required>
-          <label for="resetConfirmation">Yeni şifreyi tekrar girin</label>
-          <input id="resetConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" required>
-          <button class="primary" type="submit">Şifremi yenile</button>
-          <p class="message" id="resetMessage" role="status" aria-live="polite"></p>
-        </form>
+      <label for="password">Şifre</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="72" required>
+      <div id="confirmField" hidden>
+        <label for="passwordConfirmation">Şifreyi tekrar girin</label>
+        <input id="passwordConfirmation" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" disabled>
       </div>
-    </section>
+      <div id="roleField" hidden>
+        <label for="role">Kullanıcı tipi</label>
+        <select id="role" name="role" disabled>
+          <option value="student">Öğrenci</option>
+          <option value="teacher">Öğretmen</option>
+        </select>
+      </div>
+      <div id="teacherCodeField" hidden>
+        <label for="teacherCode">Öğretmen davet kodu</label>
+        <input id="teacherCode" name="teacherCode" type="password" autocomplete="off" disabled>
+      </div>
+      <div class="forgot-row" id="forgotRow"><button class="text-button" id="forgotLink" type="button">Şifremi unuttum</button></div>
+      <button class="primary" id="submitButton" type="submit">Giriş yap</button>
+      <p class="message" id="message" role="alert" aria-live="polite"></p>
+    </form>
+    </div>
+
+    <form id="forgotForm" hidden>
+      <p class="intro">E-posta adresinizi girin; şifre yenileme bağlantısını gönderelim.</p>
+      <label for="forgotEmail">E-posta</label>
+      <input id="forgotEmail" type="email" autocomplete="email" maxlength="254" required>
+      <button class="primary" type="submit">Sıfırlama bağlantısı gönder</button>
+      <p class="message" id="forgotMessage" role="status" aria-live="polite"></p>
+      <p class="back-link"><button class="text-button" type="button" data-mode="login">Girişe dön</button></p>
+    </form>
+
+    <form id="resetForm" hidden>
+      <p class="intro">Hesabınız için yeni ve güvenli bir şifre belirleyin.</p>
+      <label for="resetEmail">E-posta</label>
+      <input id="resetEmail" type="email" autocomplete="email" readonly required>
+      <label for="resetPassword">Yeni şifre</label>
+      <input id="resetPassword" type="password" autocomplete="new-password" minlength="10" maxlength="72" required>
+      <label for="resetConfirmation">Yeni şifreyi tekrar girin</label>
+      <input id="resetConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" required>
+      <button class="primary" type="submit">Şifremi yenile</button>
+      <p class="message" id="resetMessage" role="status" aria-live="polite"></p>
+    </form>
+    <a class="back" href="index.html">Ana sayfaya dön</a>
   </main>
   <script>
     (() => {
       const $ = id => document.getElementById(id);
       const params = new URLSearchParams(window.location.search);
-      const requestedRole = ['teacher', 'student'].includes(params.get('role')) ? params.get('role') : 'student';
       let mode = 'login';
       let googleReady = false;
       const resetToken = params.get('token') || '';
       const resetEmail = params.get('email') || '';
-
-      function showMode(nextMode) {
-        mode = nextMode;
-        const registering = mode === 'register';
-        const resetting = mode === 'reset';
-        const forgot = mode === 'forgot';
-        $('authOptions').hidden = resetting || forgot;
-        $('forgotForm').hidden = !forgot;
-        $('resetForm').hidden = !resetting;
-        $('eyebrow').textContent = resetting ? 'Hesap güvenliği' : forgot ? 'Hesap kurtarma' : registering ? 'Üyelik' : 'Hesabına eriş';
-        $('heading').textContent = resetting ? 'Yeni şifre belirle' : forgot ? 'Şifreni sıfırla' : registering ? 'Hesabını oluştur' : 'Giriş yap';
-        $('intro').textContent = resetting
-          ? 'Hesabın için yeni ve güvenli bir şifre belirle.'
-          : forgot
-            ? 'E-posta adresini gir; şifre yenileme bağlantısını gönderelim.'
-            : registering
-              ? 'Çalışma alanına başlamak için hesabını oluştur.'
-              : requestedRole === 'teacher' ? 'Öğretmen çalışma alanına giriş yap.' : 'Öğrenci çalışma alanına giriş yap.';
-        $('loginMode').setAttribute('aria-pressed', String(!registering));
-        $('registerMode').setAttribute('aria-pressed', String(registering));
-        for (const id of ['nameField', 'confirmField', 'roleField']) {
-          $(id).hidden = !registering;
-          $(id).querySelector('input, select').disabled = !registering;
-        }
-        $('name').required = registering;
-        $('passwordConfirmation').required = registering;
-        $('password').autocomplete = registering ? 'new-password' : 'current-password';
-        $('teacherCodeField').hidden = !registering || $('role').value !== 'teacher';
-        $('teacherCode').disabled = $('teacherCodeField').hidden;
-        $('teacherCode').required = !$('teacherCodeField').hidden;
-        $('forgotRow').hidden = registering;
-        $('accountPrompt').hidden = resetting || forgot;
-        $('submitButton').textContent = registering ? 'Hesap oluştur' : 'Giriş yap';
-        $('authForm').action = registering ? '/register' : '/login';
-        $('message').textContent = '';
-        if (googleReady) $('googleButton').hidden = resetting || forgot;
-      }
 
       function apiError(data, fallback) {
         return data && typeof data.mesaj === 'string' ? data.mesaj : fallback;
@@ -207,34 +129,51 @@
       }
 
       function setMessage(id, text, success = false) {
-        const message = $(id);
-        message.textContent = text;
-        message.classList.toggle('success', success);
+        $(id).textContent = text;
+        $(id).classList.toggle('success', success);
       }
 
-      $('loginMode').addEventListener('click', () => showMode('login'));
-      $('registerMode').addEventListener('click', () => showMode('register'));
-      $('registerLink').addEventListener('click', () => showMode('register'));
-      $('role').addEventListener('change', () => showMode(mode));
+      function setMode(nextMode) {
+        mode = nextMode;
+        const registering = mode === 'register';
+        const forgot = mode === 'forgot';
+        const resetting = mode === 'reset';
+        $('authOptions').hidden = forgot || resetting;
+        $('forgotForm').hidden = !forgot;
+        $('resetForm').hidden = !resetting;
+        $('loginMode').setAttribute('aria-pressed', String(!registering));
+        $('registerMode').setAttribute('aria-pressed', String(registering));
+        for (const id of ['nameField', 'phoneField', 'confirmField', 'roleField']) {
+          $(id).hidden = !registering;
+          $(id).querySelector('input, select').disabled = !registering;
+        }
+        $('name').required = registering;
+        $('phone').required = registering;
+        $('forgotRow').hidden = registering;
+        $('passwordConfirmation').required = registering;
+        $('password').autocomplete = registering ? 'new-password' : 'current-password';
+        $('teacherCodeField').hidden = !registering || $('role').value !== 'teacher';
+        $('teacherCode').disabled = $('teacherCodeField').hidden;
+        $('teacherCode').required = !$('teacherCodeField').hidden;
+        $('submitButton').textContent = registering ? 'Hesap oluştur' : 'Giriş yap';
+        $('authForm').action = registering ? '/register' : '/login';
+        $('authForm').method = 'post';
+        $('intro').textContent = registering
+          ? 'Hesabınızı oluşturmak için bilgilerinizi girin.'
+          : params.get('role') === 'teacher'
+            ? 'Öğretmen hesabınızla giriş yapın.'
+            : 'Öğrenci hesabınızla giriş yapın.';
+        $('message').textContent = '';
+      }
+
+      $('loginMode').addEventListener('click', () => setMode('login'));
+      $('registerMode').addEventListener('click', () => setMode('register'));
+      $('role').addEventListener('change', () => setMode(mode));
       $('forgotLink').addEventListener('click', () => {
         $('forgotEmail').value = $('email').value;
-        showMode('forgot');
+        setMode('forgot');
       });
-      document.querySelectorAll('[data-mode="login"]').forEach(button => button.addEventListener('click', () => showMode('login')));
-
-      $('authForm').addEventListener('submit', async event => {
-        event.preventDefault();
-        const button = $('submitButton');
-        button.disabled = true;
-        $('message').textContent = '';
-        try {
-          const result = await postJson(event.currentTarget.action, Object.fromEntries(new FormData(event.currentTarget)));
-          window.location.assign(result.redirectTo);
-        } catch (error) {
-          $('message').textContent = error.message || 'Sunucuya bağlanılamadı.';
-          button.disabled = false;
-        }
-      });
+      document.querySelectorAll('[data-mode="login"]').forEach(button => button.addEventListener('click', () => setMode('login')));
 
       $('forgotForm').addEventListener('submit', async event => {
         event.preventDefault();
@@ -264,7 +203,7 @@
             passwordConfirmation: $('resetConfirmation').value
           });
           setMessage('resetMessage', result.mesaj, true);
-          setTimeout(() => showMode('login'), 1600);
+          setTimeout(() => setMode('login'), 1600);
         } catch (error) {
           setMessage('resetMessage', error.message || 'Sunucuya bağlanılamadı.');
           button.disabled = false;
@@ -275,7 +214,7 @@
         try {
           const result = await postJson('/auth/google', {
             credential: response.credential,
-            intent: mode,
+            intent: mode === 'register' ? 'register' : 'login',
             role: $('role').value,
             teacherCode: $('teacherCode').value
           });
@@ -289,45 +228,55 @@
         try {
           const response = await fetch('/auth/config', {credentials: 'same-origin'});
           const config = await response.json();
-          if (!response.ok) throw new Error(apiError(config, 'Google ayarları yüklenemedi.'));
-          if (!config.googleClientId) {
-            $('googleDisabled').hidden = false;
-            return;
-          }
+          if (!response.ok || !config.googleClientId) throw new Error();
           const script = document.createElement('script');
           script.src = 'https://accounts.google.com/gsi/client';
           script.async = true;
           script.defer = true;
           script.onload = () => {
-            if (!window.google?.accounts?.id) {
-              $('googleDisabled').hidden = false;
-              return;
-            }
+            if (!window.google?.accounts?.id) { $('googleDisabled').hidden = false; return; }
             window.google.accounts.id.initialize({client_id: config.googleClientId, callback: onGoogleCredential});
             window.google.accounts.id.renderButton($('googleButton'), {
               type: 'standard', theme: 'outline', size: 'large', text: 'continue_with',
-              shape: 'rectangular', width: Math.min(400, document.querySelector('.form-wrap').clientWidth), locale: 'tr'
+              shape: 'rectangular', width: 376, locale: 'tr'
             });
             googleReady = true;
           };
           script.onerror = () => { $('googleDisabled').hidden = false; };
           document.head.append(script);
         } catch (error) {
-          $('googleDisabled').textContent = error.message || 'Google ayarları yüklenemedi.';
           $('googleDisabled').hidden = false;
         }
       }
+      $('authForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        $('submitButton').disabled = true;
+        $('message').textContent = '';
+        const data = Object.fromEntries(new FormData(event.currentTarget));
+        try {
+          const response = await fetch(event.currentTarget.action, {
+            method: event.currentTarget.method.toUpperCase(),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+            credentials: 'same-origin'
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.mesaj || 'İşlem tamamlanamadı.');
+          window.location.assign(result.redirectTo);
+        } catch (error) {
+          $('message').textContent = error.message || 'Sunucuya bağlanılamadı.';
+          $('submitButton').disabled = false;
+        }
+      });
 
-      $('role').value = requestedRole;
-      if (resetToken || params.get('mode') === 'reset') {
-        $('resetEmail').value = resetEmail;
-        showMode('reset');
-        history.replaceState(null, '', location.pathname);
-        if (!resetToken || !resetEmail) setMessage('resetMessage', 'Şifre sıfırlama bağlantısı eksik veya geçersiz.');
-      } else {
-        showMode(params.get('mode') === 'register' ? 'register' : 'login');
-      }
+      if (params.get('role') === 'teacher') $('role').value = 'teacher';
       setupGoogle();
+      if (resetToken && resetEmail) {
+        $('resetEmail').value = resetEmail;
+        setMode('reset');
+      } else {
+        setMode(params.get('mode') === 'register' ? 'register' : 'login');
+      }
     })();
   </script>
   <script src="/assets/site-footer.js"></script>

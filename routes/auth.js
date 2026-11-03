@@ -118,12 +118,17 @@ router.post('/register', registerLimiter, async (req, res) => {
   const body = req.body || {};
   const name = typeof body.name === 'string' ? body.name.trim() : '';
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+  const phone = typeof body.phone === 'string' ? body.phone.replace(/[\s()-]/g, '') : '';
   const password = body.password;
   const role = body.role;
 
   if (!name || name.length > 100 || !isValidEmail(email)) {
     return res.status(400).json({ mesaj: 'Ad veya e-posta biçimi geçersiz.' });
   }
+  if (!/^(\+90|0)?5\d{9}$/.test(phone)) {
+    return res.status(400).json({ mesaj: 'Telefon numarasını 05xx xxx xx xx formatında girin.' });
+  }
+  const normalizedPhone = `0${phone.slice(-10)}`;
   if (!validPassword(password)) {
     return res.status(400).json({ mesaj: 'Şifre 10–72 bayt uzunluğunda olmalıdır.' });
   }
@@ -144,7 +149,7 @@ router.post('/register', registerLimiter, async (req, res) => {
   }
 
   try {
-    const user = await User.createWithPassword({ name, email, role }, password);
+    const user = await User.createWithPassword({ name, email, phone: normalizedPhone, role }, password);
     await regenerateSession(req);
     req.session.user = { id: user._id.toString(), name: user.name, role: user.role };
     await saveSession(req);
