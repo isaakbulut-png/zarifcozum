@@ -121,6 +121,7 @@ app.use(authRouter);
 app.use(express.static(path.join(__dirname, 'public'))); // public/deneme-sinavi-optik.html
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/logo', express.static(path.join(__dirname, 'logo')));
+app.use('/pages', express.static(path.join(__dirname, 'pages'), { extensions: ['html'] }));
 
 const sitePages = [
   'index.html', 'dene.html', 'asistan.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html', 'yasal.html',
