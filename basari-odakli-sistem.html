@@ -32,10 +32,21 @@ header {
   gap: 15px;
 }
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: white;
   font-size: 22px;
   font-weight: bold;
   text-decoration: none;
+}
+.brand img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  padding: 3px;
+  border-radius: 10px;
+  background: #fffaf5;
 }
 .back {
   color: white;
@@ -166,7 +177,7 @@ footer {
 <body>
 
 <header>
-  <a href="/" class="brand">Zarif Çözüm</a>
+  <a href="/" class="brand"><img src="/assets/brand-mark.png" alt="">Zarif Çözüm</a>
   <a href="/" class="back">← Ana Sayfaya Dön</a>
 </header>
 
