@@ -129,26 +129,29 @@ function createPratikRouter({
   async function erisim(req, res, ozellik, sinif, konu) {
     const kim = kimlik(req, res);
     const uye = await uyeMi(kim.kullanici);
-    if (uye) return { kim, uye, izin: true };
+    const limitYok = uye || kim.kullanici?.role === 'student';
+    if (limitYok) return { kim, uye, limitYok, izin: true };
     const kullanilan = await kullanilanKonular(kim.anahtar, ozellik);
     const mevcut = kullanilan.some(oge => oge.sinif === sinif && oge.konu === konu);
-    return { kim, uye, izin: mevcut || kullanilan.length < UCRETSIZ_KONU_SINIRI };
+    return { kim, uye, limitYok, izin: mevcut || kullanilan.length < UCRETSIZ_KONU_SINIRI };
   }
 
   router.get('/durum', sarmala(async (req, res) => {
     res.set('Cache-Control', 'no-store');
     const kim = kimlik(req, res);
     const uye = await uyeMi(kim.kullanici);
+    const limitYok = uye || kim.kullanici?.role === 'student';
     const ozellikler = {};
     for (const ozellik of OZELLIKLER) {
-      const kullanilan = uye ? [] : await kullanilanKonular(kim.anahtar, ozellik);
+      const kullanilan = limitYok ? [] : await kullanilanKonular(kim.anahtar, ozellik);
       ozellikler[ozellik] = {
         kullanilan: kullanilan.map(({ sinif, konu }) => ({ sinif, konu })),
-        kalan: uye ? null : Math.max(UCRETSIZ_KONU_SINIRI - kullanilan.length, 0)
+        kalan: limitYok ? null : Math.max(UCRETSIZ_KONU_SINIRI - kullanilan.length, 0)
       };
     }
     res.json({
       uye,
+      limitYok,
       girisYapti: kim.girisYapti,
       limitler: { konu: UCRETSIZ_KONU_SINIRI, soru: UCRETSIZ_SORU_SAYISI },
       uyelikAdresi: UYELIK_ADRESI,
@@ -163,11 +166,11 @@ function createPratikRouter({
       return res.status(400).json({ mesaj: 'Sınıf veya konu seçimi geçersiz.' });
     }
     const { sinif, konu } = secim;
-    const { kim, uye, izin } = await erisim(req, res, ozellik, sinif, konu);
+    const { kim, uye, limitYok, izin } = await erisim(req, res, ozellik, sinif, konu);
     if (!izin) return yasakYaniti(res, kim.girisYapti);
 
     const istenen = Number(req.body?.adet);
-    const adet = uye
+    const adet = limitYok
       ? (UYE_SORU_SAYILARI.includes(istenen) ? istenen : Math.max(...UYE_SORU_SAYILARI))
       : UCRETSIZ_SORU_SAYISI;
     let sorular;
@@ -176,13 +179,14 @@ function createPratikRouter({
     } catch (error) {
       return res.status(error.status || 502).json({ mesaj: error.message || 'Sorular hazırlanamadı.' });
     }
-    if (!uye && !(await hakKullan(kim.anahtar, ozellik, sinif, konu))) return yasakYaniti(res, kim.girisYapti);
+    if (!limitYok && !(await hakKullan(kim.anahtar, ozellik, sinif, konu))) return yasakYaniti(res, kim.girisYapti);
 
-    const kullanilan = uye ? null : (await kullanilanKonular(kim.anahtar, ozellik)).length;
+    const kullanilan = limitYok ? null : (await kullanilanKonular(kim.anahtar, ozellik)).length;
     res.json({
       sorular,
       uye,
-      kalan: uye ? null : Math.max(UCRETSIZ_KONU_SINIRI - kullanilan, 0)
+      limitYok,
+      kalan: limitYok ? null : Math.max(UCRETSIZ_KONU_SINIRI - kullanilan, 0)
     });
   }));
 
@@ -190,7 +194,7 @@ function createPratikRouter({
     const secim = await konuIcinIstekDogrula(req.body);
     if (!secim) return res.status(400).json({ mesaj: 'Sınıf veya konu seçimi geçersiz.' });
     const { sinif, konu } = secim;
-    const { kim, uye, izin } = await erisim(req, res, 'konu', sinif, konu);
+    const { kim, uye, limitYok, izin } = await erisim(req, res, 'konu', sinif, konu);
     if (!izin) return yasakYaniti(res, kim.girisYapti);
 
     let anlatim;
@@ -199,15 +203,16 @@ function createPratikRouter({
     } catch (error) {
       return res.status(error.status || 502).json({ mesaj: error.message || 'Konu anlatımı hazırlanamadı.' });
     }
-    if (!uye && !(await hakKullan(kim.anahtar, 'konu', sinif, konu))) return yasakYaniti(res, kim.girisYapti);
+    if (!limitYok && !(await hakKullan(kim.anahtar, 'konu', sinif, konu))) return yasakYaniti(res, kim.girisYapti);
 
-    const kullanilan = uye ? null : (await kullanilanKonular(kim.anahtar, 'konu')).length;
+    const kullanilan = limitYok ? null : (await kullanilanKonular(kim.anahtar, 'konu')).length;
     res.json({
       sinif,
       konu,
       anlatim,
       uye,
-      kalan: uye ? null : Math.max(UCRETSIZ_KONU_SINIRI - kullanilan, 0)
+      limitYok,
+      kalan: limitYok ? null : Math.max(UCRETSIZ_KONU_SINIRI - kullanilan, 0)
     });
   }));
 

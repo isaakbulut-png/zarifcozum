@@ -84,6 +84,7 @@
     function durumSerit() {
       if (!durum) return el('div');
       if (durum.uye) return el('div', { class: 'zp-serit zp-uye' }, 'Üyelik aktif: sınırsız erişim');
+      if (durum.limitYok) return el('div', { class: 'zp-serit zp-uye' }, 'Öğrenci hesabı: sınırsız erişim');
       const kalan = durum.ozellikler[mod].kalan;
       return el('div', { class: 'zp-serit' },
         kalan > 0
@@ -187,7 +188,7 @@
           const grup = el('div', { class: 'zp-konu-grup' },
             el('h4', {}, u.title));
           u.topics.forEach(konu => {
-            const kilitli = durum && !durum.uye && durum.ozellikler[mod].kalan === 0 &&
+            const kilitli = durum && !durum.limitYok && durum.ozellikler[mod].kalan === 0 &&
               !kullanilan.some(k => k.sinif === sinif && k.konu === konu);
             const secenek = el('button', {
               type: 'button',
@@ -224,7 +225,7 @@
         konuSecici = uniteListesi.map(u => el('div', { class: 'zp-unite' },
           el('h4', {}, u.title),
           el('div', { class: 'zp-konular' }, u.topics.map(konu => {
-            const kilitli = durum && !durum.uye && durum.ozellikler[mod].kalan === 0 &&
+            const kilitli = durum && !durum.limitYok && durum.ozellikler[mod].kalan === 0 &&
               !kullanilan.some(k => k.sinif === sinif && k.konu === konu);
             return el('button', {
               type: 'button', class: 'zp-konu' + (kilitli ? ' kilitli' : ''),
@@ -253,7 +254,7 @@
       yukleniyor('Konu anlatımı hazırlanıyor…');
       try {
         const veri = await api('/konu', { sinif, konu });
-        if (durum && !veri.uye) durum.ozellikler.konu.kalan = veri.kalan;
+        if (durum && !veri.limitYok) durum.ozellikler.konu.kalan = veri.kalan;
         const a = veri.anlatim;
         temizle();
         kok.append(el('div', { class: 'zp-kart' },
@@ -264,7 +265,7 @@
           el('h4', {}, 'Örnek soru'), el('p', {}, a.ornekSoru),
           el('h4', {}, 'Çözüm'), el('p', { class: 'zp-cozum' }, a.ornekCozum),
           el('h4', {}, 'Sık yapılan hatalar'), el('ul', {}, a.sikHatalar.map(k => el('li', {}, k))),
-          veri.uye ? '' : el('p', { class: 'zp-kucuk' }, `Ücretsiz deneme: ${veri.kalan} konu hakkın kaldı.`)));
+          veri.limitYok ? '' : el('p', { class: 'zp-kucuk' }, `Ücretsiz deneme: ${veri.kalan} konu hakkın kaldı.`)));
       } catch (hata) { hataGoster(hata); }
     }
 
@@ -272,7 +273,7 @@
       yukleniyor('Sorular hazırlanıyor…');
       try {
         const veri = await api('/sorular', { ozellik: mod, sinif, konu });
-        if (durum && !veri.uye) durum.ozellikler[mod].kalan = veri.kalan;
+        if (durum && !veri.limitYok) durum.ozellikler[mod].kalan = veri.kalan;
         if (mod === 'asistan') asistanCalistir(veri.sorular, konu);
         else if (mod === 'test') pratikCalistir(veri.sorular, konu);
         else testCalistir(veri.sorular, konu);
@@ -363,7 +364,7 @@
             el('p', { class: 'zp-cozum' }, s.explanation || ''))),
           el('div', { class: 'zp-aksiyon' },
             el('button', { class: 'zp-btn', type: 'button', onclick: secimEkrani }, 'Başka konu seç'),
-            durum && !durum.uye && durum.ozellikler[mod].kalan === 0
+            durum && !durum.limitYok && durum.ozellikler[mod].kalan === 0
               ? el('a', { class: 'zp-btn zp-ikincil', href: durum.uyelikAdresi }, 'Üyelik paketlerini incele') : '')));
       }
       ciz();

@@ -125,8 +125,36 @@ test('üye deneme limiti olmadan tüm konulara erişir ve varsayılan 20 soru al
     }
     const durum = await s.istek('/durum');
     assert.equal(durum.veri.uye, true);
+    assert.equal(durum.veri.limitYok, true);
     assert.equal(durum.veri.ozellikler.test.kalan, null);
     assert.equal(durum.headers.get('cache-control'), 'no-store');
+  } finally { s.kapat(); }
+});
+
+test('giriş yapmış öğrenci üyelik olmasa da tüm konulara ve sınırsız denemeye erişir', async () => {
+  const s = await sunucu({ kullanici: { id: 'student-1', role: 'student' } });
+  try {
+    const durum = await s.istek('/durum');
+    assert.equal(durum.veri.uye, false);
+    assert.equal(durum.veri.limitYok, true);
+    assert.equal(durum.veri.ozellikler.test.kalan, null);
+    assert.deepEqual(durum.veri.ozellikler.test.kullanilan, []);
+
+    for (const ozellik of ['test', 'kazanim', 'asistan']) {
+      for (let i = 0; i < 5; i += 1) {
+        const r = await s.istek('/sorular', { ozellik, sinif: 6, konu: konular[i] });
+        assert.equal(r.status, 200);
+        assert.equal(r.veri.sorular.length, 20);
+        assert.equal(r.veri.limitYok, true);
+        assert.equal(r.veri.kalan, null);
+      }
+    }
+    for (let i = 0; i < 5; i += 1) {
+      const r = await s.istek('/konu', { sinif: 6, konu: konular[i] });
+      assert.equal(r.status, 200);
+      assert.equal(r.veri.limitYok, true);
+      assert.equal(r.veri.kalan, null);
+    }
   } finally { s.kapat(); }
 });
 
