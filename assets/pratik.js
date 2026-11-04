@@ -37,7 +37,7 @@
   async function api(yol, govde) {
     const secenekler = govde
       ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(govde) }
-      : {};
+      : { cache: 'no-store' };
     const yanit = await fetch('/api/pratik' + yol, { credentials: 'same-origin', ...secenekler });
     const veri = await yanit.json().catch(() => ({}));
     if (!yanit.ok) {

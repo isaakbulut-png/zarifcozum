@@ -62,7 +62,7 @@ async function sunucu({ uye = false, kullanici = null } = {}) {
     });
     const set = r.headers.get('set-cookie');
     if (set) cerez = set.split(';')[0];
-    return { status: r.status, veri: await r.json() };
+    return { status: r.status, headers: r.headers, veri: await r.json() };
   }
   return { istek, kapat: () => srv.close(), uretim: () => uretimSayisi };
 }
@@ -94,15 +94,26 @@ test('konu anlatımı da 3 konuyla sınırlıdır', async () => {
   } finally { s.kapat(); }
 });
 
-test('üye sınırsızdır ve 10 soru isteyebilir', async () => {
+test('üye deneme limiti olmadan tüm konulara erişir ve varsayılan 20 soru alır', async () => {
   const s = await sunucu({ uye: true, kullanici: { id: 'u1', role: 'student' } });
   try {
-    for (let i = 0; i < 5; i += 1) {
-      const r = await s.istek('/sorular', { ozellik: 'kazanim', sinif: 6, konu: konular[i], adet: 10 });
-      assert.equal(r.status, 200);
-      assert.equal(r.veri.sorular.length, 10);
+    for (const ozellik of ['test', 'kazanim', 'asistan']) {
+      for (let i = 0; i < 5; i += 1) {
+        const r = await s.istek('/sorular', { ozellik, sinif: 6, konu: konular[i] });
+        assert.equal(r.status, 200);
+        assert.equal(r.veri.sorular.length, 20);
+        assert.equal(r.veri.kalan, null);
+      }
     }
-    assert.equal((await s.istek('/durum')).veri.uye, true);
+    for (let i = 0; i < 5; i += 1) {
+      const r = await s.istek('/konu', { sinif: 6, konu: konular[i] });
+      assert.equal(r.status, 200);
+      assert.equal(r.veri.kalan, null);
+    }
+    const durum = await s.istek('/durum');
+    assert.equal(durum.veri.uye, true);
+    assert.equal(durum.veri.ozellikler.test.kalan, null);
+    assert.equal(durum.headers.get('cache-control'), 'no-store');
   } finally { s.kapat(); }
 });
 

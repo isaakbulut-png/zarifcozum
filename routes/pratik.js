@@ -125,6 +125,7 @@ function createPratikRouter({
   }
 
   router.get('/durum', sarmala(async (req, res) => {
+    res.set('Cache-Control', 'no-store');
     const kim = kimlik(req, res);
     const uye = await uyeMi(kim.kullanici);
     const ozellikler = {};
@@ -155,7 +156,9 @@ function createPratikRouter({
     if (!izin) return yasakYaniti(res, kim.girisYapti);
 
     const istenen = Number(req.body?.adet);
-    const adet = uye && UYE_SORU_SAYILARI.includes(istenen) ? istenen : UCRETSIZ_SORU_SAYISI;
+    const adet = uye
+      ? (UYE_SORU_SAYILARI.includes(istenen) ? istenen : Math.max(...UYE_SORU_SAYILARI))
+      : UCRETSIZ_SORU_SAYISI;
     let sorular;
     try {
       sorular = await icerikGetir('sorular', sinif, konu, adet, () => soruUret({ sinif, konu, adet }));
