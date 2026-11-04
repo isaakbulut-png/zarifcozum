@@ -27,6 +27,7 @@ function createPratikRouter({
   uyeMi,
   soruUret,
   konuUret,
+  mufredatKonusuVarMi = async () => false,
   limitleyici = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 120,
@@ -115,6 +116,16 @@ function createPratikRouter({
     return { sinif, konu };
   }
 
+  async function konuIcinIstekDogrula(govde) {
+    const secim = istekDogrula(govde);
+    if (secim) return secim;
+
+    const sinif = Number(govde?.sinif);
+    const konu = typeof govde?.konu === 'string' ? govde.konu : '';
+    if (!Number.isInteger(sinif) || sinif < 5 || sinif > 12 || !konu.trim()) return null;
+    return await mufredatKonusuVarMi(sinif, konu) ? { sinif, konu } : null;
+  }
+
   async function erisim(req, res, ozellik, sinif, konu) {
     const kim = kimlik(req, res);
     const uye = await uyeMi(kim.kullanici);
@@ -176,7 +187,7 @@ function createPratikRouter({
   }));
 
   router.post('/konu', sarmala(async (req, res) => {
-    const secim = istekDogrula(req.body);
+    const secim = await konuIcinIstekDogrula(req.body);
     if (!secim) return res.status(400).json({ mesaj: 'Sınıf veya konu seçimi geçersiz.' });
     const { sinif, konu } = secim;
     const { kim, uye, izin } = await erisim(req, res, 'konu', sinif, konu);

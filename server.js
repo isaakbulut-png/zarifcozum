@@ -258,6 +258,11 @@ app.use('/api/pratik', createPratikRouter({
   getUsageCollection: () => pratikKullanim,
   getContentCollection: () => pratikIcerik,
   mufredat: mufredatiYukle(),
+  mufredatKonusuVarMi: async (grade, konu) => {
+    const { mufredatKonulariniGetir } = await import('./aiService.mjs');
+    const konular = await mufredatKonulariniGetir(grade);
+    return konular.some(kayit => kayit.dosya_adi === konu);
+  },
   uyeMi: async kullanici => {
     if (!kullanici) return false;
     if (kullanici.role === 'teacher' || kullanici.role === 'admin') return true;

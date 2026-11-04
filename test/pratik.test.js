@@ -34,7 +34,7 @@ function sahteIcerik() {
   };
 }
 
-async function sunucu({ uye = false, kullanici = null } = {}) {
+async function sunucu({ uye = false, kullanici = null, mufredatKonusuVarMi = async () => false } = {}) {
   const app = express();
   app.use(express.json());
   app.use((req, res, next) => { req.session = { user: kullanici }; next(); });
@@ -44,6 +44,7 @@ async function sunucu({ uye = false, kullanici = null } = {}) {
     getContentCollection: (() => { const k = sahteIcerik(); return () => k; })(),
     mufredat,
     uyeMi: async () => uye,
+    mufredatKonusuVarMi,
     soruUret: async ({ adet }) => {
       uretimSayisi += 1;
       return Array.from({ length: adet }, (_, i) => ({ text: `S${i}`, options: { A: '1', B: '2', C: '3', D: '4' }, answer: 'A', explanation: 'x' }));
@@ -91,6 +92,18 @@ test('konu anlatımı da 3 konuyla sınırlıdır', async () => {
   try {
     for (let i = 0; i < 3; i += 1) assert.equal((await s.istek('/konu', { sinif: 6, konu: konular[i] })).status, 200);
     assert.equal((await s.istek('/konu', { sinif: 6, konu: konular[3] })).status, 403);
+  } finally { s.kapat(); }
+});
+
+test('Pinecone müfredat kazanımları yalnızca eşleşen sınıfta konu anlatımı için geçerlidir', async () => {
+  const pineconeKonusu = 'Bir doğal sayının çarpan ve katlarına yönelik muhakeme yapabilme';
+  const s = await sunucu({
+    mufredatKonusuVarMi: async (grade, konu) => grade === 6 && konu === pineconeKonusu
+  });
+  try {
+    assert.equal((await s.istek('/konu', { sinif: 6, konu: pineconeKonusu })).status, 200);
+    assert.equal((await s.istek('/konu', { sinif: 7, konu: pineconeKonusu })).status, 400);
+    assert.equal((await s.istek('/konu', { sinif: 6, konu: 'Geçersiz kazanım' })).status, 400);
   } finally { s.kapat(); }
 });
 
