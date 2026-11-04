@@ -8,7 +8,11 @@
     test: 'Test çöz',
     kazanim: 'Kazanım testi'
   };
-  const TEST_MODLARI = {
+  const SECIM_MODLARI = {
+    konu: {
+      aciklama: 'Sınıfını ve çalışmak istediğin konuyu seç; konu anlatımı hazır olduğunda aç.',
+      baslat: 'Konu anlatımını aç'
+    },
     test: {
       aciklama: 'Konu pratiği: Her sorudan sonra doğru cevabı ve çözümü görerek adım adım çalış.',
       baslat: 'Pratiğe başla'
@@ -116,11 +120,11 @@
       const kullanilan = durum ? durum.ozellikler[mod].kullanilan : [];
       const uniteListesi = mufredat[sinif] || [];
       let konuSecici;
-      if (TEST_MODLARI[mod]) {
+      if (SECIM_MODLARI[mod]) {
         const konuSecim = el('select', {
           id: 'zp-konu-secimi-' + mod,
           class: 'zp-konu-secici',
-          'aria-label': 'Test için konu seç',
+          'aria-label': 'Çalışmak için konu seç',
           onchange: () => { baslat.disabled = !konuSecim.value; }
         }, el('option', { value: '' }, 'Konu seçin…'));
         uniteListesi.forEach(u => {
@@ -139,7 +143,7 @@
           class: 'zp-btn zp-baslat',
           disabled: '',
           onclick: () => { if (konuSecim.value) konuAc(konuSecim.value); }
-        }, TEST_MODLARI[mod].baslat);
+        }, SECIM_MODLARI[mod].baslat);
         konuSecici = el('div', { class: 'zp-konu-alani' },
           el('label', { class: 'zp-konu-etiket', for: 'zp-konu-secimi-' + mod }, 'Konu seçimi'),
           konuSecim,
@@ -158,8 +162,8 @@
       }
       kok.append(el('div', { class: 'zp-kart' },
         el('h3', {}, BASLIKLAR[mod]), durumSerit(),
-        el('p', { class: 'zp-kucuk' }, TEST_MODLARI[mod]
-          ? TEST_MODLARI[mod].aciklama
+        el('p', { class: 'zp-kucuk' }, SECIM_MODLARI[mod]
+          ? SECIM_MODLARI[mod].aciklama
           : 'Sınıfını seç, sonra bir konu seç.'),
         sinifSecici, konuSecici));
     }
