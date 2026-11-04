@@ -51,6 +51,52 @@ export async function mufredatKonulariniGetir(grade) {
     a.unite.localeCompare(b.unite, 'tr') || a.dosya_adi.localeCompare(b.dosya_adi, 'tr'));
 }
 
+export async function konuAnlatimiZenginlestir(grade, topic) {
+  const sonuc = await pineconeIndex.fetchByMetadata({
+    filter: {
+      grade: { $eq: Number(grade) },
+      official_description: { $eq: topic }
+    },
+    limit: 10
+  });
+  const kayit = Object.values(sonuc.records || {}).find(k =>
+    Number(k.metadata?.grade) === Number(grade) &&
+    k.metadata?.official_description === topic);
+  const hamIcerik = typeof kayit?.metadata?.text === 'string'
+    ? kayit.metadata.text.trim()
+    : '';
+  if (!hamIcerik) throw new Error('Bu sınıf ve konu için Pinecone’da ham müfredat içeriği bulunamadı.');
+
+  const response = await aiClient.models.generateContent({
+    model: 'gemini-4-argon',
+    contents: [
+      `Sınıf seviyesi: ${grade}. sınıf`,
+      `Konu/kazanım: ${topic}`,
+      'Pinecone’dan alınan ham müfredat içeriği:',
+      hamIcerik
+    ].join('\n\n'),
+    config: {
+      systemInstruction: 'Sen uzman bir matematik öğretmenisin. Sana verilen ham müfredat özetini temel alarak; ilgili sınıf seviyesine uygun, pedagojik, bol günlük hayat örnekli, cana yakın, detaylı ve upuzun bir konu anlatımı üret. İçeriği frontend tarafında sayfalara bölebilmemiz için Markdown formatında, tam olarak [SAYFA_1], [SAYFA_2], [SAYFA_3], [SAYFA_4] ve [SAYFA_5] etiketleriyle beş ayrı bölüme ayır. Her etiket ayrı bir satırda yer alsın, bölümlerin içeriği dolu ve kendi içinde anlamlı olsun; etiketlerin dışında giriş veya sonuç metni ekleme.',
+      temperature: 0.6,
+      maxOutputTokens: 8192
+    }
+  });
+  const anlatim = response.text?.trim();
+  if (!anlatim) throw new Error('Yapay zekâ konu anlatımı üretemedi.');
+  const etiketler = [...anlatim.matchAll(/\[SAYFA_(\d+)\]/gi)];
+  const bolumler = etiketler.map((etiket, i) => {
+    const baslangic = etiket.index + etiket[0].length;
+    const bitis = etiketler[i + 1]?.index ?? anlatim.length;
+    return anlatim.slice(baslangic, bitis).trim();
+  });
+  const sayfaSayisi = Math.min(etiketler.length, 5);
+  const sayfalarGecerli = sayfaSayisi >= 4 &&
+    etiketler.slice(0, sayfaSayisi).every((etiket, i) => Number(etiket[1]) === i + 1) &&
+    bolumler.slice(0, sayfaSayisi).every(Boolean);
+  if (!sayfalarGecerli) throw new Error('Yapay zekâ konu anlatımını en az dört dolu, sıralı sayfaya bölemedi. Lütfen yeniden deneyin.');
+  return anlatim;
+}
+
 /**
  * Yeni yüklenen Pinecone metadata yapısına uygun kural metni oluşturur
  */

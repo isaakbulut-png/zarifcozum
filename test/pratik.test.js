@@ -34,7 +34,12 @@ function sahteIcerik() {
   };
 }
 
-async function sunucu({ uye = false, kullanici = null, mufredatKonusuVarMi = async () => false } = {}) {
+async function sunucu({
+  uye = false,
+  kullanici = null,
+  mufredatKonusuVarMi = async () => false,
+  konuUret = async () => ({ ozet: 'o', kavramlar: ['k'], ornekSoru: 'q', ornekCozum: 'c', sikHatalar: ['h'] })
+} = {}) {
   const app = express();
   app.use(express.json());
   app.use((req, res, next) => { req.session = { user: kullanici }; next(); });
@@ -49,7 +54,7 @@ async function sunucu({ uye = false, kullanici = null, mufredatKonusuVarMi = asy
       uretimSayisi += 1;
       return Array.from({ length: adet }, (_, i) => ({ text: `S${i}`, options: { A: '1', B: '2', C: '3', D: '4' }, answer: 'A', explanation: 'x' }));
     },
-    konuUret: async () => ({ ozet: 'o', kavramlar: ['k'], ornekSoru: 'q', ornekCozum: 'c', sikHatalar: ['h'] }),
+    konuUret,
     limitleyici: (req, res, next) => next()
   }));
   const srv = await new Promise(coz => { const s = app.listen(0, () => coz(s)); });
@@ -104,6 +109,30 @@ test('Pinecone müfredat kazanımları yalnızca eşleşen sınıfta konu anlat�
     assert.equal((await s.istek('/konu', { sinif: 6, konu: pineconeKonusu })).status, 200);
     assert.equal((await s.istek('/konu', { sinif: 7, konu: pineconeKonusu })).status, 400);
     assert.equal((await s.istek('/konu', { sinif: 6, konu: 'Geçersiz kazanım' })).status, 400);
+  } finally { s.kapat(); }
+});
+
+test('konu anlatımı rotası üretilen Markdown içeriğini öğrenciye döndürür', async () => {
+  let uretilenSecim;
+  const markdown = [
+    '[SAYFA_1]\n# Dikdörtgenin çevresi\n\nGünlük hayattan **örneklerle** anlatım.',
+    '[SAYFA_2]\n## Kenar uzunlukları\n\nİkinci sayfa içeriği.',
+    '[SAYFA_3]\n## Çevreyi hesaplama\n\nÜçüncü sayfa içeriği.',
+    '[SAYFA_4]\n## Alıştırmalar\n\nDördüncü sayfa içeriği.',
+    '[SAYFA_5]\n## Özet\n\nBeşinci sayfa içeriği.'
+  ].join('\n\n');
+  const s = await sunucu({
+    kullanici: { id: 'student-1', role: 'student' },
+    konuUret: async secim => {
+      uretilenSecim = secim;
+      return markdown;
+    }
+  });
+  try {
+    const yanit = await s.istek('/konu', { sinif: 6, konu: konular[0] });
+    assert.equal(yanit.status, 200);
+    assert.deepEqual(uretilenSecim, { sinif: 6, konu: konular[0] });
+    assert.equal(yanit.veri.anlatim, markdown);
   } finally { s.kapat(); }
 });
 

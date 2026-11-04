@@ -24,7 +24,7 @@ const { createDenemelerRouters } = require('./routes/denemeler');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
 const { createPratikRouter } = require('./routes/pratik');
-const { uretSorular, uretKonuAnlatimi } = require('./lib/ai-icerik');
+const { uretSorular } = require('./lib/ai-icerik');
 const { mufredatiYukle } = require('./lib/mufredat');
 const User = require('./models/User');
 const Payment = require('./models/Payment');
@@ -270,7 +270,10 @@ app.use('/api/pratik', createPratikRouter({
     return Boolean(kayit && kayit.subscriptionStatus === 'active' && (!kayit.expiresAt || kayit.expiresAt > new Date()));
   },
   soruUret: uretSorular,
-  konuUret: uretKonuAnlatimi
+  konuUret: async ({ sinif, konu }) => {
+    const { konuAnlatimiZenginlestir } = await import('./aiService.mjs');
+    return konuAnlatimiZenginlestir(sinif, konu);
+  }
 }));
 app.use('/api/ogretmen/gelisim', gelisimRouters.teacher);
 app.use('/api/student/gelisim', gelisimRouters.student);

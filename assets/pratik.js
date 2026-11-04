@@ -68,6 +68,116 @@
     return [...uniteHaritasi].map(([title, topics]) => ({ title, topics }));
   }
 
+  function markdownSatiri(dugum, metin) {
+    const parcalar = metin.split(/(\*\*.+?\*\*|__.+?__|`[^`]+`|\*[^*]+\*)/g);
+    parcalar.forEach(parca => {
+      if ((parca.startsWith('**') && parca.endsWith('**')) ||
+          (parca.startsWith('__') && parca.endsWith('__'))) {
+        dugum.append(el('strong', {}, parca.slice(2, -2)));
+      } else if (parca.startsWith('`') && parca.endsWith('`')) {
+        dugum.append(el('code', {}, parca.slice(1, -1)));
+      } else if (parca.startsWith('*') && parca.endsWith('*')) {
+        dugum.append(el('em', {}, parca.slice(1, -1)));
+      } else {
+        dugum.append(document.createTextNode(parca));
+      }
+    });
+  }
+
+  function markdownGoster(metin) {
+    const kok = el('div', { class: 'zp-anlatim' });
+    let paragraf = [];
+    let liste = null;
+    let listeTuru = '';
+    const paragrafiEkle = () => {
+      if (!paragraf.length) return;
+      const p = el('p');
+      markdownSatiri(p, paragraf.join(' '));
+      kok.append(p);
+      paragraf = [];
+    };
+    const listeyiBitir = () => {
+      liste = null;
+      listeTuru = '';
+    };
+
+    String(metin).split(/\r?\n/).forEach(satir => {
+      const temiz = satir.trim();
+      if (!temiz) {
+        paragrafiEkle();
+        listeyiBitir();
+        return;
+      }
+      const baslik = temiz.match(/^(#{1,4})\s+(.+)$/);
+      if (baslik) {
+        paragrafiEkle();
+        listeyiBitir();
+        const seviye = Math.min(baslik[1].length + 1, 4);
+        const h = el(`h${seviye}`);
+        markdownSatiri(h, baslik[2]);
+        kok.append(h);
+        return;
+      }
+      const madde = temiz.match(/^[-*]\s+(.+)$/);
+      const numarali = temiz.match(/^\d+[.)]\s+(.+)$/);
+      if (madde || numarali) {
+        paragrafiEkle();
+        const tur = madde ? 'ul' : 'ol';
+        if (!liste || listeTuru !== tur) {
+          listeyiBitir();
+          liste = el(tur);
+          listeTuru = tur;
+          kok.append(liste);
+        }
+        const li = el('li');
+        markdownSatiri(li, (madde || numarali)[1]);
+        liste.append(li);
+        return;
+      }
+      if (temiz.startsWith('> ')) {
+        paragrafiEkle();
+        listeyiBitir();
+        const alinti = el('blockquote');
+        markdownSatiri(alinti, temiz.slice(2));
+        kok.append(alinti);
+        return;
+      }
+      if (/^(-{3,}|\*{3,})$/.test(temiz)) {
+        paragrafiEkle();
+        listeyiBitir();
+        kok.append(el('hr'));
+        return;
+      }
+      listeyiBitir();
+      paragraf.push(temiz);
+    });
+    paragrafiEkle();
+    return kok;
+  }
+
+  function konuAnlatiminiMarkdownaCevir(anlatim) {
+    if (typeof anlatim === 'string') return anlatim;
+    return [
+      '## Konu özeti', anlatim.ozet,
+      '## Temel kavramlar', ...(anlatim.kavramlar || []).map(k => `- ${k}`),
+      '## Örnek soru', anlatim.ornekSoru,
+      '## Çözüm', anlatim.ornekCozum,
+      '## Sık yapılan hatalar', ...(anlatim.sikHatalar || []).map(k => `- ${k}`)
+    ].filter(Boolean).join('\n\n');
+  }
+
+  function anlatimSayfalari(metin) {
+    const parcalar = String(metin).split(/\[SAYFA_(\d+)\]/gi);
+    if (parcalar.length < 3) throw new Error('Konu anlatımı sayfalara ayrılamadı. Lütfen yeniden deneyin.');
+    const sayfalar = [];
+    for (let i = 1; i < parcalar.length; i += 2) {
+      const icerik = parcalar[i + 1]?.trim();
+      if (icerik) sayfalar.push({ numara: Number(parcalar[i]), icerik });
+    }
+    if (sayfalar.length < 4) throw new Error('Konu anlatımı dört sayfadan kısa geldi. Lütfen yeniden deneyin.');
+    return sayfalar;
+  }
+
   function mount(kok, { mod, sinif: baslangicSinifi } = {}) {
     if (!kok || !BASLIKLAR[mod]) return;
     kok.classList.add('zp');
@@ -255,16 +365,49 @@
       try {
         const veri = await api('/konu', { sinif, konu });
         if (durum && !veri.limitYok) durum.ozellikler.konu.kalan = veri.kalan;
-        const a = veri.anlatim;
+        const anlatim = konuAnlatiminiMarkdownaCevir(veri.anlatim);
+        const sayfalar = anlatimSayfalari(anlatim);
         temizle();
+        let aktifSayfa = 0;
+        const gorunum = el('div', {
+          class: 'zp-slayt-govde',
+          role: 'region',
+          'aria-label': 'Konu anlatımı sayfaları',
+          'aria-live': 'polite'
+        });
+        const geri = el('button', {
+          class: 'zp-slayt-ok',
+          type: 'button',
+          'aria-label': 'Önceki sayfaya git',
+          onclick: () => sayfayaGit(aktifSayfa - 1, 'geri')
+        }, '👈');
+        const ileri = el('button', {
+          class: 'zp-slayt-ok',
+          type: 'button',
+          'aria-label': 'Sonraki sayfaya git',
+          onclick: () => sayfayaGit(aktifSayfa + 1, 'ileri')
+        }, '👉');
+        const sayac = el('p', { class: 'zp-slayt-sayac', 'aria-live': 'polite' });
+        function sayfayiCiz(yon) {
+          const sayfa = sayfalar[aktifSayfa];
+          const icerik = markdownGoster(sayfa.icerik);
+          icerik.classList.add('zp-anlatim-sayfa', yon === 'geri' ? 'zp-slayt-geri' : 'zp-slayt-ileri');
+          gorunum.replaceChildren(icerik);
+          geri.disabled = aktifSayfa === 0;
+          ileri.disabled = aktifSayfa === sayfalar.length - 1;
+          sayac.textContent = `Sayfa ${aktifSayfa + 1} / ${sayfalar.length}`;
+        }
+        function sayfayaGit(yeniSayfa, yon) {
+          if (yeniSayfa < 0 || yeniSayfa >= sayfalar.length) return;
+          aktifSayfa = yeniSayfa;
+          sayfayiCiz(yon);
+        }
+        sayfayiCiz('ileri');
         kok.append(el('div', { class: 'zp-kart' },
           el('button', { class: 'zp-btn zp-ikincil', type: 'button', onclick: secimEkrani }, '← Konulara dön'),
           el('h3', {}, `${sinif}. sınıf · ${konu}`),
-          el('p', {}, a.ozet),
-          el('h4', {}, 'Temel kavramlar'), el('ul', {}, a.kavramlar.map(k => el('li', {}, k))),
-          el('h4', {}, 'Örnek soru'), el('p', {}, a.ornekSoru),
-          el('h4', {}, 'Çözüm'), el('p', { class: 'zp-cozum' }, a.ornekCozum),
-          el('h4', {}, 'Sık yapılan hatalar'), el('ul', {}, a.sikHatalar.map(k => el('li', {}, k))),
+          el('div', { class: 'zp-slayt' }, geri, gorunum, ileri),
+          sayac,
           veri.limitYok ? '' : el('p', { class: 'zp-kucuk' }, `Ücretsiz deneme: ${veri.kalan} konu hakkın kaldı.`)));
       } catch (hata) { hataGoster(hata); }
     }
