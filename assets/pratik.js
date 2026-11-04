@@ -50,12 +50,31 @@
     return veri;
   }
 
+  async function pineconeKonulariniGetir(grade) {
+    const yanit = await fetch(`/api/mufredat-konulari?grade=${encodeURIComponent(grade)}`, {
+      credentials: 'same-origin',
+      cache: 'no-store'
+    });
+    const veri = await yanit.json().catch(() => ({}));
+    if (!yanit.ok) throw new Error(veri.mesaj || 'Müfredat konuları alınamadı.');
+    if (!Array.isArray(veri.konular)) throw new Error('Müfredat konu yanıtı geçersiz.');
+
+    const uniteHaritasi = new Map();
+    veri.konular.forEach(konu => {
+      if (typeof konu.unite !== 'string' || typeof konu.dosya_adi !== 'string') return;
+      if (!uniteHaritasi.has(konu.unite)) uniteHaritasi.set(konu.unite, []);
+      uniteHaritasi.get(konu.unite).push(konu.dosya_adi);
+    });
+    return [...uniteHaritasi].map(([title, topics]) => ({ title, topics }));
+  }
+
   function mount(kok, { mod, sinif: baslangicSinifi } = {}) {
     if (!kok || !BASLIKLAR[mod]) return;
     kok.classList.add('zp');
     let durum = null;
     let sinif = Number(baslangicSinifi) >= 5 && Number(baslangicSinifi) <= 11 ? Number(baslangicSinifi) : 5;
     let yonlendirmeSayaci = null;
+    let secimIstegi = 0;
 
     function temizle() {
       clearInterval(yonlendirmeSayaci);
@@ -109,7 +128,9 @@
     }
 
     async function secimEkrani() {
+      const istekNo = ++secimIstegi;
       try { durum = await api('/durum'); } catch { durum = null; }
+      if (istekNo !== secimIstegi) return;
       temizle();
       const mufredat = MUFREDAT();
       const sinifSecici = el('div', { class: 'zp-siniflar', role: 'tablist' },
@@ -118,7 +139,23 @@
           onclick: () => { sinif = n; secimEkrani(); }
         }, n + '. sınıf')));
       const kullanilan = durum ? durum.ozellikler[mod].kullanilan : [];
-      const uniteListesi = mufredat[sinif] || [];
+      let uniteListesi;
+      if (mod === 'konu') {
+        kok.append(el('div', { class: 'zp-kart zp-yukleniyor' }, `${sinif}. sınıf müfredatı yükleniyor…`));
+        try {
+          uniteListesi = await pineconeKonulariniGetir(sinif);
+        } catch (hata) {
+          if (istekNo !== secimIstegi) return;
+          temizle();
+          kok.append(el('div', { class: 'zp-kart' },
+            el('p', { class: 'zp-hata', role: 'alert' }, hata.message),
+            el('button', { class: 'zp-btn', type: 'button', onclick: secimEkrani }, 'Tekrar dene')));
+          return;
+        }
+      } else {
+        uniteListesi = mufredat[sinif] || [];
+      }
+      if (istekNo !== secimIstegi) return;
       let konuSecici;
       if (SECIM_MODLARI[mod]) {
         const konuSecim = el('select', {
@@ -165,7 +202,11 @@
         el('p', { class: 'zp-kucuk' }, SECIM_MODLARI[mod]
           ? SECIM_MODLARI[mod].aciklama
           : 'Sınıfını seç, sonra bir konu seç.'),
-        sinifSecici, konuSecici));
+        sinifSecici,
+        mod === 'konu' && uniteListesi.length === 0
+          ? el('p', { class: 'zp-hata', role: 'status' }, 'Bu sınıf için Pinecone’da müfredat konusu bulunamadı.')
+          : '',
+        konuSecici));
     }
 
     function konuAc(konu) {

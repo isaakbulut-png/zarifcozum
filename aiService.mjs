@@ -22,6 +22,40 @@ const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
 const INDEX_NAME = "zarifcozum-maarif-modeli"; // Yeni oluşturduğumuz canlı indeks adı
 const pineconeIndex = pc.index(INDEX_NAME);
 
+export async function mufredatKonulariniGetir(grade) {
+  const filter = {
+    $or: [
+      { sinif_seviyesi: { $eq: String(grade) } },
+      { sinif_seviyesi: { $eq: grade } },
+      { grade: { $eq: grade } },
+      { grade: { $eq: String(grade) } }
+    ]
+  };
+  const konular = new Map();
+  let paginationToken;
+
+  do {
+    const sonuc = await pineconeIndex.fetchByMetadata({
+      filter,
+      limit: 1000,
+      ...(paginationToken ? { paginationToken } : {})
+    });
+
+    for (const kayit of Object.values(sonuc.records || {})) {
+      const unite = typeof kayit.metadata?.unite === 'string' ? kayit.metadata.unite.trim() : '';
+      const dosyaAdi = typeof kayit.metadata?.dosya_adi === 'string' ? kayit.metadata.dosya_adi.trim() : '';
+      if (!unite || !dosyaAdi) continue;
+      const anahtar = `${unite.toLocaleLowerCase('tr-TR')}\0${dosyaAdi.toLocaleLowerCase('tr-TR')}`;
+      if (!konular.has(anahtar)) konular.set(anahtar, { unite, dosya_adi: dosyaAdi });
+    }
+
+    paginationToken = sonuc.pagination?.next;
+  } while (paginationToken);
+
+  return [...konular.values()].sort((a, b) =>
+    a.unite.localeCompare(b.unite, 'tr') || a.dosya_adi.localeCompare(b.dosya_adi, 'tr'));
+}
+
 /**
  * Yeni yüklenen Pinecone metadata yapısına uygun kural metni oluşturur
  */

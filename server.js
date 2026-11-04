@@ -87,8 +87,32 @@ const chatLimiter = rateLimit({
   skip: (req) => LOOPBACK_IPLER.has(req.ip),
   message: { success: false, error: 'Çok fazla istek gönderdiniz. Lütfen birkaç dakika sonra tekrar deneyin.' }
 });
+const mufredatKonulariLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 60,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { mesaj: 'Çok fazla müfredat isteği gönderdiniz. Lütfen biraz sonra tekrar deneyin.' }
+});
 
 // aiService.mjs ES Module olduğundan CommonJS içinden dinamik import ile yüklenir
+app.get('/api/mufredat-konulari', mufredatKonulariLimiter, async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const grade = Number(req.query.grade);
+  if (!Number.isInteger(grade) || grade < 5 || grade > 12) {
+    return res.status(400).json({ mesaj: 'grade 5 ile 12 arasında bir tam sayı olmalı.' });
+  }
+
+  try {
+    const { mufredatKonulariniGetir } = await import('./aiService.mjs');
+    const konular = await mufredatKonulariniGetir(grade);
+    res.json({ grade, konular });
+  } catch (error) {
+    console.error('/api/mufredat-konulari hatası:', error);
+    res.status(502).json({ mesaj: 'Müfredat konuları şu anda alınamadı.' });
+  }
+});
+
 app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, async (req, res) => {
   try {
     const { ogrenciMesaji, gorevTuru, grade } = req.body || {};
