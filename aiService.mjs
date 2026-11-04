@@ -5,68 +5,83 @@ import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { Pinecone } from '@pinecone-database/pinecone';
 
-// server.js ile aynı: .env öncelikli, eksikler baglanti_adresi.env'den tamamlanır
+// .env öncelikli, eksikler baglanti_adresi.env'den tamamlanır
 const kokDizin = path.dirname(fileURLToPath(import.meta.url));
 for (const dosya of ['.env', 'baglanti_adresi.env']) {
   const envYolu = path.join(kokDizin, dosya);
   if (fs.existsSync(envYolu)) dotenv.config({ path: envYolu, quiet: true });
 }
 
+// Google Gen AI ve Pinecone Başlatma
 const aiClient = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: { timeout: 120000 }, // gemini-4-argon derin akıl yürütme yaptığı için 120 sn
+  httpOptions: { timeout: 120000 }, // gemini-4-argon veya akıl yürütme modelleri için 120 sn idealdir
 });
+
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
-const pineconeIndex = pc.index('meb-mufredat');
+const INDEX_NAME = "zarifcozum-maarif-modeli"; // Yeni oluşturduğumuz canlı indeks adı
+const pineconeIndex = pc.index(INDEX_NAME);
 
 /**
- * MEB JSON şemasındaki parçalı metadata alanlarını tek bir kural metnine çevirir
+ * Yeni yüklenen Pinecone metadata yapısına uygun kural metni oluşturur
  */
 function buildConstraintText(metadata = {}) {
-  const { outcome_code, grade, unit_topic, official_description, official_boundaries } = metadata;
-  const asText = (v) => (Array.isArray(v) ? v.join(' ') : v);
+  const { sinif_seviyesi, unite, ham_icerik } = metadata;
   const parts = [];
 
-  if (outcome_code) parts.push(`Kazanım Kodu: ${outcome_code}`);
-  if (grade) parts.push(`Sınıf: ${grade}`);
-  if (unit_topic) parts.push(`Ünite/Konu: ${unit_topic}`);
-  if (official_description) parts.push(`Kazanım Açıklaması: ${asText(official_description)}`);
-  if (official_boundaries) parts.push(`Resmi Sınırlar: ${asText(official_boundaries)}`);
+  if (sinif_seviyesi) parts.push(`Sınıf Seviyesi: ${sinif_seviyesi}`);
+  if (unite) parts.push(`Ünite/Konu: ${unite}`);
+  if (ham_icerik) parts.push(`Müfredat İçeriği ve Kazanım Sınırları:\n${ham_icerik}`);
 
   return parts.length
-    ? parts.join('\n')
-    : "Genel 5-12. sınıf MEB matematik müfredat sınırlarına ve pedagojisine sadık kal.";
+    ? parts.join('\n\n')
+    : "Genel 5-12. sınıf Türkiye Yüzyılı Maarif Modeli matematik müfredat sınırlarına ve pedagojisine sadık kal.";
 }
 
 /**
- * Öğrenci mesajına göre Pinecone'dan ilgili MEB kazanım sınırını bulan fonksiyon (RAG)
+ * Öğrenci mesajına göre Pinecone'dan text-embedding-004 kullanarak ilgili kazanımı bulur (RAG)
  */
 async function getMebConstraints(ogrenciMesaji, grade) {
   try {
-    // Mesajı sayısal vektöre çeviriyoruz
+    // 1. Yeni 'text-embedding-004' modeli ile vektör oluşturma
+    // Bu model sabit olarak 768 boyutlu (dimension) çıktı üretir
     const embeddingResponse = await aiClient.models.embedContent({
-      model: 'gemini-embedding-001',
+      model: 'text-embedding-004',
       contents: ogrenciMesaji,
-      config: { outputDimensionality: 768, taskType: 'RETRIEVAL_QUERY' },
+      config: { taskType: 'RETRIEVAL_QUERY' }
     });
-    const queryVector = embeddingResponse.embeddings[0].values;
+    
+    // API yanıt yapısına göre vektör dizisini güvenli şekilde çekiyoruz
+    const queryVector = embeddingResponse.embedding?.values || embeddingResponse.embeddings?.[0]?.values;
+    
+    if (!queryVector) {
+      throw new Error("Vektör verisi Google API'den alınamadı.");
+    }
 
-    // Pinecone'da en alakalı kazanımı aratıyoruz
+    // 2. Pinecone Filtreleme Hazırlığı
+    // Eğer sınıf seviyesi (grade) geldiyse, aramayı sadece o sınıfın kazanımlarıyla daraltıyoruz
+    const filterQuery = {};
+    if (grade) {
+      filterQuery.sinif_seviyesi = { $eq: String(grade).trim() }; // Metadata'daki veri tipine göre string/sayı uyumu
+    }
+
+    // 3. Pinecone'da en alakalı 2 kazanımı aratıyoruz
     const searchResults = await pineconeIndex.query({
       vector: queryVector,
-      topK: 1,
+      topK: 2,
       includeMetadata: true,
-      // Sınıf verilmişse yalnızca o sınıfın kazanımları aranır (üst sınıf sorusu riskini engeller)
-      ...(Number.isInteger(grade) && { filter: { grade: { $eq: grade } } }),
+      ...(grade && { filter: filterQuery }),
     });
 
     if (searchResults.matches && searchResults.matches.length > 0) {
+      // En yüksek puanlı/alakalı ilk eşleşmenin metadatasını kural olarak döndürüyoruz
       return buildConstraintText(searchResults.matches[0].metadata);
     }
-    return "Genel 5-12. sınıf MEB matematik müfredat sınırlarına ve pedagojisine sadık kal.";
+    
+    return "Genel 5-12. sınıf Türkiye Yüzyılı Maarif Modeli matematik müfredat sınırlarına ve pedagojisine sadık kal.";
   } catch (error) {
-    console.error("Pinecone arama hatası:", error);
-    return "Müfredat sınırları okunamadı. Genel sınıf düzeyine sadık kal.";
+    console.error("❌ Pinecone veya Embedding arama hatası:", error);
+    return "Müfredat sınırları okunamadı. Genel sınıf düzeyine ve Türkiye Yüzyılı Maarif Modeli pedagojisine sadık kal.";
   }
 }
 
@@ -74,45 +89,50 @@ async function getMebConstraints(ogrenciMesaji, grade) {
  * Ana İşlem Merkezi: Soru üretimi ve AI Mentörlüğü tek koldan yönetir
  * @param {string} ogrenciMesaji - Kullanıcının chat mesajı veya soru üretme isteği
  * @param {string} gorevTuru - 'ai_mentor' veya 'soru_uretme'
+ * @param {string|number} grade - Öğrencinin sınıf seviyesi (Örn: '5', '6', 9 vb.)
  */
 export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor', grade) {
-  // 1. Adım: Pinecone'dan müfredat sınırını çek
+  // 1. Adım: Pinecone'dan yeni 768 boyutlu müfredat sınırını çek
   const mebSiniri = await getMebConstraints(ogrenciMesaji, grade);
 
   let systemInstruction = "";
-  let selectedModel = "gemini-4-argon"; // Ücretli hattımızın en zeki akıl yürütme modeli
+  let selectedModel = "gemini-4-argon"; // Ücretli hattınızın en zeki akıl yürütme modeli
 
   // 2. Adım: Göreve göre yapay zekaya rol biçme
   if (gorevTuru === 'ai_mentor') {
     systemInstruction = `
       Sen Türkiye Yüzyılı Maarif Modeline tamamen hakim, uzman bir Matematik AI Mentörüsün.
       Öğrenciye matematik sorusunun cevabını asla doğrudan söyleme.
-      Yaptığı mantıksal veya işlemsel hatayı tespit et, hatayı kendisinin bulmasını sağlayacak pedagojik ipuçları ver.
-      Sadece şu resmi MEB kazanım sınırları içinde kal, üst sınıf formülleri verme:
+      Yaptığı mantıksal veya işlemsel hatayı tespit et, hatayı kendisinin bulmasını sağlayacak pedagojik ipuçları (Sokratik yöntem) ver.
+      Sadece sana verilen resmi müfredat kazanım sınırları içinde kal, üst sınıf formülleri ve yöntemleri kesinlikle verme:
+      
+      [RESMİ MÜFREDAT BAĞLAMI]
       ${mebSiniri}
     `;
   } else if (gorevTuru === 'soru_uretme') {
     systemInstruction = `
-      Sen MEB müfredat standartlarında özgün matematik soruları yazan profesyonel bir yazarsın.
-      Aşağıda belirtilen kazanım sınırlarına %100 uyumlu (Örn: 4 basamak sınırı varsa aşma), şıkları ve detaylı adımlı çözümü olan özgün bir soru üret:
+      Sen Türkiye Yüzyılı Maarif Modeli matematik müfredat standartlarında özgün sorular yazan profesyonel bir yazarsın.
+      Aşağıda belirtilen kazanım sınırlarına %100 uyumlu (Örn: içerikteki sayı sınırlarını veya yöntem kısıtlamalarını aşma), şıkları ve detaylı adımlı çözümü olan tamamen özgün bir matematik sorusu üret:
+      
+      [RESMİ MÜFREDAT BAĞLAMI]
       ${mebSiniri}
     `;
   }
 
-  // 3. Adım: Satın aldığınız ücretli API limitleriyle Gemini'ı tetikleme
+  // 3. Adım: Gemini'ı tetikleme
   try {
     const response = await aiClient.models.generateContent({
       model: selectedModel,
       contents: ogrenciMesaji,
       config: {
         systemInstruction: systemInstruction,
-        temperature: 0.2, // Matematiksel netlik için yaratıcılığı düşük tutuyoruz
+        temperature: 0.2, // Matematiksel netlik ve müfredata sadakat için yaratıcılığı düşük tutuyoruz
       },
     });
 
     return response.text;
   } catch (error) {
-    console.error("Gerçek Hata Logu:", error);
+    console.error("❌ Gemini API Gerçek Hata Logu:", error);
     return "Sistemimizde anlık bir yoğunluk yaşanmaktadır, lütfen birazdan tekrar deneyiniz.";
   }
 }
