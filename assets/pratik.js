@@ -8,6 +8,16 @@
     test: 'Test çöz',
     kazanim: 'Kazanım testi'
   };
+  const TEST_MODLARI = {
+    test: {
+      aciklama: 'Konu pratiği: Her sorudan sonra doğru cevabı ve çözümü görerek adım adım çalış.',
+      baslat: 'Pratiğe başla'
+    },
+    kazanim: {
+      aciklama: 'Kazanım değerlendirmesi: Soruları tamamla; doğru cevapları ve çözümleri test sonunda incele.',
+      baslat: 'Kazanım testini başlat'
+    }
+  };
 
   function el(tag, ozellikler, ...cocuklar) {
     const dugum = document.createElement(tag);
@@ -104,20 +114,54 @@
           onclick: () => { sinif = n; secimEkrani(); }
         }, n + '. sınıf')));
       const kullanilan = durum ? durum.ozellikler[mod].kullanilan : [];
-      const unite = (mufredat[sinif] || []).map(u => el('div', { class: 'zp-unite' },
-        el('h4', {}, u.title),
-        el('div', { class: 'zp-konular' }, u.topics.map(konu => {
-          const kilitli = durum && !durum.uye && durum.ozellikler[mod].kalan === 0 &&
-            !kullanilan.some(k => k.sinif === sinif && k.konu === konu);
-          return el('button', {
-            type: 'button', class: 'zp-konu' + (kilitli ? ' kilitli' : ''),
-            onclick: () => konuAc(konu)
-          }, (kilitli ? '🔒 ' : '') + konu);
-        }))));
+      const uniteListesi = mufredat[sinif] || [];
+      let konuSecici;
+      if (TEST_MODLARI[mod]) {
+        const konuSecim = el('select', {
+          id: 'zp-konu-secimi-' + mod,
+          class: 'zp-konu-secici',
+          'aria-label': 'Test için konu seç',
+          onchange: () => { baslat.disabled = !konuSecim.value; }
+        }, el('option', { value: '' }, 'Konu seçin…'));
+        uniteListesi.forEach(u => {
+          const grup = el('optgroup', { label: u.title });
+          u.topics.forEach(konu => {
+            const kilitli = durum && !durum.uye && durum.ozellikler[mod].kalan === 0 &&
+              !kullanilan.some(k => k.sinif === sinif && k.konu === konu);
+            const secenek = el('option', { value: konu }, (kilitli ? '🔒 ' : '') + konu);
+            if (kilitli) secenek.disabled = true;
+            grup.append(secenek);
+          });
+          konuSecim.append(grup);
+        });
+        const baslat = el('button', {
+          type: 'button',
+          class: 'zp-btn zp-baslat',
+          disabled: '',
+          onclick: () => { if (konuSecim.value) konuAc(konuSecim.value); }
+        }, TEST_MODLARI[mod].baslat);
+        konuSecici = el('div', { class: 'zp-konu-alani' },
+          el('label', { class: 'zp-konu-etiket', for: 'zp-konu-secimi-' + mod }, 'Konu seçimi'),
+          konuSecim,
+          baslat);
+      } else {
+        konuSecici = uniteListesi.map(u => el('div', { class: 'zp-unite' },
+          el('h4', {}, u.title),
+          el('div', { class: 'zp-konular' }, u.topics.map(konu => {
+            const kilitli = durum && !durum.uye && durum.ozellikler[mod].kalan === 0 &&
+              !kullanilan.some(k => k.sinif === sinif && k.konu === konu);
+            return el('button', {
+              type: 'button', class: 'zp-konu' + (kilitli ? ' kilitli' : ''),
+              onclick: () => konuAc(konu)
+            }, (kilitli ? '🔒 ' : '') + konu);
+          }))));
+      }
       kok.append(el('div', { class: 'zp-kart' },
         el('h3', {}, BASLIKLAR[mod]), durumSerit(),
-        el('p', { class: 'zp-kucuk' }, 'Sınıfını seç, sonra bir konu seç.'),
-        sinifSecici, unite));
+        el('p', { class: 'zp-kucuk' }, TEST_MODLARI[mod]
+          ? TEST_MODLARI[mod].aciklama
+          : 'Sınıfını seç, sonra bir konu seç.'),
+        sinifSecici, konuSecici));
     }
 
     function konuAc(konu) {
@@ -149,14 +193,14 @@
       try {
         const veri = await api('/sorular', { ozellik: mod, sinif, konu });
         if (durum && !veri.uye) durum.ozellikler[mod].kalan = veri.kalan;
-        mod === 'asistan' ? asistanCalistir(veri.sorular, konu) : testCalistir(veri.sorular, konu);
+        if (mod === 'asistan') asistanCalistir(veri.sorular, konu);
+        else if (mod === 'test') pratikCalistir(veri.sorular, konu);
+        else testCalistir(veri.sorular, konu);
       } catch (hata) { hataGoster(hata); }
     }
 
-    function soruKarti(soru, secili, onSec, dogruGoster) {
-      return el('div', {},
-        el('p', { class: 'zp-soru' }, soru.text),
-        el('div', { class: 'zp-secenekler' }, ['A', 'B', 'C', 'D'].map(harf => {
+    function soruKarti(soru, secili, onSec, dogruGoster, kilitle = false) {
+      const secenekler = el('div', { class: 'zp-secenekler' }, ['A', 'B', 'C', 'D'].map(harf => {
           let sinifAd = 'zp-secenek';
           if (secili === harf) sinifAd += ' secili';
           if (dogruGoster) {
@@ -164,7 +208,51 @@
             else if (secili === harf) sinifAd += ' yanlis';
           }
           return el('button', { type: 'button', class: sinifAd, onclick: () => onSec(harf) }, `${harf}) ${soru.options[harf]}`);
-        })));
+        }));
+      if (kilitle) secenekler.querySelectorAll('button').forEach(button => { button.disabled = true; });
+      return el('div', {}, el('p', { class: 'zp-soru' }, soru.text), secenekler);
+    }
+
+    function pratikCalistir(sorular, konu) {
+      const cevaplar = new Array(sorular.length).fill(null);
+      let i = 0;
+      function ciz() {
+        temizle();
+        const soru = sorular[i];
+        const cevap = cevaplar[i];
+        const dogru = cevap === soru.answer;
+        kok.append(el('div', { class: 'zp-kart' },
+          el('button', { class: 'zp-btn zp-ikincil', type: 'button', onclick: secimEkrani }, '← Konu seçimine dön'),
+          el('h3', {}, `${sinif}. sınıf · ${konu}`),
+          el('p', { class: 'zp-kucuk' }, `Pratik sorusu ${i + 1} / ${sorular.length}`),
+          soruKarti(soru, cevap, harf => {
+            if (cevaplar[i] === null) {
+              cevaplar[i] = harf;
+              ciz();
+            }
+          }, cevap !== null, cevap !== null),
+          cevap !== null ? el('div', { class: dogru ? 'zp-dogru-mesaj' : 'zp-hata' },
+            dogru ? 'Doğru cevap!' : `Bu kez olmadı. Doğru cevap: ${soru.answer}.`,
+            el('p', { class: 'zp-cozum' }, soru.explanation || '')) : '',
+          cevap !== null ? el('button', {
+            class: 'zp-btn',
+            type: 'button',
+            onclick: () => { if (i < sorular.length - 1) { i += 1; ciz(); } else pratikBitir(); }
+          }, i < sorular.length - 1 ? 'Sonraki soru' : 'Pratiği bitir') : ''));
+      }
+      function pratikBitir() {
+        const dogru = sorular.filter((s, n) => cevaplar[n] === s.answer).length;
+        const bos = cevaplar.filter(c => !c).length;
+        temizle();
+        kok.append(el('div', { class: 'zp-kart' },
+          el('h3', {}, 'Pratik tamamlandı'),
+          el('p', { class: 'zp-puan' }, `${dogru} doğru · ${sorular.length - dogru - bos} yanlış · ${bos} boş`),
+          el('p', { class: 'zp-kucuk' }, 'Her sorunun çözümünü cevabından hemen sonra görebilirsin.'),
+          el('div', { class: 'zp-aksiyon' },
+            el('button', { class: 'zp-btn', type: 'button', onclick: () => pratikCalistir(sorular, konu) }, 'Aynı pratiği yeniden çöz'),
+            el('button', { class: 'zp-btn zp-ikincil', type: 'button', onclick: secimEkrani }, 'Başka konu seç'))));
+      }
+      ciz();
     }
 
     function testCalistir(sorular, konu) {
