@@ -158,32 +158,67 @@
       if (istekNo !== secimIstegi) return;
       let konuSecici;
       if (SECIM_MODLARI[mod]) {
-        const konuSecim = el('select', {
+        let seciliKonu = '';
+        const konuPanelId = 'zp-konu-panel-' + mod;
+        const konuSecim = el('button', {
+          type: 'button',
           id: 'zp-konu-secimi-' + mod,
           class: 'zp-konu-secici',
-          'aria-label': 'Çalışmak için konu seç',
-          onchange: () => { baslat.disabled = !konuSecim.value; }
-        }, el('option', { value: '' }, 'Konu seçin…'));
+          'aria-expanded': 'false',
+          'aria-controls': konuPanelId,
+          onclick: () => {
+            const acik = konuPanel.hidden;
+            konuPanel.hidden = !acik;
+            konuSecim.setAttribute('aria-expanded', String(acik));
+          },
+          onkeydown: event => {
+            if (event.key === 'Escape' && !konuPanel.hidden) {
+              konuPanel.hidden = true;
+              konuSecim.setAttribute('aria-expanded', 'false');
+            }
+          }
+        }, 'Konu seçin…');
+        const konuPanel = el('div', {
+          id: konuPanelId,
+          class: 'zp-konu-panel',
+          hidden: ''
+        });
         uniteListesi.forEach(u => {
-          const grup = el('optgroup', { label: u.title });
+          const grup = el('div', { class: 'zp-konu-grup' },
+            el('h4', {}, u.title));
           u.topics.forEach(konu => {
             const kilitli = durum && !durum.uye && durum.ozellikler[mod].kalan === 0 &&
               !kullanilan.some(k => k.sinif === sinif && k.konu === konu);
-            const secenek = el('option', { value: konu }, (kilitli ? '🔒 ' : '') + konu);
+            const secenek = el('button', {
+              type: 'button',
+              class: 'zp-konu-secim',
+              onclick: () => {
+                seciliKonu = konu;
+                konuSecim.textContent = konu;
+                baslat.disabled = false;
+                konuPanel.hidden = true;
+                konuSecim.setAttribute('aria-expanded', 'false');
+                konuSecim.focus();
+              }
+            }, (kilitli ? '🔒 ' : '') + konu);
             if (kilitli) secenek.disabled = true;
             grup.append(secenek);
           });
-          konuSecim.append(grup);
+          konuPanel.append(grup);
         });
+        if (!uniteListesi.length) {
+          konuPanel.append(el('p', { class: 'zp-konu-bos' }, 'Bu sınıf için konu bulunamadı.'));
+        }
         const baslat = el('button', {
           type: 'button',
           class: 'zp-btn zp-baslat',
           disabled: '',
-          onclick: () => { if (konuSecim.value) konuAc(konuSecim.value); }
+          onclick: () => { if (seciliKonu) konuAc(seciliKonu); }
         }, SECIM_MODLARI[mod].baslat);
         konuSecici = el('div', { class: 'zp-konu-alani' },
           el('label', { class: 'zp-konu-etiket', for: 'zp-konu-secimi-' + mod }, 'Konu seçimi'),
           konuSecim,
+          konuPanel,
           baslat);
       } else {
         konuSecici = uniteListesi.map(u => el('div', { class: 'zp-unite' },
