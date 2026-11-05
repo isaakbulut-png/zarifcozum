@@ -24,7 +24,7 @@ app.get('/deneme-sinavi-optik.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'deneme-sinavi-optik.html'));
 });
 
-app.get(['/ogrenci-paneli.html', '/ogretmen-paneli.html'], (req, res) => {
+app.get(['/ogrenci-paneli.html', '/ogretmen-paneli.html', '/admin-paneli.html'], (req, res) => {
   res.status(503).send('Bu paneller için kimlik doğrulaması gerekir. npm start komutuyla server.js sunucusunu başlatın.');
 });
 

@@ -210,8 +210,8 @@ function createPratikRouter({
 
   async function erisim(req, res, ozellik, sinif, konu, haklar) {
     const kim = kimlik(req, res, haklar.denemeSuresiGun);
-    const uye = await uyeMi(kim.kullanici);
-    const limitYok = uye || kim.kullanici?.role === 'student';
+    const uye = kim.girisYapti && Boolean(await uyeMi(kim.kullanici));
+    const limitYok = kim.girisYapti && (uye || kim.kullanici?.role === 'student');
     if (limitYok) return { kim, uye, limitYok, izin: true };
     const ziyaretciIzinli = ozellik === 'konu'
       ? haklar.ozetGorebilir
@@ -226,8 +226,8 @@ function createPratikRouter({
     res.set('Cache-Control', 'no-store');
     const haklar = haklariEsle(await getVisitorSettings());
     const kim = kimlik(req, res, haklar.denemeSuresiGun);
-    const uye = await uyeMi(kim.kullanici);
-    const limitYok = uye || kim.kullanici?.role === 'student';
+    const uye = kim.girisYapti && Boolean(await uyeMi(kim.kullanici));
+    const limitYok = kim.girisYapti && (uye || kim.kullanici?.role === 'student');
     const soruKullanilan = limitYok ? 0 : await kullanilanSoruSayisi(kim.anahtar, haklar);
     const ozellikler = {};
     for (const ozellik of OZELLIKLER) {

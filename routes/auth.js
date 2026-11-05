@@ -114,8 +114,9 @@ const adminLoginLimiter = rateLimit({
 });
 
 function redirectForRole(role, adminRole) {
+  if (role === 'teacher') return '/ogretmen-paneli.html';
   if (role === 'admin' || adminRole) return '/admin-paneli.html';
-  return role === 'teacher' ? '/ogretmen-paneli.html' : '/ogrenci-paneli.html';
+  return '/ogrenci-paneli.html';
 }
 
 router.post('/register', registerLimiter, async (req, res) => {
@@ -385,7 +386,7 @@ router.post('/change-password', passwordChangeLimiter, requireSession, async (re
     return res.status(400).json({ mesaj: 'Yeni şifre 10–72 bayt uzunluğunda olmalıdır.' });
   }
   if (!passwordsMatch(password, passwordConfirmation)) {
-    return res.status(400).json({ mesaj: 'Yeni şifreler eşleşmiyor.' });
+    return res.status(400).json({ mesaj: 'Aynı şifreyi girmediniz.' });
   }
 
   try {
@@ -399,7 +400,7 @@ router.post('/change-password', passwordChangeLimiter, requireSession, async (re
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
-    res.json({ mesaj: 'Şifreniz başarıyla değiştirildi.' });
+    res.json({ mesaj: 'Şifre başarı ile değiştirildi.' });
   } catch (error) {
     console.error('Şifre değiştirme başarısız:', error);
     res.status(500).json({ mesaj: 'Şifre değiştirilirken sunucu hatası oluştu.' });
@@ -506,4 +507,4 @@ function requireSession(req, res, next) {
   next();
 }
 
-module.exports = { router, requireRole, createRequireRole, requireSession };
+module.exports = { router, requireRole, createRequireRole, requireSession, redirectForRole };

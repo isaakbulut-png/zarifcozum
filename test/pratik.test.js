@@ -124,6 +124,22 @@ test('ziyaretçi 3 soru hakkına sahiptir ve tam kazanım testini başlatamaz', 
   } finally { s.kapat(); }
 });
 
+test('oturumsuz ziyaretçi, uyeMi sonucu true dönse bile sınırsız erişim alamaz', async () => {
+  const s = await sunucu({ uye: true });
+  try {
+    const durum = await s.istek('/durum');
+    assert.equal(durum.veri.girisYapti, false);
+    assert.equal(durum.veri.uye, false);
+    assert.equal(durum.veri.limitYok, false);
+    assert.equal(durum.veri.ziyaretciHaklari.soru.kalan, 3);
+
+    const soru = await s.istek('/sorular', { ozellik: 'test', sinif: 6, konu: konular[0] });
+    assert.equal(soru.status, 200);
+    assert.equal(soru.veri.sorular.length, 3);
+    assert.equal(soru.veri.limitYok, false);
+  } finally { s.kapat(); }
+});
+
 test('eşzamanlı ziyaretçi istekleri soru hakkı sınırını aşamaz', async () => {
   const s = await sunucu();
   try {

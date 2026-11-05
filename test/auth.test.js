@@ -4,7 +4,7 @@ const express = require('express');
 const test = require('node:test');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
-const { router } = require('../routes/auth');
+const { redirectForRole, router } = require('../routes/auth');
 
 function withServer(sessionUser, callback) {
   const app = express();
@@ -37,6 +37,13 @@ const post = body => ({
   method: 'POST',
   headers: {'Content-Type': 'application/json'},
   body: JSON.stringify(body)
+});
+
+test('role redirects keep editor teachers in the teacher panel', () => {
+  assert.equal(redirectForRole('teacher', 'editor'), '/ogretmen-paneli.html');
+  assert.equal(redirectForRole('teacher', null), '/ogretmen-paneli.html');
+  assert.equal(redirectForRole('admin', 'support'), '/admin-paneli.html');
+  assert.equal(redirectForRole('student', null), '/ogrenci-paneli.html');
 });
 
 test('Google client config exposes only its public client ID', async () => {
@@ -85,12 +92,21 @@ test('password change requires a session, verifies an existing password and upda
       }));
       assert.equal(invalid.status, 400);
 
+      const mismatch = await fetch(`${base}/change-password`, post({
+        currentPassword: 'correct-current',
+        password: 'a-new-password',
+        passwordConfirmation: 'a-different-password'
+      }));
+      assert.equal(mismatch.status, 400);
+      assert.deepEqual(await mismatch.json(), {mesaj: 'Aynı şifreyi girmediniz.'});
+
       const response = await fetch(`${base}/change-password`, post({
         currentPassword: 'correct-current',
         password: 'a-new-password',
         passwordConfirmation: 'a-new-password'
       }));
       assert.equal(response.status, 200);
+      assert.deepEqual(await response.json(), {mesaj: 'Şifre başarı ile değiştirildi.'});
       assert.equal(user.passwordHash, 'hash:a-new-password');
       assert.equal(user.resetPasswordToken, undefined);
       assert.equal(user.resetPasswordExpires, undefined);

@@ -15,7 +15,7 @@ const { MongoClient, ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const { MongoStore } = require('connect-mongo');
-const { router: authRouter, requireRole } = require('./routes/auth');
+const { router: authRouter, requireRole, redirectForRole } = require('./routes/auth');
 const { createAIRouter } = require('./routes/ai');
 const { createPaymentRouter } = require('./routes/payments');
 const { createAdminRouter } = require('./routes/admin');
@@ -197,11 +197,20 @@ sitePages.forEach(page => {
     const role = page === 'ogrenci-paneli.html' ? 'student'
       : page === 'ogretmen-paneli.html' ? 'teacher'
       : null;
-    // Giriş yapmış kullanıcı kendi rolüyle giriş sayfasına gelirse panele yönlenir;
-    // farklı bir rolle girmek isterse (role parametresi) form açılır.
+    // Öğretmen giriş bağlantısı mevcut oturumu kapatıp parola ekranını gösterir.
     if (page === 'kayit-giris.html' && req.query.mode !== 'register') {
       const current = req.session.user?.role;
       const requested = req.query.role;
+      if (requested === 'teacher' && req.session?.user) {
+        return req.session.destroy(error => {
+          if (error) {
+            console.error('Öğretmen girişi öncesi oturum kapatılamadı:', error);
+            return res.status(500).send('Güvenli giriş için mevcut oturum kapatılamadı.');
+          }
+          res.clearCookie('zarifcozum.sid', { path: '/' });
+          next();
+        });
+      }
       const panel = current === 'student' ? '/ogrenci-paneli.html'
         : current === 'teacher' ? '/ogretmen-paneli.html'
         : null;
@@ -245,7 +254,9 @@ function adminSayfasiGonder(dosya) {
   };
 }
 app.get(['/yonetim', '/admin-giris.html'], (req, res, next) => {
-  if (req.session.user?.role === 'admin' || req.session.user?.adminRole) return res.redirect('/admin-paneli.html');
+  if (req.session.user?.role === 'admin' || req.session.user?.adminRole) {
+    return res.redirect(redirectForRole(req.session.user.role, req.session.user.adminRole));
+  }
   next();
 }, adminSayfasiGonder('admin-giris.html'));
 app.get('/admin-paneli.html', async (req, res, next) => {

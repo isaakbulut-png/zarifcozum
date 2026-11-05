@@ -193,8 +193,8 @@
 
     function durumSerit() {
       if (!durum) return el('div');
-      if (durum.uye) return el('div', { class: 'zp-serit zp-uye' }, 'Üyelik aktif: sınırsız erişim');
-      if (durum.limitYok) return el('div', { class: 'zp-serit zp-uye' }, 'Öğrenci hesabı: sınırsız erişim');
+      if (durum.girisYapti && durum.uye) return el('div', { class: 'zp-serit zp-uye' }, 'Üyelik aktif: sınırsız erişim');
+      if (durum.girisYapti && durum.limitYok) return el('div', { class: 'zp-serit zp-uye' }, 'Giriş yapıldı: sınırsız erişim');
       const soruKalan = durum.ziyaretciHaklari.soru.kalan;
       if (mod === 'konu') {
         const kalanKonu = durum.ozellikler.konu.kalan;
@@ -248,6 +248,10 @@
     async function secimEkrani() {
       const istekNo = ++secimIstegi;
       try { durum = await api('/durum'); } catch { durum = null; }
+      if (durum && !durum.girisYapti) {
+        durum.uye = false;
+        durum.limitYok = false;
+      }
       if (istekNo !== secimIstegi) return;
       temizle();
       const mufredat = MUFREDAT();
