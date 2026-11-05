@@ -2,10 +2,14 @@ const assert = require('node:assert/strict');
 const express = require('express');
 const test = require('node:test');
 const { createSorularRouter } = require('../routes/sorular');
-const { requireRole } = require('../routes/auth');
+const { createRequireRole } = require('../routes/auth');
 const Soru = require('../models/Soru');
 
 function withServer(sessionUser, callback, yukleyici) {
+  const UserModel = {
+    findById: id => ({ select: async () => sessionUser ? { ...sessionUser, _id: { toString: () => id } } : null })
+  };
+  const requireRole = createRequireRole(UserModel);
   const app = express();
   app.use(express.json());
   app.use((req, res, next) => { req.session = { user: sessionUser }; next(); });
@@ -30,6 +34,9 @@ test('soru API anonim ve öğrenci oturumlarını reddeder', async () => {
       assert.equal((await fetch(`${base}/tara`, { method: 'POST' })).status, user ? 403 : 401);
     });
   }
+  await withServer({ id: 'support-1', role: 'admin', adminRole: 'support' }, async base => {
+    assert.equal((await fetch(base)).status, 403);
+  });
 });
 
 test('öğretmen ve admin soruları listeleyebilir', async () => {
@@ -44,6 +51,9 @@ test('öğretmen ve admin soruları listeleyebilir', async () => {
         assert.deepEqual(await response.json(), { sorular: [] });
       });
     }
+    await withServer({ id: 'editor-1', role: 'admin', adminRole: 'editor' }, async base => {
+      assert.equal((await fetch(base)).status, 200);
+    });
   } finally {
     Soru.find = original;
   }

@@ -27,9 +27,11 @@ const { createPratikRouter } = require('./routes/pratik');
 const { createZoomMeeting } = require('./lib/zoom');
 const { uretSorular } = require('./lib/ai-icerik');
 const { mufredatiYukle } = require('./lib/mufredat');
+const { adminRoleOf } = require('./lib/admin-rbac');
 const User = require('./models/User');
 const Payment = require('./models/Payment');
 const SystemConfig = require('./models/SystemConfig');
+const AdminLog = require('./models/AdminLog');
 const { createWebhookRouter } = require('./routes/webhooks');
 
 const PORT = process.env.PORT || 3000;
@@ -191,7 +193,7 @@ sitePages.forEach(page => {
   const route = page === 'Platform Ayrıcalıkları.html'
     ? /^\/Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1\.html$/i
     : `/${page}`;
-  app.get(route, (req, res, next) => {
+  app.get(route, async (req, res, next) => {
     const role = page === 'ogrenci-paneli.html' ? 'student'
       : page === 'ogretmen-paneli.html' ? 'teacher'
       : null;
@@ -207,10 +209,26 @@ sitePages.forEach(page => {
     }
     if (!role) return next();
     if (!req.session.user) return res.redirect('/kayit-giris.html');
-    const adminOgretmenPaneli = role === 'teacher' && req.session.user.role === 'admin';
-    if (req.session.user.role !== role && !adminOgretmenPaneli) {
+    let canOpen = req.session.user.role === role;
+    if (role === 'teacher') {
+      try {
+        const user = await User.findById(req.session.user.id).select('name role adminRole');
+        const adminRole = adminRoleOf(user);
+        canOpen = Boolean(user && (
+          user.role === 'teacher' && (!adminRole || ['superadmin', 'editor'].includes(adminRole)) ||
+          user.role === 'admin' && adminRole !== 'support'
+        ));
+        if (user) {
+          req.session.user = { ...req.session.user, name: user.name, role: user.role, adminRole };
+        }
+      } catch (error) {
+        console.error('Öğretmen paneli rolü doğrulanamadı:', error);
+        return res.status(500).send('Öğretmen paneli yetkisi doğrulanamadı.');
+      }
+    }
+    if (!canOpen) {
       return res.redirect(
-        req.session.user.role === 'admin' ? '/admin-paneli.html'
+        req.session.user.adminRole || req.session.user.role === 'admin' ? '/admin-paneli.html'
           : req.session.user.role === 'teacher' ? '/ogretmen-paneli.html'
           : '/ogrenci-paneli.html'
       );
@@ -227,11 +245,20 @@ function adminSayfasiGonder(dosya) {
   };
 }
 app.get(['/yonetim', '/admin-giris.html'], (req, res, next) => {
-  if (req.session.user?.role === 'admin') return res.redirect('/admin-paneli.html');
+  if (req.session.user?.role === 'admin' || req.session.user?.adminRole) return res.redirect('/admin-paneli.html');
   next();
 }, adminSayfasiGonder('admin-giris.html'));
-app.get('/admin-paneli.html', (req, res, next) => {
-  if (req.session.user?.role !== 'admin') return res.redirect('/yonetim');
+app.get('/admin-paneli.html', async (req, res, next) => {
+  if (!req.session.user?.id) return res.redirect('/yonetim');
+  try {
+    const user = await User.findById(req.session.user.id).select('name role adminRole');
+    const adminRole = adminRoleOf(user);
+    if (!adminRole) return res.redirect('/yonetim');
+    req.session.user = { ...req.session.user, name: user.name, role: user.role, adminRole };
+  } catch (error) {
+    console.error('Yönetim paneli rolü doğrulanamadı:', error);
+    return res.status(500).send('Yönetim paneli yetkisi doğrulanamadı.');
+  }
   next();
 }, adminSayfasiGonder('admin-paneli.html'));
 app.get('/favicon.svg', (req, res) => res.sendFile(path.join(__dirname, 'favicon.svg')));
@@ -241,6 +268,7 @@ let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, duyuruKoleksiy
 let studentProfiles, homeworks, homeworkAssignments, homeworkAudits;
 let calismaKayitlari, ogrenciHedefleri, kazanimIlerleme, ogretmenYorumlari, takvimOlaylari;
 let pratikKullanim, pratikIcerik;
+let supportTickets;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
 const canliYoneticiKontrol = requireRole('teacher', 'admin');
@@ -251,7 +279,10 @@ const canliDersOzeti = ders => ({
   joinUrl: ders.joinUrl || '',
   startedAt: ders.startedAt
 });
-app.use('/api/sorular', createSorularRouter({ requireStaff: requireRole('teacher', 'admin') }));
+app.use('/api/sorular', createSorularRouter({
+  requireStaff: requireRole('teacher', 'admin'),
+  AdminLog
+}));
 const denemeRouters = createDenemelerRouters({
   requireStaff: requireRole('teacher', 'admin'),
   requireStudent: ogrenciKontrol,
@@ -261,16 +292,20 @@ app.use('/api/denemeler', denemeRouters.staff);
 app.use('/api/ogrenci/denemeler', denemeRouters.student);
 app.use('/api/acik-deneme', denemeRouters.acik);
 app.use('/api/admin', createAdminRouter({
-  requireAdmin: requireRole('admin'),
   User,
   Payment,
   SystemConfig,
-  getAnnouncementCollection: () => duyuruKoleksiyonu
+  AdminLog,
+  getAnnouncementCollection: () => duyuruKoleksiyonu,
+  getQuizCollection: () => quizKoleksiyonu,
+  getLessonCollection: () => pratikIcerik,
+  getSupportTicketCollection: () => supportTickets
 }));
 app.use('/api/payments', createPaymentRouter({ requireStudent: ogrenciKontrol }));
 app.use('/api/ai', createAIRouter({
   getQuizCollection: () => quizKoleksiyonu,
-  requireRole
+  requireRole,
+  AdminLog
 }));
 const teacherStudentHomeworkRouters = createTeacherStudentHomeworkRouters({
   requireTeacher: requireRole('teacher', 'admin'),
@@ -814,6 +849,7 @@ async function baslat() {
   takvimOlaylari = client.db(DB_ADI).collection('takvim_olaylari');
   pratikKullanim = client.db(DB_ADI).collection('pratik_kullanim');
   pratikIcerik = client.db(DB_ADI).collection('pratik_icerik');
+  supportTickets = client.db(DB_ADI).collection('destek_talepleri');
   await Promise.all([
     pratikKullanim.createIndex({key: 1, ozellik: 1}, {unique: true, name: 'uniq_pratik_usage'}),
     pratikKullanim.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, name: 'expire_pratik_usage' }),

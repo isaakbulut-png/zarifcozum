@@ -4,7 +4,7 @@ const net = require('net');
 const { rateLimit } = require('express-rate-limit');
 const Payment = require('../models/Payment');
 const User = require('../models/User');
-const { requireRole } = require('./auth');
+const { createRequireRole } = require('./auth');
 
 const SANDBOX_PLANS = Object.freeze({
   temel: Object.freeze({ label: 'Temel aylık demo üyeliği', amountMinor: 24900 }),
@@ -50,11 +50,12 @@ function createPaymentRouter({
   UserModel = User,
   PaymentModel = Payment,
   fetchImpl = globalThis.fetch,
-  requireStudent = requireRole('student')
+  requireStudent
 } = {}) {
   const router = express.Router();
+  const ogrenciKontrol = requireStudent || createRequireRole(UserModel)('student');
 
-  router.get('/subscription', requireStudent, async (req, res) => {
+  router.get('/subscription', ogrenciKontrol, async (req, res) => {
     try {
       const user = await UserModel.findById(req.session.user.id)
         .select('subscriptionStatus subscriptionType expiresAt');
@@ -70,7 +71,7 @@ function createPaymentRouter({
     }
   });
 
-  router.post('/paytr/checkout', requireStudent, checkoutLimiter, async (req, res) => {
+  router.post('/paytr/checkout', ogrenciKontrol, checkoutLimiter, async (req, res) => {
     const planKey = typeof req.body?.plan === 'string' ? req.body.plan : '';
     const plan = SANDBOX_PLANS[planKey];
     if (!plan) return res.status(400).json({ mesaj: 'Geçersiz demo paketi.' });

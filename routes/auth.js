@@ -4,8 +4,10 @@ const { rateLimit } = require('express-rate-limit');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
+const { adminRoleOf } = require('../lib/admin-rbac');
 
 const router = express.Router();
+const requireRole = createRequireRole(User);
 const googleClient = new OAuth2Client();
 const genericResetMessage = 'E-posta adresi kayıtlıysa şifre sıfırlama bağlantısı gönderildi.';
 const loginLimiter = rateLimit({
@@ -93,11 +95,13 @@ function saveSession(req) {
 }
 
 function publicUser(user) {
+  const adminRole = adminRoleOf(user);
   return {
     id: user._id.toString(),
     name: user.name,
     email: user.email,
-    role: user.role
+    role: user.role,
+    adminRole
   };
 }
 
@@ -109,8 +113,8 @@ const adminLoginLimiter = rateLimit({
   message: { mesaj: 'Çok fazla giriş denemesi. Bir süre sonra tekrar deneyin.' }
 });
 
-function redirectForRole(role) {
-  if (role === 'admin') return '/admin-paneli.html';
+function redirectForRole(role, adminRole) {
+  if (role === 'admin' || adminRole) return '/admin-paneli.html';
   return role === 'teacher' ? '/ogretmen-paneli.html' : '/ogrenci-paneli.html';
 }
 
@@ -151,12 +155,12 @@ router.post('/register', registerLimiter, async (req, res) => {
   try {
     const user = await User.createWithPassword({ name, email, phone: normalizedPhone, role }, password);
     await regenerateSession(req);
-    req.session.user = { id: user._id.toString(), name: user.name, role: user.role };
+    req.session.user = { ...publicUser(user) };
     await saveSession(req);
     res.status(201).json({
       mesaj: 'Hesap oluşturuldu.',
       user: publicUser(user),
-      redirectTo: redirectForRole(user.role)
+      redirectTo: redirectForRole(user.role, adminRoleOf(user))
     });
   } catch (error) {
     if (error.code === 11000) {
@@ -183,12 +187,12 @@ router.post('/login', loginLimiter, async (req, res) => {
     }
 
     await regenerateSession(req);
-    req.session.user = { id: user._id.toString(), name: user.name, role: user.role };
+    req.session.user = { ...publicUser(user) };
     await saveSession(req);
     res.json({
       mesaj: 'Giriş başarılı.',
       user: publicUser(user),
-      redirectTo: redirectForRole(user.role)
+      redirectTo: redirectForRole(user.role, adminRoleOf(user))
     });
   } catch (error) {
     console.error('Giriş işlemi başarısız:', error);
@@ -262,14 +266,16 @@ router.post('/auth/google', (req, res, next) => {
       }
     }
 
-    if (user.role === 'admin') return res.status(403).json({ mesaj: 'Yönetici hesabı Google ile giriş yapamaz.' });
+    if (user.role === 'admin' || user.adminRole) {
+      return res.status(403).json({ mesaj: 'Yönetim hesabı Google ile giriş yapamaz.' });
+    }
     await regenerateSession(req);
-    req.session.user = { id: user._id.toString(), name: user.name, role: user.role };
+    req.session.user = { ...publicUser(user) };
     await saveSession(req);
     res.json({
       mesaj: 'Google girişi başarılı.',
       user: publicUser(user),
-      redirectTo: redirectForRole(user.role)
+      redirectTo: redirectForRole(user.role, adminRoleOf(user))
     });
   } catch (error) {
     if (error.code === 11000) {
@@ -373,7 +379,7 @@ router.post('/reset-password', resetLimiter, async (req, res) => {
   }
 });
 
-router.post('/change-password', passwordChangeLimiter, requireRole('student', 'teacher', 'admin'), async (req, res) => {
+router.post('/change-password', passwordChangeLimiter, requireSession, async (req, res) => {
   const { currentPassword, password, passwordConfirmation } = req.body || {};
   if (!validPassword(password)) {
     return res.status(400).json({ mesaj: 'Yeni şifre 10–72 bayt uzunluğunda olmalıdır.' });
@@ -410,16 +416,16 @@ router.post('/admin/login', adminLoginLimiter, async (req, res) => {
 
   try {
     const user = await User.findOne({ email }).select('+passwordHash');
-    const valid = user && user.role === 'admin' && await user.verifyPassword(password);
+    const valid = user && (user.role === 'admin' || adminRoleOf(user)) && await user.verifyPassword(password);
     if (!valid) return res.status(401).json({ mesaj: 'E-posta veya şifre hatalı.' });
 
     await regenerateSession(req);
-    req.session.user = { id: user._id.toString(), name: user.name, role: user.role };
+    req.session.user = { ...publicUser(user) };
     await saveSession(req);
     res.json({
       mesaj: 'Giriş başarılı.',
       user: publicUser(user),
-      redirectTo: redirectForRole(user.role)
+      redirectTo: redirectForRole(user.role, adminRoleOf(user))
     });
   } catch (error) {
     console.error('Yönetici girişi başarısız:', error);
@@ -430,7 +436,7 @@ router.post('/admin/login', adminLoginLimiter, async (req, res) => {
 router.get('/me', async (req, res) => {
   if (!req.session.user?.id) return res.status(401).json({ mesaj: 'Oturum açılmamış.' });
   try {
-    const user = await User.findById(req.session.user.id).select('name email role');
+    const user = await User.findById(req.session.user.id).select('name email role adminRole');
     if (!user) {
       req.session.destroy(error => {
         if (error) return res.status(500).json({ mesaj: 'Oturum kapatılamadı.' });
@@ -443,7 +449,8 @@ router.get('/me', async (req, res) => {
         id: user._id.toString(),
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        adminRole: adminRoleOf(user)
       }
     });
   } catch (error) {
@@ -465,14 +472,38 @@ router.post('/logout', (req, res, next) => {
   });
 });
 
-function requireRole(...roles) {
-  return (req, res, next) => {
-    if (!req.session.user) return res.status(401).json({ mesaj: 'Giriş yapmanız gerekiyor.' });
-    if (!roles.includes(req.session.user.role)) {
-      return res.status(403).json({ mesaj: 'Bu işlem için yetkiniz yok.' });
+function createRequireRole(UserModel) {
+  return (...roles) => async (req, res, next) => {
+    if (!req.session?.user?.id) return res.status(401).json({ mesaj: 'Giriş yapmanız gerekiyor.' });
+    try {
+      const user = await UserModel.findById(req.session.user.id).select('name role adminRole');
+      if (!user) return res.status(401).json({ mesaj: 'Hesap bulunamadı. Yeniden giriş yapın.' });
+      const adminRole = adminRoleOf(user);
+      const effectiveRoles = adminRole === 'superadmin' ? ['admin', 'teacher']
+        : adminRole === 'editor' ? ['teacher']
+        : adminRole === 'support' ? []
+        : [user.role];
+      if (!roles.some(allowedRole => effectiveRoles.includes(allowedRole))) {
+        return res.status(403).json({ mesaj: 'Bu işlem için yetkiniz yok.' });
+      }
+      req.session.user = {
+        ...req.session.user,
+        id: user._id.toString(),
+        name: user.name,
+        role: user.role,
+        adminRole
+      };
+      next();
+    } catch (error) {
+      console.error('Kullanıcı rolü doğrulanamadı:', error);
+      res.status(500).json({ mesaj: 'Yetki doğrulanamadı.' });
     }
-    next();
   };
 }
 
-module.exports = { router, requireRole };
+function requireSession(req, res, next) {
+  if (!req.session?.user?.id) return res.status(401).json({ mesaj: 'Giriş yapmanız gerekiyor.' });
+  next();
+}
+
+module.exports = { router, requireRole, createRequireRole, requireSession };

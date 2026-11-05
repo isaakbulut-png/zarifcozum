@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const express = require('express');
 const test = require('node:test');
 const { createDenemelerRouters } = require('../routes/denemeler');
-const { requireRole } = require('../routes/auth');
+const { createRequireRole } = require('../routes/auth');
 const Deneme = require('../models/Deneme');
 const Soru = require('../models/Soru');
 
@@ -30,6 +30,10 @@ function sahteSonucKoleksiyonu() {
 }
 
 function withServer(user, callback, { sonuclar = sahteSonucKoleksiyonu() } = {}) {
+  const UserModel = {
+    findById: id => ({ select: async () => user ? { ...user, _id: { toString: () => id } } : null })
+  };
+  const requireRole = createRequireRole(UserModel);
   const { staff, student, acik } = createDenemelerRouters({
     requireStaff: requireRole('teacher', 'admin'),
     requireStudent: requireRole('student'),
