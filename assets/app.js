@@ -26,6 +26,7 @@
     side.innerHTML = `
       <a class="brand" href="index.html"><img class="brand-logo" src="assets/brand-mark.png" alt="">ZarifÇözüm</a>
       <a class="side-cta" href="asistan.html" ${current === 'asistan.html' ? 'aria-current="page"' : ''}>🤖 AI Mentör ile Serbest Sohbet</a>
+      <a class="side-cta side-cta-live" href="canli.html?host=1">Canlı Ders Başlat</a>
       <nav class="side-nav" aria-label="Uygulama">
         ${nav.map(n => `<a href="${n.href}" ${n.href === current ? 'aria-current="page"' : ''}>${icons[n.icon]}<span>${n.label}</span></a>`).join('')}
       </nav>
