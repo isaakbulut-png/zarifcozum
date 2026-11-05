@@ -113,6 +113,22 @@ app.get('/api/mufredat-konulari', mufredatKonulariLimiter, async (req, res) => {
   }
 });
 
+app.get('/api/mufredat-ozet', mufredatKonulariLimiter, async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const grade = Number(req.query.grade);
+  const topic = typeof req.query.topic === 'string' ? req.query.topic.trim() : '';
+  if (!Number.isInteger(grade) || grade < 5 || grade > 12 || !topic || topic.length > 300) {
+    return res.status(400).json({ mesaj: 'Geçerli bir grade (5-12) ve topic gerekli.' });
+  }
+  try {
+    const { konuOzetiGetir } = await import('./aiService.mjs');
+    res.json({ grade, topic, ozet: await konuOzetiGetir(grade, topic) });
+  } catch (error) {
+    console.error('/api/mufredat-ozet hatası:', error);
+    res.status(502).json({ mesaj: 'Konu özeti şu anda alınamadı.' });
+  }
+});
+
 app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, async (req, res) => {
   try {
     const { ogrenciMesaji, gorevTuru, grade } = req.body || {};

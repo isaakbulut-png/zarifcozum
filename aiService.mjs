@@ -51,6 +51,24 @@ export async function mufredatKonulariniGetir(grade) {
     a.unite.localeCompare(b.unite, 'tr') || a.dosya_adi.localeCompare(b.dosya_adi, 'tr'));
 }
 
+export async function konuOzetiGetir(grade, topic) {
+  const sonuc = await pineconeIndex.fetchByMetadata({
+    filter: {
+      grade: { $eq: Number(grade) },
+      official_description: { $eq: topic }
+    },
+    limit: 10
+  });
+  const kayit = Object.values(sonuc.records || {}).find(k =>
+    Number(k.metadata?.grade) === Number(grade) &&
+    k.metadata?.official_description === topic);
+  const metin = typeof kayit?.metadata?.text === 'string'
+    ? kayit.metadata.text.replace(/\s+/g, ' ').trim()
+    : '';
+  if (!metin) return '';
+  return metin.length > 600 ? `${metin.slice(0, 600).replace(/\s+\S*$/, '')}…` : metin;
+}
+
 export async function konuAnlatimiZenginlestir(grade, topic) {
   const sonuc = await pineconeIndex.fetchByMetadata({
     filter: {
