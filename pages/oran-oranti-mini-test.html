@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#fbf1e7">
+<title>Oran ve Orantı Mini Test | Zarif Çözüm</title>
+<style>
+:root{--cream:#fbf1e7;--paper:#fffaf5;--brown:#493020;--brown2:#67472f;--muted:#806b5c;--gold:#b88a28;--gold2:#e9d3a5;--line:#ead8c5;--green:#587760;--red:#a2493d;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--brown)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 90% 0%,#fff9f1 0,transparent 35%),var(--cream);line-height:1.6}
+a{color:inherit}
+.wrap{width:min(860px,calc(100% - 36px));margin:auto}
+.topbar{height:82px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(184,138,40,.18)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand img{width:56px;height:56px;object-fit:contain;mix-blend-mode:multiply}
+.brand strong{font:600 19px Georgia,serif}
+.brand strong span{color:var(--gold)}
+.crumb{font-size:12px;color:var(--muted)}
+.crumb b{color:var(--gold);font-weight:650}
+h1{font:600 clamp(30px,5vw,44px)/1.1 Georgia,serif;letter-spacing:-.03em;margin:14px 0 10px}
+h1 em{color:var(--gold);font-style:normal}
+h2{font:600 24px Georgia,serif;margin:0 0 10px}
+.eyebrow{display:inline-block;padding:6px 11px;background:#fff8ee;border:1px solid var(--gold2);border-radius:99px;color:#8c6c2c;font-size:11px;font-weight:800;letter-spacing:.08em}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:20px;margin:16px 0;box-shadow:0 6px 20px rgba(76,48,27,.04)}
+.card p{margin:0 0 10px;font-size:14px;color:#5e4a3b}
+.card ul{margin:0 0 10px;padding-left:20px;font-size:14px;color:#5e4a3b}
+.formula{display:inline-block;padding:3px 9px;border-radius:8px;background:#f3e4d3;font-weight:700}
+.q{font-weight:650;font-size:15px;margin-bottom:12px}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-size:14px;color:var(--brown);cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--gold)}
+.opt:disabled{cursor:default}
+.opt.correct{background:#e8f1ea;border-color:var(--green)}
+.opt.wrong{background:#f7e4e1;border-color:var(--red)}
+.explain{margin-top:12px;padding:13px 15px;border-left:3px solid var(--gold);border-radius:0 12px 12px 0;background:#f8eddf;font-size:13px;color:#5e4a3b}
+.explain[hidden]{display:none}
+.explain b.ok{color:var(--green)}
+.explain b.no{color:var(--red)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:0;border-radius:11px;background:var(--brown);color:#fffaf5;text-decoration:none;font:700 13px ui-sans-serif,system-ui;cursor:pointer}
+.btn:hover{background:var(--brown2)}
+.btn.secondary{background:#f5e5d5;border:1px solid var(--line);color:var(--brown)}
+.btn[disabled]{opacity:.6;cursor:wait}
+.ai-box{margin-top:10px;font-size:13px;white-space:pre-wrap}
+.score{font:600 28px Georgia,serif}
+.footer{margin:28px auto;padding-top:19px;border-top:1px solid rgba(184,138,40,.2);color:var(--muted);font-size:12px}
+</style>
+</head>
+<body data-home="/">
+<header class="wrap topbar"><a class="brand" href="/" aria-label="ZarifÇözüm ana sayfa"><img class="brand-logo" src="../assets/brand-mark.png" alt=""><strong>Zarif<span>Çözüm</span></strong></a><div class="crumb">Öğrenme Alanı　›　<b>Çalışma Planım</b></div></header>
+<main class="wrap" id="top">
+<section style="padding:34px 0 6px">
+<span class="eyebrow">ÇALIŞMA PLANIM · 7. SINIF</span>
+<h1>Oran ve <em>orantı</em></h1>
+<p class="muted" style="color:var(--muted)">Kısa anlatımı oku, ardından 5 soruluk mini testi çöz. Bir şık işaretlediğinde doğru cevabı ve çözümünü göreceksin.</p>
+</section>
+
+<section class="card" aria-labelledby="anlatim">
+<h2 id="anlatim">Kısa anlatım</h2>
+<p><b>Oran:</b> Aynı türden iki çokluğun bölme yoluyla karşılaştırılmasıdır. a ve b için oran <span class="formula">a / b</span> (a : b) biçiminde yazılır. Örneğin 12 kız, 8 erkek öğrencinin oranı 12/8 = 3/2'dir.</p>
+<p><b>Orantı:</b> İki oranın eşitliğidir: <span class="formula">a / b = c / d</span>. Bu durumda <b>içler çarpımı = dışlar çarpımıdır</b> (a·d = b·c).</p>
+<p><b>Doğru orantı:</b> Birisi artarken diğeri de aynı oranda artar (kalem sayısı – ödenen para). Oran sabittir: <span class="formula">a / b = sabit</span>.</p>
+<p><b>Ters orantı:</b> Birisi artarken diğeri aynı oranda azalır (işçi sayısı – iş süresi). Çarpım sabittir: <span class="formula">a · b = sabit</span>.</p>
+<p><b>İpucu:</b> a : b = m : n ise a = m·k ve b = n·k yazılır; toplam bilgisi varsa (m + n)·k eşitliğinden k bulunur.</p>
+</section>
+
+<section aria-labelledby="test">
+<h2 id="test" style="margin-top:26px">Mini test</h2>
+<div id="quiz"></div>
+<div class="card" id="result" hidden>
+<div class="score" id="scoreText"></div>
+<p id="scoreMsg"></p>
+<button class="btn secondary" type="button" id="restart">Testi yeniden çöz</button>
+<a class="btn" href="ilerlemeni-takip-et-tanitim.html">İlerleme sayfasına dön</a>
+</div>
+</section>
+</main>
+<footer class="wrap footer">Zarif Çözüm · Her adımda daha güçlü öğrenme. Bu mini test örnek çalışma içeriğidir.</footer>
+
+<script src="../assets/breadcrumb.js"></script>
+<script>
+(() => {
+  const questions = [
+    {
+      q: '3/5 = x/20 orantısında x kaçtır?',
+      options: ['10', '12', '15', '18'],
+      answer: 1,
+      explain: 'İçler çarpımı = dışlar çarpımı: 5·x = 3·20 = 60. Buradan x = 60 / 5 = 12 bulunur. Ayrıca 5, 20 olmak için 4 ile çarpılmış; 3 de 4 ile çarpılınca 12 olur.'
+    },
+    {
+      q: '4 kalem 12 TL ise aynı fiyattan 10 kalem kaç TL eder?',
+      options: ['24 TL', '28 TL', '30 TL', '36 TL'],
+      answer: 2,
+      explain: 'Kalem sayısı arttıkça ödenecek para da artar; bu bir doğru orantıdır. Bir kalem 12 / 4 = 3 TL olduğundan 10 kalem 10·3 = 30 TL eder. (4/12 = 10/x → 4x = 120 → x = 30)'
+    },
+    {
+      q: '6 işçi bir işi 10 günde bitiriyorsa, aynı güçteki 15 işçi aynı işi kaç günde bitirir?',
+      options: ['4 gün', '6 gün', '8 gün', '25 gün'],
+      answer: 0,
+      explain: 'İşçi sayısı arttıkça süre azalır; bu bir ters orantıdır ve çarpım sabittir. Toplam iş = 6·10 = 60 işçi-günü. 15 işçi için süre = 60 / 15 = 4 gündür.'
+    },
+    {
+      q: 'İki sayının oranı 3/5 ve toplamları 48 ise büyük sayı kaçtır?',
+      options: ['18', '24', '27', '30'],
+      answer: 3,
+      explain: 'Sayılar 3k ve 5k olsun. Toplam: 3k + 5k = 8k = 48 olduğundan k = 6. Büyük sayı 5k = 30, küçük sayı 3k = 18\'dir. (18 + 30 = 48 ✓)'
+    },
+    {
+      q: 'Sabit hızla giden bir araç 3 saatte 240 km yol alıyor. Aynı hızla 5 saatte kaç km yol alır?',
+      options: ['300 km', '400 km', '450 km', '480 km'],
+      answer: 1,
+      explain: 'Süre arttıkça yol da artar; doğru orantıdır. Araç saatte 240 / 3 = 80 km gider. 5 saatte 5·80 = 400 km yol alır. (3/240 = 5/x → 3x = 1200 → x = 400)'
+    }
+  ];
+  const letters = ['A', 'B', 'C', 'D'];
+  const quiz = document.getElementById('quiz');
+  const result = document.getElementById('result');
+  let answered = 0;
+  let correct = 0;
+
+  function render() {
+    quiz.innerHTML = '';
+    answered = 0;
+    correct = 0;
+    result.hidden = true;
+    questions.forEach((item, qi) => {
+      const card = document.createElement('article');
+      card.className = 'card';
+      const title = document.createElement('div');
+      title.className = 'q';
+      title.textContent = `${qi + 1}. ${item.q}`;
+      const opts = document.createElement('div');
+      opts.className = 'opts';
+      const explain = document.createElement('div');
+      explain.className = 'explain';
+      explain.hidden = true;
+      explain.setAttribute('aria-live', 'polite');
+      const buttons = item.options.map((text, oi) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'opt';
+        b.textContent = `${letters[oi]}) ${text}`;
+        b.addEventListener('click', () => choose(item, oi, buttons, explain));
+        opts.appendChild(b);
+        return b;
+      });
+      card.append(title, opts, explain);
+      quiz.appendChild(card);
+    });
+  }
+
+  function choose(item, picked, buttons, explain) {
+    buttons.forEach((b, i) => {
+      b.disabled = true;
+      if (i === item.answer) b.classList.add('correct');
+    });
+    const ok = picked === item.answer;
+    if (!ok) buttons[picked].classList.add('wrong');
+    if (ok) correct++;
+    answered++;
+
+    explain.innerHTML = '';
+    const head = document.createElement('b');
+    head.className = ok ? 'ok' : 'no';
+    head.textContent = ok ? 'Doğru! ' : `Yanlış. Doğru cevap: ${letters[item.answer]}) ${item.options[item.answer]}. `;
+    const body = document.createElement('span');
+    body.textContent = item.explain;
+    const aiBtn = document.createElement('button');
+    aiBtn.type = 'button';
+    aiBtn.className = 'btn secondary';
+    aiBtn.style.marginTop = '10px';
+    aiBtn.textContent = 'Yapay zeka asistanından ek açıklama al';
+    const aiBox = document.createElement('div');
+    aiBox.className = 'ai-box';
+    aiBtn.addEventListener('click', () => askAssistant(item, picked, aiBtn, aiBox));
+    explain.append(head, body, document.createElement('br'), aiBtn, aiBox);
+    explain.hidden = false;
+
+    if (answered === questions.length) showResult();
+  }
+
+  async function askAssistant(item, picked, btn, box) {
+    btn.disabled = true;
+    box.textContent = 'Asistan düşünüyor…';
+    const mesaj = `7. sınıf oran ve orantı sorusu: "${item.q}" Şıklar: ${item.options.map((o, i) => `${letters[i]}) ${o}`).join(', ')}. ` +
+      `Doğru cevap ${letters[item.answer]}) ${item.options[item.answer]}. Öğrenci ${letters[picked]}) ${item.options[picked]} şıkkını işaretledi. ` +
+      'Çözümü öğrenciye kısa ve adım adım, sade Türkçe ile anlat.';
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ ogrenciMesaji: mesaj, gorevTuru: 'ai_mentor', grade: 7 })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 401 || response.status === 403) {
+        box.textContent = 'Asistanı kullanmak için öğrenci hesabınla giriş yapmalısın.';
+      } else if (response.ok && data.success && data.yanit) {
+        box.textContent = typeof data.yanit === 'string' ? data.yanit : JSON.stringify(data.yanit);
+      } else {
+        box.textContent = 'Asistan şu anda yanıt veremiyor. Yukarıdaki çözümü inceleyebilirsin.';
+      }
+    } catch {
+      box.textContent = 'Asistana ulaşılamadı. Yukarıdaki çözümü inceleyebilirsin.';
+    }
+    btn.disabled = false;
+  }
+
+  function showResult() {
+    document.getElementById('scoreText').textContent = `${correct} / ${questions.length} doğru`;
+    document.getElementById('scoreMsg').textContent = correct === questions.length
+      ? 'Harika! Oran ve orantı konusunu çok iyi kavramışsın.'
+      : correct >= 3
+        ? 'Güzel gidiyorsun. Yanlış yaptığın soruların çözümünü tekrar oku.'
+        : 'Anlatımı bir kez daha oku ve testi yeniden çözmeyi dene.';
+    result.hidden = false;
+    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  document.getElementById('restart').addEventListener('click', () => {
+    render();
+    document.getElementById('test').scrollIntoView({ behavior: 'smooth' });
+  });
+  render();
+})();
+</script>
+</body>
+</html>

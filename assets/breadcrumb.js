@@ -1,5 +1,5 @@
 (() => {
-  const HOME_URL = 'index.html';
+  const HOME_URL = document.body.dataset.home || 'index.html';
   const isHome = document.body.classList.contains('homepage');
   if (isHome || document.querySelector('[data-site-breadcrumb]')) return;
 
