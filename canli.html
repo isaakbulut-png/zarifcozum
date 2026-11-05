@@ -32,7 +32,26 @@
       <p>Zoom canlı dersine bağlanılıyor. Tarayıcı kamera ve mikrofon izinleri isteyebilir.</p>
     </div>
 
-    <div class="room" style="overflow:hidden">
+    <div class="card" id="startPanel" hidden style="margin-bottom:var(--space-5);padding:var(--space-5)">
+      <h3 style="margin:0 0 8px">Canlı ders başlat</h3>
+      <p class="muted" style="margin:0 0 12px">Ders konusunu yazın; Zoom toplantısı otomatik oluşturulur ve öğrenciler ders sayfasından katılabilir.</p>
+      <div class="row" style="gap:10px;flex-wrap:wrap">
+        <input id="topicInput" type="text" maxlength="200" value="ZarifÇözüm Canlı Ders" aria-label="Ders konusu" style="flex:1;min-width:220px;padding:10px 12px;border:1px solid var(--line,#ddd);border-radius:10px;font:inherit">
+        <button class="btn btn-primary" id="startMeeting" type="button">Canlı dersi başlat</button>
+      </div>
+    </div>
+
+    <div class="card" id="meetingDetails" hidden style="margin-bottom:var(--space-5);padding:var(--space-5)">
+      <h3 style="margin:0 0 8px">Katılım detayları</h3>
+      <dl style="margin:0;display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;font-size:14px">
+        <dt class="muted">Konu</dt><dd id="detTopic" style="margin:0"></dd>
+        <dt class="muted">Toplantı No</dt><dd id="detNumber" style="margin:0"></dd>
+        <dt class="muted">Şifre</dt><dd id="detPassword" style="margin:0"></dd>
+        <dt class="muted">Katılım bağlantısı</dt><dd style="margin:0"><a id="detLink" target="_blank" rel="noopener"></a></dd>
+      </dl>
+    </div>
+
+    <div class="room" id="roomBox" style="overflow:hidden">
       <iframe id="zoomFrame" title="Zoom canlı ders" allow="camera; microphone; display-capture; fullscreen; autoplay" allowfullscreen style="display:block;width:100%;height:78vh;min-height:560px;border:0;background:#4a2e1a"></iframe>
     </div>
   </main>
@@ -45,23 +64,96 @@
   const iframe = document.getElementById('zoomFrame');
   const finish = document.getElementById('finishMeeting');
   const status = document.getElementById('roomStatus');
+  const setStatus = text => { status.querySelector('p').textContent = text; };
+  const startPanel = document.getElementById('startPanel');
+  const details = document.getElementById('meetingDetails');
+  const roomBox = document.getElementById('roomBox');
   document.getElementById('roomRole').textContent = isHost ? 'Öğretmen' : 'Öğrenci';
-  finish.hidden = !isHost;
-  iframe.src = isHost ? 'zoom-room.html?role=host' : 'zoom-room.html?role=student';
 
-  if (isHost) {
+  async function api(path, options) {
+    const response = await fetch(path, options);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const error = new Error(data.mesaj || `Sunucu hatası (${response.status})`);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+    return data;
+  }
+
+  function showDetails(ders) {
+    document.getElementById('detTopic').textContent = ders.topic || '';
+    document.getElementById('detNumber').textContent = ders.meetingNumber || '';
+    document.getElementById('detPassword').textContent = ders.password || '—';
+    const link = document.getElementById('detLink');
+    if (ders.joinUrl) { link.href = ders.joinUrl; link.textContent = ders.joinUrl; }
+    else { link.removeAttribute('href'); link.textContent = '—'; }
+    details.hidden = false;
+  }
+
+  function joinRoom() {
+    roomBox.hidden = false;
+    startPanel.hidden = true;
+    finish.hidden = false;
+    setStatus('Zoom canlı dersine bağlanılıyor. Tarayıcı kamera ve mikrofon izinleri isteyebilir.');
+    iframe.src = 'zoom-room.html?role=host';
+  }
+
+  if (!isHost) {
+    iframe.src = 'zoom-room.html?role=student';
+  } else {
+    roomBox.hidden = true;
+    (async () => {
+      try {
+        const durum = await api('/api/ogretmen/canli/durum');
+        if (durum.aktif) { showDetails(durum); joinRoom(); return; }
+      } catch (error) {
+        setStatus('Canlı ders durumu alınamadı: ' + error.message);
+      }
+      startPanel.hidden = false;
+      if (!status.textContent.includes('alınamadı')) setStatus('Aktif canlı ders yok. Konuyu yazıp dersi başlatabilirsiniz.');
+    })();
+
+    document.getElementById('startMeeting').addEventListener('click', async event => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      setStatus('Zoom toplantısı oluşturuluyor…');
+      try {
+        const topic = document.getElementById('topicInput').value.trim();
+        let ders;
+        try {
+          ders = await api('/api/ogretmen/canli/baslat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ topic })
+          });
+        } catch (error) {
+          if (error.status !== 409) throw error;
+          ders = error.data;
+        }
+        showDetails(ders);
+        joinRoom();
+      } catch (error) {
+        setStatus('Canlı ders başlatılamadı: ' + error.message);
+        button.disabled = false;
+      }
+    });
+
     finish.addEventListener('click', async () => {
       finish.disabled = true;
       try {
-        const response = await fetch('/api/ogretmen/canli/sonlandir', {
-          method: 'POST'
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.mesaj || `Sunucu hatası (${response.status})`);
+        await api('/api/ogretmen/canli/sonlandir', { method: 'POST' });
         iframe.src = 'about:blank';
-        status.querySelector('p').textContent = 'Canlı ders sonlandırıldı.';
+        roomBox.hidden = true;
+        details.hidden = true;
+        finish.hidden = true;
+        finish.disabled = false;
+        startPanel.hidden = false;
+        document.getElementById('startMeeting').disabled = false;
+        setStatus('Canlı ders sonlandırıldı.');
       } catch (error) {
-        status.querySelector('p').textContent = 'Ders sonlandırılamadı: ' + error.message;
+        setStatus('Ders sonlandırılamadı: ' + error.message);
         finish.disabled = false;
       }
     });
