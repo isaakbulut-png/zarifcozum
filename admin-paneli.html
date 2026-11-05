@@ -59,6 +59,11 @@
     .announcement{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #ecd9c6}
     .announcement p{margin:0 0 4px;white-space:pre-wrap;overflow-wrap:anywhere}
     .announcement small{color:#6a5242}
+    .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+    .settings-grid label{display:grid;gap:6px;color:#6a5242;font-size:.9rem}
+    .toggle-list{display:grid;gap:12px;margin-top:18px}
+    .toggle-list label{display:flex;align-items:center;gap:10px;color:#523520}
+    .toggle-list input{width:18px;height:18px}
     [hidden]{display:none!important}
     @media (max-width:820px){body{grid-template-columns:1fr}aside{position:static;height:auto}.logout{margin-top:16px}}
   </style>
@@ -88,7 +93,7 @@
     <button class="nav-btn" type="button" disabled>Destek Talepleri <span class="soon">YAKINDA</span></button>
 
     <div class="nav-title">SİSTEM</div>
-    <button class="nav-btn" type="button" disabled>Site Ayarları <span class="soon">YAKINDA</span></button>
+    <button class="nav-btn" type="button" data-view="settings">Ziyaretçi / Freemium Ayarları</button>
     <button class="nav-btn" type="button" disabled>Güvenlik ve Kayıtlar <span class="soon">YAKINDA</span></button>
     <button class="nav-btn" type="button" disabled>Yedekleme <span class="soon">YAKINDA</span></button>
 
@@ -174,17 +179,44 @@
         <div id="announcementList"></div>
       </div>
     </section>
+
+    <section id="view-settings" hidden>
+      <form class="panel" id="visitorSettingsForm" style="margin-top:0">
+        <h3>Ziyaretçi deneme sınırları</h3>
+        <div class="settings-grid">
+          <label for="visitorQuestionLimit">Soru hakkı (0–500)
+            <input id="visitorQuestionLimit" type="number" min="0" max="500" step="1" required>
+          </label>
+          <label for="visitorTopicLimit">Konu hakkı (0–100)
+            <input id="visitorTopicLimit" type="number" min="0" max="100" step="1" required>
+          </label>
+          <label for="visitorTrialDays">Deneme süresi (gün, 1–3650)
+            <input id="visitorTrialDays" type="number" min="1" max="3650" step="1" required>
+          </label>
+        </div>
+        <div class="toggle-list">
+          <label><input id="visitorSummaryEnabled" type="checkbox"> Ziyaretçiler konu özetlerini görebilsin</label>
+          <label><input id="visitorPracticeEnabled" type="checkbox"> Ziyaretçiler pratik test çözebilsin</label>
+          <label><input id="visitorAssistantEnabled" type="checkbox"> Ziyaretçiler asistan özelliğini kullanabilsin</label>
+          <label><input id="visitorFullTestEnabled" type="checkbox"> Ziyaretçiler tam kazanım testini başlatabilsin</label>
+        </div>
+        <div class="toolbar" style="margin-top:18px">
+          <button class="btn primary" type="submit" id="saveVisitorSettings">Ayarları kaydet</button>
+        </div>
+        <p class="msg" id="visitorSettingsMsg" role="alert"></p>
+      </form>
+    </section>
   </main>
 
   <script>
     (() => {
       const $ = id => document.getElementById(id);
-      const titles = { overview: 'Genel Bakış', users: 'Kullanıcılar', payments: 'Ödemeler', announcements: 'Duyurular' };
+      const titles = { overview: 'Genel Bakış', users: 'Kullanıcılar', payments: 'Ödemeler', announcements: 'Duyurular', settings: 'Ziyaretçi / Freemium Ayarları' };
       const roleNames = { student: 'Öğrenci', teacher: 'Öğretmen', admin: 'Yönetici' };
       const subNames = { free: 'Ücretsiz', active: 'Aktif', expired: 'Süresi doldu' };
       const payNames = { paid: ['Ödendi', 'ok'], pending: ['Beklemede', 'warn'], failed: ['Başarısız', 'bad'] };
       const planNames = { monthly: 'Aylık', yearly: 'Yıllık' };
-      const loaders = { overview: loadOverview, users: loadUsers, payments: loadPayments, announcements: loadAnnouncements };
+      const loaders = { overview: loadOverview, users: loadUsers, payments: loadPayments, announcements: loadAnnouncements, settings: loadVisitorSettings };
       let page = 1;
       let totalPages = 1;
 
@@ -355,6 +387,23 @@
         } catch (error) { $('announcementMsg').textContent = error.message; }
       }
 
+      async function loadVisitorSettings() {
+        const message = $('visitorSettingsMsg');
+        message.className = 'msg';
+        message.textContent = '';
+        try {
+          const data = await api('/api/admin/settings');
+          const settings = data.ziyaretciHaklari;
+          $('visitorQuestionLimit').value = settings.questionLimit;
+          $('visitorTopicLimit').value = settings.topicLimit;
+          $('visitorTrialDays').value = settings.trialDurationDays;
+          $('visitorSummaryEnabled').checked = settings.summaryEnabled;
+          $('visitorPracticeEnabled').checked = settings.practiceEnabled;
+          $('visitorAssistantEnabled').checked = settings.assistantEnabled;
+          $('visitorFullTestEnabled').checked = settings.fullTestEnabled;
+        } catch (error) { message.textContent = error.message; }
+      }
+
       document.querySelectorAll('[data-view]').forEach(button =>
         button.addEventListener('click', () => showView(button.dataset.view)));
       $('userSearchButton').addEventListener('click', () => { page = 1; loadUsers(); });
@@ -379,6 +428,36 @@
           message.textContent = data.mesaj;
           loadAnnouncements();
         } catch (error) { message.textContent = error.message; }
+      });
+
+      $('visitorSettingsForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const message = $('visitorSettingsMsg');
+        const button = $('saveVisitorSettings');
+        message.className = 'msg';
+        message.textContent = '';
+        button.disabled = true;
+        const ziyaretciHaklari = {
+          questionLimit: Number($('visitorQuestionLimit').value),
+          topicLimit: Number($('visitorTopicLimit').value),
+          trialDurationDays: Number($('visitorTrialDays').value),
+          summaryEnabled: $('visitorSummaryEnabled').checked,
+          practiceEnabled: $('visitorPracticeEnabled').checked,
+          assistantEnabled: $('visitorAssistantEnabled').checked,
+          fullTestEnabled: $('visitorFullTestEnabled').checked
+        };
+        try {
+          const data = await api('/api/admin/settings', {
+            method: 'POST',
+            body: JSON.stringify({ ziyaretciHaklari })
+          });
+          message.className = 'msg ok';
+          message.textContent = data.mesaj;
+        } catch (error) {
+          message.textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
       });
 
       $('logoutButton').addEventListener('click', async () => {

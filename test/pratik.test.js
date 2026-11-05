@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const express = require('express');
 const { createPratikRouter } = require('../routes/pratik');
 const { mufredatiYukle } = require('../lib/mufredat');
+const { DEFAULT_VISITOR_SETTINGS } = require('../models/SystemConfig');
 
 const mufredat = mufredatiYukle();
 const konular = mufredat[6].flatMap(unite => unite.topics);
@@ -12,8 +13,13 @@ function sahteKullanim() {
   const anahtar = f => `${f.key}|${f.ozellik}`;
   return {
     async findOne(f) { return kayitlar.get(anahtar(f)) || null; },
+    async deleteOne(f) { return { deletedCount: kayitlar.delete(anahtar(f)) ? 1 : 0 }; },
     async updateOne(f, g, options = {}) {
       const mevcut = kayitlar.get(anahtar(f));
+      if (g.$set) {
+        Object.assign(mevcut, g.$set);
+        return { matchedCount: 1, upsertedCount: 0 };
+      }
       if (g.$inc) {
         const artim = g.$inc.soruSayisi;
         const sinir = f.soruSayisi.$lte;
@@ -51,7 +57,7 @@ function sahteIcerik() {
 async function sunucu({
   uye = false,
   kullanici = null,
-  ziyaretciHaklari,
+  visitorSettings = {},
   mufredatKonusuVarMi = async () => false,
   konuUret = async () => ({ ozet: 'o', kavramlar: ['k'], ornekSoru: 'q', ornekCozum: 'c', sikHatalar: ['h'] })
 } = {}) {
@@ -64,7 +70,7 @@ async function sunucu({
     getContentCollection: (() => { const k = sahteIcerik(); return () => k; })(),
     mufredat,
     uyeMi: async () => uye,
-    ziyaretciHaklari,
+    getVisitorSettings: async () => ({ ...DEFAULT_VISITOR_SETTINGS, ...visitorSettings }),
     mufredatKonusuVarMi,
     soruUret: async ({ adet }) => {
       uretimSayisi += 1;
@@ -152,7 +158,7 @@ test('Pinecone müfredat kazanımları yalnızca eşleşen sınıfta konu anlat�
 });
 
 test('ziyaretçi soru hakkı ve tam kazanım testi feature toggle ile değiştirilebilir', async () => {
-  const s = await sunucu({ ziyaretciHaklari: { soru: 1, kazanim: true } });
+  const s = await sunucu({ visitorSettings: { questionLimit: 1, fullTestEnabled: true } });
   try {
     const durum = await s.istek('/durum');
     assert.equal(durum.veri.limitler.soru, 1);
@@ -166,8 +172,26 @@ test('ziyaretçi soru hakkı ve tam kazanım testi feature toggle ile değiştir
   } finally { s.kapat(); }
 });
 
+test('ziyaretçi ayarları istekler arasında canlı güncellenir', async () => {
+  const visitorSettings = { ...DEFAULT_VISITOR_SETTINGS, questionLimit: 1 };
+  const s = await sunucu({ visitorSettings });
+  try {
+    const ilk = await s.istek('/sorular', { ozellik: 'test', sinif: 6, konu: konular[0] });
+    assert.equal(ilk.status, 200);
+    assert.equal(ilk.veri.soruHakki, 0);
+
+    visitorSettings.questionLimit = 2;
+    const durum = await s.istek('/durum');
+    assert.equal(durum.veri.limitler.soru, 2);
+    assert.equal(durum.veri.ziyaretciHaklari.soru.kalan, 1);
+    const ikinci = await s.istek('/sorular', { ozellik: 'test', sinif: 6, konu: konular[0] });
+    assert.equal(ikinci.status, 200);
+    assert.equal(ikinci.veri.soruHakki, 0);
+  } finally { s.kapat(); }
+});
+
 test('ziyaretçi konu özeti erişimi toggle ile kapatılabilir', async () => {
-  const s = await sunucu({ ziyaretciHaklari: { ozetGorebilir: false } });
+  const s = await sunucu({ visitorSettings: { summaryEnabled: false } });
   try {
     const durum = await s.istek('/durum');
     assert.equal(durum.veri.ozellikler.konu.acik, false);
@@ -178,7 +202,7 @@ test('ziyaretçi konu özeti erişimi toggle ile kapatılabilir', async () => {
 });
 
 test('ziyaretçi konu hakkı ayrı olarak ayarlanabilir', async () => {
-  const s = await sunucu({ ziyaretciHaklari: { konu: 1 } });
+  const s = await sunucu({ visitorSettings: { topicLimit: 1 } });
   try {
     const ilkKonu = await s.istek('/konu', { sinif: 6, konu: konular[0] });
     assert.equal(ilkKonu.status, 200);

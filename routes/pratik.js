@@ -2,19 +2,26 @@ const crypto = require('crypto');
 const express = require('express');
 const { rateLimit } = require('express-rate-limit');
 const { konuVarMi } = require('../lib/mufredat');
+const { DEFAULT_VISITOR_SETTINGS } = require('../models/SystemConfig');
 
 const OZELLIKLER = ['asistan', 'test', 'kazanim', 'konu'];
-const ZIYARETCI_SORU_HAKKI = 3;
-const ZIYARETCI_KONU_HAKKI = 3;
-const ZIYARETCI_OZET_GOREBILIR = true;
-const ZIYARETCI_TEST_KULLANABILIR = true;
-const ZIYARETCI_ASISTAN_KULLANABILIR = true;
-const ZIYARETCI_KAZANIM_TESTI_KULLANABILIR = false;
 const UYE_SORU_SAYILARI = [5, 10, 20];
 const ZIYARETCI_CEREZI = 'zc_ziyaretci';
-const ZIYARETCI_CEREZ_SURESI = 30 * 24 * 60 * 60 * 1000;
 const UYELIK_ADRESI = '/Paketler.html';
 const UYELIK_GEREKLI_MESAJI = 'Sınırınıza ulaştınız, devam etmek için lütfen üye girişi yapın.';
+const birGunMs = 24 * 60 * 60 * 1000;
+
+function haklariEsle(settings) {
+  return {
+    soru: settings.questionLimit,
+    konu: settings.topicLimit,
+    denemeSuresiGun: settings.trialDurationDays,
+    ozetGorebilir: settings.summaryEnabled,
+    test: settings.practiceEnabled,
+    asistan: settings.assistantEnabled,
+    kazanim: settings.fullTestEnabled
+  };
+}
 
 function cerezOku(req, ad) {
   const eslesme = String(req.headers.cookie || '').split(';').map(parca => parca.trim())
@@ -34,7 +41,7 @@ function createPratikRouter({
   soruUret,
   konuUret,
   mufredatKonusuVarMi = async () => false,
-  ziyaretciHaklari = {},
+  getVisitorSettings = async () => DEFAULT_VISITOR_SETTINGS,
   limitleyici = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 120,
@@ -45,15 +52,6 @@ function createPratikRouter({
 }) {
   const router = express.Router();
   const uretimde = new Map();
-  const haklar = {
-    soru: ZIYARETCI_SORU_HAKKI,
-    konu: ZIYARETCI_KONU_HAKKI,
-    ozetGorebilir: ZIYARETCI_OZET_GOREBILIR,
-    test: ZIYARETCI_TEST_KULLANABILIR,
-    asistan: ZIYARETCI_ASISTAN_KULLANABILIR,
-    kazanim: ZIYARETCI_KAZANIM_TESTI_KULLANABILIR,
-    ...ziyaretciHaklari
-  };
 
   router.use((req, res, next) => {
     res.set('Cache-Control', 'no-store');
@@ -61,25 +59,43 @@ function createPratikRouter({
   });
   router.use(limitleyici);
 
-  function kimlik(req, res) {
+  function kimlik(req, res, denemeSuresiGun) {
     const kullanici = req.session?.user;
     if (kullanici?.id) return { anahtar: `u:${kullanici.id}`, girisYapti: true, kullanici };
     let ziyaretci = cerezOku(req, ZIYARETCI_CEREZI);
-    if (!/^[a-f0-9]{32}$/.test(ziyaretci)) {
-      ziyaretci = crypto.randomBytes(16).toString('hex');
-      res.cookie(ZIYARETCI_CEREZI, ziyaretci, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: ZIYARETCI_CEREZ_SURESI,
-        path: '/'
-      });
-    }
+    if (!/^[a-f0-9]{32}$/.test(ziyaretci)) ziyaretci = crypto.randomBytes(16).toString('hex');
+    res.cookie(ZIYARETCI_CEREZI, ziyaretci, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: denemeSuresiGun * birGunMs,
+      path: '/'
+    });
     return { anahtar: `a:${ziyaretci}`, girisYapti: false, kullanici: null };
   }
 
-  async function kullanilanKonular(anahtar, ozellik) {
-    const kayit = await getUsageCollection().findOne({ key: anahtar, ozellik });
+  async function kullanimKaydi(anahtar, ozellik, denemeSuresiGun) {
+    const collection = getUsageCollection();
+    const filtre = { key: anahtar, ozellik };
+    const kayit = await collection.findOne(filtre);
+    if (!kayit) return null;
+    const konuTarihi = kayit.konular?.find(konu => konu.at)?.at;
+    const baslangic = kayit.createdAt || konuTarihi;
+    const expiresAt = baslangic
+      ? new Date(new Date(baslangic).getTime() + denemeSuresiGun * birGunMs)
+      : kayit.expiresAt;
+    if (expiresAt && new Date(expiresAt) <= new Date()) {
+      await collection.deleteOne(filtre);
+      return null;
+    }
+    if (expiresAt && new Date(expiresAt).getTime() !== new Date(kayit.expiresAt).getTime()) {
+      await collection.updateOne(filtre, { $set: { expiresAt } });
+    }
+    return kayit;
+  }
+
+  async function kullanilanKonular(anahtar, ozellik, haklar) {
+    const kayit = await kullanimKaydi(anahtar, ozellik, haklar.denemeSuresiGun);
     return kayit?.konular || [];
   }
 
@@ -92,25 +108,27 @@ function createPratikRouter({
     });
   }
 
-  async function kullanilanSoruSayisi(anahtar) {
-    const kayit = await getUsageCollection().findOne({ key: anahtar, ozellik: 'sorular' });
+  async function kullanilanSoruSayisi(anahtar, haklar) {
+    const kayit = await kullanimKaydi(anahtar, 'sorular', haklar.denemeSuresiGun);
     return kayit?.soruSayisi || 0;
   }
 
-  async function soruHakkiKullan(anahtar, adet) {
+  async function soruHakkiKullan(anahtar, adet, haklar) {
     try {
       const sonuc = await getUsageCollection().updateOne(
         {
           key: anahtar,
           ozellik: 'sorular',
-          soruSayisi: { $lte: haklar.soru - adet }
+          soruSayisi: { $lte: haklar.soru - adet },
+          $or: [{ expiresAt: { $exists: false } }, { expiresAt: { $gt: new Date() } }]
         },
         {
           $inc: { soruSayisi: adet },
           $setOnInsert: {
             key: anahtar,
             ozellik: 'sorular',
-            expiresAt: new Date(Date.now() + ZIYARETCI_CEREZ_SURESI)
+            createdAt: new Date(),
+            expiresAt: new Date(Date.now() + haklar.denemeSuresiGun * birGunMs)
           }
         },
         { upsert: true }
@@ -120,6 +138,13 @@ function createPratikRouter({
       if (error?.code === 11000) return false;
       throw error;
     }
+  }
+
+  async function soruHakkiIadeEt(anahtar, adet) {
+    await getUsageCollection().updateOne(
+      { key: anahtar, ozellik: 'sorular' },
+      { $inc: { soruSayisi: -adet } }
+    );
   }
 
   async function icerikGetir(tur, sinif, konu, adet, uret) {
@@ -138,8 +163,8 @@ function createPratikRouter({
     return uretimde.get(anahtar);
   }
 
-  async function hakKullan(anahtar, ozellik, sinif, konu) {
-    const onceki = await kullanilanKonular(anahtar, ozellik);
+  async function hakKullan(anahtar, ozellik, sinif, konu, haklar) {
+    const onceki = await kullanilanKonular(anahtar, ozellik, haklar);
     if (onceki.some(oge => oge.sinif === sinif && oge.konu === konu)) return true;
     try {
       await getUsageCollection().updateOne(
@@ -147,11 +172,15 @@ function createPratikRouter({
           key: anahtar,
           ozellik,
           [`konular.${haklar.konu - 1}`]: { $exists: false },
-          konular: { $not: { $elemMatch: { sinif, konu } } }
+          konular: { $not: { $elemMatch: { sinif, konu } } },
+          $or: [{ expiresAt: { $exists: false } }, { expiresAt: { $gt: new Date() } }]
         },
         {
           $push: { konular: { sinif, konu, at: new Date() } },
-          $setOnInsert: { expiresAt: new Date(Date.now() + ZIYARETCI_CEREZ_SURESI) }
+          $setOnInsert: {
+            createdAt: new Date(),
+            expiresAt: new Date(Date.now() + haklar.denemeSuresiGun * birGunMs)
+          }
         },
         { upsert: true }
       );
@@ -179,8 +208,8 @@ function createPratikRouter({
     return await mufredatKonusuVarMi(sinif, konu) ? { sinif, konu } : null;
   }
 
-  async function erisim(req, res, ozellik, sinif, konu) {
-    const kim = kimlik(req, res);
+  async function erisim(req, res, ozellik, sinif, konu, haklar) {
+    const kim = kimlik(req, res, haklar.denemeSuresiGun);
     const uye = await uyeMi(kim.kullanici);
     const limitYok = uye || kim.kullanici?.role === 'student';
     if (limitYok) return { kim, uye, limitYok, izin: true };
@@ -188,20 +217,21 @@ function createPratikRouter({
       ? haklar.ozetGorebilir
       : Boolean(haklar[ozellik]);
     if (!ziyaretciIzinli) return { kim, uye, limitYok, izin: false };
-    const kullanilan = await kullanilanKonular(kim.anahtar, ozellik);
+    const kullanilan = await kullanilanKonular(kim.anahtar, ozellik, haklar);
     const mevcut = kullanilan.some(oge => oge.sinif === sinif && oge.konu === konu);
     return { kim, uye, limitYok, izin: mevcut || kullanilan.length < haklar.konu };
   }
 
   router.get('/durum', sarmala(async (req, res) => {
     res.set('Cache-Control', 'no-store');
-    const kim = kimlik(req, res);
+    const haklar = haklariEsle(await getVisitorSettings());
+    const kim = kimlik(req, res, haklar.denemeSuresiGun);
     const uye = await uyeMi(kim.kullanici);
     const limitYok = uye || kim.kullanici?.role === 'student';
-    const soruKullanilan = limitYok ? 0 : await kullanilanSoruSayisi(kim.anahtar);
+    const soruKullanilan = limitYok ? 0 : await kullanilanSoruSayisi(kim.anahtar, haklar);
     const ozellikler = {};
     for (const ozellik of OZELLIKLER) {
-      const kullanilan = limitYok ? [] : await kullanilanKonular(kim.anahtar, ozellik);
+      const kullanilan = limitYok ? [] : await kullanilanKonular(kim.anahtar, ozellik, haklar);
       ozellikler[ozellik] = {
         kullanilan: kullanilan.map(({ sinif, konu }) => ({ sinif, konu })),
         kalan: limitYok ? null : Math.max(haklar.konu - kullanilan.length, 0),
@@ -228,17 +258,18 @@ function createPratikRouter({
   }));
 
   router.post('/sorular', sarmala(async (req, res) => {
+    const haklar = haklariEsle(await getVisitorSettings());
     const ozellik = req.body?.ozellik;
     const secim = istekDogrula(req.body);
     if (!['asistan', 'test', 'kazanim'].includes(ozellik) || !secim) {
       return res.status(400).json({ mesaj: 'Sınıf veya konu seçimi geçersiz.' });
     }
     const { sinif, konu } = secim;
-    const { kim, uye, limitYok, izin } = await erisim(req, res, ozellik, sinif, konu);
+    const { kim, uye, limitYok, izin } = await erisim(req, res, ozellik, sinif, konu, haklar);
     if (!izin) return yasakYaniti(res, kim.girisYapti);
 
     const istenen = Number(req.body?.adet);
-    const soruKullanilan = limitYok ? 0 : await kullanilanSoruSayisi(kim.anahtar);
+    const soruKullanilan = limitYok ? 0 : await kullanilanSoruSayisi(kim.anahtar, haklar);
     const soruKalan = limitYok ? null : Math.max(haklar.soru - soruKullanilan, 0);
     if (!limitYok && soruKalan === 0) return yasakYaniti(res, kim.girisYapti);
     const adet = limitYok
@@ -250,11 +281,14 @@ function createPratikRouter({
     } catch (error) {
       return res.status(error.status || 502).json({ mesaj: error.message || 'Sorular hazırlanamadı.' });
     }
-    if (!limitYok && !(await hakKullan(kim.anahtar, ozellik, sinif, konu))) return yasakYaniti(res, kim.girisYapti);
-    if (!limitYok && !(await soruHakkiKullan(kim.anahtar, adet))) return yasakYaniti(res, kim.girisYapti);
+    if (!limitYok && !(await soruHakkiKullan(kim.anahtar, adet, haklar))) return yasakYaniti(res, kim.girisYapti);
+    if (!limitYok && !(await hakKullan(kim.anahtar, ozellik, sinif, konu, haklar))) {
+      await soruHakkiIadeEt(kim.anahtar, adet);
+      return yasakYaniti(res, kim.girisYapti);
+    }
 
-    const kullanilan = limitYok ? null : (await kullanilanKonular(kim.anahtar, ozellik)).length;
-    const guncelSoruSayisi = limitYok ? null : await kullanilanSoruSayisi(kim.anahtar);
+    const kullanilan = limitYok ? null : (await kullanilanKonular(kim.anahtar, ozellik, haklar)).length;
+    const guncelSoruSayisi = limitYok ? null : await kullanilanSoruSayisi(kim.anahtar, haklar);
     res.json({
       sorular,
       uye,
@@ -265,10 +299,11 @@ function createPratikRouter({
   }));
 
   router.post('/konu', sarmala(async (req, res) => {
+    const haklar = haklariEsle(await getVisitorSettings());
     const secim = await konuIcinIstekDogrula(req.body);
     if (!secim) return res.status(400).json({ mesaj: 'Sınıf veya konu seçimi geçersiz.' });
     const { sinif, konu } = secim;
-    const { kim, uye, limitYok, izin } = await erisim(req, res, 'konu', sinif, konu);
+    const { kim, uye, limitYok, izin } = await erisim(req, res, 'konu', sinif, konu, haklar);
     if (!izin) return yasakYaniti(res, kim.girisYapti);
 
     let anlatim;
@@ -277,9 +312,9 @@ function createPratikRouter({
     } catch (error) {
       return res.status(error.status || 502).json({ mesaj: error.message || 'Konu anlatımı hazırlanamadı.' });
     }
-    if (!limitYok && !(await hakKullan(kim.anahtar, 'konu', sinif, konu))) return yasakYaniti(res, kim.girisYapti);
+    if (!limitYok && !(await hakKullan(kim.anahtar, 'konu', sinif, konu, haklar))) return yasakYaniti(res, kim.girisYapti);
 
-    const kullanilan = limitYok ? null : (await kullanilanKonular(kim.anahtar, 'konu')).length;
+    const kullanilan = limitYok ? null : (await kullanilanKonular(kim.anahtar, 'konu', haklar)).length;
     res.json({
       sinif,
       konu,
@@ -294,11 +329,5 @@ function createPratikRouter({
 }
 
 module.exports = {
-  createPratikRouter,
-  ZIYARETCI_SORU_HAKKI,
-  ZIYARETCI_KONU_HAKKI,
-  ZIYARETCI_OZET_GOREBILIR,
-  ZIYARETCI_TEST_KULLANABILIR,
-  ZIYARETCI_ASISTAN_KULLANABILIR,
-  ZIYARETCI_KAZANIM_TESTI_KULLANABILIR
+  createPratikRouter
 };

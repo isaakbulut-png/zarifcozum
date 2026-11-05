@@ -23,12 +23,13 @@ const { createSorularRouter } = require('./routes/sorular');
 const { createDenemelerRouters } = require('./routes/denemeler');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
-const { createPratikRouter, ZIYARETCI_OZET_GOREBILIR } = require('./routes/pratik');
+const { createPratikRouter } = require('./routes/pratik');
 const { createZoomMeeting } = require('./lib/zoom');
 const { uretSorular } = require('./lib/ai-icerik');
 const { mufredatiYukle } = require('./lib/mufredat');
 const User = require('./models/User');
 const Payment = require('./models/Payment');
+const SystemConfig = require('./models/SystemConfig');
 const { createWebhookRouter } = require('./routes/webhooks');
 
 const PORT = process.env.PORT || 3000;
@@ -115,13 +116,22 @@ app.get('/api/mufredat-ozet', mufredatKonulariLimiter, async (req, res) => {
   res.set('Cache-Control', 'no-store');
   const rol = req.session?.user?.role;
   const girisYapti = ['student', 'teacher', 'admin'].includes(rol);
-  if (!girisYapti && !ZIYARETCI_OZET_GOREBILIR) {
-    return res.status(403).json({
-      kod: 'UYELIK_GEREKLI',
-      mesaj: 'Konu özetlerini görmek için üye girişi yapın.',
-      yonlendir: '/Paketler.html',
-      girisYapti: false
-    });
+  if (!girisYapti) {
+    let visitorSettings;
+    try {
+      visitorSettings = await SystemConfig.getVisitorSettings();
+    } catch (error) {
+      console.error('/api/mufredat-ozet ziyaretçi ayarları alınamadı:', error);
+      return res.status(500).json({ mesaj: 'Konu özeti erişim ayarları alınamadı.' });
+    }
+    if (!visitorSettings.summaryEnabled) {
+      return res.status(403).json({
+        kod: 'UYELIK_GEREKLI',
+        mesaj: 'Konu özetlerini görmek için üye girişi yapın.',
+        yonlendir: '/Paketler.html',
+        girisYapti: false
+      });
+    }
   }
   const grade = Number(req.query.grade);
   const topic = typeof req.query.topic === 'string' ? req.query.topic.trim() : '';
@@ -254,6 +264,7 @@ app.use('/api/admin', createAdminRouter({
   requireAdmin: requireRole('admin'),
   User,
   Payment,
+  SystemConfig,
   getAnnouncementCollection: () => duyuruKoleksiyonu
 }));
 app.use('/api/payments', createPaymentRouter({ requireStudent: ogrenciKontrol }));
@@ -289,6 +300,7 @@ const gelisimRouters = createGelisimRouters({
 app.use('/api/pratik', createPratikRouter({
   getUsageCollection: () => pratikKullanim,
   getContentCollection: () => pratikIcerik,
+  getVisitorSettings: () => SystemConfig.getVisitorSettings(),
   mufredat: mufredatiYukle(),
   mufredatKonusuVarMi: async (grade, konu) => {
     const { mufredatKonulariniGetir } = await import('./aiService.mjs');
@@ -781,6 +793,7 @@ app.delete('/api/ogretmen/sonuc/:id', ogretmenKontrol, async (req, res) => {
 
 async function baslat() {
   await mongoose.connect(MONGODB_URI, { dbName: DB_ADI });
+  await SystemConfig.initializeVisitorSettings();
   const client = new MongoClient(MONGODB_URI);
   await client.connect();
   koleksiyon = client.db(DB_ADI).collection(KOLEKSIYON);

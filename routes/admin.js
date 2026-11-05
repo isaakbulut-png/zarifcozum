@@ -2,12 +2,26 @@ const express = require('express');
 const { ObjectId } = require('mongodb');
 
 const PAGE_SIZE = 25;
+const VISITOR_SETTING_FIELDS = new Set([
+  'questionLimit',
+  'topicLimit',
+  'trialDurationDays',
+  'summaryEnabled',
+  'practiceEnabled',
+  'assistantEnabled',
+  'fullTestEnabled'
+]);
+const VISITOR_SETTING_RANGES = {
+  questionLimit: [0, 500],
+  topicLimit: [0, 100],
+  trialDurationDays: [1, 3650]
+};
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function createAdminRouter({ requireAdmin, User, Payment, getAnnouncementCollection }) {
+function createAdminRouter({ requireAdmin, User, Payment, SystemConfig, getAnnouncementCollection }) {
   const router = express.Router();
   router.use(requireAdmin);
   router.use((req, res, next) => {
@@ -31,6 +45,43 @@ function createAdminRouter({ requireAdmin, User, Payment, getAnnouncementCollect
     } catch (error) {
       console.error('Yönetici özeti alınamadı:', error);
       res.status(500).json({ mesaj: 'Özet verileri alınamadı.' });
+    }
+  });
+
+  router.get('/settings', async (req, res) => {
+    try {
+      res.json({ ziyaretciHaklari: await SystemConfig.getVisitorSettings() });
+    } catch (error) {
+      console.error('Ziyaretçi hakları alınamadı:', error);
+      res.status(500).json({ mesaj: 'Ziyaretçi ayarları alınamadı.' });
+    }
+  });
+
+  router.post('/settings', async (req, res) => {
+    const body = req.body?.ziyaretciHaklari;
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return res.status(400).json({ mesaj: 'Ziyaretçi ayarları geçerli biçimde gönderilmelidir.' });
+    }
+    const fields = Object.keys(body);
+    if (!fields.length || fields.some(field => !VISITOR_SETTING_FIELDS.has(field))) {
+      return res.status(400).json({ mesaj: 'Bilinmeyen veya boş ziyaretçi ayarı.' });
+    }
+    for (const [field, value] of Object.entries(body)) {
+      if (Object.hasOwn(VISITOR_SETTING_RANGES, field)) {
+        const [min, max] = VISITOR_SETTING_RANGES[field];
+        if (!Number.isInteger(value) || value < min || value > max) {
+          return res.status(400).json({ mesaj: `${field} ${min} ile ${max} arasında tam sayı olmalıdır.` });
+        }
+      } else if (typeof value !== 'boolean') {
+        return res.status(400).json({ mesaj: `${field} true veya false olmalıdır.` });
+      }
+    }
+    try {
+      const ziyaretciHaklari = await SystemConfig.saveVisitorSettings(body);
+      res.json({ mesaj: 'Ziyaretçi ayarları kaydedildi.', ziyaretciHaklari });
+    } catch (error) {
+      console.error('Ziyaretçi ayarları kaydedilemedi:', error);
+      res.status(500).json({ mesaj: 'Ziyaretçi ayarları kaydedilemedi.' });
     }
   });
 

@@ -3,6 +3,7 @@ const express = require('express');
 const test = require('node:test');
 const { createAdminRouter } = require('../routes/admin');
 const { requireRole } = require('../routes/auth');
+const { DEFAULT_VISITOR_SETTINGS } = require('../models/SystemConfig');
 
 function fakeQuery(rows) {
   const query = {
@@ -12,7 +13,7 @@ function fakeQuery(rows) {
   return query;
 }
 
-function buildRouter(announcements = []) {
+function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_SETTINGS }) {
   const filters = [];
   const User = {
     countDocuments: async () => 3,
@@ -23,10 +24,15 @@ function buildRouter(announcements = []) {
     countDocuments: async () => announcements.length,
     insertOne: async doc => { announcements.push(doc); return { insertedId: 'a1' }; }
   };
+  const SystemConfig = {
+    getVisitorSettings: async () => ({ ...visitorSettings }),
+    saveVisitorSettings: async updates => Object.assign(visitorSettings, updates)
+  };
   return {
     filters,
     router: createAdminRouter({
-      requireAdmin: requireRole('admin'), User, Payment, getAnnouncementCollection: () => collection
+      requireAdmin: requireRole('admin'), User, Payment, SystemConfig,
+      getAnnouncementCollection: () => collection
     })
   };
 }
@@ -82,5 +88,27 @@ test('admin can publish announcements and validates input', async () => {
     assert.equal((await post({ message: 'Merhaba' })).status, 201);
     assert.equal(announcements[0].message, 'Merhaba');
     assert.equal(announcements[0].createdBy, '9');
+  });
+});
+
+test('admin can read and update visitor access settings with validation', async () => {
+  const settings = { ...DEFAULT_VISITOR_SETTINGS };
+  await withServer(buildRouter([], settings).router, { id: '9', role: 'admin' }, async base => {
+    const read = await fetch(`${base}/settings`);
+    assert.equal(read.status, 200);
+    assert.deepEqual((await read.json()).ziyaretciHaklari, DEFAULT_VISITOR_SETTINGS);
+
+    const post = body => fetch(`${base}/settings`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    assert.equal((await post({ ziyaretciHaklari: { questionLimit: 501 } })).status, 400);
+    assert.equal((await post({ ziyaretciHaklari: { fullTestEnabled: 'true' } })).status, 400);
+    assert.equal((await post({ ziyaretciHaklari: { unknown: true } })).status, 400);
+
+    const saved = await post({ ziyaretciHaklari: { questionLimit: 8, fullTestEnabled: true } });
+    assert.equal(saved.status, 200);
+    assert.equal(settings.questionLimit, 8);
+    assert.equal(settings.fullTestEnabled, true);
+    assert.equal(settings.topicLimit, DEFAULT_VISITOR_SETTINGS.topicLimit);
   });
 });
