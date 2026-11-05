@@ -51,7 +51,12 @@ export async function mufredatKonulariniGetir(grade) {
     a.unite.localeCompare(b.unite, 'tr') || a.dosya_adi.localeCompare(b.dosya_adi, 'tr'));
 }
 
+const ozetOnbellegi = new Map();
+
 export async function konuOzetiGetir(grade, topic) {
+  const anahtar = `${Number(grade)}\0${topic}`;
+  if (ozetOnbellegi.has(anahtar)) return ozetOnbellegi.get(anahtar);
+
   const sonuc = await pineconeIndex.fetchByMetadata({
     filter: {
       grade: { $eq: Number(grade) },
@@ -62,11 +67,29 @@ export async function konuOzetiGetir(grade, topic) {
   const kayit = Object.values(sonuc.records || {}).find(k =>
     Number(k.metadata?.grade) === Number(grade) &&
     k.metadata?.official_description === topic);
-  const metin = typeof kayit?.metadata?.text === 'string'
-    ? kayit.metadata.text.replace(/\s+/g, ' ').trim()
+  const hamMetin = typeof kayit?.metadata?.text === 'string'
+    ? kayit.metadata.text.replace(/\s+/g, ' ').trim().slice(0, 4000)
     : '';
-  if (!metin) return '';
-  return metin.length > 600 ? `${metin.slice(0, 600).replace(/\s+\S*$/, '')}…` : metin;
+  if (!hamMetin) return '';
+
+  const response = await aiClient.models.generateContent({
+    model: 'gemini-4-argon',
+    contents: [
+      `Sınıf seviyesi: ${grade}. sınıf`,
+      `Konu/kazanım: ${topic}`,
+      'Ham müfredat metni:',
+      hamMetin
+    ].join('\n\n'),
+    config: {
+      systemInstruction: 'Sana resmi müfredat metni verilecek. Kazanım kodlarını, "Kazanım Açıklaması", "Resmi Sınırlar" gibi teknik etiketleri ve resmi dili kullanma. Bu konuda öğrencinin neler öğreneceğini öğrenci ve velilerin anlayacağı sade, akıcı Türkçe ile EN FAZLA 2-3 cümlelik kısa bir özet olarak yaz. Yalnızca özet metnini döndür; başlık, madde işareti, Markdown veya giriş cümlesi ekleme.',
+      temperature: 0.4,
+      maxOutputTokens: 300
+    }
+  });
+  const ozet = response.text?.replace(/\s+/g, ' ').trim();
+  if (!ozet) throw new Error('Yapay zekâ konu özeti üretemedi.');
+  ozetOnbellegi.set(anahtar, ozet);
+  return ozet;
 }
 
 export async function konuAnlatimiZenginlestir(grade, topic) {
