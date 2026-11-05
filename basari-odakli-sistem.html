@@ -1,299 +1,183 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#fbf1e7">
+<meta name="description" content="Matematikteki gelişimini takip et, güçlü yönlerini keşfet ve eksiklerini tamamla. Başarı odaklı sistem ile velilere de şeffaf takip.">
 <title>Başarı Odaklı Sistem | Zarif Çözüm</title>
-
-<meta name="description" content="Zarif Çözüm ile matematik başarını takip et. Konu bazlı gelişimini gör, eksiklerini keşfet ve hedeflerine ilerle.">
-
 <style>
-:root {
-  --green: #352618;
-  --gold: #a7804f;
-  --cream: #f8f5ef;
-  --ink: #40372e;
-  --muted: #81776d;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  color: var(--ink);
-}
-header {
-  background: var(--green);
-  padding: 19px 6%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-}
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: white;
-  font-size: 22px;
-  font-weight: bold;
-  text-decoration: none;
-}
-.brand img {
-  width: 44px;
-  height: 44px;
-  object-fit: contain;
-  padding: 3px;
-  border-radius: 10px;
-  background: #fffaf5;
-}
-.back {
-  color: white;
-  text-decoration: none;
-  font-size: 13px;
-}
-.hero {
-  background: var(--cream);
-  padding: 75px 20px;
-  text-align: center;
-}
-.eyebrow {
-  color: var(--gold);
-  font-size: 12px;
-  font-weight: bold;
-  letter-spacing: 2px;
-}
-h1 {
-  color: var(--green);
-  font-size: clamp(32px,5vw,49px);
-  line-height: 1.2;
-  max-width: 850px;
-  margin: 20px auto;
-}
-.lead {
-  max-width: 750px;
-  margin: auto;
-  color: var(--muted);
-  line-height: 1.9;
-  font-size: 16px;
-}
-.container {
-  max-width: 1100px;
-  margin: auto;
-  padding: 65px 22px;
-}
-.section-title {
-  text-align: center;
-  margin-bottom: 35px;
-}
-.section-title h2 {
-  color: var(--green);
-  font-size: 29px;
-}
-.section-title p {
-  color: var(--muted);
-  line-height: 1.8;
-}
-.cards {
-  display: grid;
-  grid-template-columns: repeat(2,1fr);
-  gap: 18px;
-}
-.card {
-  padding: 25px;
-  background: white;
-  border: 1px solid #eee6da;
-  border-radius: 13px;
-  transition: .2s;
-}
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px #0000000c;
-}
-.card-icon {
-  font-size: 27px;
-  color: var(--gold);
-}
-.card h3 { color: var(--green); }
-.card p {
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.8;
-}
-.parent {
-  margin-top: 45px;
-  padding: 30px;
-  border-radius: 14px;
-  background: var(--cream);
-}
-.parent h2 { color: var(--green); }
-.parent p {
-  color: var(--muted);
-  line-height: 1.9;
-}
-.cta {
-  margin-top: 45px;
-  padding: 45px 20px;
-  text-align: center;
-  background: var(--green);
-  color: white;
-  border-radius: 15px;
-}
-.cta h2 { font-size: 27px; }
-.cta p {
-  color: #e2ddd9;
-  line-height: 1.8;
-}
-.btn {
-  display: inline-block;
-  margin-top: 12px;
-  padding: 14px 25px;
-  color: white;
-  background: var(--gold);
-  text-decoration: none;
-  border-radius: 7px;
-  font-weight: bold;
-}
-.btn:hover { background: #89653f; }
-footer {
-  background: #291e15;
-  color: #dfdbd8;
-  text-align: center;
-  padding: 25px;
-  font-size: 12px;
-}
-@media(max-width:650px) {
-  .cards { grid-template-columns: 1fr; }
-  .hero { padding: 55px 18px; }
-  .container { padding: 45px 18px; }
-}
-@media(prefers-reduced-motion:reduce) {
-  .card { transition: none; }
-}
+:root{--cream:#fbf1e7;--paper:#fffaf5;--brown:#493020;--brown2:#67472f;--muted:#806b5c;--gold:#b88a28;--gold2:#e9d3a5;--line:#ead8c5;--green:#587760;--shadow:0 16px 40px rgba(76,48,27,.08);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--brown)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 90% 0%,#fff9f1 0,transparent 35%),var(--cream);line-height:1.6}
+a{color:inherit}
+.wrap{width:min(1120px,calc(100% - 36px));margin:auto}
+.topbar{height:82px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(184,138,40,.18)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand img{width:56px;height:56px;object-fit:contain;mix-blend-mode:multiply}
+.brand strong{font:600 19px Georgia,serif}
+.brand strong span{color:var(--gold)}
+.crumb{font-size:12px;color:var(--muted)}
+.crumb b{color:var(--gold);font-weight:650}
+.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:36px;align-items:center;padding:48px 0 33px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 11px;background:#fff8ee;border:1px solid var(--gold2);border-radius:99px;color:#8c6c2c;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--gold)}
+h1,h2,h3,p{margin-top:0}
+h1{font:600 clamp(35px,5vw,52px)/1.08 Georgia,serif;letter-spacing:-.03em;margin:17px 0 13px}
+h1 em{color:var(--gold);font-style:normal}
+.lead{max-width:590px;font-size:16px;color:#705c4d;margin:0 0 19px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:#fffaf5;font-size:12px;color:#715b49}
+.hero-art{min-height:270px;display:grid;place-items:center;border:1px solid #edd9c3;border-radius:24px;background:linear-gradient(145deg,#fffaf4,#f5e2ce);box-shadow:var(--shadow);overflow:hidden;position:relative;padding:18px}
+.hero-art:after,.hero-art:before{content:"";position:absolute;border:1px solid rgba(184,138,40,.23);border-radius:50%;width:210px;height:210px;right:-70px;top:-110px}
+.hero-art:after{width:155px;height:155px;right:-42px;top:-82px}
+.hero-art svg{position:relative;z-index:1;width:100%;max-width:400px;height:auto}
+.section{padding:21px 0}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:16px}
+.section-head h2{font:600 25px Georgia,serif;margin:0 0 4px}
+.section-head p{font-size:13px;color:var(--muted);margin:0}
+.grid{display:grid;gap:14px}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:19px;box-shadow:0 6px 20px rgba(76,48,27,.04);transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(76,48,27,.09)}
+.card h3{font:600 19px Georgia,serif;margin:0 0 8px}
+.card p{font-size:13px;color:#705c4d;margin:0 0 10px}
+.card p:last-child{margin-bottom:0}
+.iconbox{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:#f3e4d3;color:#8a682c;font-size:18px;margin-bottom:12px}
+.tag{display:inline-block;padding:4px 8px;border-radius:99px;background:#f4e8d9;color:#7d612d;font-size:10px;font-weight:800;letter-spacing:.04em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 15px;border:0;border-radius:11px;background:var(--brown);color:#fffaf5;text-decoration:none;font:700 13px ui-sans-serif,system-ui;cursor:pointer}
+.btn:hover{background:var(--brown2)}
+.btn.secondary{background:#f5e5d5;border:1px solid var(--line);color:var(--brown)}
+.callout{padding:16px 18px;border-left:3px solid var(--gold);border-radius:0 12px 12px 0;background:#f8eddf;color:#705c4d;font-size:13px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.bar{height:9px;background:#efe4d8;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#b88a28,#d2a94f)}
+.bar i.ok{background:linear-gradient(90deg,#587760,#7a987f)}
+.bar i.low{background:linear-gradient(90deg,#c98a5a,#d9a27a)}
+.stat{text-align:center}
+.stat b{display:block;font:600 34px Georgia,serif;color:var(--gold)}
+.stat span{font-size:12px;color:var(--muted)}
+.topics{display:grid;gap:14px;margin-top:14px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--muted);margin-top:14px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.parent{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center;padding:26px;border-radius:24px;background:linear-gradient(145deg,#fffaf4,#f5e2ce);border:1px solid #edd9c3;box-shadow:var(--shadow)}
+.parent h2{font:600 26px Georgia,serif;margin:12px 0 10px}
+.parent p{font-size:14px;color:#705c4d}
+.parent ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.parent li{display:flex;gap:10px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:13px;color:#5e4a3b}
+.parent li:before{content:"✓";flex:none;color:var(--green);font-weight:800}
+.cta{text-align:center;padding:36px 22px;border-radius:24px;background:linear-gradient(145deg,#fffaf4,#f5e2ce);border:1px solid #edd9c3;box-shadow:var(--shadow)}
+.cta h2{font:600 28px Georgia,serif;margin:0 0 8px}
+.cta p{color:#705c4d;max-width:560px;margin:0 auto 18px}
+.footer{margin-top:28px;padding:19px 0 26px;border-top:1px solid rgba(184,138,40,.2);display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:11px}
+.footer strong{font:600 14px Georgia,serif;color:var(--brown)}
+.footer a{color:#80602b}
+@media(max-width:760px){.topbar{height:72px}.brand img{width:48px;height:48px}.hero,.parent{grid-template-columns:1fr}.hero{gap:20px;padding:32px 0 23px}.hero-art{min-height:210px}.grid-3,.grid-2{grid-template-columns:1fr}.section{padding:15px 0}.section-head{align-items:flex-start;flex-direction:column}.footer{flex-direction:column}}
+@media(max-width:420px){.wrap{width:calc(100% - 24px)}.crumb{max-width:130px;text-align:right;font-size:10px}.brand strong{font-size:17px}h1{font-size:37px}.lead{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.card{transition:none}.card:hover{transform:none}}
 </style>
 </head>
-
-<body>
-
-<header>
-  <a href="/" class="brand"><img src="/assets/brand-mark.png" alt="">Zarif Çözüm</a>
-  <a href="/" class="back">← Ana Sayfaya Dön</a>
-</header>
+<body data-home="/" data-breadcrumb="Başarı Odaklı Sistem">
+<header class="wrap topbar"><a class="brand" href="/" aria-label="ZarifÇözüm ana sayfa"><img class="brand-logo" src="/assets/brand-mark.png" alt=""><strong>Zarif<span>Çözüm</span></strong></a><div class="crumb">Öğrenme Alanı　›　<b>Başarı Odaklı Sistem</b></div></header>
+<main id="top" class="wrap">
 
 <section class="hero">
-  <span class="eyebrow">ZARİF ÇÖZÜM • BAŞARI ODAKLI SİSTEM</span>
-
-  <h1>Gelişimini Gör, Hedefe İlerle.</h1>
-
-  <p class="lead">
-    Her soru bir deneyim, her çalışma başarıya atılan
-    yeni bir adımdır. Matematikteki gelişimini takip et,
-    güçlü yönlerini keşfet ve eksiklerini tamamla.
-    Çünkü başarı, gelişimini fark etmekle başlar.
-  </p>
+  <div>
+    <span class="eyebrow">ZARİF ÇÖZÜM · BAŞARI ODAKLI SİSTEM</span>
+    <h1>Gelişimini gör, <em>hedefe ilerle.</em></h1>
+    <p class="lead">Her soru bir deneyim, her çalışma başarıya atılan yeni bir adımdır. Matematikteki gelişimini takip et, güçlü yönlerini keşfet ve eksiklerini tamamla. Çünkü başarı, gelişimini fark etmekle başlar.</p>
+    <div class="chips"><span class="chip">Gelişim grafikleri</span><span class="chip">Konu bazlı analiz</span><span class="chip">Haftalık raporlar</span><span class="chip">Veli bilgilendirme</span></div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <svg viewBox="0 0 400 290" role="img" aria-label="Gelişim grafiği illüstrasyonu">
+      <rect x="30" y="30" width="340" height="230" rx="22" fill="#fffaf5" stroke="#ead8c5"/>
+      <text x="52" y="62" font-family="Georgia,serif" font-size="17" fill="#493020">Gelişim grafiğin</text>
+      <text x="348" y="62" text-anchor="end" font-family="ui-sans-serif,system-ui" font-size="11" fill="#806b5c">son 6 hafta</text>
+      <g stroke="#ead8c5"><line x1="52" y1="100" x2="348" y2="100"/><line x1="52" y1="140" x2="348" y2="140"/><line x1="52" y1="180" x2="348" y2="180"/><line x1="52" y1="220" x2="348" y2="220"/></g>
+      <g fill="#f3e4d3">
+        <rect x="66" y="190" width="28" height="30" rx="6"/><rect x="118" y="172" width="28" height="48" rx="6"/><rect x="170" y="160" width="28" height="60" rx="6"/>
+        <rect x="222" y="140" width="28" height="80" rx="6"/><rect x="274" y="122" width="28" height="98" rx="6"/>
+      </g>
+      <rect x="318" y="104" width="28" height="116" rx="6" fill="#b88a28"/>
+      <polyline points="80,186 132,168 184,156 236,134 288,116 332,98" fill="none" stroke="#587760" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <g fill="#587760"><circle cx="80" cy="186" r="4"/><circle cx="132" cy="168" r="4"/><circle cx="184" cy="156" r="4"/><circle cx="236" cy="134" r="4"/><circle cx="288" cy="116" r="4"/><circle cx="332" cy="98" r="5"/></g>
+      <g font-family="ui-sans-serif,system-ui" font-size="10" fill="#806b5c" text-anchor="middle"><text x="80" y="238">H1</text><text x="132" y="238">H2</text><text x="184" y="238">H3</text><text x="236" y="238">H4</text><text x="288" y="238">H5</text><text x="332" y="238" font-weight="700" fill="#b88a28">H6</text></g>
+      <rect x="262" y="72" width="86" height="22" rx="11" fill="#e8f1ea"/><text x="305" y="87" text-anchor="middle" font-family="ui-sans-serif,system-ui" font-size="11" font-weight="700" fill="#587760">↗ %24 artış</text>
+    </svg>
+  </div>
 </section>
 
-<main class="container">
-
-  <div class="section-title">
-    <h2>Başarı Yolculuğunun Her Adımını Takip Et</h2>
-    <p>
-      Öğrencinin çalışmalarını değerlendiren,
-      velinin gelişimi anlayabilmesini sağlayan
-      bütüncül bir takip yaklaşımı.
-    </p>
+<section class="section">
+  <div class="grid grid-3">
+    <article class="card stat"><b>360°</b><span>öğrenci ve veli için bütüncül takip</span></article>
+    <article class="card stat"><b>Konu bazlı</b><span>güçlü ve gelişime açık alanlar</span></article>
+    <article class="card stat"><b>Haftalık</b><span>ve aylık gelişim değerlendirmesi</span></article>
   </div>
+</section>
 
-  <section class="cards">
+<section class="section">
+  <div class="section-head"><div><h2>Başarı yolculuğunun her adımını takip et</h2><p>Öğrencinin çalışmalarını değerlendiren, velinin gelişimi anlayabilmesini sağlayan bütüncül bir yaklaşım.</p></div></div>
+  <div class="grid grid-3">
+    <article class="card"><div class="iconbox">↗</div><h3>Gelişim grafikleri</h3><p>Çözdüğün soruları, doğru cevaplarını ve çalışma ilerlemeni zaman içinde grafiklerle takip et.</p></article>
+    <article class="card"><div class="iconbox">◎</div><h3>Konu bazlı başarı analizi</h3><p>Doğal sayılar, kesirler, geometri ve diğer konulardaki başarı durumunu ayrı ayrı değerlendir.</p></article>
+    <article class="card"><div class="iconbox">✦</div><h3>Eksiklerini keşfet</h3><p>Daha fazla çalışman gereken konuları belirle ve çalışmalarını ihtiyaçlarına göre düzenle.</p></article>
+    <article class="card"><div class="iconbox">✓</div><h3>Ödev ve çalışma takibi</h3><p>Tamamlanan ödevlerini, bekleyen görevlerini ve çalışma durumunu bir arada incele.</p></article>
+    <article class="card"><div class="iconbox">▤</div><h3>Gelişim raporları</h3><p>Haftalık ve aylık çalışmalarını değerlendir, ilerlemeni önceki dönemlerle karşılaştır.</p></article>
+    <article class="card"><div class="iconbox">♡</div><h3>Veli bilgilendirme</h3><p>Veliler çocuklarının gelişimini ve ihtiyaçlarını anlaşılır raporlarla takip edebilir.</p></article>
+  </div>
+</section>
 
+<section class="section">
+  <div class="grid grid-2">
     <article class="card">
-      <div class="card-icon">↗</div>
-      <h3>Gelişim Grafikleri</h3>
-      <p>
-        Çözdüğün soruları, doğru cevaplarını ve
-        çalışma ilerlemeni zaman içerisinde
-        grafiklerle takip et.
-      </p>
+      <div class="row"><h3 style="margin:0">Konu bazlı başarı</h3><span class="tag">ÖRNEK GÖSTERİM</span></div>
+      <p style="margin-top:6px">Matematik · 7. sınıf</p>
+      <div class="topics">
+        <div><div class="row"><small>Doğrular ve açılar</small><small>90%</small></div><div class="bar"><i class="ok" style="width:90%"></i></div></div>
+        <div><div class="row"><small>Rasyonel sayılar</small><small>68%</small></div><div class="bar"><i style="width:68%"></i></div></div>
+        <div><div class="row"><small>Oran ve orantı</small><small>54%</small></div><div class="bar"><i class="low" style="width:54%"></i></div></div>
+        <div><div class="row"><small>Cebirsel ifadeler</small><small>78%</small></div><div class="bar"><i style="width:78%"></i></div></div>
+      </div>
+      <div class="legend"><span><i style="background:#587760"></i>Güçlü</span><span><i style="background:#b88a28"></i>Gelişiyor</span><span><i style="background:#c98a5a"></i>Tekrar önerilir</span></div>
     </article>
-
-    <article class="card">
-      <div class="card-icon">◎</div>
-      <h3>Konu Bazlı Başarı Analizi</h3>
-      <p>
-        Doğal sayılar, kesirler, geometri ve diğer
-        matematik konularındaki başarı durumunu
-        ayrı ayrı değerlendir.
-      </p>
+    <article class="card" style="background:linear-gradient(145deg,#fffaf5,#f5e5d5)">
+      <span class="tag">SONRAKİ ADIM</span>
+      <h3 style="margin-top:11px">Sadece puan değil, yol haritası</h3>
+      <p>Sistem, hangi konuda ne kadar ilerlediğini gösterir ve bir sonraki çalışma adımını önerir. Böylece zamanını en çok ihtiyaç duyduğun konuya ayırırsın.</p>
+      <div class="callout"><b>Öneri:</b> Oran ve orantı konusunu gözden geçir, ardından 5 soruluk mini testi çöz.</div>
+      <p style="margin-top:14px"><a class="btn secondary" href="/pages/ilerlemeni-takip-et-tanitim.html">İlerleme tanıtımını gör →</a></p>
     </article>
+  </div>
+</section>
 
-    <article class="card">
-      <div class="card-icon">✦</div>
-      <h3>Eksiklerini Keşfet</h3>
-      <p>
-        Yanlış yaptığın ve daha fazla çalışman
-        gereken konuları belirle.
-        Çalışmalarını ihtiyaçlarına göre düzenle.
-      </p>
-    </article>
+<section class="section">
+  <div class="parent">
+    <div>
+      <span class="tag">VELİLER İÇİN</span>
+      <h2>Çocuğunuzun gelişimini yakından izleyin</h2>
+      <p>Her çocuğun öğrenme yolculuğu kendine özeldir. Çocuğunuzun matematik çalışmalarını, tamamladığı ödevleri ve konu bazlı gelişimini takip edebilirsiniz. Böylece yalnızca sonuçları değil, öğrenme sürecini de görürsünüz.</p>
+    </div>
+    <ul>
+      <li>Anlaşılır haftalık ve aylık gelişim raporları</li>
+      <li>Tamamlanan ve bekleyen ödevlerin özeti</li>
+      <li>Güçlü yönler ve desteklenmesi gereken konular</li>
+      <li>Çalışma düzeninin ve sürekliliğin takibi</li>
+    </ul>
+  </div>
+</section>
 
-    <article class="card">
-      <div class="card-icon">✓</div>
-      <h3>Ödev ve Çalışma Takibi</h3>
-      <p>
-        Tamamlanan ödevlerini, bekleyen görevlerini
-        ve çalışma durumunu bir arada incele.
-      </p>
-    </article>
-
-    <article class="card">
-      <div class="card-icon">▤</div>
-      <h3>Gelişim Raporları</h3>
-      <p>
-        Haftalık ve aylık çalışmalarını değerlendir.
-        İlerlemeni önceki dönemlerle karşılaştır.
-      </p>
-    </article>
-
-    <article class="card">
-      <div class="card-icon">♡</div>
-      <h3>Veli Bilgilendirme</h3>
-      <p>
-        Veliler, çocuklarının eğitim yolculuğundaki
-        gelişimini, çalışmalarını ve ihtiyaçlarını
-        anlaşılır raporlarla takip edebilir.
-      </p>
-    </article>
-
-  </section>
-
-  <section class="parent">
-    <h2>Veliler İçin: Çocuğunuzun Gelişimini Yakından İzleyin</h2>
-    <p>
-      Her çocuğun öğrenme yolculuğu kendine özeldir.
-      Zarif Çözüm ile çocuğunuzun matematik çalışmalarını,
-      tamamladığı ödevleri ve konu bazlı gelişimini
-      takip edebilirsiniz. Böylece yalnızca sonuçları
-      değil, öğrenme sürecini de görebilirsiniz.
-    </p>
-  </section>
-
-  <section class="cta">
+<section class="section">
+  <div class="cta">
     <h2>Her soru bir adım, her adım bir başarı.</h2>
-    <p>
-      Güçlü yönlerini keşfet, eksiklerini tamamla
-      ve kendi başarı yolculuğuna devam et.
-    </p>
-    <a class="btn" href="/panel.html?modul=basari-analizi">
-      Gelişimimi Gör →
-    </a>
-  </section>
+    <p>Güçlü yönlerini keşfet, eksiklerini tamamla ve kendi başarı yolculuğuna devam et.</p>
+    <a class="btn" href="/kayit-giris.html?mode=register">Hemen ücretsiz kaydol →</a>
+    <a class="btn secondary" href="/panel.html?modul=basari-analizi" style="margin-left:6px">Gelişimimi gör</a>
+  </div>
+</section>
 
 </main>
-
-<footer>
-  © 2026 Zarif Çözüm | Matematiği Anla, Başarıyla Çöz.
-</footer>
-
+<footer class="wrap footer"><div><strong>Zarif Çözüm</strong><br>Matematiği anla, başarıyla çöz.</div><a href="#top">Başa dön ↑</a></footer>
+<script src="/assets/breadcrumb.js"></script>
 </body>
 </html>
