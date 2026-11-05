@@ -555,7 +555,7 @@ button,select{font:inherit}
       });
     });
 
-    function renderContent(content) {
+    function renderLiveLessons(content) {
       const activeLesson = content.aktifDers
         ? `<article class="feed-card is-live">
             <span class="chip hot">CANLI</span>
@@ -564,11 +564,25 @@ button,select{font:inherit}
             <a class="btn-join" href="${esc(content.aktifDers.link)}">Canlı derse katıl</a>
           </article>`
         : '';
-      const plannedLessons = content.dersler.map(lesson => `<article class="feed-card">
-            <h3>${esc(lesson.title)}</h3>
-            <small>${new Date(lesson.startsAt).toLocaleString('tr-TR')}</small>
-            <a class="btn-join" href="${esc(lesson.link)}" target="_blank" rel="noopener noreferrer">Derse katıl</a>
-          </article>`).join('');
+      const renderPlannedLesson = lesson => {
+        const startsAt = new Date(lesson.startsAt);
+        const status = lesson.status === 'active'
+          ? 'Ders başladı. Canlı Ders bölümünden katılabilirsiniz.'
+          : startsAt <= new Date()
+            ? 'Ders saati geldi. Öğretmeninizin dersi başlatması bekleniyor.'
+            : 'Ders saati gelene kadar burada bekleyin.';
+        const action = lesson.status === 'active'
+          ? '<a class="btn-join" href="/canli.html">Canlı derse katıl</a>'
+          : lesson.link
+            ? `<a class="btn-join" href="${esc(lesson.link)}" target="_blank" rel="noopener noreferrer">Derse katıl</a>`
+            : `<p>${esc(status)}</p>`;
+        return `<article class="feed-card">
+          <h3>${esc(lesson.title)}</h3>
+          <small>${startsAt.toLocaleString('tr-TR')}</small>
+          ${action}
+        </article>`;
+      };
+      const plannedLessons = content.dersler.map(renderPlannedLesson).join('');
       $('lessonFeed').innerHTML = activeLesson ||
         emptyMessage('Şu anda aktif canlı ders yok.');
       $('scheduleFeed').innerHTML = content.dersler.length
@@ -579,6 +593,10 @@ button,select{font:inherit}
         : emptyMessage('Henüz yaklaşan ders programı yok.');
       $('plannedLessonFeed').innerHTML = plannedLessons ||
         emptyMessage('Henüz yaklaşan ders programı yok.');
+    }
+
+    function renderContent(content) {
+      renderLiveLessons(content);
       $('quizFeed').innerHTML = content.quizler.length
         ? content.quizler.map(quiz => `<article class="feed-card">
             <h3>${esc(quiz.title)}</h3>
@@ -686,6 +704,20 @@ button,select{font:inherit}
         }
         $('dashboardError').textContent = error.message;
         $('dashboardError').hidden = false;
+      }
+    }
+
+    let liveRefreshRunning = false;
+    async function refreshLiveLessons() {
+      if (liveRefreshRunning || document.hidden) return;
+      liveRefreshRunning = true;
+      try {
+        const content = await api('/api/student/dashboard');
+        renderLiveLessons(content);
+      } catch (error) {
+        $('lessonFeed').innerHTML = `<p class="feed-status error">Canlı ders durumu yenilenemedi: ${esc(error.message)}</p>`;
+      } finally {
+        liveRefreshRunning = false;
       }
     }
 
@@ -959,6 +991,8 @@ button,select{font:inherit}
 
     loadContent();
     loadImageExams().catch(() => {});
+    const liveLessonPoll = setInterval(refreshLiveLessons, 15000);
+    window.addEventListener('pagehide', () => clearInterval(liveLessonPoll), {once: true});
   })();
 </script>
 <script src="/assets/matematik-mufredati.js"></script>

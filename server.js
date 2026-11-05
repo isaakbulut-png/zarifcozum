@@ -24,6 +24,7 @@ const { createDenemelerRouters } = require('./routes/denemeler');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
 const { createPratikRouter } = require('./routes/pratik');
+const { createLiveLessonsRouter } = require('./routes/live-lessons');
 const { createZoomMeeting } = require('./lib/zoom');
 const { uretSorular } = require('./lib/ai-icerik');
 const { mufredatiYukle } = require('./lib/mufredat');
@@ -282,14 +283,6 @@ let pratikKullanim, pratikIcerik;
 let supportTickets;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
-const canliYoneticiKontrol = requireRole('teacher', 'admin');
-const canliDersOzeti = ders => ({
-  topic: ders.topic,
-  meetingNumber: ders.meetingNumber,
-  password: ders.password,
-  joinUrl: ders.joinUrl || '',
-  startedAt: ders.startedAt
-});
 app.use('/api/sorular', createSorularRouter({
   requireStaff: requireRole('teacher', 'admin'),
   AdminLog
@@ -442,7 +435,12 @@ async function aktifCanliDersiAl() {
 app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async (req, res) => {
   try {
     const [dersler, quizler, duyurular, sonuclar, aktifDers] = await Promise.all([
-      planliDersKoleksiyonu.find({ startsAt: { $gte: new Date() } })
+      planliDersKoleksiyonu.find({
+        $or: [
+          { startsAt: { $gte: new Date() } },
+          { kind: 'live', status: 'scheduled' }
+        ]
+      })
         .sort({ startsAt: 1 }).limit(50).toArray(),
       quizKoleksiyonu.find({
         $or: [{ source: { $ne: 'ai' } }, { source: 'ai', published: true }]
@@ -460,8 +458,12 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
         startsAt: aktifDers.startedAt,
         link: '/canli.html'
       } : null,
-      dersler: dersler.map(({ _id, title, startsAt, link }) => ({
-        id: _id.toString(), title, startsAt, link
+      dersler: dersler.map(lesson => ({
+        id: lesson._id.toString(),
+        title: lesson.title,
+        startsAt: lesson.startsAt,
+        status: lesson.kind === 'live' ? lesson.status : 'scheduled',
+        link: lesson.kind === 'live' ? '' : lesson.link
       })),
       quizler: quizler.map(({ _id, title, description, questions, createdAt }) => ({
         id: _id.toString(), title, description,
@@ -559,8 +561,13 @@ app.get('/api/ogretmen/yonetim', ogretmenKontrol, async (req, res) => {
       };
     });
     res.json({
-      dersler: dersler.map(({ _id, title, startsAt, link }) => ({
-        id: _id.toString(), title, startsAt, link
+      dersler: dersler.map(({ _id, title, startsAt, link, kind, status }) => ({
+        id: _id.toString(),
+        title,
+        startsAt,
+        link: kind === 'live' ? '' : link,
+        kind: kind || 'scheduled',
+        status: status || 'scheduled'
       })),
       quizler: quizler.map(({ _id, title, description, questions, createdAt, source, published }) => ({
         id: _id.toString(), title, description, soruSayisi: questions.length, createdAt,
@@ -673,37 +680,6 @@ app.post('/api/ogretmen/duyurular', ogretmenKontrol, async (req, res) => {
   }
 });
 
-app.post('/api/ogretmen/canli/baslat', canliYoneticiKontrol, async (req, res) => {
-  try {
-    const konu = String(req.body?.topic || 'ZarifÇözüm Canlı Ders').trim().slice(0, 200);
-    if (!konu) return res.status(400).json({ mesaj: 'Ders konusu boş olamaz.' });
-
-    const mevcutDers = await aktifCanliDersiAl();
-    if (mevcutDers) {
-      return res.status(409).json({ mesaj: 'Zaten aktif bir canlı ders var.', ...canliDersOzeti(mevcutDers) });
-    }
-
-    zoomAyarlariniKontrolEt([{ ad: 'ZOOM_HOST_USER_ID', deger: ZOOM_HOST_USER_ID }]);
-    const toplanti = await createZoomMeeting({ topic: konu });
-
-    const ders = {
-      meetingId: String(toplanti.id),
-      meetingNumber: String(toplanti.id),
-      password: toplanti.password || '',
-      topic: toplanti.topic || konu,
-      joinUrl: toplanti.joinUrl || '',
-      hostUserId: ZOOM_HOST_USER_ID,
-      startedAt: new Date(),
-      expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000)
-    };
-    await canliDersKoleksiyonu.updateOne({ _id: 'aktif' }, { $set: ders }, { upsert: true });
-    res.status(201).json({ mesaj: 'Canlı ders oluşturuldu.', ...canliDersOzeti(ders), startUrl: toplanti.startUrl || '' });
-  } catch (err) {
-    console.error('❌ Zoom toplantısı oluşturulamadı:', err.message);
-    res.status(err.status || 500).json({ mesaj: err.message });
-  }
-});
-
 // start_url kısa ömürlüdür; her istekte Zoom'dan taze alınır.
 async function ogretmenBaslatmaBaglantisiAl(ders) {
   const belirteci = await zoomErisimBelirteciAl();
@@ -711,46 +687,26 @@ async function ogretmenBaslatmaBaglantisiAl(ders) {
   return toplanti.start_url || '';
 }
 
-app.get('/api/ogretmen/canli/durum', canliYoneticiKontrol, async (req, res) => {
-  try {
-    const ders = await aktifCanliDersiAl();
-    if (!ders) return res.json({ aktif: false });
-    res.json({ aktif: true, ...canliDersOzeti(ders), startUrl: await ogretmenBaslatmaBaglantisiAl(ders) });
-  } catch (err) {
-    console.error('❌ Zoom durumu alınamadı:', err.message);
-    res.status(err.status || 500).json({ mesaj: err.message });
-  }
-});
-
-app.get('/api/canli/katilim', ogrenciKontrol, async (req, res) => {
-  try {
-    const ders = await aktifCanliDersiAl();
-    if (!ders) return res.status(404).json({ mesaj: 'Şu anda aktif bir canlı ders yok.' });
-    res.json(canliDersOzeti(ders));
-  } catch (err) {
-    res.status(500).json({ mesaj: err.message });
-  }
-});
-
-app.post('/api/ogretmen/canli/sonlandir', canliYoneticiKontrol, async (req, res) => {
-  try {
-    const ders = await aktifCanliDersiAl();
-    if (!ders) return res.status(404).json({ mesaj: 'Aktif canlı ders bulunamadı.' });
-
-    const belirteci = await zoomErisimBelirteciAl();
+app.use(createLiveLessonsRouter({
+  requireTeacher: requireRole('teacher', 'admin'),
+  requireStudent: ogrenciKontrol,
+  getScheduledCollection: () => planliDersKoleksiyonu,
+  getActiveCollection: () => canliDersKoleksiyonu,
+  createMeeting: options => {
+    zoomAyarlariniKontrolEt([{ ad: 'ZOOM_HOST_USER_ID', deger: ZOOM_HOST_USER_ID }]);
+    return createZoomMeeting(options);
+  },
+  getHostStartUrl: ogretmenBaslatmaBaglantisiAl,
+  endMeeting: async lesson => {
+    const token = await zoomErisimBelirteciAl();
     await zoomApiIstegiYap(
-      belirteci,
+      token,
       'PUT',
-      `/meetings/${encodeURIComponent(ders.meetingId)}/status`,
+      `/meetings/${encodeURIComponent(lesson.meetingId)}/status`,
       { action: 'end' }
     );
-    await canliDersKoleksiyonu.deleteOne({ _id: 'aktif' });
-    res.json({ mesaj: 'Canlı ders sonlandırıldı.' });
-  } catch (err) {
-    console.error('❌ Zoom toplantısı sonlandırılamadı:', err.message);
-    res.status(err.status || 500).json({ mesaj: err.message });
   }
-});
+}));
 
 // Sınav sonucunu kaydet
 app.post('/api/cevap-kaydet', ogrenciKontrol, async (req, res) => {

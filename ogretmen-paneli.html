@@ -107,6 +107,12 @@ td.net{font-weight:700;color:var(--navy-900)}
 .teacher-layout{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:22px;max-width:1480px;margin:0 auto}
 .teacher-layout.authenticated{grid-template-columns:230px minmax(0,1fr)}
 .teacher-sidebar{position:sticky;top:18px;margin:24px 0 24px 20px;padding:18px 12px;background:var(--navy-900);border-radius:16px;color:#fff}
+.teacher-live-cta{display:block;width:100%;margin:0 0 9px;padding:12px 10px;border:0;border-radius:9px;background:#d93043;color:#fff;text-align:center;text-decoration:none;font-size:.86rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.teacher-live-cta:hover{background:#bd2637}
+.teacher-live-cta:disabled{opacity:.65;cursor:wait}
+.teacher-live-cta.secondary{background:#76543a}
+.teacher-live-cta.secondary:hover{background:#8b6444}
+.teacher-live-status{min-height:1.2em;margin:0 2px 12px;color:#f4d7c1;font-size:.75rem}
 .teacher-sidebar strong{display:block;padding:4px 10px 14px;font-family:var(--head);font-size:.92rem}
 .teacher-sidebar nav{display:grid;gap:5px}
 .teacher-sidebar a{padding:10px;border-radius:8px;color:#e3dcd6;text-decoration:none;font-size:.88rem}
@@ -172,6 +178,9 @@ td.net{font-weight:700;color:var(--navy-900)}
 <div class="teacher-layout">
 <aside class="teacher-sidebar" id="teacherSidebar" hidden>
   <div class="teacher-brand"><span class="teacher-brand-mark">Z</span><span>Zarif Çözüm<small>Öğretmen çalışma alanı</small></span></div>
+  <a class="teacher-live-cta" href="#lessons">● Canlı Ders Oluştur</a>
+  <button class="teacher-live-cta secondary" id="sidebarQuickLive" type="button">● Anında Canlı Ders Başlat</button>
+  <p class="teacher-live-status" id="sidebarLiveStatus" role="status" aria-live="polite"></p>
   <strong>YÖNETİM MENÜSÜ</strong>
   <nav aria-label="Öğretmen paneli bölümleri">
     <a href="#overview" aria-current="page"><span>⌂</span>Ana sayfa</a>
@@ -182,7 +191,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     <a href="#analytics"><span>▥</span>Başarı analizi</a>
     <a href="#image-questions"><span>▦</span>Soru bankası</a>
     <a href="#ai-question-wizard"><span>✦</span>Yapay Zeka İle Soru Üret</a>
-    <a href="#lessons"><span>◷</span>Ders takvimi</a>
+    <a href="#lessons"><span>◷</span>Canlı dersler</a>
     <a href="#library"><span>▧</span>PDF kütüphanesi</a>
     <a href="#announcements"><span>♧</span>Duyurular</a>
     <a href="#teacher-settings"><span>⚙</span>Profil ve ayarlar</a>
@@ -357,17 +366,26 @@ td.net{font-weight:700;color:var(--navy-900)}
     </section>
 
     <section class="card" id="lessons">
-      <div class="section-title"><div><h2>Canlı ders planla</h2><p class="hint">Zoom veya Google Meet bağlantısını ekleyin; ders öğrenci panelinde listelensin.</p></div></div>
+      <div class="section-title"><div><h2>Canlı ders oluştur</h2><p class="hint">Tarih ve saati belirleyin. Öğrenciler kendi panellerinde dersi bekler; ders saati geldiğinde buradan başlatabilirsiniz.</p></div></div>
       <form id="lessonForm">
         <div class="form-grid">
-          <div class="field full"><label for="lessonTitle">Ders adı</label><input id="lessonTitle" name="title" maxlength="150" required placeholder="Örn. Denklem çözme soru saati"></div>
+          <div class="field full"><label for="lessonTitle">Ders adı / konusu</label><input id="lessonTitle" name="title" maxlength="200" required placeholder="Örn. Denklem çözme soru saati"></div>
           <div class="field"><label for="lessonDate">Tarih</label><input id="lessonDate" name="date" type="date" required></div>
           <div class="field"><label for="lessonTime">Saat</label><input id="lessonTime" name="time" type="time" required></div>
-          <div class="field full"><label for="lessonLink">Zoom / Meet bağlantısı</label><input id="lessonLink" name="link" type="url" required placeholder="https://..."></div>
+          <div class="field"><label for="lessonDuration">Ders süresi</label><select id="lessonDuration" name="duration"><option value="30">30 dakika</option><option value="45">45 dakika</option><option value="60" selected>60 dakika</option><option value="90">90 dakika</option><option value="120">120 dakika</option></select></div>
         </div>
-        <div class="button-row"><button class="btn" type="submit">Ders Oluştur</button><span class="muted" id="lessonStatus" role="status"></span></div>
+        <div class="button-row"><button class="btn" type="submit">Canlı dersi planla</button><span class="muted" id="lessonStatus" role="status" aria-live="polite"></span></div>
       </form>
-      <div class="data-list" id="lessonList"></div>
+      <div class="data-list" id="lessonList" aria-live="polite"></div>
+      <div class="exam-create">
+        <h3>Anında canlı ders başlat</h3>
+        <p class="hint">Ders hemen başlar; öğrenciler aktif dersi kendi panellerinden açabilir.</p>
+        <div class="tools">
+          <input id="canliKonu" type="text" maxlength="200" value="ZarifÇözüm Canlı Ders" aria-label="Anında canlı ders konusu">
+          <button class="btn" id="canliBaslat" type="button">Anında başlat</button>
+        </div>
+        <p class="err" id="canliDurum" role="status" aria-live="polite"></p>
+      </div>
     </section>
 
     <section class="card" id="quiz-builder">
@@ -502,16 +520,6 @@ td.net{font-weight:700;color:var(--navy-900)}
 
     <div class="notice" id="anahtarUyari" hidden>Bu sınav için <strong>cevap anahtarı</strong> girilmemiş. Aşağıdan anahtarı girip kaydedin; doğru, yanlış ve net sayıları otomatik hesaplanır.</div>
 
-    <section class="card">
-      <h2>Canlı ders</h2>
-      <p class="hint">Zoom toplantısı oluşturun ve öğretmen olarak derse katılın.</p>
-      <div class="tools">
-        <input id="canliKonu" type="text" maxlength="200" value="ZarifÇözüm Canlı Ders" aria-label="Canlı ders konusu">
-        <button class="btn" id="canliBaslat" type="button">Canlı dersi başlat</button>
-      </div>
-      <p class="err" id="canliDurum" role="status" aria-live="polite"></p>
-    </section>
-
     <section class="stats" id="stats"></section>
 
     <details class="card" id="anahtarKutu">
@@ -614,6 +622,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       anahtarCiz();
       ciz();
       yonetimCiz();
+      await canliPlanlariYukle();
     } catch (error) {
       console.error('Panel verileri alınamadı:', error);
     }
@@ -673,12 +682,6 @@ td.net{font-weight:700;color:var(--navy-900)}
   }
 
   function yonetimCiz() {
-    $('lessonList').innerHTML = yonetim.dersler.length
-      ? yonetim.dersler.map(lesson => `<article class="data-item">
-          <div><strong>${esc(lesson.title)}</strong><p>${tarihSaat(lesson.startsAt)}</p></div>
-          <a class="btn light" href="${esc(lesson.link)}" target="_blank" rel="noopener noreferrer">Ders bağlantısı</a>
-        </article>`).join('')
-      : '<p class="empty">Henüz planlanmış ders yok.</p>';
     $('quizList').innerHTML = yonetim.quizler.length
       ? yonetim.quizler.map(quiz => `<article class="data-item">
           <div><strong>${esc(quiz.title)}</strong><p>${quiz.soruSayisi} soru · ${tarihSaat(quiz.createdAt)}</p></div>
@@ -700,6 +703,43 @@ td.net{font-weight:700;color:var(--navy-900)}
       : '<tr><td colspan="4" class="empty">Henüz test sonucu yok.</td></tr>';
     window.dispatchEvent(new CustomEvent('teacher-dashboard:data', {detail: yonetim}));
   }
+
+  async function canliPlanlariYukle() {
+    const {dersler} = await api('/api/ogretmen/canli/planlar');
+    $('lessonList').innerHTML = dersler.length
+      ? dersler.map(lesson => {
+          const baslatilabilir = lesson.status === 'scheduled' && new Date(lesson.startsAt) <= new Date();
+          const bekliyor = lesson.status === 'scheduled' && !baslatilabilir;
+          const durum = lesson.status === 'active' ? 'Canlı yayın başladı'
+            : lesson.status === 'completed' ? 'Tamamlandı'
+            : baslatilabilir ? 'Ders saati geldi · Öğrenciler başlatmanızı bekliyor'
+            : `Planlandı · ${tarihSaat(lesson.startsAt)}`;
+          return `<article class="data-item">
+            <div><strong>${esc(lesson.title)}</strong><p>${esc(durum)}</p></div>
+            ${baslatilabilir
+              ? `<button class="btn" type="button" data-start-live-lesson="${esc(lesson.id)}">Canlı dersi başlat</button>`
+              : lesson.status === 'active'
+                ? '<a class="btn light" href="canli.html?host=1">Derse dön</a>'
+                : `<button class="btn light" type="button" disabled>${bekliyor ? 'Ders saatini bekleyin' : 'Ders tamamlandı'}</button>`}
+          </article>`;
+        }).join('')
+      : '<p class="empty">Henüz planlanmış canlı ders yok.</p>';
+  }
+
+  $('lessonList').addEventListener('click', async event => {
+    const button = event.target.closest('[data-start-live-lesson]');
+    if (!button) return;
+    button.disabled = true;
+    button.textContent = 'Ders başlatılıyor…';
+    try {
+      const result = await api(`/api/ogretmen/canli/planlar/${encodeURIComponent(button.dataset.startLiveLesson)}/baslat`, {method: 'POST'});
+      if (result.startUrl) location.href = result.startUrl;
+      else location.href = 'canli.html?host=1';
+    } catch (error) {
+      $('lessonStatus').textContent = 'Canlı ders başlatılamadı: ' + error.message;
+      await canliPlanlariYukle();
+    }
+  });
 
   $('quizList').addEventListener('click', async event => {
     const button = event.target.closest('[data-delete-ai-quiz]');
@@ -732,19 +772,21 @@ td.net{font-weight:700;color:var(--navy-900)}
     $('lessonStatus').textContent = 'Ders kaydediliyor…';
     const startsAt = new Date(`${$('lessonDate').value}T${$('lessonTime').value}`);
     try {
-      if (!Number.isFinite(startsAt.getTime())) throw new Error('Geçerli tarih ve saat seçin.');
-      await api('/api/ogretmen/dersler', {
+      if (!Number.isFinite(startsAt.getTime()) || startsAt <= new Date()) {
+        throw new Error('Gelecekte bir tarih ve saat seçin.');
+      }
+      await api('/api/ogretmen/canli/planla', {
         method: 'POST',
         body: JSON.stringify({
           title: $('lessonTitle').value,
           startsAt: startsAt.toISOString(),
-          link: $('lessonLink').value
+          duration: Number($('lessonDuration').value)
         })
       });
       form.reset();
-      yonetim = await api('/api/ogretmen/yonetim');
-      yonetimCiz();
-      $('lessonStatus').textContent = 'Ders oluşturuldu ve öğrenci panelinde yayınlandı.';
+      $('lessonDuration').value = '60';
+      await canliPlanlariYukle();
+      $('lessonStatus').textContent = 'Canlı ders planlandı; öğrenciler ders saatini kendi panellerinde görebilir.';
     } catch (error) {
       $('lessonStatus').textContent = 'Ders oluşturulamadı: ' + error.message;
     } finally {
@@ -1129,9 +1171,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     }
   });
 
-  $('canliBaslat').addEventListener('click', async () => {
-    const dugme = $('canliBaslat');
-    const durum = $('canliDurum');
+  async function anindaCanliBaslat(dugme, durum) {
     dugme.disabled = true;
     durum.textContent = 'Zoom toplantısı oluşturuluyor…';
     try {
@@ -1144,7 +1184,20 @@ td.net{font-weight:700;color:var(--navy-900)}
       durum.textContent = 'Canlı ders başlatılamadı: ' + err.message;
       dugme.disabled = false;
     }
-  });
+  }
+
+  $('canliBaslat').addEventListener('click', event =>
+    anindaCanliBaslat(event.currentTarget, $('canliDurum')));
+  $('sidebarQuickLive').addEventListener('click', event =>
+    anindaCanliBaslat(event.currentTarget, $('sidebarLiveStatus')));
+
+  const bugun = new Date();
+  $('lessonDate').min = `${bugun.getFullYear()}-${pad(bugun.getMonth() + 1)}-${pad(bugun.getDate())}`;
+  setInterval(() => {
+    if (!$('teacherSidebar').hidden) canliPlanlariYukle().catch(error => {
+      $('lessonStatus').textContent = 'Canlı ders listesi yenilenemedi: ' + error.message;
+    });
+  }, 30000);
 
   // ---- Sınav seçici ----
   function sinavListesi() {
