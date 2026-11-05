@@ -40,9 +40,6 @@ const ZOOM_ACCOUNT_ID = String(process.env.ZOOM_ACCOUNT_ID || '').trim();
 const ZOOM_CLIENT_ID = String(process.env.ZOOM_CLIENT_ID || '').trim();
 const ZOOM_CLIENT_SECRET = String(process.env.ZOOM_CLIENT_SECRET || '').trim();
 const ZOOM_HOST_USER_ID = String(process.env.ZOOM_HOST_USER_ID || '').trim();
-const ZOOM_MEETING_SDK_CLIENT_ID = String(process.env.ZOOM_MEETING_SDK_CLIENT_ID || '').trim();
-const ZOOM_MEETING_SDK_CLIENT_SECRET = String(process.env.ZOOM_MEETING_SDK_CLIENT_SECRET || '').trim();
-
 if (!MONGODB_URI) {
   console.error('❌ .env dosyasında MONGODB_URI bulunamadı.');
   process.exit(1);
@@ -364,31 +361,6 @@ async function zoomApiIstegiYap(belirteci, method, yol, govde) {
   return veri;
 }
 
-function zoomImzasiOlustur(toplantiNo, rol) {
-  zoomAyarlariniKontrolEt([
-    { ad: 'ZOOM_MEETING_SDK_CLIENT_ID', deger: ZOOM_MEETING_SDK_CLIENT_ID },
-    { ad: 'ZOOM_MEETING_SDK_CLIENT_SECRET', deger: ZOOM_MEETING_SDK_CLIENT_SECRET }
-  ]);
-
-  const iat = Math.floor(Date.now() / 1000) - 30;
-  const exp = iat + 60 * 60 * 2;
-  const baslik = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
-  const icerik = Buffer.from(JSON.stringify({
-    appKey: ZOOM_MEETING_SDK_CLIENT_ID,
-    mn: String(toplantiNo),
-    role: rol,
-    iat,
-    exp,
-    tokenExp: exp
-  })).toString('base64url');
-  const imza = crypto
-    .createHmac('sha256', ZOOM_MEETING_SDK_CLIENT_SECRET)
-    .update(`${baslik}.${icerik}`)
-    .digest('base64url');
-
-  return `${baslik}.${icerik}.${imza}`;
-}
-
 async function aktifCanliDersiAl() {
   const ders = await canliDersKoleksiyonu.findOne({ _id: 'aktif' });
   if (!ders) return null;
@@ -398,23 +370,6 @@ async function aktifCanliDersiAl() {
   }
   return ders;
 }
-
-app.get('/api/canli/katilim', ogrenciKontrol, async (req, res) => {
-  try {
-    const ders = await aktifCanliDersiAl();
-    if (!ders) return res.status(404).json({ mesaj: 'Şu anda aktif bir canlı ders yok.' });
-    res.json({
-      sdkKey: ZOOM_MEETING_SDK_CLIENT_ID,
-      signature: zoomImzasiOlustur(ders.meetingNumber, 0),
-      meetingNumber: ders.meetingNumber,
-      password: ders.password,
-      userName: 'Öğrenci'
-    });
-  } catch (err) {
-    console.error('❌ Zoom öğrenci katılımı hazırlanamadı:', err.message);
-    res.status(err.status || 500).json({ mesaj: err.message });
-  }
-});
 
 app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async (req, res) => {
   try {
@@ -674,49 +629,38 @@ app.post('/api/ogretmen/canli/baslat', canliYoneticiKontrol, async (req, res) =>
       expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000)
     };
     await canliDersKoleksiyonu.updateOne({ _id: 'aktif' }, { $set: ders }, { upsert: true });
-    res.status(201).json({ mesaj: 'Canlı ders oluşturuldu.', ...canliDersOzeti(ders) });
+    res.status(201).json({ mesaj: 'Canlı ders oluşturuldu.', ...canliDersOzeti(ders), startUrl: toplanti.startUrl || '' });
   } catch (err) {
     console.error('❌ Zoom toplantısı oluşturulamadı:', err.message);
     res.status(err.status || 500).json({ mesaj: err.message });
   }
 });
 
+// start_url kısa ömürlüdür; her istekte Zoom'dan taze alınır.
+async function ogretmenBaslatmaBaglantisiAl(ders) {
+  const belirteci = await zoomErisimBelirteciAl();
+  const toplanti = await zoomApiIstegiYap(belirteci, 'GET', `/meetings/${encodeURIComponent(ders.meetingId)}`);
+  return toplanti.start_url || '';
+}
+
 app.get('/api/ogretmen/canli/durum', canliYoneticiKontrol, async (req, res) => {
   try {
     const ders = await aktifCanliDersiAl();
-    res.json({ aktif: Boolean(ders), ...(ders ? canliDersOzeti(ders) : {}) });
+    if (!ders) return res.json({ aktif: false });
+    res.json({ aktif: true, ...canliDersOzeti(ders), startUrl: await ogretmenBaslatmaBaglantisiAl(ders) });
   } catch (err) {
-    res.status(500).json({ mesaj: err.message });
+    console.error('❌ Zoom durumu alınamadı:', err.message);
+    res.status(err.status || 500).json({ mesaj: err.message });
   }
 });
 
-app.post('/api/ogretmen/canli/katilim', canliYoneticiKontrol, async (req, res) => {
+app.get('/api/canli/katilim', ogrenciKontrol, async (req, res) => {
   try {
-    zoomAyarlariniKontrolEt([
-      { ad: 'ZOOM_HOST_USER_ID', deger: ZOOM_HOST_USER_ID },
-      { ad: 'ZOOM_MEETING_SDK_CLIENT_ID', deger: ZOOM_MEETING_SDK_CLIENT_ID },
-      { ad: 'ZOOM_MEETING_SDK_CLIENT_SECRET', deger: ZOOM_MEETING_SDK_CLIENT_SECRET }
-    ]);
     const ders = await aktifCanliDersiAl();
     if (!ders) return res.status(404).json({ mesaj: 'Şu anda aktif bir canlı ders yok.' });
-
-    const belirteci = await zoomErisimBelirteciAl();
-    const zak = await zoomApiIstegiYap(
-      belirteci,
-      'GET',
-      `/users/${encodeURIComponent(ZOOM_HOST_USER_ID)}/token?type=zak`
-    );
-    res.json({
-      sdkKey: ZOOM_MEETING_SDK_CLIENT_ID,
-      signature: zoomImzasiOlustur(ders.meetingNumber, 1),
-      meetingNumber: ders.meetingNumber,
-      password: ders.password,
-      userName: 'Öğretmen',
-      zak: zak.token
-    });
+    res.json(canliDersOzeti(ders));
   } catch (err) {
-    console.error('❌ Zoom öğretmen katılımı hazırlanamadı:', err.message);
-    res.status(err.status || 500).json({ mesaj: err.message });
+    res.status(500).json({ mesaj: err.message });
   }
 });
 

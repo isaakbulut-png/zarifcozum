@@ -29,7 +29,7 @@
 
     <div class="notice notice-info" id="roomStatus" role="status" aria-live="polite" style="margin-bottom:var(--space-5)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
-      <p>Zoom canlı dersine bağlanılıyor. Tarayıcı kamera ve mikrofon izinleri isteyebilir.</p>
+      <p>Canlı ders bilgisi yükleniyor…</p>
     </div>
 
     <div class="card" id="startPanel" hidden style="margin-bottom:var(--space-5);padding:var(--space-5)">
@@ -51,8 +51,9 @@
       </dl>
     </div>
 
-    <div class="room" id="roomBox" style="overflow:hidden">
-      <iframe id="zoomFrame" title="Zoom canlı ders" allow="camera; microphone; display-capture; fullscreen; autoplay" allowfullscreen style="display:block;width:100%;height:78vh;min-height:560px;border:0;background:#4a2e1a"></iframe>
+    <div class="card" id="roomBox" hidden style="padding:var(--space-5);text-align:center">
+      <p class="muted" style="margin:0 0 14px" id="roomHint"></p>
+      <a class="btn btn-primary" id="openZoom" target="_blank" rel="noopener">Zoom'da aç</a>
     </div>
   </main>
 </div>
@@ -61,13 +62,13 @@
 <script>
 (function () {
   const isHost = new URLSearchParams(location.search).get('host') === '1';
-  const iframe = document.getElementById('zoomFrame');
   const finish = document.getElementById('finishMeeting');
   const status = document.getElementById('roomStatus');
   const setStatus = text => { status.querySelector('p').textContent = text; };
   const startPanel = document.getElementById('startPanel');
   const details = document.getElementById('meetingDetails');
   const roomBox = document.getElementById('roomBox');
+  const openZoom = document.getElementById('openZoom');
   document.getElementById('roomRole').textContent = isHost ? 'Öğretmen' : 'Öğrenci';
 
   async function api(path, options) {
@@ -92,27 +93,46 @@
     details.hidden = false;
   }
 
-  function joinRoom() {
+  function showAction(ders) {
+    const url = isHost ? ders.startUrl : ders.joinUrl;
+    if (!url) { setStatus('Zoom bağlantısı alınamadı. Lütfen sayfayı yenileyin.'); return; }
+    openZoom.href = url;
+    openZoom.textContent = isHost ? "Dersi Zoom'da başlat" : 'Derse katıl';
+    document.getElementById('roomHint').textContent = isHost
+      ? 'Zoom uygulaması veya tarayıcı yeni sekmede açılır; ders sizin hesabınızla başlar.'
+      : 'Zoom yeni sekmede açılır. Ders bilgilerini yukarıdan görebilirsiniz.';
     roomBox.hidden = false;
+    setStatus(isHost ? 'Canlı ders hazır. Zoom’da başlatabilirsiniz.' : 'Canlı ders aktif. Katılmak için butona basın.');
+  }
+
+  function joinRoom(ders) {
     startPanel.hidden = true;
     finish.hidden = false;
-    setStatus('Zoom canlı dersine bağlanılıyor. Tarayıcı kamera ve mikrofon izinleri isteyebilir.');
-    iframe.src = 'zoom-room.html?role=host';
+    showDetails(ders);
+    showAction(ders);
+    if (ders.startUrl) window.open(ders.startUrl, '_blank', 'noopener');
   }
 
   if (!isHost) {
-    iframe.src = 'zoom-room.html?role=student';
+    (async () => {
+      try {
+        const ders = await api('/api/canli/katilim');
+        showDetails(ders);
+        showAction(ders);
+      } catch (error) {
+        setStatus(error.message);
+      }
+    })();
   } else {
-    roomBox.hidden = true;
     (async () => {
       try {
         const durum = await api('/api/ogretmen/canli/durum');
-        if (durum.aktif) { showDetails(durum); joinRoom(); return; }
+        if (durum.aktif) { finish.hidden = false; showDetails(durum); showAction(durum); return; }
+        setStatus('Aktif canlı ders yok. Konuyu yazıp dersi başlatabilirsiniz.');
       } catch (error) {
         setStatus('Canlı ders durumu alınamadı: ' + error.message);
       }
       startPanel.hidden = false;
-      if (!status.textContent.includes('alınamadı')) setStatus('Aktif canlı ders yok. Konuyu yazıp dersi başlatabilirsiniz.');
     })();
 
     document.getElementById('startMeeting').addEventListener('click', async event => {
@@ -130,10 +150,9 @@
           });
         } catch (error) {
           if (error.status !== 409) throw error;
-          ders = error.data;
+          ders = await api('/api/ogretmen/canli/durum');
         }
-        showDetails(ders);
-        joinRoom();
+        joinRoom(ders);
       } catch (error) {
         setStatus('Canlı ders başlatılamadı: ' + error.message);
         button.disabled = false;
@@ -144,7 +163,6 @@
       finish.disabled = true;
       try {
         await api('/api/ogretmen/canli/sonlandir', { method: 'POST' });
-        iframe.src = 'about:blank';
         roomBox.hidden = true;
         details.hidden = true;
         finish.hidden = true;
