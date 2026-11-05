@@ -48,6 +48,12 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: 'student'
   },
+  adminRole: {
+    type: String,
+    enum: ['superadmin', 'editor', 'support', null],
+    default: null,
+    index: true
+  },
   subscriptionStatus: {
     type: String,
     enum: ['free', 'active', 'expired'],

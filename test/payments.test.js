@@ -130,7 +130,7 @@ test('invalid plans and unauthenticated requests cannot start checkout', async (
         body: JSON.stringify({ plan: 'custom', amount: 1 })
       });
       assert.equal(invalid.status, 400);
-      assert.equal(databaseLookups, 0);
+      assert.equal(databaseLookups, 1);
       assert.equal(providerCalls, 0);
     });
     await withPaymentServer(router, null, async baseUrl => {

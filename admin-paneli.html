@@ -63,39 +63,40 @@
     .settings-grid label{display:grid;gap:6px;color:#6a5242;font-size:.9rem}
     .toggle-list{display:grid;gap:12px;margin-top:18px}
     .toggle-list label{display:flex;align-items:center;gap:10px;color:#523520}
+    .rbac-loading{visibility:hidden}
     .toggle-list input{width:18px;height:18px}
     [hidden]{display:none!important}
     @media (max-width:820px){body{grid-template-columns:1fr}aside{position:static;height:auto}.logout{margin-top:16px}}
   </style>
 </head>
-<body>
+<body class="rbac-loading">
   <aside>
     <h1>ZarifÇözüm</h1>
     <p class="sub">Yönetim Paneli</p>
 
-    <div class="nav-title">GENEL</div>
-    <button class="nav-btn" type="button" data-view="overview" aria-current="page">Genel Bakış</button>
-    <button class="nav-btn" type="button" data-view="users">Kullanıcılar</button>
-    <button class="nav-btn" type="button" data-view="payments">Ödemeler</button>
-    <button class="nav-btn" type="button" data-view="announcements">Duyurular</button>
+    <div class="nav-title" data-admin-roles="superadmin,support">GENEL</div>
+    <button class="nav-btn" type="button" data-view="overview" data-admin-roles="superadmin,support" aria-current="page">Genel Bakış</button>
+    <button class="nav-btn" type="button" data-view="users" data-admin-roles="superadmin,support">Kullanıcılar</button>
+    <button class="nav-btn" type="button" data-view="payments" data-admin-roles="superadmin">Ödemeler / Abonelikler</button>
+    <button class="nav-btn" type="button" data-view="announcements" data-admin-roles="superadmin">Duyurular</button>
 
-    <div class="nav-title">EĞİTİM</div>
-    <a class="nav-btn" href="/ogretmen-paneli.html#image-questions" style="display:block;text-decoration:none">Soru Ekle / Resim Yükle / Deneme</a>
-    <button class="nav-btn" type="button" disabled>Dersler ve Canlı Ders <span class="soon">YAKINDA</span></button>
-    <button class="nav-btn" type="button" disabled>Konu Anlatımları <span class="soon">YAKINDA</span></button>
-    <button class="nav-btn" type="button" disabled>Testler ve Quizler <span class="soon">YAKINDA</span></button>
-    <button class="nav-btn" type="button" disabled>Deneme Sınavları <span class="soon">YAKINDA</span></button>
-    <button class="nav-btn" type="button" disabled>Yapay Zekâ İçerikleri <span class="soon">YAKINDA</span></button>
+    <div class="nav-title" data-admin-roles="superadmin,editor">EĞİTİM</div>
+    <a class="nav-btn" data-admin-roles="superadmin,editor" href="/ogretmen-paneli.html#image-questions" style="display:block;text-decoration:none">Soru Ekle / Resim Yükle</a>
+    <a class="nav-btn" data-admin-roles="superadmin,editor" href="/ogretmen-paneli.html#lessons" style="display:block;text-decoration:none">Dersler ve Canlı Ders</a>
+    <button class="nav-btn" type="button" data-view="education-lessons" data-admin-roles="superadmin,editor">Konu Anlatımları</button>
+    <button class="nav-btn" type="button" data-view="education-quizzes" data-admin-roles="superadmin,editor">Testler ve Quizler</button>
+    <button class="nav-btn" type="button" data-view="education-exams" data-admin-roles="superadmin,editor">Deneme Sınavları</button>
+    <a class="nav-btn" data-admin-roles="superadmin,editor" href="/ogretmen-paneli.html#ai-question-wizard" style="display:block;text-decoration:none">Yapay Zekâ İçerikleri</a>
 
-    <div class="nav-title">İŞLETME</div>
-    <button class="nav-btn" type="button" disabled>Abonelikler ve Paketler <span class="soon">YAKINDA</span></button>
-    <button class="nav-btn" type="button" disabled>Raporlar ve Analitik <span class="soon">YAKINDA</span></button>
-    <button class="nav-btn" type="button" disabled>Destek Talepleri <span class="soon">YAKINDA</span></button>
+    <div class="nav-title" data-admin-roles="superadmin,support">İŞLETME</div>
+    <button class="nav-btn" type="button" data-view="payments" data-admin-roles="superadmin">Abonelikler ve Paketler</button>
+    <button class="nav-btn" type="button" data-view="overview" data-admin-roles="superadmin">Raporlar ve Analitik</button>
+    <button class="nav-btn" type="button" data-view="support-tickets" data-admin-roles="superadmin,support">Destek Talepleri</button>
 
-    <div class="nav-title">SİSTEM</div>
-    <button class="nav-btn" type="button" data-view="settings">Ziyaretçi / Freemium Ayarları</button>
-    <button class="nav-btn" type="button" disabled>Güvenlik ve Kayıtlar <span class="soon">YAKINDA</span></button>
-    <button class="nav-btn" type="button" disabled>Yedekleme <span class="soon">YAKINDA</span></button>
+    <div class="nav-title" data-admin-roles="superadmin">SİSTEM</div>
+    <button class="nav-btn" type="button" data-view="settings" data-admin-roles="superadmin">Site Ayarları (Freemium)</button>
+    <button class="nav-btn" type="button" data-view="logs" data-admin-roles="superadmin">Güvenlik ve Kayıtlar</button>
+    <button class="nav-btn" type="button" data-admin-roles="superadmin" disabled>Yedekleme</button>
 
     <button class="nav-btn logout" type="button" id="logoutButton">Çıkış yap</button>
   </aside>
@@ -122,12 +123,10 @@
             <option value="admin">Yönetici</option>
           </select>
           <button class="btn primary" type="button" id="userSearchButton">Ara</button>
-          <button class="btn" type="button" disabled title="Yakında">Yeni kullanıcı ekle</button>
-          <button class="btn" type="button" disabled title="Yakında">Dışa aktar</button>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Ad</th><th>E-posta</th><th>Rol</th><th>Abonelik</th><th>Kayıt tarihi</th><th>İşlemler</th></tr></thead>
+            <thead><tr><th>Ad</th><th>E-posta</th><th>Hesap rolü</th><th>Yönetim rolü</th><th>Abonelik</th><th>Kayıt tarihi</th><th>İşlemler</th></tr></thead>
             <tbody id="usersBody"></tbody>
           </table>
         </div>
@@ -149,8 +148,6 @@
             <option value="pending">Beklemede</option>
             <option value="failed">Başarısız</option>
           </select>
-          <button class="btn" type="button" disabled title="Yakında">İade başlat</button>
-          <button class="btn" type="button" disabled title="Yakında">Dışa aktar</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -169,7 +166,6 @@
           <textarea id="announcementText" maxlength="1000" placeholder="Duyuru metni (en fazla 1000 karakter)" required></textarea>
           <div class="toolbar" style="margin-top:10px">
             <button class="btn primary" type="submit">Yayınla</button>
-            <button class="btn" type="button" disabled title="Yakında">Zamanlanmış duyuru</button>
           </div>
           <p class="msg" id="announcementMsg" role="alert"></p>
         </form>
@@ -206,19 +202,85 @@
         <p class="msg" id="visitorSettingsMsg" role="alert"></p>
       </form>
     </section>
+
+    <section id="view-education-lessons" hidden>
+      <div class="panel" style="margin-top:0">
+        <h3>Konu anlatımları</h3>
+        <p><a class="btn" href="/ogretmen-paneli.html#lessons">Ders / içerik araçlarını aç</a></p>
+        <div class="table-wrap">
+          <table><thead><tr><th>Sınıf</th><th>Konu</th><th>Oluşturulma</th></tr></thead><tbody id="lessonsBody"></tbody></table>
+        </div>
+        <p class="msg" id="lessonsMsg" role="alert"></p>
+      </div>
+    </section>
+
+    <section id="view-education-quizzes" hidden>
+      <div class="panel" style="margin-top:0">
+        <h3>Testler ve quizler</h3>
+        <p><a class="btn" href="/ogretmen-paneli.html#quiz-builder">Test oluşturma araçlarını aç</a></p>
+        <div class="table-wrap">
+          <table><thead><tr><th>Başlık</th><th>Tür</th><th>Soru</th><th>Durum</th><th>Oluşturulma</th></tr></thead><tbody id="quizzesBody"></tbody></table>
+        </div>
+        <p class="msg" id="quizzesMsg" role="alert"></p>
+      </div>
+    </section>
+
+    <section id="view-education-exams" hidden>
+      <div class="panel" style="margin-top:0">
+        <h3>Deneme sınavları</h3>
+        <div class="table-wrap">
+          <table><thead><tr><th>Başlık</th><th>Soru</th><th>Yayın</th><th>Oluşturulma</th></tr></thead><tbody id="examsBody"></tbody></table>
+        </div>
+        <p class="msg" id="examsMsg" role="alert"></p>
+      </div>
+    </section>
+
+    <section id="view-support-tickets" hidden>
+      <div class="panel" style="margin-top:0">
+        <h3>Destek talepleri</h3>
+        <div class="table-wrap">
+          <table><thead><tr><th>Konu</th><th>Gönderen</th><th>Durum</th><th>Mesaj</th><th>Tarih</th></tr></thead><tbody id="ticketsBody"></tbody></table>
+        </div>
+        <p class="msg" id="ticketsMsg" role="alert"></p>
+      </div>
+    </section>
+
+    <section id="view-logs" hidden>
+      <div class="panel" style="margin-top:0">
+        <h3>Yönetim işlem kayıtları</h3>
+        <div class="table-wrap">
+          <table><thead><tr><th>Yönetici</th><th>İşlem</th><th>Kayıt</th><th>Detay</th><th>Tarih</th></tr></thead><tbody id="logsBody"></tbody></table>
+        </div>
+        <p class="msg" id="logsMsg" role="alert"></p>
+      </div>
+    </section>
   </main>
 
   <script>
     (() => {
       const $ = id => document.getElementById(id);
-      const titles = { overview: 'Genel Bakış', users: 'Kullanıcılar', payments: 'Ödemeler', announcements: 'Duyurular', settings: 'Ziyaretçi / Freemium Ayarları' };
+      const titles = {
+        overview: 'Genel Bakış', users: 'Kullanıcılar', payments: 'Ödemeler / Abonelikler',
+        announcements: 'Duyurular', settings: 'Site Ayarları', logs: 'Güvenlik ve Kayıtlar',
+        'education-lessons': 'Konu Anlatımları', 'education-quizzes': 'Testler ve Quizler',
+        'education-exams': 'Deneme Sınavları', 'support-tickets': 'Destek Talepleri'
+      };
       const roleNames = { student: 'Öğrenci', teacher: 'Öğretmen', admin: 'Yönetici' };
+      const adminRoleNames = { superadmin: 'Süper Admin', editor: 'Editör / Öğretmen', support: 'Destek Personeli' };
       const subNames = { free: 'Ücretsiz', active: 'Aktif', expired: 'Süresi doldu' };
       const payNames = { paid: ['Ödendi', 'ok'], pending: ['Beklemede', 'warn'], failed: ['Başarısız', 'bad'] };
       const planNames = { monthly: 'Aylık', yearly: 'Yıllık' };
-      const loaders = { overview: loadOverview, users: loadUsers, payments: loadPayments, announcements: loadAnnouncements, settings: loadVisitorSettings };
+      const loaders = {
+        overview: loadOverview, users: loadUsers, payments: loadPayments,
+        announcements: loadAnnouncements, settings: loadVisitorSettings,
+        logs: loadLogs, 'education-lessons': loadLessons,
+        'education-quizzes': loadQuizzes, 'education-exams': loadExams,
+        'support-tickets': loadTickets
+      };
       let page = 1;
       let totalPages = 1;
+      let activeAdminRole = '';
+      let activeAdminId = '';
 
       async function api(url, options = {}) {
         const response = await fetch(url, {
@@ -226,7 +288,7 @@
           ...options,
           headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
         });
-        if (response.status === 401 || response.status === 403) {
+        if (response.status === 401) {
           window.location.assign('/yonetim');
           throw new Error('Oturum sona erdi.');
         }
@@ -263,6 +325,7 @@
       }
 
       function showView(name) {
+        if (!titles[name]) return;
         for (const key of Object.keys(titles)) $(`view-${key}`).hidden = key !== name;
         document.querySelectorAll('[data-view]').forEach(button => {
           if (button.dataset.view === name) button.setAttribute('aria-current', 'page');
@@ -276,11 +339,12 @@
         $('overviewMsg').textContent = '';
         try {
           const data = await api('/api/admin/overview');
-          const items = [
-            ['Öğrenci', data.students], ['Öğretmen', data.teachers], ['Yönetici', data.admins],
-            ['Aktif abonelik', data.activeSubs], ['Başarılı ödeme', data.paidPayments],
-            ['Bekleyen ödeme', data.pendingPayments], ['Duyuru', data.announcements]
-          ];
+          const labels = {
+            students: 'Öğrenci', teachers: 'Öğretmen', admins: 'Yönetici',
+            activeSubs: 'Aktif abonelik', paidPayments: 'Başarılı ödeme',
+            pendingPayments: 'Bekleyen ödeme', announcements: 'Duyuru'
+          };
+          const items = Object.entries(data).map(([key, value]) => [labels[key] || key, value]);
           $('stats').replaceChildren(...items.map(([label, value]) => {
             const box = document.createElement('div');
             box.className = 'stat';
@@ -305,25 +369,45 @@
           $('pageInfo').textContent = `Sayfa ${data.page} / ${totalPages} · ${data.total} kayıt`;
           $('prevPage').disabled = data.page <= 1;
           $('nextPage').disabled = data.page >= totalPages;
-          if (!data.users.length) return emptyRow($('usersBody'), 6, 'Kullanıcı bulunamadı.');
+          if (!data.users.length) return emptyRow($('usersBody'), 7, 'Kullanıcı bulunamadı.');
           $('usersBody').replaceChildren(...data.users.map(user => {
             const tr = document.createElement('tr');
             cell(tr, user.name);
             cell(tr, user.email);
             cell(tr, roleNames[user.role] || user.role, user.role === 'admin' ? 'warn' : '');
+            const roleCell = cell(tr, adminRoleNames[user.adminRole] || '—');
+            if (activeAdminRole === 'superadmin' && user.id !== activeAdminId && ['admin', 'teacher'].includes(user.role)) {
+              const selector = document.createElement('select');
+              selector.setAttribute('aria-label', `${user.name} yönetim rolü`);
+              const placeholder = document.createElement('option');
+              placeholder.value = '';
+              placeholder.textContent = 'Rol ata...';
+              selector.append(placeholder);
+              for (const [value, label] of Object.entries(adminRoleNames)) {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = label;
+                selector.append(option);
+              }
+              selector.value = user.adminRole || '';
+              selector.addEventListener('change', async () => {
+                if (!selector.value) return;
+                try {
+                  await api(`/api/admin/users/${encodeURIComponent(user.id)}/admin-role`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ adminRole: selector.value })
+                  });
+                  loadUsers();
+                } catch (error) {
+                  $('usersMsg').textContent = error.message;
+                  loadUsers();
+                }
+              });
+              roleCell.replaceChildren(selector);
+            }
             cell(tr, subNames[user.subscriptionStatus] || '—', user.subscriptionStatus === 'active' ? 'ok' : '');
             cell(tr, fmtDate(user.createdAt));
-            const actions = cell(tr, '');
-            for (const label of ['Düzenle', 'Askıya al', 'Sil']) {
-              const button = document.createElement('button');
-              button.type = 'button';
-              button.className = 'btn sm';
-              button.textContent = label;
-              button.disabled = true;
-              button.title = 'Yakında';
-              button.style.marginRight = '6px';
-              actions.append(button);
-            }
+            cell(tr, '');
             return tr;
           }));
         } catch (error) { $('usersMsg').textContent = error.message; }
@@ -404,6 +488,93 @@
         } catch (error) { message.textContent = error.message; }
       }
 
+      async function loadLessons() {
+        const message = $('lessonsMsg');
+        message.textContent = '';
+        try {
+          const data = await api('/api/admin/education/lessons');
+          if (!data.lessons.length) return emptyRow($('lessonsBody'), 3, 'Henüz oluşturulmuş konu anlatımı yok.');
+          $('lessonsBody').replaceChildren(...data.lessons.map(lesson => {
+            const row = document.createElement('tr');
+            cell(row, `${lesson.sinif}. sınıf`);
+            cell(row, lesson.konu);
+            cell(row, fmtDate(lesson.createdAt));
+            return row;
+          }));
+        } catch (error) { message.textContent = error.message; }
+      }
+
+      async function loadQuizzes() {
+        const message = $('quizzesMsg');
+        message.textContent = '';
+        try {
+          const data = await api('/api/admin/education/quizzes');
+          if (!data.quizzes.length) return emptyRow($('quizzesBody'), 5, 'Henüz oluşturulmuş test yok.');
+          $('quizzesBody').replaceChildren(...data.quizzes.map(quiz => {
+            const row = document.createElement('tr');
+            cell(row, quiz.title);
+            cell(row, quiz.source === 'ai' ? 'Yapay zekâ' : 'Test');
+            cell(row, quiz.questionCount);
+            cell(row, quiz.published ? 'Yayında' : 'Taslak', quiz.published ? 'ok' : 'warn');
+            cell(row, fmtDate(quiz.createdAt));
+            return row;
+          }));
+        } catch (error) { message.textContent = error.message; }
+      }
+
+      async function loadExams() {
+        const message = $('examsMsg');
+        message.textContent = '';
+        try {
+          const data = await api('/api/denemeler');
+          if (!data.denemeler.length) return emptyRow($('examsBody'), 4, 'Henüz oluşturulmuş deneme sınavı yok.');
+          $('examsBody').replaceChildren(...data.denemeler.map(exam => {
+            const row = document.createElement('tr');
+            cell(row, exam.title);
+            cell(row, exam.soruSayisi);
+            cell(row, exam.published ? 'Yayında' : 'Taslak', exam.published ? 'ok' : 'warn');
+            cell(row, fmtDate(exam.createdAt));
+            return row;
+          }));
+        } catch (error) { message.textContent = error.message; }
+      }
+
+      async function loadTickets() {
+        const message = $('ticketsMsg');
+        message.textContent = '';
+        try {
+          const data = await api('/api/admin/support/tickets');
+          if (!data.tickets.length) return emptyRow($('ticketsBody'), 5, 'Açık destek talebi bulunmuyor.');
+          $('ticketsBody').replaceChildren(...data.tickets.map(ticket => {
+            const row = document.createElement('tr');
+            cell(row, ticket.subject);
+            cell(row, [ticket.name, ticket.email].filter(Boolean).join(' · ') || '—');
+            cell(row, ticket.status);
+            cell(row, ticket.message);
+            cell(row, fmtDate(ticket.createdAt));
+            return row;
+          }));
+        } catch (error) { message.textContent = error.message; }
+      }
+
+      async function loadLogs() {
+        const message = $('logsMsg');
+        message.textContent = '';
+        try {
+          const data = await api('/api/admin/logs');
+          if (!data.logs.length) return emptyRow($('logsBody'), 5, 'Henüz yönetim işlemi kaydedilmemiş.');
+          $('logsBody').replaceChildren(...data.logs.map(log => {
+            const row = document.createElement('tr');
+            cell(row, log.actorName);
+            cell(row, log.action);
+            cell(row, `${log.entityType}${log.entityId ? ` · ${log.entityId}` : ''}`);
+            cell(row, JSON.stringify(log.details || {}));
+            cell(row, fmtDate(log.createdAt));
+            return row;
+          }));
+        } catch (error) { message.textContent = error.message; }
+      }
+
       document.querySelectorAll('[data-view]').forEach(button =>
         button.addEventListener('click', () => showView(button.dataset.view)));
       $('userSearchButton').addEventListener('click', () => { page = 1; loadUsers(); });
@@ -465,12 +636,24 @@
         window.location.assign('/yonetim');
       });
 
-      fetch('/me', { credentials: 'same-origin' })
-        .then(response => response.ok ? response.json() : Promise.reject())
-        .then(data => { $('who').textContent = `${data.user.name} · ${data.user.email}`; })
-        .catch(() => window.location.assign('/yonetim'));
+      async function initializePanel() {
+        try {
+          const data = await api('/api/admin/me');
+          activeAdminRole = data.user.adminRole;
+          activeAdminId = data.user.id;
+          $('who').textContent = `${data.user.name} · ${adminRoleNames[activeAdminRole]}`;
+          document.querySelectorAll('[data-admin-roles]').forEach(element => {
+            element.hidden = !element.dataset.adminRoles.split(',').includes(activeAdminRole);
+          });
+          const firstView = activeAdminRole === 'editor' ? 'education-quizzes' : 'overview';
+          document.body.classList.remove('rbac-loading');
+          showView(firstView);
+        } catch {
+          window.location.assign('/yonetim');
+        }
+      }
 
-      loadOverview();
+      initializePanel();
     })();
   </script>
   <script src="/assets/breadcrumb.js"></script>

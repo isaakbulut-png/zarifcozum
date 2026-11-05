@@ -15,7 +15,7 @@ function resimTuru(buffer) {
   return null;
 }
 
-function createSorularRouter({ requireStaff, yukleyici = cloudinaryYukleyici }) {
+function createSorularRouter({ requireStaff, yukleyici = cloudinaryYukleyici, AdminLog }) {
   const router = express.Router();
   router.use(requireStaff);
 
@@ -110,6 +110,26 @@ function createSorularRouter({ requireStaff, yukleyici = cloudinaryYukleyici }) 
     } catch (err) {
       console.error('❌ Cevap kaydedilemedi:', err);
       res.status(500).json({ mesaj: 'Cevap kaydedilemedi.' });
+    }
+  });
+
+  router.delete('/:id', async (req, res) => {
+    try {
+      if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz soru numarası.' });
+      const soru = await Soru.findByIdAndDelete(req.params.id).lean();
+      if (!soru) return res.status(404).json({ mesaj: 'Soru bulunamadı.' });
+      await AdminLog.create({
+        actorId: req.session.user.id,
+        actorName: req.session.user.name || 'Yönetici',
+        action: 'question.deleted',
+        entityType: 'question',
+        entityId: soru._id.toString(),
+        details: { ders: soru.ders, imageFile: soru.imageFile }
+      });
+      res.json({ mesaj: 'Soru silindi.' });
+    } catch (error) {
+      console.error('Soru silinemedi veya işlem kaydı oluşturulamadı:', error);
+      res.status(500).json({ mesaj: 'Soru silinemedi veya işlem kaydı oluşturulamadı.' });
     }
   });
 

@@ -65,6 +65,9 @@ test('password change requires a session, verifies an existing password and upda
   });
 
   const user = {
+    _id: { toString: () => 'student-1' },
+    name: 'Student',
+    role: 'student',
     passwordHash: 'old-hash',
     resetPasswordToken: 'old-token',
     resetPasswordExpires: new Date(),
@@ -99,6 +102,9 @@ test('password change requires a session, verifies an existing password and upda
 
 test('Google-only accounts can set a password from their authenticated session', async () => {
   const user = {
+    _id: { toString: () => 'google-student-1' },
+    name: 'Student',
+    role: 'student',
     passwordHash: undefined,
     setPassword: async value => { user.passwordHash = `hash:${value}`; },
     save: async () => {}

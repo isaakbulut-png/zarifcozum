@@ -91,7 +91,7 @@ function soruSemasi() {
   };
 }
 
-function createAIRouter({ getQuizCollection, requireRole }) {
+function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
   const router = express.Router();
 
   router.get('/konular', requireRole('teacher'), (req, res) => {
@@ -298,10 +298,18 @@ function createAIRouter({ getQuizCollection, requireRole }) {
       if (result.deletedCount === 0) {
         return res.status(404).json({ mesaj: 'Yayınlanmış yapay zeka sorusu bulunamadı.' });
       }
+      await AdminLog.create({
+        actorId: req.session.user.id,
+        actorName: req.session.user.name || 'Öğretmen',
+        action: 'question.deleted',
+        entityType: 'ai_question',
+        entityId: req.params.id,
+        details: { source: 'ai' }
+      });
       res.json({ mesaj: 'Soru veritabanından silindi.' });
     } catch (error) {
-      console.error('Yapay zeka sorusu silinemedi:', error);
-      res.status(500).json({ mesaj: 'Soru silinemedi. Lütfen yeniden deneyin.' });
+      console.error('Yapay zeka sorusu silinemedi veya işlem kaydı oluşturulamadı:', error);
+      res.status(500).json({ mesaj: 'Soru silinemedi veya işlem kaydı oluşturulamadı.' });
     }
   });
 
