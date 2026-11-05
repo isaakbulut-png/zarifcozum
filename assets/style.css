@@ -287,6 +287,8 @@ section.block { padding-block: clamp(var(--space-12), 7vw, var(--space-24)); }
 .side-nav { display: grid; gap: 2px; }
 .side-cta { display: block; margin: 0 0 var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--color-primary); color: #fff; font-size: var(--text-sm); font-weight: 700; text-align: center; line-height: 1.3; box-shadow: 0 4px 14px rgba(0,0,0,.15); transition: filter var(--transition); }
 .side-cta:hover { filter: brightness(1.1); }
+.side-cta-live { background: var(--color-live); }
+.side-cta-live::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: var(--space-2); border-radius: 50%; background: #fff; vertical-align: 1px; animation: pulse 1.4s infinite; }
 .side-nav a { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight: 500; color: var(--color-text-muted); transition: background var(--transition), color var(--transition); }
 .side-nav a svg { width: 18px; height: 18px; flex: none; }
 .side-nav a:hover { background: var(--color-surface-offset); color: var(--color-text); }
