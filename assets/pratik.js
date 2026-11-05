@@ -195,11 +195,18 @@
       if (!durum) return el('div');
       if (durum.uye) return el('div', { class: 'zp-serit zp-uye' }, 'Üyelik aktif: sınırsız erişim');
       if (durum.limitYok) return el('div', { class: 'zp-serit zp-uye' }, 'Öğrenci hesabı: sınırsız erişim');
-      const kalan = durum.ozellikler[mod].kalan;
+      const soruKalan = durum.ziyaretciHaklari.soru.kalan;
+      if (mod === 'konu') {
+        const kalanKonu = durum.ozellikler.konu.kalan;
+        return el('div', { class: 'zp-serit' },
+          durum.ziyaretciHaklari.ozetGorebilir
+            ? `Ücretsiz deneme: konu özetleri açık; ${kalanKonu} konu hakkın ve ${soruKalan} soru hakkın kaldı.`
+            : 'Konu özetlerini görmek için üye girişi yap.');
+      }
       return el('div', { class: 'zp-serit' },
-        kalan > 0
-          ? `Ücretsiz deneme: ${kalan} konu hakkın kaldı (her konuda ${durum.limitler.soru} soru).`
-          : 'Ücretsiz deneme hakkın doldu.');
+        soruKalan > 0
+          ? `Ücretsiz deneme sürümü: ${soruKalan} soru hakkın kaldı.`
+          : 'Soru hakkın doldu; devam etmek için üye girişi yap.');
     }
 
     function paywall(hata) {
@@ -361,6 +368,13 @@
     }
 
     async function anlatimAc(konu) {
+      if (durum && !durum.limitYok && !durum.ziyaretciHaklari.ozetGorebilir) {
+        const hata = new Error('Konu özetlerini görmek için üye girişi yapın.');
+        hata.kod = 'UYELIK_GEREKLI';
+        hata.girisYapti = false;
+        hata.yonlendir = durum.uyelikAdresi;
+        return paywall(hata);
+      }
       yukleniyor('Konu anlatımı hazırlanıyor…');
       try {
         const veri = await api('/konu', { sinif, konu });
@@ -413,10 +427,22 @@
     }
 
     async function sorularAc(konu) {
+      if (durum && !durum.limitYok) {
+        const ozelIzin = durum.ozellikler[mod]?.acik;
+        const soruKalan = durum.ziyaretciHaklari.soru.kalan;
+        if (!ozelIzin || soruKalan === 0) {
+          const hata = new Error('Sınırınıza ulaştınız, devam etmek için lütfen üye girişi yapın.');
+          hata.kod = 'UYELIK_GEREKLI';
+          hata.girisYapti = false;
+          hata.yonlendir = durum.uyelikAdresi;
+          return paywall(hata);
+        }
+      }
       yukleniyor('Sorular hazırlanıyor…');
       try {
         const veri = await api('/sorular', { ozellik: mod, sinif, konu });
         if (durum && !veri.limitYok) durum.ozellikler[mod].kalan = veri.kalan;
+        if (durum && !veri.limitYok) durum.ziyaretciHaklari.soru.kalan = veri.soruHakki;
         if (mod === 'asistan') asistanCalistir(veri.sorular, konu);
         else if (mod === 'test') pratikCalistir(veri.sorular, konu);
         else testCalistir(veri.sorular, konu);

@@ -12,16 +12,30 @@ function sahteKullanim() {
   const anahtar = f => `${f.key}|${f.ozellik}`;
   return {
     async findOne(f) { return kayitlar.get(anahtar(f)) || null; },
-    async updateOne(f, g) {
+    async updateOne(f, g, options = {}) {
       const mevcut = kayitlar.get(anahtar(f));
-      if (!mevcut) {
-        kayitlar.set(anahtar(f), { key: f.key, ozellik: f.ozellik, konular: [g.$push.konular] });
-        return;
+      if (g.$inc) {
+        const artim = g.$inc.soruSayisi;
+        const sinir = f.soruSayisi.$lte;
+        if (mevcut && mevcut.soruSayisi > sinir) throw Object.assign(new Error('limit'), { code: 11000 });
+        if (mevcut) mevcut.soruSayisi += artim;
+        else kayitlar.set(anahtar(f), { ...g.$setOnInsert, soruSayisi: artim });
+        return { matchedCount: mevcut ? 1 : 0, upsertedCount: mevcut ? 0 : 1 };
       }
-      const dolu = mevcut.konular.length >= 3;
+      if (!mevcut) {
+        if (options.upsert) {
+          kayitlar.set(anahtar(f), { ...g.$setOnInsert, key: f.key, ozellik: f.ozellik, konular: [g.$push.konular] });
+          return { upsertedCount: 1 };
+        }
+        return { matchedCount: 0, upsertedCount: 0 };
+      }
+      const konuIndeksi = Object.keys(f).find(key => /^konular\.\d+$/.test(key));
+      const konuSiniri = konuIndeksi ? Number(konuIndeksi.split('.')[1]) + 1 : 3;
+      const dolu = mevcut.konular.length >= konuSiniri;
       const var_ = mevcut.konular.some(k => k.sinif === g.$push.konular.sinif && k.konu === g.$push.konular.konu);
       if (dolu || var_) throw Object.assign(new Error('dup'), { code: 11000 });
       mevcut.konular.push(g.$push.konular);
+      return { matchedCount: 1, upsertedCount: 0 };
     }
   };
 }
@@ -37,6 +51,7 @@ function sahteIcerik() {
 async function sunucu({
   uye = false,
   kullanici = null,
+  ziyaretciHaklari,
   mufredatKonusuVarMi = async () => false,
   konuUret = async () => ({ ozet: 'o', kavramlar: ['k'], ornekSoru: 'q', ornekCozum: 'c', sikHatalar: ['h'] })
 } = {}) {
@@ -49,6 +64,7 @@ async function sunucu({
     getContentCollection: (() => { const k = sahteIcerik(); return () => k; })(),
     mufredat,
     uyeMi: async () => uye,
+    ziyaretciHaklari,
     mufredatKonusuVarMi,
     soruUret: async ({ adet }) => {
       uretimSayisi += 1;
@@ -73,22 +89,45 @@ async function sunucu({
   return { istek, kapat: () => srv.close(), uretim: () => uretimSayisi };
 }
 
-test('ücretsiz kullanıcı özellik başına 3 konu ve 5 soru alır, 4. konuda üyeliğe yönlendirilir', async () => {
+test('ziyaretçi 3 soru hakkına sahiptir ve tam kazanım testini başlatamaz', async () => {
   const s = await sunucu();
   try {
-    for (let i = 0; i < 3; i += 1) {
-      const r = await s.istek('/sorular', { ozellik: 'test', sinif: 6, konu: konular[i] });
-      assert.equal(r.status, 200);
-      assert.equal(r.veri.sorular.length, 5);
-    }
-    const tekrar = await s.istek('/sorular', { ozellik: 'test', sinif: 6, konu: konular[0] });
-    assert.equal(tekrar.status, 200);
-    const dorduncu = await s.istek('/sorular', { ozellik: 'test', sinif: 6, konu: konular[3] });
-    assert.equal(dorduncu.status, 403);
-    assert.equal(dorduncu.veri.kod, 'UYELIK_GEREKLI');
-    assert.equal(dorduncu.veri.yonlendir, '/Paketler.html');
-    const baska = await s.istek('/sorular', { ozellik: 'asistan', sinif: 6, konu: konular[3] });
-    assert.equal(baska.status, 200);
+    const ilkDurum = await s.istek('/durum');
+    assert.equal(ilkDurum.veri.ziyaretciHaklari.soru.kalan, 3);
+    assert.equal(ilkDurum.veri.ziyaretciHaklari.ozetGorebilir, true);
+    assert.equal(ilkDurum.veri.ozellikler.kazanim.acik, false);
+    assert.match(ilkDurum.headers.get('set-cookie'), /Max-Age=2592000/i);
+
+    const pratik = await s.istek('/sorular', { ozellik: 'test', sinif: 6, konu: konular[0] });
+    assert.equal(pratik.status, 200);
+    assert.equal(pratik.veri.sorular.length, 3);
+    assert.equal(pratik.veri.soruHakki, 0);
+
+    const tekrar = await s.istek('/sorular', { ozellik: 'asistan', sinif: 6, konu: konular[1] });
+    assert.equal(tekrar.status, 403);
+    assert.match(tekrar.veri.mesaj, /üye girişi yapın/);
+
+    const kazanim = await s.istek('/sorular', { ozellik: 'kazanim', sinif: 6, konu: konular[1] });
+    assert.equal(kazanim.status, 403);
+    assert.equal(kazanim.veri.kod, 'UYELIK_GEREKLI');
+    assert.equal(kazanim.veri.girisYapti, false);
+    assert.equal(kazanim.veri.yonlendir, '/Paketler.html');
+
+    const sonDurum = await s.istek('/durum');
+    assert.equal(sonDurum.veri.ziyaretciHaklari.soru.kalan, 0);
+  } finally { s.kapat(); }
+});
+
+test('eşzamanlı ziyaretçi istekleri soru hakkı sınırını aşamaz', async () => {
+  const s = await sunucu();
+  try {
+    await s.istek('/durum');
+    const yanitlar = await Promise.all([
+      s.istek('/sorular', { ozellik: 'test', sinif: 6, konu: konular[0] }),
+      s.istek('/sorular', { ozellik: 'asistan', sinif: 6, konu: konular[1] })
+    ]);
+    assert.deepEqual(yanitlar.map(yanit => yanit.status).sort(), [200, 403]);
+    assert.equal((await s.istek('/durum')).veri.ziyaretciHaklari.soru.kalan, 0);
   } finally { s.kapat(); }
 });
 
@@ -109,6 +148,44 @@ test('Pinecone müfredat kazanımları yalnızca eşleşen sınıfta konu anlat�
     assert.equal((await s.istek('/konu', { sinif: 6, konu: pineconeKonusu })).status, 200);
     assert.equal((await s.istek('/konu', { sinif: 7, konu: pineconeKonusu })).status, 400);
     assert.equal((await s.istek('/konu', { sinif: 6, konu: 'Geçersiz kazanım' })).status, 400);
+  } finally { s.kapat(); }
+});
+
+test('ziyaretçi soru hakkı ve tam kazanım testi feature toggle ile değiştirilebilir', async () => {
+  const s = await sunucu({ ziyaretciHaklari: { soru: 1, kazanim: true } });
+  try {
+    const durum = await s.istek('/durum');
+    assert.equal(durum.veri.limitler.soru, 1);
+    assert.equal(durum.veri.ziyaretciHaklari.kazanimTestiAcik, true);
+    assert.equal(durum.veri.ozellikler.kazanim.acik, true);
+
+    const test = await s.istek('/sorular', { ozellik: 'kazanim', sinif: 6, konu: konular[0] });
+    assert.equal(test.status, 200);
+    assert.equal(test.veri.sorular.length, 1);
+    assert.equal(test.veri.soruHakki, 0);
+  } finally { s.kapat(); }
+});
+
+test('ziyaretçi konu özeti erişimi toggle ile kapatılabilir', async () => {
+  const s = await sunucu({ ziyaretciHaklari: { ozetGorebilir: false } });
+  try {
+    const durum = await s.istek('/durum');
+    assert.equal(durum.veri.ozellikler.konu.acik, false);
+    const ozet = await s.istek('/konu', { sinif: 6, konu: konular[0] });
+    assert.equal(ozet.status, 403);
+    assert.equal(ozet.veri.kod, 'UYELIK_GEREKLI');
+  } finally { s.kapat(); }
+});
+
+test('ziyaretçi konu hakkı ayrı olarak ayarlanabilir', async () => {
+  const s = await sunucu({ ziyaretciHaklari: { konu: 1 } });
+  try {
+    const ilkKonu = await s.istek('/konu', { sinif: 6, konu: konular[0] });
+    assert.equal(ilkKonu.status, 200);
+    assert.equal(ilkKonu.veri.kalan, 0);
+
+    const ikinciKonu = await s.istek('/konu', { sinif: 6, konu: konular[1] });
+    assert.equal(ikinciKonu.status, 403);
   } finally { s.kapat(); }
 });
 

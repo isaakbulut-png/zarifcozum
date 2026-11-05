@@ -23,7 +23,7 @@ const { createSorularRouter } = require('./routes/sorular');
 const { createDenemelerRouters } = require('./routes/denemeler');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
-const { createPratikRouter } = require('./routes/pratik');
+const { createPratikRouter, ZIYARETCI_OZET_GOREBILIR } = require('./routes/pratik');
 const { createZoomMeeting } = require('./lib/zoom');
 const { uretSorular } = require('./lib/ai-icerik');
 const { mufredatiYukle } = require('./lib/mufredat');
@@ -113,6 +113,16 @@ app.get('/api/mufredat-konulari', mufredatKonulariLimiter, async (req, res) => {
 
 app.get('/api/mufredat-ozet', mufredatKonulariLimiter, async (req, res) => {
   res.set('Cache-Control', 'no-store');
+  const rol = req.session?.user?.role;
+  const girisYapti = ['student', 'teacher', 'admin'].includes(rol);
+  if (!girisYapti && !ZIYARETCI_OZET_GOREBILIR) {
+    return res.status(403).json({
+      kod: 'UYELIK_GEREKLI',
+      mesaj: 'Konu özetlerini görmek için üye girişi yapın.',
+      yonlendir: '/Paketler.html',
+      girisYapti: false
+    });
+  }
   const grade = Number(req.query.grade);
   const topic = typeof req.query.topic === 'string' ? req.query.topic.trim() : '';
   if (!Number.isInteger(grade) || grade < 5 || grade > 12 || !topic || topic.length > 300) {
@@ -793,6 +803,7 @@ async function baslat() {
   pratikIcerik = client.db(DB_ADI).collection('pratik_icerik');
   await Promise.all([
     pratikKullanim.createIndex({key: 1, ozellik: 1}, {unique: true, name: 'uniq_pratik_usage'}),
+    pratikKullanim.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, name: 'expire_pratik_usage' }),
     pratikIcerik.createIndex({tur: 1, sinif: 1, konu: 1, adet: 1}, {unique: true, name: 'uniq_pratik_content'}),
     calismaKayitlari.createIndex({studentUserId: 1, day: -1}, {name: 'student_study_days'}),
     ogrenciHedefleri.createIndex({studentUserId: 1}, {unique: true, name: 'uniq_student_goal'}),
