@@ -5,6 +5,15 @@ const test = require('node:test');
 const vm = require('node:vm');
 
 const script = fs.readFileSync(path.join(__dirname, '..', 'assets', 'ogretmen-canli.js'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'ogretmen-paneli.html'), 'utf8');
+
+test('the teacher sidebar contains the active lesson controls', () => {
+  const sidebar = html.match(/<aside class="teacher-sidebar"[\s\S]*?<\/aside>/);
+  assert.ok(sidebar);
+  assert.match(sidebar[0], /id="sidebarAktifCanliIslemler" hidden/);
+  assert.match(sidebar[0], /id="sidebarCanliSonlandir"[^>]*>Dersi sonlandır<\/button>/);
+  assert.match(sidebar[0], /href="\/canli\.html\?host=1">Derse dön<\/a>/);
+});
 
 function setup(api, onSonlandir = async () => {}) {
   const window = { confirm: () => true };
@@ -16,8 +25,14 @@ function setup(api, onSonlandir = async () => {}) {
     disabled: false,
     addEventListener(event, callback) { this.click = callback; }
   };
-  const yonetim = window.ogretmenCanliYonetimi({ api, bilgi, islemler, hata, sonlandir, onSonlandir });
-  return { window, bilgi, islemler, hata, sonlandir, yonetim };
+  const sidebar = {
+    bilgi: { textContent: '' }, islemler: { hidden: true }, hata: { textContent: '' },
+    sonlandir: { disabled: false, addEventListener(event, callback) { this.click = callback; } }
+  };
+  const yonetim = window.ogretmenCanliYonetimi({
+    api, gorunumler: [{ bilgi, islemler, hata, sonlandir }, sidebar], onSonlandir
+  });
+  return { window, bilgi, islemler, hata, sonlandir, sidebar, yonetim };
 }
 
 test('active lesson is displayed and can be ended from the teacher panel', async () => {
@@ -32,10 +47,13 @@ test('active lesson is displayed and can be ended from the teacher panel', async
   await state.yonetim.yenile();
   assert.equal(state.islemler.hidden, false);
   assert.match(state.bilgi.textContent, /Matematik.*123/);
-  await state.sonlandir.click();
+  assert.equal(state.sidebar.islemler.hidden, false);
+  assert.match(state.sidebar.bilgi.textContent, /Matematik.*123/);
+  await state.sidebar.sonlandir.click();
   assert.equal(calls[1].url, '/api/ogretmen/canli/sonlandir');
   assert.equal(calls[1].method, 'POST');
   assert.equal(state.islemler.hidden, true);
+  assert.equal(state.sidebar.islemler.hidden, true);
   assert.equal(state.sonlandir.disabled, false);
   assert.equal(refreshed, true);
 });
@@ -56,6 +74,7 @@ test('cancellation and API failures preserve the active lesson controls', async 
   assert.equal(state.islemler.hidden, false);
   assert.equal(state.sonlandir.disabled, false);
   assert.match(state.hata.textContent, /Zoom hatası/);
+  assert.match(state.sidebar.hata.textContent, /Zoom hatası/);
 });
 
 test('summary failure is shown and empty summary hides controls', async () => {

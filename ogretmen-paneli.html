@@ -181,6 +181,12 @@ td.net{font-weight:700;color:var(--navy-900)}
   <a class="teacher-live-cta" href="#lessons">● Canlı Ders Oluştur</a>
   <button class="teacher-live-cta secondary" id="sidebarQuickLive" type="button">● Anında Canlı Ders Başlat</button>
   <p class="teacher-live-status" id="sidebarLiveStatus" role="status" aria-live="polite"></p>
+  <p class="teacher-live-status" id="sidebarAktifCanliBilgi" role="status" aria-live="polite">Canlı ders durumu yükleniyor…</p>
+  <div id="sidebarAktifCanliIslemler" hidden>
+    <a class="teacher-live-cta secondary" href="/canli.html?host=1">Derse dön</a>
+    <button class="teacher-live-cta" id="sidebarCanliSonlandir" type="button">Dersi sonlandır</button>
+  </div>
+  <p class="teacher-live-status" id="sidebarAktifCanliHata" role="status" aria-live="polite"></p>
   <strong>YÖNETİM MENÜSÜ</strong>
   <nav aria-label="Öğretmen paneli bölümleri">
     <a href="#overview" aria-current="page"><span>⌂</span>Ana sayfa</a>
@@ -623,10 +629,12 @@ td.net{font-weight:700;color:var(--navy-900)}
 
   const canliYonetim = window.ogretmenCanliYonetimi({
     api,
-    bilgi: $('aktifCanliBilgi'),
-    islemler: $('aktifCanliIslemler'),
-    hata: $('aktifCanliHata'),
-    sonlandir: $('canliSonlandir'),
+    gorunumler: [
+      { bilgi: $('aktifCanliBilgi'), islemler: $('aktifCanliIslemler'),
+        hata: $('aktifCanliHata'), sonlandir: $('canliSonlandir') },
+      { bilgi: $('sidebarAktifCanliBilgi'), islemler: $('sidebarAktifCanliIslemler'),
+        hata: $('sidebarAktifCanliHata'), sonlandir: $('sidebarCanliSonlandir') }
+    ],
     onSonlandir: () => canliPlanlariYukle()
   });
 
@@ -761,6 +769,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       else location.href = 'canli.html?host=1';
     } catch (error) {
       $('lessonStatus').textContent = 'Canlı ders başlatılamadı: ' + error.message;
+      if (error.status === 409) canliYonetim.yenile();
       await canliPlanlariYukle();
     }
   });
