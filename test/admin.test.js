@@ -1,5 +1,8 @@
 const assert = require('node:assert/strict');
 const express = require('express');
+const fs = require('node:fs/promises');
+const os = require('node:os');
+const path = require('node:path');
 const test = require('node:test');
 const { createAdminRouter } = require('../routes/admin');
 const { DEFAULT_VISITOR_SETTINGS } = require('../models/SystemConfig');
@@ -12,8 +15,10 @@ function fakeQuery(rows) {
   return query;
 }
 
-function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_SETTINGS }) {
+function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_SETTINGS }, options = {}) {
   const filters = [];
+  const homepageAssets = { animation: null, heroImage: null, featureImage: null };
+  const auditLogs = [];
   const User = {
     countDocuments: async () => 3,
     findById: id => ({
@@ -37,10 +42,18 @@ function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_
   };
   const SystemConfig = {
     getVisitorSettings: async () => ({ ...visitorSettings }),
-    saveVisitorSettings: async updates => Object.assign(visitorSettings, updates)
+    saveVisitorSettings: async updates => Object.assign(visitorSettings, updates),
+    getHomepageAssets: async () => ({ ...homepageAssets }),
+    saveHomepageAsset: async (slot, url) => {
+      homepageAssets[slot] = url;
+      return { ...homepageAssets };
+    }
   };
   const AdminLog = {
-    create: async doc => ({ _id: { toString: () => 'log1' }, ...doc }),
+    create: async doc => {
+      auditLogs.push(doc);
+      return { _id: { toString: () => 'log1' }, ...doc };
+    },
     find: () => ({ sort() { return this; }, limit() { return this; }, lean: async () => [] })
   };
   const listCollection = docs => ({
@@ -51,8 +64,10 @@ function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_
   });
   return {
     filters,
+    homepageAssets,
+    auditLogs,
     router: createAdminRouter({
-      User, Payment, SystemConfig, AdminLog,
+      User, Payment, SystemConfig, AdminLog, uploadDir: options.uploadDir,
       getAnnouncementCollection: () => collection,
       getQuizCollection: () => listCollection([]),
       getLessonCollection: () => listCollection([]),
@@ -135,6 +150,63 @@ test('admin can read and update visitor access settings with validation', async 
     assert.equal(settings.fullTestEnabled, true);
     assert.equal(settings.topicLimit, DEFAULT_VISITOR_SETTINGS.topicLimit);
   });
+});
+
+test('superadmin can upload validated homepage images and Lottie animations', async () => {
+  const uploadDir = await fs.mkdtemp(path.join(os.tmpdir(), 'zarifcozum-home-assets-'));
+  const { router, homepageAssets, auditLogs } = buildRouter([], undefined, { uploadDir });
+  const png = await fs.readFile(path.join(__dirname, '..', 'assets', 'brand-mark.png'));
+  const animation = Buffer.from(JSON.stringify({
+    v: '5.12.2', fr: 30, ip: 0, op: 60, w: 250, h: 250, layers: [{ ty: 4 }]
+  }));
+  try {
+    await withServer(router, { id: 'admin', role: 'admin' }, async base => {
+      const upload = (assetType, slot, file, name, mimeType) => {
+        const form = new FormData();
+        form.append('assetType', assetType);
+        form.append('slot', slot);
+        form.append('file', new Blob([file], { type: mimeType }), name);
+        return fetch(`${base}/homepage-assets/upload`, { method: 'POST', body: form });
+      };
+
+      const imageResponse = await upload('image', 'heroImage', png, 'hero.png', 'image/png');
+      assert.equal(imageResponse.status, 200);
+      assert.match(homepageAssets.heroImage, /^\/uploads\/homepage\/[a-f0-9-]+\.png$/);
+      const imageName = path.basename(homepageAssets.heroImage);
+      assert.deepEqual(await fs.readFile(path.join(uploadDir, imageName)), png);
+
+      const animationResponse = await upload(
+        'animation', 'animation', animation, 'math.json', 'application/json'
+      );
+      assert.equal(animationResponse.status, 200);
+      assert.match(homepageAssets.animation, /^\/uploads\/homepage\/[a-f0-9-]+\.json$/);
+
+      assert.equal((await upload('image', 'heroImage', 'not an image', 'fake.png', 'image/png')).status, 400);
+      assert.equal((await upload('image', 'heroImage', png.subarray(0, 20), 'truncated.png', 'image/png')).status, 400);
+      assert.equal((await upload('image', 'heroImage', 'svg content', 'fake.svg', 'image/svg+xml')).status, 400);
+      assert.equal((await upload(
+        'animation', 'animation', '{"layers":[]}', 'invalid.json', 'application/json'
+      )).status, 400);
+      assert.equal((await upload(
+        'animation', 'animation',
+        JSON.stringify({ v: '5.12.2', fr: 30, ip: 0, op: 60, w: 250, h: 250, layers: [{ x: 'alert(1)' }] }),
+        'expression.json',
+        'application/json'
+      )).status, 400);
+      assert.equal((await upload(
+        'image', 'heroImage', Buffer.alloc(8 * 1024 * 1024 + 1), 'large.png', 'image/png'
+      )).status, 413);
+      assert.equal((await upload(
+        'animation', 'animation', Buffer.alloc(5 * 1024 * 1024 + 1), 'large.json', 'application/json'
+      )).status, 413);
+      assert.equal(auditLogs.length, 2);
+
+      const settings = await (await fetch(`${base}/homepage-assets`)).json();
+      assert.deepEqual(settings.homepageAssets, homepageAssets);
+    });
+  } finally {
+    await fs.rm(uploadDir, { recursive: true, force: true });
+  }
 });
 
 test('editor and support roles are restricted to their allowed admin sections', async () => {

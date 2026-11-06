@@ -181,8 +181,22 @@ app.get('/panel.html', (req, res) => res.redirect(301, '/ogrenci-paneli.html'));
 app.use(authRouter);
 app.use(express.static(path.join(__dirname, 'public'))); // public/deneme-sinavi-optik.html
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  dotfiles: 'deny',
+  index: false,
+  fallthrough: true
+}));
 app.use('/logo', express.static(path.join(__dirname, 'logo')));
 app.use('/pages', express.static(path.join(__dirname, 'pages'), { extensions: ['html'] }));
+app.get('/api/homepage-assets', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  try {
+    res.json({ homepageAssets: await SystemConfig.getHomepageAssets() });
+  } catch (error) {
+    console.error('Ana sayfa medya ayarları alınamadı:', error);
+    res.status(500).json({ mesaj: 'Ana sayfa medya ayarları alınamadı.' });
+  }
+});
 
 const sitePages = [
   'index.html', 'dene.html', 'asistan.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html', 'yasal.html',

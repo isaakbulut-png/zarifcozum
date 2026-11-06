@@ -1,8 +1,21 @@
 const express = require('express');
 const { ObjectId } = require('mongodb');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const { randomUUID } = require('node:crypto');
+const multer = require('multer');
 const { adminRoleOf, yetkiKontrolEt } = require('../lib/admin-rbac');
 
 const PAGE_SIZE = 25;
+const MAX_ANIMATION_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const ALLOWED_MEDIA_TYPES = new Map([
+  ['.json', new Set(['application/json', 'text/json'])],
+  ['.png', new Set(['image/png'])],
+  ['.jpg', new Set(['image/jpeg'])],
+  ['.jpeg', new Set(['image/jpeg'])],
+  ['.webp', new Set(['image/webp'])]
+]);
 const VISITOR_SETTING_FIELDS = new Set([
   'questionLimit',
   'topicLimit',
@@ -22,11 +35,88 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function validateAnimation(buffer) {
+  let animation;
+  try {
+    animation = JSON.parse(buffer.toString('utf8'));
+  } catch {
+    return 'Animasyon dosyası geçerli bir JSON değil.';
+  }
+  if (!animation || typeof animation !== 'object' || Array.isArray(animation) ||
+      typeof animation.v !== 'string' ||
+      !Number.isFinite(animation.fr) || animation.fr <= 0 || animation.fr > 120 ||
+      !Number.isFinite(animation.ip) || !Number.isFinite(animation.op) ||
+      animation.op <= animation.ip || (animation.op - animation.ip) / animation.fr > 600 ||
+      !Number.isInteger(animation.w) || animation.w < 1 || animation.w > 4096 ||
+      !Number.isInteger(animation.h) || animation.h < 1 || animation.h > 4096 ||
+      !Array.isArray(animation.layers) || animation.layers.length < 1 || animation.layers.length > 300) {
+    return 'JSON dosyası geçerli ve sınırlar içindeki bir Lottie animasyonu değil.';
+  }
+
+  let nodeCount = 0;
+  const inspect = (value, depth = 0) => {
+    if (!value || typeof value !== 'object') return null;
+    if (depth > 40 || ++nodeCount > 100000) return 'Animasyon JSON yapısı çok karmaşık.';
+    for (const [key, child] of Object.entries(value)) {
+      if (key === 'x' && typeof child === 'string' && child.trim()) {
+        return 'Lottie ifadeleri içeren animasyonlara izin verilmiyor.';
+      }
+      if ((key === 'p' || key === 'u') && typeof child === 'string' && child.trim()) {
+        return 'Harici görsel kullanan animasyonlara izin verilmiyor.';
+      }
+      if (key === 'ty' && child === 2) {
+        return 'Görsel katmanı içeren Lottie dosyaları desteklenmiyor.';
+      }
+      const error = inspect(child, depth + 1);
+      if (error) return error;
+    }
+    return null;
+  };
+  return inspect(animation);
+}
+
+function validateImage(buffer, extension) {
+  if (extension === '.png') {
+    if (buffer.length < 45 ||
+        !buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])) ||
+        buffer.readUInt32BE(8) !== 13 || buffer.toString('ascii', 12, 16) !== 'IHDR') {
+      return false;
+    }
+    const width = buffer.readUInt32BE(16);
+    const height = buffer.readUInt32BE(20);
+    return width > 0 && height > 0 && width <= 8192 && height <= 8192 &&
+      width * height <= 40000000 && buffer.indexOf('IDAT', 33) !== -1 &&
+      buffer.readUInt32BE(buffer.length - 12) === 0 &&
+      buffer.toString('ascii', buffer.length - 8, buffer.length - 4) === 'IEND';
+  }
+  if (extension === '.jpg' || extension === '.jpeg') {
+    return buffer.length >= 4 && buffer[0] === 0xff && buffer[1] === 0xd8 &&
+      buffer[2] === 0xff && buffer[buffer.length - 2] === 0xff &&
+      buffer[buffer.length - 1] === 0xd9;
+  }
+  return extension === '.webp' && buffer.length >= 30 &&
+    buffer.toString('ascii', 0, 4) === 'RIFF' &&
+    buffer.readUInt32LE(4) === buffer.length - 8 &&
+    buffer.toString('ascii', 8, 12) === 'WEBP';
+}
+
 function createAdminRouter({
-  User, Payment, SystemConfig, AdminLog,
+  User, Payment, SystemConfig, AdminLog, uploadDir = path.join(__dirname, '..', 'uploads', 'homepage'),
   getAnnouncementCollection, getQuizCollection, getLessonCollection, getSupportTicketCollection
 }) {
   const router = express.Router();
+  const mediaUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: MAX_IMAGE_BYTES, files: 1, fields: 2, fieldSize: 64 },
+    fileFilter: (req, file, callback) => {
+      const extension = path.extname(file.originalname).toLowerCase();
+      const allowedMimes = ALLOWED_MEDIA_TYPES.get(extension);
+      if (!allowedMimes || !allowedMimes.has(file.mimetype)) {
+        return callback(new Error('Yalnızca .json, .png, .jpg ve .webp dosyaları yüklenebilir.'));
+      }
+      callback(null, true);
+    }
+  });
   router.use((req, res, next) => {
     res.set('Cache-Control', 'no-store');
     next();
@@ -39,6 +129,65 @@ function createAdminRouter({
     entityType,
     entityId,
     details
+  });
+
+  router.get('/homepage-assets', allow('superadmin'), async (req, res) => {
+    try {
+      res.json({ homepageAssets: await SystemConfig.getHomepageAssets() });
+    } catch (error) {
+      console.error('Ana sayfa medya ayarları alınamadı:', error);
+      res.status(500).json({ mesaj: 'Ana sayfa medya ayarları alınamadı.' });
+    }
+  });
+
+  router.post('/homepage-assets/upload', allow('superadmin'), (req, res, next) => {
+    mediaUpload.single('file')(req, res, error => {
+      if (!error) return next();
+      const status = error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+      res.status(status).json({
+        mesaj: status === 413 ? 'Dosya boyutu izin verilen sınırı aşıyor.' : error.message
+      });
+    });
+  }, async (req, res) => {
+    if (!req.file) return res.status(400).json({ mesaj: 'Yüklenecek dosyayı seçin.' });
+    const extension = path.extname(req.file.originalname).toLowerCase();
+    const isAnimation = extension === '.json';
+    const slot = req.body?.slot;
+    if ((isAnimation && (req.body?.assetType !== 'animation' || slot !== 'animation')) ||
+        (!isAnimation && (req.body?.assetType !== 'image' || !['heroImage', 'featureImage'].includes(slot)))) {
+      return res.status(400).json({ mesaj: 'Dosya türü ve ana sayfa alanı eşleşmiyor.' });
+    }
+    if (req.file.size > (isAnimation ? MAX_ANIMATION_BYTES : MAX_IMAGE_BYTES)) {
+      return res.status(413).json({ mesaj: 'Dosya boyutu izin verilen sınırı aşıyor.' });
+    }
+    if (isAnimation) {
+      const errorMessage = validateAnimation(req.file.buffer);
+      if (errorMessage) return res.status(400).json({ mesaj: errorMessage });
+    } else if (!validateImage(req.file.buffer, extension)) {
+      return res.status(400).json({ mesaj: 'Dosyanın içeriği seçilen görsel türüyle eşleşmiyor.' });
+    }
+
+    const filename = `${randomUUID()}${extension}`;
+    const destination = path.join(uploadDir, filename);
+    const publicPath = `/uploads/homepage/${filename}`;
+    let saved = false;
+    try {
+      await fs.mkdir(uploadDir, { recursive: true });
+      await fs.writeFile(destination, req.file.buffer, { flag: 'wx' });
+      const homepageAssets = await SystemConfig.saveHomepageAsset(slot, publicPath);
+      saved = true;
+      await audit(req, 'homepage_asset.updated', 'homepage_asset', slot, {
+        assetType: isAnimation ? 'animation' : 'image',
+        filename
+      });
+      res.json({ mesaj: 'Ana sayfa medyası güncellendi.', homepageAssets });
+    } catch (error) {
+      if (!saved) await fs.unlink(destination).catch(unlinkError => {
+        if (unlinkError.code !== 'ENOENT') console.error('Yüklenen dosya temizlenemedi:', unlinkError);
+      });
+      console.error('Ana sayfa medyası kaydedilemedi:', error);
+      res.status(500).json({ mesaj: 'Ana sayfa medyası kaydedilemedi.' });
+    }
   });
 
   router.get('/me', allow('superadmin', 'editor', 'support'), (req, res) => {

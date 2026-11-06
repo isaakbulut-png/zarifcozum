@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
+  <meta charset="UTF-8">
+<script src="animasyon.js"></script>
+
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ZarifÇözüm — Maarif Modeli Matematik Platformu (Demo)</title>
 <meta name="description" content="5-11. sınıf Maarif Modeli matematik: konu anlatımı, test, canlı ders ve yapay zekâ destekli soru-cevap. Demo.">
@@ -80,6 +83,7 @@
         </article>
       </div>
       <div class="hero-visual">
+        <img id="homepage-hero-image" class="homepage-hero-image" alt="ZarifÇözüm ana sayfa görseli" hidden>
         <div class="device">
           <div class="device-screen">
             <section class="home-carousel" data-home-carousel role="region" aria-roledescription="carousel" aria-label="Öğrenme panosu">
@@ -262,6 +266,8 @@
         <h3>Zarif Çözüm ile Matematikte Yeni Bir Başlangıç Yap.</h3>
         <p>Kendi sınıfını seç ve öğrenme yolculuğuna katıl.</p>
         <a class="btn btn-primary btn-sm" href="#sinif-sec">Hemen Keşfet</a>
+        <img id="homepage-feature-image" class="homepage-feature-image" src="assets/brand-mark.png" alt="ZarifÇözüm öne çıkan görseli">
+        <div id="lottie-oyun-alani" class="math-animation" role="img" aria-label="Hareketli matematik şekilleri" hidden></div>
       </article>
     </div>
   </section>
@@ -347,6 +353,62 @@
 </footer>
 <script src="/assets/site-footer.js"></script>
 <script src="assets/home-carousel.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
+<script>
+  (async function loadHomepageAssets() {
+    const isUploadPath = (value, extensions) => typeof value === "string" &&
+      new RegExp(`^/uploads/homepage/[a-f0-9-]+\\.(?:${extensions})$`, "i").test(value);
+    const fallbackImage = "assets/brand-mark.png";
+    try {
+      const response = await fetch("/api/homepage-assets", { cache: "no-store" });
+      if (!response.ok) throw new Error(`Ana sayfa medyası alınamadı (${response.status}).`);
+      const { homepageAssets } = await response.json();
+      const heroImage = document.getElementById("homepage-hero-image");
+      if (isUploadPath(homepageAssets?.heroImage, "png|jpe?g|webp")) {
+        heroImage.addEventListener("load", () => {
+          heroImage.hidden = false;
+          heroImage.closest(".hero-visual").classList.add("has-custom-image");
+        }, { once: true });
+        heroImage.addEventListener("error", () => {
+          console.error("Ana sayfa görseli yüklenemedi:", homepageAssets.heroImage);
+        }, { once: true });
+        heroImage.src = homepageAssets.heroImage;
+      }
+
+      const featureImage = document.getElementById("homepage-feature-image");
+      if (isUploadPath(homepageAssets?.featureImage, "png|jpe?g|webp")) {
+        featureImage.addEventListener("error", () => {
+          console.error("Öne çıkan görsel yüklenemedi:", homepageAssets.featureImage);
+          featureImage.src = fallbackImage;
+        }, { once: true });
+        featureImage.src = homepageAssets.featureImage;
+      }
+
+      const animationContainer = document.getElementById("lottie-oyun-alani");
+      if (isUploadPath(homepageAssets?.animation, "json")) {
+        if (!window.lottie) throw new Error("Lottie oynatıcısı yüklenemedi.");
+        const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const animation = window.lottie.loadAnimation({
+          container: animationContainer,
+          renderer: "svg",
+          loop: true,
+          autoplay: !motionPreference.matches,
+          path: homepageAssets.animation
+        });
+        motionPreference.addEventListener("change", event => {
+          if (event.matches) animation.pause();
+          else animation.play();
+        });
+        animation.addEventListener("DOMLoaded", () => { animationContainer.hidden = false; });
+        animation.addEventListener("data_failed", () => {
+          console.error("Ana sayfa Lottie animasyonu yüklenemedi:", homepageAssets.animation);
+        });
+      }
+    } catch (error) {
+      console.error("Ana sayfa medyası yüklenemedi:", error);
+    }
+  })();
+</script>
 <script data-pplx-inline-edit>
 (function () {
   if (window === window.top) return;

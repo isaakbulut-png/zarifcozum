@@ -61,6 +61,8 @@
     .announcement small{color:#6a5242}
     .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
     .settings-grid label{display:grid;gap:6px;color:#6a5242;font-size:.9rem}
+    .asset-preview{display:block;max-width:min(100%,320px);max-height:180px;margin-top:10px;object-fit:contain;border:1px solid #ecd9c6;border-radius:8px;background:#fff}
+    .asset-path{overflow-wrap:anywhere;color:#6a5242;font-size:.82rem}
     .toggle-list{display:grid;gap:12px;margin-top:18px}
     .toggle-list label{display:flex;align-items:center;gap:10px;color:#523520}
     .rbac-loading{visibility:hidden}
@@ -201,6 +203,42 @@
         </div>
         <p class="msg" id="visitorSettingsMsg" role="alert"></p>
       </form>
+      <div class="panel">
+        <h3>Ana sayfa animasyonu</h3>
+        <form id="homepageAnimationForm">
+          <label for="homepageAnimationFile">Lottie animasyonu (.json, en fazla 5 MB)</label>
+          <div class="toolbar" style="margin-top:8px">
+            <input id="homepageAnimationFile" name="file" type="file" accept=".json,application/json" required>
+            <button class="btn primary" type="submit" id="uploadHomepageAnimation">Animasyonu yükle</button>
+          </div>
+        </form>
+        <p class="asset-path" id="homepageAnimationPath">Henüz animasyon yüklenmedi.</p>
+        <p class="msg" id="homepageAnimationMsg" role="alert"></p>
+      </div>
+      <div class="panel">
+        <h3>Ana sayfa görselleri</h3>
+        <form id="homepageImageForm">
+          <div class="settings-grid">
+            <label for="homepageImageSlot">Görsel alanı
+              <select id="homepageImageSlot" name="slot">
+                <option value="heroImage">Ana görsel</option>
+                <option value="featureImage">Öne çıkan görsel</option>
+              </select>
+            </label>
+            <label for="homepageImageFile">Görsel (.png, .jpg veya .webp, en fazla 8 MB)
+              <input id="homepageImageFile" name="file" type="file" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp" required>
+            </label>
+          </div>
+          <div class="toolbar" style="margin-top:12px">
+            <button class="btn primary" type="submit" id="uploadHomepageImage">Görseli yükle</button>
+          </div>
+        </form>
+        <div class="settings-grid">
+          <div><p>Ana görsel</p><img class="asset-preview" id="homepageHeroPreview" alt="Yüklenen ana sayfa görseli" hidden></div>
+          <div><p>Öne çıkan görsel</p><img class="asset-preview" id="homepageFeaturePreview" alt="Yüklenen öne çıkan görsel" hidden></div>
+        </div>
+        <p class="msg" id="homepageImageMsg" role="alert"></p>
+      </div>
     </section>
 
     <section id="view-education-lessons" hidden>
@@ -486,6 +524,73 @@
           $('visitorAssistantEnabled').checked = settings.assistantEnabled;
           $('visitorFullTestEnabled').checked = settings.fullTestEnabled;
         } catch (error) { message.textContent = error.message; }
+        await loadHomepageAssets();
+      }
+
+      function isHomepageUploadUrl(value) {
+        return typeof value === 'string' &&
+          /^\/uploads\/homepage\/[a-f0-9-]+\.(?:json|png|jpe?g|webp)$/i.test(value);
+      }
+
+      async function loadHomepageAssets() {
+        const message = $('homepageAnimationMsg');
+        message.className = 'msg';
+        message.textContent = '';
+        try {
+          const data = await api('/api/admin/homepage-assets');
+          const assets = data.homepageAssets;
+          $('homepageAnimationPath').textContent = isHomepageUploadUrl(assets.animation)
+            ? `Mevcut animasyon: ${assets.animation}`
+            : 'Henüz animasyon yüklenmedi.';
+          for (const [slot, id] of [
+            ['heroImage', 'homepageHeroPreview'],
+            ['featureImage', 'homepageFeaturePreview']
+          ]) {
+            const preview = $(id);
+            preview.hidden = !isHomepageUploadUrl(assets[slot]);
+            preview.removeAttribute('src');
+            if (!preview.hidden) preview.src = assets[slot];
+          }
+        } catch (error) {
+          message.textContent = error.message;
+        }
+      }
+
+      async function uploadHomepageMedia(form, assetType, button, message) {
+        const fileInput = form.querySelector('input[type="file"]');
+        message.className = 'msg';
+        message.textContent = '';
+        if (!fileInput.files.length) {
+          message.textContent = 'Yüklenecek dosyayı seçin.';
+          return;
+        }
+        const formData = new FormData();
+        formData.append('assetType', assetType);
+        if (assetType === 'animation') formData.append('slot', 'animation');
+        else formData.append('slot', $('homepageImageSlot').value);
+        formData.append('file', fileInput.files[0]);
+        button.disabled = true;
+        try {
+          const response = await fetch('/api/admin/homepage-assets/upload', {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: formData
+          });
+          if (response.status === 401) {
+            window.location.assign('/yonetim');
+            throw new Error('Oturum sona erdi.');
+          }
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.mesaj || 'Yükleme tamamlanamadı.');
+          fileInput.value = '';
+          message.className = 'msg ok';
+          message.textContent = data.mesaj;
+          await loadHomepageAssets();
+        } catch (error) {
+          message.textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
       }
 
       async function loadLessons() {
@@ -629,6 +734,26 @@
         } finally {
           button.disabled = false;
         }
+      });
+
+      $('homepageAnimationForm').addEventListener('submit', event => {
+        event.preventDefault();
+        uploadHomepageMedia(
+          event.currentTarget,
+          'animation',
+          $('uploadHomepageAnimation'),
+          $('homepageAnimationMsg')
+        );
+      });
+
+      $('homepageImageForm').addEventListener('submit', event => {
+        event.preventDefault();
+        uploadHomepageMedia(
+          event.currentTarget,
+          'image',
+          $('uploadHomepageImage'),
+          $('homepageImageMsg')
+        );
       });
 
       $('logoutButton').addEventListener('click', async () => {

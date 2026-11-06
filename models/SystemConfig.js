@@ -18,7 +18,12 @@ const systemConfigSchema = new mongoose.Schema({
   summaryEnabled: { type: Boolean, default: DEFAULT_VISITOR_SETTINGS.summaryEnabled },
   practiceEnabled: { type: Boolean, default: DEFAULT_VISITOR_SETTINGS.practiceEnabled },
   assistantEnabled: { type: Boolean, default: DEFAULT_VISITOR_SETTINGS.assistantEnabled },
-  fullTestEnabled: { type: Boolean, default: DEFAULT_VISITOR_SETTINGS.fullTestEnabled }
+  fullTestEnabled: { type: Boolean, default: DEFAULT_VISITOR_SETTINGS.fullTestEnabled },
+  homepageAssets: {
+    animation: { type: String, default: null },
+    heroImage: { type: String, default: null },
+    featureImage: { type: String, default: null }
+  }
 }, { timestamps: true, collection: 'system_configs', versionKey: false });
 
 systemConfigSchema.statics.getVisitorSettings = async function () {
@@ -44,6 +49,27 @@ systemConfigSchema.statics.saveVisitorSettings = function (settings) {
     { $set: settings, $setOnInsert: { _id: 'visitor-access' } },
     { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
   ).lean();
+};
+
+systemConfigSchema.statics.getHomepageAssets = async function () {
+  const settings = await this.findById('homepage-assets').lean();
+  return {
+    animation: settings?.homepageAssets?.animation || null,
+    heroImage: settings?.homepageAssets?.heroImage || null,
+    featureImage: settings?.homepageAssets?.featureImage || null
+  };
+};
+
+systemConfigSchema.statics.saveHomepageAsset = async function (slot, url) {
+  if (!['animation', 'heroImage', 'featureImage'].includes(slot)) {
+    throw new TypeError('Geçersiz ana sayfa medya alanı.');
+  }
+  await this.findOneAndUpdate(
+    { _id: 'homepage-assets' },
+    { $set: { [`homepageAssets.${slot}`]: url }, $setOnInsert: { _id: 'homepage-assets' } },
+    { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
+  );
+  return this.getHomepageAssets();
 };
 
 module.exports = mongoose.models.SystemConfig || mongoose.model('SystemConfig', systemConfigSchema);
