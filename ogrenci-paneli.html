@@ -136,6 +136,14 @@ button,select{font:inherit}
 .exam-image{display:block;max-width:100%;height:auto;margin:8px 0 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
 .exam-choices{display:flex;gap:18px;flex-wrap:wrap}
 .exam-choices .quiz-option{align-items:center;padding:6px 2px}
+.exam-navigation{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.exam-navigation button{display:grid;place-items:center;min-width:44px;min-height:44px;padding:4px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--navy-900);font-weight:600;cursor:pointer}
+.exam-navigation button.answered{background:var(--navy-900);color:#fff}
+.exam-choices label{position:relative;display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0;border:2px solid var(--navy-900);border-radius:50%;cursor:pointer}
+.exam-choices label:has(input:checked){background:var(--navy-900);color:#fff}
+.exam-choices input{position:absolute;opacity:0}
+.exam-choices label:has(input:focus-visible){outline:3px solid #7a4f2d;outline-offset:3px}
+.exam-clear{margin-top:8px;border:0;background:transparent;color:var(--navy-900);text-decoration:underline;cursor:pointer}
 .review-ok{color:var(--ok,#6b4a2f);font-weight:600}
 .review-bad{color:#a3201a;font-weight:600}
 .feed-status{min-height:1.5em;margin:10px 0;color:var(--muted)}
@@ -458,8 +466,8 @@ button,select{font:inherit}
     </section>
 
     <div class="section-head">
-      <h2>Yaklaşan deneme sınavları</h2>
-      <a href="deneme-sinavi-optik.html">Tümünü gör</a>
+      <h2>Konu pratiği</h2>
+      <a href="deneme-sinavi-optik.html">Konu pratiğine git</a>
     </div>
 
     <p class="feed-status">Öğretmeninin planladığı sınav tarihleri <a href="#ders-takvimim" style="text-decoration:underline">Ders Takvimim</a> bölümünde görünür. Çözdüğün denemeler <a href="#testlerim" style="text-decoration:underline">Sınav ve Testlerim</a> bölümünde listelenir.</p>
@@ -505,9 +513,9 @@ button,select{font:inherit}
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const message = response.status === 404
+        const message = data.mesaj || (response.status === 404
           ? 'Öğrenci paneli API rotası bulunamadı (404). Güncel server.js sürümünü npm start ile çalıştırın ve sayfayı sunucu adresinden açın.'
-          : data.mesaj || `Sunucu hatası (${response.status})`;
+          : `Sunucu hatası (${response.status})`);
         const error = new Error(message);
         error.status = response.status;
         throw error;
@@ -931,20 +939,28 @@ button,select{font:inherit}
     $('imageExamFeed').addEventListener('click', async event => {
       const button = event.target.closest('[data-image-exam-id]');
       if (!button) return;
+      if (activeImageExam && !confirm('Devam eden denemeden çıkmak istiyor musunuz? İşaretlediğiniz cevaplar kaybolur.')) return;
+      button.disabled = true;
       try {
         const exam = await api(`/api/ogrenci/denemeler/${encodeURIComponent(button.dataset.imageExamId)}`);
         activeImageExam = exam;
         $('imageExamTitle').textContent = exam.title;
         $('imageExamDescription').textContent = exam.description || `${exam.sorular.length} soru`;
-        $('imageExamForm').innerHTML = exam.sorular.map((soru, index) => `
-          <fieldset class="quiz-question">
+        $('imageExamForm').innerHTML = `
+          <p>Cevapların sınavı bitirince kaydedilir; sayfadan ayrılırsan işaretlerin kaybolur.</p>
+          <p id="imageExamProgress" aria-live="polite">0 / ${exam.sorular.length} soru işaretlendi</p>
+          <nav class="exam-navigation" aria-label="Sorular arasında gezin">
+            ${exam.sorular.map((soru, index) => `<button type="button" data-exam-nav="${index}" aria-label="${soru.no}. soruya git">${soru.no}</button>`).join('')}
+          </nav>` + exam.sorular.map((soru, index) => `
+          <fieldset class="quiz-question" id="image-exam-question-${index}">
             <legend>Soru ${soru.no}</legend>
             <img class="exam-image" src="${esc(soru.imageUrl)}" alt="Soru ${soru.no}" loading="lazy">
             <div class="exam-choices">
-              ${exam.secenekler.map(letter => `<label class="quiz-option">
-                <input type="radio" name="exam-answer-${index}" value="${esc(letter)}"><span><strong>${esc(letter)}</strong></span>
+              ${exam.secenekler.map(letter => `<label>
+                <input type="radio" name="exam-answer-${index}" value="${esc(letter)}" aria-label="${soru.no}. soru, ${esc(letter)} şıkkı"><span><strong>${esc(letter)}</strong></span>
               </label>`).join('')}
             </div>
+            <button type="button" class="exam-clear" data-exam-clear="${index}">Cevabı temizle</button>
           </fieldset>`).join('') + '<button class="btn-join" type="submit">Sınavı bitir</button>';
         $('imageExamStatus').textContent = '';
         $('imageExamStatus').className = 'feed-status';
@@ -955,7 +971,35 @@ button,select{font:inherit}
         $('imageExamRunner').hidden = false;
         $('imageExamStatus').textContent = error.message;
         $('imageExamStatus').className = 'feed-status error';
+      } finally {
+        button.disabled = false;
       }
+    });
+
+    function updateImageExamProgress() {
+      if (!activeImageExam) return;
+      const form = $('imageExamForm');
+      const checked = form.querySelectorAll('input[type="radio"]:checked');
+      $('imageExamProgress').textContent = `${checked.length} / ${activeImageExam.sorular.length} soru işaretlendi`;
+      form.querySelectorAll('[data-exam-nav]').forEach(button => {
+        const selected = form.querySelector(`input[name="exam-answer-${button.dataset.examNav}"]:checked`);
+        button.classList.toggle('answered', Boolean(selected));
+        button.setAttribute('aria-label', `${Number(button.dataset.examNav) + 1}. soruya git${selected ? ', cevaplandı' : ', boş'}`);
+      });
+    }
+
+    $('imageExamForm').addEventListener('change', updateImageExamProgress);
+    $('imageExamForm').addEventListener('click', event => {
+      const nav = event.target.closest('[data-exam-nav]');
+      if (nav) {
+        $(`image-exam-question-${nav.dataset.examNav}`).scrollIntoView({ block: 'start' });
+        return;
+      }
+      const clear = event.target.closest('[data-exam-clear]');
+      if (!clear) return;
+      const selected = clear.closest('fieldset').querySelector('input:checked');
+      if (selected) selected.checked = false;
+      updateImageExamProgress();
     });
 
     $('imageExamForm').addEventListener('submit', async event => {
@@ -966,13 +1010,14 @@ button,select{font:inherit}
       const bos = answers.filter(answer => answer === null).length;
       if (bos && !confirm(`${bos} soru boş. Yine de sınavı bitirmek istiyor musunuz?`)) return;
       const button = event.currentTarget.querySelector('button[type="submit"]');
+      if (button.disabled) return;
       button.disabled = true;
       try {
         const result = await api(`/api/ogrenci/denemeler/${encodeURIComponent(activeImageExam.id)}/teslim`, {
           method: 'POST',
           body: JSON.stringify({answers})
         });
-        $('imageExamStatus').textContent = `Sınav tamamlandı: %${result.score} (${result.correctCount}/${result.totalCount} doğru).`;
+        $('imageExamStatus').textContent = `Sınav tamamlandı: %${result.score} · ${result.correctCount} doğru · ${result.wrongCount} yanlış · ${result.blankCount} boş.`;
         $('imageExamStatus').className = 'feed-status ok';
         $('imageExamForm').replaceChildren();
         $('imageExamReview').innerHTML = result.review.map(item => `
@@ -981,7 +1026,10 @@ button,select{font:inherit}
             <p class="${item.secilen === item.dogru ? 'review-ok' : 'review-bad'}">Senin cevabın: ${esc(item.secilen || 'Boş')} · Doğru cevap: ${esc(item.dogru)}</p>
           </article>`).join('');
         activeImageExam = null;
-        await Promise.all([loadImageExams(), loadContent()]);
+        await Promise.all([loadImageExams(), loadContent()]).catch(error => {
+          console.error('Sınav listesi veya panel güncellenemedi:', error);
+          $('imageExamStatus').textContent += ' Liste güncellenemedi; sayfayı yenileyin.';
+        });
       } catch (error) {
         $('imageExamStatus').textContent = `Sınav gönderilemedi: ${error.message}`;
         $('imageExamStatus').className = 'feed-status error';
@@ -990,7 +1038,10 @@ button,select{font:inherit}
     });
 
     loadContent();
-    loadImageExams().catch(() => {});
+    loadImageExams().catch(error => {
+      console.error('Denemeler alınamadı:', error);
+      $('imageExamFeed').textContent = `Denemeler yüklenemedi: ${error.message}`;
+    });
     const liveLessonPoll = setInterval(refreshLiveLessons, 15000);
     window.addEventListener('pagehide', () => clearInterval(liveLessonPoll), {once: true});
   })();

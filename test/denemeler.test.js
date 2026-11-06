@@ -130,10 +130,31 @@ test('teslim puanlanır, kaydedilir ve ikinci teslim 409 döner', async () => {
       const govde = await r.json();
       assert.equal(govde.score, 50);
       assert.equal(govde.correctCount, 1);
+      assert.equal(govde.wrongCount, 1);
+      assert.equal(govde.blankCount, 0);
       assert.deepEqual(govde.review, [{ no: 1, secilen: 'A', dogru: 'A' }, { no: 2, secilen: 'B', dogru: 'C' }]);
       assert.equal(sonuclar.kayitlar[0].type, 'deneme');
       assert.equal(sonuclar.kayitlar[0].studentId, 's1');
+      assert.equal(sonuclar.kayitlar[0].wrongCount, 1);
+      assert.equal(sonuclar.kayitlar[0].blankCount, 0);
       assert.equal((await fetch(`${base}/api/ogrenci/denemeler/${DENEME_ID}/teslim`, json({ answers: ['A', 'C'] }))).status, 409);
+    });
+  } finally { geriDeneme(); geriSoru(); }
+});
+
+test('boş cevaplar yanlış sayılmadan sonuçlara kaydedilir', async () => {
+  const geriDeneme = stub(Deneme, 'findOne', () => lean({ _id: DENEME_ID, title: 'D1', soruIds: [ID1, ID2] }));
+  const geriSoru = stub(Soru, 'find', () => lean([{ _id: ID1, imageUrl: 'a', answer: 'A' }, { _id: ID2, imageUrl: 'b', answer: 'C' }]));
+  try {
+    await withServer({ id: 's1', role: 'student', name: 'Ada' }, async (base, sonuclar) => {
+      const response = await fetch(`${base}/api/ogrenci/denemeler/${DENEME_ID}/teslim`, json({ answers: ['B', null] }));
+      const result = await response.json();
+      assert.equal(response.status, 201);
+      assert.equal(result.correctCount, 0);
+      assert.equal(result.wrongCount, 1);
+      assert.equal(result.blankCount, 1);
+      assert.equal(result.score, 0);
+      assert.equal(sonuclar.kayitlar[0].blankCount, 1);
     });
   } finally { geriDeneme(); geriSoru(); }
 });

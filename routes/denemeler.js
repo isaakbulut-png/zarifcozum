@@ -161,6 +161,8 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
 
       const correctCount = answers.reduce((sayi, answer, i) => sayi + (answer === sorular[i].answer ? 1 : 0), 0);
       const totalCount = sorular.length;
+      const blankCount = answers.filter(answer => answer === null).length;
+      const wrongCount = totalCount - correctCount - blankCount;
       const score = Math.round(correctCount * 100 / totalCount);
       // Upsert tek bir deneme için ikinci teslimi atomik olarak engeller.
       const yazim = await getResultCollection().updateOne(
@@ -168,7 +170,7 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
         {
           $setOnInsert: {
             quizTitle: deneme.title, studentName: req.session.user.name,
-            answers, correctCount, totalCount, score, createdAt: new Date()
+            answers, correctCount, wrongCount, blankCount, totalCount, score, createdAt: new Date()
           }
         },
         { upsert: true }
@@ -177,7 +179,7 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
 
       res.status(201).json({
         mesaj: 'Deneme sonucu kaydedildi.',
-        score, correctCount, totalCount,
+        score, correctCount, wrongCount, blankCount, totalCount,
         review: sorular.map((soru, i) => ({ no: i + 1, secilen: answers[i], dogru: soru.answer }))
       });
     } catch (err) {
