@@ -21,6 +21,7 @@ const { createPaymentRouter } = require('./routes/payments');
 const { createAdminRouter } = require('./routes/admin');
 const { createSorularRouter } = require('./routes/sorular');
 const { createDenemelerRouters } = require('./routes/denemeler');
+const { requireKonuLogin } = require('./lib/konu-erisimi');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
 const { createPratikRouter } = require('./routes/pratik');
@@ -115,27 +116,8 @@ app.get('/api/mufredat-konulari', mufredatKonulariLimiter, async (req, res) => {
   }
 });
 
-app.get('/api/mufredat-ozet', mufredatKonulariLimiter, async (req, res) => {
+app.get('/api/mufredat-ozet', mufredatKonulariLimiter, requireKonuLogin, async (req, res) => {
   res.set('Cache-Control', 'no-store');
-  const rol = req.session?.user?.role;
-  const girisYapti = ['student', 'teacher', 'admin'].includes(rol);
-  if (!girisYapti) {
-    let visitorSettings;
-    try {
-      visitorSettings = await SystemConfig.getVisitorSettings();
-    } catch (error) {
-      console.error('/api/mufredat-ozet ziyaretçi ayarları alınamadı:', error);
-      return res.status(500).json({ mesaj: 'Konu özeti erişim ayarları alınamadı.' });
-    }
-    if (!visitorSettings.summaryEnabled) {
-      return res.status(403).json({
-        kod: 'UYELIK_GEREKLI',
-        mesaj: 'Konu özetlerini görmek için üye girişi yapın.',
-        yonlendir: '/Paketler.html',
-        girisYapti: false
-      });
-    }
-  }
   const grade = Number(req.query.grade);
   const topic = typeof req.query.topic === 'string' ? req.query.topic.trim() : '';
   if (!Number.isInteger(grade) || grade < 5 || grade > 12 || !topic || topic.length > 300) {
