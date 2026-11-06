@@ -20,6 +20,7 @@ const { createAIRouter } = require('./routes/ai');
 const { createPaymentRouter } = require('./routes/payments');
 const { createAdminRouter } = require('./routes/admin');
 const { createSorularRouter } = require('./routes/sorular');
+const { createCozumluSorularRouters } = require('./routes/cozumlu-sorular');
 const { createDenemelerRouters } = require('./routes/denemeler');
 const { requireKonuLogin } = require('./lib/konu-erisimi');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
@@ -34,6 +35,7 @@ const User = require('./models/User');
 const Payment = require('./models/Payment');
 const SystemConfig = require('./models/SystemConfig');
 const AdminLog = require('./models/AdminLog');
+const CozumluSoru = require('./models/CozumluSoru');
 const { createWebhookRouter } = require('./routes/webhooks');
 
 const PORT = process.env.PORT || 3000;
@@ -283,6 +285,12 @@ app.use('/api/sorular', createSorularRouter({
   requireStaff: requireRole('teacher', 'admin'),
   AdminLog
 }));
+const cozumluSorular = createCozumluSorularRouters({
+  Model: CozumluSoru, User, AdminLog,
+  getTopics: async grade => (await import('./aiService.mjs')).mufredatKonulariniGetir(grade)
+});
+app.use('/api/cozumlu-sorular', cozumluSorular.publicRouter);
+app.use('/api/admin/cozumlu-sorular', cozumluSorular.admin);
 const denemeRouters = createDenemelerRouters({
   requireStaff: requireRole('teacher', 'admin'),
   requireStudent: ogrenciKontrol,

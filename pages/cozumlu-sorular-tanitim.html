@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#102d2b">
-  <meta name="description" content="5–11. sınıflar için konu ve seviyeye göre filtrelenebilen çözümlü soru arşivi.">
+  <meta name="description" content="5–12. sınıflar için müfredat konularına göre çözümlü soru arşivi.">
   <title>Çözümlü Sorular | Zarif Çözüm</title>
   <style>
     :root {
@@ -103,6 +103,10 @@
     .empty-state p { margin: 7px 0 16px; color: var(--muted); font-size: 14px; }
     .empty-state button { border: 0; border-radius: 10px; padding: 10px 15px; background: var(--forest); color: white; font-size: 13px; font-weight: 700; }
     .guide { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 48px; padding: 24px; border: 1px solid var(--line); border-radius: var(--radius); background: #f0f4ee; }
+    .guide[hidden] { display: none; }
+    #solutions { grid-template-columns: 1fr; }
+    #solutions-list img { display: block; max-width: 100%; height: auto; margin: 12px 0 24px; }
+    #solutions-list img[hidden] { display: none; }
     .guide h2 { margin: 0 0 8px; font-family: Georgia, serif; font-size: 23px; font-weight: 500; }
     .guide p { margin: 0; color: #5c7069; font-size: 13px; }
     .guide ol { margin: 0; padding-left: 20px; color: #435d54; font-size: 13px; }
@@ -168,172 +172,36 @@ body{background:var(--cream);color:var(--ink)}.site-header{color:var(--ink);bord
     <div class="shell hero-content">
       <p class="eyebrow">Öğrenme arşivi</p>
       <h1 id="page-title">Her soruda<br>bir adım ileri.</h1>
-      <p class="hero-copy">Sınıfına ve konuna uygun örnekleri bul, çözüm yolunu adım adım incele. Düzenli pratik, sağlam öğrenmenin başlangıcıdır.</p>
+      <p class="hero-copy">Sınıfını ve konunu seç. Eklenen çözümlü soruları incelemek için giriş yap.</p>
       <div class="hero-bottom">
-        <div class="grade-range" aria-label="5. sınıftan 11. sınıfa kadar"><span>5</span><b>—</b><span>11</span><b>· sınıflar</b></div>
-        <div class="hero-count"><strong id="hero-total">0</strong> çözümlü örnek</div>
+        <div class="grade-range" aria-label="5. sınıftan 12. sınıfa kadar"><span>5</span><b>—</b><span>12</span><b>· sınıflar</b></div>
       </div>
     </div>
   </section>
 
   <main id="main-content" class="shell">
     <div class="section-heading">
-      <div><h2>Çözümlü sorular</h2><p>İhtiyacına göre filtrele ve çözümünü incele.</p></div>
-      <div class="result-count" id="result-count" aria-live="polite">0 soru</div>
+      <div><h2>Çözümlü sorular</h2><p>Sınıfının müfredatındaki konuları gör ve eklenen soruları incele.</p></div>
+      <div class="result-count" id="result-count" aria-live="polite"></div>
     </div>
     <section class="filter-panel" aria-label="Soru filtreleri">
-      <div class="filters">
-        <div class="field"><label for="grade-filter">Sınıf</label><select id="grade-filter"><option value="">Tüm sınıflar</option></select></div>
-        <div class="field"><label for="subject-filter">Ders</label><select id="subject-filter"><option value="">Tüm dersler</option></select></div>
-        <div class="field"><label for="topic-filter">Konu</label><select id="topic-filter"><option value="">Tüm konular</option></select></div>
-        <div class="field"><label for="level-filter">Seviye</label><select id="level-filter"><option value="">Tüm seviyeler</option><option>Temel</option><option>Orta</option><option>İleri</option></select></div>
+      <div class="filters" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))">
+        <div class="field"><label for="grade-filter">Sınıf</label><select id="grade-filter"><option value="5">5. sınıf</option><option value="6">6. sınıf</option><option value="7">7. sınıf</option><option value="8">8. sınıf</option><option value="9">9. sınıf</option><option value="10">10. sınıf</option><option value="11">11. sınıf</option><option value="12">12. sınıf</option></select></div>
+        <div class="field"><label for="unit-filter">Ünite</label><select id="unit-filter"><option value="">Tüm üniteler</option></select></div>
         <div class="field search-field"><label for="search-input">Ara</label><div class="search-wrap"><span class="search-icon" aria-hidden="true">⌕</span><input id="search-input" type="search" placeholder="Soru, konu veya kazanım ara…" autocomplete="off"></div></div>
-        <button class="reset-button" id="reset-button" type="button">Filtreleri temizle</button>
       </div>
       <div class="active-filter-note" id="filter-summary" aria-live="polite"></div>
     </section>
-    <section id="cards" class="cards" aria-label="Çözümlü soru kartları"></section>
-    <section class="empty-state" id="empty-state" aria-live="polite">
-      <div class="empty-symbol" aria-hidden="true">⌕</div><h3>Bu aramada soru bulamadık</h3>
-      <p>Filtreleri değiştir veya arama kelimeni kısaltıp yeniden dene.</p><button type="button" id="empty-reset">Tüm soruları göster</button>
-    </section>
-    <section class="guide" aria-labelledby="guide-title">
-      <div><h2 id="guide-title">Kendi soru görsellerini ekle</h2><p>Görselleri bu sayfayla aynı klasördeki <code>images/</code> klasörüne koy. Her soru için veri dizisindeki <code>image</code> değerini dosya adıyla eşleştir. Görseller doğrudan tarayıcıda açılır; ayrıca sunucu tarafında işlem gerekmez.</p><p class="naming-example"><strong>Örnek adlandırma:</strong> <code>5-sinif-matematik-kesirler-01.jpg</code></p></div>
-      <ol>
-        <li>Dosya adlarında Türkçe karakter ve boşluk yerine küçük harf, rakam ve tire kullan.</li>
-        <li>JPG, PNG veya WebP kullan; okunabilirlik için görseli mümkünse dikey ya da kare kadrajda hazırla.</li>
-        <li>Görselin her adımının net olduğundan ve metinlerin telefonda okunabildiğinden emin ol.</li>
-        <li>Yeni soru eklerken aşağıdaki <code>QUESTIONS</code> dizisinde bir kayıt kopyala; sınıf, ders, konu, seviye ve dosya yolunu güncelle.</li>
-      </ol>
+    <p id="topics-status" role="status" aria-live="polite"></p>
+    <button class="reset-button" id="retry-topics" type="button" hidden>Tekrar dene</button>
+    <section id="cards" class="cards" aria-label="Müfredat konuları"></section>
+    <section id="solutions" class="guide" hidden aria-labelledby="solutions-title">
+      <div><h2 id="solutions-title"></h2><p id="solutions-status" role="status" aria-live="polite"></p><div id="solutions-list"></div></div>
     </section>
   </main>
   <footer class="site-footer"><div class="shell footer-inner"><span>© <span id="year"></span> Zarif Çözüm</span><span>Sabırla çöz, kalıcı öğren.</span></div></footer>
 
-  <div class="modal" id="solution-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
-    <div class="modal-dialog">
-      <button class="modal-close" id="modal-close" type="button" aria-label="Çözümü kapat">×</button>
-      <div class="modal-visual">
-        <img id="modal-image" alt="" hidden>
-        <div class="modal-placeholder" id="modal-placeholder" hidden><strong>Çözüm görseli henüz eklenmedi.</strong><span id="modal-missing-path"></span></div>
-      </div>
-      <div class="modal-info"><div class="tags" id="modal-tags"></div><h2 id="modal-title"></h2><p id="modal-summary"></p><span class="solution-label">Çözüm notu</span><p class="solution-text" id="modal-solution"></p><div class="modal-path">Görsel yolu: <code id="modal-path"></code></div></div>
-    </div>
-  </div>
-
-  <script>
-    /*
-      SORU EKLEME: Bu dizideki örnek kaydı kopyalayıp bilgileri ve image değerini değiştirin.
-      Görsel yolu, bu HTML dosyasına göre images/dosya-adi.jpg biçimindedir.
-      Soru görselinde çözüm yoksa solution alanına kısa çözüm açıklaması yazın.
-    */
-    const QUESTIONS = [
-      { id: "s5-mat-kesir-01", grade: 5, subject: "Matematik", topic: "Kesirler", level: "Temel", title: "Birim kesirleri karşılaştıralım", summary: "Paydası büyük olan birim kesrin neden daha küçük olduğunu model üzerinden düşün.", image: "images/5-sinif-matematik-kesirler-01.jpg", alt: "Birim kesirleri karşılaştırma sorusunun adım adım çözümü", solution: "Birim kesirlerde pay 1'dir. Bütün eş parçalara ayrıldıkça her bir parça küçülür.\n\nÖrneğin 1/8, 1/4'ten küçüktür; çünkü bir bütünün sekizde biri, dörtte birinden daha küçük bir parçadır." },
-      { id: "s6-fen-hucre-01", grade: 6, subject: "Fen Bilimleri", topic: "Hücre ve Organeller", level: "Orta", title: "Hücrede görev paylaşımı", summary: "Verilen organel özelliklerinden hareketle hücre içindeki görevleri eşleştir.", image: "images/6-sinif-fen-hucre-ve-organeller-01.jpg", alt: "Hücre organellerinin görevlerini açıklayan çözüm görseli", solution: "Önce sorudaki anahtar ifadeleri belirle: enerji üretimi mitokondriyi, protein üretimi ribozomu, madde taşınması endoplazmik retikulumu işaret eder.\n\nOrganelleri görevleriyle eşleştirirken hücreyi bir iş bölümü sistemi gibi düşün." },
-      { id: "s7-mat-oran-01", grade: 7, subject: "Matematik", topic: "Oran ve Orantı", level: "Orta", title: "Orantıda bilinmeyeni bulma", summary: "İki çokluk arasındaki sabit oranı kullanarak eksik değeri hesapla.", image: "images/7-sinif-matematik-oran-oranti-01.jpg", alt: "Oran orantı sorusunun çözüm basamakları", solution: "Önce eş oranları kesir biçiminde yaz. Çapraz çarpım yaparak bilinmeyeni yalnız bırak.\n\nSon adımda bulduğun değeri başlangıçtaki oranlardan birinde yerine koyup kontrol et." },
-      { id: "s8-fen-basinc-01", grade: 8, subject: "Fen Bilimleri", topic: "Basınç", level: "Orta", title: "Katı basıncını yorumlayalım", summary: "Yüzey alanı ve kuvvet değişiminin basınca etkisini karşılaştır.", image: "images/8-sinif-fen-basinc-01.jpg", alt: "Katı basıncı karşılaştırma sorusunun açıklamalı çözümü", solution: "Katı basıncı, uygulanan dik kuvvetin temas yüzey alanına bölünmesiyle bulunur: P = F / A.\n\nKuvvet artarsa basınç artar; temas alanı artarsa basınç azalır. Karşılaştırmada değişen büyüklükleri ayrı ayrı incele." },
-      { id: "s9-mat-denklemler-01", grade: 9, subject: "Matematik", topic: "Denklemler ve Eşitsizlikler", level: "Temel", title: "Birinci dereceden denklem", summary: "Eşitliğin iki tarafında aynı işlemi yaparak bilinmeyeni yalnız bırak.", image: "images/9-sinif-matematik-denklemler-01.jpg", alt: "Birinci dereceden denklemin adım adım çözümü", solution: "Bilinmeyenli terimleri bir tarafta, sabit terimleri diğer tarafta topla. Bir terimi eşitliğin karşı tarafına geçirirken işaretini değiştir.\n\nSon olarak katsayıya böl ve sonucu denklemde yerine koyarak doğrula." },
-      { id: "s10-fizik-hareket-01", grade: 10, subject: "Fizik", topic: "Hareket", level: "İleri", title: "Hız-zaman grafiğini okuyalım", summary: "Grafiğin eğimi ve altında kalan alanı kullanarak hareketi yorumla.", image: "images/10-sinif-fizik-hareket-01.jpg", alt: "Hız zaman grafiği üzerinden hareket çözümü", solution: "Hız-zaman grafiğinde eğim ivmeyi verir. Grafiğin zaman ekseniyle arasında kalan alan yer değiştirmeyi gösterir.\n\nParçalı grafikte her bölgenin alanını ayrı hesapla; yön değişimi varsa işaretleri koru." },
-      { id: "s11-mat-trigonometri-01", grade: 11, subject: "Matematik", topic: "Trigonometri", level: "İleri", title: "Trigonometrik oranlarla çözüm", summary: "Dik üçgende doğru oranı seçip bilinmeyen uzunluğu hesapla.", image: "images/11-sinif-matematik-trigonometri-01.jpg", alt: "Trigonometri sorusunun açıklamalı çözümü", solution: "Önce verilen açıya göre karşı, komşu ve hipotenüs kenarlarını belirle.\n\nİstenen ve verilen kenarları içeren oranı seç: sinüs karşı/hipotenüs, kosinüs komşu/hipotenüs, tanjant karşı/komşu. Denklemi kurup bilinmeyeni bul." }
-    ];
-
-    const $ = (id) => document.getElementById(id);
-    const gradeFilter = $("grade-filter"), subjectFilter = $("subject-filter"), topicFilter = $("topic-filter"), levelFilter = $("level-filter"), searchInput = $("search-input");
-    const cards = $("cards"), emptyState = $("empty-state"), modal = $("solution-modal");
-    let lastFocused = null;
-
-    function escapeHtml(value) {
-      return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
-    }
-    function populateFilters() {
-      [...new Set(QUESTIONS.map(q => q.grade))].sort((a,b) => a-b).forEach(grade => gradeFilter.insertAdjacentHTML("beforeend", `<option value="${grade}">${grade}. sınıf</option>`));
-      [...new Set(QUESTIONS.map(q => q.subject))].sort((a,b) => a.localeCompare(b, "tr")).forEach(subject => subjectFilter.insertAdjacentHTML("beforeend", `<option value="${escapeHtml(subject)}">${escapeHtml(subject)}</option>`));
-      updateTopics();
-    }
-    function updateTopics() {
-      const previous = topicFilter.value;
-      const pool = QUESTIONS.filter(q => (!gradeFilter.value || q.grade === Number(gradeFilter.value)) && (!subjectFilter.value || q.subject === subjectFilter.value));
-      const topics = [...new Set(pool.map(q => q.topic))].sort((a,b) => a.localeCompare(b, "tr"));
-      topicFilter.innerHTML = '<option value="">Tüm konular</option>';
-      topics.forEach(topic => topicFilter.insertAdjacentHTML("beforeend", `<option value="${escapeHtml(topic)}">${escapeHtml(topic)}</option>`));
-      if (topics.includes(previous)) topicFilter.value = previous;
-      else topicFilter.value = "";
-    }
-    function filteredQuestions() {
-      const term = searchInput.value.trim().toLocaleLowerCase("tr");
-      return QUESTIONS.filter(q => {
-        const haystack = [q.title, q.summary, q.topic, q.subject, q.grade, q.level].join(" ").toLocaleLowerCase("tr");
-        return (!gradeFilter.value || q.grade === Number(gradeFilter.value)) && (!subjectFilter.value || q.subject === subjectFilter.value) && (!topicFilter.value || q.topic === topicFilter.value) && (!levelFilter.value || q.level === levelFilter.value) && (!term || haystack.includes(term));
-      });
-    }
-    function cardMarkup(q) {
-      const id = escapeHtml(q.id), title = escapeHtml(q.title), image = escapeHtml(q.image), alt = escapeHtml(q.alt || q.title);
-      return `<article class="card">
-        <button class="card-image" type="button" data-open="${id}" aria-label="${title} çözüm görselini aç">
-          <img src="${image}" alt="${alt}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
-          <span class="image-fallback" hidden><span><span class="fallback-icon" aria-hidden="true">▧</span><span class="fallback-title">Çözüm görseli eklenecek</span><span class="fallback-path">${image}</span></span></span>
-          <span class="image-hint">Görseli büyüt ↗</span>
-        </button>
-        <div class="card-body"><div class="tags"><span class="tag">${q.grade}. sınıf</span><span class="tag">${escapeHtml(q.subject)}</span><span class="tag level">${escapeHtml(q.level)}</span></div>
-          <h3>${title}</h3><p class="card-summary">${escapeHtml(q.summary)}</p>
-          <div class="card-foot"><small>${escapeHtml(q.topic)}</small><button class="open-button" type="button" data-open="${id}">Çözümü incele <span aria-hidden="true">↗</span></button></div></div>
-      </article>`;
-    }
-    function render() {
-      const results = filteredQuestions();
-      cards.innerHTML = results.map(cardMarkup).join("");
-      const countText = `${results.length} soru${results.length === 1 ? "" : ""}`;
-      $("result-count").textContent = countText;
-      $("hero-total").textContent = QUESTIONS.length;
-      cards.style.display = results.length ? "grid" : "none";
-      emptyState.classList.toggle("visible", results.length === 0);
-      const selected = [];
-      if (gradeFilter.value) selected.push(`${gradeFilter.value}. sınıf`);
-      if (subjectFilter.value) selected.push(subjectFilter.value);
-      if (topicFilter.value) selected.push(topicFilter.value);
-      if (levelFilter.value) selected.push(`${levelFilter.value} seviye`);
-      $("filter-summary").textContent = selected.length ? `Seçili filtreler: ${selected.join(" · ")}` : "Tüm sınıflar ve konular gösteriliyor.";
-    }
-    function clearFilters() {
-      gradeFilter.value = ""; subjectFilter.value = ""; topicFilter.value = ""; levelFilter.value = ""; searchInput.value = ""; updateTopics(); render();
-    }
-    function openModal(id, trigger) {
-      const q = QUESTIONS.find(item => item.id === id);
-      if (!q) return;
-      lastFocused = trigger;
-      $("modal-title").textContent = q.title;
-      $("modal-summary").textContent = q.summary;
-      $("modal-solution").textContent = q.solution || "Adım adım çözüm için görseli inceleyin.";
-      $("modal-tags").innerHTML = `<span class="tag">${q.grade}. sınıf</span><span class="tag">${escapeHtml(q.subject)}</span><span class="tag level">${escapeHtml(q.level)}</span><span class="tag">${escapeHtml(q.topic)}</span>`;
-      $("modal-path").textContent = q.image;
-      const image = $("modal-image"), placeholder = $("modal-placeholder");
-      placeholder.hidden = true; image.hidden = true; image.alt = q.alt || q.title;
-      image.onload = () => { image.hidden = false; placeholder.hidden = true; };
-      image.onerror = () => { image.hidden = true; placeholder.hidden = false; $("modal-missing-path").textContent = q.image; };
-      image.src = q.image;
-      modal.classList.add("open"); modal.setAttribute("aria-hidden", "false"); document.body.style.overflow = "hidden"; $("modal-close").focus();
-    }
-    function closeModal() {
-      modal.classList.remove("open"); modal.setAttribute("aria-hidden", "true"); document.body.style.overflow = ""; if (lastFocused) lastFocused.focus();
-    }
-    [gradeFilter, subjectFilter].forEach(el => el.addEventListener("change", () => { updateTopics(); render(); }));
-    [topicFilter, levelFilter].forEach(el => el.addEventListener("change", render));
-    searchInput.addEventListener("input", render);
-    $("reset-button").addEventListener("click", clearFilters); $("empty-reset").addEventListener("click", clearFilters);
-    cards.addEventListener("click", event => { const trigger = event.target.closest("[data-open]"); if (trigger) openModal(trigger.dataset.open, trigger); });
-    $("modal-close").addEventListener("click", closeModal);
-    modal.addEventListener("click", event => { if (event.target === modal) closeModal(); });
-    document.addEventListener("keydown", event => {
-      if (event.key === "Escape" && modal.classList.contains("open")) closeModal();
-      if (event.key === "Tab" && modal.classList.contains("open")) {
-        const focusable = [...modal.querySelectorAll("button:not([disabled]), a[href], input, select, [tabindex]:not([tabindex='-1'])")];
-        const first = focusable[0], last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-      }
-    });
-    $("year").textContent = new Date().getFullYear();
-    populateFilters(); render();
-  </script>
+  <script src="../assets/cozumlu-sorular.js"></script>
   <script src="../assets/breadcrumb.js"></script>
 </body>
 </html>

@@ -86,6 +86,7 @@
     <a class="nav-btn" data-admin-roles="superadmin,editor" href="/ogretmen-paneli.html#image-questions" style="display:block;text-decoration:none">Soru Ekle / Resim Yükle</a>
     <a class="nav-btn" data-admin-roles="superadmin,editor" href="/ogretmen-paneli.html#lessons" style="display:block;text-decoration:none">Dersler ve Canlı Ders</a>
     <button class="nav-btn" type="button" data-view="education-lessons" data-admin-roles="superadmin,editor">Konu Anlatımları</button>
+    <button class="nav-btn" type="button" data-view="solved-questions" data-admin-roles="superadmin">Çözümlü Sorular</button>
     <button class="nav-btn" type="button" data-view="education-quizzes" data-admin-roles="superadmin,editor">Testler ve Quizler</button>
     <button class="nav-btn" type="button" data-view="education-exams" data-admin-roles="superadmin,editor">Deneme Sınavları</button>
     <a class="nav-btn" data-admin-roles="superadmin,editor" href="/ogretmen-paneli.html#ai-question-wizard" style="display:block;text-decoration:none">Yapay Zekâ İçerikleri</a>
@@ -175,6 +176,38 @@
       <div class="panel">
         <h3>Yayındaki duyurular</h3>
         <div id="announcementList"></div>
+      </div>
+    </section>
+
+    <section id="view-solved-questions" hidden>
+      <div class="panel" style="margin-top:0">
+        <h3>Çözümlü soru ekle</h3>
+        <p>Sınıf ve müfredat konusunu seçin. Görsel soru ve çözümünü birlikte içermelidir; sadece giriş yapan kullanıcılar görebilir.</p>
+        <form id="solvedQuestionForm">
+          <div class="settings-grid">
+            <label for="solvedGrade">Sınıf
+              <select id="solvedGrade" name="grade" required>
+                <option value="5">5. sınıf</option><option value="6">6. sınıf</option><option value="7">7. sınıf</option><option value="8">8. sınıf</option>
+                <option value="9">9. sınıf</option><option value="10">10. sınıf</option><option value="11">11. sınıf</option><option value="12">12. sınıf</option>
+              </select>
+            </label>
+            <label for="solvedTopic">Müfredat konusu
+              <select id="solvedTopic" required disabled><option value="">Önce konular yüklenmeli</option></select>
+            </label>
+            <label for="solvedTitle">Soru başlığı
+              <input id="solvedTitle" name="baslik" maxlength="160" required>
+            </label>
+          </div>
+          <label for="solvedImage">Soru ve çözüm görseli (JPG, PNG, WebP; en fazla 5 MB)</label>
+          <input id="solvedImage" name="resim" type="file" accept=".jpg,.jpeg,.png,.webp" required>
+          <div class="toolbar" style="margin-top:12px"><button class="btn primary" id="solvedSave" type="submit" disabled>Çözümlü soruyu ekle</button></div>
+          <p class="msg" id="solvedMsg" role="status" aria-live="polite"></p>
+          <button class="btn sm" id="solvedRetry" type="button" hidden>Yeniden yükle</button>
+        </form>
+      </div>
+      <div class="panel">
+        <h3>Seçili sınıftaki çözümlü sorular</h3>
+        <div id="solvedList"></div>
       </div>
     </section>
 
@@ -295,6 +328,7 @@
     </section>
   </main>
 
+  <script src="/assets/cozumlu-sorular-admin.js"></script>
   <script>
     (() => {
       const $ = id => document.getElementById(id);
@@ -302,7 +336,8 @@
         overview: 'Genel Bakış', users: 'Kullanıcılar', payments: 'Ödemeler / Abonelikler',
         announcements: 'Duyurular', settings: 'Site Ayarları', logs: 'Güvenlik ve Kayıtlar',
         'education-lessons': 'Konu Anlatımları', 'education-quizzes': 'Testler ve Quizler',
-        'education-exams': 'Deneme Sınavları', 'support-tickets': 'Destek Talepleri'
+        'education-exams': 'Deneme Sınavları', 'support-tickets': 'Destek Talepleri',
+        'solved-questions': 'Çözümlü Sorular'
       };
       const roleNames = { student: 'Öğrenci', teacher: 'Öğretmen', admin: 'Yönetici' };
       const adminRoleNames = { superadmin: 'Süper Admin', editor: 'Editör / Öğretmen', support: 'Destek Personeli' };
@@ -314,7 +349,7 @@
         announcements: loadAnnouncements, settings: loadVisitorSettings,
         logs: loadLogs, 'education-lessons': loadLessons,
         'education-quizzes': loadQuizzes, 'education-exams': loadExams,
-        'support-tickets': loadTickets
+        'support-tickets': loadTickets, 'solved-questions': () => window.solvedQuestionsAdmin.load()
       };
       let page = 1;
       let totalPages = 1;
