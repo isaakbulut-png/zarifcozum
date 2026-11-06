@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asistanla Soru Çöz | ZarifÇözüm</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="/assets/pratik.css">
+</head>
+<body data-home="index.html" data-breadcrumb="Asistanla Soru Çöz">
+  <main class="wrap">
+    <section class="block">
+      <a class="btn btn-ghost btn-sm" href="ogrenci-paneli.html">← Öğrenci paneline dön</a>
+      <h1 class="section-title" style="margin-top:var(--space-4)">Asistanla soru çöz</h1>
+      <p class="muted" style="margin-top:var(--space-3)">Sınıfını ve konunu seç; asistanla adım adım soru çöz.</p>
+      <div id="pratik-mount"></div>
+    </section>
+  </main>
+  <script src="/assets/matematik-mufredati.js"></script>
+  <script src="/assets/pratik.js"></script>
+  <script>
+    ZarifPratik.mount(document.getElementById("pratik-mount"), {
+      mod: "asistan",
+      sinif: new URLSearchParams(location.search).get("sinif")
+    });
+  </script>
+  <script src="/assets/breadcrumb.js"></script>
+</body>
+</html>
