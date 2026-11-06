@@ -3,6 +3,7 @@ const express = require('express');
 const test = require('node:test');
 const { ObjectId } = require('mongodb');
 const { createLiveLessonsRouter } = require('../routes/live-lessons');
+const { ZOOM_HOST_USER_ID } = require('../lib/zoom');
 
 function same(left, right) {
   return String(left) === String(right);
@@ -89,6 +90,7 @@ async function setup() {
   const base = `http://127.0.0.1:${server.address().port}`;
   return {
     scheduled,
+    active,
     async request(path, role, method = 'GET', body, userId) {
       const requestHeaders = {'Content-Type': 'application/json'};
       if (role) requestHeaders['x-role'] = role;
@@ -116,6 +118,7 @@ test('scheduled Zoom lesson waits until its time and is joinable only after teac
     assert.equal(created.response.status, 201);
     assert.equal(created.data.ders.status, 'scheduled');
     assert.equal(created.data.ders.title, 'Kesirler canlı ders');
+    assert.equal(app.scheduled.rows[0].hostUserId, ZOOM_HOST_USER_ID);
 
     const listed = await app.request('/api/ogretmen/canli/planlar', 'teacher');
     assert.equal(listed.response.status, 200);
@@ -140,6 +143,7 @@ test('scheduled Zoom lesson waits until its time and is joinable only after teac
     );
     assert.equal(started.response.status, 200);
     assert.equal(started.data.startUrl, 'https://zoom.example/start');
+    assert.equal(app.active.rows[0].hostUserId, ZOOM_HOST_USER_ID);
 
     const joined = await app.request('/api/canli/katilim', 'student');
     assert.equal(joined.response.status, 200);
@@ -162,6 +166,7 @@ test('teacher can start an immediate lesson and students can join it', async () 
     });
     assert.equal(started.response.status, 201);
     assert.equal(started.data.startUrl, 'https://zoom.example/start');
+    assert.equal(app.active.rows[0].hostUserId, ZOOM_HOST_USER_ID);
 
     const joined = await app.request('/api/canli/katilim', 'student');
     assert.equal(joined.response.status, 200);

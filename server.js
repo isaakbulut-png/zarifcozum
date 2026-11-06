@@ -47,7 +47,6 @@ const SESSION_SECRET = String(process.env.SESSION_SECRET || '');
 const ZOOM_ACCOUNT_ID = String(process.env.ZOOM_ACCOUNT_ID || '').trim();
 const ZOOM_CLIENT_ID = String(process.env.ZOOM_CLIENT_ID || '').trim();
 const ZOOM_CLIENT_SECRET = String(process.env.ZOOM_CLIENT_SECRET || '').trim();
-const ZOOM_HOST_USER_ID = String(process.env.ZOOM_HOST_USER_ID || '').trim();
 if (!MONGODB_URI) {
   console.error('❌ .env dosyasında MONGODB_URI bulunamadı.');
   process.exit(1);
@@ -771,10 +770,7 @@ app.use(createLiveLessonsRouter({
   requireStudent: ogrenciKontrol,
   getScheduledCollection: () => planliDersKoleksiyonu,
   getActiveCollection: () => canliDersKoleksiyonu,
-  createMeeting: options => {
-    zoomAyarlariniKontrolEt([{ ad: 'ZOOM_HOST_USER_ID', deger: ZOOM_HOST_USER_ID }]);
-    return createZoomMeeting(options);
-  },
+  createMeeting: createZoomMeeting,
   getHostStartUrl: ogretmenBaslatmaBaglantisiAl,
   endMeeting: async lesson => {
     const token = await zoomErisimBelirteciAl();
@@ -913,7 +909,12 @@ async function baslat() {
     homeworkAudits.createIndex({teacherId: 1, createdAt: -1}, {name: 'teacher_student_homework_audit'})
   ]);
   console.log(`✅ MongoDB bağlantısı hazır → veritabanı: ${DB_ADI}, koleksiyon: ${KOLEKSIYON}`);
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  const sunucu = app.listen(PORT, () => {
+    const adres = sunucu.address();
+    console.log(typeof adres === 'string'
+      ? `Sunucu ${adres} adresinde aktiftir.`
+      : `Sunucu ${adres.port} portunda aktiftir.`);
+  });
 }
 
 baslat().catch(err => {

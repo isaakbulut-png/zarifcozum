@@ -1,5 +1,6 @@
 const express = require('express');
 const { ObjectId } = require('mongodb');
+const { ZOOM_HOST_USER_ID } = require('../lib/zoom');
 
 function asyncRoute(handler) {
   return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
@@ -79,7 +80,7 @@ function createLiveLessonsRouter({
       meetingNumber: String(meeting.id),
       password: meeting.password || '',
       joinUrl: meeting.joinUrl || '',
-      hostUserId: process.env.ZOOM_HOST_USER_ID || '',
+      hostUserId: ZOOM_HOST_USER_ID,
       status: 'scheduled',
       createdBy: req.session.user.id,
       createdAt: new Date()
@@ -153,7 +154,7 @@ function createLiveLessonsRouter({
       password: meeting.password || '',
       topic: meeting.topic || topic,
       joinUrl: meeting.joinUrl || '',
-      hostUserId: process.env.ZOOM_HOST_USER_ID || '',
+      hostUserId: ZOOM_HOST_USER_ID,
       startedAt,
       expiresAt: new Date(startedAt.getTime() + 8 * 60 * 60 * 1000)
     };
