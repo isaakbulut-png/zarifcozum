@@ -182,7 +182,9 @@
     if (!kok || !BASLIKLAR[mod]) return;
     kok.classList.add('zp');
     let durum = null;
-    let sinif = Number(baslangicSinifi) >= 5 && Number(baslangicSinifi) <= 11 ? Number(baslangicSinifi) : 5;
+    const sonSinif = mod === 'konu' ? 12 : 11;
+    let sinif = Number.isInteger(Number(baslangicSinifi)) &&
+      Number(baslangicSinifi) >= 5 && Number(baslangicSinifi) <= sonSinif ? Number(baslangicSinifi) : 5;
     let yonlendirmeSayaci = null;
     let secimIstegi = 0;
 
@@ -197,6 +199,8 @@
       if (durum.girisYapti && durum.limitYok) return el('div', { class: 'zp-serit zp-uye' }, 'Giriş yapıldı: sınırsız erişim');
       const soruKalan = durum.ziyaretciHaklari.soru.kalan;
       if (mod === 'konu') {
+        if (!durum.girisYapti) return el('div', { class: 'zp-serit' },
+          'Konu başlıklarını inceleyebilirsin. Konu anlatımlarını açmak için üye ol veya giriş yap.');
         const kalanKonu = durum.ozellikler.konu.kalan;
         return el('div', { class: 'zp-serit' },
           durum.ziyaretciHaklari.ozetGorebilir
@@ -234,6 +238,9 @@
     }
 
     function hataGoster(hata) {
+      if (hata.kod === 'UYELIK_GEREKLI' && hata.girisYapti === false && mod === 'konu') {
+        return konuGirisUyarisi();
+      }
       if (hata.kod === 'UYELIK_GEREKLI') return paywall(hata);
       temizle();
       kok.append(el('div', { class: 'zp-kart' }, el('p', { class: 'zp-hata' }, hata.message),
@@ -243,6 +250,16 @@
     function yukleniyor(metin) {
       temizle();
       kok.append(el('div', { class: 'zp-kart zp-yukleniyor' }, metin || 'Hazırlanıyor…'));
+    }
+
+    function konuGirisUyarisi() {
+      temizle();
+      kok.append(el('div', { class: 'zp-kart' },
+        el('h3', {}, 'Konu anlatımı için giriş yap'),
+        el('p', {}, 'Konu içeriklerini görmek için üye olun veya hesabınıza giriş yapın.'),
+        el('a', { class: 'zp-btn', href: '/kayit-giris.html?mode=register' }, 'Üye ol'),
+        el('a', { class: 'zp-btn zp-ikincil', href: '/kayit-giris.html?role=student' }, 'Giriş yap'),
+        el('button', { class: 'zp-btn zp-ikincil', type: 'button', onclick: secimEkrani }, 'Konulara dön')));
     }
 
     async function secimEkrani() {
@@ -256,7 +273,7 @@
       temizle();
       const mufredat = MUFREDAT();
       const sinifSecici = el('div', { class: 'zp-siniflar', role: 'tablist' },
-        [5, 6, 7, 8, 9, 10, 11].map(n => el('button', {
+        Array.from({ length: sonSinif - 4 }, (_, i) => i + 5).map(n => el('button', {
           type: 'button', class: 'zp-sinif' + (n === sinif ? ' aktif' : ''),
           onclick: () => { sinif = n; secimEkrani(); }
         }, n + '. sınıf')));
@@ -278,6 +295,7 @@
         uniteListesi = mufredat[sinif] || [];
       }
       if (istekNo !== secimIstegi) return;
+      temizle();
       let konuSecici;
       if (SECIM_MODLARI[mod]) {
         let seciliKonu = '';
@@ -309,7 +327,7 @@
           const grup = el('div', { class: 'zp-konu-grup' },
             el('h4', {}, u.title));
           u.topics.forEach(konu => {
-            const kilitli = durum && !durum.limitYok && durum.ozellikler[mod].kalan === 0 &&
+            const kilitli = durum && !(mod === 'konu' && !durum.girisYapti) && !durum.limitYok && durum.ozellikler[mod].kalan === 0 &&
               !kullanilan.some(k => k.sinif === sinif && k.konu === konu);
             const secenek = el('button', {
               type: 'button',
@@ -355,7 +373,7 @@
           }))));
       }
       kok.append(el('div', { class: 'zp-kart' },
-        el('h3', {}, BASLIKLAR[mod]), durumSerit(),
+        el('h3', {}, mod === 'konu' ? `${sinif}. sınıf konu anlatımları` : BASLIKLAR[mod]), durumSerit(),
         el('p', { class: 'zp-kucuk' }, SECIM_MODLARI[mod]
           ? SECIM_MODLARI[mod].aciklama
           : 'Sınıfını seç, sonra bir konu seç.'),
@@ -372,10 +390,11 @@
     }
 
     async function anlatimAc(konu) {
+      if (durum && !durum.girisYapti) return konuGirisUyarisi();
       if (durum && !durum.limitYok && !durum.ziyaretciHaklari.ozetGorebilir) {
         const hata = new Error('Konu özetlerini görmek için üye girişi yapın.');
         hata.kod = 'UYELIK_GEREKLI';
-        hata.girisYapti = false;
+        hata.girisYapti = durum.girisYapti;
         hata.yonlendir = durum.uyelikAdresi;
         return paywall(hata);
       }

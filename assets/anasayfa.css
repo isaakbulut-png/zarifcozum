@@ -108,6 +108,7 @@ body.homepage .grade-section .section-head h2::after {
   background: #c9a27c;
 }
 body.homepage .section-head p { color: var(--color-text-muted); margin-top: 0.35rem; }
+body.homepage .grade-section .section-head p { margin-inline: auto; }
 
 /* Sınıf kutuları */
 body.homepage .grade-grid {

@@ -3,6 +3,7 @@ const express = require('express');
 const { rateLimit } = require('express-rate-limit');
 const { konuVarMi } = require('../lib/mufredat');
 const { DEFAULT_VISITOR_SETTINGS } = require('../models/SystemConfig');
+const { requireKonuLogin } = require('../lib/konu-erisimi');
 
 const OZELLIKLER = ['asistan', 'test', 'kazanim', 'konu'];
 const UYE_SORU_SAYILARI = [5, 10, 20];
@@ -235,7 +236,7 @@ function createPratikRouter({
       ozellikler[ozellik] = {
         kullanilan: kullanilan.map(({ sinif, konu }) => ({ sinif, konu })),
         kalan: limitYok ? null : Math.max(haklar.konu - kullanilan.length, 0),
-        acik: limitYok || (ozellik === 'konu' ? haklar.ozetGorebilir : Boolean(haklar[ozellik]))
+        acik: limitYok || (ozellik === 'konu' ? kim.girisYapti && haklar.ozetGorebilir : Boolean(haklar[ozellik]))
       };
     }
     res.json({
@@ -249,7 +250,7 @@ function createPratikRouter({
           kullanilan: soruKullanilan,
           kalan: limitYok ? null : Math.max(haklar.soru - soruKullanilan, 0)
         },
-        ozetGorebilir: haklar.ozetGorebilir,
+        ozetGorebilir: kim.girisYapti && haklar.ozetGorebilir,
         kazanimTestiAcik: haklar.kazanim
       },
       uyelikAdresi: UYELIK_ADRESI,
@@ -298,7 +299,7 @@ function createPratikRouter({
     });
   }));
 
-  router.post('/konu', sarmala(async (req, res) => {
+  router.post('/konu', requireKonuLogin, sarmala(async (req, res) => {
     const haklar = haklariEsle(await getVisitorSettings());
     const secim = await konuIcinIstekDogrula(req.body);
     if (!secim) return res.status(400).json({ mesaj: 'Sınıf veya konu seçimi geçersiz.' });

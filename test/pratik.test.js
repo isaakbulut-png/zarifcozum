@@ -100,7 +100,7 @@ test('ziyaretçi 3 soru hakkına sahiptir ve tam kazanım testini başlatamaz', 
   try {
     const ilkDurum = await s.istek('/durum');
     assert.equal(ilkDurum.veri.ziyaretciHaklari.soru.kalan, 3);
-    assert.equal(ilkDurum.veri.ziyaretciHaklari.ozetGorebilir, true);
+    assert.equal(ilkDurum.veri.ziyaretciHaklari.ozetGorebilir, false);
     assert.equal(ilkDurum.veri.ozellikler.kazanim.acik, false);
     assert.match(ilkDurum.headers.get('set-cookie'), /Max-Age=2592000/i);
 
@@ -153,23 +153,43 @@ test('eşzamanlı ziyaretçi istekleri soru hakkı sınırını aşamaz', async 
   } finally { s.kapat(); }
 });
 
-test('konu anlatımı da 3 konuyla sınırlıdır', async () => {
-  const s = await sunucu();
+test('ziyaretçi konu anlatımına erişemez ve içerik üretilmez', async () => {
+  let uretim = 0;
+  const s = await sunucu({ visitorSettings: { summaryEnabled: true }, konuUret: async () => { uretim++; return 'icerik'; } });
   try {
-    for (let i = 0; i < 3; i += 1) assert.equal((await s.istek('/konu', { sinif: 6, konu: konular[i] })).status, 200);
-    assert.equal((await s.istek('/konu', { sinif: 6, konu: konular[3] })).status, 403);
+    const durum = await s.istek('/durum');
+    assert.equal(durum.veri.ozellikler.konu.acik, false);
+    const sonuc = await s.istek('/konu', { sinif: 6, konu: konular[0] });
+    assert.equal(sonuc.status, 403);
+    assert.equal(sonuc.veri.kod, 'UYELIK_GEREKLI');
+    assert.equal(sonuc.veri.girisYapti, false);
+    assert.equal(uretim, 0);
   } finally { s.kapat(); }
 });
 
 test('Pinecone müfredat kazanımları yalnızca eşleşen sınıfta konu anlatımı için geçerlidir', async () => {
   const pineconeKonusu = 'Bir doğal sayının çarpan ve katlarına yönelik muhakeme yapabilme';
   const s = await sunucu({
+    kullanici: { id: 'student-1', role: 'student' },
     mufredatKonusuVarMi: async (grade, konu) => grade === 6 && konu === pineconeKonusu
   });
   try {
     assert.equal((await s.istek('/konu', { sinif: 6, konu: pineconeKonusu })).status, 200);
     assert.equal((await s.istek('/konu', { sinif: 7, konu: pineconeKonusu })).status, 400);
     assert.equal((await s.istek('/konu', { sinif: 6, konu: 'Geçersiz kazanım' })).status, 400);
+  } finally { s.kapat(); }
+});
+
+test('12. sınıfın Pinecone konuları giriş yapmış öğrenciye açılır', async () => {
+  const s = await sunucu({
+    kullanici: { id: 'student-1', role: 'student' },
+    mufredatKonusuVarMi: async (grade, konu) => grade === 12 && konu === 'Türev'
+  });
+  try {
+    const result = await s.istek('/konu', { sinif: 12, konu: 'Türev' });
+    assert.equal(result.status, 200);
+    assert.equal(result.veri.sinif, 12);
+    assert.equal(result.veri.konu, 'Türev');
   } finally { s.kapat(); }
 });
 
@@ -217,8 +237,8 @@ test('ziyaretçi konu özeti erişimi toggle ile kapatılabilir', async () => {
   } finally { s.kapat(); }
 });
 
-test('ziyaretçi konu hakkı ayrı olarak ayarlanabilir', async () => {
-  const s = await sunucu({ visitorSettings: { topicLimit: 1 } });
+test('sınırlı erişimli giriş yapmış kullanıcıların konu hakkı ayrı olarak ayarlanabilir', async () => {
+  const s = await sunucu({ kullanici: { id: 'teacher-1', role: 'teacher' }, visitorSettings: { topicLimit: 1 } });
   try {
     const ilkKonu = await s.istek('/konu', { sinif: 6, konu: konular[0] });
     assert.equal(ilkKonu.status, 200);
@@ -305,7 +325,7 @@ test('giriş yapmış öğrenci üyelik olmasa da tüm konulara ve sınırsız d
 });
 
 test('geçersiz sınıf veya konu 400 döner', async () => {
-  const s = await sunucu();
+  const s = await sunucu({ kullanici: { id: 'student-1', role: 'student' } });
   try {
     assert.equal((await s.istek('/sorular', { ozellik: 'test', sinif: 4, konu: konular[0] })).status, 400);
     assert.equal((await s.istek('/sorular', { ozellik: 'test', sinif: 6, konu: 'yok' })).status, 400);

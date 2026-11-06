@@ -22,3 +22,14 @@ test('kazanım testi sayfası demo panel yerine gerçek kazanım bileşenini aç
   assert.doesNotMatch(page, /data-shell=|assets\/app\.js|const Q = \[/);
   assert.equal((page.match(/src="\/assets\/site-footer\.js"/g) || []).length, 1);
 });
+
+test('tüm sınıf bağlantıları dinamik konu sayfasını açar', () => {
+  const homepage = read('index.html');
+  for (let grade = 5; grade <= 12; grade++) {
+    assert.ok(homepage.includes(`href="konu.html?sinif=${grade}"`), `${grade}. sınıf bağlantısı eksik`);
+  }
+  const page = read('konu.html');
+  assert.match(page, /ZarifPratik\.mount\([^;]*mod:\s*"konu"/);
+  assert.match(page, /URLSearchParams\(location\.search\)\.get\("sinif"\)/);
+  assert.doesNotMatch(page, /Asal Sayılar ve Asal Çarpanlar|data-shell=|assets\/app\.js/);
+});
