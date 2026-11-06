@@ -378,6 +378,15 @@ td.net{font-weight:700;color:var(--navy-900)}
       </form>
       <div class="data-list" id="lessonList" aria-live="polite"></div>
       <div class="exam-create">
+        <h3>Mevcut canlı ders</h3>
+        <p id="aktifCanliBilgi" role="status" aria-live="polite">Canlı ders durumu yükleniyor…</p>
+        <div class="tools" id="aktifCanliIslemler" hidden>
+          <a class="btn light" href="/canli.html?host=1">Derse dön</a>
+          <button class="btn" id="canliSonlandir" type="button">Dersi sonlandır</button>
+        </div>
+        <p class="err" id="aktifCanliHata" role="status" aria-live="polite"></p>
+      </div>
+      <div class="exam-create">
         <h3>Anında canlı ders başlat</h3>
         <p class="hint">Ders hemen başlar; öğrenciler aktif dersi kendi panellerinden açabilir.</p>
         <div class="tools">
@@ -574,6 +583,7 @@ td.net{font-weight:700;color:var(--navy-900)}
 <script src="assets/matematik-mufredati.js"></script>
 <script src="assets/ogretmen-yonetim.js"></script>
 <script src="assets/ogrenci-gelisim.js"></script>
+<script src="assets/ogretmen-canli.js"></script>
 <script>
 (() => {
   const YANLIS_KATSAYI = 4;       // 4 yanlış 1 doğruyu götürür
@@ -603,9 +613,22 @@ td.net{font-weight:700;color:var(--navy-900)}
       cikis();
       throw new Error('Öğretmen oturumu geçersiz. Yeniden giriş yapın.');
     }
-    if (!r.ok) throw new Error(d.mesaj || ('Sunucu hatası (' + r.status + ')'));
+    if (!r.ok) {
+      const error = new Error(d.mesaj || ('Sunucu hatası (' + r.status + ')'));
+      error.status = r.status;
+      throw error;
+    }
     return d;
   }
+
+  const canliYonetim = window.ogretmenCanliYonetimi({
+    api,
+    bilgi: $('aktifCanliBilgi'),
+    islemler: $('aktifCanliIslemler'),
+    hata: $('aktifCanliHata'),
+    sonlandir: $('canliSonlandir'),
+    onSonlandir: () => canliPlanlariYukle()
+  });
 
   async function yukle() {
     const oturum = await api('/me');
@@ -615,6 +638,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     $('giris').hidden = true; $('panel').hidden = false;
     $('cikis').hidden = false;
     $('changePasswordButton').hidden = false;
+    canliYonetim.yenile();
     try {
       veri = await api('/api/ogretmen/veri');
       yonetim = await api('/api/ogretmen/yonetim');
@@ -1182,6 +1206,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       location.href = 'canli.html?host=1';
     } catch (err) {
       durum.textContent = 'Canlı ders başlatılamadı: ' + err.message;
+      if (err.status === 409) canliYonetim.yenile();
       dugme.disabled = false;
     }
   }
@@ -1197,6 +1222,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     if (!$('teacherSidebar').hidden) canliPlanlariYukle().catch(error => {
       $('lessonStatus').textContent = 'Canlı ders listesi yenilenemedi: ' + error.message;
     });
+    if (!$('teacherSidebar').hidden) canliYonetim.yenile();
   }, 30000);
 
   // ---- Sınav seçici ----

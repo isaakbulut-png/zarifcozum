@@ -166,6 +166,12 @@ function createLiveLessonsRouter({
     });
   }));
 
+  router.get('/api/ogretmen/canli/ozet', requireTeacher, asyncRoute(async (req, res) => {
+    const lesson = await activeMeeting();
+    if (!lesson) return res.json({ aktif: false });
+    res.json({ aktif: true, topic: lesson.topic, meetingNumber: lesson.meetingNumber });
+  }));
+
   router.get('/api/ogretmen/canli/durum', requireTeacher, asyncRoute(async (req, res) => {
     const lesson = await activeMeeting();
     if (!lesson) return res.json({ aktif: false });

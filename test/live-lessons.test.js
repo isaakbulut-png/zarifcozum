@@ -161,12 +161,20 @@ test('scheduled Zoom lesson waits until its time and is joinable only after teac
 test('teacher can start an immediate lesson and students can join it', async () => {
   const app = await setup();
   try {
+    const empty = await app.request('/api/ogretmen/canli/ozet', 'teacher');
+    assert.deepEqual(empty.data, { aktif: false });
+    const forbidden = await app.request('/api/ogretmen/canli/ozet', 'student');
+    assert.equal(forbidden.response.status, 403);
     const started = await app.request('/api/ogretmen/canli/baslat', 'teacher', 'POST', {
       topic: 'Anında canlı ders'
     });
     assert.equal(started.response.status, 201);
     assert.equal(started.data.startUrl, 'https://zoom.example/start');
     assert.equal(app.active.rows[0].hostUserId, ZOOM_HOST_USER_ID);
+    const summary = await app.request('/api/ogretmen/canli/ozet', 'teacher');
+    assert.deepEqual(summary.data, {
+      aktif: true, topic: 'Anında canlı ders', meetingNumber: 'meeting-123'
+    });
 
     const joined = await app.request('/api/canli/katilim', 'student');
     assert.equal(joined.response.status, 200);
