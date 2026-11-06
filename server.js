@@ -34,6 +34,7 @@ const { adminRoleOf } = require('./lib/admin-rbac');
 const User = require('./models/User');
 const Payment = require('./models/Payment');
 const SystemConfig = require('./models/SystemConfig');
+const { PLANS, featureDecision } = require('./lib/subscription-plans');
 const AdminLog = require('./models/AdminLog');
 const CozumluSoru = require('./models/CozumluSoru');
 const { createWebhookRouter } = require('./routes/webhooks');
@@ -80,6 +81,75 @@ app.use(session({
     maxAge: 8 * 60 * 60 * 1000
   }
 }));
+// Abonelik zorunluyken öğrenci özellikleri pakete göre açılır (bkz. lib/subscription-plans.js).
+// Ödeme (/api/payments) ve oturum uçları bilerek dışarıda bırakılmıştır.
+const PAKET_OZELLIK_YOLLARI = [
+  ['/api/chat', 'asistan'],
+  ['/api/mufredat-ozet', 'konu'],
+  ['/api/canli/katilim', 'canli'],
+  ['/api/ogrenci/denemeler', 'deneme'],
+  ['/api/student', 'takip'],
+  ['/api/ogrenci/quiz', 'takip'],
+  ['/api/cevap-kaydet', 'takip']
+];
+let abonelikZorunluOnbellek = { deger: false, zaman: 0 };
+async function abonelikZorunluMu() {
+  if (Date.now() - abonelikZorunluOnbellek.zaman > 15000) {
+    const ayarlar = await SystemConfig.getVisitorSettings();
+    abonelikZorunluOnbellek = { deger: Boolean(ayarlar.subscriptionRequired), zaman: Date.now() };
+  }
+  return abonelikZorunluOnbellek.deger;
+}
+
+function paketYaniti(res, karar) {
+  const adlar = Object.fromEntries(Object.entries(PLANS).map(([anahtar, plan]) => [anahtar, plan.label]));
+  const gerekli = adlar[karar.gerekliPlan] || karar.gerekliPlan;
+  return res.status(karar.mevcutPlan ? 403 : 402).json({
+    mesaj: karar.mevcutPlan
+      ? `Bu özellik için ${gerekli} veya üzeri paket gerekir.`
+      : 'Bu özellik için aktif aboneliğiniz olmalıdır.',
+    kod: karar.mevcutPlan ? 'PLAN_UPGRADE_REQUIRED' : 'SUBSCRIPTION_REQUIRED',
+    gerekliPlan: karar.gerekliPlan,
+    mevcutPlan: karar.mevcutPlan,
+    yonlendir: '/Paketler.html'
+  });
+}
+
+// Yönetici tarafından kısıtlanan öğrenci/öğretmen hesapları, açık oturumları olsa bile hiçbir işlem yapamaz.
+app.use(async (req, res, next) => {
+  const sessionUser = req.session?.user;
+  const isPageRequest = req.method === 'GET' && (req.path === '/' || req.path.endsWith('.html'));
+  if (!sessionUser?.id || sessionUser.adminRole || sessionUser.role === 'admin' ||
+      !(req.path.startsWith('/api') || isPageRequest)) return next();
+  try {
+    const account = await User.findById(sessionUser.id)
+      .select('role restricted restrictionReason subscriptionStatus subscriptionPlan expiresAt').lean();
+    if (account?.restricted) {
+      return req.session.destroy(error => {
+        if (error) console.error('Kısıtlı hesabın oturumu kapatılamadı:', error);
+        res.clearCookie('zarifcozum.sid', { path: '/' });
+        if (req.path.startsWith('/api')) {
+          const neden = account.restrictionReason ? ` Neden: ${account.restrictionReason}` : '';
+          return res.status(403).json({
+            mesaj: `Hesabınız yönetici tarafından kısıtlanmıştır.${neden}`,
+            kod: 'ACCOUNT_RESTRICTED'
+          });
+        }
+        res.redirect('/kayit-giris.html');
+      });
+    }
+    const kural = account?.role === 'student' && PAKET_OZELLIK_YOLLARI
+      .find(([yol]) => req.path === yol || req.path.startsWith(`${yol}/`));
+    if (kural && await abonelikZorunluMu()) {
+      const karar = featureDecision(account, kural[1]);
+      if (!karar.izin) return paketYaniti(res, karar);
+    }
+    return next();
+  } catch (error) {
+    console.error('Hesap kısıtlaması doğrulanamadı:', error);
+    res.status(500).json({ mesaj: 'Hesap durumu doğrulanamadı.' });
+  }
+});
 // Ücretli Gemini kotasını korur: yalnızca giriş yapmış kullanıcılar, kullanıcı başına sınırlı istek.
 // Yerel testler (localhost) limitten muaftır.
 const LOOPBACK_IPLER = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
@@ -355,6 +425,11 @@ app.use('/api/pratik', createPratikRouter({
     if (kullanici.role === 'teacher' || kullanici.role === 'admin') return true;
     const kayit = await User.findById(kullanici.id).select('subscriptionStatus expiresAt').lean();
     return Boolean(kayit && kayit.subscriptionStatus === 'active' && (!kayit.expiresAt || kayit.expiresAt > new Date()));
+  },
+  ozellikErisimi: async (kullanici, ozellik) => {
+    if (kullanici?.role !== 'student' || !(await abonelikZorunluMu())) return null;
+    const kayit = await User.findById(kullanici.id).select('subscriptionStatus subscriptionPlan expiresAt').lean();
+    return featureDecision(kayit, ozellik);
   },
   soruUret: uretSorular,
   konuUret: async ({ sinif, konu }) => {

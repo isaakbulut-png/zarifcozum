@@ -54,6 +54,21 @@ const userSchema = new mongoose.Schema({
     default: null,
     index: true
   },
+  restricted: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
+  restrictedAt: {
+    type: Date,
+    default: null
+  },
+  restrictionReason: {
+    type: String,
+    trim: true,
+    maxlength: 300,
+    default: null
+  },
   subscriptionStatus: {
     type: String,
     enum: ['free', 'active', 'expired'],
@@ -63,6 +78,11 @@ const userSchema = new mongoose.Schema({
   subscriptionType: {
     type: String,
     enum: ['monthly', 'yearly', null],
+    default: null
+  },
+  subscriptionPlan: {
+    type: String,
+    enum: ['temel', 'standart', 'vip', null],
     default: null
   },
   expiresAt: {

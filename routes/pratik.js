@@ -39,6 +39,7 @@ function createPratikRouter({
   getContentCollection,
   mufredat,
   uyeMi,
+  ozellikErisimi = async () => null,
   soruUret,
   konuUret,
   mufredatKonusuVarMi = async () => false,
@@ -100,7 +101,19 @@ function createPratikRouter({
     return kayit?.konular || [];
   }
 
-  function yasakYaniti(res, girisYapti, mesaj = UYELIK_GEREKLI_MESAJI) {
+  function yasakYaniti(res, girisYapti, mesaj = UYELIK_GEREKLI_MESAJI, karar = null) {
+    if (karar && !karar.izin) {
+      return res.status(karar.mevcutPlan ? 403 : 402).json({
+        kod: karar.mevcutPlan ? 'PLAN_UPGRADE_REQUIRED' : 'SUBSCRIPTION_REQUIRED',
+        mesaj: karar.mevcutPlan
+          ? 'Bu özellik için paketinizi yükseltmeniz gerekir.'
+          : 'Bu özellik için aktif aboneliğiniz olmalıdır.',
+        gerekliPlan: karar.gerekliPlan,
+        mevcutPlan: karar.mevcutPlan,
+        yonlendir: UYELIK_ADRESI,
+        girisYapti
+      });
+    }
     return res.status(403).json({
       kod: 'UYELIK_GEREKLI',
       mesaj,
@@ -212,9 +225,11 @@ function createPratikRouter({
   async function erisim(req, res, ozellik, sinif, konu, haklar) {
     const kim = kimlik(req, res, haklar.denemeSuresiGun);
     const uye = kim.girisYapti && Boolean(await uyeMi(kim.kullanici));
-    const limitYok = kim.girisYapti && (uye || kim.kullanici?.role === 'student');
+    const karar = kim.girisYapti ? await ozellikErisimi(kim.kullanici, ozellik) : null;
+    if (karar && !karar.izin) return { kim, uye, limitYok: false, izin: false, karar };
+    const limitYok = kim.girisYapti && (karar ? karar.limitYok : (uye || kim.kullanici?.role === 'student'));
     if (limitYok) return { kim, uye, limitYok, izin: true };
-    const ziyaretciIzinli = ozellik === 'konu'
+    const ziyaretciIzinli = karar ? true : ozellik === 'konu'
       ? haklar.ozetGorebilir
       : Boolean(haklar[ozellik]);
     if (!ziyaretciIzinli) return { kim, uye, limitYok, izin: false };
@@ -228,15 +243,25 @@ function createPratikRouter({
     const haklar = haklariEsle(await getVisitorSettings());
     const kim = kimlik(req, res, haklar.denemeSuresiGun);
     const uye = kim.girisYapti && Boolean(await uyeMi(kim.kullanici));
-    const limitYok = kim.girisYapti && (uye || kim.kullanici?.role === 'student');
+    const kararlar = {};
+    for (const ozellik of OZELLIKLER) {
+      kararlar[ozellik] = kim.girisYapti ? await ozellikErisimi(kim.kullanici, ozellik) : null;
+    }
+    const sinirYok = ozellik => kim.girisYapti &&
+      (kararlar[ozellik] ? kararlar[ozellik].limitYok : (uye || kim.kullanici?.role === 'student'));
+    const limitYok = sinirYok('test');
     const soruKullanilan = limitYok ? 0 : await kullanilanSoruSayisi(kim.anahtar, haklar);
     const ozellikler = {};
     for (const ozellik of OZELLIKLER) {
-      const kullanilan = limitYok ? [] : await kullanilanKonular(kim.anahtar, ozellik, haklar);
+      const karar = kararlar[ozellik];
+      const ozellikLimitYok = sinirYok(ozellik);
+      const kullanilan = ozellikLimitYok ? [] : await kullanilanKonular(kim.anahtar, ozellik, haklar);
       ozellikler[ozellik] = {
         kullanilan: kullanilan.map(({ sinif, konu }) => ({ sinif, konu })),
-        kalan: limitYok ? null : Math.max(haklar.konu - kullanilan.length, 0),
-        acik: limitYok || (ozellik === 'konu' ? kim.girisYapti && haklar.ozetGorebilir : Boolean(haklar[ozellik]))
+        kalan: ozellikLimitYok ? null : Math.max(haklar.konu - kullanilan.length, 0),
+        acik: karar ? karar.izin : ozellikLimitYok ||
+          (ozellik === 'konu' ? kim.girisYapti && haklar.ozetGorebilir : Boolean(haklar[ozellik])),
+        ...(karar && !karar.izin && { gerekliPlan: karar.gerekliPlan })
       };
     }
     res.json({
@@ -266,8 +291,8 @@ function createPratikRouter({
       return res.status(400).json({ mesaj: 'Sınıf veya konu seçimi geçersiz.' });
     }
     const { sinif, konu } = secim;
-    const { kim, uye, limitYok, izin } = await erisim(req, res, ozellik, sinif, konu, haklar);
-    if (!izin) return yasakYaniti(res, kim.girisYapti);
+    const { kim, uye, limitYok, izin, karar } = await erisim(req, res, ozellik, sinif, konu, haklar);
+    if (!izin) return yasakYaniti(res, kim.girisYapti, undefined, karar);
 
     const istenen = Number(req.body?.adet);
     const soruKullanilan = limitYok ? 0 : await kullanilanSoruSayisi(kim.anahtar, haklar);
@@ -304,8 +329,8 @@ function createPratikRouter({
     const secim = await konuIcinIstekDogrula(req.body);
     if (!secim) return res.status(400).json({ mesaj: 'Sınıf veya konu seçimi geçersiz.' });
     const { sinif, konu } = secim;
-    const { kim, uye, limitYok, izin } = await erisim(req, res, 'konu', sinif, konu, haklar);
-    if (!izin) return yasakYaniti(res, kim.girisYapti);
+    const { kim, uye, limitYok, izin, karar } = await erisim(req, res, 'konu', sinif, konu, haklar);
+    if (!izin) return yasakYaniti(res, kim.girisYapti, undefined, karar);
 
     let anlatim;
     try {

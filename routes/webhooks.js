@@ -101,6 +101,7 @@ async function updatePayment({ gateway, orderReference, paymentId, amountMinor, 
       const base = user.expiresAt && user.expiresAt > now ? user.expiresAt : now;
       user.subscriptionStatus = 'active';
       user.subscriptionType = payment.subscriptionType;
+      if (payment.plan) user.subscriptionPlan = payment.plan;
       user.expiresAt = addSubscriptionPeriod(base, payment.subscriptionType);
       user.paymentGateway = gateway;
       if (payment.providerCustomerId) {

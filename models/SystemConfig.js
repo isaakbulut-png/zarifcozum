@@ -7,7 +7,8 @@ const DEFAULT_VISITOR_SETTINGS = Object.freeze({
   summaryEnabled: true,
   practiceEnabled: true,
   assistantEnabled: true,
-  fullTestEnabled: false
+  fullTestEnabled: false,
+  subscriptionRequired: false
 });
 
 const systemConfigSchema = new mongoose.Schema({
@@ -19,6 +20,7 @@ const systemConfigSchema = new mongoose.Schema({
   practiceEnabled: { type: Boolean, default: DEFAULT_VISITOR_SETTINGS.practiceEnabled },
   assistantEnabled: { type: Boolean, default: DEFAULT_VISITOR_SETTINGS.assistantEnabled },
   fullTestEnabled: { type: Boolean, default: DEFAULT_VISITOR_SETTINGS.fullTestEnabled },
+  subscriptionRequired: { type: Boolean, default: DEFAULT_VISITOR_SETTINGS.subscriptionRequired },
   homepageAssets: {
     animation: { type: String, default: null },
     heroImage: { type: String, default: null },

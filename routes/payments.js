@@ -5,12 +5,12 @@ const { rateLimit } = require('express-rate-limit');
 const Payment = require('../models/Payment');
 const User = require('../models/User');
 const { createRequireRole } = require('./auth');
+const { PLANS } = require('../lib/subscription-plans');
 
-const SANDBOX_PLANS = Object.freeze({
-  temel: Object.freeze({ label: 'Temel aylık demo üyeliği', amountMinor: 24900 }),
-  standart: Object.freeze({ label: 'Standart aylık demo üyeliği', amountMinor: 49900 }),
-  yogun: Object.freeze({ label: 'Yoğun aylık demo üyeliği', amountMinor: 89900 })
-});
+const SANDBOX_PLANS = Object.freeze(Object.fromEntries(Object.entries(PLANS).map(([key, plan]) => [
+  key,
+  Object.freeze({ label: `${plan.label} aylık demo üyeliği`, amountMinor: plan.amountMinor })
+])));
 
 const checkoutLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -58,11 +58,12 @@ function createPaymentRouter({
   router.get('/subscription', ogrenciKontrol, async (req, res) => {
     try {
       const user = await UserModel.findById(req.session.user.id)
-        .select('subscriptionStatus subscriptionType expiresAt');
+        .select('subscriptionStatus subscriptionType subscriptionPlan expiresAt');
       if (!user) return res.status(404).json({ mesaj: 'Hesap bulunamadı.' });
       res.json({
         subscriptionStatus: user.subscriptionStatus,
         subscriptionType: user.subscriptionType,
+        subscriptionPlan: user.subscriptionPlan,
         expiresAt: user.expiresAt
       });
     } catch (error) {
@@ -73,7 +74,7 @@ function createPaymentRouter({
 
   router.post('/paytr/checkout', ogrenciKontrol, checkoutLimiter, async (req, res) => {
     const planKey = typeof req.body?.plan === 'string' ? req.body.plan : '';
-    const plan = SANDBOX_PLANS[planKey];
+    const plan = Object.hasOwn(SANDBOX_PLANS, planKey) ? SANDBOX_PLANS[planKey] : null;
     if (!plan) return res.status(400).json({ mesaj: 'Geçersiz demo paketi.' });
 
     const merchantId = String(process.env.PAYTR_MERCHANT_ID || '').trim();
@@ -139,6 +140,7 @@ function createPaymentRouter({
         expectedAmountMinor: plan.amountMinor,
         currency: 'TRY',
         subscriptionType: 'monthly',
+        plan: planKey,
         status: 'pending'
       });
 

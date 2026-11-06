@@ -35,6 +35,11 @@ const paymentSchema = new mongoose.Schema({
     enum: ['monthly', 'yearly'],
     required: true
   },
+  plan: {
+    type: String,
+    enum: ['temel', 'standart', 'vip', null],
+    default: null
+  },
   status: {
     type: String,
     enum: ['pending', 'paid', 'failed'],

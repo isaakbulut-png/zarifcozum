@@ -94,6 +94,12 @@ function saveSession(req) {
   });
 }
 
+function restrictionMessage(user) {
+  return user.restrictionReason
+    ? `Hesabınız yönetici tarafından kısıtlanmıştır. Neden: ${user.restrictionReason}`
+    : 'Hesabınız yönetici tarafından kısıtlanmıştır.';
+}
+
 function publicUser(user) {
   const adminRole = adminRoleOf(user);
   return {
@@ -186,6 +192,9 @@ router.post('/login', loginLimiter, async (req, res) => {
     if (!user || user.role === 'admin' || !(await user.verifyPassword(password))) {
       return res.status(401).json({ mesaj: 'E-posta veya şifre hatalı.' });
     }
+    if (user.restricted) {
+      return res.status(403).json({ mesaj: restrictionMessage(user) });
+    }
 
     await regenerateSession(req);
     req.session.user = { ...publicUser(user) };
@@ -269,6 +278,9 @@ router.post('/auth/google', (req, res, next) => {
 
     if (user.role === 'admin' || user.adminRole) {
       return res.status(403).json({ mesaj: 'Yönetim hesabı Google ile giriş yapamaz.' });
+    }
+    if (user.restricted) {
+      return res.status(403).json({ mesaj: restrictionMessage(user) });
     }
     await regenerateSession(req);
     req.session.user = { ...publicUser(user) };

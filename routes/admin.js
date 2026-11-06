@@ -6,6 +6,7 @@ const { randomUUID } = require('node:crypto');
 const multer = require('multer');
 const { adminRoleOf, yetkiKontrolEt } = require('../lib/admin-rbac');
 const { validateImage } = require('../lib/resim-dogrula');
+const { PLANS } = require('../lib/subscription-plans');
 
 const PAGE_SIZE = 25;
 const MAX_ANIMATION_BYTES = 5 * 1024 * 1024;
@@ -24,7 +25,8 @@ const VISITOR_SETTING_FIELDS = new Set([
   'summaryEnabled',
   'practiceEnabled',
   'assistantEnabled',
-  'fullTestEnabled'
+  'fullTestEnabled',
+  'subscriptionRequired'
 ]);
 const VISITOR_SETTING_RANGES = {
   questionLimit: [0, 500],
@@ -254,7 +256,7 @@ function createAdminRouter({
       const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
       const [users, total] = await Promise.all([
         User.find(filter)
-          .select('name email role adminRole subscriptionStatus subscriptionType expiresAt createdAt')
+          .select('name email role adminRole restricted restrictionReason subscriptionStatus subscriptionType subscriptionPlan expiresAt createdAt')
           .sort({ createdAt: -1 })
           .skip((page - 1) * PAGE_SIZE)
           .limit(PAGE_SIZE)
@@ -271,9 +273,12 @@ function createAdminRouter({
           email: user.email,
           role: user.role,
           adminRole: adminRoleOf(user),
+          restricted: Boolean(user.restricted),
+          restrictionReason: user.restrictionReason || null,
           ...(req.adminRole === 'superadmin' && {
             subscriptionStatus: user.subscriptionStatus,
             subscriptionType: user.subscriptionType,
+            subscriptionPlan: user.subscriptionPlan || null,
             expiresAt: user.expiresAt
           }),
           createdAt: user.createdAt
@@ -282,6 +287,70 @@ function createAdminRouter({
     } catch (error) {
       console.error('Kullanıcılar alınamadı:', error);
       res.status(500).json({ mesaj: 'Kullanıcılar alınamadı.' });
+    }
+  });
+
+  router.put('/users/:id/restriction', allow('superadmin', 'support'), async (req, res) => {
+    const restricted = req.body?.restricted;
+    const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim() : '';
+    if (!ObjectId.isValid(req.params.id) || typeof restricted !== 'boolean') {
+      return res.status(400).json({ mesaj: 'Geçerli kullanıcı ve kısıtlama durumu gönderin.' });
+    }
+    if (restricted && (!reason || reason.length > 300)) {
+      return res.status(400).json({ mesaj: 'Kısıtlama nedeni 1–300 karakter olmalıdır.' });
+    }
+    try {
+      const target = await User.findById(req.params.id).select('role adminRole name');
+      if (!target || !['student', 'teacher'].includes(target.role) || adminRoleOf(target)) {
+        return res.status(404).json({ mesaj: 'Yalnızca öğrenci veya öğretmen hesapları kısıtlanabilir.' });
+      }
+      target.restricted = restricted;
+      target.restrictedAt = restricted ? new Date() : null;
+      target.restrictionReason = restricted ? reason : null;
+      await target.save();
+      await audit(req, restricted ? 'user.restricted' : 'user.restriction.removed', 'user', target._id.toString(),
+        restricted ? { reason } : {});
+      res.json({
+        mesaj: restricted ? 'Kullanıcı kısıtlandı.' : 'Kullanıcı kısıtlaması kaldırıldı.',
+        restricted
+      });
+    } catch (error) {
+      console.error('Kullanıcı kısıtlaması güncellenemedi:', error);
+      res.status(500).json({ mesaj: 'Kullanıcı kısıtlaması güncellenemedi.' });
+    }
+  });
+
+  router.put('/users/:id/subscription', allow('superadmin'), async (req, res) => {
+    const plan = req.body?.plan;
+    const days = req.body?.days;
+    const revoke = plan === null;
+    if (!ObjectId.isValid(req.params.id) || (!revoke && !Object.hasOwn(PLANS, plan)) ||
+        (!revoke && (!Number.isInteger(days) || days < 1 || days > 3650))) {
+      return res.status(400).json({ mesaj: 'Geçerli paket ve 1–3650 arası gün sayısı gönderin.' });
+    }
+    try {
+      const target = await User.findById(req.params.id).select('role name');
+      if (!target || target.role !== 'student') {
+        return res.status(404).json({ mesaj: 'Yalnızca öğrenci hesaplarına paket tanımlanabilir.' });
+      }
+      if (revoke) {
+        target.subscriptionStatus = 'free';
+        target.subscriptionPlan = null;
+        target.subscriptionType = null;
+        target.expiresAt = null;
+      } else {
+        target.subscriptionStatus = 'active';
+        target.subscriptionPlan = plan;
+        target.subscriptionType = 'monthly';
+        target.expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+      }
+      await target.save();
+      await audit(req, revoke ? 'user.subscription.revoked' : 'user.subscription.granted', 'user',
+        target._id.toString(), revoke ? {} : { plan, days });
+      res.json({ mesaj: revoke ? 'Abonelik kaldırıldı.' : 'Paket tanımlandı.' });
+    } catch (error) {
+      console.error('Kullanıcı aboneliği güncellenemedi:', error);
+      res.status(500).json({ mesaj: 'Kullanıcı aboneliği güncellenemedi.' });
     }
   });
 
@@ -336,6 +405,7 @@ function createAdminRouter({
           amount: payment.expectedAmountMinor / 100,
           currency: payment.currency,
           subscriptionType: payment.subscriptionType,
+          plan: payment.plan || null,
           status: payment.status,
           createdAt: payment.createdAt,
           paidAt: payment.paidAt

@@ -129,7 +129,7 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Ad</th><th>E-posta</th><th>Hesap rolü</th><th>Yönetim rolü</th><th>Abonelik</th><th>Kayıt tarihi</th><th>İşlemler</th></tr></thead>
+            <thead><tr><th>Ad</th><th>E-posta</th><th>Hesap rolü</th><th>Yönetim rolü</th><th>Abonelik</th><th>Paket</th><th>Bitiş</th><th>Kayıt tarihi</th><th>İşlemler</th></tr></thead>
             <tbody id="usersBody"></tbody>
           </table>
         </div>
@@ -154,7 +154,7 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Sipariş</th><th>Kullanıcı</th><th>Plan</th><th>Tutar</th><th>Sağlayıcı</th><th>Durum</th><th>Tarih</th></tr></thead>
+            <thead><tr><th>Sipariş</th><th>Kullanıcı</th><th>Paket</th><th>Plan</th><th>Tutar</th><th>Sağlayıcı</th><th>Durum</th><th>Tarih</th></tr></thead>
             <tbody id="paymentsBody"></tbody>
           </table>
         </div>
@@ -231,6 +231,7 @@
           <label><input id="visitorPracticeEnabled" type="checkbox"> Ziyaretçiler pratik test çözebilsin</label>
           <label><input id="visitorAssistantEnabled" type="checkbox"> Ziyaretçiler asistan özelliğini kullanabilsin</label>
           <label><input id="visitorFullTestEnabled" type="checkbox"> Ziyaretçiler tam kazanım testini başlatabilsin</label>
+          <label><input id="subscriptionRequired" type="checkbox"> Öğrenci özellikleri için aktif abonelik zorunlu olsun (ödeme açıldığında işaretleyin)</label>
         </div>
         <div class="toolbar" style="margin-top:18px">
           <button class="btn primary" type="submit" id="saveVisitorSettings">Ayarları kaydet</button>
@@ -344,6 +345,7 @@
       const subNames = { free: 'Ücretsiz', active: 'Aktif', expired: 'Süresi doldu' };
       const payNames = { paid: ['Ödendi', 'ok'], pending: ['Beklemede', 'warn'], failed: ['Başarısız', 'bad'] };
       const planNames = { monthly: 'Aylık', yearly: 'Yıllık' };
+      const packageNames = { temel: 'Temel', standart: 'Standart', vip: 'VIP' };
       const loaders = {
         overview: loadOverview, users: loadUsers, payments: loadPayments,
         announcements: loadAnnouncements, settings: loadVisitorSettings,
@@ -443,7 +445,7 @@
           $('pageInfo').textContent = `Sayfa ${data.page} / ${totalPages} · ${data.total} kayıt`;
           $('prevPage').disabled = data.page <= 1;
           $('nextPage').disabled = data.page >= totalPages;
-          if (!data.users.length) return emptyRow($('usersBody'), 7, 'Kullanıcı bulunamadı.');
+          if (!data.users.length) return emptyRow($('usersBody'), 9, 'Kullanıcı bulunamadı.');
           $('usersBody').replaceChildren(...data.users.map(user => {
             const tr = document.createElement('tr');
             cell(tr, user.name);
@@ -480,8 +482,79 @@
               roleCell.replaceChildren(selector);
             }
             cell(tr, subNames[user.subscriptionStatus] || '—', user.subscriptionStatus === 'active' ? 'ok' : '');
+            cell(tr, user.subscriptionStatus === 'active'
+              ? (packageNames[user.subscriptionPlan] || 'Temel (eski)')
+              : '—');
+            cell(tr, user.expiresAt ? fmtDate(user.expiresAt) : '—');
             cell(tr, fmtDate(user.createdAt));
-            cell(tr, '');
+            const actionCell = cell(tr, '');
+            if (activeAdminRole === 'superadmin' && user.role === 'student') {
+              const packageSelect = document.createElement('select');
+              packageSelect.setAttribute('aria-label', `${user.name} paket işlemi`);
+              for (const [value, label] of [['', 'Paket...'], ['temel', 'Temel ver'], ['standart', 'Standart ver'],
+                ['vip', 'VIP ver'], ['revoke', 'Aboneliği kaldır']]) {
+                packageSelect.append(Object.assign(document.createElement('option'), { value, textContent: label }));
+              }
+              packageSelect.addEventListener('change', async () => {
+                const choice = packageSelect.value;
+                if (!choice) return;
+                let body;
+                if (choice === 'revoke') {
+                  if (!confirm(`${user.name} aboneliği kaldırılsın mı?`)) { packageSelect.value = ''; return; }
+                  body = { plan: null };
+                } else {
+                  const days = Number(prompt(`${packageNames[choice]} paketi kaç gün geçerli olsun? (1–3650)`, '30'));
+                  if (!Number.isInteger(days) || days < 1 || days > 3650) { packageSelect.value = ''; return; }
+                  body = { plan: choice, days };
+                }
+                try {
+                  await api(`/api/admin/users/${encodeURIComponent(user.id)}/subscription`, {
+                    method: 'PUT',
+                    body: JSON.stringify(body)
+                  });
+                } catch (error) {
+                  $('usersMsg').textContent = error.message;
+                }
+                loadUsers();
+              });
+              actionCell.append(packageSelect, ' ');
+            }
+            if (['student', 'teacher'].includes(user.role) && !user.adminRole) {
+              const button = document.createElement('button');
+              button.type = 'button';
+              button.className = `btn sm${user.restricted ? '' : ' danger'}`;
+              button.textContent = user.restricted ? 'Kısıtlamayı kaldır' : 'Kısıtla';
+              button.addEventListener('click', async () => {
+                let reason = '';
+                if (user.restricted) {
+                  if (!confirm(`${user.name} için kısıtlama kaldırılsın mı?`)) return;
+                } else {
+                  reason = (prompt(`${user.name} kısıtlanacak; hesap hiçbir işlem yapamaz ve oturumu kapatılır.\nKısıtlama nedeni (zorunlu, en fazla 300 karakter):`) || '').trim();
+                  if (!reason) return;
+                }
+                try {
+                  await api(`/api/admin/users/${encodeURIComponent(user.id)}/restriction`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ restricted: !user.restricted, reason })
+                  });
+                } catch (error) {
+                  $('usersMsg').textContent = error.message;
+                }
+                loadUsers();
+              });
+              actionCell.append(button);
+            }
+            if (user.restricted) {
+              tr.children[0].append(' ', Object.assign(document.createElement('span'), {
+                className: 'chip warn',
+                textContent: 'Kısıtlı',
+                title: user.restrictionReason || ''
+              }));
+              if (user.restrictionReason) tr.children[0].append(Object.assign(document.createElement('div'), {
+                className: 'msg',
+                textContent: `Neden: ${user.restrictionReason}`
+              }));
+            }
             return tr;
           }));
         } catch (error) { $('usersMsg').textContent = error.message; }
@@ -493,11 +566,12 @@
         if ($('paymentStatus').value) params.set('status', $('paymentStatus').value);
         try {
           const data = await api(`/api/admin/payments?${params}`);
-          if (!data.payments.length) return emptyRow($('paymentsBody'), 7, 'Ödeme kaydı yok.');
+          if (!data.payments.length) return emptyRow($('paymentsBody'), 8, 'Ödeme kaydı yok.');
           $('paymentsBody').replaceChildren(...data.payments.map(payment => {
             const tr = document.createElement('tr');
             cell(tr, payment.orderReference);
             cell(tr, `${payment.userName} (${payment.userEmail})`);
+            cell(tr, packageNames[payment.plan] || '—');
             cell(tr, planNames[payment.subscriptionType] || payment.subscriptionType);
             cell(tr, `${payment.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ${payment.currency}`);
             cell(tr, payment.gateway);
@@ -559,6 +633,7 @@
           $('visitorPracticeEnabled').checked = settings.practiceEnabled;
           $('visitorAssistantEnabled').checked = settings.assistantEnabled;
           $('visitorFullTestEnabled').checked = settings.fullTestEnabled;
+          $('subscriptionRequired').checked = settings.subscriptionRequired;
         } catch (error) { message.textContent = error.message; }
         await loadHomepageAssets();
       }
@@ -756,7 +831,8 @@
           summaryEnabled: $('visitorSummaryEnabled').checked,
           practiceEnabled: $('visitorPracticeEnabled').checked,
           assistantEnabled: $('visitorAssistantEnabled').checked,
-          fullTestEnabled: $('visitorFullTestEnabled').checked
+          fullTestEnabled: $('visitorFullTestEnabled').checked,
+          subscriptionRequired: $('subscriptionRequired').checked
         };
         try {
           const data = await api('/api/admin/settings', {
