@@ -24,7 +24,7 @@
           <a href="/test.html">Kazanım Testleri</a>
           <a href="/canli.html">Canlı Dersler</a>
           <a href="/asistan.html">Öğrenme Asistanı</a>
-          <a href="/deneme-sinavi-optik.html">Optik Deneme</a>
+          <a href="/deneme-sinavi-optik.html">Soru Pratiği ve Denemeler</a>
         </nav>
         <nav class="site-footer-group" aria-label="Kurum bağlantıları">
           <h2>Kurum</h2>
