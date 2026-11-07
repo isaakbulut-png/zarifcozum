@@ -39,26 +39,31 @@
   let hasMore = false;
   let loadingOlder = false;
 
-  function createMessage(role, text) {
+  function createMessage(role, text, richHtml) {
     const bubble = document.createElement('article');
     bubble.className = `live-ai-message is-${role}`;
     const label = document.createElement('strong');
     label.textContent = role === 'user' ? 'Sen' : role === 'ai' ? 'AI Mentör' : 'Bilgi';
-    const content = document.createElement('p');
-    content.textContent = text;
+    const content = document.createElement('div');
+    content.className = 'live-ai-content';
+    if (role === 'ai' && richHtml && window.zarifRichContent?.render(content, richHtml)) {
+      content.classList.add('has-rich-content');
+    } else {
+      content.textContent = text;
+    }
     bubble.append(label, content);
     return bubble;
   }
 
-  function addMessage(role, text) {
-    const bubble = createMessage(role, text);
+  function addMessage(role, text, richHtml) {
+    const bubble = createMessage(role, text, richHtml);
     messages.append(bubble);
     messages.scrollTop = messages.scrollHeight;
     return bubble;
   }
 
   function appendStoredMessage(record, prepend) {
-    const bubble = createMessage(record.sender, record.message);
+    const bubble = createMessage(record.sender, record.message, record.richHtml);
     if (prepend) messages.prepend(bubble);
     else {
       messages.append(bubble);
@@ -69,7 +74,9 @@
   function showHistory(result, prepend) {
     const records = result.messages || [];
     const fragment = document.createDocumentFragment();
-    for (const record of records) fragment.append(createMessage(record.sender, record.message));
+    for (const record of records) {
+      fragment.append(createMessage(record.sender, record.message, record.richHtml));
+    }
     if (prepend) messages.prepend(fragment);
     else {
       messages.append(fragment);
@@ -171,7 +178,7 @@
         ogrenciMesaji,
         gorevTuru: 'ai_mentor'
       });
-      addMessage('ai', result.yanit);
+      addMessage('ai', result.yanit, result.yanitHtml);
       status.textContent = 'AI Mentör hazır.';
     } catch (error) {
       addMessage('notice', error.message || 'AI Mentör şu anda yanıt veremiyor.');

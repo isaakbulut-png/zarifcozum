@@ -117,7 +117,10 @@ function createRealtimeFixture() {
     },
     generateReply: async request => {
       replies.push(request);
-      return `Yanıt: ${request.ogrenciMesaji}`;
+      return {
+        text: `Yanıt: ${request.ogrenciMesaji}`,
+        html: '<p><span class="ql-formula" data-value="x^2">x²</span></p>'
+      };
     }
   });
 
@@ -246,15 +249,18 @@ test('Socket.IO authenticates sessions and keeps persisted room history private'
   });
   assert.equal(acknowledgement.success, true);
   assert.equal(acknowledgement.yanit, 'Yanıt: Kesir nedir?');
+  assert.equal(acknowledgement.yanitHtml, '<p><span class="ql-formula" data-value="x^2">x²</span></p>');
   const received = await studentReply;
   assert.equal(received.userMessage.message, 'Kesir nedir?');
   assert.equal(received.aiMessage.message, 'Yanıt: Kesir nedir?');
+  assert.equal(received.aiMessage.richHtml, acknowledgement.yanitHtml);
   await new Promise(resolve => setTimeout(resolve, 25));
   assert.equal(teacherReceivedPrivateMessage, false);
   assert.equal(fixture.replies.length, 1);
   assert.equal(fixture.replies[0].sinif, 6);
   assert.equal(fixture.messages.length, 2);
   assert.deepEqual(fixture.messages.map(message => message.sender), ['user', 'ai']);
+  assert.equal(fixture.messages.find(message => message.sender === 'ai').richHtml, acknowledgement.yanitHtml);
   assert.ok(fixture.messages.every(message => message.roomName === 'meeting-123'));
 
   const secondStudentSocket = await connect(url, 'student-1');
@@ -262,6 +268,7 @@ test('Socket.IO authenticates sessions and keeps persisted room history private'
   const rejoined = await emitWithAck(secondStudentSocket, 'join-room', '123456789');
   assert.equal(rejoined.messages.length, 2);
   assert.deepEqual(rejoined.messages.map(message => message.sender), ['user', 'ai']);
+  assert.equal(rejoined.messages.find(message => message.sender === 'ai').richHtml, acknowledgement.yanitHtml);
   assert.equal(fixture.attendances[0].joinCount, 2);
 
   const studentHistory = await emitWithAck(student, 'load-history', '123456789');

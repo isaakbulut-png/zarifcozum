@@ -6,6 +6,7 @@
 <title>Öğrenci Paneli | ZarifÇözüm</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
 <style>
 :root{
   --navy-900:#4a2e1a;
@@ -27,6 +28,9 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.55;min-height:100vh}
+.quiz-rich-content{margin:8px 0}
+.quiz-svg{overflow:auto}
+.quiz-svg svg{max-width:100%;max-height:300px}
 a{color:inherit;text-decoration:none}
 button,select{font:inherit}
 :focus-visible{outline:3px solid var(--orange);outline-offset:2px}
@@ -477,6 +481,9 @@ button,select{font:inherit}
   </form>
 </dialog>
 
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+<script src="assets/rich-content.js"></script>
+<script src="assets/safe-svg.js"></script>
 <script>
   (() => {
     const $ = id => document.getElementById(id);
@@ -762,12 +769,32 @@ button,select{font:inherit}
       $('activeQuizDescription').textContent = quiz.description || `${quiz.questions.length} soru`;
       $('quizAttemptForm').innerHTML = quiz.questions.map((question, index) => `
         <fieldset class="quiz-question">
-          <legend>${index + 1}. ${esc(question.text)}</legend>
+          <legend>${index + 1}. Soru</legend>
+          <div class="quiz-rich-content">${question.html ? '' : esc(question.text)}</div>
+          <div class="quiz-svg"></div>
           ${['A','B','C','D'].map(letter => `<label class="quiz-option">
             <input type="radio" name="answer-${index}" value="${letter}">
             <span><strong>${letter})</strong> ${esc(question.options[letter])}</span>
           </label>`).join('')}
         </fieldset>`).join('') + '<button class="btn-join" type="submit">Testi gönder</button>';
+          $('quizAttemptForm').querySelectorAll('.quiz-question').forEach((fieldset, index) => {
+            const question = quiz.questions[index];
+            if (question.html) {
+              const target = fieldset.querySelector('.quiz-rich-content');
+              if (!window.zarifRichContent || !window.zarifRichContent.render(target, question.html)) {
+                target.textContent = question.text;
+              }
+            }
+            if (question.svg) {
+              const target = fieldset.querySelector('.quiz-svg');
+              try {
+                window.zarifSafeSvg.render(target, question.svg);
+              } catch (error) {
+                target.textContent = 'Soru şekli görüntülenemedi.';
+                console.error('Soru şekli görüntülenemedi:', error);
+              }
+            }
+          });
       $('quizAttemptStatus').textContent = '';
       $('quizAttemptStatus').className = 'feed-status';
       $('quizReview').replaceChildren();

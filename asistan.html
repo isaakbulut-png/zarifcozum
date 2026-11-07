@@ -84,6 +84,7 @@
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/pratik.js"></script>
 <script src="/socket.io/socket.io.js"></script>
+<script src="/assets/rich-content.js"></script>
 <script src="/assets/ai-chat.js"></script>
 <script>ZarifPratik.mount(document.getElementById("pratik-mount"),{mod:"asistan",sinif:new URLSearchParams(location.search).get("sinif")});</script>
 <script>
@@ -184,6 +185,26 @@
     status(); bot(T[topic].steps[step].q);
   }
   const escapeHtml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  function createRichBot(richHtml, tag) {
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble bot';
+    const label = document.createElement('span');
+    label.className = 'tag';
+    label.textContent = tag;
+    bubble.append(label, document.createElement('br'));
+    const content = document.createElement('div');
+    if (window.zarifRichContent.render(content, richHtml)) {
+      bubble.append(content);
+      return bubble;
+    }
+    bubble.append(document.createTextNode('Yanıt içeriği gösterilemiyor.'));
+    return bubble;
+  }
+  function addRichBot(richHtml, tag) {
+    const bubble = createRichBot(richHtml, tag);
+    body.append(bubble);
+    body.scrollTop = body.scrollHeight;
+  }
 
   // $$...$$, \[...\], $...$ ve \(...\) bloklarını KaTeX ile çizer; kalan metin kaçışlanır.
   // KaTeX yüklenemezse veya formül hatalıysa ilgili parça düz metin olarak kalır.
@@ -213,12 +234,14 @@
     const t = document.createElement('div'); t.className = 'typing'; t.innerHTML = '<i></i><i></i><i></i>';
     body.appendChild(t); body.scrollTop = body.scrollHeight;
     let metin;
+    let richHtml;
     try {
       const data = await window.zarifAiChat.sendMessage({
         ogrenciMesaji: mesaj,
         gorevTuru: 'ai_mentor'
       });
       metin = data.yanit;
+      richHtml = data.yanitHtml;
     } catch (error) {
       if (error.status === 401) metin = 'AI Mentör\'ü kullanmak için lütfen giriş yapın.';
       else if (error.status === 429) metin = error.message;
@@ -226,7 +249,8 @@
     } finally {
       t.remove(); bekliyor = false;
     }
-    add('bot', metniCiz(String(metin)), 'AI Mentör');
+    if (richHtml) addRichBot(richHtml, 'AI Mentör');
+    else add('bot', metniCiz(String(metin)), 'AI Mentör');
   }
 
   $('form').addEventListener('submit', e => {
@@ -248,7 +272,8 @@
     if (topic !== AI_TOPIC || !data?.userMessage || !data.aiMessage) return;
     const tag = data.roomName === 'assistant' ? 'AI Mentör' : 'Canlı ders · AI Mentör';
     add('user', escapeHtml(data.userMessage.message), tag);
-    add('bot', metniCiz(String(data.aiMessage.message)), tag);
+    if (data.aiMessage.richHtml) addRichBot(data.aiMessage.richHtml, tag);
+    else add('bot', metniCiz(String(data.aiMessage.message)), tag);
   });
   const historyButton = $('historyOlder');
   const formButton = $('form').querySelector('button[type="submit"]');
@@ -262,6 +287,7 @@
     for (const record of records) {
       const tag = record.roomName === 'assistant' ? 'AI Mentör' : 'Canlı ders · AI Mentör';
       if (record.sender === 'user') add('user', escapeHtml(record.message), tag);
+      else if (record.richHtml) addRichBot(record.richHtml, tag);
       else add('bot', metniCiz(String(record.message)), tag);
     }
     historyHasMore = result.hasMore;
@@ -287,7 +313,9 @@
         const tag = record.roomName === 'assistant' ? 'AI Mentör' : 'Canlı ders · AI Mentör';
         fragment.append(record.sender === 'user'
           ? add('user', escapeHtml(record.message), tag)
-          : add('bot', metniCiz(String(record.message)), tag));
+          : record.richHtml
+            ? createRichBot(record.richHtml, tag)
+            : add('bot', metniCiz(String(record.message)), tag));
       }
       body.prepend(fragment);
       historyHasMore = result.hasMore;

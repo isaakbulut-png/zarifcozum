@@ -13,7 +13,9 @@
 .live-ai-messages { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; min-height: 100px; padding: 4px; }
 .live-ai-message { max-width: 92%; padding: 8px 10px; border-radius: 10px; overflow-wrap: anywhere; }
 .live-ai-message strong { display: block; margin-bottom: 3px; font-size: 11px; }
-.live-ai-message p { margin: 0; white-space: pre-wrap; }
+.live-ai-content { white-space: pre-wrap; }
+.live-ai-content p { margin: 0; }
+.live-ai-content ul, .live-ai-content ol { margin: 0; padding-left: 20px; }
 .live-ai-message.is-user { align-self: flex-end; background: #efe3d5; }
 .live-ai-message.is-ai { align-self: flex-start; background: #fff; border: 1px solid #eee4da; }
 .live-ai-message.is-notice { align-self: stretch; background: #fff0e8; color: #8a321b; }

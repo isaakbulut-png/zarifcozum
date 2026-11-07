@@ -7,6 +7,8 @@ const multer = require('multer');
 const { adminRoleOf, yetkiKontrolEt } = require('../lib/admin-rbac');
 const { validateImage } = require('../lib/resim-dogrula');
 const { PLANS } = require('../lib/subscription-plans');
+const { normalizeFaqQuestion } = require('../lib/faq-service');
+const { sanitizeFaqHtml } = require('../lib/rich-content');
 
 const PAGE_SIZE = 25;
 const MAX_ANIMATION_BYTES = 5 * 1024 * 1024;
@@ -80,7 +82,8 @@ function validateAnimation(buffer) {
 
 function createAdminRouter({
   User, Payment, SystemConfig, AdminLog, uploadDir = path.join(__dirname, '..', 'uploads', 'homepage'),
-  getAnnouncementCollection, getQuizCollection, getLessonCollection, getSupportTicketCollection
+  getAnnouncementCollection, getFaqModel, invalidateFaqCache,
+  getQuizCollection, getLessonCollection, getSupportTicketCollection
 }) {
   const router = express.Router();
   const mediaUpload = multer({
@@ -458,6 +461,120 @@ function createAdminRouter({
     } catch (error) {
       console.error('Duyuru silinemedi:', error);
       res.status(500).json({ mesaj: 'Duyuru silinemedi.' });
+    }
+  });
+
+  router.get('/faqs', allow('superadmin'), async (req, res) => {
+    try {
+      const entries = await getFaqModel().find({})
+        .select('question answerHtml grade active createdAt updatedAt')
+        .sort({ updatedAt: -1, createdAt: -1 }).limit(500).lean();
+      res.json({
+        faqs: entries.map(({ _id, question, answerHtml, grade, active, createdAt, updatedAt }) => ({
+          id: _id.toString(), question, answerHtml, grade: grade ?? null,
+          active: active !== false, createdAt, updatedAt
+        }))
+      });
+    } catch (error) {
+      console.error('FAQ kayıtları alınamadı:', error);
+      res.status(500).json({ mesaj: 'FAQ kayıtları alınamadı.' });
+    }
+  });
+
+  router.post('/faqs', allow('superadmin'), async (req, res) => {
+    const question = typeof req.body?.question === 'string' ? req.body.question.trim() : '';
+    const rawAnswerHtml = typeof req.body?.answerHtml === 'string' ? req.body.answerHtml : '';
+    const grade = req.body?.grade === '' || req.body?.grade == null ? null : Number(req.body.grade);
+    const active = req.body?.active !== false;
+    const normalizedQuestion = normalizeFaqQuestion(question);
+    if (!question || question.length > 300 || !normalizedQuestion ||
+        (grade !== null && (!Number.isInteger(grade) || grade < 5 || grade > 12)) ||
+        typeof req.body?.active !== 'undefined' && typeof req.body.active !== 'boolean') {
+      return res.status(400).json({ mesaj: 'Soru (1–300), yanıt (1–5000), sınıf veya yayın durumu geçersiz.' });
+    }
+    let answer;
+    try {
+      answer = sanitizeFaqHtml(rawAnswerHtml);
+    } catch (error) {
+      return res.status(400).json({ mesaj: error.message });
+    }
+    try {
+      const { html: answerHtml, text: answerText } = answer;
+      const scopeKey = grade === null ? 'all' : String(grade);
+      const existing = await getFaqModel().findOne({ normalizedQuestion, scopeKey }).select('_id').lean();
+      if (existing) return res.status(409).json({ mesaj: 'Bu soru aynı sınıf kapsamıyla zaten kayıtlı.' });
+      const now = new Date();
+      const faq = {
+        question, normalizedQuestion, answerHtml, answerText, grade, scopeKey,
+        active, createdBy: req.session.user.id
+      };
+      const created = await getFaqModel().create(faq);
+      await invalidateFaqCache?.();
+      await audit(req, 'faq.created', 'faq', created._id.toString(), { grade });
+      res.status(201).json({
+        mesaj: 'FAQ kaydedildi.',
+        faq: {
+          id: created._id.toString(), question, answerHtml, grade, active,
+          createdAt: created.createdAt, updatedAt: created.updatedAt
+        }
+      });
+    } catch (error) {
+      if (error.code === 11000) return res.status(409).json({ mesaj: 'Bu soru aynı sınıf kapsamıyla zaten kayıtlı.' });
+      console.error('FAQ kaydedilemedi:', error);
+      res.status(500).json({ mesaj: 'FAQ kaydedilemedi.' });
+    }
+  });
+
+  router.put('/faqs/:id', allow('superadmin'), async (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz FAQ no.' });
+    const question = typeof req.body?.question === 'string' ? req.body.question.trim() : '';
+    const rawAnswerHtml = typeof req.body?.answerHtml === 'string' ? req.body.answerHtml : '';
+    const grade = req.body?.grade === '' || req.body?.grade == null ? null : Number(req.body.grade);
+    const active = req.body?.active !== false;
+    const normalizedQuestion = normalizeFaqQuestion(question);
+    if (!question || question.length > 300 || !normalizedQuestion ||
+        (grade !== null && (!Number.isInteger(grade) || grade < 5 || grade > 12)) ||
+        typeof req.body?.active !== 'undefined' && typeof req.body.active !== 'boolean') {
+      return res.status(400).json({ mesaj: 'Soru (1–300), yanıt (1–5000), sınıf veya yayın durumu geçersiz.' });
+    }
+    let answer;
+    try {
+      answer = sanitizeFaqHtml(rawAnswerHtml);
+    } catch (error) {
+      return res.status(400).json({ mesaj: error.message });
+    }
+    try {
+      const { html: answerHtml, text: answerText } = answer;
+      const id = new ObjectId(req.params.id);
+      const updated = await getFaqModel().findByIdAndUpdate(id, {
+        $set: {
+          question, normalizedQuestion, answerHtml, answerText, grade,
+          scopeKey: grade === null ? 'all' : String(grade),
+          active
+        }
+      }, { new: true, runValidators: true });
+      if (!updated) return res.status(404).json({ mesaj: 'FAQ bulunamadı.' });
+      await invalidateFaqCache?.();
+      await audit(req, 'faq.updated', 'faq', req.params.id, { grade, active });
+      res.json({ mesaj: 'FAQ güncellendi.' });
+    } catch (error) {
+      if (error.code === 11000) return res.status(409).json({ mesaj: 'Bu soru aynı sınıf kapsamıyla zaten kayıtlı.' });
+      console.error('FAQ güncellenemedi:', error);
+      res.status(500).json({ mesaj: 'FAQ güncellenemedi.' });
+    }
+  });
+
+  router.delete('/faqs/:id', allow('superadmin'), async (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz FAQ no.' });
+    try {
+      const result = await getFaqModel().deleteOne({ _id: new ObjectId(req.params.id) });
+      if (!result.deletedCount) return res.status(404).json({ mesaj: 'FAQ bulunamadı.' });
+      await invalidateFaqCache?.();
+      await audit(req, 'faq.deleted', 'faq', req.params.id);
+      res.json({ mesaj: 'FAQ silindi.' });
+    } catch (error) {
+      console.error('FAQ silinemedi:', error);
+      res.status(500).json({ mesaj: 'FAQ silinemedi.' });
     }
   });
 

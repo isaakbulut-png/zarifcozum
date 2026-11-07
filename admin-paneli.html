@@ -7,6 +7,9 @@
   <meta name="color-scheme" content="light">
   <title>Yönetim Paneli | ZarifÇözüm</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" integrity="sha384-ecIckRi4QlKYya/FQUbBUjS4qp65jF/J87Guw5uzTbO1C1Jfa/6kYmd6dXUF6D7i" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <style>
     :root{font-family:Inter,"Segoe UI",sans-serif;color:#3a2618;background:#fbf1e8;font-synthesis:none}
     *{box-sizing:border-box}
@@ -67,6 +70,12 @@
     .toggle-list label{display:flex;align-items:center;gap:10px;color:#523520}
     .rbac-loading{visibility:hidden}
     .toggle-list input{width:18px;height:18px}
+    #faqAnswerEditor{background:#fffaf5}
+    #faqAnswerEditor .ql-editor{min-height:180px}
+    #faqAnswerEditor .ql-formula{font-size:1.1em}
+    #faqFormulaDialog{width:min(560px,calc(100% - 32px));border:1px solid #d9d3c3;border-radius:14px;padding:22px;background:#fffaf5;color:#3a2618}
+    #faqFormulaDialog::backdrop{background:rgba(35,24,16,.55)}
+    #faqFormulaPreview{min-height:64px;margin:12px 0;padding:14px;border:1px solid #d9d3c3;border-radius:8px;background:#fff;overflow:auto}
     [hidden]{display:none!important}
     @media (max-width:820px){body{grid-template-columns:1fr}aside{position:static;height:auto}.logout{margin-top:16px}}
   </style>
@@ -81,6 +90,7 @@
     <button class="nav-btn" type="button" data-view="users" data-admin-roles="superadmin,support">Kullanıcılar</button>
     <button class="nav-btn" type="button" data-view="payments" data-admin-roles="superadmin">Ödemeler / Abonelikler</button>
     <button class="nav-btn" type="button" data-view="announcements" data-admin-roles="superadmin">Duyurular</button>
+    <button class="nav-btn" type="button" data-view="faqs" data-admin-roles="superadmin">Yapay Zekâ FAQ</button>
 
     <div class="nav-title" data-admin-roles="superadmin,editor">EĞİTİM</div>
     <a class="nav-btn" data-admin-roles="superadmin,editor" href="/ogretmen-paneli.html#image-questions" style="display:block;text-decoration:none">Soru Ekle / Resim Yükle</a>
@@ -178,6 +188,54 @@
         <div id="announcementList"></div>
       </div>
     </section>
+
+    <section id="view-faqs" hidden>
+      <div class="panel" style="margin-top:0">
+        <h3 id="faqFormTitle">Yeni FAQ yanıtı</h3>
+        <p>Yalnızca soru metniyle tam eşleşen etkin kayıtlar AI kullanılmadan yanıtlanır. Sınıf seçilmezse kayıt tüm sınıflar için geçerlidir.</p>
+        <form id="faqForm">
+          <div class="settings-grid">
+            <label for="faqGrade">Sınıf kapsamı
+              <select id="faqGrade">
+                <option value="">Tüm sınıflar</option>
+                <option value="5">5. sınıf</option><option value="6">6. sınıf</option><option value="7">7. sınıf</option><option value="8">8. sınıf</option>
+                <option value="9">9. sınıf</option><option value="10">10. sınıf</option><option value="11">11. sınıf</option><option value="12">12. sınıf</option>
+              </select>
+            </label>
+            <label><span>Yayın durumu</span><span><input id="faqActive" type="checkbox" checked> Etkin</span></label>
+          </div>
+          <label for="faqQuestion">Soru (en fazla 300 karakter)</label>
+          <textarea id="faqQuestion" maxlength="300" required></textarea>
+          <label for="faqAnswerEditor">Yanıt / ipucu</label>
+          <div id="faqAnswerEditor"></div>
+          <div class="toolbar" style="margin-top:10px">
+            <button class="btn" id="faqFormulaOpen" type="button">∑ Formül sihirbazı</button>
+          </div>
+          <p>Formülleri LaTeX ile ekleyebilir, düzenleyici araç çubuğundan metni biçimlendirebilirsiniz.</p>
+          <div class="toolbar" style="margin-top:10px">
+            <button class="btn primary" id="faqSave" type="submit">FAQ kaydet</button>
+            <button class="btn" id="faqCancel" type="button" hidden>Vazgeç</button>
+          </div>
+          <p class="msg" id="faqMsg" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+      <div class="panel">
+        <h3>Kayıtlı FAQ yanıtları</h3>
+        <div id="faqList"></div>
+      </div>
+    </section>
+    <dialog id="faqFormulaDialog" aria-labelledby="faqFormulaTitle">
+      <form method="dialog" id="faqFormulaForm">
+        <h3 id="faqFormulaTitle">LaTeX formülü ekle</h3>
+        <label for="faqFormulaInput">LaTeX ifadesi</label>
+        <textarea id="faqFormulaInput" maxlength="500" placeholder="Örnek: \frac{a}{b}" required></textarea>
+        <div id="faqFormulaPreview" aria-live="polite"></div>
+        <div class="toolbar">
+          <button class="btn primary" id="faqFormulaInsert" type="button">Formülü ekle</button>
+          <button class="btn" type="submit">İptal</button>
+        </div>
+      </form>
+    </dialog>
 
     <section id="view-solved-questions" hidden>
       <div class="panel" style="margin-top:0">
@@ -330,12 +388,14 @@
   </main>
 
   <script src="/assets/cozumlu-sorular-admin.js"></script>
+  <script src="/assets/rich-content.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js" integrity="sha384-reiVBUvj2HgLgCZalqLFSMBVD9LdtiwGyybRGCq2AfP8Rgebz5DxEnwKp4FpagKV" crossorigin="anonymous"></script>
   <script>
     (() => {
       const $ = id => document.getElementById(id);
       const titles = {
         overview: 'Genel Bakış', users: 'Kullanıcılar', payments: 'Ödemeler / Abonelikler',
-        announcements: 'Duyurular', settings: 'Site Ayarları', logs: 'Güvenlik ve Kayıtlar',
+        announcements: 'Duyurular', faqs: 'Yapay Zekâ FAQ', settings: 'Site Ayarları', logs: 'Güvenlik ve Kayıtlar',
         'education-lessons': 'Konu Anlatımları', 'education-quizzes': 'Testler ve Quizler',
         'education-exams': 'Deneme Sınavları', 'support-tickets': 'Destek Talepleri',
         'solved-questions': 'Çözümlü Sorular'
@@ -346,9 +406,22 @@
       const payNames = { paid: ['Ödendi', 'ok'], pending: ['Beklemede', 'warn'], failed: ['Başarısız', 'bad'] };
       const planNames = { monthly: 'Aylık', yearly: 'Yıllık' };
       const packageNames = { temel: 'Temel', standart: 'Standart', vip: 'VIP' };
+      const faqEditor = window.Quill
+        ? new window.Quill('#faqAnswerEditor', {
+          theme: 'snow',
+          modules: {
+            toolbar: [
+              ['bold', 'italic', 'underline', 'strike'],
+              [{ list: 'ordered' }, { list: 'bullet' }],
+              [{ script: 'sub' }, { script: 'super' }],
+              ['blockquote', 'clean']
+            ]
+          }
+        })
+        : null;
       const loaders = {
         overview: loadOverview, users: loadUsers, payments: loadPayments,
-        announcements: loadAnnouncements, settings: loadVisitorSettings,
+        announcements: loadAnnouncements, faqs: loadFaqs, settings: loadVisitorSettings,
         logs: loadLogs, 'education-lessons': loadLessons,
         'education-quizzes': loadQuizzes, 'education-exams': loadExams,
         'support-tickets': loadTickets, 'solved-questions': () => window.solvedQuestionsAdmin.load()
@@ -619,6 +692,82 @@
         } catch (error) { $('announcementMsg').textContent = error.message; }
       }
 
+      async function loadFaqs() {
+        const message = $('faqMsg');
+        message.className = 'msg';
+        message.textContent = '';
+        if (!faqEditor) {
+          message.textContent = 'Zengin metin editörü yüklenemedi. CDN bağlantısını kontrol edin.';
+          return;
+        }
+        try {
+          const data = await api('/api/admin/faqs');
+          const list = $('faqList');
+          if (!data.faqs.length) {
+            const empty = document.createElement('div');
+            empty.className = 'empty';
+            empty.textContent = 'Henüz FAQ yanıtı eklenmedi.';
+            return list.replaceChildren(empty);
+          }
+          list.replaceChildren(...data.faqs.map(item => {
+            const row = document.createElement('div');
+            row.className = 'announcement';
+            const content = document.createElement('div');
+            const question = document.createElement('p');
+            question.textContent = item.question;
+            const answer = document.createElement('div');
+            if (!window.zarifRichContent?.render(answer, item.answerHtml)) {
+              answer.textContent = 'Yanıt içeriği gösterilemiyor.';
+            }
+            const meta = document.createElement('small');
+            meta.textContent = `${item.grade ? `${item.grade}. sınıf` : 'Tüm sınıflar'} · ${item.active ? 'Etkin' : 'Pasif'}`;
+            content.append(question, answer, meta);
+            const actions = document.createElement('div');
+            const edit = document.createElement('button');
+            edit.type = 'button';
+            edit.className = 'btn sm';
+            edit.textContent = 'Düzenle';
+            edit.addEventListener('click', () => {
+              activeFaqId = item.id;
+              $('faqQuestion').value = item.question;
+              faqEditor.clipboard.dangerouslyPasteHTML(item.answerHtml, 'silent');
+              $('faqGrade').value = item.grade ?? '';
+              $('faqActive').checked = item.active;
+              $('faqFormTitle').textContent = 'FAQ yanıtını düzenle';
+              $('faqSave').textContent = 'Değişiklikleri kaydet';
+              $('faqCancel').hidden = false;
+              $('faqQuestion').focus();
+            });
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'btn sm danger';
+            remove.textContent = 'Sil';
+            remove.addEventListener('click', async () => {
+              if (!confirm('Bu FAQ yanıtı silinsin mi?')) return;
+              try {
+                await api(`/api/admin/faqs/${encodeURIComponent(item.id)}`, { method: 'DELETE' });
+                if (activeFaqId === item.id) resetFaqForm();
+                await loadFaqs();
+              } catch (error) { message.textContent = error.message; }
+            });
+            actions.append(edit, ' ', remove);
+            row.append(content, actions);
+            return row;
+          }));
+        } catch (error) { message.textContent = error.message; }
+      }
+
+      let activeFaqId = '';
+      function resetFaqForm() {
+        activeFaqId = '';
+        $('faqForm').reset();
+        faqEditor?.setText('\n', 'silent');
+        $('faqActive').checked = true;
+        $('faqFormTitle').textContent = 'Yeni FAQ yanıtı';
+        $('faqSave').textContent = 'FAQ kaydet';
+        $('faqCancel').hidden = true;
+      }
+
       async function loadVisitorSettings() {
         const message = $('visitorSettingsMsg');
         message.className = 'msg';
@@ -815,6 +964,74 @@
           message.textContent = data.mesaj;
           loadAnnouncements();
         } catch (error) { message.textContent = error.message; }
+      });
+
+      $('faqForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const message = $('faqMsg');
+        const button = $('faqSave');
+        message.className = 'msg';
+        message.textContent = '';
+        button.disabled = true;
+        const payload = {
+          question: $('faqQuestion').value,
+          answerHtml: faqEditor?.root.innerHTML || '',
+          grade: $('faqGrade').value,
+          active: $('faqActive').checked
+        };
+        try {
+          const data = await api(
+            activeFaqId ? `/api/admin/faqs/${encodeURIComponent(activeFaqId)}` : '/api/admin/faqs',
+            { method: activeFaqId ? 'PUT' : 'POST', body: JSON.stringify(payload) }
+          );
+          message.className = 'msg ok';
+          message.textContent = data.mesaj;
+          resetFaqForm();
+          await loadFaqs();
+        } catch (error) {
+          message.textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+      $('faqCancel').addEventListener('click', resetFaqForm);
+      if (!faqEditor) {
+        $('faqSave').disabled = true;
+        $('faqFormulaOpen').disabled = true;
+      }
+
+      const formulaDialog = $('faqFormulaDialog');
+      const formulaInput = $('faqFormulaInput');
+      const formulaPreview = $('faqFormulaPreview');
+      const formulaInsertButton = $('faqFormulaInsert');
+      function previewFaqFormula() {
+        formulaPreview.replaceChildren();
+        const hasFormula = Boolean(formulaInput.value.trim());
+        formulaInsertButton.disabled = !hasFormula || !window.katex;
+        if (!hasFormula) return;
+        if (!window.katex) {
+          formulaPreview.textContent = 'LaTeX önizlemesi yüklenemedi.';
+          return;
+        }
+        window.katex.render(formulaInput.value, formulaPreview, {
+          throwOnError: false,
+          trust: false
+        });
+      }
+      $('faqFormulaOpen').addEventListener('click', () => {
+        formulaInput.value = '';
+        previewFaqFormula();
+        formulaDialog.showModal();
+        formulaInput.focus();
+      });
+      formulaInput.addEventListener('input', previewFaqFormula);
+      formulaInsertButton.addEventListener('click', () => {
+        const latex = formulaInput.value.trim();
+        if (!faqEditor || !window.katex || !latex) return;
+        const selection = faqEditor.getSelection(true);
+        faqEditor.insertEmbed(selection?.index ?? faqEditor.getLength() - 1, 'formula', latex, 'user');
+        faqEditor.setSelection((selection?.index ?? faqEditor.getLength() - 2) + 1, 0, 'silent');
+        formulaDialog.close();
       });
 
       $('visitorSettingsForm').addEventListener('submit', async event => {

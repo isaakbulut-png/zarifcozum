@@ -28,12 +28,15 @@
     "express-rate-limit": "^8.7.1",
     "express-session": "^1.19.0",
     "google-auth-library": "^10.9.1",
+    "html-to-text": "^10.0.1",
     "mongodb": "^7.7.0",
     "mongoose": "^9.11.3",
     "multer": "^2.5.0",
     "nodemailer": "^10.3.1",
     "openai": "^7.45.1",
-    "socket.io": "^4.8.4"
+    "redis": "^6.3.1",
+    "socket.io": "^4.8.4",
+    "xss": "^1.0.17"
   },
   "devDependencies": {
     "socket.io-client": "^4.8.4"

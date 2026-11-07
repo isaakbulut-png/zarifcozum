@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/ogretmen-yonetim.css">
 <link rel="stylesheet" href="assets/ogrenci-gelisim.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" integrity="sha384-ecIckRi4QlKYya/FQUbBUjS4qp65jF/J87Guw5uzTbO1C1Jfa/6kYmd6dXUF6D7i" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
 <style>
 :root{
   --navy-900:#4a2e1a; --navy-800:#523520; --navy-700:#5a422d; --navy-100:#eee9e5;
@@ -101,6 +103,14 @@ td.net{font-weight:700;color:var(--navy-900)}
 .password-dialog p{color:var(--muted);font-size:.9rem}
 .password-dialog .field{margin-top:14px}
 .password-dialog .button-row{justify-content:flex-end;margin-top:18px}
+.question-editor{min-height:110px;background:#fff}
+.question-svg-code{width:100%;min-height:90px;font-family:monospace}
+.question-svg-preview{overflow:auto;margin:8px 0}
+.question-svg-preview svg{max-width:100%;max-height:300px}
+#quizFormulaDialog{width:min(560px,calc(100% - 32px));padding:22px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text)}
+#quizFormulaDialog::backdrop{background:rgba(35,24,16,.55)}
+#quizFormulaInput{width:100%;min-height:90px}
+#quizFormulaPreview{min-height:50px;overflow:auto;padding:10px}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -586,6 +596,20 @@ td.net{font-weight:700;color:var(--navy-900)}
   </form>
 </dialog>
 
+<dialog id="quizFormulaDialog" aria-labelledby="quizFormulaTitle">
+  <h3 id="quizFormulaTitle">LaTeX formülü ekle</h3>
+  <label for="quizFormulaInput">LaTeX ifadesi</label>
+  <textarea id="quizFormulaInput" maxlength="500" placeholder="Örnek: \frac{a}{b}"></textarea>
+  <div id="quizFormulaPreview" aria-live="polite"></div>
+  <div class="button-row">
+    <button class="btn light" type="button" id="quizFormulaCancel">Vazgeç</button>
+    <button class="btn" type="button" id="quizFormulaInsert">Formülü ekle</button>
+  </div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js" integrity="sha384-reiVBUvj2HgLgCZalqLFSMBVD9LdtiwGyybRGCq2AfP8Rgebz5DxEnwKp4FpagKV" crossorigin="anonymous"></script>
+<script src="assets/safe-svg.js"></script>
 <script src="assets/matematik-mufredati.js"></script>
 <script src="assets/ogretmen-yonetim.js"></script>
 <script src="assets/ogrenci-gelisim.js"></script>
@@ -828,6 +852,9 @@ td.net{font-weight:700;color:var(--navy-900)}
   });
 
   let soruSayaci = 0;
+  const questionEditors = new WeakMap();
+  let formulaEditor = null;
+  let formulaIndex = 0;
   function soruEkle() {
     if ($('questionList').children.length >= 50) {
       durumYaz('quizStatus', 'Bir testte en fazla 50 soru olabilir.', 'error');
@@ -841,7 +868,16 @@ td.net{font-weight:700;color:var(--navy-900)}
       <strong>Soru ${$('questionList').children.length + 1}</strong>
       <button class="btn light remove-question" type="button" aria-label="Soruyu kaldır">Soruyu kaldır</button>
     </div>
-    <div class="field"><label>Soru metni</label><textarea class="question-text" maxlength="1000" required></textarea></div>
+    <div class="field"><label id="question-label-${index}">Soru metni</label>
+      <div class="question-editor" aria-labelledby="question-label-${index}"></div>
+      <div class="button-row"><button class="btn light question-formula" type="button">∑ Formül sihirbazı</button></div>
+    </div>
+    <div class="field"><label for="question-svg-${index}">SVG kodu (isteğe bağlı)</label>
+      <textarea class="question-svg-code" id="question-svg-${index}" maxlength="10000" placeholder="&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;&gt;...&lt;/svg&gt;"></textarea>
+      <p class="hint">Temel şekiller: path, rect, circle, ellipse, line, polyline, polygon ve text. Betik, stil, bağlantı ve dış kaynaklara izin verilmez. Örnek: <code>&lt;svg viewBox="0 0 100 100"&gt;&lt;circle cx="50" cy="50" r="30" fill="none" stroke="black"/&gt;&lt;/svg&gt;</code></p>
+      <div class="question-svg-preview" aria-label="SVG önizleme"></div>
+      <p class="question-svg-status status" role="status"></p>
+    </div>
     <div class="question-options">
       ${['A', 'B', 'C', 'D'].map(letter => `<div class="field"><label>${letter} şıkkı</label><input class="option-${letter}" maxlength="300" required></div>`).join('')}
     </div>
@@ -849,10 +885,53 @@ td.net{font-weight:700;color:var(--navy-900)}
       <select class="correct-answer"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select>
     </div>`;
     $('questionList').append(article);
+    if (window.Quill && window.katex) {
+      const editor = new window.Quill(article.querySelector('.question-editor'), {
+        theme: 'snow',
+        modules: {toolbar: [
+          ['bold', 'italic', 'underline', 'strike'],
+          [{list: 'ordered'}, {list: 'bullet'}],
+          [{script: 'sub'}, {script: 'super'}],
+          ['blockquote', 'clean']
+        ]}
+      });
+      questionEditors.set(article, editor);
+    } else {
+      durumYaz('quizStatus', 'Editör veya formül kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.', 'error');
+    }
   }
 
   $('addQuestion').addEventListener('click', soruEkle);
+  $('questionList').addEventListener('input', event => {
+    if (!event.target.classList.contains('question-svg-code')) return;
+    const article = event.target.closest('.question-card');
+    const preview = article.querySelector('.question-svg-preview');
+    const status = article.querySelector('.question-svg-status');
+    preview.replaceChildren();
+    status.textContent = '';
+    if (!event.target.value.trim()) return;
+    try {
+      window.zarifSafeSvg.render(preview, window.zarifSafeSvg.parse(event.target.value));
+    } catch (error) {
+      status.textContent = error.message;
+    }
+  });
   $('questionList').addEventListener('click', event => {
+    const formulaButton = event.target.closest('.question-formula');
+    if (formulaButton) {
+      formulaEditor = questionEditors.get(formulaButton.closest('.question-card'));
+      if (!formulaEditor || !window.katex) {
+        durumYaz('quizStatus', 'Formül editörü yüklenemedi; sayfayı yenileyin.', 'error');
+        return;
+      }
+      const selection = formulaEditor.getSelection();
+      formulaIndex = selection ? selection.index : formulaEditor.getLength() - 1;
+      $('quizFormulaInput').value = '';
+      $('quizFormulaPreview').replaceChildren();
+      $('quizFormulaDialog').showModal();
+      $('quizFormulaInput').focus();
+      return;
+    }
     const button = event.target.closest('.remove-question');
     if (!button) return;
     if ($('questionList').children.length <= 1) {
@@ -864,20 +943,45 @@ td.net{font-weight:700;color:var(--navy-900)}
       item.querySelector('.question-top strong').textContent = `Soru ${index + 1}`;
     });
   });
+  $('quizFormulaInput').addEventListener('input', () => {
+    window.katex.render($('quizFormulaInput').value, $('quizFormulaPreview'), {throwOnError: false, trust: false});
+  });
+  $('quizFormulaCancel').addEventListener('click', () => $('quizFormulaDialog').close());
+  $('quizFormulaInsert').addEventListener('click', () => {
+    const latex = $('quizFormulaInput').value.trim();
+    if (!latex || !formulaEditor) return;
+    formulaEditor.insertEmbed(formulaIndex, 'formula', latex, 'user');
+    formulaEditor.setSelection(formulaIndex + 1, 0, 'silent');
+    $('quizFormulaDialog').close();
+  });
   $('quizForm').addEventListener('submit', async event => {
     event.preventDefault();
     const form = event.currentTarget;
     const button = form.querySelector('button[type="submit"]');
     button.disabled = true;
     durumYaz('quizStatus', 'Test yayınlanıyor…');
-    const questions = [...$('questionList').children].map(item => ({
-      text: item.querySelector('.question-text').value,
-      options: Object.fromEntries(['A', 'B', 'C', 'D'].map(letter =>
-        [letter, item.querySelector(`.option-${letter}`).value]
-      )),
-      answer: item.querySelector('.correct-answer').value
-    }));
     try {
+      const questions = [...$('questionList').children].map(item => {
+        const editor = questionEditors.get(item);
+        if (!editor) throw new Error('Soru editörü yüklenemedi; sayfayı yenileyin.');
+        const text = editor.getContents().ops.map(op =>
+          typeof op.insert === 'string' ? op.insert : (op.insert.formula || '')
+        ).join('').trim();
+        if (!text || text.length > 1000) throw new Error('Soru metni 1–1000 karakter olmalıdır.');
+        const content = editor.root.cloneNode(true);
+        content.querySelectorAll('span.ql-formula').forEach(formula => formula.replaceChildren());
+        const question = {
+          text,
+          html: content.innerHTML,
+          options: Object.fromEntries(['A', 'B', 'C', 'D'].map(letter =>
+            [letter, item.querySelector(`.option-${letter}`).value]
+          )),
+          answer: item.querySelector('.correct-answer').value
+        };
+        const svg = item.querySelector('.question-svg-code').value.trim();
+        if (svg) question.svg = window.zarifSafeSvg.parse(svg);
+        return question;
+      });
       await api('/api/ogretmen/quizler', {
         method: 'POST',
         body: JSON.stringify({
@@ -889,9 +993,13 @@ td.net{font-weight:700;color:var(--navy-900)}
       form.reset();
       $('questionList').replaceChildren();
       soruEkle();
-      yonetim = await api('/api/ogretmen/yonetim');
-      yonetimCiz();
-      durumYaz('quizStatus', 'Test yayınlandı; öğrenciler panelinde görebilir.', 'ok');
+      try {
+        yonetim = await api('/api/ogretmen/yonetim');
+        yonetimCiz();
+        durumYaz('quizStatus', 'Test yayınlandı; öğrenciler panelinde görebilir.', 'ok');
+      } catch (error) {
+        durumYaz('quizStatus', 'Test yayınlandı, ancak liste yenilenemedi: ' + error.message, 'error');
+      }
     } catch (error) {
       durumYaz('quizStatus', 'Test yayınlanamadı: ' + error.message, 'error');
     } finally {

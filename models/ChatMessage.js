@@ -5,6 +5,7 @@ const chatMessageSchema = new mongoose.Schema({
   roomName: { type: String, required: true, maxlength: 128 },
   sender: { type: String, enum: ['user', 'ai'], required: true },
   message: { type: String, required: true, maxlength: 12000 },
+  richHtml: { type: String, maxlength: 12000 },
   createdAt: { type: Date, default: Date.now, required: true }
 }, {
   versionKey: false,

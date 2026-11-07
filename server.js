@@ -12,6 +12,7 @@ const express = require('express');
 const { Server: SocketIOServer } = require('socket.io');
 const cors = require('cors');
 const { rateLimit } = require('express-rate-limit');
+const { createClient } = require('redis');
 const crypto = require('crypto');
 const { MongoClient, ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
@@ -45,7 +46,12 @@ const AdminLog = require('./models/AdminLog');
 const CozumluSoru = require('./models/CozumluSoru');
 const { createWebhookRouter } = require('./routes/webhooks');
 const { attachRealtimeChat } = require('./lib/realtime-chat');
-const { normalizeAiChatRequest, generateAiChatReply } = require('./lib/ai-chat');
+const { normalizeAiChatRequest, createAiChatReply } = require('./lib/ai-chat');
+const { createFaqService } = require('./lib/faq-service');
+const { redisOptions } = require('./lib/redis-options');
+const { studentQuestion } = require('./lib/quiz-content');
+const { createTeacherQuizHandler } = require('./routes/quizler');
+const AiFaq = require('./models/AiFaq');
 
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI;           // .env dosyasından okunur
@@ -65,6 +71,17 @@ if (SESSION_SECRET.length < 32) {
 }
 
 const app = express();
+const redisClient = process.env.REDIS_URL
+  ? createClient(redisOptions(process.env.REDIS_URL))
+  : null;
+if (redisClient) {
+  redisClient.on('error', error => console.error('Redis bağlantı hatası:', error));
+}
+const faqService = createFaqService({
+  getFaqModel: () => AiFaq,
+  redisClient
+});
+const generateAssistantReply = createAiChatReply({ findFaq: faqService.findAnswer });
 if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 app.use('/api/webhooks', createWebhookRouter());
 app.use(cors());                                       // file:// ile açılan sayfa da erişebilsin
@@ -101,7 +118,7 @@ attachRealtimeChat(io, {
   getActiveCollection: () => canliDersKoleksiyonu,
   ChatMessageModel: ChatMessage,
   LessonAttendanceModel: LessonAttendance,
-  generateReply: generateAiChatReply
+  generateReply: generateAssistantReply
 });
 // Abonelik zorunluyken öğrenci özellikleri pakete göre açılır (bkz. lib/subscription-plans.js).
 // Ödeme (/api/payments) ve oturum uçları bilerek dışarıda bırakılmıştır.
@@ -229,13 +246,17 @@ app.get('/api/mufredat-ozet', mufredatKonulariLimiter, requireKonuLogin, async (
 app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, async (req, res) => {
   try {
     const request = normalizeAiChatRequest(req.body);
-    const yanit = await generateAiChatReply(request);
+    const yanit = await generateAssistantReply(request);
     const createdAt = new Date();
     await ChatMessage.create([
       { userId: req.session.user.id, roomName: 'assistant', sender: 'user', message: request.ogrenciMesaji, createdAt },
-      { userId: req.session.user.id, roomName: 'assistant', sender: 'ai', message: yanit, createdAt: new Date(createdAt.getTime() + 1) }
+      {
+        userId: req.session.user.id, roomName: 'assistant', sender: 'ai',
+        message: yanit.text, richHtml: yanit.html || undefined,
+        createdAt: new Date(createdAt.getTime() + 1)
+      }
     ]);
-    res.json({ success: true, yanit });
+    res.json({ success: true, yanit: yanit.text, yanitHtml: yanit.html || undefined });
   } catch (error) {
     if (error.status === 400) {
       return res.status(400).json({ success: false, error: error.message });
@@ -426,6 +447,8 @@ app.use('/api/admin', createAdminRouter({
   SystemConfig,
   AdminLog,
   getAnnouncementCollection: () => duyuruKoleksiyonu,
+  getFaqModel: () => AiFaq,
+  invalidateFaqCache: faqService.invalidate,
   getQuizCollection: () => quizKoleksiyonu,
   getLessonCollection: () => pratikIcerik,
   getSupportTicketCollection: () => supportTickets
@@ -609,7 +632,7 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
         id: _id.toString(), title, description,
         soruSayisi: questions.length, createdAt,
         tamamlandi: tamamlananQuizler.has(_id.toString()),
-        questions: questions.map(({ text, options }) => ({ text, options }))
+        questions: questions.map(studentQuestion)
       })),
       duyurular: duyurular.map(({ _id, message, createdAt }) => ({
         id: _id.toString(), message, createdAt
@@ -755,48 +778,7 @@ app.post('/api/ogretmen/dersler', ogretmenKontrol, async (req, res) => {
   }
 });
 
-app.post('/api/ogretmen/quizler', ogretmenKontrol, async (req, res) => {
-  try {
-    const title = typeof req.body?.title === 'string' ? req.body.title.trim() : '';
-    const description = typeof req.body?.description === 'string' ? req.body.description.trim() : '';
-    const questions = req.body?.questions;
-    if (!title || title.length > 150 || description.length > 500 ||
-        !Array.isArray(questions) || questions.length < 1 || questions.length > 50 ||
-        !questions.every(question =>
-          typeof question?.text === 'string' && question.text.trim().length > 0 &&
-          question.text.trim().length <= 1000 &&
-          question.options && ['A', 'B', 'C', 'D'].every(letter =>
-            typeof question.options[letter] === 'string' &&
-            question.options[letter].trim().length > 0 &&
-            question.options[letter].trim().length <= 300
-          ) &&
-          ['A', 'B', 'C', 'D'].includes(question.answer)
-        )) {
-      return res.status(400).json({ mesaj: 'Test başlığı ve 1–50 geçerli soru gereklidir.' });
-    }
-    const quiz = {
-      title,
-      description,
-      questions: questions.map(question => ({
-        text: question.text.trim(),
-        options: Object.fromEntries(['A', 'B', 'C', 'D'].map(letter =>
-          [letter, question.options[letter].trim()]
-        )),
-        answer: question.answer
-      })),
-      createdBy: req.session.user.id,
-      createdAt: new Date()
-    };
-    const result = await quizKoleksiyonu.insertOne(quiz);
-    res.status(201).json({
-      mesaj: 'Test yayınlandı.',
-      quiz: { id: result.insertedId.toString(), title, soruSayisi: quiz.questions.length }
-    });
-  } catch (err) {
-    console.error('❌ Test oluşturulamadı:', err);
-    res.status(500).json({ mesaj: 'Test oluşturulamadı.' });
-  }
-});
+app.post('/api/ogretmen/quizler', ogretmenKontrol, createTeacherQuizHandler(() => quizKoleksiyonu));
 
 app.post('/api/ogretmen/duyurular', ogretmenKontrol, async (req, res) => {
   try {
@@ -959,6 +941,7 @@ async function baslat() {
     pratikKullanim.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, name: 'expire_pratik_usage' }),
     pratikIcerik.createIndex({tur: 1, sinif: 1, konu: 1, adet: 1}, {unique: true, name: 'uniq_pratik_content'}),
     User.createIndexes(),
+    AiFaq.createIndexes(),
     Parent.createIndexes(),
     ChatMessage.createIndexes(),
     LessonAttendance.createIndexes(),
@@ -974,6 +957,13 @@ async function baslat() {
     homeworkAssignments.createIndex({studentUserId: 1, status: 1, dueAt: 1}, {name: 'student_homework_status'}),
     homeworkAudits.createIndex({teacherId: 1, createdAt: -1}, {name: 'teacher_student_homework_audit'})
   ]);
+  if (redisClient) {
+    redisClient.connect().catch(error => {
+      console.error('Redis bağlantısı kurulamadı; FAQ aramaları MongoDB üzerinden sürdürülecek:', error);
+    });
+  } else {
+    console.warn('REDIS_URL tanımlı değil; FAQ aramaları MongoDB üzerinden yapılacak.');
+  }
   console.log(`✅ MongoDB bağlantısı hazır → veritabanı: ${DB_ADI}, koleksiyon: ${KOLEKSIYON}`);
   httpServer.listen(PORT, () => {
     const adres = httpServer.address();

@@ -3,6 +3,7 @@ const express = require('express');
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
+const { ObjectId } = require('mongodb');
 const test = require('node:test');
 const { createAdminRouter } = require('../routes/admin');
 const { DEFAULT_VISITOR_SETTINGS } = require('../models/SystemConfig');
@@ -17,8 +18,10 @@ function fakeQuery(rows) {
 
 function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_SETTINGS }, options = {}) {
   const filters = [];
+  const faqs = [];
   const homepageAssets = { animation: null, heroImage: null, featureImage: null };
   const auditLogs = [];
+  let faqInvalidations = 0;
   const User = {
     countDocuments: async () => 3,
     findById: id => ({
@@ -39,6 +42,55 @@ function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_
   const collection = {
     countDocuments: async () => announcements.length,
     insertOne: async doc => { announcements.push(doc); return { insertedId: 'a1' }; }
+  };
+  const faqModel = {
+    find: filter => {
+      const entries = faqs.filter(entry =>
+        (!filter.normalizedQuestion || entry.normalizedQuestion === filter.normalizedQuestion) &&
+        (filter.active === undefined || entry.active === filter.active) &&
+        (filter.grade === undefined || filter.grade === null && entry.grade === null ||
+          filter.$or?.some(condition =>
+            condition.grade === null ? entry.grade === null : entry.grade === condition.grade)));
+      const cursor = {
+        select() { return cursor; },
+        sort() { return cursor; },
+        limit() { return cursor; },
+        lean: async () => entries
+      };
+      return cursor;
+    },
+    findOne: filter => ({
+      select() {
+        return { lean: async () => faqs.find(entry =>
+          entry.normalizedQuestion === filter.normalizedQuestion && entry.scopeKey === filter.scopeKey) || null };
+      }
+    }),
+    create: async doc => {
+      if (faqs.some(entry => entry.normalizedQuestion === doc.normalizedQuestion &&
+          entry.scopeKey === doc.scopeKey)) {
+        throw Object.assign(new Error('duplicate key'), { code: 11000 });
+      }
+      const created = {
+        _id: new ObjectId(),
+        ...doc,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      faqs.push(created);
+      return created;
+    },
+    findByIdAndUpdate: async (id, update) => {
+      const entry = faqs.find(item => item._id.equals(id));
+      if (!entry) return null;
+      Object.assign(entry, update.$set);
+      return entry;
+    },
+    deleteOne: async filter => {
+      const index = faqs.findIndex(entry => entry._id.equals(filter._id));
+      if (index < 0) return { deletedCount: 0 };
+      faqs.splice(index, 1);
+      return { deletedCount: 1 };
+    }
   };
   const SystemConfig = {
     getVisitorSettings: async () => ({ ...visitorSettings }),
@@ -65,10 +117,14 @@ function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_
   return {
     filters,
     homepageAssets,
+    faqs,
     auditLogs,
+    get faqInvalidations() { return faqInvalidations; },
     router: createAdminRouter({
       User, Payment, SystemConfig, AdminLog, uploadDir: options.uploadDir,
       getAnnouncementCollection: () => collection,
+      getFaqModel: () => faqModel,
+      invalidateFaqCache: async () => { faqInvalidations += 1; },
       getQuizCollection: () => listCollection([]),
       getLessonCollection: () => listCollection([]),
       getSupportTicketCollection: () => listCollection([])
@@ -127,6 +183,55 @@ test('admin can publish announcements and validates input', async () => {
     assert.equal((await post({ message: 'Merhaba' })).status, 201);
     assert.equal(announcements[0].message, 'Merhaba');
     assert.equal(announcements[0].createdBy, 'admin');
+  });
+});
+
+test('superadmin can manage exact-match FAQ entries and invalidates their cache', async () => {
+  const context = buildRouter();
+  await withServer(context.router, { id: 'admin', role: 'admin' }, async base => {
+    const send = (url, method, body) => fetch(`${base}${url}`, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      ...(body ? { body: JSON.stringify(body) } : {})
+    });
+
+    assert.equal((await send('/faqs', 'POST', { question: '', answer: 'Yanıt' })).status, 400);
+    const created = await send('/faqs', 'POST', {
+      question: 'Kesir nedir?',
+      answerHtml: '<p>Bir bütünün <strong>eş parçalarından</strong> biridir.</p>',
+      grade: '5',
+      active: true
+    });
+    assert.equal(created.status, 201);
+    const faq = (await created.json()).faq;
+    assert.equal(context.faqs[0].normalizedQuestion, 'kesir nedir');
+    assert.equal(context.faqs[0].answerText, 'Bir bütünün eş parçalarından biridir.');
+    assert.equal(context.faqInvalidations, 1);
+
+    assert.equal((await send('/faqs', 'POST', {
+      question: 'KESİR NEDİR',
+      answerHtml: '<p>Çift kayıt</p>',
+      grade: 5
+    })).status, 409);
+
+    const updated = await send(`/faqs/${faq.id}`, 'PUT', {
+      question: 'Kesir nedir?',
+      answerHtml: '<p>Güncel yanıt</p>',
+      grade: 5,
+      active: false
+    });
+    assert.equal(updated.status, 200);
+    assert.equal(context.faqs[0].answerText, 'Güncel yanıt');
+    assert.equal(context.faqInvalidations, 2);
+
+    const list = await send('/faqs', 'GET');
+    const items = (await list.json()).faqs;
+    assert.equal(items.length, 1);
+    assert.equal(items[0].active, false);
+
+    assert.equal((await send(`/faqs/${faq.id}`, 'DELETE')).status, 200);
+    assert.equal(context.faqs.length, 0);
+    assert.equal(context.faqInvalidations, 3);
   });
 });
 
@@ -213,6 +318,7 @@ test('editor and support roles are restricted to their allowed admin sections', 
   const router = buildRouter().router;
   await withServer(router, { id: 'teacher', role: 'teacher', adminRole: 'editor' }, async base => {
     assert.equal((await fetch(`${base}/education/quizzes`)).status, 200);
+    assert.equal((await fetch(`${base}/faqs`)).status, 403);
     assert.equal((await fetch(`${base}/overview`)).status, 403);
     assert.equal((await fetch(`${base}/settings`)).status, 403);
     assert.equal((await fetch(`${base}/logs`)).status, 403);
@@ -226,6 +332,7 @@ test('editor and support roles are restricted to their allowed admin sections', 
     assert.equal((await fetch(`${base}/users`)).status, 200);
     assert.equal((await fetch(`${base}/support/tickets`)).status, 200);
     assert.equal((await fetch(`${base}/payments`)).status, 403);
+    assert.equal((await fetch(`${base}/faqs`)).status, 403);
     assert.equal((await fetch(`${base}/education/quizzes`)).status, 403);
     assert.equal((await fetch(`${base}/logs`)).status, 403);
   });
