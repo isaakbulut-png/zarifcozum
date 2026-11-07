@@ -18,6 +18,8 @@
 .ai-chat-btn:not(.active):hover { background: var(--color-primary-highlight); filter: none; }
 .ai-chat-btn:not(.active) small { color: var(--color-text-muted); }
 .ai-ornekler { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.ai-svg { display:block; overflow:auto; }
+.ai-svg svg { max-width:100%; height:auto; max-height:300px; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
@@ -85,6 +87,8 @@
 <script src="/assets/pratik.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/assets/rich-content.js"></script>
+<script src="/assets/safe-svg.js"></script>
+<script src="/assets/ai-visual.js"></script>
 <script src="/assets/ai-chat.js"></script>
 <script>ZarifPratik.mount(document.getElementById("pratik-mount"),{mod:"asistan",sinif:new URLSearchParams(location.search).get("sinif")});</script>
 <script>
@@ -205,27 +209,21 @@
     body.append(bubble);
     body.scrollTop = body.scrollHeight;
   }
-
-  // $$...$$, \[...\], $...$ ve \(...\) bloklarını KaTeX ile çizer; kalan metin kaçışlanır.
-  // KaTeX yüklenemezse veya formül hatalıysa ilgili parça düz metin olarak kalır.
-  const MATEMATIK_RE = /\$\$([\s\S]+?)\$\$|\\\[([\s\S]+?)\\\]|\\\(([\s\S]+?)\\\)|\$([^$\n]+?)\$/g;
-  function metniCiz(metin) {
-    const duz = s => escapeHtml(s).replace(/\n/g, '<br>');
-    let html = '', son = 0, m;
-    MATEMATIK_RE.lastIndex = 0;
-    while ((m = MATEMATIK_RE.exec(metin)) !== null) {
-      html += duz(metin.slice(son, m.index));
-      const blok = m[1] !== undefined || m[2] !== undefined;
-      const kod = (m[1] ?? m[2] ?? m[3] ?? m[4]).trim();
-      try {
-        if (!window.katex) throw new Error('KaTeX yüklenmedi');
-        html += window.katex.renderToString(kod, { displayMode: blok, throwOnError: true, output: 'htmlAndMathml', trust: false });
-      } catch (_) {
-        html += duz(m[0]);
-      }
-      son = m.index + m[0].length;
-    }
-    return html + duz(metin.slice(son));
+  function createAiBot(text, tag) {
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble bot';
+    const label = document.createElement('span');
+    label.className = 'tag';
+    label.textContent = tag;
+    const content = document.createElement('div');
+    content.style.whiteSpace = 'pre-wrap';
+    window.zarifAiVisual.append(content, String(text));
+    bubble.append(label, document.createElement('br'), content);
+    return bubble;
+  }
+  function addAiBot(text, tag) {
+    body.append(createAiBot(text, tag));
+    body.scrollTop = body.scrollHeight;
   }
 
   async function aiyaSor(mesaj) {
@@ -236,9 +234,11 @@
     let metin;
     let richHtml;
     try {
+      const sinif = Number(new URLSearchParams(location.search).get('sinif'));
       const data = await window.zarifAiChat.sendMessage({
         ogrenciMesaji: mesaj,
-        gorevTuru: 'ai_mentor'
+        gorevTuru: 'ai_mentor',
+        grade: Number.isInteger(sinif) && sinif >= 5 && sinif <= 12 ? sinif : undefined
       });
       metin = data.yanit;
       richHtml = data.yanitHtml;
@@ -250,7 +250,7 @@
       t.remove(); bekliyor = false;
     }
     if (richHtml) addRichBot(richHtml, 'AI Mentör');
-    else add('bot', metniCiz(String(metin)), 'AI Mentör');
+    else addAiBot(metin, 'AI Mentör');
   }
 
   $('form').addEventListener('submit', e => {
@@ -273,7 +273,7 @@
     const tag = data.roomName === 'assistant' ? 'AI Mentör' : 'Canlı ders · AI Mentör';
     add('user', escapeHtml(data.userMessage.message), tag);
     if (data.aiMessage.richHtml) addRichBot(data.aiMessage.richHtml, tag);
-    else add('bot', metniCiz(String(data.aiMessage.message)), tag);
+    else addAiBot(data.aiMessage.message, tag);
   });
   const historyButton = $('historyOlder');
   const formButton = $('form').querySelector('button[type="submit"]');
@@ -288,7 +288,7 @@
       const tag = record.roomName === 'assistant' ? 'AI Mentör' : 'Canlı ders · AI Mentör';
       if (record.sender === 'user') add('user', escapeHtml(record.message), tag);
       else if (record.richHtml) addRichBot(record.richHtml, tag);
-      else add('bot', metniCiz(String(record.message)), tag);
+      else addAiBot(record.message, tag);
     }
     historyHasMore = result.hasMore;
     historyBefore = result.nextBefore;
@@ -315,7 +315,7 @@
           ? add('user', escapeHtml(record.message), tag)
           : record.richHtml
             ? createRichBot(record.richHtml, tag)
-            : add('bot', metniCiz(String(record.message)), tag));
+            : createAiBot(record.message, tag));
       }
       body.prepend(fragment);
       historyHasMore = result.hasMore;

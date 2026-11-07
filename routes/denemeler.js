@@ -13,7 +13,7 @@ async function denemeSorulari(deneme) {
   return deneme.soruIds.map(id => byId.get(id.toString())).filter(Boolean);
 }
 
-function createDenemelerRouters({ requireStaff, requireStudent, getResultCollection }) {
+function createDenemelerRouters({ requireStaff, requireStudent, getResultCollection, pointsService }) {
   const staff = express.Router();
   staff.use(requireStaff);
 
@@ -159,27 +159,35 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
         return res.status(400).json({ mesaj: 'Deneme cevapları geçersiz.' });
       }
 
-      const correctCount = answers.reduce((sayi, answer, i) => sayi + (answer === sorular[i].answer ? 1 : 0), 0);
+      const correctCount = answers.reduce((sayi, answer, i) => sayi + (answer !== null && answer === sorular[i].answer ? 1 : 0), 0);
       const totalCount = sorular.length;
       const blankCount = answers.filter(answer => answer === null).length;
       const wrongCount = totalCount - correctCount - blankCount;
       const score = Math.round(correctCount * 100 / totalCount);
       // Upsert tek bir deneme için ikinci teslimi atomik olarak engeller.
-      const yazim = await getResultCollection().updateOne(
-        { quizId: new ObjectId(deneme._id.toString()), studentId: req.session.user.id, type: 'deneme' },
-        {
-          $setOnInsert: {
-            quizTitle: deneme.title, studentName: req.session.user.name,
-            answers, correctCount, wrongCount, blankCount, totalCount, score, createdAt: new Date()
-          }
-        },
-        { upsert: true }
-      );
+      const {yazim, kazanilanPuan} = await pointsService.transaction(async session => {
+        const yazim = await getResultCollection().updateOne(
+          { quizId: new ObjectId(deneme._id.toString()), studentId: req.session.user.id, type: 'deneme' },
+          {
+            $setOnInsert: {
+              quizTitle: deneme.title, studentName: req.session.user.name,
+              answers, correctCount, wrongCount, blankCount, totalCount, score, createdAt: new Date()
+            }
+          },
+          { upsert: true, session }
+        );
+        if (!yazim.upsertedCount) return {yazim, kazanilanPuan: 0};
+        const keys = sorular.flatMap((soru, i) =>
+          answers[i] !== null && answers[i] === soru.answer ? [`soru:${soru._id}`] : []
+        );
+        const kazanilanPuan = await pointsService.award(session, req.session.user.id, keys);
+        return {yazim, kazanilanPuan};
+      });
       if (!yazim.upsertedCount) return res.status(409).json({ mesaj: 'Bu denemeyi zaten tamamladınız.' });
 
       res.status(201).json({
         mesaj: 'Deneme sonucu kaydedildi.',
-        score, correctCount, wrongCount, blankCount, totalCount,
+        score, correctCount, wrongCount, blankCount, totalCount, kazanilanPuan,
         review: sorular.map((soru, i) => ({ no: i + 1, secilen: answers[i], dogru: soru.answer }))
       });
     } catch (err) {

@@ -29,7 +29,10 @@ function sahteSonucKoleksiyonu() {
   };
 }
 
-function withServer(user, callback, { sonuclar = sahteSonucKoleksiyonu() } = {}) {
+function withServer(user, callback, {
+  sonuclar = sahteSonucKoleksiyonu(),
+  pointsService = { transaction: operation => operation({}), award: async () => 0 }
+} = {}) {
   const UserModel = {
     findById: id => ({ select: async () => user ? { ...user, _id: { toString: () => id } } : null })
   };
@@ -37,7 +40,8 @@ function withServer(user, callback, { sonuclar = sahteSonucKoleksiyonu() } = {})
   const { staff, student, acik } = createDenemelerRouters({
     requireStaff: requireRole('teacher', 'admin'),
     requireStudent: requireRole('student'),
-    getResultCollection: () => sonuclar
+    getResultCollection: () => sonuclar,
+    pointsService
   });
   const app = express();
   app.use(express.json());
@@ -70,6 +74,24 @@ test('yönetim API öğrenci ve anonim oturumlarını reddeder; öğrenci API ö
   await withServer(undefined, async base => assert.equal((await fetch(`${base}/api/denemeler`)).status, 401));
   await withServer({ id: 's1', role: 'student' }, async base => assert.equal((await fetch(`${base}/api/denemeler`)).status, 403));
   await withServer({ id: 't1', role: 'teacher' }, async base => assert.equal((await fetch(`${base}/api/ogrenci/denemeler`)).status, 403));
+});
+
+test('deneme doğru cevapları soru kimliği ile puan servisine gönderilir', async () => {
+  const geriDeneme = stub(Deneme, 'findOne', () => lean({ _id: DENEME_ID, title: 'D1', soruIds: [ID1, ID2] }));
+  const geriSoru = stub(Soru, 'find', () => lean([{ _id: ID1, imageUrl: 'a', answer: 'A' }, { _id: ID2, imageUrl: 'b', answer: 'C' }]));
+  const calls = [];
+  const pointsService = {
+    transaction: operation => operation({}),
+    award: async (session, user, keys) => { calls.push({user, keys}); return 10; }
+  };
+  try {
+    await withServer({id: 's1', role: 'student', name: 'Ada'}, async base => {
+      const response = await fetch(`${base}/api/ogrenci/denemeler/${DENEME_ID}/teslim`, json({answers: ['A', null]}));
+      assert.equal(response.status, 201);
+      assert.equal((await response.json()).kazanilanPuan, 10);
+      assert.deepEqual(calls, [{user: 's1', keys: [`soru:${ID1}`]}]);
+    }, {pointsService});
+  } finally { geriDeneme(); geriSoru(); }
 });
 
 test('cevabı girilmemiş soruyla deneme oluşturulamaz', async () => {

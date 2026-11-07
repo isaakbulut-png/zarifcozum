@@ -50,7 +50,10 @@ const { normalizeAiChatRequest, createAiChatReply } = require('./lib/ai-chat');
 const { createFaqService } = require('./lib/faq-service');
 const { redisOptions } = require('./lib/redis-options');
 const { studentQuestion } = require('./lib/quiz-content');
-const { createTeacherQuizHandler } = require('./routes/quizler');
+const { createTeacherQuizHandler, createStudentQuizSubmissionHandler } = require('./routes/quizler');
+const { createPointsService } = require('./lib/leaderboard');
+const { createLeaderboardRouter } = require('./routes/leaderboard');
+const { createMentorHintRouter } = require('./routes/mentor-ipucu');
 const AiFaq = require('./models/AiFaq');
 
 const PORT = process.env.PORT || 3000;
@@ -129,7 +132,8 @@ const PAKET_OZELLIK_YOLLARI = [
   ['/api/ogrenci/denemeler', 'deneme'],
   ['/api/student', 'takip'],
   ['/api/ogrenci/quiz', 'takip'],
-  ['/api/cevap-kaydet', 'takip']
+  ['/api/cevap-kaydet', 'takip'],
+  ['/api/mentor-ipucu', 'asistan']
 ];
 let abonelikZorunluOnbellek = { deger: false, zaman: 0 };
 async function abonelikZorunluMu() {
@@ -416,6 +420,12 @@ app.get('/favicon.svg', (req, res) => res.sendFile(path.join(__dirname, 'favicon
 
 let koleksiyon, anahtarKoleksiyon, canliDersKoleksiyonu;
 let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, duyuruKoleksiyonu;
+let mongoClient;
+const pointsService = createPointsService({
+  getClient: () => mongoClient,
+  getDb: () => mongoClient.db(DB_ADI),
+  userCollectionName: User.collection.name
+});
 let studentProfiles, homeworks, homeworkAssignments, homeworkAudits;
 let calismaKayitlari, ogrenciHedefleri, kazanimIlerleme, ogretmenYorumlari, takvimOlaylari;
 let pratikKullanim, pratikIcerik;
@@ -423,6 +433,13 @@ let supportTickets;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
 const veliKontrol = requireRole('parent');
+app.use('/api/leaderboard', createLeaderboardRouter({requireStudent: ogrenciKontrol, pointsService}));
+app.use('/api/mentor-ipucu', createMentorHintRouter({
+  requireStudent: ogrenciKontrol, limiter: chatLimiter,
+  getResults: () => quizSonucKoleksiyonu,
+  getQuizzes: () => quizKoleksiyonu,
+  generateHint: async payload => (await import('./aiService.mjs')).kazanimaOzelIpucu(payload)
+}));
 app.use('/api/sorular', createSorularRouter({
   requireStaff: requireRole('teacher', 'admin'),
   AdminLog
@@ -436,7 +453,8 @@ app.use('/api/admin/cozumlu-sorular', cozumluSorular.admin);
 const denemeRouters = createDenemelerRouters({
   requireStaff: requireRole('teacher', 'admin'),
   requireStudent: ogrenciKontrol,
-  getResultCollection: () => quizSonucKoleksiyonu
+  getResultCollection: () => quizSonucKoleksiyonu,
+  pointsService
 });
 app.use('/api/denemeler', denemeRouters.staff);
 app.use('/api/ogrenci/denemeler', denemeRouters.student);
@@ -468,7 +486,8 @@ const teacherStudentHomeworkRouters = createTeacherStudentHomeworkRouters({
   getAssignmentCollection: () => homeworkAssignments,
   getAuditCollection: () => homeworkAudits,
   getQuizCollection: () => quizKoleksiyonu,
-  getStudentQuizResultsCollection: () => quizSonucKoleksiyonu
+  getStudentQuizResultsCollection: () => quizSonucKoleksiyonu,
+  pointsService
 });
 const gelisimRouters = createGelisimRouters({
   requireTeacher: requireRole('teacher', 'admin'),
@@ -647,53 +666,11 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
   }
 });
 
-app.post('/api/ogrenci/quiz/:id/teslim', ogrenciKontrol, async (req, res) => {
-  try {
-    if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz test numarası.' });
-    const quiz = await quizKoleksiyonu.findOne({ _id: new ObjectId(req.params.id) });
-    if (!quiz) return res.status(404).json({ mesaj: 'Test bulunamadı.' });
-    if (quiz.source === 'ai' && quiz.published !== true) {
-      return res.status(404).json({ mesaj: 'Test bulunamadı.' });
-    }
-    const answers = req.body?.answers;
-    if (!Array.isArray(answers) || answers.length !== quiz.questions.length ||
-        !answers.every((answer, index) => answer === null ||
-          ['A', 'B', 'C', 'D'].includes(answer) && quiz.questions[index].options[answer])) {
-      return res.status(400).json({ mesaj: 'Test cevapları geçersiz.' });
-    }
-
-    const correctCount = answers.reduce(
-      (count, answer, index) => count + (answer === quiz.questions[index].answer ? 1 : 0), 0
-    );
-    const totalCount = quiz.questions.length;
-    const score = Math.round(correctCount * 100 / totalCount);
-    const result = await quizSonucKoleksiyonu.insertOne({
-      quizId: quiz._id,
-      quizTitle: quiz.title,
-      studentId: req.session.user.id,
-      studentName: req.session.user.name,
-      answers,
-      correctCount,
-      totalCount,
-      score,
-      createdAt: new Date()
-    });
-    res.status(201).json({
-      mesaj: 'Test sonucu kaydedildi.',
-      id: result.insertedId,
-      score,
-      correctCount,
-      totalCount,
-      review: quiz.questions.map(({ answer, explanation }) => ({
-        answer,
-        explanation: explanation || ''
-      }))
-    });
-  } catch (err) {
-    console.error('❌ Öğrenci testi kaydedilemedi:', err);
-    res.status(500).json({ mesaj: 'Test sonucu kaydedilemedi.' });
-  }
-});
+app.post('/api/ogrenci/quiz/:id/teslim', ogrenciKontrol, createStudentQuizSubmissionHandler({
+  getQuizCollection: () => quizKoleksiyonu,
+  getResultCollection: () => quizSonucKoleksiyonu,
+  pointsService
+}));
 
 app.get('/api/ogretmen/yonetim', ogretmenKontrol, async (req, res) => {
   try {
@@ -917,6 +894,7 @@ async function baslat() {
   await SystemConfig.initializeVisitorSettings();
   const client = new MongoClient(MONGODB_URI);
   await client.connect();
+  mongoClient = client;
   koleksiyon = client.db(DB_ADI).collection(KOLEKSIYON);
   anahtarKoleksiyon = client.db(DB_ADI).collection('cevap_anahtarlari');
   canliDersKoleksiyonu = client.db(DB_ADI).collection('canli_dersler');
@@ -937,6 +915,9 @@ async function baslat() {
   pratikIcerik = client.db(DB_ADI).collection('pratik_icerik');
   supportTickets = client.db(DB_ADI).collection('destek_talepleri');
   await Promise.all([
+    client.db(DB_ADI).collection('zarif_puan_sorulari').createIndex(
+      {studentId: 1, questionKey: 1}, {unique: true, name: 'uniq_student_question_points'}
+    ),
     pratikKullanim.createIndex({key: 1, ozellik: 1}, {unique: true, name: 'uniq_pratik_usage'}),
     pratikKullanim.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, name: 'expire_pratik_usage' }),
     pratikIcerik.createIndex({tur: 1, sinif: 1, konu: 1, adet: 1}, {unique: true, name: 'uniq_pratik_content'}),

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { Pinecone } from '@pinecone-database/pinecone';
+import outcome from './lib/meb-outcome.js';
 
 // .env öncelikli, eksikler baglanti_adresi.env'den tamamlanır
 const kokDizin = path.dirname(fileURLToPath(import.meta.url));
@@ -21,6 +22,9 @@ const aiClient = new GoogleGenAI({
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
 const INDEX_NAME = 'meb-mufredat';
 const pineconeIndex = pc.index(INDEX_NAME);
+const visualInstruction = `Matematiksel ifadeleri satır içinde $...$, ayrı satırda $$...$$ ile geçerli LaTeX olarak yaz.
+Gerektiğinde şekli metinde doğrudan <svg>...</svg> ile göster. SVG yalnızca svg, g, path, rect, circle, ellipse, line, polyline, polygon, text etiketleri ve temel sayısal koordinatlar, viewBox, fill, stroke, stroke-width, opacity, font-size, text-anchor kullanabilir.
+viewBox kullan, CSS, style, class, transform, bağlantı, animasyon, betik, dış kaynak, foreignObject veya SVG dışı HTML kullanma. Örnek: <svg viewBox="0 0 100 100"><polygon points="50,10 10,90 90,90" fill="none" stroke="#4F46E5" stroke-width="3"/></svg>.`;
 
 export async function mufredatKonulariniGetir(grade) {
   const filter = { grade: { $eq: Number(grade) } };
@@ -117,7 +121,7 @@ export async function konuAnlatimiZenginlestir(grade, topic) {
       hamIcerik
     ].join('\n\n'),
     config: {
-      systemInstruction: 'Sen uzman bir matematik öğretmenisin. Sana verilen ham müfredat özetini temel alarak; ilgili sınıf seviyesine uygun, pedagojik, bol günlük hayat örnekli, cana yakın, detaylı ve upuzun bir konu anlatımı üret. İçeriği frontend tarafında sayfalara bölebilmemiz için Markdown formatında, tam olarak [SAYFA_1], [SAYFA_2], [SAYFA_3], [SAYFA_4] ve [SAYFA_5] etiketleriyle beş ayrı bölüme ayır. Her etiket ayrı bir satırda yer alsın, bölümlerin içeriği dolu ve kendi içinde anlamlı olsun; etiketlerin dışında giriş veya sonuç metni ekleme.',
+      systemInstruction: `Sen uzman bir matematik öğretmenisin. Sana verilen ham müfredat özetini temel alarak; ilgili sınıf seviyesine uygun, pedagojik, bol günlük hayat örnekli, cana yakın, detaylı bir konu anlatımı üret. İçeriği Markdown formatında, tam olarak [SAYFA_1], [SAYFA_2], [SAYFA_3], [SAYFA_4] ve [SAYFA_5] etiketleriyle beş ayrı bölüme ayır. Her etiket ayrı bir satırda yer alsın, bölümlerin içeriği dolu ve kendi içinde anlamlı olsun; etiketlerin dışında giriş veya sonuç metni ekleme. ${visualInstruction}`,
       temperature: 0.6,
       maxOutputTokens: 8192
     }
@@ -138,16 +142,31 @@ export async function konuAnlatimiZenginlestir(grade, topic) {
   return anlatim;
 }
 
+export async function kazanimaOzelIpucu({outcomeCode, question, selected}) {
+  const metadata = await outcome.findExactOutcome(pineconeIndex, outcomeCode);
+  const response = await aiClient.models.generateContent({
+    model: 'gemini-4-argon',
+    contents: `Soru: ${question.text}\nÖğrencinin seçtiği cevap: ${selected}) ${question.options[selected]}`,
+    config: {
+      systemInstruction: `Sen bir matematik mentörüsün. Yalnızca aşağıdaki MEB kazanımına sadık kal, sorunun cevabını veya doğru şıkkını söyleme. Öğrencinin seçimini düşünmesine yardımcı olacak kısa, kişiselleştirilmiş bir ipucu ver. ${visualInstruction}\n[DOĞRULANMIŞ MEB KAZANIMI]\n${buildConstraintText(metadata)}`,
+      temperature: 0.2
+    }
+  });
+  if (!response.text?.trim()) throw new Error('Kazanım ipucu oluşturulamadı.');
+  return response.text.trim();
+}
+
 /**
  * Yeni yüklenen Pinecone metadata yapısına uygun kural metni oluşturur
  */
 function buildConstraintText(metadata = {}) {
-  const { sinif_seviyesi, unite, ham_icerik } = metadata;
+  const { grade, unit_topic, text, outcome_code } = metadata;
   const parts = [];
 
-  if (sinif_seviyesi) parts.push(`Sınıf Seviyesi: ${sinif_seviyesi}`);
-  if (unite) parts.push(`Ünite/Konu: ${unite}`);
-  if (ham_icerik) parts.push(`Müfredat İçeriği ve Kazanım Sınırları:\n${ham_icerik}`);
+  if (grade) parts.push(`Sınıf Seviyesi: ${grade}`);
+  if (unit_topic) parts.push(`Ünite/Konu: ${unit_topic}`);
+  if (outcome_code) parts.push(`Kazanım Kodu: ${outcome_code}`);
+  if (text) parts.push(`Müfredat İçeriği ve Kazanım Sınırları:\n${text}`);
 
   return parts.length
     ? parts.join('\n\n')
@@ -155,16 +174,14 @@ function buildConstraintText(metadata = {}) {
 }
 
 /**
- * Öğrenci mesajına göre Pinecone'dan text-embedding-004 kullanarak ilgili kazanımı bulur (RAG)
+ * Öğrenci mesajına göre Pinecone'dan ilgili kazanımı bulur (RAG).
  */
 async function getMebConstraints(ogrenciMesaji, grade) {
   try {
-    // 1. Yeni 'text-embedding-004' modeli ile vektör oluşturma
-    // Bu model sabit olarak 768 boyutlu (dimension) çıktı üretir
     const embeddingResponse = await aiClient.models.embedContent({
-      model: 'text-embedding-004',
+      model: 'gemini-embedding-001',
       contents: ogrenciMesaji,
-      config: { taskType: 'RETRIEVAL_QUERY' }
+      config: { taskType: 'RETRIEVAL_QUERY', outputDimensionality: 768 }
     });
     
     // API yanıt yapısına göre vektör dizisini güvenli şekilde çekiyoruz
@@ -178,7 +195,7 @@ async function getMebConstraints(ogrenciMesaji, grade) {
     // Eğer sınıf seviyesi (grade) geldiyse, aramayı sadece o sınıfın kazanımlarıyla daraltıyoruz
     const filterQuery = {};
     if (grade) {
-      filterQuery.sinif_seviyesi = { $eq: String(grade).trim() }; // Metadata'daki veri tipine göre string/sayı uyumu
+      filterQuery.grade = { $eq: Number(grade) };
     }
 
     // 3. Pinecone'da en alakalı 2 kazanımı aratıyoruz
@@ -208,7 +225,7 @@ async function getMebConstraints(ogrenciMesaji, grade) {
  * @param {string|number} grade - Öğrencinin sınıf seviyesi (Örn: '5', '6', 9 vb.)
  */
 export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor', grade) {
-  // 1. Adım: Pinecone'dan yeni 768 boyutlu müfredat sınırını çek
+  // 1. Adım: Pinecone'dan 768 boyutlu müfredat sınırını çek
   const mebSiniri = await getMebConstraints(ogrenciMesaji, grade);
 
   let systemInstruction = "";
@@ -220,6 +237,7 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
       Sen Türkiye Yüzyılı Maarif Modeline tamamen hakim, uzman bir Matematik AI Mentörüsün.
       Öğrenciye matematik sorusunun cevabını asla doğrudan söyleme.
       Yaptığı mantıksal veya işlemsel hatayı tespit et, hatayı kendisinin bulmasını sağlayacak pedagojik ipuçları (Sokratik yöntem) ver.
+      ${visualInstruction}
       Sadece sana verilen resmi müfredat kazanım sınırları içinde kal, üst sınıf formülleri ve yöntemleri kesinlikle verme:
       
       [RESMİ MÜFREDAT BAĞLAMI]

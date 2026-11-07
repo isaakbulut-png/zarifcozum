@@ -894,6 +894,10 @@ td.net{font-weight:700;color:var(--navy-900)}
       <div class="question-svg-preview" aria-label="SVG önizleme"></div>
       <p class="question-svg-status status" role="status"></p>
     </div>
+    <div class="field"><label for="question-outcome-${index}">MEB kazanım kodu (isteğe bağlı)</label>
+      <input id="question-outcome-${index}" class="question-outcome" maxlength="40" placeholder="Örn. MAT.6.1.1">
+      <p class="hint">Doğrulanmış kazanım kodu girildiğinde yanlış cevaplar için AI ipucu istenebilir.</p>
+    </div>
     <div class="question-options">
       ${['A', 'B', 'C', 'D'].map(letter => `<div class="field"><label>${letter} şıkkı</label><input class="option-${letter}" maxlength="300" required></div>`).join('')}
     </div>
@@ -1017,6 +1021,8 @@ td.net{font-weight:700;color:var(--navy-900)}
         };
         const svg = item.querySelector('.question-svg-code').value.trim();
         if (svg) question.svg = window.zarifSafeSvg.parse(svg);
+        const outcomeCode = item.querySelector('.question-outcome').value.trim();
+        if (outcomeCode) question.outcomeCode = outcomeCode;
         return question;
       });
       await api('/api/ogretmen/quizler', {

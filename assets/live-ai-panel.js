@@ -48,6 +48,8 @@
     content.className = 'live-ai-content';
     if (role === 'ai' && richHtml && window.zarifRichContent?.render(content, richHtml)) {
       content.classList.add('has-rich-content');
+    } else if (role === 'ai' && window.zarifAiVisual) {
+      window.zarifAiVisual.append(content, text);
     } else {
       content.textContent = text;
     }

@@ -116,7 +116,8 @@ function setup() {
     getSubmissionCollection: () => collections.assignments,
     getAuditCollection: () => collections.audits,
     getQuizCollection: () => collections.quizzes,
-    getStudentQuizResultsCollection: () => collections.results
+    getStudentQuizResultsCollection: () => collections.results,
+    pointsService: {transaction: operation => operation({}), award: async () => 0}
   });
   const app = express();
   app.use(express.json());

@@ -334,7 +334,7 @@ function createPratikRouter({
 
     let anlatim;
     try {
-      anlatim = await icerikGetir('konu-slides-v3', sinif, konu, 0, () => konuUret({ sinif, konu }));
+      anlatim = await icerikGetir('konu-slides-v4', sinif, konu, 0, () => konuUret({ sinif, konu }));
     } catch (error) {
       return res.status(error.status || 502).json({ mesaj: error.message || 'Konu anlatımı hazırlanamadı.' });
     }

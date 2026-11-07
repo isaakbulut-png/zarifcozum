@@ -64,6 +64,9 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: 'student'
   },
+  zarifPuan: { type: Number, default: 0, min: 0 },
+  haftalikPuan: { type: Number, default: 0, min: 0 },
+  mevcutLig: { type: String, default: 'Bronz' },
   adminRole: {
     type: String,
     enum: ['superadmin', 'editor', 'support', null],
@@ -118,6 +121,8 @@ const userSchema = new mongoose.Schema({
     default: null
   }
 }, { timestamps: true });
+
+userSchema.index({ role: 1, haftalikPuan: -1, _id: 1 }, { name: 'student_weekly_leaderboard' });
 
 userSchema.statics.createWithPassword = async function (userData, password) {
   const passwordHash = await this.hashPassword(password);

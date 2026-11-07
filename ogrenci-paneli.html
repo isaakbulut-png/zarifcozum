@@ -484,6 +484,7 @@ button,select{font:inherit}
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
 <script src="assets/rich-content.js"></script>
 <script src="assets/safe-svg.js"></script>
+<script src="assets/ai-visual.js"></script>
 <script>
   (() => {
     const $ = id => document.getElementById(id);
@@ -925,6 +926,7 @@ button,select{font:inherit}
           <article class="feed-card">
             <h3>${index + 1}. soru · Doğru cevap: ${esc(item.answer)}</h3>
             <p>${esc(item.explanation || 'Açıklama bulunmuyor.')}</p>
+            ${item.ipucuVar ? `<button class="btn-join" type="button" data-mentor-result="${esc(result.id)}" data-mentor-index="${index}">AI ipucu iste</button><div class="mentor-hint" role="status" aria-live="polite"></div>` : ''}
           </article>`).join('');
         await loadContent();
         showPanel('test-sonuclarim', true);
@@ -932,6 +934,23 @@ button,select{font:inherit}
       } catch (error) {
         $('quizAttemptStatus').textContent = `Test gönderilemedi: ${error.message}`;
         $('quizAttemptStatus').className = 'feed-status error';
+        button.disabled = false;
+      }
+    });
+    $('quizReview').addEventListener('click', async event => {
+      const button = event.target.closest('[data-mentor-result]');
+      if (!button) return;
+      const target = button.parentElement.querySelector('.mentor-hint');
+      button.disabled = true;
+      target.textContent = 'Kazanım kontrol ediliyor, ipucu hazırlanıyor…';
+      try {
+        const result = await api(`/api/mentor-ipucu/${encodeURIComponent(button.dataset.mentorResult)}/${encodeURIComponent(button.dataset.mentorIndex)}`, {
+          method: 'POST', body: '{}'
+        });
+        target.replaceChildren();
+        window.zarifAiVisual.append(target, result.ipucu);
+      } catch (error) {
+        target.textContent = error.message || 'İpucu alınamadı.';
         button.disabled = false;
       }
     });

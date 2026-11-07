@@ -72,7 +72,8 @@ function createTeacherStudentHomeworkRouters({
   getAssignmentCollection,
   getAuditCollection,
   getQuizCollection,
-  getStudentQuizResultsCollection
+  getStudentQuizResultsCollection,
+  pointsService
 }) {
   const teacher = express.Router();
   const student = express.Router();
@@ -707,36 +708,44 @@ function createTeacherStudentHomeworkRouters({
       return res.status(400).json({mesaj: 'Test cevapları geçersiz.'});
     }
     const correctCount = answers.reduce(
-      (count, answer, index) => count + (answer === quiz.questions[index].answer ? 1 : 0), 0
+      (count, answer, index) => count + (answer !== null && answer === quiz.questions[index].answer ? 1 : 0), 0
     );
     const totalCount = quiz.questions.length;
     const score = Math.round(correctCount * 100 / totalCount);
     const now = new Date();
     const status = now > new Date(assignment.dueAt) || assignment.status === 'Teslim edilmedi'
       ? 'Geç teslim' : 'Teslim edildi';
-    const updated = await assignments().updateOne({
-      _id: id,
-      studentUserId: req.session.user.id,
-      status: {$nin: ['Kontrol edildi', 'Teslim edildi', 'Geç teslim']}
-    }, {$set: {
-      status,
-      score,
-      submissionText: `${quiz.title}: ${correctCount}/${totalCount} doğru`,
-      quizAnswers: answers,
-      submittedAt: now,
-      updatedAt: now
-    }});
-    if (!updated.modifiedCount) return res.status(409).json({mesaj: 'Teslim durumu aynı anda değiştirildi; ödev listesini yenileyin.'});
-    await audit().insertOne({
-      teacherId: assignment.teacherId,
-      actorId: req.session.user.id,
-      action: status === 'Geç teslim' ? 'homework.quiz_submitted_late' : 'homework.quiz_submitted',
-      entity: 'homework_assignment',
-      entityId: String(id),
-      details: {quizId: String(quizId), score},
-      createdAt: now
+    const {updated, kazanilanPuan} = await pointsService.transaction(async session => {
+      const updated = await assignments().updateOne({
+        _id: id,
+        studentUserId: req.session.user.id,
+        status: {$nin: ['Kontrol edildi', 'Teslim edildi', 'Geç teslim']}
+      }, {$set: {
+        status,
+        score,
+        submissionText: `${quiz.title}: ${correctCount}/${totalCount} doğru`,
+        quizAnswers: answers,
+        submittedAt: now,
+        updatedAt: now
+      }}, {session});
+      if (!updated.modifiedCount) return {updated, kazanilanPuan: 0};
+      const keys = quiz.questions.flatMap((question, index) =>
+        answers[index] !== null && answers[index] === question.answer ? [`quiz:${quizId}:${index}`] : []
+      );
+      const kazanilanPuan = await pointsService.award(session, req.session.user.id, keys);
+      await audit().insertOne({
+        teacherId: assignment.teacherId,
+        actorId: req.session.user.id,
+        action: status === 'Geç teslim' ? 'homework.quiz_submitted_late' : 'homework.quiz_submitted',
+        entity: 'homework_assignment',
+        entityId: String(id),
+        details: {quizId: String(quizId), score},
+        createdAt: now
+      }, {session});
+      return {updated, kazanilanPuan};
     });
-    res.status(201).json({mesaj: status, status, score, correctCount, totalCount});
+    if (!updated.modifiedCount) return res.status(409).json({mesaj: 'Teslim durumu aynı anda değiştirildi; ödev listesini yenileyin.'});
+    res.status(201).json({mesaj: status, status, score, correctCount, totalCount, kazanilanPuan});
   }));
 
   student.post('/homeworks/:assignmentId/submissions', (req, res, next) => {

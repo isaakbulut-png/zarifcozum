@@ -79,7 +79,8 @@
       } else if (parca.startsWith('*') && parca.endsWith('*')) {
         dugum.append(el('em', {}, parca.slice(1, -1)));
       } else {
-        dugum.append(document.createTextNode(parca));
+        if (window.zarifAiVisual) window.zarifAiVisual.append(dugum, parca);
+        else dugum.append(document.createTextNode(parca));
       }
     });
   }
@@ -101,7 +102,7 @@
       listeTuru = '';
     };
 
-    String(metin).split(/\r?\n/).forEach(satir => {
+    String(metin).replace(/<svg\b[\s\S]*?<\/svg\s*>/gi, svg => svg.replace(/\r?\n/g, ' ')).split(/\r?\n/).forEach(satir => {
       const temiz = satir.trim();
       if (!temiz) {
         paragrafiEkle();

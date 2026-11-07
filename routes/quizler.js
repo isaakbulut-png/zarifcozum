@@ -1,4 +1,5 @@
 const {prepareQuestion} = require('../lib/quiz-content');
+const {ObjectId} = require('mongodb');
 
 function createTeacherQuizHandler(getCollection) {
   return async (req, res) => {
@@ -34,4 +35,48 @@ function createTeacherQuizHandler(getCollection) {
   };
 }
 
-module.exports = {createTeacherQuizHandler};
+function createStudentQuizSubmissionHandler({getQuizCollection, getResultCollection, pointsService}) {
+  return async (req, res) => {
+    try {
+      if (!ObjectId.isValid(req.params.id)) return res.status(400).json({mesaj: 'Geçersiz test numarası.'});
+      const quiz = await getQuizCollection().findOne({_id: new ObjectId(req.params.id)});
+      if (!quiz || (quiz.source === 'ai' && quiz.published !== true)) {
+        return res.status(404).json({mesaj: 'Test bulunamadı.'});
+      }
+      const answers = req.body?.answers;
+      if (!Array.isArray(answers) || answers.length !== quiz.questions.length ||
+          !answers.every((answer, index) => answer === null ||
+            ['A', 'B', 'C', 'D'].includes(answer) && quiz.questions[index].options[answer])) {
+        return res.status(400).json({mesaj: 'Test cevapları geçersiz.'});
+      }
+      const correctCount = answers.reduce(
+        (count, answer, index) => count + (answer !== null && answer === quiz.questions[index].answer ? 1 : 0), 0
+      );
+      const totalCount = quiz.questions.length;
+      const score = Math.round(correctCount * 100 / totalCount);
+      const {result, kazanilanPuan} = await pointsService.transaction(async session => {
+        const result = await getResultCollection().insertOne({
+          quizId: quiz._id, quizTitle: quiz.title, studentId: req.session.user.id,
+          studentName: req.session.user.name, answers, correctCount, totalCount, score, createdAt: new Date()
+        }, {session});
+        const keys = quiz.questions.flatMap((question, index) =>
+          answers[index] !== null && answers[index] === question.answer ? [`quiz:${quiz._id}:${index}`] : []
+        );
+        const kazanilanPuan = await pointsService.award(session, req.session.user.id, keys);
+        return {result, kazanilanPuan};
+      });
+      res.status(201).json({
+        mesaj: 'Test sonucu kaydedildi.', id: result.insertedId, score, correctCount, totalCount, kazanilanPuan,
+        review: quiz.questions.map(({answer, explanation, outcomeCode}, index) => ({
+          answer, explanation: explanation || '',
+          ipucuVar: Boolean(outcomeCode && answers[index] !== null && answers[index] !== answer)
+        }))
+      });
+    } catch (error) {
+      console.error('❌ Öğrenci testi kaydedilemedi:', error);
+      res.status(500).json({mesaj: 'Test sonucu kaydedilemedi.'});
+    }
+  };
+}
+
+module.exports = {createTeacherQuizHandler, createStudentQuizSubmissionHandler};
