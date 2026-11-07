@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const express = require('express');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 const {prepareQuestion, studentQuestion} = require('../lib/quiz-content');
 const {validate} = require('../assets/safe-svg');
 const {createTeacherQuizHandler} = require('../routes/quizler');
@@ -30,6 +31,41 @@ test('öğretmen yan menüsünden formül ve SVG soru editörüne erişilir', ()
   assert.match(html, /class="question-editor"/);
   assert.match(html, /class="btn light question-formula"/);
   assert.match(html, /class="question-svg-preview"/);
+});
+
+test('formül şablonları seçim yerine eklenir ve imleç ilk paranteze taşınır', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'ogretmen-paneli.html'), 'utf8');
+  const markup = html.match(/<div class="formula-templates"[\s\S]*?<\/div>/)[0];
+  const templates = [...markup.matchAll(/data-template="([^"]+)"/g)].map(match => match[1]);
+  assert.deepEqual(templates, ['\\frac{}{}', '^{}', '\\sqrt{}', '\\cdot']);
+  const handler = html.match(/\$\('quizFormulaTemplates'\)\.addEventListener\('click', event => \{[\s\S]*?\n  \}\);/)[0];
+  let click;
+  const status = {textContent: ''};
+  const input = {
+    value: '', selectionStart: 0, selectionEnd: 0, maxLength: 500,
+    setRangeText(text, start, end) { this.value = this.value.slice(0, start) + text + this.value.slice(end); },
+    focus() { this.focused = true; },
+    setSelectionRange(start, end) { this.selectionStart = start; this.selectionEnd = end; },
+    dispatchEvent() { this.updated = true; }
+  };
+  const elements = {
+    quizFormulaInput: input,
+    quizFormulaStatus: status,
+    quizFormulaTemplates: {addEventListener(event, callback) { click = callback; }}
+  };
+  vm.runInNewContext(handler, {$: id => elements[id], Event: class Event {}});
+  for (const [index, template] of templates.entries()) {
+    input.value = 'abCD'; input.selectionStart = 2; input.selectionEnd = 4; input.updated = false;
+    click({target: {closest: () => ({dataset: {template}})}});
+    assert.equal(input.value, 'ab' + template);
+    assert.equal(input.selectionStart, 2 + [6, 2, 6, 5][index]);
+    assert.equal(input.selectionEnd, input.selectionStart);
+    assert.equal(input.updated, true);
+  }
+  input.value = 'x'.repeat(500); input.selectionStart = 500; input.selectionEnd = 500;
+  click({target: {closest: () => ({dataset: {template: templates[0]}})}});
+  assert.equal(input.value.length, 500);
+  assert.match(status.textContent, /500/);
 });
 
 test('zengin soru sanitize edilir ve öğrenciye cevap anahtarı gönderilmez', () => {

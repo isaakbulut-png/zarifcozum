@@ -109,6 +109,8 @@ td.net{font-weight:700;color:var(--navy-900)}
 .question-svg-preview svg{max-width:100%;max-height:300px}
 #quizFormulaDialog{width:min(560px,calc(100% - 32px));padding:22px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text)}
 #quizFormulaDialog::backdrop{background:rgba(35,24,16,.55)}
+.formula-templates{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.formula-templates .btn{padding:8px 12px}
 #quizFormulaInput{width:100%;min-height:90px}
 #quizFormulaPreview{min-height:50px;overflow:auto;padding:10px}
 
@@ -605,8 +607,15 @@ td.net{font-weight:700;color:var(--navy-900)}
 
 <dialog id="quizFormulaDialog" aria-labelledby="quizFormulaTitle">
   <h3 id="quizFormulaTitle">LaTeX formülü ekle</h3>
+  <div class="formula-templates" id="quizFormulaTemplates" role="group" aria-label="Formül şablonları">
+    <button class="btn light" type="button" data-template="\frac{}{}">Kesir <span aria-hidden="true">½</span></button>
+    <button class="btn light" type="button" data-template="^{}">Üslü sayı <span aria-hidden="true">x²</span></button>
+    <button class="btn light" type="button" data-template="\sqrt{}">Köklü sayı <span aria-hidden="true">√x</span></button>
+    <button class="btn light" type="button" data-template="\cdot">Çarpı işareti <span aria-hidden="true">·</span></button>
+  </div>
   <label for="quizFormulaInput">LaTeX ifadesi</label>
   <textarea id="quizFormulaInput" maxlength="500" placeholder="Örnek: \frac{a}{b}"></textarea>
+  <p class="status" id="quizFormulaStatus" role="status" aria-live="polite"></p>
   <div id="quizFormulaPreview" aria-live="polite"></div>
   <div class="button-row">
     <button class="btn light" type="button" id="quizFormulaCancel">Vazgeç</button>
@@ -935,6 +944,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       formulaIndex = selection ? selection.index : formulaEditor.getLength() - 1;
       $('quizFormulaInput').value = '';
       $('quizFormulaPreview').replaceChildren();
+      $('quizFormulaStatus').textContent = '';
       $('quizFormulaDialog').showModal();
       $('quizFormulaInput').focus();
       return;
@@ -951,7 +961,27 @@ td.net{font-weight:700;color:var(--navy-900)}
     });
   });
   $('quizFormulaInput').addEventListener('input', () => {
+    $('quizFormulaStatus').textContent = '';
     window.katex.render($('quizFormulaInput').value, $('quizFormulaPreview'), {throwOnError: false, trust: false});
+  });
+  $('quizFormulaTemplates').addEventListener('click', event => {
+    const button = event.target.closest('button[data-template]');
+    if (!button) return;
+    const input = $('quizFormulaInput');
+    const template = button.dataset.template;
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    if (input.value.length - (end - start) + template.length > input.maxLength) {
+      $('quizFormulaStatus').textContent = 'Formül en fazla 500 karakter olabilir.';
+      input.focus();
+      return;
+    }
+    input.setRangeText(template, start, end, 'end');
+    const brace = template.indexOf('{');
+    const cursor = start + (brace === -1 ? template.length : brace + 1);
+    input.focus();
+    input.setSelectionRange(cursor, cursor);
+    input.dispatchEvent(new Event('input', {bubbles: true}));
   });
   $('quizFormulaCancel').addEventListener('click', () => $('quizFormulaDialog').close());
   $('quizFormulaInsert').addEventListener('click', () => {
