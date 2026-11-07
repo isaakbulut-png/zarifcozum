@@ -52,6 +52,12 @@ Yapay Zeka Soru Sihirbazı için Google AI Studio'dan Gemini API anahtarı alıp
 
 Şifre en az 10, en fazla 72 UTF-8 bayt olmalıdır (bcrypt'in giriş uzunluğu sınırı). Öğretmen kaydı için `TEACHER_REGISTRATION_CODE` gereklidir. IP başına giriş ve şifre değiştirme denemeleri 15 dakikada 10, kayıt denemeleri saatte 5, şifre sıfırlama denemeleri 15 dakikada 5 istekle sınırlandırılır. Google oturumları OAuth istemci kimliği ve doğrulanmış Google ID belirteciyle sunucuda doğrulanır; admin hesapları Google girişi kullanamaz.
 
+## Gerçek zamanlı AI sohbeti
+
+AI Mentör ekranları Socket.IO üzerinden `send-message` olayı gönderir ve `receive-message` yanıtını alır. Bağlantı, Express ile aynı MongoDB oturum çerezini ve rol/hesap/abonelik kontrollerini kullanır. `POST /api/chat` geriye dönük uyumluluk için açık kalır. İstek başına mesaj 4.000 karakterle, kullanıcı başına Socket.IO sohbeti 10 dakikada 20 istekle sınırlandırılır.
+
+Socket.IO `send-message` olayındaki kullanıcı mesajı ve AI yanıtı ile geriye dönük uyumluluk için açık bırakılan `POST /api/chat` mesaj çiftleri `ChatMessage` modeliyle MongoDB'deki `chat_messages` koleksiyonuna kaydedilir. Her kayıt `userId`, `roomName`, `sender` (`user` veya `ai`), `message` ve `createdAt` alanlarını taşır; geçmiş kullanıcıya özeldir ve kullanıcı silene kadar saklanır. Canlı ders ekranı açıldığında Zoom toplantı numarası `join-room` olayına gönderilir; sunucu aktif toplantıyı doğrular, aynı Socket.IO odasına katılma işlemini yapar ve kullanıcının o ders için son 20 özel mesajını olay onayıyla döndürür. Sonraki geçmiş sayfaları `load-history` olayıyla 50'şer kayıt halinde yüklenir; ana AI Mentör ekranı kullanıcının asistan ve canlı ders mesajlarını gösterir. Canlı ders panelindeki **Geçmişi sil** düğmesi yalnızca o dersin geçmişini, ana AI Mentör ekranındaki düğme ise kullanıcının tüm AI geçmişini siler. Oda üyeliği ortak olsa da AI yanıtları ve geçmiş başka katılımcılara gösterilmez. `zoom-room.html` paneli Zoom SDK yanında açılır; `canli.html` paneli ise Zoom'un ayrı sekmede açılan bağlantısına eşlik eder. Oda/kota durumu şu an tek Node.js sürecinde tutulur. Birden fazla uygulama örneğine yatay ölçeklemeden önce Socket.IO Redis adapter ve süreçler arası ortak kota deposu gerekir. Socket.IO HTTP istek/yanıt yükünü azaltabilir; Gemini üretim yükünü veya maliyetini azaltmaz.
+
 ## Yönetici paneli
 
 Yönetici hesabı arayüzden **açılamaz**; yalnızca sunucuda şu komutla oluşturulur (PowerShell):

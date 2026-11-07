@@ -444,7 +444,8 @@ section.block { padding-block: clamp(var(--space-12), 7vw, var(--space-24)); }
 /* ---------- AI tutor ---------- */
 .tutor { display: grid; grid-template-columns: 300px minmax(0,1fr); gap: var(--space-5); align-items: start; }
 @media (max-width: 1000px) { .tutor { grid-template-columns: 1fr; } .tutor aside { order: 2; } }
-.chat { display: grid; grid-template-rows: auto 1fr auto; height: min(72dvh, 720px); min-height: 480px; overflow: hidden; padding: 0; }
+.chat { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; height: min(72dvh, 720px); min-height: 480px; overflow: hidden; padding: 0; }
+.chat #historyOlder { justify-self: start; margin: var(--space-2) var(--space-5) 0; }
 .chat-head { padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-divider); display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .chat-body { overflow-y: auto; padding: var(--space-5); display: grid; gap: var(--space-4); align-content: start; }
 .bubble { max-width: min(88%, 560px); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); font-size: var(--text-sm); line-height: 1.6; white-space: pre-wrap; }

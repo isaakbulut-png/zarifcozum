@@ -78,6 +78,8 @@ h2{font:600 24px Georgia,serif;margin:0 0 10px}
 <footer class="wrap footer">Zarif Çözüm · Her adımda daha güçlü öğrenme. Bu mini test örnek çalışma içeriğidir.</footer>
 
 <script src="../assets/breadcrumb.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/assets/ai-chat.js"></script>
 <script>
 (() => {
   const questions = [
@@ -186,22 +188,24 @@ h2{font:600 24px Georgia,serif;margin:0 0 10px}
       `Doğru cevap ${letters[item.answer]}) ${item.options[item.answer]}. Öğrenci ${letters[picked]}) ${item.options[picked]} şıkkını işaretledi. ` +
       'Çözümü öğrenciye kısa ve adım adım, sade Türkçe ile anlat.';
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ ogrenciMesaji: mesaj, gorevTuru: 'ai_mentor', grade: 7 })
+      const data = await window.zarifAiChat.sendMessage({
+        ogrenciMesaji: mesaj,
+        gorevTuru: 'ai_mentor',
+        grade: 7
       });
-      const data = await response.json().catch(() => ({}));
-      if (response.status === 401 || response.status === 403) {
-        box.textContent = 'Asistanı kullanmak için öğrenci hesabınla giriş yapmalısın.';
-      } else if (response.ok && data.success && data.yanit) {
+      if (data?.yanit) {
         box.textContent = typeof data.yanit === 'string' ? data.yanit : JSON.stringify(data.yanit);
       } else {
         box.textContent = 'Asistan şu anda yanıt veremiyor. Yukarıdaki çözümü inceleyebilirsin.';
       }
-    } catch {
-      box.textContent = 'Asistana ulaşılamadı. Yukarıdaki çözümü inceleyebilirsin.';
+    } catch (error) {
+      if (error.status === 401 || error.status === 403) {
+        box.textContent = 'Asistanı kullanmak için öğrenci hesabınla giriş yapmalısın.';
+      } else if (error.status === 429) {
+        box.textContent = error.message;
+      } else {
+        box.textContent = 'Asistan şu anda yanıt veremiyor. Yukarıdaki çözümü inceleyebilirsin.';
+      }
     }
     btn.disabled = false;
   }

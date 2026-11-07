@@ -1,0 +1,30 @@
+.live-ai-panel { color: #24190f; font: 14px/1.45 system-ui, sans-serif; }
+.live-ai-panel[hidden], .live-ai-card[hidden], .live-ai-toggle[hidden] { display: none !important; }
+.live-ai-card { display: grid; grid-template-rows: auto auto auto minmax(120px, 1fr) auto; gap: 10px; min-height: 340px; max-height: min(72vh, 620px); padding: 14px; border: 1px solid #e8dfd6; border-radius: 14px; background: #fffaf5; box-shadow: 0 12px 36px rgba(0,0,0,.2); }
+.live-ai-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.live-ai-header strong, .live-ai-header small { display: block; }
+.live-ai-header strong { font-size: 16px; }
+.live-ai-header small { margin-top: 2px; color: #75685b; font-size: 12px; }
+.live-ai-actions { display: flex; align-items: center; gap: 6px; }
+.live-ai-delete { padding: 4px 6px; border: 0; background: transparent; color: #70451f; font: inherit; font-size: 11px; text-decoration: underline; cursor: pointer; }
+.live-ai-close { border: 0; background: transparent; color: inherit; font-size: 24px; cursor: pointer; }
+.live-ai-status { margin: 0; color: #665748; font-size: 12px; }
+.live-ai-older { border: 0; background: transparent; color: #70451f; text-decoration: underline; cursor: pointer; }
+.live-ai-messages { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; min-height: 100px; padding: 4px; }
+.live-ai-message { max-width: 92%; padding: 8px 10px; border-radius: 10px; overflow-wrap: anywhere; }
+.live-ai-message strong { display: block; margin-bottom: 3px; font-size: 11px; }
+.live-ai-message p { margin: 0; white-space: pre-wrap; }
+.live-ai-message.is-user { align-self: flex-end; background: #efe3d5; }
+.live-ai-message.is-ai { align-self: flex-start; background: #fff; border: 1px solid #eee4da; }
+.live-ai-message.is-notice { align-self: stretch; background: #fff0e8; color: #8a321b; }
+.live-ai-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.live-ai-form textarea { min-width: 0; resize: vertical; padding: 9px; border: 1px solid #d8cbbd; border-radius: 8px; font: inherit; }
+.live-ai-form button, .live-ai-toggle { padding: 9px 13px; border: 0; border-radius: 8px; background: #70451f; color: white; font: inherit; font-weight: 600; cursor: pointer; }
+.live-ai-form button:disabled, .live-ai-older:disabled { opacity: .6; cursor: wait; }
+.live-ai-panel.is-floating { position: fixed; z-index: 9999; right: 16px; bottom: 16px; }
+.live-ai-panel.is-floating .live-ai-card { width: min(360px, calc(100vw - 32px)); }
+.live-ai-panel.is-floating .live-ai-toggle { box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+@media (max-width: 520px) {
+  .live-ai-panel.is-floating { right: 8px; bottom: 8px; }
+  .live-ai-panel.is-floating .live-ai-card { max-height: 68vh; }
+}

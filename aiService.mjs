@@ -249,6 +249,6 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
     return response.text;
   } catch (error) {
     console.error("❌ Gemini API Gerçek Hata Logu:", error);
-    return "Sistemimizde anlık bir yoğunluk yaşanmaktadır, lütfen birazdan tekrar deneyiniz.";
+    throw new Error('AI Mentör yanıtı şu anda üretilemedi.');
   }
 }

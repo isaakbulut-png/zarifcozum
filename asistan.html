@@ -55,7 +55,7 @@
             <li>Yalnızca seçili kazanım ve ön koşulları kapsamında kalır.</li>
             <li>İki yanlış denemeden sonra adımı açıklar ve tekrar listesine işler.</li>
             <li>Her matematiksel ifade bir doğrulayıcıdan (CAS) geçer; model yalnız başına "doğru" diyemez.</li>
-            <li>Konuşmalar veli ve öğretmen tarafından görülebilir.</li>
+            <li>AI Mentör sohbet geçmişi hesabınıza özel olarak kaydedilir.</li>
           </ul>
         </div>
         <div class="notice notice-warning">
@@ -67,8 +67,9 @@
       <section class="card chat">
         <div class="chat-head">
           <div class="row"><span class="avatar alt" style="background:var(--color-primary)" id="tavatar">🤖</span><div><strong id="ttitle">AI Mentör</strong><br><span class="xs muted" id="tsub">Serbest sohbet</span></div></div>
-          <div class="row"><button class="btn btn-ghost btn-sm" id="restart">Baştan</button><button class="btn btn-soft btn-sm" id="hintbtn" style="display:none">İpucu</button></div>
+          <div class="row"><button class="btn btn-ghost btn-sm" id="historyDelete" type="button">Geçmişi sil</button><button class="btn btn-ghost btn-sm" id="restart">Baştan</button><button class="btn btn-soft btn-sm" id="hintbtn" style="display:none">İpucu</button></div>
         </div>
+        <button id="historyOlder" class="btn btn-ghost btn-sm" type="button" hidden>Daha eski mesajları yükle</button>
         <div class="chat-body" id="body"></div>
         <form class="chat-input" id="form">
           <input type="text" id="inp" placeholder="Matematik sorunu buraya yaz…" autocomplete="off" aria-label="Mesajın">
@@ -82,6 +83,8 @@
 <script src="assets/app.js"></script>
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/pratik.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/assets/ai-chat.js"></script>
 <script>ZarifPratik.mount(document.getElementById("pratik-mount"),{mod:"asistan",sinif:new URLSearchParams(location.search).get("sinif")});</script>
 <script>
 (function () {
@@ -130,6 +133,9 @@
   const body = $('body');
   const AI_TOPIC = 'ai';
   let bekliyor = false;
+  let historyBefore = null;
+  let historyHasMore = false;
+  let historyLoading = false;
   function add(kind, html, tag) { const d = document.createElement('div'); d.className = 'bubble ' + kind; d.innerHTML = (tag ? `<span class="tag">${tag}</span><br>` : '') + html; body.appendChild(d); body.scrollTop = body.scrollHeight; return d; }
   function bot(html, tag) { const t = document.createElement('div'); t.className = 'typing'; t.innerHTML = '<i></i><i></i><i></i>'; body.appendChild(t); body.scrollTop = body.scrollHeight; setTimeout(() => { t.remove(); add('bot', html, tag); }, 550 + Math.min(900, html.length * 6)); }
   function status() {
@@ -208,19 +214,15 @@
     body.appendChild(t); body.scrollTop = body.scrollHeight;
     let metin;
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ogrenciMesaji: mesaj, gorevTuru: 'ai_mentor' })
+      const data = await window.zarifAiChat.sendMessage({
+        ogrenciMesaji: mesaj,
+        gorevTuru: 'ai_mentor'
       });
-      const data = await response.json().catch(() => ({}));
-      if (response.status === 401) metin = 'AI Mentör\'ü kullanmak için lütfen giriş yapın.';
-      else if (response.status === 429) metin = data.error || 'Çok fazla istek gönderdiniz. Lütfen biraz bekleyin.';
-      else if (response.ok && data.success) metin = data.yanit;
-      else metin = data.error || data.mesaj || 'Şu anda yanıt alınamadı. Lütfen tekrar deneyin.';
-    } catch (_) {
-      metin = 'Sunucuya ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin.';
+      metin = data.yanit;
+    } catch (error) {
+      if (error.status === 401) metin = 'AI Mentör\'ü kullanmak için lütfen giriş yapın.';
+      else if (error.status === 429) metin = error.message;
+      else metin = error.message || 'Sunucuya ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin.';
     } finally {
       t.remove(); bekliyor = false;
     }
@@ -228,7 +230,7 @@
   }
 
   $('form').addEventListener('submit', e => {
-    e.preventDefault(); const v = $('inp').value.trim(); if (!v) return; $('inp').value = ''; add('user', v.replace(/</g, '&lt;'));
+    e.preventDefault(); const v = $('inp').value.trim(); if (!v || (topic === AI_TOPIC && historyLoading)) return; $('inp').value = ''; add('user', v.replace(/</g, '&lt;'));
     if (topic === AI_TOPIC) { aiyaSor(v); return; }
     if (finished) { if (has(v, '180')) { bot('180 için aynı yolu izle: çift → 2 ile başla. 180 ÷ 2 = ? (Bu kısım demoda serbest bırakıldı; üretimde yeni oturum açılır.)'); } else bot('Bu kazanımı bitirdin. Soldan yeni bir kazanım seç ya da "Baştan" ile tekrar et.'); return; }
     if (has(v, 'cevab', 'söyle', 'direkt', 'direk')) { bot('Cevabı doğrudan vermiyorum; birlikte bulacağız. Önce şunu dene:', 'Kural'); setTimeout(hint, 900); return; }
@@ -241,6 +243,84 @@
   $('restart').addEventListener('click', () => startTopic(topic));
   document.querySelectorAll('.topic-btn').forEach(b => b.addEventListener('click', () => startTopic(b.dataset.topic)));
   startTopic(AI_TOPIC);
+  window.addEventListener('zarif-chat-message', event => {
+    const data = event.detail;
+    if (topic !== AI_TOPIC || !data?.userMessage || !data.aiMessage) return;
+    const tag = data.roomName === 'assistant' ? 'AI Mentör' : 'Canlı ders · AI Mentör';
+    add('user', escapeHtml(data.userMessage.message), tag);
+    add('bot', metniCiz(String(data.aiMessage.message)), tag);
+  });
+  const historyButton = $('historyOlder');
+  const formButton = $('form').querySelector('button[type="submit"]');
+  const input = $('inp');
+  historyLoading = true;
+  formButton.disabled = true;
+  input.disabled = true;
+  window.zarifAiChat.loadHistory().then(result => {
+    const records = result.messages || [];
+    if (records.length) body.querySelector('.ai-ornekler')?.closest('.bubble')?.remove();
+    for (const record of records) {
+      const tag = record.roomName === 'assistant' ? 'AI Mentör' : 'Canlı ders · AI Mentör';
+      if (record.sender === 'user') add('user', escapeHtml(record.message), tag);
+      else add('bot', metniCiz(String(record.message)), tag);
+    }
+    historyHasMore = result.hasMore;
+    historyBefore = result.nextBefore;
+    historyButton.hidden = !historyHasMore;
+  }).catch(error => {
+    add('bot', escapeHtml(error.message || 'Sohbet geçmişi yüklenemedi.'), 'Bilgi');
+  }).finally(() => {
+    historyLoading = false;
+    formButton.disabled = false;
+    input.disabled = false;
+    input.focus();
+  });
+  historyButton.addEventListener('click', async () => {
+    if (!historyHasMore || !historyBefore || historyLoading) return;
+    historyLoading = true;
+    historyButton.disabled = true;
+    const previousHeight = body.scrollHeight;
+    try {
+      const result = await window.zarifAiChat.loadHistory({ before: historyBefore });
+      const fragment = document.createDocumentFragment();
+      for (const record of result.messages || []) {
+        const tag = record.roomName === 'assistant' ? 'AI Mentör' : 'Canlı ders · AI Mentör';
+        fragment.append(record.sender === 'user'
+          ? add('user', escapeHtml(record.message), tag)
+          : add('bot', metniCiz(String(record.message)), tag));
+      }
+      body.prepend(fragment);
+      historyHasMore = result.hasMore;
+      historyBefore = result.nextBefore;
+      historyButton.hidden = !historyHasMore;
+      body.scrollTop += body.scrollHeight - previousHeight;
+    } catch (error) {
+      add('bot', escapeHtml(error.message || 'Eski mesajlar yüklenemedi.'), 'Bilgi');
+    } finally {
+      historyLoading = false;
+      historyButton.disabled = false;
+    }
+  });
+  $('historyDelete').addEventListener('click', async () => {
+    if (!window.confirm('AI Mentör sohbet geçmişiniz kalıcı olarak silinsin mi?')) return;
+    try {
+      await window.zarifAiChat.deleteHistory();
+      body.replaceChildren();
+      historyBefore = null;
+      historyHasMore = false;
+      historyButton.hidden = true;
+      add('bot', 'Sohbet geçmişiniz silindi. Yeni bir soru sorabilirsiniz.', 'Bilgi');
+    } catch (error) {
+      add('bot', escapeHtml(error.message || 'Sohbet geçmişi silinemedi.'), 'Bilgi');
+    }
+  });
+  window.addEventListener('zarif-history-deleted', event => {
+    if (event.detail?.roomId !== null) return;
+    body.replaceChildren();
+    historyBefore = null;
+    historyHasMore = false;
+    historyButton.hidden = true;
+  });
 })();
 </script>
 <script data-pplx-inline-edit>

@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="/assets/live-ai-panel.css">
 </head>
 <body>
 <div class="app">
@@ -55,10 +56,14 @@
       <p class="muted" style="margin:0 0 14px" id="roomHint"></p>
       <a class="btn btn-primary" id="openZoom" target="_blank" rel="noopener">Zoom'da aç</a>
     </div>
+    <div data-live-ai-panel hidden style="margin-top:var(--space-5)"></div>
   </main>
 </div>
 <nav class="tabbar" data-shell="tabbar" aria-label="Alt menü"></nav>
 <script src="assets/app.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/assets/ai-chat.js"></script>
+<script src="/assets/live-ai-panel.js"></script>
 <script>
 (function () {
   const isHost = new URLSearchParams(location.search).get('host') === '1';
@@ -69,6 +74,7 @@
   const details = document.getElementById('meetingDetails');
   const roomBox = document.getElementById('roomBox');
   const openZoom = document.getElementById('openZoom');
+  const liveAiPanel = window.liveAiPanel;
   document.getElementById('roomRole').textContent = isHost ? 'Öğretmen' : 'Öğrenci';
 
   async function api(path, options) {
@@ -102,6 +108,7 @@
       ? 'Zoom uygulaması veya tarayıcı yeni sekmede açılır; ders sizin hesabınızla başlar.'
       : 'Zoom yeni sekmede açılır. Ders bilgilerini yukarıdan görebilirsiniz.';
     roomBox.hidden = false;
+    if (ders.meetingNumber) liveAiPanel.setRoomId(ders.meetingNumber);
     setStatus(isHost ? 'Canlı ders hazır. Zoom’da başlatabilirsiniz.' : 'Canlı ders aktif. Katılmak için butona basın.');
   }
 
@@ -163,6 +170,7 @@
       finish.disabled = true;
       try {
         await api('/api/ogretmen/canli/sonlandir', { method: 'POST' });
+        await liveAiPanel.leaveRoom();
         roomBox.hidden = true;
         details.hidden = true;
         finish.hidden = true;

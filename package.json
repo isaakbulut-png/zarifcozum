@@ -32,6 +32,10 @@
     "mongoose": "^9.11.3",
     "multer": "^2.5.0",
     "nodemailer": "^10.3.1",
-    "openai": "^7.45.1"
+    "openai": "^7.45.1",
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.4"
   }
 }

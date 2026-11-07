@@ -2,12 +2,14 @@
 // Çalıştır: npm start
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 // .env önceliklidir; eksik değişkenler baglanti_adresi.env dosyasından tamamlanır.
 for (const file of ['.env', 'baglanti_adresi.env']) {
   const envPath = path.join(__dirname, file);
   if (fs.existsSync(envPath)) require('dotenv').config({ path: envPath });
 }
 const express = require('express');
+const { Server: SocketIOServer } = require('socket.io');
 const cors = require('cors');
 const { rateLimit } = require('express-rate-limit');
 const crypto = require('crypto');
@@ -34,10 +36,13 @@ const { adminRoleOf } = require('./lib/admin-rbac');
 const User = require('./models/User');
 const Payment = require('./models/Payment');
 const SystemConfig = require('./models/SystemConfig');
+const ChatMessage = require('./models/ChatMessage');
 const { PLANS, featureDecision } = require('./lib/subscription-plans');
 const AdminLog = require('./models/AdminLog');
 const CozumluSoru = require('./models/CozumluSoru');
 const { createWebhookRouter } = require('./routes/webhooks');
+const { attachRealtimeChat } = require('./lib/realtime-chat');
+const { normalizeAiChatRequest, generateAiChatReply } = require('./lib/ai-chat');
 
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI;           // .env dosyasından okunur
@@ -61,15 +66,16 @@ if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 app.use('/api/webhooks', createWebhookRouter());
 app.use(cors());                                       // file:// ile açılan sayfa da erişebilsin
 app.use(express.json({ limit: '1mb' }));
-app.use(session({
+const sessionStore = MongoStore.create({
+  mongoUrl: MONGODB_URI,
+  dbName: DB_ADI,
+  collectionName: 'sessions',
+  ttl: 8 * 60 * 60
+});
+const sessionMiddleware = session({
   name: 'zarifcozum.sid',
   secret: SESSION_SECRET,
-  store: MongoStore.create({
-    mongoUrl: MONGODB_URI,
-    dbName: DB_ADI,
-    collectionName: 'sessions',
-    ttl: 8 * 60 * 60
-  }),
+  store: sessionStore,
   resave: false,
   saveUninitialized: false,
   rolling: true,
@@ -79,7 +85,20 @@ app.use(session({
     sameSite: 'lax',
     maxAge: 8 * 60 * 60 * 1000
   }
-}));
+});
+app.use(sessionMiddleware);
+const httpServer = http.createServer(app);
+const io = new SocketIOServer(httpServer, { maxHttpBufferSize: 64 * 1024 });
+attachRealtimeChat(io, {
+  sessionMiddleware,
+  sessionStore,
+  UserModel: User,
+  SystemConfigModel: SystemConfig,
+  isSubscriptionRequired: abonelikZorunluMu,
+  getActiveCollection: () => canliDersKoleksiyonu,
+  ChatMessageModel: ChatMessage,
+  generateReply: generateAiChatReply
+});
 // Abonelik zorunluyken öğrenci özellikleri pakete göre açılır (bkz. lib/subscription-plans.js).
 // Ödeme (/api/payments) ve oturum uçları bilerek dışarıda bırakılmıştır.
 const PAKET_OZELLIK_YOLLARI = [
@@ -205,18 +224,18 @@ app.get('/api/mufredat-ozet', mufredatKonulariLimiter, requireKonuLogin, async (
 
 app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, async (req, res) => {
   try {
-    const { ogrenciMesaji, gorevTuru, grade } = req.body || {};
-    if (typeof ogrenciMesaji !== 'string' || !ogrenciMesaji.trim()) {
-      return res.status(400).json({ success: false, error: 'ogrenciMesaji gerekli.' });
-    }
-    const sinif = grade === undefined || grade === null || grade === '' ? undefined : Number(grade);
-    if (sinif !== undefined && !(Number.isInteger(sinif) && sinif >= 5 && sinif <= 12)) {
-      return res.status(400).json({ success: false, error: 'grade 5 ile 12 arasında bir tam sayı olmalı.' });
-    }
-    const { zarifCozumAIServisi } = await import('./aiService.mjs');
-    const yanit = await zarifCozumAIServisi(ogrenciMesaji, gorevTuru || 'ai_mentor', sinif);
+    const request = normalizeAiChatRequest(req.body);
+    const yanit = await generateAiChatReply(request);
+    const createdAt = new Date();
+    await ChatMessage.create([
+      { userId: req.session.user.id, roomName: 'assistant', sender: 'user', message: request.ogrenciMesaji, createdAt },
+      { userId: req.session.user.id, roomName: 'assistant', sender: 'ai', message: yanit, createdAt: new Date(createdAt.getTime() + 1) }
+    ]);
     res.json({ success: true, yanit });
   } catch (error) {
+    if (error.status === 400) {
+      return res.status(400).json({ success: false, error: error.message });
+    }
     console.error('/api/chat hatası:', error);
     res.status(500).json({ success: false, error: 'Sunucu hatası oluştu.' });
   }
@@ -896,6 +915,7 @@ async function baslat() {
     pratikKullanim.createIndex({key: 1, ozellik: 1}, {unique: true, name: 'uniq_pratik_usage'}),
     pratikKullanim.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, name: 'expire_pratik_usage' }),
     pratikIcerik.createIndex({tur: 1, sinif: 1, konu: 1, adet: 1}, {unique: true, name: 'uniq_pratik_content'}),
+    ChatMessage.createIndexes(),
     calismaKayitlari.createIndex({studentUserId: 1, day: -1}, {name: 'student_study_days'}),
     ogrenciHedefleri.createIndex({studentUserId: 1}, {unique: true, name: 'uniq_student_goal'}),
     kazanimIlerleme.createIndex({studentUserId: 1, grade: 1, unit: 1, topic: 1}, {unique: true, name: 'uniq_student_outcome'}),
@@ -909,8 +929,8 @@ async function baslat() {
     homeworkAudits.createIndex({teacherId: 1, createdAt: -1}, {name: 'teacher_student_homework_audit'})
   ]);
   console.log(`✅ MongoDB bağlantısı hazır → veritabanı: ${DB_ADI}, koleksiyon: ${KOLEKSIYON}`);
-  const sunucu = app.listen(PORT, () => {
-    const adres = sunucu.address();
+  httpServer.listen(PORT, () => {
+    const adres = httpServer.address();
     console.log(typeof adres === 'string'
       ? `Sunucu ${adres} adresinde aktiftir.`
       : `Sunucu ${adres.port} portunda aktiftir.`);
