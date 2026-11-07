@@ -8,6 +8,14 @@ const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const script = html.match(/<script>\s*(\(async function loadHomepageAssets\(\) \{[\s\S]*?\}\)\(\);)\s*<\/script>/);
 assert.ok(script, 'Homepage media loader must exist');
 
+test('homepage provides login shortcuts for students, teachers, and parents', () => {
+  const loginLinks = html.match(/<div class="row">([\s\S]*?)<\/div>/);
+  assert.ok(loginLinks, 'Homepage login links must exist');
+  assert.match(loginLinks[1], /href="kayit-giris\.html\?role=student">Öğrenci Girişi/);
+  assert.match(loginLinks[1], /href="kayit-giris\.html\?role=teacher">Öğretmen Girişi/);
+  assert.match(loginLinks[1], /href="kayit-giris\.html\?role=parent">Veli Girişi/);
+});
+
 function createElement() {
   const listeners = {};
   return {
