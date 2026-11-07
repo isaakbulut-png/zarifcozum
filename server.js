@@ -29,14 +29,17 @@ const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogren
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
 const { createPratikRouter } = require('./routes/pratik');
 const { createLiveLessonsRouter } = require('./routes/live-lessons');
+const { createParentRouter } = require('./routes/parent');
 const { createZoomMeeting } = require('./lib/zoom');
 const { uretSorular } = require('./lib/ai-icerik');
 const { mufredatiYukle } = require('./lib/mufredat');
 const { adminRoleOf } = require('./lib/admin-rbac');
 const User = require('./models/User');
+const Parent = require('./models/Parent');
 const Payment = require('./models/Payment');
 const SystemConfig = require('./models/SystemConfig');
 const ChatMessage = require('./models/ChatMessage');
+const LessonAttendance = require('./models/LessonAttendance');
 const { PLANS, featureDecision } = require('./lib/subscription-plans');
 const AdminLog = require('./models/AdminLog');
 const CozumluSoru = require('./models/CozumluSoru');
@@ -97,6 +100,7 @@ attachRealtimeChat(io, {
   isSubscriptionRequired: abonelikZorunluMu,
   getActiveCollection: () => canliDersKoleksiyonu,
   ChatMessageModel: ChatMessage,
+  LessonAttendanceModel: LessonAttendance,
   generateReply: generateAiChatReply
 });
 // Abonelik zorunluyken öğrenci özellikleri pakete göre açılır (bkz. lib/subscription-plans.js).
@@ -272,7 +276,7 @@ app.get('/api/homepage-assets', async (req, res) => {
 
 const sitePages = [
   'index.html', 'dene.html', 'asistan.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html', 'yasal.html',
-  'ogrenci-paneli.html', 'ogretmen-paneli.html', 'kayit-giris.html', 'hakkimizda.html',
+  'ogrenci-paneli.html', 'ogretmen-paneli.html', 'veli-panel.html', 'kayit-giris.html', 'hakkimizda.html',
   'Platform Ayrıcalıkları.html',   'Paketler.html', 'deneme-sinavi-optik.html'
 ];
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
@@ -283,6 +287,7 @@ sitePages.forEach(page => {
   app.get(route, async (req, res, next) => {
     const role = page === 'ogrenci-paneli.html' ? 'student'
       : page === 'ogretmen-paneli.html' ? 'teacher'
+      : page === 'veli-panel.html' ? 'parent'
       : null;
     // Öğretmen giriş bağlantısı mevcut oturumu kapatıp parola ekranını gösterir.
     if (page === 'kayit-giris.html' && req.query.mode !== 'register') {
@@ -300,33 +305,57 @@ sitePages.forEach(page => {
       }
       const panel = current === 'student' ? '/ogrenci-paneli.html'
         : current === 'teacher' ? '/ogretmen-paneli.html'
+        : current === 'parent' ? '/veli-panel.html'
         : null;
       if (panel && (!requested || requested === current)) return res.redirect(panel);
     }
     if (!role) return next();
-    if (!req.session.user) return res.redirect('/kayit-giris.html');
+    if (!req.session.user) return res.redirect(role === 'parent' ? '/kayit-giris.html?role=parent' : '/kayit-giris.html');
     let canOpen = req.session.user.role === role;
-    if (role === 'teacher') {
-      try {
-        const user = await User.findById(req.session.user.id).select('name role adminRole');
-        const adminRole = adminRoleOf(user);
-        canOpen = Boolean(user && (
-          user.role === 'teacher' && (!adminRole || ['superadmin', 'editor'].includes(adminRole)) ||
-          user.role === 'admin' && adminRole !== 'support'
-        ));
-        if (user) {
-          req.session.user = { ...req.session.user, name: user.name, role: user.role, adminRole };
+    if (role === 'parent') {
+      if (req.session.user.role !== 'parent') {
+        canOpen = false;
+      } else {
+        try {
+          const parent = await Parent.findById(req.session.user.id).select('name surname restricted');
+          canOpen = Boolean(parent && !parent.restricted);
+          if (parent) {
+            req.session.user = {
+              ...req.session.user,
+              name: `${parent.name} ${parent.surname}`.trim(),
+              role: 'parent',
+              adminRole: null
+            };
+          }
+        } catch (error) {
+          console.error('Veli paneli hesabı doğrulanamadı:', error);
+          return res.status(500).send('Veli paneli hesabı doğrulanamadı.');
         }
-      } catch (error) {
-        console.error('Öğretmen paneli rolü doğrulanamadı:', error);
-        return res.status(500).send('Öğretmen paneli yetkisi doğrulanamadı.');
+      }
+    } else if (role === 'teacher') {
+      if (!['teacher', 'admin'].includes(req.session.user.role) && !req.session.user.adminRole) {
+        canOpen = false;
+      } else {
+        try {
+          const user = await User.findById(req.session.user.id).select('name role adminRole');
+          const adminRole = adminRoleOf(user);
+          canOpen = Boolean(user && (
+            user.role === 'teacher' && (!adminRole || ['superadmin', 'editor'].includes(adminRole)) ||
+            user.role === 'admin' && adminRole !== 'support'
+          ));
+          if (user) {
+            req.session.user = { ...req.session.user, name: user.name, role: user.role, adminRole };
+          }
+        } catch (error) {
+          console.error('Öğretmen paneli rolü doğrulanamadı:', error);
+          return res.status(500).send('Öğretmen paneli yetkisi doğrulanamadı.');
+        }
       }
     }
     if (!canOpen) {
       return res.redirect(
         req.session.user.adminRole || req.session.user.role === 'admin' ? '/admin-paneli.html'
-          : req.session.user.role === 'teacher' ? '/ogretmen-paneli.html'
-          : '/ogrenci-paneli.html'
+          : redirectForRole(req.session.user.role, req.session.user.adminRole)
       );
     }
     next();
@@ -348,6 +377,9 @@ app.get(['/yonetim', '/admin-giris.html'], (req, res, next) => {
 }, adminSayfasiGonder('admin-giris.html'));
 app.get('/admin-paneli.html', async (req, res, next) => {
   if (!req.session.user?.id) return res.redirect('/yonetim');
+  if (!['admin', 'teacher'].includes(req.session.user.role) && !req.session.user.adminRole) {
+    return res.redirect('/yonetim');
+  }
   try {
     const user = await User.findById(req.session.user.id).select('name role adminRole');
     const adminRole = adminRoleOf(user);
@@ -369,6 +401,7 @@ let pratikKullanim, pratikIcerik;
 let supportTickets;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
+const veliKontrol = requireRole('parent');
 app.use('/api/sorular', createSorularRouter({
   requireStaff: requireRole('teacher', 'admin'),
   AdminLog
@@ -459,6 +492,14 @@ app.use('/api/ogretmen/gelisim', gelisimRouters.teacher);
 app.use('/api/student/gelisim', gelisimRouters.student);
 app.use('/api/ogretmen', teacherStudentHomeworkRouters.teacher);
 app.use('/api/student', teacherStudentHomeworkRouters.student);
+app.use('/api/parent', createParentRouter({
+  requireParent: veliKontrol,
+  ParentModel: Parent,
+  UserModel: User,
+  ChatMessageModel: ChatMessage,
+  LessonAttendanceModel: LessonAttendance,
+  getStudentCollection: () => studentProfiles
+}));
 
 // Sunucu ve veritabanı ayakta mı?
 app.get('/api/saglik', (req, res) => res.json({ mesaj: 'Sunucu çalışıyor', db: DB_ADI, koleksiyon: KOLEKSIYON }));
@@ -531,7 +572,7 @@ async function aktifCanliDersiAl() {
 
 app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async (req, res) => {
   try {
-    const [dersler, quizler, duyurular, sonuclar, aktifDers] = await Promise.all([
+    const [dersler, quizler, duyurular, sonuclar, aktifDers, parentConnectionCode] = await Promise.all([
       planliDersKoleksiyonu.find({
         $or: [
           { startsAt: { $gte: new Date() } },
@@ -546,10 +587,12 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
       duyuruKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(20).toArray(),
       quizSonucKoleksiyonu.find({ studentId: req.session.user.id })
         .sort({ createdAt: -1 }).limit(100).toArray(),
-      aktifCanliDersiAl()
+      aktifCanliDersiAl(),
+      User.ensureParentConnectionCode(req.session.user.id)
     ]);
     const tamamlananQuizler = new Set(sonuclar.map(result => result.quizId.toString()));
     res.json({
+      parentConnectionCode,
       aktifDers: aktifDers ? {
         title: aktifDers.topic,
         startsAt: aktifDers.startedAt,
@@ -915,7 +958,10 @@ async function baslat() {
     pratikKullanim.createIndex({key: 1, ozellik: 1}, {unique: true, name: 'uniq_pratik_usage'}),
     pratikKullanim.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, name: 'expire_pratik_usage' }),
     pratikIcerik.createIndex({tur: 1, sinif: 1, konu: 1, adet: 1}, {unique: true, name: 'uniq_pratik_content'}),
+    User.createIndexes(),
+    Parent.createIndexes(),
     ChatMessage.createIndexes(),
+    LessonAttendance.createIndexes(),
     calismaKayitlari.createIndex({studentUserId: 1, day: -1}, {name: 'student_study_days'}),
     ogrenciHedefleri.createIndex({studentUserId: 1}, {unique: true, name: 'uniq_student_goal'}),
     kazanimIlerleme.createIndex({studentUserId: 1, grade: 1, unit: 1, topic: 1}, {unique: true, name: 'uniq_student_outcome'}),

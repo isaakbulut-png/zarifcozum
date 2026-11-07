@@ -27,14 +27,16 @@ function createRealtimeFixture() {
   ]);
   const sessions = new Map();
   const messages = [];
+  const attendances = [];
   const replies = [];
   const httpServer = http.createServer();
   const io = new Server(httpServer);
   const sessionMiddleware = (request, _response, next) => {
     const id = request.headers['x-test-user'];
     request.sessionID = id;
-    request.session = { user: id ? { id } : undefined };
-    if (id) sessions.set(id, { user: { id } });
+    const role = request.headers['x-test-role'] || (id ? users.get(id)?.role : undefined);
+    request.session = { user: id ? { id, role } : undefined };
+    if (id) sessions.set(id, { user: { id, role } });
     next();
   };
 
@@ -99,13 +101,27 @@ function createRealtimeFixture() {
         }
       })
     },
+    LessonAttendanceModel: {
+      updateOne: async (filter, update) => {
+        let record = attendances.find(item =>
+          item.studentId === filter.studentId && item.meetingId === filter.meetingId
+        );
+        if (!record) {
+          record = { ...update.$setOnInsert, ...filter };
+          attendances.push(record);
+        }
+        Object.assign(record, update.$set);
+        record.joinCount = (record.joinCount || 0) + update.$inc.joinCount;
+        return { matchedCount: 1, modifiedCount: 1 };
+      }
+    },
     generateReply: async request => {
       replies.push(request);
       return `Yanıt: ${request.ogrenciMesaji}`;
     }
   });
 
-  return { httpServer, io, replies, sessions, messages };
+  return { httpServer, io, replies, sessions, messages, attendances };
 }
 
 async function listen(server) {
@@ -189,6 +205,18 @@ test('Socket.IO authenticates sessions and keeps persisted room history private'
   assert.match(unauthenticatedError.message, /Giriş yapmanız gerekiyor/);
   unauthenticated.disconnect();
 
+  const parentSocket = connectSocket(url, {
+    transports: ['websocket'],
+    reconnection: false,
+    extraHeaders: {'x-test-user': 'student-1', 'x-test-role': 'parent'}
+  });
+  const parentError = await new Promise(resolve => {
+    parentSocket.once('connect', resolve);
+    parentSocket.once('connect_error', resolve);
+  });
+  assert.equal(parentError.data.status, 403);
+  parentSocket.disconnect();
+
   const student = await connect(url, 'student-1');
   const teacher = await connect(url, 'teacher-1');
   sockets.push(student, teacher);
@@ -202,6 +230,10 @@ test('Socket.IO authenticates sessions and keeps persisted room history private'
   const teacherJoin = await emitWithAck(teacher, 'join-room', { roomId: 'meeting-123' });
   assert.equal(teacherJoin.success, true);
   assert.deepEqual(teacherJoin.messages, []);
+  assert.equal(fixture.attendances.length, 1);
+  assert.equal(fixture.attendances[0].studentId, 'student-1');
+  assert.equal(fixture.attendances[0].meetingId, 'meeting-123');
+  assert.equal(fixture.attendances[0].joinCount, 1);
 
   const studentReply = new Promise(resolve => student.once('receive-message', resolve));
   let teacherReceivedPrivateMessage = false;
@@ -230,6 +262,7 @@ test('Socket.IO authenticates sessions and keeps persisted room history private'
   const rejoined = await emitWithAck(secondStudentSocket, 'join-room', '123456789');
   assert.equal(rejoined.messages.length, 2);
   assert.deepEqual(rejoined.messages.map(message => message.sender), ['user', 'ai']);
+  assert.equal(fixture.attendances[0].joinCount, 2);
 
   const studentHistory = await emitWithAck(student, 'load-history', '123456789');
   assert.equal(studentHistory.success, true);

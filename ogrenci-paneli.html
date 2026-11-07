@@ -151,6 +151,10 @@ button,select{font:inherit}
 .password-dialog .btn-join{margin-top:14px}
 .sidebar .feed-status{color:#e8c987;font-size:.8rem}
 .student-link-card{margin-bottom:20px}
+.parent-code-card{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:22px;padding:18px 20px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.parent-code-card h2{font-family:var(--head);font-size:1rem;color:var(--navy-900)}
+.parent-code-card p{margin-top:4px;color:var(--muted);font-size:.86rem}
+.parent-code-value{flex:none;padding:9px 14px;border:1px dashed var(--orange);border-radius:9px;background:var(--orange-soft);color:var(--orange-dark);font-family:var(--head);font-size:1.2rem;font-weight:700;letter-spacing:.14em}
 .student-link-form{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:8px;margin-top:12px}
 .student-link-form label{grid-column:1/-1;font-size:.82rem;font-weight:600}
 .student-link-form input{width:100%;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}
@@ -196,6 +200,7 @@ button,select{font:inherit}
   .main{padding-top:24px}
 }
 @media (max-width:480px){
+  .parent-code-card{align-items:flex-start;flex-direction:column}
   .student-link-form{grid-template-columns:1fr}
   .student-link-form label{grid-column:auto}
   .homework-card-heading{flex-direction:column}
@@ -291,6 +296,13 @@ button,select{font:inherit}
         <h1 id="welcomeTitle">Hoş geldin</h1>
         <p>Çalışma durumunu, hedeflerini ve yaklaşan etkinliklerini buradan takip edebilirsin. Ayrıntılar için soldaki menüyü kullan.</p>
       </section>
+      <article class="parent-code-card" id="parentConnectionCard" hidden>
+        <div>
+          <h2>Veli bağlantı kodun</h2>
+          <p>Velin bu kodla hesabını sana bağlayabilir. Kodu yalnızca güvendiğin velinle paylaş.</p>
+        </div>
+        <strong class="parent-code-value" id="parentConnectionCode"></strong>
+      </article>
       <div class="section-head"><h2>Genel durum</h2></div>
       <div id="gzKpis"><p class="feed-status">Gelişim verileri yükleniyor…</p></div>
       <div class="gz-grid">
@@ -579,6 +591,10 @@ button,select{font:inherit}
 
     function renderContent(content) {
       renderLiveLessons(content);
+      if (content.parentConnectionCode) {
+        $('parentConnectionCode').textContent = content.parentConnectionCode;
+        $('parentConnectionCard').hidden = false;
+      }
       $('quizFeed').innerHTML = content.quizler.length
         ? content.quizler.map(quiz => `<article class="feed-card">
             <h3>${esc(quiz.title)}</h3>

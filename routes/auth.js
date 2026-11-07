@@ -4,10 +4,11 @@ const { rateLimit } = require('express-rate-limit');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
+const Parent = require('../models/Parent');
 const { adminRoleOf } = require('../lib/admin-rbac');
 
 const router = express.Router();
-const requireRole = createRequireRole(User);
+const requireRole = createRequireRole(User, Parent);
 const googleClient = new OAuth2Client();
 const genericResetMessage = 'E-posta adresi kayıtlıysa şifre sıfırlama bağlantısı gönderildi.';
 const loginLimiter = rateLimit({
@@ -101,12 +102,13 @@ function restrictionMessage(user) {
 }
 
 function publicUser(user) {
+  const role = user.role || 'parent';
   const adminRole = adminRoleOf(user);
   return {
     id: user._id.toString(),
-    name: user.name,
+    name: role === 'parent' ? `${user.name} ${user.surname}`.trim() : user.name,
     email: user.email,
-    role: user.role,
+    role,
     adminRole
   };
 }
@@ -121,6 +123,7 @@ const adminLoginLimiter = rateLimit({
 
 function redirectForRole(role, adminRole) {
   if (role === 'teacher') return '/ogretmen-paneli.html';
+  if (role === 'parent') return '/veli-panel.html';
   if (role === 'admin' || adminRole) return '/admin-paneli.html';
   return '/ogrenci-paneli.html';
 }
@@ -178,7 +181,7 @@ router.post('/register', registerLimiter, async (req, res) => {
   }
 });
 
-router.post('/login', loginLimiter, async (req, res) => {
+async function loginHandler(req, res, parentOnly = false) {
   const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
   const password = req.body?.password;
   if (!isValidEmail(email) || typeof password !== 'string' ||
@@ -187,9 +190,9 @@ router.post('/login', loginLimiter, async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email }).select('+passwordHash');
-    // Yönetici hesapları yalnızca /admin/login üzerinden giriş yapabilir.
-    if (!user || user.role === 'admin' || !(await user.verifyPassword(password))) {
+    const accountModel = parentOnly ? Parent : User;
+    const user = await accountModel.findOne({ email }).select('+passwordHash');
+    if (!user || (!parentOnly && user.role === 'admin') || !(await user.verifyPassword(password))) {
       return res.status(401).json({ mesaj: 'E-posta veya şifre hatalı.' });
     }
     if (user.restricted) {
@@ -199,14 +202,84 @@ router.post('/login', loginLimiter, async (req, res) => {
     await regenerateSession(req);
     req.session.user = { ...publicUser(user) };
     await saveSession(req);
+    const role = parentOnly ? 'parent' : user.role;
     res.json({
       mesaj: 'Giriş başarılı.',
       user: publicUser(user),
-      redirectTo: redirectForRole(user.role, adminRoleOf(user))
+      redirectTo: redirectForRole(role, adminRoleOf(user))
     });
   } catch (error) {
     console.error('Giriş işlemi başarısız:', error);
     res.status(500).json({ mesaj: 'Giriş sırasında sunucu hatası oluştu.' });
+  }
+}
+
+router.post('/login', loginLimiter, (req, res) => loginHandler(req, res));
+router.post('/parent/login', loginLimiter, (req, res) => loginHandler(req, res, true));
+
+router.post('/parent/register', registerLimiter, async (req, res) => {
+  const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
+  const surname = typeof req.body?.surname === 'string' ? req.body.surname.trim() : '';
+  const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+  const phone = typeof req.body?.phone === 'string' ? req.body.phone.replace(/[\s()-]/g, '') : '';
+  const password = req.body?.password;
+  const code = typeof req.body?.parentConnectionCode === 'string'
+    ? req.body.parentConnectionCode.trim().toUpperCase()
+    : '';
+
+  if (!name || name.length > 100 || !surname || surname.length > 100 || !isValidEmail(email)) {
+    return res.status(400).json({ mesaj: 'Ad, soyad veya e-posta biçimi geçersiz.' });
+  }
+  if (!/^(\+90|0)?5\d{9}$/.test(phone)) {
+    return res.status(400).json({ mesaj: 'Telefon numarasını 05xx xxx xx xx formatında girin.' });
+  }
+  if (!validPassword(password)) {
+    return res.status(400).json({ mesaj: 'Şifre 10–72 bayt uzunluğunda olmalıdır.' });
+  }
+  if (!passwordsMatch(password, req.body?.passwordConfirmation)) {
+    return res.status(400).json({ mesaj: 'Şifreler eşleşmiyor.' });
+  }
+  if (!/^[A-Z0-9]{6}$/.test(code)) {
+    return res.status(400).json({ mesaj: '6 karakterli veli bağlantı kodunu girin.' });
+  }
+
+  try {
+    const student = await User.findOne({
+      parentConnectionCode: code,
+      role: 'student',
+      restricted: { $ne: true }
+    }).select('_id');
+    if (!student) return res.status(404).json({ mesaj: 'Veli bağlantı kodu geçersiz.' });
+
+    const [existingUser, existingParent] = await Promise.all([
+      User.findOne({ email }).select('_id'),
+      Parent.findOne({ email }).select('_id')
+    ]);
+    if (existingUser || existingParent) {
+      return res.status(409).json({ mesaj: 'Bu e-posta adresiyle zaten hesap kayıtlı.' });
+    }
+
+    const parent = await Parent.createWithPassword({
+      name,
+      surname,
+      email,
+      phone: `0${phone.slice(-10)}`,
+      studentId: student._id
+    }, password);
+    await regenerateSession(req);
+    req.session.user = { ...publicUser(parent), role: 'parent' };
+    await saveSession(req);
+    res.status(201).json({
+      mesaj: 'Veli hesabı oluşturuldu.',
+      user: publicUser(parent),
+      redirectTo: redirectForRole('parent')
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ mesaj: 'Bu e-posta adresiyle zaten hesap kayıtlı.' });
+    }
+    console.error('Veli kaydı başarısız:', error);
+    res.status(500).json({ mesaj: 'Veli kaydı sırasında sunucu hatası oluştu.' });
   }
 });
 
@@ -248,6 +321,9 @@ router.post('/auth/google', (req, res, next) => {
       user = await User.findOne({ email }).select('+googleId');
       if (user?.role === 'admin' || (user?.googleId && user.googleId !== profile.sub)) {
         return res.status(403).json({ mesaj: 'Bu Google hesabıyla giriş yapılamıyor.' });
+      }
+      if (!user && await Parent.exists({ email })) {
+        return res.status(403).json({ mesaj: 'Veli hesapları e-posta ve şifreyle giriş yapar.' });
       }
       if (user) {
         user.googleId = profile.sub;
@@ -321,7 +397,7 @@ router.post('/forgot-password', resetLimiter, async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }) || await Parent.findOne({ email });
     if (user) {
       const token = crypto.randomBytes(32).toString('hex');
       user.resetPasswordToken = crypto.createHash('sha256').update(token).digest('hex');
@@ -374,14 +450,18 @@ router.post('/reset-password', resetLimiter, async (req, res) => {
 
   try {
     const resetHash = crypto.createHash('sha256').update(token).digest('hex');
-    const user = await User.findOneAndUpdate({
+    const filter = {
       email,
       resetPasswordToken: resetHash,
       resetPasswordExpires: { $gt: new Date() }
-    }, {
+    };
+    const update = {
       $set: { passwordHash: await User.hashPassword(password) },
       $unset: { resetPasswordToken: 1, resetPasswordExpires: 1 }
-    }, { new: true, runValidators: true });
+    };
+    const options = { new: true, runValidators: true };
+    const user = await User.findOneAndUpdate(filter, update, options) ||
+      await Parent.findOneAndUpdate(filter, update, options);
     if (!user) {
       return res.status(400).json({ mesaj: 'Şifre sıfırlama bağlantısı geçersiz veya süresi dolmuş.' });
     }
@@ -402,7 +482,8 @@ router.post('/change-password', passwordChangeLimiter, requireSession, async (re
   }
 
   try {
-    const user = await User.findById(req.session.user.id).select('+passwordHash');
+    const accountModel = req.session.user.role === 'parent' ? Parent : User;
+    const user = await accountModel.findById(req.session.user.id).select('+passwordHash');
     if (!user) return res.status(401).json({ mesaj: 'Hesap bulunamadı. Yeniden giriş yapın.' });
     if (user.passwordHash &&
         (typeof currentPassword !== 'string' || !(await user.verifyPassword(currentPassword)))) {
@@ -449,7 +530,10 @@ router.post('/admin/login', adminLoginLimiter, async (req, res) => {
 router.get('/me', async (req, res) => {
   if (!req.session.user?.id) return res.status(401).json({ mesaj: 'Oturum açılmamış.' });
   try {
-    const user = await User.findById(req.session.user.id).select('name email role adminRole');
+    const isParent = req.session.user.role === 'parent';
+    const accountModel = isParent ? Parent : User;
+    const user = await accountModel.findById(req.session.user.id)
+      .select(isParent ? 'name surname email restricted' : 'name email role adminRole');
     if (!user) {
       req.session.destroy(error => {
         if (error) return res.status(500).json({ mesaj: 'Oturum kapatılamadı.' });
@@ -460,10 +544,10 @@ router.get('/me', async (req, res) => {
     res.json({
       user: {
         id: user._id.toString(),
-        name: user.name,
+        name: isParent ? `${user.name} ${user.surname}`.trim() : user.name,
         email: user.email,
-        role: user.role,
-        adminRole: adminRoleOf(user)
+        role: isParent ? 'parent' : user.role,
+        adminRole: isParent ? null : adminRoleOf(user)
       }
     });
   } catch (error) {
@@ -485,25 +569,34 @@ router.post('/logout', (req, res, next) => {
   });
 });
 
-function createRequireRole(UserModel) {
+function createRequireRole(UserModel, ParentModel = Parent) {
   return (...roles) => async (req, res, next) => {
     if (!req.session?.user?.id) return res.status(401).json({ mesaj: 'Giriş yapmanız gerekiyor.' });
+    if (req.session.user.role === 'parent' && !roles.includes('parent')) {
+      return res.status(403).json({ mesaj: 'Bu işlem için yetkiniz yok.' });
+    }
     try {
-      const user = await UserModel.findById(req.session.user.id).select('name role adminRole');
+      const isParent = req.session.user.role === 'parent' && roles.includes('parent');
+      const accountModel = isParent ? ParentModel : UserModel;
+      const user = await accountModel.findById(req.session.user.id)
+        .select(isParent ? 'name surname restricted' : 'name role adminRole restricted');
       if (!user) return res.status(401).json({ mesaj: 'Hesap bulunamadı. Yeniden giriş yapın.' });
+      if (user.restricted) return res.status(403).json({ mesaj: restrictionMessage(user) });
+      const currentRole = isParent ? 'parent' : user.role;
       const adminRole = adminRoleOf(user);
-      const effectiveRoles = adminRole === 'superadmin' ? ['admin', 'teacher']
+      const effectiveRoles = isParent ? ['parent']
+        : adminRole === 'superadmin' ? ['admin', 'teacher']
         : adminRole === 'editor' ? ['teacher']
         : adminRole === 'support' ? []
-        : [user.role];
+        : [currentRole];
       if (!roles.some(allowedRole => effectiveRoles.includes(allowedRole))) {
         return res.status(403).json({ mesaj: 'Bu işlem için yetkiniz yok.' });
       }
       req.session.user = {
         ...req.session.user,
         id: user._id.toString(),
-        name: user.name,
-        role: user.role,
+        name: isParent ? `${user.name} ${user.surname}`.trim() : user.name,
+        role: currentRole,
         adminRole
       };
       next();

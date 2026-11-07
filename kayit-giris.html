@@ -17,6 +17,7 @@
     .switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px;padding:5px;border-radius:10px;background:#f3e1cf}
     .switch button{padding:10px;border:0;border-radius:7px;background:transparent;color:#6a5242;font:inherit;font-weight:600;cursor:pointer}
     .switch button[aria-pressed=true]{background:#fffaf5;color:#523520;box-shadow:0 1px 5px rgba(49, 36, 24,.12)}
+    .parent-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:0 0 18px}
     label{display:block;margin:15px 0 6px;font-size:.92rem;font-weight:600}
     input,select{width:100%;padding:12px;border:1px solid #d9d3c3;border-radius:8px;background:#fffaf5;color:inherit;font:inherit}
     input:focus,select:focus,button:focus-visible{outline:3px solid rgba(125, 90, 60,.3);border-color:#7a4f2d}
@@ -41,8 +42,12 @@
     <h1 class="brand">ZarifÇözüm</h1>
     <p class="intro" id="intro">Hesabınıza giriş yapın veya yeni hesap oluşturun.</p>
     <div id="authOptions">
-    <div class="google-wrap"><div id="googleButton"></div><p class="google-disabled" id="googleDisabled" hidden>Google ile giriş bu sitede henüz etkinleştirilmedi.</p></div>
-    <div class="divider"><span>veya e-posta ile</span></div>
+    <div class="google-wrap" id="googleWrap"><div id="googleButton"></div><p class="google-disabled" id="googleDisabled" hidden>Google ile giriş bu sitede henüz etkinleştirilmedi.</p></div>
+    <div class="divider" id="googleDivider"><span>veya e-posta ile</span></div>
+    <div class="parent-actions">
+      <button class="text-button" id="parentLoginMode" type="button">Veli Girişi</button>
+      <button class="text-button" id="parentRegisterMode" type="button">Veli Kayıt Ol</button>
+    </div>
     <div class="switch" aria-label="İşlem seçin">
       <button id="loginMode" type="button" aria-pressed="true">Giriş yap</button>
       <button id="registerMode" type="button" aria-pressed="false">Kayıt ol</button>
@@ -57,6 +62,10 @@
       <div id="phoneField" hidden>
         <label for="phone">Telefon numarası</label>
         <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" maxlength="20" disabled>
+      </div>
+      <div id="surnameField" hidden>
+        <label for="surname">Soyad</label>
+        <input id="surname" name="surname" autocomplete="family-name" maxlength="100" disabled>
       </div>
       <label for="password">Şifre</label>
       <input id="password" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="72" required>
@@ -74,6 +83,10 @@
       <div id="teacherCodeField" hidden>
         <label for="teacherCode">Öğretmen davet kodu</label>
         <input id="teacherCode" name="teacherCode" type="password" autocomplete="off" disabled>
+      </div>
+      <div id="parentCodeField" hidden>
+        <label for="parentConnectionCode">6 karakterli veli bağlantı kodu</label>
+        <input id="parentConnectionCode" name="parentConnectionCode" autocomplete="off" autocapitalize="characters" maxlength="6" pattern="[A-Za-z0-9]{6}" disabled>
       </div>
       <div class="forgot-row" id="forgotRow"><button class="text-button" id="forgotLink" type="button">Şifremi unuttum</button></div>
       <button class="primary" id="submitButton" type="submit">Giriş yap</button>
@@ -108,6 +121,7 @@
       const $ = id => document.getElementById(id);
       const params = new URLSearchParams(window.location.search);
       let mode = 'login';
+      let parentMode = params.get('role') === 'parent';
       let googleReady = false;
       const resetToken = params.get('token') || '';
       const resetEmail = params.get('email') || '';
@@ -136,6 +150,7 @@
       function setMode(nextMode) {
         mode = nextMode;
         const registering = mode === 'register';
+        const parentRegistration = registering && parentMode;
         const forgot = mode === 'forgot';
         const resetting = mode === 'reset';
         $('authOptions').hidden = forgot || resetting;
@@ -143,22 +158,39 @@
         $('resetForm').hidden = !resetting;
         $('loginMode').setAttribute('aria-pressed', String(!registering));
         $('registerMode').setAttribute('aria-pressed', String(registering));
-        for (const id of ['nameField', 'phoneField', 'confirmField', 'roleField']) {
+        for (const id of ['nameField', 'phoneField', 'confirmField']) {
           $(id).hidden = !registering;
           $(id).querySelector('input, select').disabled = !registering;
         }
+        $('roleField').hidden = !registering || parentMode;
+        $('role').disabled = !registering || parentMode;
+        $('surnameField').hidden = !parentRegistration;
+        $('surname').disabled = !parentRegistration;
+        $('surname').required = parentRegistration;
+        $('parentCodeField').hidden = !parentRegistration;
+        $('parentConnectionCode').disabled = !parentRegistration;
+        $('parentConnectionCode').required = parentRegistration;
+        $('googleWrap').hidden = parentMode;
+        $('googleDivider').hidden = parentMode;
+        $('nameField').querySelector('label').textContent = parentMode ? 'Ad' : 'Ad soyad';
         $('name').required = registering;
         $('phone').required = registering;
         $('forgotRow').hidden = registering;
         $('passwordConfirmation').required = registering;
         $('password').autocomplete = registering ? 'new-password' : 'current-password';
-        $('teacherCodeField').hidden = !registering || $('role').value !== 'teacher';
+        $('teacherCodeField').hidden = !registering || parentMode || $('role').value !== 'teacher';
         $('teacherCode').disabled = $('teacherCodeField').hidden;
         $('teacherCode').required = !$('teacherCodeField').hidden;
-        $('submitButton').textContent = registering ? 'Hesap oluştur' : 'Giriş yap';
-        $('authForm').action = registering ? '/register' : '/login';
+        $('submitButton').textContent = parentRegistration ? 'Veli hesabı oluştur' : registering ? 'Hesap oluştur' : 'Giriş yap';
+        $('authForm').action = parentMode
+          ? parentRegistration ? '/parent/register' : '/parent/login'
+          : registering ? '/register' : '/login';
         $('authForm').method = 'post';
-        $('intro').textContent = registering
+        $('intro').textContent = parentMode
+          ? parentRegistration
+            ? 'Çocuğunuzun panelindeki bağlantı koduyla veli hesabınızı oluşturun.'
+            : 'Veli hesabınızla giriş yapın.'
+          : registering
           ? 'Hesabınızı oluşturmak için bilgilerinizi girin.'
           : params.get('role') === 'teacher'
             ? 'Öğretmen hesabınızla giriş yapın.'
@@ -166,8 +198,22 @@
         $('message').textContent = '';
       }
 
-      $('loginMode').addEventListener('click', () => setMode('login'));
-      $('registerMode').addEventListener('click', () => setMode('register'));
+      $('loginMode').addEventListener('click', () => {
+        parentMode = false;
+        setMode('login');
+      });
+      $('registerMode').addEventListener('click', () => {
+        parentMode = false;
+        setMode('register');
+      });
+      $('parentLoginMode').addEventListener('click', () => {
+        parentMode = true;
+        setMode('login');
+      });
+      $('parentRegisterMode').addEventListener('click', () => {
+        parentMode = true;
+        setMode('register');
+      });
       $('role').addEventListener('change', () => setMode(mode));
       $('forgotLink').addEventListener('click', () => {
         $('forgotEmail').value = $('email').value;

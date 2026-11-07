@@ -1,5 +1,14 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+
+const PARENT_CODE_CHARACTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function createParentConnectionCode() {
+  return Array.from({ length: 6 }, () =>
+    PARENT_CODE_CHARACTERS[crypto.randomInt(PARENT_CODE_CHARACTERS.length)]
+  ).join('');
+}
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -22,6 +31,13 @@ const userSchema = new mongoose.Schema({
     trim: true,
     maxlength: 20,
     match: /^05\d{9}$/
+  },
+  parentConnectionCode: {
+    type: String,
+    match: /^[A-Z0-9]{6}$/,
+    sparse: true,
+    unique: true,
+    select: false
   },
   passwordHash: {
     type: String,
@@ -118,6 +134,40 @@ userSchema.methods.verifyPassword = function (password) {
 
 userSchema.methods.setPassword = async function (password) {
   this.passwordHash = await this.constructor.hashPassword(password);
+};
+
+userSchema.pre('validate', async function () {
+  if (this.role !== 'student' || this.parentConnectionCode) return;
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const code = createParentConnectionCode();
+    const existing = await this.constructor.exists({ parentConnectionCode: code });
+    if (!existing) {
+      this.parentConnectionCode = code;
+      return;
+    }
+  }
+  throw new Error('Veli bağlantı kodu üretilemedi.');
+});
+
+userSchema.statics.ensureParentConnectionCode = async function (userId) {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const user = await this.findById(userId).select('role +parentConnectionCode');
+    if (!user || user.role !== 'student') return null;
+    if (user.parentConnectionCode) return user.parentConnectionCode;
+
+    const code = createParentConnectionCode();
+    try {
+      const updated = await this.findOneAndUpdate(
+        { _id: user._id, role: 'student', parentConnectionCode: { $exists: false } },
+        { $set: { parentConnectionCode: code } },
+        { new: true, runValidators: true }
+      ).select('+parentConnectionCode');
+      if (updated?.parentConnectionCode) return updated.parentConnectionCode;
+    } catch (error) {
+      if (error.code !== 11000) throw error;
+    }
+  }
+  throw new Error('Veli bağlantı kodu oluşturulamadı. Lütfen yeniden deneyin.');
 };
 
 module.exports = mongoose.models.User || mongoose.model('User', userSchema);

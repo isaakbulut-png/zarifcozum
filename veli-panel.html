@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Veli Paneli | ZarifÇözüm</title>
+  <style>
+    :root{font-family:Inter,"Segoe UI",sans-serif;color:#35271d;background:#f7f4ef;font-synthesis:none;--ink:#493526;--muted:#796b60;--line:#e4ddd4;--card:#fff;--brand:#6b4a2f;--soft:#efe7de}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh}
+    button{font:inherit}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px clamp(18px,5vw,64px);background:#fff;border-bottom:1px solid var(--line)}
+    .brand{color:var(--ink);font-weight:800;font-size:1.15rem;letter-spacing:.01em}
+    .topbar p{margin:3px 0 0;color:var(--muted);font-size:.84rem}
+    .logout{padding:9px 14px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-weight:650;cursor:pointer}
+    .logout:hover{border-color:var(--brand);color:var(--brand)}
+    main{width:min(1120px,calc(100% - 36px));margin:34px auto 60px}
+    .welcome{margin-bottom:24px}
+    .eyebrow{color:var(--brand);font-weight:750;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase}
+    h1{margin:7px 0;font-size:clamp(1.7rem,4vw,2.4rem);letter-spacing:-.04em;color:var(--ink)}
+    .welcome p{margin:0;color:var(--muted)}
+    .notice{margin:22px 0;padding:13px 16px;border:1px solid #e6d9c7;border-radius:12px;background:#fbf6ed;color:#665341;font-size:.88rem}
+    .stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+    .stat,.card{border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 6px 20px rgba(58,38,24,.035)}
+    .stat{padding:18px}
+    .stat span{display:block;color:var(--muted);font-size:.82rem}
+    .stat strong{display:block;margin-top:8px;color:var(--ink);font-size:1.75rem;line-height:1.1}
+    .columns{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:18px;margin-top:18px}
+    .card{padding:22px}
+    .card h2{margin:0;color:var(--ink);font-size:1.08rem}
+    .card-intro{margin:5px 0 16px;color:var(--muted);font-size:.83rem}
+    .lesson-list,.message-list{display:grid;gap:10px}
+    .lesson,.message{padding:13px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .lesson{display:flex;align-items:center;justify-content:space-between;gap:14px}
+    .lesson strong,.message strong{color:var(--ink);font-size:.9rem}
+    .lesson small,.message small{display:block;margin-top:4px;color:var(--muted);font-size:.76rem}
+    .lesson-count{flex:none;padding:5px 9px;border-radius:999px;background:var(--soft);color:var(--brand);font-size:.74rem;font-weight:700}
+    .message{overflow-wrap:anywhere}
+    .message p{margin:7px 0 0;color:#51453c;font-size:.9rem;white-space:pre-wrap}
+    .message.is-ai{border-left:3px solid #8a6a4e}
+    .message.is-user{border-left:3px solid #c9a477}
+    .message-tag{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;background:#f6ead8;color:#785b35;font-size:.68rem;font-weight:700}
+    .empty{padding:18px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:.88rem;text-align:center}
+    .error{padding:14px;border:1px solid #ecc7c4;border-radius:10px;background:#fff3f2;color:#8f2f28}
+    .loading{color:var(--muted)}
+    @media(max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.columns{grid-template-columns:1fr}}
+    @media(max-width:440px){.topbar{align-items:flex-start}.stats{gap:9px}.stat{padding:14px}.stat strong{font-size:1.45rem}.card{padding:17px}.lesson{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div><div class="brand">ZarifÇözüm · Veli Paneli</div><p id="parentEmail"></p></div>
+    <button class="logout" id="logout" type="button">Güvenli çıkış</button>
+  </header>
+  <main>
+    <p id="status" class="loading" role="status">Öğrenci gelişim özeti yükleniyor…</p>
+    <div id="dashboard" hidden>
+      <section class="welcome">
+        <span class="eyebrow">Öğrenci gelişim özeti</span>
+        <h1 id="studentName"></h1>
+        <p id="studentDetails"></p>
+      </section>
+      <p class="notice">Bu özet, öğrencinin AI Mentör ile yaptığı son konuşmalardan hazırlanır. İçerik yalnızca bu veli hesabına ve bağlı öğrenciye özeldir.</p>
+      <section class="stats" aria-label="Sohbet özeti">
+        <article class="stat"><span>Görüntülenen mesaj</span><strong id="messageCount">0</strong></article>
+        <article class="stat"><span>Öğrenci sorusu</span><strong id="questionCount">0</strong></article>
+        <article class="stat"><span>AI Mentör yanıtı</span><strong id="responseCount">0</strong></article>
+        <article class="stat"><span>İpucu olabilecek yanıt</span><strong id="hintCount">0</strong></article>
+        <article class="stat"><span>Canlı ders sohbeti</span><strong id="lessonCount">0</strong></article>
+      </section>
+      <div class="columns">
+        <section class="card">
+          <h2>Son konuşmalar ve ipuçları</h2>
+          <p class="card-intro">Son 30 mesaj · özet sayıları son 100 kayıttan hesaplanır. AI yanıtlarında ipucu olabilecek bölümler işaretlenir.</p>
+          <div class="message-list" id="messages"></div>
+        </section>
+        <section class="card">
+          <h2>Canlı dersler</h2>
+          <p class="card-intro">Canlı ders Socket.IO odasına bağlanma kayıtları. AI Mentör kullanılan odalarda mesaj sayısı da gösterilir.</p>
+          <div class="lesson-list" id="lessons"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+  <script>
+    (() => {
+      const $ = id => document.getElementById(id);
+      const esc = value => String(value ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[character]);
+      const dateText = value => value ? new Date(value).toLocaleString('tr-TR') : 'Henüz etkinlik yok';
+
+      async function loadDashboard() {
+        const [meResponse, dashboardResponse] = await Promise.all([
+          fetch('/me', {credentials: 'same-origin'}),
+          fetch('/api/parent/dashboard', {credentials: 'same-origin'})
+        ]);
+        if (meResponse.status === 401 || dashboardResponse.status === 401) {
+          location.replace('/kayit-giris.html?role=parent');
+          return;
+        }
+        const me = await meResponse.json();
+        const result = await dashboardResponse.json();
+        if (!meResponse.ok || !dashboardResponse.ok) {
+          throw new Error(result.mesaj || me.mesaj || 'Veli paneli yüklenemedi.');
+        }
+        if (me.user.role !== 'parent') {
+          location.replace('/kayit-giris.html?role=parent');
+          return;
+        }
+        $('parentEmail').textContent = me.user.email;
+        $('studentName').textContent = result.student.name;
+        $('studentDetails').textContent = result.student.grade
+          ? `${result.student.grade}. sınıf${result.student.section ? ` · ${result.student.section}` : ''}`
+          : 'Bağlı öğrenci hesabı';
+        $('messageCount').textContent = result.summary.messageCount;
+        $('questionCount').textContent = result.summary.questionCount;
+        $('responseCount').textContent = result.summary.aiResponseCount;
+        $('hintCount').textContent = result.summary.hintCount;
+        $('lessonCount').textContent = result.summary.liveLessonCount;
+
+        $('messages').innerHTML = result.recentMessages.length
+          ? result.recentMessages.map(item => `<article class="message is-${item.sender === 'ai' ? 'ai' : 'user'}">
+              <strong>${item.sender === 'ai' ? 'AI Mentör' : 'Öğrenci'}</strong>
+              ${item.isHint ? '<span class="message-tag">İpucu</span>' : ''}
+              <p>${esc(item.message)}</p>
+              <small>${esc(item.roomName === 'assistant' ? 'Asistan sohbeti' : 'Canlı ders')} · ${esc(dateText(item.createdAt))}</small>
+            </article>`).join('')
+          : '<p class="empty">Henüz AI Mentör sohbeti bulunmuyor.</p>';
+
+        $('lessons').innerHTML = result.liveLessons.length
+          ? result.liveLessons.map(lesson => `<article class="lesson">
+              <div><strong>${esc(lesson.title || 'Canlı ders')}</strong><small>İlk bağlantı: ${esc(dateText(lesson.firstJoinedAt))} · Son bağlantı: ${esc(dateText(lesson.lastActivityAt))}</small></div>
+              <span class="lesson-count">${lesson.joinCount || 0} bağlantı · ${lesson.messageCount} mesaj</span>
+            </article>`).join('')
+          : '<p class="empty">AI Mentör kullanılan canlı ders kaydı yok.</p>';
+        $('status').hidden = true;
+        $('dashboard').hidden = false;
+      }
+
+      $('logout').addEventListener('click', async () => {
+        try {
+          await fetch('/logout', {method: 'POST', credentials: 'same-origin'});
+          location.replace('/kayit-giris.html?role=parent');
+        } catch {
+          $('status').textContent = 'Çıkış yapılamadı. Lütfen yeniden deneyin.';
+          $('status').className = 'error';
+          $('status').hidden = false;
+        }
+      });
+
+      loadDashboard().catch(error => {
+        $('status').textContent = error.message || 'Veli paneli yüklenemedi.';
+        $('status').className = 'error';
+      });
+    })();
+  </script>
+</body>
+</html>

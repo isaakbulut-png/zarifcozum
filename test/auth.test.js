@@ -4,13 +4,19 @@ const express = require('express');
 const test = require('node:test');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
-const { redirectForRole, router } = require('../routes/auth');
+const Parent = require('../models/Parent');
+const { createRequireRole, redirectForRole, router } = require('../routes/auth');
 
 function withServer(sessionUser, callback) {
   const app = express();
   app.use(express.json());
   app.use((req, res, next) => {
-    req.session = { user: sessionUser };
+    req.session = {
+      user: sessionUser,
+      regenerate(callback) { this.user = undefined; callback(); },
+      save(callback) { callback(); },
+      destroy(callback) { callback(); }
+    };
     next();
   });
   app.use(router);
@@ -44,6 +50,136 @@ test('role redirects keep editor teachers in the teacher panel', () => {
   assert.equal(redirectForRole('teacher', null), '/ogretmen-paneli.html');
   assert.equal(redirectForRole('admin', 'support'), '/admin-paneli.html');
   assert.equal(redirectForRole('student', null), '/ogrenci-paneli.html');
+  assert.equal(redirectForRole('parent', null), '/veli-panel.html');
+});
+
+test('student accounts receive a unique-format six-character parent code', async () => {
+  const restore = stub(User, 'exists', async () => null);
+  try {
+    const student = new User({
+      name: 'Deniz',
+      email: 'deniz@example.com',
+      role: 'student'
+    });
+    await student.validate();
+    assert.match(student.parentConnectionCode, /^[A-Z0-9]{6}$/);
+    assert.equal(User.schema.path('parentConnectionCode').options.unique, true);
+    assert.equal(User.schema.path('parentConnectionCode').options.select, false);
+  } finally {
+    restore();
+  }
+});
+
+test('parent registration validates the connection code and creates a parent session', async () => {
+  const student = {_id: {toString: () => 'student-id'}};
+  const parent = {
+    _id: {toString: () => 'parent-id'},
+    name: 'Ayşe',
+    surname: 'Yılmaz',
+    email: 'ayse@example.com',
+    phone: '05551112233'
+  };
+  const restoreUserFind = stub(User, 'findOne', filter => ({
+    select: async () => filter.parentConnectionCode === 'ZRF123' && filter.role === 'student'
+      ? student
+      : null
+  }));
+  const restoreParentFind = stub(Parent, 'findOne', () => ({select: async () => null}));
+  const restoreCreate = stub(Parent, 'createWithPassword', async (data, password) => {
+    assert.deepEqual(data, {
+      name: 'Ayşe',
+      surname: 'Yılmaz',
+      email: 'ayse@example.com',
+      phone: '05551112233',
+      studentId: student._id
+    });
+    assert.equal(password, 'parent-password');
+    return parent;
+  });
+  try {
+    await withServer(undefined, async base => {
+      const invalid = await fetch(`${base}/parent/register`, post({
+        name: 'Ayşe',
+        surname: 'Yılmaz',
+        email: 'ayse@example.com',
+        phone: '0555 111 22 33',
+        password: 'parent-password',
+        passwordConfirmation: 'parent-password',
+        parentConnectionCode: 'bad'
+      }));
+      assert.equal(invalid.status, 400);
+
+      const response = await fetch(`${base}/parent/register`, post({
+        name: 'Ayşe',
+        surname: 'Yılmaz',
+        email: 'ayse@example.com',
+        phone: '0555 111 22 33',
+        password: 'parent-password',
+        passwordConfirmation: 'parent-password',
+        parentConnectionCode: 'zrf123'
+      }));
+      assert.equal(response.status, 201);
+      const result = await response.json();
+      assert.equal(result.user.role, 'parent');
+      assert.equal(result.redirectTo, '/veli-panel.html');
+    });
+  } finally {
+    restoreCreate();
+    restoreParentFind();
+    restoreUserFind();
+  }
+});
+
+test('parent login uses parent credentials and redirects to the parent panel', async () => {
+  const parent = {
+    _id: {toString: () => 'parent-id'},
+    name: 'Ayşe',
+    surname: 'Yılmaz',
+    email: 'ayse@example.com',
+    role: 'parent',
+    restricted: false,
+    verifyPassword: async password => password === 'parent-password'
+  };
+  const restore = stub(Parent, 'findOne', () => ({select: async () => parent}));
+  try {
+    await withServer(undefined, async base => {
+      const response = await fetch(`${base}/parent/login`, post({
+        email: 'ayse@example.com',
+        password: 'parent-password'
+      }));
+      assert.equal(response.status, 200);
+      const result = await response.json();
+      assert.equal(result.user.role, 'parent');
+      assert.equal(result.user.name, 'Ayşe Yılmaz');
+      assert.equal(result.redirectTo, '/veli-panel.html');
+    });
+  } finally {
+    restore();
+  }
+});
+
+test('role guard resolves parent sessions from the Parent collection', async () => {
+  let userLookups = 0;
+  const guard = createRequireRole({
+    findById: () => { userLookups += 1; return {select: async () => null}; }
+  }, {
+    findById: id => ({
+      select: async () => id === 'parent-id'
+        ? {_id: {toString: () => id}, name: 'Ayşe', surname: 'Yılmaz', restricted: false}
+        : null
+    })
+  })('parent');
+  const req = {session: {user: {id: 'parent-id', role: 'parent'}}};
+  let nextCalled = false;
+  const res = {
+    status() { return this; },
+    json(body) { throw new Error(body.mesaj); }
+  };
+  await guard(req, res, () => { nextCalled = true; });
+  assert.equal(nextCalled, true);
+  assert.equal(userLookups, 0);
+  assert.equal(req.session.user.name, 'Ayşe Yılmaz');
+  assert.equal(req.session.user.role, 'parent');
 });
 
 test('Google client config exposes only its public client ID', async () => {
@@ -204,6 +340,7 @@ test('password reset emails use hashed, expiring tokens without revealing accoun
     save: async () => {}
   };
   const restoreFind = stub(User, 'findOne', async () => knownAccount ? user : null);
+  const restoreParentFind = stub(Parent, 'findOne', async () => null);
   const restoreTransport = stub(nodemailer, 'createTransport', () => ({
     sendMail: async message => { sentMessage = message; }
   }));
@@ -229,6 +366,7 @@ test('password reset emails use hashed, expiring tokens without revealing accoun
     });
   } finally {
     restoreFind();
+    restoreParentFind();
     restoreTransport();
     for (const [key, value] of Object.entries(env)) {
       if (value === undefined) delete process.env[key];
