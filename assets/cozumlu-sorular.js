@@ -107,7 +107,13 @@
       button.className = 'open-button';
       button.type = 'button';
       button.textContent = count ? 'Soruları incele ↗' : 'Konuyu incele ↗';
-      button.addEventListener('click', () => openTopic(item, count));
+      button.addEventListener('click', () => {
+        if (!count) {
+          window.location.assign('/kayit-giris.html?mode=register');
+          return;
+        }
+        openTopic(item, count);
+      });
       foot.append(detail, button);
       body.append(tag, title, description, foot);
       article.append(body);
