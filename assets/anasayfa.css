@@ -109,7 +109,12 @@ body.homepage .grade-section .section-head h2::after {
 }
 body.homepage .section-head p { color: var(--color-text-muted); margin-top: 0.35rem; }
 body.homepage .grade-section .section-head p { margin-inline: auto; }
-body.homepage .why-section .section-head p { text-align: center; }
+body.homepage .why-section .section-head p {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  text-align: center;
+}
 
 /* Sınıf kutuları */
 body.homepage .grade-grid {
