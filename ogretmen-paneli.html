@@ -140,6 +140,8 @@ td.net{font-weight:700;color:var(--navy-900)}
 .section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .section-title h2{margin-bottom:3px}
 .question-list{display:grid;gap:14px;margin:18px 0}
+.math-editor-section{margin-top:20px;scroll-margin-top:18px}
+.math-editor-section h3{font-family:var(--head);font-size:1rem;color:var(--navy-900)}
 .question-card{padding:16px;border:1px solid var(--line);border-radius:12px;background:#f8f6f0}
 .question-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .question-top strong{color:var(--navy-800)}
@@ -204,6 +206,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     <a href="#students"><span>♙</span>Öğrenciler</a>
     <a href="#assignments"><span>☑</span>Ödev yönetimi</a>
     <a href="#quiz-builder"><span>✎</span>Sınav ve testler</a>
+    <a href="#math-question-editor"><span>∑</span>Formüllü soru editörü</a>
     <a href="#analytics"><span>▥</span>Başarı analizi</a>
     <a href="#image-questions"><span>▦</span>Soru bankası</a>
     <a href="#ai-question-wizard"><span>✦</span>Yapay Zeka İle Soru Üret</a>
@@ -420,7 +423,11 @@ td.net{font-weight:700;color:var(--navy-900)}
           <div class="field"><label for="quizTitle">Test adı</label><input id="quizTitle" maxlength="150" required placeholder="Örn. Kesirler mini testi"></div>
           <div class="field"><label for="quizDescription">Açıklama</label><input id="quizDescription" maxlength="500" placeholder="Kısa test açıklaması"></div>
         </div>
-        <div class="question-list" id="questionList"></div>
+        <div class="math-editor-section" id="math-question-editor">
+          <h3>Formüllü soru editörü</h3>
+          <p class="hint">Soru metnini biçimlendirin, LaTeX formülü ekleyin ve SVG şeklinizi önizleyin. Sorular testi yayınladığınızda öğrencilere açılır.</p>
+          <div class="question-list" id="questionList"></div>
+        </div>
         <div class="button-row">
           <button class="btn light" id="addQuestion" type="button">+ Soru ekle</button>
           <button class="btn" type="submit">Testi Yayınla</button>

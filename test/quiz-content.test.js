@@ -1,6 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const express = require('express');
+const fs = require('node:fs');
+const path = require('node:path');
 const {prepareQuestion, studentQuestion} = require('../lib/quiz-content');
 const {validate} = require('../assets/safe-svg');
 const {createTeacherQuizHandler} = require('../routes/quizler');
@@ -17,6 +19,17 @@ const question = () => ({
   svg,
   options: {A: '1', B: '2', C: '3', D: '4'},
   answer: 'B'
+});
+
+test('öğretmen yan menüsünden formül ve SVG soru editörüne erişilir', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'ogretmen-paneli.html'), 'utf8');
+  const sidebar = html.match(/<aside class="teacher-sidebar"[\s\S]*?<\/aside>/);
+  assert.ok(sidebar);
+  assert.match(sidebar[0], /href="#math-question-editor"[^>]*>[\s\S]*?Formüllü soru editörü<\/a>/);
+  assert.match(html, /id="math-question-editor"[\s\S]*?id="questionList"/);
+  assert.match(html, /class="question-editor"/);
+  assert.match(html, /class="btn light question-formula"/);
+  assert.match(html, /class="question-svg-preview"/);
 });
 
 test('zengin soru sanitize edilir ve öğrenciye cevap anahtarı gönderilmez', () => {
