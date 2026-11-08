@@ -60,6 +60,47 @@ test('servis anahtarı eksikse istek gönderilmez', async () => {
   await assert.rejects(service.getTree(), { code: 'CURRICULUM_NOT_CONFIGURED' });
 });
 
+test('production ortamında müfredat servisi URLsi zorunlu ve localhost olamaz', async () => {
+  const token = 'a'.repeat(32);
+  const missingUrl = createCurriculumService({
+    token,
+    environment: { NODE_ENV: 'production' }
+  });
+  await assert.rejects(missingUrl.getTree(), { code: 'CURRICULUM_SERVICE_URL_NOT_CONFIGURED' });
+
+  const loopbackUrl = createCurriculumService({
+    baseURL: 'http://127.0.0.1:8000',
+    token,
+    environment: { NODE_ENV: 'production' }
+  });
+  await assert.rejects(loopbackUrl.getTree(), { code: 'CURRICULUM_SERVICE_URL_LOOPBACK' });
+
+  const localhostUrl = createCurriculumService({
+    baseURL: 'http://localhost.:8000',
+    token,
+    environment: { NODE_ENV: 'production' }
+  });
+  await assert.rejects(localhostUrl.getTree(), { code: 'CURRICULUM_SERVICE_URL_LOOPBACK' });
+});
+
+test('müfredat rotası bağlantı hatasında dahili adres veya kimlik bilgisi sızdırmadan 503 döndürür', async t => {
+  const app = express();
+  app.use('/api/v1/curriculum', createCurriculumRouter({
+    requireStaff: (_req, _res, next) => next(),
+    service: {
+      getTree: async () => {
+        throw Object.assign(new Error('private upstream details'), { code: 'ENOTFOUND' });
+      }
+    }
+  }));
+  const response = await fetch(`${await listen(app, t)}/api/v1/curriculum/tree`);
+  assert.equal(response.status, 503);
+  assert.deepEqual(await response.json(), {
+    kod: 'CURRICULUM_SERVICE_UNREACHABLE',
+    mesaj: 'Python müfredat servisine bağlanılamadı; internal URL ve portu kontrol edin.'
+  });
+});
+
 test('manuel bağlantı yalnız geçerli düğüme yazılır ve test sahibiyle sınırlandırılır', async t => {
   const nodeId = '507f1f77bcf86cd799439011';
   const questionId = '507f1f77bcf86cd799439012';

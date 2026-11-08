@@ -17,7 +17,29 @@ function createCurriculumRouter({ requireStaff, service = createCurriculumServic
       return res.status(response.status).json(response.data);
     } catch (error) {
       console.error('Müfredat servisine erişilemedi:', error.code || error.message);
-      return res.status(503).json({ mesaj: 'Müfredat servisine erişilemiyor.' });
+      const configurationMessages = {
+        CURRICULUM_NOT_CONFIGURED: 'CURRICULUM_SERVICE_TOKEN ayarı eksik veya geçersiz.',
+        CURRICULUM_SERVICE_URL_NOT_CONFIGURED: 'Production ortamında CURRICULUM_SERVICE_URL ayarlanmalıdır.',
+        CURRICULUM_SERVICE_URL_INVALID: 'CURRICULUM_SERVICE_URL geçerli bir HTTP(S) adresi olmalıdır.',
+        CURRICULUM_SERVICE_URL_LOOPBACK: 'Production CURRICULUM_SERVICE_URL localhost adresi olamaz.'
+      };
+      if (configurationMessages[error.code]) {
+        return res.status(503).json({
+          kod: error.code,
+          mesaj: configurationMessages[error.code]
+        });
+      }
+      if (['ECONNABORTED', 'ECONNREFUSED', 'ECONNRESET', 'ENOTFOUND',
+        'EHOSTUNREACH', 'ENETUNREACH', 'ETIMEDOUT'].includes(error.code)) {
+        return res.status(503).json({
+          kod: 'CURRICULUM_SERVICE_UNREACHABLE',
+          mesaj: 'Python müfredat servisine bağlanılamadı; internal URL ve portu kontrol edin.'
+        });
+      }
+      return res.status(503).json({
+        kod: 'CURRICULUM_SERVICE_FAILURE',
+        mesaj: 'Müfredat servisine erişilemiyor.'
+      });
     }
   }
 
