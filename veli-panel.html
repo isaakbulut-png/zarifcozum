@@ -21,6 +21,7 @@
     h1{margin:7px 0;font-size:clamp(1.7rem,4vw,2.4rem);letter-spacing:-.04em;color:var(--ink)}
     .welcome p{margin:0;color:var(--muted)}
     .notice{margin:22px 0;padding:13px 16px;border:1px solid #e6d9c7;border-radius:12px;background:#fbf6ed;color:#665341;font-size:.88rem}
+    .demo-notice{margin:14px 0;padding:13px 16px;border:1px solid #e8b866;border-radius:12px;background:#fff6e5;color:#754b0b;font-size:.88rem;font-weight:650}
     .stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
     .stat,.card{border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 6px 20px rgba(58,38,24,.035)}
     .stat{padding:18px}
@@ -70,6 +71,7 @@
         <p id="studentDetails"></p>
       </section>
       <p class="notice">Bu özet, öğrencinin AI Mentör ile yaptığı son konuşmalardan hazırlanır. İçerik yalnızca bu veli hesabına ve bağlı öğrenciye özeldir.</p>
+      <p class="demo-notice" id="demoNotice" role="status" hidden>DEMO · Örnek veriler gösteriliyor; gerçek öğrenci performansı değildir.</p>
       <section class="stats" aria-label="Sohbet özeti">
         <article class="stat"><span>Görüntülenen mesaj</span><strong id="messageCount">0</strong></article>
         <article class="stat"><span>Öğrenci sorusu</span><strong id="questionCount">0</strong></article>
@@ -114,6 +116,9 @@
       const dateOnly = value => new Date(value).toLocaleDateString('tr-TR', {
         day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Istanbul'
       });
+      function markDemo() {
+        $('demoNotice').hidden = false;
+      }
 
       async function loadWeeklyReport() {
         try {
@@ -127,25 +132,29 @@
 
           $('reportWeek').textContent = `${dateOnly(report.week_start)} – ${dateOnly(new Date(new Date(report.week_end).getTime() - 1))}`;
           $('reportAssignments').textContent = report.completed_assignments;
-          $('reportSuccess').textContent = report.average_success_percent === null
+          $('reportSuccess').textContent = report.average_success_percent == null
             ? 'Veri yok'
             : `%${report.average_success_percent}`;
           const gaps = $('reportGaps');
           gaps.replaceChildren();
-          if (report.critical_gaps.length) {
-            report.critical_gaps.forEach(gap => {
+          const criticalGaps = Array.isArray(report.critical_gaps) ? report.critical_gaps : [];
+          if (criticalGaps.length) {
+            criticalGaps.forEach(gap => {
               const item = document.createElement('li');
               item.textContent = `${gap.title} · %${gap.success_percent}`;
               gaps.append(item);
             });
           } else {
             const item = document.createElement('li');
-            item.textContent = report.average_success_percent === null
+            item.textContent = report.average_success_percent == null
               ? 'Bu hafta henüz değerlendirme verisi yok.'
               : 'Bu hafta kritik kazanım eksiği bulunmuyor.';
             gaps.append(item);
           }
-          $('reportStatus').textContent = 'Öğrencinizin haftalık performans özeti.';
+          if (report.demo) markDemo();
+          $('reportStatus').textContent = report.demo
+            ? 'DEMO · Örnek haftalık öğrenme karnesi (gerçek performans verisi değildir).'
+            : 'Öğrencinizin haftalık performans özeti.';
           $('reportContent').hidden = false;
         } catch (error) {
           $('reportStatus').textContent = error.message || 'Haftalık karne alınamadı.';
@@ -181,6 +190,7 @@
         $('responseCount').textContent = result.summary.aiResponseCount;
         $('hintCount').textContent = result.summary.hintCount;
         $('lessonCount').textContent = result.summary.liveLessonCount;
+        if (result.demo) markDemo();
 
         $('messages').innerHTML = result.recentMessages.length
           ? result.recentMessages.map(item => `<article class="message is-${item.sender === 'ai' ? 'ai' : 'user'}">

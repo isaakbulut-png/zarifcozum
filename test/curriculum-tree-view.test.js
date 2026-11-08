@@ -34,3 +34,15 @@ test('öğretmen paneli yeni bileşeni ve oturum yaşam döngüsünü bağlar', 
   assert.match(html, /curriculum-tree:open/);
   assert.match(html, /curriculum-tree:close/);
 });
+
+test('müfredat ağacı Express API üzerinden yüklenir ve ödev sepeti drag-drop olaylarını dinler', () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'assets', 'curriculum-tree-view.js'), 'utf8');
+  assert.match(source, /fetch\('\/api\/v1\/curriculum\/tree', \{credentials: 'same-origin'\}\)/);
+  assert.match(source, /button\.draggable = true/);
+  assert.match(source, /addEventListener\('dragstart'/);
+  assert.match(source, /application\/x-zarif-curriculum/);
+  assert.match(source, /addEventListener\('dragover'/);
+  assert.match(source, /addEventListener\('drop'/);
+  assert.match(source, /fetch\('\/api\/v1\/assignments\/classes'/);
+  assert.match(source, /fetch\('\/api\/v1\/assignments'/);
+});

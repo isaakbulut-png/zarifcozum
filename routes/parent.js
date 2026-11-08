@@ -5,6 +5,85 @@ function isLikelyHint(message) {
   return /(ipucu|ipuç|deneyelim|birlikte|önce)/i.test(message);
 }
 
+function demoDashboard(student) {
+  const now = new Date();
+  const earlier = new Date(now.getTime() - 60 * 60 * 1000);
+  return {
+    student,
+    summary: {
+      messageCount: 4,
+      questionCount: 2,
+      aiResponseCount: 2,
+      hintCount: 1,
+      lastActivityAt: now,
+      liveLessonCount: 1
+    },
+    liveLessons: [{
+      meetingId: 'demo-lesson',
+      title: 'Örnek canlı ders',
+      firstJoinedAt: earlier,
+      lastActivityAt: now,
+      joinCount: 1,
+      messageCount: 2
+    }],
+    recentMessages: [
+      {sender: 'user', message: 'Kesirleri nasıl karşılaştırabilirim?', roomName: 'assistant', createdAt: earlier, isHint: false},
+      {sender: 'ai', message: 'Önce paydaları eşitlemeyi deneyelim.', roomName: 'assistant', createdAt: now, isHint: true}
+    ],
+    demo: true
+  };
+}
+
+function demoReport(studentId, reason) {
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+  return {
+    student_id: studentId,
+    week_start: weekStart,
+    week_end: weekEnd,
+    completed_assignments: 3,
+    average_success_percent: 78,
+    critical_gaps: [
+      {curriculum_node_id: 'demo-gap-1', title: 'Örnek kazanım: kesirleri karşılaştırma', code: 'DEMO.1', success_percent: 45},
+      {curriculum_node_id: 'demo-gap-2', title: 'Örnek kazanım: problem çözme', code: 'DEMO.2', success_percent: 55}
+    ],
+    demo: true,
+    demo_reason: reason
+  };
+}
+
+function reportServiceFailure(res, studentId, error, demoMode) {
+  console.error('Veli haftalık rapor servisi başarısız:', error.code || error.message || error);
+  if (demoMode) {
+    res.set('Cache-Control', 'private, no-store');
+    return res.json(demoReport(studentId, error.code === 'CURRICULUM_NOT_CONFIGURED'
+      ? 'service_not_configured' : 'service_unavailable'));
+  }
+  if (error.status === 404) {
+    return res.status(404).json({
+      kod: 'PARENT_REPORT_NOT_FOUND',
+      mesaj: 'Bu öğrenci için haftalık karne bulunamadı.'
+    });
+  }
+
+  const code = error.code === 'CURRICULUM_NOT_CONFIGURED'
+    ? 'CURRICULUM_SERVICE_NOT_CONFIGURED'
+    : error.code === 'ECONNREFUSED' || error.code === 'ECONNABORTED'
+      ? 'CURRICULUM_SERVICE_UNREACHABLE'
+      : 'CURRICULUM_REPORT_FAILED';
+  const message = code === 'CURRICULUM_SERVICE_NOT_CONFIGURED'
+    ? 'CURRICULUM_SERVICE_TOKEN eksik veya geçersiz; .env içinde en az 32 karakter olmalıdır.'
+    : code === 'CURRICULUM_SERVICE_UNREACHABLE'
+      ? 'Python servisine bağlanılamadı. 8000 portunda FastAPI servisini başlatın.'
+      : 'Haftalık öğrenme karnesi alınamadı.';
+  return res.status(code === 'CURRICULUM_REPORT_FAILED' ? 502 : 503)
+    .json({kod: code, mesaj: message});
+}
+
 function createParentRouter({
   requireParent,
   requireReportAccess = requireParent,
@@ -13,7 +92,8 @@ function createParentRouter({
   ChatMessageModel,
   LessonAttendanceModel,
   getStudentCollection,
-  service = createCurriculumService()
+  service = createCurriculumService(),
+  demoMode = false
 }) {
   const router = express.Router();
 
@@ -45,6 +125,16 @@ function createParentRouter({
           .lean()
           .exec()
       ]);
+      const studentSummary = {
+        name: student.name,
+        grade: profile?.grade || null,
+        section: profile?.section || ''
+      };
+      if (demoMode && records.length === 0 && attendance.length === 0) {
+        res.set('Cache-Control', 'private, no-store');
+        return res.json(demoDashboard(studentSummary));
+      }
+
       const messages = records.reverse();
       const liveLessonsByRoom = new Map(attendance.map(record => [record.meetingId, {
         meetingId: record.meetingId,
@@ -74,11 +164,7 @@ function createParentRouter({
       const hints = aiMessages.filter(message => isLikelyHint(message.message));
       res.set('Cache-Control', 'private, no-store');
       res.json({
-        student: {
-          name: student.name,
-          grade: profile?.grade || null,
-          section: profile?.section || ''
-        },
+        student: studentSummary,
         summary: {
           messageCount: messages.length,
           questionCount: userMessages.length,
@@ -95,7 +181,8 @@ function createParentRouter({
           roomName: message.roomName,
           createdAt: message.createdAt,
           isHint: message.sender === 'ai' && isLikelyHint(message.message)
-        }))
+        })),
+        demo: false
       });
     } catch (error) {
       console.error('Veli paneli verileri alınamadı:', error);
@@ -128,17 +215,32 @@ function createParentRouter({
       }).select('_id').lean();
       if (!student) return res.status(404).json({mesaj: 'Bağlı öğrenci hesabı bulunamadı.'});
 
-      const response = await service.getParentReport(String(student._id));
+      let response;
+      try {
+        response = await service.getParentReport(String(student._id));
+      } catch (error) {
+        return reportServiceFailure(res, String(student._id), error, demoMode);
+      }
       if (response.status !== 200) {
-        console.error('Veli haftalık rapor servisi başarısız:', response.status);
-        return res.status(response.status === 404 ? 404 : 502)
-          .json({mesaj: 'Haftalık öğrenme karnesi alınamadı.'});
+        return reportServiceFailure(res, String(student._id), {
+          status: response.status,
+          code: 'CURRICULUM_SERVICE_UNAVAILABLE',
+          message: `Python servisi HTTP ${response.status} döndürdü.`
+        }, demoMode);
+      }
+      const report = response.data;
+      const noReportData = report.completed_assignments === 0 &&
+        report.average_success_percent == null &&
+        Array.isArray(report.critical_gaps) && report.critical_gaps.length === 0;
+      if (demoMode && noReportData) {
+        res.set('Cache-Control', 'private, no-store');
+        return res.json(demoReport(String(student._id), 'empty_data'));
       }
       res.set('Cache-Control', 'private, no-store');
-      return res.json(response.data);
+      return res.json({...report, demo: false});
     } catch (error) {
       console.error('Veli haftalık raporu alınamadı:', error.code || error.message);
-      return res.status(503).json({mesaj: 'Haftalık öğrenme karnesi servisine erişilemiyor.'});
+      return res.status(500).json({kod: 'PARENT_REPORT_FAILED', mesaj: 'Haftalık öğrenme karnesi alınamadı.'});
     }
   });
 

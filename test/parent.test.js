@@ -3,7 +3,7 @@ const express = require('express');
 const test = require('node:test');
 const {createParentRouter} = require('../routes/parent');
 
-function withParentApi(sessionUser, callback) {
+function withParentApi(sessionUser, callback, options = {}) {
   const app = express();
   app.use(express.json());
   app.use((req, _res, next) => {
@@ -46,7 +46,7 @@ function withParentApi(sessionUser, callback) {
     ChatMessageModel: {
       find: query => {
         calls.chatUserId = query.userId;
-        const records = [
+        const records = options.chatRecords ?? [
           {roomName: 'assistant', sender: 'user', message: 'Kesir nedir?', createdAt: new Date('2026-11-06T10:00:00Z')},
           {roomName: 'assistant', sender: 'ai', message: 'Birlikte bir ipucu bulalım.', createdAt: new Date('2026-11-06T10:01:00Z')},
           {roomName: 'meeting-123', sender: 'user', message: 'Bu canlı derste soru.', createdAt: new Date('2026-11-07T10:00:00Z')}
@@ -70,7 +70,7 @@ function withParentApi(sessionUser, callback) {
           sort: () => cursor,
           limit: () => cursor,
           lean: () => cursor,
-          exec: async () => [{
+          exec: async () => options.attendanceRecords ?? [{
             meetingId: 'meeting-123',
             title: 'Kesirler',
             firstJoinedAt: new Date('2026-11-07T09:50:00Z'),
@@ -88,11 +88,12 @@ function withParentApi(sessionUser, callback) {
       }
     }),
     service: {
-      getParentReport: async studentId => ({
+      getParentReport: options.getParentReport || (async studentId => ({
         status: 200,
         data: {student_id: studentId, completed_assignments: 2, average_success_percent: 75}
-      })
-    }
+      }))
+    },
+    demoMode: options.demoMode || false
   }));
   const server = app.listen(0);
   return new Promise((resolve, reject) => {
@@ -131,6 +132,17 @@ test('parent dashboard only reads the linked student and returns a bounded progr
   });
 });
 
+test('empty dashboard data uses demo content only when demo mode is enabled', async () => {
+  await withParentApi({id: 'parent-1', role: 'parent'}, async base => {
+    const response = await fetch(`${base}/api/parent/dashboard`);
+    const result = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
+    assert.equal(result.demo, true);
+    assert.equal(result.summary.messageCount, 4);
+  }, {demoMode: true, chatRecords: [], attendanceRecords: []});
+});
+
 test('student sessions cannot call the parent dashboard', async () => {
   await withParentApi({id: 'student-1', role: 'student'}, async base => {
     const response = await fetch(`${base}/api/parent/dashboard`);
@@ -145,6 +157,34 @@ test('parent report always uses the linked student, ignoring a supplied student 
     assert.equal(response.headers.get('cache-control'), 'private, no-store');
     assert.equal(calls.reportStudentId, 'student-1');
     assert.equal((await response.json()).student_id, 'student-1');
+  });
+});
+
+test('report endpoint returns clearly marked demo content when the curriculum service is offline', async () => {
+  await withParentApi({id: 'parent-1', role: 'parent'}, async base => {
+    const response = await fetch(`${base}/api/parent/report`);
+    const result = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(result.demo, true);
+    assert.equal(result.demo_reason, 'service_unavailable');
+    assert.equal(result.student_id, 'student-1');
+    assert.equal(result.critical_gaps.length, 2);
+  }, {
+    demoMode: true,
+    getParentReport: async () => { throw Object.assign(new Error('offline'), {code: 'ECONNREFUSED'}); }
+  });
+});
+
+test('report endpoint explains an invalid service token when demo mode is off', async () => {
+  await withParentApi({id: 'parent-1', role: 'parent'}, async base => {
+    const response = await fetch(`${base}/api/parent/report`);
+    assert.equal(response.status, 503);
+    assert.deepEqual(await response.json(), {
+      kod: 'CURRICULUM_SERVICE_NOT_CONFIGURED',
+      mesaj: 'CURRICULUM_SERVICE_TOKEN eksik veya geçersiz; .env içinde en az 32 karakter olmalıdır.'
+    });
+  }, {
+    getParentReport: async () => { throw Object.assign(new Error('invalid token'), {code: 'CURRICULUM_NOT_CONFIGURED'}); }
   });
 });
 

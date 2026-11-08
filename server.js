@@ -57,11 +57,13 @@ const { createCurriculumRouter } = require('./routes/curriculum');
 const { createCurriculumAssignmentsRouter } = require('./routes/curriculum-assignments');
 const { createStudentRecommendationsRouter } = require('./routes/student-recommendations');
 const { createCurriculumService } = require('./lib/curriculumService');
+const { isParentPanelDemoEnabled } = require('./lib/parent-panel-demo');
 const { createMentorHintRouter } = require('./routes/mentor-ipucu');
 const AiFaq = require('./models/AiFaq');
 
 const PORT = process.env.PORT || 3000;
 const curriculumService = createCurriculumService();
+const parentPanelDemoMode = isParentPanelDemoEnabled();
 const MONGODB_URI = process.env.MONGODB_URI;           // .env dosyasından okunur
 const DB_ADI      = process.env.DB_ADI || 'etut_merkezi';
 const KOLEKSIYON  = process.env.KOLEKSIYON || 'sinav_sonuclari';
@@ -92,7 +94,7 @@ const faqService = createFaqService({
 const generateAssistantReply = createAiChatReply({ findFaq: faqService.findAnswer });
 if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 app.use('/api/webhooks', createWebhookRouter());
-app.use(cors());                                       // file:// ile açılan sayfa da erişebilsin
+app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 const sessionStore = MongoStore.create({
   mongoUrl: MONGODB_URI,
@@ -561,7 +563,8 @@ app.use('/api/parent', createParentRouter({
   ChatMessageModel: ChatMessage,
   LessonAttendanceModel: LessonAttendance,
   getStudentCollection: () => studentProfiles,
-  service: curriculumService
+  service: curriculumService,
+  demoMode: parentPanelDemoMode
 }));
 
 // Sunucu ve veritabanı ayakta mı?

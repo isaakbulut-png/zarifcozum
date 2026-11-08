@@ -26,10 +26,32 @@ değerini en az 32 karakterlik rastgele bir gizli anahtarla,
 npm start
 ```
 
-Komutları ayrı terminallerde çalıştırın. Python servisini doğrudan internete
-açmayın; farklı makinelerde özel ağ ve TLS ile koruyun. Servis anahtarı
-kullanıcı kimlik doğrulamasının yerine geçmez. Express mevcut oturum ve
-güncel hesap rolü denetimini kullanır.
+Komutları proje kökünde iki ayrı PowerShell terminalinde çalıştırın. Önce
+`.env` dosyasında `CURRICULUM_SERVICE_TOKEN` için en az 32 karakterlik aynı
+gizli değeri iki servise de tanımlayın ve `CURRICULUM_SERVICE_URL` değerini
+`http://127.0.0.1:8000` yapın. İsteğe bağlı yerel veli örnek verisi için
+`NODE_ENV=development` ve `LOCAL_PARENT_PANEL_DEMO=true` ayarlayın; bu ayar
+production ortamında etkinleşmez. Örnek sayaç ve karne cevaplarında arayüz
+görünür bir `DEMO` etiketi gösterir.
+
+Node varsayılan olarak `3000`, FastAPI `8000` portunu kullanır. Tarayıcıda
+uygulamayı `http://localhost:3000/veli-panel.html` adresinden, müfredat
+gezginini de öğretmen oturumu ile öğretmen panelinden açın. Sayfalar
+`file://` ile veya `8000` portundan açılmamalıdır: tarayıcı istekleri aynı
+origin'deki Express API rotalarına ve oturum çerezlerine gider; Express'in
+CORS middleware'i zaten yapılandırılmıştır. Python servisine yapılan istek
+Node sunucusundan sunucuya yapılır, bu nedenle tarayıcı için Python CORS
+izni gerekmez. Python servisini doğrudan internete açmayın; farklı
+makinelerde özel ağ ve TLS ile koruyun. Servis anahtarı kullanıcı kimlik
+doğrulamasının yerine geçmez. Express mevcut oturum ve güncel hesap rolü
+denetimini kullanır.
+
+Node sunucusu açılışta MongoDB'ye bağlanır ve indeksleri doğrular/oluşturur.
+Çalıştırmadan önce `MONGODB_URI` değerinin kullanmak istediğiniz yerel veya
+izole test veritabanına işaret ettiğini doğrulayın; uzak bir veritabanı
+hedefleniyorsa izin ve test verisi güvenliği doğrulanmadan sunucuyu ya da
+seed komutlarını çalıştırmayın. Veritabanında öğrenci/veli hesabı yoksa demo
+paneli göstermek için yine de oturum açmış, bağlı bir veli hesabı gerekir.
 
 ## API ve veri yapısı
 
