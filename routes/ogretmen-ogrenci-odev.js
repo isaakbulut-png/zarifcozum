@@ -73,6 +73,7 @@ function createTeacherStudentHomeworkRouters({
   getAuditCollection,
   getQuizCollection,
   getStudentQuizResultsCollection,
+  getCurriculumAssignmentsCollection,
   pointsService
 }) {
   const teacher = express.Router();
@@ -733,6 +734,16 @@ function createTeacherStudentHomeworkRouters({
         updatedAt: now
       }}, {session});
       if (!updated.modifiedCount) return {updated, kazanilanPuan: 0};
+      if (homework.curriculumAssignmentId) {
+        const collection = getCurriculumAssignmentsCollection();
+        await collection.updateOne({_id: homework.curriculumAssignmentId}, {
+          $addToSet: {completed_student_ids: assignment.studentProfileId}
+        }, {session});
+        await collection.updateOne({
+          _id: homework.curriculumAssignmentId,
+          $expr: {$gte: [{$size: '$completed_student_ids'}, '$recipient_count']}
+        }, {$set: {status: 'COMPLETED'}}, {session});
+      }
       const keys = quiz.questions.flatMap((question, index) =>
         answers[index] !== null && answers[index] === question.answer ? [`quiz:${quizId}:${index}`] : []
       );

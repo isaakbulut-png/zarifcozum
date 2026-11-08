@@ -54,6 +54,8 @@ const { createTeacherQuizHandler, createStudentQuizSubmissionHandler, createLive
 const { createPointsService } = require('./lib/leaderboard');
 const { createLeaderboardRouter } = require('./routes/leaderboard');
 const { createCurriculumRouter } = require('./routes/curriculum');
+const { createCurriculumAssignmentsRouter } = require('./routes/curriculum-assignments');
+const { createStudentRecommendationsRouter } = require('./routes/student-recommendations');
 const { createMentorHintRouter } = require('./routes/mentor-ipucu');
 const AiFaq = require('./models/AiFaq');
 
@@ -437,6 +439,13 @@ const veliKontrol = requireRole('parent');
 app.use('/api/v1/curriculum', createCurriculumRouter({
   requireStaff: requireRole('teacher', 'admin'), getDb: () => mongoClient.db(DB_ADI)
 }));
+app.use('/api/v1/assignments', createCurriculumAssignmentsRouter({
+  requireTeacher: ogretmenKontrol, getStudents: () => studentProfiles
+}));
+app.use('/api/student', createStudentRecommendationsRouter({
+  requireRoles: requireRole('student', 'parent', 'teacher'),
+  ParentModel: Parent, UserModel: User, getStudents: () => studentProfiles
+}));
 app.use('/api/leaderboard', createLeaderboardRouter({requireStudent: ogrenciKontrol, pointsService}));
 app.use('/api/mentor-ipucu', createMentorHintRouter({
   requireStudent: ogrenciKontrol, limiter: chatLimiter,
@@ -493,6 +502,7 @@ const teacherStudentHomeworkRouters = createTeacherStudentHomeworkRouters({
   getAuditCollection: () => homeworkAudits,
   getQuizCollection: () => quizKoleksiyonu,
   getStudentQuizResultsCollection: () => quizSonucKoleksiyonu,
+  getCurriculumAssignmentsCollection: () => mongoClient.db(DB_ADI).collection('curriculum_assignments'),
   pointsService
 });
 const gelisimRouters = createGelisimRouters({
@@ -629,6 +639,7 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
       })
         .sort({ startsAt: 1 }).limit(50).toArray(),
       quizKoleksiyonu.find({
+        source: { $ne: 'curriculum_assignment' },
         $or: [{ source: { $ne: 'ai' } }, { source: 'ai', published: true }]
       })
         .sort({ createdAt: -1 }).limit(50).toArray(),
@@ -638,6 +649,16 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
       aktifCanliDersiAl(),
       User.ensureParentConnectionCode(req.session.user.id)
     ]);
+    const assignedRows = await homeworkAssignments.find({studentUserId: req.session.user.id}).toArray();
+    const assignedHomeworks = assignedRows.length
+      ? await homeworks.find({_id: {$in: assignedRows.map(row => row.homeworkId)}, type: 'online'}).toArray()
+      : [];
+    const assignedQuizIds = assignedHomeworks.map(row => row.quizId)
+      .filter(id => typeof id === 'string' && /^[a-f\d]{24}$/i.test(id))
+      .map(id => new ObjectId(id));
+    if (assignedQuizIds.length) {
+      quizler.push(...await quizKoleksiyonu.find({_id: {$in: assignedQuizIds}, source: 'curriculum_assignment'}).toArray());
+    }
     const tamamlananQuizler = new Set(sonuclar.map(result => result.quizId.toString()));
     res.json({
       parentConnectionCode,
@@ -676,6 +697,8 @@ const liveQuizHandlers = createLiveQuizHandlers({
   getQuizCollection: () => quizKoleksiyonu,
   getAttemptCollection: () => quizAttemptKoleksiyonu,
   getResultCollection: () => quizSonucKoleksiyonu,
+  getHomeworkCollection: () => homeworks,
+  getHomeworkAssignmentCollection: () => homeworkAssignments,
   pointsService
 });
 app.post('/api/ogrenci/quiz/:id/attempt', ogrenciKontrol, liveQuizHandlers.start);

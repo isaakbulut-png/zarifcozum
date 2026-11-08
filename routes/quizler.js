@@ -1,5 +1,12 @@
 const {prepareQuestion} = require('../lib/quiz-content');
 const {ObjectId} = require('mongodb');
+const {createHash} = require('node:crypto');
+
+function questionFingerprint(question) {
+  const parts = [question.text, ...'ABCD'.split('').map(key => question.options?.[key]), question.answer];
+  if (!parts.every(value => typeof value === 'string')) return null;
+  return createHash('sha256').update(JSON.stringify(parts)).digest('hex');
+}
 
 function createTeacherQuizHandler(getCollection) {
   return async (req, res) => {
@@ -42,7 +49,7 @@ function createStudentQuizSubmissionHandler() {
   });
 }
 
-function createLiveQuizHandlers({getQuizCollection, getAttemptCollection, getResultCollection, pointsService}) {
+function createLiveQuizHandlers({getQuizCollection, getAttemptCollection, getResultCollection, pointsService, getHomeworkCollection, getHomeworkAssignmentCollection}) {
   const key = (studentId, quizId) => `${studentId}:${quizId}`;
   const runId = attempt => attempt.runId || attempt._id;
   const runFilter = attempt => attempt.runId ? {runId: attempt.runId} : {runId: {$exists: false}};
@@ -68,14 +75,21 @@ function createLiveQuizHandlers({getQuizCollection, getAttemptCollection, getRes
     start: async (req, res) => {
       try {
         if (!validId(req)) return res.status(400).json({mesaj: 'Geçersiz test numarası.'});
+        const quiz = await getQuizCollection().findOne({_id: new ObjectId(req.params.id)});
+        if (!quiz || (quiz.source === 'ai' && quiz.published !== true) || !quiz.questions?.length) {
+          return res.status(404).json({mesaj: 'Test bulunamadı.'});
+        }
+        if (quiz.source === 'curriculum_assignment') {
+          const homework = await getHomeworkCollection().findOne({quizId: String(quiz._id), teacherId: quiz.createdBy});
+          const assigned = homework && await getHomeworkAssignmentCollection().findOne({
+            homeworkId: homework._id, studentUserId: req.session.user.id
+          });
+          if (!assigned) return res.status(404).json({mesaj: 'Test bulunamadı.'});
+        }
         const existing = await findAttempt(req);
         if (existing && existing.status !== 'legacy' &&
             (existing.status !== 'finished' || req.body?.restart !== true)) {
           return res.json({attempt: publicAttempt(existing)});
-        }
-        const quiz = await getQuizCollection().findOne({_id: new ObjectId(req.params.id)});
-        if (!quiz || (quiz.source === 'ai' && quiz.published !== true) || !quiz.questions?.length) {
-          return res.status(404).json({mesaj: 'Test bulunamadı.'});
         }
         const attempt = {
           _id: key(req.session.user.id, req.params.id.toLowerCase()),
@@ -168,7 +182,12 @@ function createLiveQuizHandlers({getQuizCollection, getAttemptCollection, getRes
           const result = {
             _id: resultId, liveAttemptId: runId(attempt), quizId: attempt.quizId, quizTitle: attempt.quizTitle,
             studentId: attempt.studentId, studentName: attempt.studentName, answers, correctCount,
-            totalCount, score, kazanilanPuan, review, createdAt: new Date()
+            totalCount, score, kazanilanPuan, review, createdAt: new Date(),
+            performance: attempt.questions.map((question, index) => ({
+              curriculum_node_id: question.curriculum_node_id instanceof ObjectId ? question.curriculum_node_id : null,
+              question_fingerprint: questionFingerprint(question),
+              correct: attempt.state[index].correct === true
+            }))
           };
           await getResultCollection().insertOne(result, {session});
           return {result};

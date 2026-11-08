@@ -8,6 +8,8 @@ from fastapi import Depends, FastAPI, Header, HTTPException
 
 from .router import router
 from .database import ensure_indexes, get_client, get_collection
+from .assignments import router as assignment_router
+from .recommendations import router as recommendations_router
 
 logger = logging.getLogger(__name__)
 
@@ -36,3 +38,5 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 app.include_router(router, dependencies=[Depends(authenticate_service)])
+app.include_router(assignment_router, dependencies=[Depends(authenticate_service)])
+app.include_router(recommendations_router, dependencies=[Depends(authenticate_service)])

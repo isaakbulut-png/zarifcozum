@@ -35,6 +35,10 @@ class CurriculumTests(unittest.TestCase):
 
     def test_authentication_and_configuration(self):
         self.assertEqual(self.client.get("/api/v1/curriculum/tree").status_code, 401)
+        student = str(ObjectId())
+        self.assertEqual(self.client.get(f"/api/v1/students/{student}/recommendations").status_code, 401)
+        self.assertEqual(self.client.get("/api/v1/students/invalid/recommendations", headers=self.headers).status_code, 422)
+        self.assertEqual(self.client.get(f"/api/v1/students/{student}/recommendations", headers=self.headers).status_code, 200)
         with patch.dict(os.environ, {"CURRICULUM_SERVICE_TOKEN": ""}):
             self.assertEqual(self.client.get("/api/v1/curriculum/tree").status_code, 503)
 
@@ -85,6 +89,7 @@ class CurriculumTests(unittest.TestCase):
         self.collection.database["quizler"].insert_many([
             {"questions": [{"curriculum_node_id": outcome["_id"]}, {"curriculum_node_id": theme["_id"]}, {}]},
             {"questions": [{"curriculum_node_id": outcome["_id"]}]},
+            {"source": "curriculum_assignment", "questions": [{"curriculum_node_id": outcome["_id"]}]},
         ])
         result = self.client.get(f"/api/v1/curriculum/tree?parent_id={theme['_id']}", headers=self.headers)
         self.assertEqual(result.status_code, 200, result.text)

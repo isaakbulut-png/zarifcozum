@@ -35,7 +35,7 @@ def add_content_counts(collection: Collection, documents: list[dict]) -> None:
             {"$group": {"_id": "$curriculum_node_id", "count": {"$sum": 1}}},
         ]
         quiz_pipeline = [
-            {"$match": {"questions.curriculum_node_id": {"$in": ids}}},
+            {"$match": {"questions.curriculum_node_id": {"$in": ids}, "source": {"$ne": "curriculum_assignment"}}},
             {"$unwind": "$questions"},
             {"$match": {"questions.curriculum_node_id": {"$in": ids}}},
             {"$group": {"_id": "$questions.curriculum_node_id", "count": {"$sum": 1}}},

@@ -1,5 +1,6 @@
 import os
 import unittest
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -9,10 +10,32 @@ from pymongo import MongoClient
 from curriculum_backend.database import ensure_indexes, get_collection
 from curriculum_backend.main import app
 from curriculum_backend.seed_curriculum import SEED_NODES, seed_curriculum
+from curriculum_backend.assignments import AssignmentCreate, assignment_transaction
+from bson import ObjectId
 
 
 @unittest.skipUnless(os.environ.get("CURRICULUM_TEST_MONGODB_URI"), "MongoDB test URI not configured")
 class MongoDBIntegrationTests(unittest.TestCase):
+    def test_assignment_transaction(self):
+        client = MongoClient(os.environ["CURRICULUM_TEST_MONGODB_URI"], serverSelectionTimeoutMS=5000)
+        self.addCleanup(client.close)
+        database = client["curriculum_test_" + uuid4().hex]
+        for name in ("curriculum_nodes", "ogrenci_profilleri", "quizler", "odevler",
+                     "odev_atamalari", "curriculum_assignments", "ogrenci_odev_islem_gecmisi"):
+            self.addCleanup(database[name].drop)
+        node_id = ObjectId()
+        database.curriculum_nodes.insert_one({"_id": node_id, "parent_id": None, "node_type": "KAZANIM_CIKTI", "is_active": True, "title": "Kazanım"})
+        database.ogrenci_profilleri.insert_one({"teacherId": "teacher", "grade": 9, "section": "A", "active": True, "linkedUserId": "student"})
+        database.quizler.insert_one({"questions": [{"curriculum_node_id": node_id, "text": "Soru",
+                                                     "options": dict.fromkeys("ABCD", "x"), "answer": "A"}]})
+        payload = AssignmentCreate(teacher_id="teacher", grade=9, section="A", curriculum_node_ids=[str(node_id)],
+                                   due_date=datetime.now(timezone.utc) + timedelta(days=1))
+        with client.start_session() as session:
+            result = session.with_transaction(lambda active: assignment_transaction(database, payload, active))
+        self.assertEqual(result["question_count"], 1)
+        self.assertEqual(database.odev_atamalari.count_documents({"studentUserId": "student"}), 1)
+        self.assertEqual(database.curriculum_assignments.count_documents({"status": "ACTIVE"}), 1)
+
     def test_seed_and_api(self):
         client = MongoClient(os.environ["CURRICULUM_TEST_MONGODB_URI"], serverSelectionTimeoutMS=5000)
         self.addCleanup(client.close)

@@ -88,6 +88,66 @@ await fetch('/api/v1/curriculum/links/questions/SORU_OBJECT_ID', {
 Bağlantılar BSON ObjectId olarak yazılır. Ağaç yeniden yüklendiğinde sayaçlar
 güncellenir; henüz içerik seçme/eşleme arayüzü veya veri taşıma işlemi yoktur.
 
+## Akıllı ödev
+
+Öğretmen gezgininde tema ve kazanımlar sürüklenebilir veya klavye ve
+dokunmatik cihazlar için "Sepete ekle" ile seçilebilir. Sepet tek bir
+ödeve dönüşür. Sınıf listesi öğretmenin etkin öğrenci profillerindeki
+sınıf/şubelerden türetilir. Hesap bağlantısı olmayan öğrenciler için ödev
+atanır ancak öğrenci hesabı bağlanana kadar görünmez.
+
+Test, seçilen düğümler ve tema altındaki düğümlere bağlı `quizler.questions`
+kayıtlarından en fazla 10 şıklı soru içerir. Diğer öğretmenlerin erişilebilir
+test soruları dahil edilir; yayınlanmamış yapay zekâ testleri hariç tutulur.
+Soru bankasındaki yalnızca resim içeren ve şıkları bulunmayan kayıtlar mevcut
+test çözücüsüne uyumlu olmadığından dahil edilmez. Sayaç bu kayıtları da
+sayabildiği için sepetteki çözülebilir soru sayısı farklı olabilir. Hiç uygun
+soru yoksa ödev oluşturulmaz; 1–9 soru varsa kısa test oluşturulur.
+
+Oluşturma, mevcut `odevler`, `odev_atamalari`, `quizler` kayıtlarını ve
+`curriculum_assignments` üst kaydını MongoDB transaction içinde yazar. Bu
+işlem transaction destekleyen bir replica set veya sharded cluster gerektirir;
+standalone MongoDB'de işlem başarısız olur. `COMPLETED` tüm alıcıların en az
+bir kez test teslimi yapması anlamına gelir. Oluşturulan test yalnızca atanmış
+öğrencilerin panelinde görünür. `POST /api/v1/assignments` ağ geçidi oturum
+öğretmenini kullanır; kullanıcı tarafından gönderilen öğretmen kimliğine
+güvenilmez.
+
+## Öğrenme eksikleri ve öneriler
+
+Canlı test bitirildiğinde sonuçla aynı transaction içinde `quiz_sonuclari`
+belgesinin `performance` dizisine her sorunun kazanım ObjectId'si, içerik
+parmak izi ve son kontrolün doğruluğu yazılır. Boş soru ile test bitirilemez;
+tekrar denemeler ayrı sonuçlardır. Sınıf ödevinin tüm öğrencilerce
+tamamlanması beklenmeden öğrencinin kendi bitirdiği test analiz edilir.
+Eski sonuçlara veya bağlantısız sorulara kazanım otomatik atanmaz. Eski
+oluşturulmuş ödev testleri de bu bilgiye sahip olmayabilir.
+
+Özel ağdaki `GET /api/v1/students/<student_id>/recommendations`, son 20
+tamamlanmış testte kazanım başına doğru/toplam oranını hesaplar; %60'ın
+altındakileri en düşük başarıdan başlayarak listeler. Bu bir kural tabanlı
+motor olup üretken yapay zekâ kullanmaz. Express üzerinden
+`GET /api/student/recommendations` öğrenci ve bağlı veli içindir; öğretmen
+`?student_id=<öğrenci_id>` eklemeli ve etkin öğrenci bağlantısına sahip
+olmalıdır. Veli ve öğrenci başka bir kimlik isteyemez.
+
+Materyaller `curriculum_materials` koleksiyonuna şu biçimde eklenmelidir:
+`{curriculum_node_id: ObjectId(...), active: true, type: "LESSON" | "VIDEO",
+title: "...", url: "https://..."}`. Bu aşamada materyal düzenleme arayüzü veya
+ekleme API'si yoktur. Aktif ve doğrudan kazanıma bağlı ilk geçerli HTTP(S)
+bağlantısı seçilir. Takviye soruları yalnızca öğrencinin tek ve açıkça
+belirlenmiş etkin profil sınıfına eşit sayısal `quizler.grade` taşıyan,
+yayınlanmış veya normal testlerdeki kazanıma doğrudan bağlı şıklı sorulardır.
+Yanıtlar cevap anahtarı içermez. Soru parmak izi metin, dört şık ve cevap
+üzerinden alınır; değiştirilen soru farklı soru sayılır. Testin önceki
+sonuçlarındaki parmak izleri tüm geçmişte ve açık denemelerin kontrol edilmiş
+sorularında aranır; eski sonuçlarda kimlik
+eksikse önceden çözülmediği garanti edilemeyeceği için soru önerilmez.
+Soru seçimi `question_selection_status`, eski veri kapsamı
+`incomplete_history_tests` ve `incomplete_recent_tests` ile bildirilir.
+Materyal veya üç uygun soru yoksa mevcut olanlar ve eksik sayıları döndürülür.
+Materyal linkleri içerik yöneticilerince güvenilir kaynaklardan girilmelidir.
+
 ## Örnek veri
 
 ```powershell

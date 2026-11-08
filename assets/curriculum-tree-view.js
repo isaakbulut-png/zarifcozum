@@ -4,9 +4,11 @@
   if (root && root.document) {
     const host = root.document.getElementById('curriculumTreeView');
     if (host) {
-      const view = api.createCurriculumTreeView(host);
+      const workspace = api.createAssignmentWorkspace(root.document.getElementById('assignmentWorkspace'));
+      const view = api.createCurriculumTreeView(host, {onAdd: node => workspace.add(node)});
       root.addEventListener('curriculum-tree:open', () => view.load());
-      root.addEventListener('curriculum-tree:close', () => view.clear());
+      root.addEventListener('curriculum-tree:open', () => workspace.loadClasses());
+      root.addEventListener('curriculum-tree:close', () => { view.clear(); workspace.clear(); });
     }
   }
 })(typeof window !== 'undefined' ? window : null, () => {
@@ -90,7 +92,22 @@
         button.appendChild(badge);
       }
       button.addEventListener('click', () => select(node, type));
-      return button;
+      if (type === 'grade') return button;
+      button.draggable = true;
+      button.addEventListener('dragstart', event => {
+        event.dataTransfer.setData('application/x-zarif-curriculum', JSON.stringify({
+          id: node.id, title: node.title, code: node.code, node_type: node.node_type
+        }));
+        event.dataTransfer.effectAllowed = 'copy';
+      });
+      const wrapper = el('div', 'ctv-draggable');
+      wrapper.appendChild(button);
+      const add = el('button', 'ctv-add', 'Sepete ekle');
+      add.type = 'button';
+      add.setAttribute('aria-label', `${node.title} sepete ekle`);
+      add.addEventListener('click', () => options.onAdd?.(node));
+      wrapper.appendChild(add);
+      return wrapper;
     }
 
     function column(number, title, caption) {
@@ -203,5 +220,103 @@
     return {load, clear};
   }
 
-  return {createCurriculumTreeView, questionCount, themeCount, skillsOf, validateCounts};
+  function createAssignmentWorkspace(host) {
+    const doc = host.ownerDocument;
+    const basket = new Map();
+    let classes = [], busy = false, generation = 0;
+    host.innerHTML = `<h3>Akıllı Ödev Sepeti</h3><p class="workspace-hint">Tema veya kazanımı buraya sürükleyin ya da “Sepete ekle” seçeneğini kullanın.</p>
+      <div class="workspace-drop" tabindex="0"><ul class="workspace-items"></ul><p class="workspace-empty">Sepetiniz boş.</p></div>
+      <form class="workspace-form"><label>Hedef sınıf<select name="class" required><option value="">Sınıflar yükleniyor...</option></select></label>
+      <label>Son teslim tarihi<input name="due_date" type="datetime-local" required></label>
+      <button type="submit">Ödevi Sınıfa Gönder</button></form><p class="workspace-status" role="status" aria-live="polite"></p>`;
+    const list = host.querySelector('.workspace-items');
+    const drop = host.querySelector('.workspace-drop');
+    const empty = host.querySelector('.workspace-empty');
+    const form = host.querySelector('form');
+    const select = form.elements.class;
+    const status = host.querySelector('.workspace-status');
+    function render() {
+      list.replaceChildren();
+      for (const node of basket.values()) {
+        const li = doc.createElement('li');
+        const text = doc.createElement('span');
+        text.textContent = `${node.code} · ${node.title}`;
+        const remove = doc.createElement('button');
+        remove.type = 'button';
+        remove.textContent = 'Kaldır';
+        remove.setAttribute('aria-label', `${node.title} sepetten kaldır`);
+        remove.addEventListener('click', () => { basket.delete(node.id); render(); });
+        li.append(text, remove);
+        list.append(li);
+      }
+      empty.hidden = basket.size > 0;
+    }
+    function add(node) {
+      if (!node || !['TEMA_UNITE', 'KAZANIM_CIKTI'].includes(node.node_type) ||
+          !/^[a-f\d]{24}$/i.test(node.id)) {
+        status.textContent = 'Geçersiz müfredat düğümü.';
+        return;
+      }
+      basket.set(node.id, {id: node.id, title: node.title, code: node.code});
+      status.textContent = 'Sepet güncellendi.';
+      render();
+    }
+    drop.addEventListener('dragover', event => { event.preventDefault(); event.dataTransfer.dropEffect = 'copy'; });
+    drop.addEventListener('drop', event => {
+      event.preventDefault();
+      try { add(JSON.parse(event.dataTransfer.getData('application/x-zarif-curriculum'))); }
+      catch (error) { console.error('Sürüklenen müfredat verisi okunamadı:', error); status.textContent = 'Sürüklenen veri okunamadı.'; }
+    });
+    async function loadClasses() {
+      const current = ++generation;
+      try {
+        const response = await fetch('/api/v1/assignments/classes', {credentials: 'same-origin'});
+        if (!response.ok) throw new Error(`Sınıflar yüklenemedi (${response.status}).`);
+        const data = await response.json();
+        if (!Array.isArray(data.classes)) throw new Error('Sınıf listesi geçersiz.');
+        if (current !== generation) return;
+        classes = data.classes;
+        select.replaceChildren(new Option('Hedef sınıf seçin', ''));
+        classes.forEach((item, index) => select.add(new Option(`${item.grade}-${item.section} (${item.linked}/${item.students} bağlı)`, String(index))));
+        if (!classes.length) status.textContent = 'Kayıtlı etkin sınıf bulunamadı.';
+      } catch (error) {
+        if (current !== generation) return;
+        console.error('Sınıflar yüklenemedi:', error);
+        select.replaceChildren(new Option('Sınıflar yüklenemedi', ''));
+        status.textContent = error.message;
+      }
+    }
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (busy) return;
+      if (!basket.size || select.value === '') { status.textContent = 'Sepet ve sınıf seçimi gereklidir.'; return; }
+      const due = new Date(form.elements.due_date.value);
+      if (!Number.isFinite(due.getTime()) || due <= new Date()) { status.textContent = 'Gelecekte bir teslim tarihi seçin.'; return; }
+      busy = true;
+      form.querySelector('button').disabled = true;
+      status.textContent = 'Ödev hazırlanıyor...';
+      try {
+        const target = classes[Number(select.value)];
+        const response = await fetch('/api/v1/assignments', {
+          method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({grade: target.grade, section: target.section,
+            curriculum_node_ids: [...basket.keys()], due_date: due.toISOString()})
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(typeof result.detail === 'string' ? result.detail : result.mesaj || `Ödev gönderilemedi (${response.status}).`);
+        basket.clear(); render();
+        status.textContent = `${result.recipient_count} öğrenciye ${result.question_count} soruluk ödev atandı. ${result.unlinked_count} öğrenci hesabı henüz bağlı değil.`;
+        doc.defaultView.dispatchEvent(new CustomEvent('teacher-dashboard:data', {detail: {}}));
+      } catch (error) {
+        console.error('Ödev gönderilemedi:', error);
+        status.textContent = error.message;
+      } finally {
+        busy = false;
+        form.querySelector('button').disabled = false;
+      }
+    });
+    return {add, loadClasses, clear() { generation++; basket.clear(); classes = []; form.reset(); render(); status.textContent = ''; }};
+  }
+
+  return {createCurriculumTreeView, createAssignmentWorkspace, questionCount, themeCount, skillsOf, validateCounts};
 });

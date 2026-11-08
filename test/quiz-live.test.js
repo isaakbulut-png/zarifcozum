@@ -8,8 +8,9 @@ const {createMentorHintRouter} = require('../routes/mentor-ipucu');
 test('canlı test atomik kontroller, sahiplik, ipuçları ve idempotent teslim uygular', async t => {
   const clone = value => BSON.deserialize(BSON.serialize(value));
   const quizId = new ObjectId();
+  const nodeId = new ObjectId();
   const quiz = {_id: quizId, title: 'Test', questions: [
-    {text: 'Bir', options: {A: '1', B: '2'}, answer: 'A', outcomeCode: 'MAT.6.1.1'},
+    {text: 'Bir', options: {A: '1', B: '2', C: '3', D: '4'}, answer: 'A', outcomeCode: 'MAT.6.1.1', curriculum_node_id: nodeId},
     {text: 'İki', options: {A: '1', B: '2'}, answer: 'B'}
   ]};
   const attempts = new Map(), results = new Map(), points = new Set(), calls = [];
@@ -166,6 +167,9 @@ test('canlı test atomik kontroller, sahiplik, ipuçları ve idempotent teslim u
   assert.equal(String(saved.quizId), String(quizId));
   assert.equal(saved.liveAttemptId, currentIds.owner);
   assert.deepEqual(saved.answers, first.answers);
+  assert.equal(String(saved.performance[0].curriculum_node_id), String(nodeId));
+  assert.match(saved.performance[0].question_fingerprint, /^[a-f0-9]{64}$/);
+  assert.equal(saved.performance[0].correct, true);
   assert.equal((await post(`${prefix}/attempt/check`, {index: 1, answer: 'A'})).status, 409);
   assert.equal((await post(`/hint/live/${quizId}/1`)).status, 404);
   assert.equal((await post(`${prefix}/attempt`)).status, 200);
