@@ -10,6 +10,8 @@ from .router import router
 from .database import ensure_indexes, get_client, get_collection
 from .assignments import router as assignment_router
 from .recommendations import router as recommendations_router
+from .parent_reports import create_parent_reports_router
+from .notifications import create_notification_router, get_notification_provider
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +39,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
+notification_provider = get_notification_provider()
 app.include_router(router, dependencies=[Depends(authenticate_service)])
 app.include_router(assignment_router, dependencies=[Depends(authenticate_service)])
 app.include_router(recommendations_router, dependencies=[Depends(authenticate_service)])
+app.include_router(
+    create_parent_reports_router(notification_provider),
+    dependencies=[Depends(authenticate_service)],
+)
+app.include_router(
+    create_notification_router(notification_provider),
+    dependencies=[Depends(authenticate_service)],
+)

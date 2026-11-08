@@ -74,6 +74,7 @@ function createTeacherStudentHomeworkRouters({
   getQuizCollection,
   getStudentQuizResultsCollection,
   getCurriculumAssignmentsCollection,
+  notifyParent,
   pointsService
 }) {
   const teacher = express.Router();
@@ -86,6 +87,26 @@ function createTeacherStudentHomeworkRouters({
   const quizzes = getQuizCollection;
 
   teacher.use(requireTeacher);
+
+  async function queueParentNotification(studentId, assignmentId) {
+    if (typeof notifyParent !== 'function') {
+      return {status: 'not_configured'};
+    }
+    try {
+      const response = await notifyParent({
+        student_id: String(studentId),
+        event_id: `assignment-completed:${assignmentId}`,
+        event_type: 'assignment_completed',
+        title: 'Ödev tamamlandı',
+        body: 'Öğrenciniz bir ödevi tamamladı.'
+      });
+      if (response?.status >= 400) throw new Error(`Notification service returned ${response.status}`);
+      return response?.data || response;
+    } catch (error) {
+      console.error('Veli ödev bildirimi kuyruğa alınamadı:', error.code || error.message);
+      return {status: 'unavailable'};
+    }
+  }
 
   async function recordAudit(req, action, entity, entityId, details = {}) {
     await audit().insertOne({
@@ -760,7 +781,8 @@ function createTeacherStudentHomeworkRouters({
       return {updated, kazanilanPuan};
     });
     if (!updated.modifiedCount) return res.status(409).json({mesaj: 'Teslim durumu aynı anda değiştirildi; ödev listesini yenileyin.'});
-    res.status(201).json({mesaj: status, status, score, correctCount, totalCount, kazanilanPuan});
+    const notification = await queueParentNotification(req.session.user.id, id);
+    res.status(201).json({mesaj: status, status, score, correctCount, totalCount, kazanilanPuan, notification});
   }));
 
   student.post('/homeworks/:assignmentId/submissions', (req, res, next) => {
@@ -815,7 +837,8 @@ function createTeacherStudentHomeworkRouters({
       entityId: String(id),
       createdAt: now
     });
-    res.status(201).json({mesaj: status, status});
+    const notification = await queueParentNotification(req.session.user.id, id);
+    res.status(201).json({mesaj: status, status, notification});
   }));
 
   student.get('/homeworks/:assignmentId/file', asyncRoute(async (req, res) => {

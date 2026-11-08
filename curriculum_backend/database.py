@@ -46,6 +46,17 @@ def ensure_indexes(collection: Collection) -> None:
     collection.database["quiz_sonuclari"].create_index(
         [("studentId", ASCENDING), ("createdAt", -1), ("_id", -1)], name="student_recent_results"
     )
+    collection.database["parent_reports"].create_index(
+        [("student_id", ASCENDING), ("week_start", ASCENDING)],
+        unique=True,
+        name="parent_report_student_week",
+    )
+    collection.database["notification_jobs"].create_index(
+        [("event_id", ASCENDING)], unique=True, name="notification_event_id"
+    )
+    collection.database["notification_jobs"].create_index(
+        [("status", ASCENDING), ("created_at", ASCENDING)], name="notification_pending"
+    )
 
 
 def get_collection() -> Collection:

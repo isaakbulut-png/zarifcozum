@@ -45,3 +45,19 @@ class Assignment(BaseModel):
     recipient_count: int
     completed_student_ids: list[ObjectId]
     quiz_id: ObjectId
+
+
+class ParentReport(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True, populate_by_name=True)
+
+    id: ObjectId = Field(default_factory=ObjectId, alias="_id")
+    student_id: str
+    week_start: datetime
+    week_end: datetime
+    completed_assignments: int = 0
+    average_success_percent: float | None = None
+    critical_gaps: list[dict] = Field(default_factory=list)
+    generated_at: datetime
+
+    def document(self) -> dict:
+        return self.model_dump(by_alias=True, mode="python")

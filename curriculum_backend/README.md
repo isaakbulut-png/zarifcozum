@@ -148,6 +148,41 @@ Soru seçimi `question_selection_status`, eski veri kapsamı
 Materyal veya üç uygun soru yoksa mevcut olanlar ve eksik sayıları döndürülür.
 Materyal linkleri içerik yöneticilerince güvenilir kaynaklardan girilmelidir.
 
+## Veli haftalık karnesi ve bildirimler
+
+`GET /api/v1/parents/<student_id>/report` son tamamlanmış Europe/Istanbul
+takvim haftasının raporunu üretir veya mevcut raporu döndürür. Rapor
+`parent_reports` koleksiyonunda öğrenci ve hafta başına tek belge olarak
+saklanır. Tamamlanan ödevler `odev_atamalari` içindeki öğrenciye ait teslim
+kayıtlarından; başarı yüzdesi ve en kritik iki eksik kazanım
+`quiz_sonuclari.performance` kayıtlarından hesaplanır. Eksik değerlendirme
+verisi `average_success_percent: null` olarak döner; %60 başarı eşiğinin
+altındaki etkin kazanımlar en düşük başarıdan başlayarak seçilir.
+
+Haftalık üretim, dağıtım ortamının Europe/Istanbul saat diliminde her pazartesi
+çalıştıracağı CLI işi olarak sunulur:
+
+```powershell
+.\.venv\Scripts\python.exe -m curriculum_backend.weekly_reports
+```
+
+Komut aynı MongoDB ayarlarını kullanır, etkin veli-öğrenci bağlantılarını
+işler ve aynı hafta tekrar çalıştırıldığında rapor/bildirim kopyası üretmez.
+Express'teki `GET /api/parent/report` bağlı velinin öğrencisini kendisi
+belirler; admin erişimi `student_id` ister. İki servis arasındaki Python
+uçları `CURRICULUM_SERVICE_TOKEN` ile korunur.
+
+`POST /api/v1/notifications/send` olayı veli bağlantısından çözümler ve
+`notification_jobs` koleksiyonuna benzersiz `event_id` ile ekler. Sağlayıcı
+`NotificationProvider.send(parent, job)` arayüzüyle bağlanır. Şu an NetGSM,
+Twilio veya FCM sağlayıcısı yapılandırılmadığından istek açıkça `queued`
+döner; bu durum teslim edildi anlamına gelmez. Sağlayıcı eklendiğinde
+`get_notification_provider()` aynı adapter'ı API ve haftalık CLI işine verir;
+`create_notification_router(provider)` ve `create_parent_reports_router(provider)`
+bu adapter'ı kullanır.
+Ödev teslim bildirimleri Node teslim işleminden, haftalık rapor bildirimleri
+ise rapor ilk kez üretildiğinde kuyruğa alınır.
+
 ## Örnek veri
 
 ```powershell

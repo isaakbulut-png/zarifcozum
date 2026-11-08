@@ -99,6 +99,7 @@ function setup() {
     quizzes: memoryCollection(),
     results: memoryCollection()
   };
+  const notifications = [];
   const UserModel = {
     findById: () => ({select: () => ({lean: async () => null})})
   };
@@ -117,6 +118,10 @@ function setup() {
     getAuditCollection: () => collections.audits,
     getQuizCollection: () => collections.quizzes,
     getStudentQuizResultsCollection: () => collections.results,
+    notifyParent: async event => {
+      notifications.push(event);
+      return {status: 202, data: {status: 'queued'}};
+    },
     pointsService: {transaction: operation => operation({}), award: async () => 0}
   });
   const app = express();
@@ -131,7 +136,7 @@ function setup() {
   app.use('/api/student', routers.student);
   const server = app.listen(0);
   const base = new Promise(resolve => server.once('listening', () => resolve(`http://127.0.0.1:${server.address().port}`)));
-  return {collections, base, close: () => new Promise(resolve => server.close(resolve))};
+  return {collections, notifications, base, close: () => new Promise(resolve => server.close(resolve))};
 }
 
 function teacherHeaders() {
@@ -236,7 +241,11 @@ test('class assignments create individual records and track on-time, late, and r
       body: (() => { const data = new FormData(); data.set('text', 'Çözümlerim hazır.'); return data; })()
     });
     assert.equal(submitted.status, 201);
-    assert.equal((await submitted.json()).status, 'Teslim edildi');
+    const submissionResult = await submitted.json();
+    assert.equal(submissionResult.status, 'Teslim edildi');
+    assert.equal(submissionResult.notification.status, 'queued');
+    assert.equal(workspace.notifications[0].student_id, 'student-ontime');
+    assert.equal(workspace.notifications[0].event_type, 'assignment_completed');
 
     const lateAssignment = workspace.collections.assignments.rows.find(row => String(row.studentProfileId) === second.data.student.id);
     lateAssignment.dueAt = new Date(Date.now() - 60_000);
@@ -250,6 +259,7 @@ test('class assignments create individual records and track on-time, late, and r
     });
     assert.equal(lateDelivery.status, 201);
     assert.equal((await lateDelivery.json()).status, 'Geç teslim');
+    assert.equal(workspace.notifications.length, 2);
 
     const teacherList = await (await fetch(`${base}/api/ogretmen/odevler`, {headers: teacherHeaders()})).json();
     const recipients = teacherList.homework[0].recipients;
@@ -369,6 +379,9 @@ test('linked online tests are graded automatically and complete only their assig
     const result = await response.json();
     assert.equal(result.score, 100);
     assert.equal(result.status, 'Teslim edildi');
+    assert.equal(result.notification.status, 'queued');
+    assert.equal(workspace.notifications.length, 1);
+    assert.equal(workspace.notifications[0].student_id, 'online-test-student');
     assert.equal(workspace.collections.assignments.rows[0].score, 100);
     assert.equal((await fetch(`${base}/api/student/homeworks/${assigned.assignmentId}/quiz-submission`, jsonOptions('POST', {
       quizId: String(quizId),

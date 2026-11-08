@@ -56,10 +56,12 @@ const { createLeaderboardRouter } = require('./routes/leaderboard');
 const { createCurriculumRouter } = require('./routes/curriculum');
 const { createCurriculumAssignmentsRouter } = require('./routes/curriculum-assignments');
 const { createStudentRecommendationsRouter } = require('./routes/student-recommendations');
+const { createCurriculumService } = require('./lib/curriculumService');
 const { createMentorHintRouter } = require('./routes/mentor-ipucu');
 const AiFaq = require('./models/AiFaq');
 
 const PORT = process.env.PORT || 3000;
+const curriculumService = createCurriculumService();
 const MONGODB_URI = process.env.MONGODB_URI;           // .env dosyasından okunur
 const DB_ADI      = process.env.DB_ADI || 'etut_merkezi';
 const KOLEKSIYON  = process.env.KOLEKSIYON || 'sinav_sonuclari';
@@ -503,6 +505,7 @@ const teacherStudentHomeworkRouters = createTeacherStudentHomeworkRouters({
   getQuizCollection: () => quizKoleksiyonu,
   getStudentQuizResultsCollection: () => quizSonucKoleksiyonu,
   getCurriculumAssignmentsCollection: () => mongoClient.db(DB_ADI).collection('curriculum_assignments'),
+  notifyParent: event => curriculumService.sendNotification(event),
   pointsService
 });
 const gelisimRouters = createGelisimRouters({
@@ -552,11 +555,13 @@ app.use('/api/ogretmen', teacherStudentHomeworkRouters.teacher);
 app.use('/api/student', teacherStudentHomeworkRouters.student);
 app.use('/api/parent', createParentRouter({
   requireParent: veliKontrol,
+  requireReportAccess: requireRole('parent', 'admin'),
   ParentModel: Parent,
   UserModel: User,
   ChatMessageModel: ChatMessage,
   LessonAttendanceModel: LessonAttendance,
-  getStudentCollection: () => studentProfiles
+  getStudentCollection: () => studentProfiles,
+  service: curriculumService
 }));
 
 // Sunucu ve veritabanı ayakta mı?

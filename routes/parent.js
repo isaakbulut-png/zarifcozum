@@ -1,4 +1,5 @@
 const express = require('express');
+const {createCurriculumService} = require('../lib/curriculumService');
 
 function isLikelyHint(message) {
   return /(ipucu|ipuç|deneyelim|birlikte|önce)/i.test(message);
@@ -6,11 +7,13 @@ function isLikelyHint(message) {
 
 function createParentRouter({
   requireParent,
+  requireReportAccess = requireParent,
   ParentModel,
   UserModel,
   ChatMessageModel,
   LessonAttendanceModel,
-  getStudentCollection
+  getStudentCollection,
+  service = createCurriculumService()
 }) {
   const router = express.Router();
 
@@ -97,6 +100,45 @@ function createParentRouter({
     } catch (error) {
       console.error('Veli paneli verileri alınamadı:', error);
       res.status(500).json({ mesaj: 'Veli paneli verileri alınamadı.' });
+    }
+  });
+
+  router.get('/report', requireReportAccess, async (req, res) => {
+    try {
+      let studentId;
+      if (req.session.user.role === 'parent') {
+        const parent = await ParentModel.findById(req.session.user.id)
+          .select('studentId restricted')
+          .lean();
+        if (!parent || parent.restricted) {
+          return res.status(parent?.restricted ? 403 : 401).json({mesaj: 'Veli hesabı doğrulanamadı.'});
+        }
+        studentId = String(parent.studentId);
+      } else {
+        studentId = typeof req.query.student_id === 'string' ? req.query.student_id : '';
+        if (!/^[a-f\d]{24}$/i.test(studentId)) {
+          return res.status(400).json({mesaj: 'Yönetici için geçerli student_id gereklidir.'});
+        }
+      }
+
+      const student = await UserModel.findOne({
+        _id: studentId,
+        role: 'student',
+        restricted: {$ne: true}
+      }).select('_id').lean();
+      if (!student) return res.status(404).json({mesaj: 'Bağlı öğrenci hesabı bulunamadı.'});
+
+      const response = await service.getParentReport(String(student._id));
+      if (response.status !== 200) {
+        console.error('Veli haftalık rapor servisi başarısız:', response.status);
+        return res.status(response.status === 404 ? 404 : 502)
+          .json({mesaj: 'Haftalık öğrenme karnesi alınamadı.'});
+      }
+      res.set('Cache-Control', 'private, no-store');
+      return res.json(response.data);
+    } catch (error) {
+      console.error('Veli haftalık raporu alınamadı:', error.code || error.message);
+      return res.status(503).json({mesaj: 'Haftalık öğrenme karnesi servisine erişilemiyor.'});
     }
   });
 

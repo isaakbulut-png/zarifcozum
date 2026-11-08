@@ -26,6 +26,14 @@
     .stat{padding:18px}
     .stat span{display:block;color:var(--muted);font-size:.82rem}
     .stat strong{display:block;margin-top:8px;color:var(--ink);font-size:1.75rem;line-height:1.1}
+    .weekly-report{margin-top:18px}
+    .report-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+    .report-stat{padding:14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .report-stat span{display:block;color:var(--muted);font-size:.82rem}
+    .report-stat strong{display:block;margin-top:6px;color:var(--ink);font-size:1.35rem}
+    .gap-list{display:grid;gap:8px;margin:12px 0 0;padding:0;list-style:none}
+    .gap-list li{padding:11px 13px;border:1px solid var(--line);border-radius:9px;color:#51453c;font-size:.88rem}
+    .report-week{margin:8px 0 0;color:var(--muted);font-size:.8rem}
     .columns{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:18px;margin-top:18px}
     .card{padding:22px}
     .card h2{margin:0;color:var(--ink);font-size:1.08rem}
@@ -69,6 +77,19 @@
         <article class="stat"><span>İpucu olabilecek yanıt</span><strong id="hintCount">0</strong></article>
         <article class="stat"><span>Canlı ders sohbeti</span><strong id="lessonCount">0</strong></article>
       </section>
+      <section class="card weekly-report" aria-labelledby="weeklyReportTitle">
+        <h2 id="weeklyReportTitle">Haftalık Öğrenme Karnesi</h2>
+        <p class="card-intro" id="reportStatus" role="status">Haftalık karne yükleniyor…</p>
+        <div id="reportContent" hidden>
+          <p class="report-week" id="reportWeek"></p>
+          <div class="report-summary">
+            <div class="report-stat"><span>Tamamlanan ödev</span><strong id="reportAssignments">0</strong></div>
+            <div class="report-stat"><span>Ortalama başarı</span><strong id="reportSuccess">Veri yok</strong></div>
+          </div>
+          <h3>Öncelikli kazanım eksikleri</h3>
+          <ul class="gap-list" id="reportGaps"></ul>
+        </div>
+      </section>
       <div class="columns">
         <section class="card">
           <h2>Son konuşmalar ve ipuçları</h2>
@@ -90,6 +111,47 @@
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       })[character]);
       const dateText = value => value ? new Date(value).toLocaleString('tr-TR') : 'Henüz etkinlik yok';
+      const dateOnly = value => new Date(value).toLocaleDateString('tr-TR', {
+        day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Istanbul'
+      });
+
+      async function loadWeeklyReport() {
+        try {
+          const response = await fetch('/api/parent/report', {credentials: 'same-origin'});
+          if (response.status === 401) {
+            location.replace('/kayit-giris.html?role=parent');
+            return;
+          }
+          const report = await response.json();
+          if (!response.ok) throw new Error(report.mesaj || 'Haftalık karne alınamadı.');
+
+          $('reportWeek').textContent = `${dateOnly(report.week_start)} – ${dateOnly(new Date(new Date(report.week_end).getTime() - 1))}`;
+          $('reportAssignments').textContent = report.completed_assignments;
+          $('reportSuccess').textContent = report.average_success_percent === null
+            ? 'Veri yok'
+            : `%${report.average_success_percent}`;
+          const gaps = $('reportGaps');
+          gaps.replaceChildren();
+          if (report.critical_gaps.length) {
+            report.critical_gaps.forEach(gap => {
+              const item = document.createElement('li');
+              item.textContent = `${gap.title} · %${gap.success_percent}`;
+              gaps.append(item);
+            });
+          } else {
+            const item = document.createElement('li');
+            item.textContent = report.average_success_percent === null
+              ? 'Bu hafta henüz değerlendirme verisi yok.'
+              : 'Bu hafta kritik kazanım eksiği bulunmuyor.';
+            gaps.append(item);
+          }
+          $('reportStatus').textContent = 'Öğrencinizin haftalık performans özeti.';
+          $('reportContent').hidden = false;
+        } catch (error) {
+          $('reportStatus').textContent = error.message || 'Haftalık karne alınamadı.';
+          $('reportStatus').className = 'card-intro error';
+        }
+      }
 
       async function loadDashboard() {
         const [meResponse, dashboardResponse] = await Promise.all([
@@ -137,6 +199,7 @@
           : '<p class="empty">AI Mentör kullanılan canlı ders kaydı yok.</p>';
         $('status').hidden = true;
         $('dashboard').hidden = false;
+        await loadWeeklyReport();
       }
 
       $('logout').addEventListener('click', async () => {
