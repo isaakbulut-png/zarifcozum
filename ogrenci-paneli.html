@@ -125,6 +125,9 @@ button,select{font:inherit}
 .quiz-question{background:#fffaf5;border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
 .quiz-question legend{font-weight:600;color:var(--navy-900);padding:0 4px}
 .quiz-option{display:flex;gap:9px;align-items:flex-start;padding:8px 4px;color:var(--text)}
+.quiz-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.quiz-feedback{margin:10px 0}
+.mentor-hint{margin:10px 0;overflow-wrap:anywhere}
 .exam-image{display:block;max-width:100%;height:auto;margin:8px 0 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
 .exam-choices{display:flex;gap:18px;flex-wrap:wrap}
 .exam-choices .quiz-option{align-items:center;padding:6px 2px}
@@ -441,6 +444,8 @@ button,select{font:inherit}
     <section class="panel-view" id="test-sonuclarim" data-panel-view="test-sonuclarim">
       <div class="section-head"><h2>Test sonuçlarım</h2></div>
       <section class="teacher-feed" id="studentResults" aria-live="polite"><p class="feed-status">Sonuçlar yükleniyor…</p></section>
+      <p class="feed-status" id="quizResultStatus" role="status" aria-live="polite"></p>
+      <div id="quizHomeworkRetry"></div>
       <div id="quizReview"></div>
     </section>
 
@@ -492,6 +497,10 @@ button,select{font:inherit}
       ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     let activeQuiz = null;
     let activeHomeworkAssignmentId = null;
+    let quizAttempt = null;
+    let quizQuestionIndex = 0;
+    let quizBusy = false;
+    let pendingHomework = null;
 
     async function api(url, options = {}) {
       if (window.location.protocol === 'file:') {
@@ -608,7 +617,7 @@ button,select{font:inherit}
             <h3>${esc(quiz.title)}</h3>
             <p>${esc(quiz.description || '')}</p>
             <small>${quiz.soruSayisi} soru</small>
-            <button class="btn-join" type="button" data-quiz-id="${esc(quiz.id)}">${quiz.tamamlandi ? 'Tekrar çöz' : 'Teste başla'}</button>
+            <button class="btn-join" type="button" data-quiz-id="${esc(quiz.id)}" data-quiz-restart="${quiz.tamamlandi ? 'true' : 'false'}">${quiz.tamamlandi ? 'Tekrar çöz' : 'Teste başla'}</button>
           </article>`).join('')
         : emptyMessage('Henüz öğretmen testi yayınlanmadı.');
       $('taskFeed').innerHTML = emptyMessage('Ödevler yükleniyor…');
@@ -763,21 +772,34 @@ button,select{font:inherit}
       }
     });
 
-    function renderQuiz(quiz, homeworkAssignmentId = null) {
+    function renderQuiz(quiz, attempt, homeworkAssignmentId = null) {
       activeQuiz = quiz;
+      quizAttempt = attempt;
+      quizQuestionIndex = 0;
       activeHomeworkAssignmentId = homeworkAssignmentId;
       $('activeQuizTitle').textContent = quiz.title;
       $('activeQuizDescription').textContent = quiz.description || `${quiz.questions.length} soru`;
       $('quizAttemptForm').innerHTML = quiz.questions.map((question, index) => `
         <fieldset class="quiz-question">
-          <legend>${index + 1}. Soru</legend>
+          <legend>${index + 1} / ${quiz.questions.length}. Soru</legend>
           <div class="quiz-rich-content">${question.html ? '' : esc(question.text)}</div>
           <div class="quiz-svg"></div>
           ${['A','B','C','D'].map(letter => `<label class="quiz-option">
             <input type="radio" name="answer-${index}" value="${letter}">
             <span><strong>${letter})</strong> ${esc(question.options[letter])}</span>
           </label>`).join('')}
-        </fieldset>`).join('') + '<button class="btn-join" type="submit">Testi gönder</button>';
+          <div class="quiz-actions">
+            <button class="btn-join" type="button" data-quiz-check="${index}">Cevabı kontrol et</button>
+            <button class="btn-join" type="button" data-quiz-hint="${index}" hidden>AI ipucu iste</button>
+          </div>
+          <p class="quiz-feedback" role="status" aria-live="polite"></p>
+          <div class="mentor-hint" role="status" aria-live="polite"></div>
+        </fieldset>`).join('') + `
+        <div class="quiz-actions">
+          <button class="btn-join" type="button" id="quizPrevious">Önceki</button>
+          <button class="btn-join" type="button" id="quizNext">Sonraki</button>
+          <button class="btn-join" type="submit">Testi bitir</button>
+        </div>`;
           $('quizAttemptForm').querySelectorAll('.quiz-question').forEach((fieldset, index) => {
             const question = quiz.questions[index];
             if (question.html) {
@@ -795,7 +817,13 @@ button,select{font:inherit}
                 console.error('Soru şekli görüntülenemedi:', error);
               }
             }
+            const selected = quizAttempt.questions[index].answer;
+            if (selected) {
+              const input = fieldset.querySelector(`input[value="${selected}"]`);
+              if (input) input.checked = true;
+            }
           });
+      updateQuizView();
       $('quizAttemptStatus').textContent = '';
       $('quizAttemptStatus').className = 'feed-status';
       $('quizReview').replaceChildren();
@@ -806,19 +834,35 @@ button,select{font:inherit}
 
     function openQuiz(event) {
       const button = event.target.closest('[data-quiz-id]');
-      if (!button) return;
+      if (!button || quizBusy) return;
+      if (pendingHomework) {
+        showPanel('test-sonuclarim', true);
+        $('quizResultStatus').textContent = 'Yeni bir teste başlamadan önce bekleyen ödev teslimini tamamlayın.';
+        return;
+      }
       const homeworkId = button.dataset.homeworkQuiz || '';
       const prepare = homeworkId
         ? api(`/api/student/homeworks/${encodeURIComponent(homeworkId)}/start`, {method: 'POST'})
         : Promise.resolve();
-      prepare.then(() => api('/api/student/dashboard')).then(({quizler}) => {
+      quizBusy = true;
+      button.disabled = true;
+      prepare.then(() => api('/api/student/dashboard')).then(async ({quizler}) => {
         const quiz = quizler.find(item => item.id === button.dataset.quizId);
         if (!quiz) throw new Error('Test artık kullanılamıyor.');
-        renderQuiz(quiz, homeworkId || null);
+        const {attempt} = await api(`/api/ogrenci/quiz/${encodeURIComponent(quiz.id)}/attempt`, {
+          method: 'POST', body: JSON.stringify({restart: button.dataset.quizRestart === 'true'})
+        });
+        renderQuiz(quiz, attempt, homeworkId || null);
         if (homeworkId) loadStudentHomework();
       }).catch(error => {
+        $('quizRunner').hidden = false;
         $('quizAttemptStatus').textContent = error.message;
         $('quizAttemptStatus').className = 'feed-status error';
+        showPanel('ogretmen-testleri', true);
+      }).finally(() => {
+        quizBusy = false;
+        button.disabled = false;
+        if (activeQuiz) updateQuizView();
       });
     }
     $('quizFeed').addEventListener('click', openQuiz);
@@ -899,42 +943,150 @@ button,select{font:inherit}
       }
     });
 
+    function updateQuizView() {
+      if (!activeQuiz || !quizAttempt) return;
+      const fields = [...$('quizAttemptForm').querySelectorAll('.quiz-question')];
+      fields.forEach((field, index) => {
+        const state = quizAttempt.questions[index];
+        const locked = quizAttempt.status !== 'open' || state.correct || state.checks >= 2;
+        field.hidden = index !== quizQuestionIndex;
+        field.querySelectorAll('input').forEach(input => { input.disabled = quizBusy || locked; });
+        field.querySelector('[data-quiz-check]').disabled = quizBusy || locked;
+        const hint = field.querySelector('[data-quiz-hint]');
+        hint.hidden = quizAttempt.status !== 'open' || !state.checks || state.correct;
+        hint.disabled = quizBusy;
+        field.querySelector('.quiz-feedback').textContent = !state.checks
+          ? 'Cevabınızı seçip kontrol edin.'
+          : state.correct ? 'Doğru cevap!' : state.checks >= 2
+            ? 'İki deneme hakkınız doldu. Sonraki soruya geçebilirsiniz.'
+            : 'Yanlış cevap. İpucu isteyebilir ve bir kez daha deneyebilirsiniz.';
+      });
+      $('quizPrevious').disabled = quizBusy || quizQuestionIndex === 0;
+      $('quizNext').disabled = quizBusy || quizQuestionIndex === fields.length - 1;
+      $('quizAttemptForm').querySelector('button[type="submit"]').disabled =
+        quizBusy || !quizAttempt.questions.every(state => state.checks > 0);
+    }
+
+    $('quizAttemptForm').addEventListener('click', async event => {
+      if (!activeQuiz || quizBusy) return;
+      const check = event.target.closest('[data-quiz-check]');
+      const hint = event.target.closest('[data-quiz-hint]');
+      if (event.target.closest('#quizPrevious') || event.target.closest('#quizNext')) {
+        quizQuestionIndex += event.target.closest('#quizPrevious') ? -1 : 1;
+        updateQuizView();
+        return;
+      }
+      if (!check && !hint) return;
+      const index = Number((check || hint).dataset[check ? 'quizCheck' : 'quizHint']);
+      const field = $('quizAttemptForm').querySelectorAll('.quiz-question')[index];
+      const selected = field.querySelector('input:checked');
+      if (check && !selected) {
+        field.querySelector('.quiz-feedback').textContent = 'Önce bir cevap seçin.';
+        return;
+      }
+      quizBusy = true;
+      updateQuizView();
+      try {
+        if (check) {
+          const state = await api(`/api/ogrenci/quiz/${encodeURIComponent(activeQuiz.id)}/attempt/check`, {
+            method: 'POST', body: JSON.stringify({attemptId: quizAttempt.id, index, answer: selected.value})
+          });
+          quizAttempt.questions[index] = state;
+        } else {
+          const target = field.querySelector('.mentor-hint');
+          target.textContent = 'İpucu hazırlanıyor…';
+          const result = await api(`/api/mentor-ipucu/live/${encodeURIComponent(activeQuiz.id)}/${index}`, {
+            method: 'POST', body: JSON.stringify({attemptId: quizAttempt.id})
+          });
+          target.replaceChildren();
+          window.zarifAiVisual.append(target, result.ipucu);
+        }
+        $('quizAttemptStatus').textContent = '';
+      } catch (error) {
+        if (hint) field.querySelector('.mentor-hint').textContent = `İpucu alınamadı: ${error.message}`;
+        else {
+          $('quizAttemptStatus').textContent = `Cevap kontrol edilemedi: ${error.message}`;
+          $('quizAttemptStatus').className = 'feed-status error';
+          try {
+            const {attempt} = await api(`/api/ogrenci/quiz/${encodeURIComponent(activeQuiz.id)}/attempt`, {
+              method: 'POST', body: '{}'
+            });
+            quizAttempt = attempt;
+            $('quizAttemptForm').querySelectorAll('.quiz-question').forEach((questionField, questionIndex) => {
+              const answer = attempt.questions[questionIndex].answer;
+              if (!answer) return;
+              const input = questionField.querySelector(`input[value="${answer}"]`);
+              if (input) input.checked = true;
+            });
+          } catch (syncError) {
+            $('quizAttemptStatus').textContent += ` Test durumu yenilenemedi: ${syncError.message}`;
+          }
+        }
+      } finally {
+        quizBusy = false;
+        updateQuizView();
+      }
+    });
+
+    async function submitQuizHomework() {
+      if (!pendingHomework) return;
+      const {assignmentId, quizId, resultId} = pendingHomework;
+      try {
+        const result = await api(`/api/student/homeworks/${encodeURIComponent(assignmentId)}/quiz-submission`, {
+          method: 'POST', body: JSON.stringify({quizId, resultId})
+        });
+        pendingHomework = null;
+        $('quizHomeworkRetry').replaceChildren();
+        $('quizResultStatus').textContent += ` Ödev durumu: ${result.status}.`;
+      } catch (error) {
+        $('quizHomeworkRetry').innerHTML = `<p class="feed-status error">Test kaydedildi, ancak ödev teslim edilemedi: ${esc(error.message)}</p>
+          <button class="btn-join" type="button" id="retryQuizHomework">Ödev teslimini tekrar dene</button>`;
+      }
+    }
+
+    $('quizHomeworkRetry').addEventListener('click', async event => {
+      if (!event.target.closest('#retryQuizHomework')) return;
+      event.target.disabled = true;
+      await submitQuizHomework();
+    });
+
     $('quizAttemptForm').addEventListener('submit', async event => {
       event.preventDefault();
-      if (!activeQuiz) return;
-      const answers = activeQuiz.questions.map((_, index) =>
-        new FormData(event.currentTarget).get(`answer-${index}`) || null
-      );
-      const button = event.currentTarget.querySelector('button[type="submit"]');
-      button.disabled = true;
+      if (!activeQuiz || quizBusy) return;
+      quizBusy = true;
+      updateQuizView();
       try {
-        const result = await api(`/api/ogrenci/quiz/${encodeURIComponent(activeQuiz.id)}/teslim`, {
-          method: 'POST',
-          body: JSON.stringify({answers})
+        const result = await api(`/api/ogrenci/quiz/${encodeURIComponent(activeQuiz.id)}/attempt/finish`, {
+          method: 'POST', body: JSON.stringify({attemptId: quizAttempt.id})
         });
-        let homeworkResult = null;
         if (activeHomeworkAssignmentId) {
-          homeworkResult = await api(`/api/student/homeworks/${encodeURIComponent(activeHomeworkAssignmentId)}/quiz-submission`, {
-            method: 'POST',
-            body: JSON.stringify({quizId: activeQuiz.id, answers})
-          });
+          pendingHomework = {assignmentId: activeHomeworkAssignmentId, quizId: activeQuiz.id, resultId: result.id};
           activeHomeworkAssignmentId = null;
         }
-        $('quizAttemptStatus').textContent = `Test tamamlandı: %${result.score} (${result.correctCount}/${result.totalCount} doğru).${homeworkResult ? ` Ödev durumu: ${homeworkResult.status}.` : ''}`;
-        $('quizAttemptStatus').className = 'feed-status ok';
+        $('quizResultStatus').textContent = `Test tamamlandı: %${result.score} (${result.correctCount}/${result.totalCount} doğru). Kazanılan puan: ${result.kazanilanPuan}.`;
+        $('quizResultStatus').className = 'feed-status ok';
         $('quizReview').innerHTML = result.review.map((item, index) => `
           <article class="feed-card">
             <h3>${index + 1}. soru · Doğru cevap: ${esc(item.answer)}</h3>
             <p>${esc(item.explanation || 'Açıklama bulunmuyor.')}</p>
             ${item.ipucuVar ? `<button class="btn-join" type="button" data-mentor-result="${esc(result.id)}" data-mentor-index="${index}">AI ipucu iste</button><div class="mentor-hint" role="status" aria-live="polite"></div>` : ''}
           </article>`).join('');
-        await loadContent();
+        $('quizRunner').hidden = true;
+        activeQuiz = null;
         showPanel('test-sonuclarim', true);
         window.scrollTo({top: 0, behavior: 'smooth'});
+        await submitQuizHomework();
+        try {
+          await loadContent();
+        } catch (error) {
+          $('quizResultStatus').textContent += ` Sonuç listesi yenilenemedi: ${error.message}`;
+        }
       } catch (error) {
         $('quizAttemptStatus').textContent = `Test gönderilemedi: ${error.message}`;
         $('quizAttemptStatus').className = 'feed-status error';
-        button.disabled = false;
+      } finally {
+        quizBusy = false;
+        if (activeQuiz) updateQuizView();
       }
     });
     $('quizReview').addEventListener('click', async event => {

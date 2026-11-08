@@ -83,7 +83,7 @@ test('liderlik tablosu yalnızca öğrenciye açılır', async t => {
   assert.equal((await response.json()).leaderboard[0].ad, 'Ayşe Y.');
 });
 
-test('test tekrarında yalnızca daha önce puanlanmayan doğru sorular puan getirir', async t => {
+test('legacy teslim doğrudan cevapla puan veya sonuç üretmez', async t => {
   const {studentId, service, user} = setup();
   const quizId = new ObjectId();
   const quiz = {_id: quizId, title: 'Test', questions: [
@@ -104,15 +104,12 @@ test('test tekrarında yalnızca daha önce puanlanmayan doğru sorular puan get
   t.after(() => new Promise(resolve => server.close(resolve)));
   const url = `http://127.0.0.1:${server.address().port}/quiz/${quizId}`;
   const submit = answers => fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({answers})});
-  let response = await submit(['A', 'A']);
-  assert.equal((await response.json()).kazanilanPuan, 10);
-  response = await submit(['A', 'B']);
-  assert.equal((await response.json()).kazanilanPuan, 10);
-  response = await submit(['A', 'B']);
-  assert.equal((await response.json()).kazanilanPuan, 0);
-  assert.equal(user.zarifPuan, 20);
-  assert.equal(user.haftalikPuan, 20);
-  assert.equal(results.length, 3);
+  const response = await submit(['A', 'A']);
+  assert.equal(response.status, 409);
+  assert.equal((await response.json()).code, 'LIVE_ATTEMPT_REQUIRED');
+  assert.equal(user.zarifPuan, 0);
+  assert.equal(user.haftalikPuan, 0);
+  assert.equal(results.length, 0);
 });
 
 test('haftalık görev taslağı otomatik çalışmaz ve kurallar olmadan sıfırlamaz', async () => {

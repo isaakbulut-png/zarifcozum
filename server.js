@@ -50,7 +50,7 @@ const { normalizeAiChatRequest, createAiChatReply } = require('./lib/ai-chat');
 const { createFaqService } = require('./lib/faq-service');
 const { redisOptions } = require('./lib/redis-options');
 const { studentQuestion } = require('./lib/quiz-content');
-const { createTeacherQuizHandler, createStudentQuizSubmissionHandler } = require('./routes/quizler');
+const { createTeacherQuizHandler, createStudentQuizSubmissionHandler, createLiveQuizHandlers } = require('./routes/quizler');
 const { createPointsService } = require('./lib/leaderboard');
 const { createLeaderboardRouter } = require('./routes/leaderboard');
 const { createMentorHintRouter } = require('./routes/mentor-ipucu');
@@ -419,7 +419,7 @@ app.get('/admin-paneli.html', async (req, res, next) => {
 app.get('/favicon.svg', (req, res) => res.sendFile(path.join(__dirname, 'favicon.svg')));
 
 let koleksiyon, anahtarKoleksiyon, canliDersKoleksiyonu;
-let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, duyuruKoleksiyonu;
+let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, quizAttemptKoleksiyonu, duyuruKoleksiyonu;
 let mongoClient;
 const pointsService = createPointsService({
   getClient: () => mongoClient,
@@ -438,7 +438,9 @@ app.use('/api/mentor-ipucu', createMentorHintRouter({
   requireStudent: ogrenciKontrol, limiter: chatLimiter,
   getResults: () => quizSonucKoleksiyonu,
   getQuizzes: () => quizKoleksiyonu,
-  generateHint: async payload => (await import('./aiService.mjs')).kazanimaOzelIpucu(payload)
+  getAttempts: () => quizAttemptKoleksiyonu,
+  generateHint: async payload => (await import('./aiService.mjs')).kazanimaOzelIpucu(payload),
+  generateGeneralHint: async payload => (await import('./aiService.mjs')).genelSokratikIpucu(payload)
 }));
 app.use('/api/sorular', createSorularRouter({
   requireStaff: requireRole('teacher', 'admin'),
@@ -666,9 +668,19 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
   }
 });
 
+const liveQuizHandlers = createLiveQuizHandlers({
+  getQuizCollection: () => quizKoleksiyonu,
+  getAttemptCollection: () => quizAttemptKoleksiyonu,
+  getResultCollection: () => quizSonucKoleksiyonu,
+  pointsService
+});
+app.post('/api/ogrenci/quiz/:id/attempt', ogrenciKontrol, liveQuizHandlers.start);
+app.post('/api/ogrenci/quiz/:id/attempt/check', ogrenciKontrol, liveQuizHandlers.check);
+app.post('/api/ogrenci/quiz/:id/attempt/finish', ogrenciKontrol, liveQuizHandlers.finish);
 app.post('/api/ogrenci/quiz/:id/teslim', ogrenciKontrol, createStudentQuizSubmissionHandler({
   getQuizCollection: () => quizKoleksiyonu,
   getResultCollection: () => quizSonucKoleksiyonu,
+  getAttemptCollection: () => quizAttemptKoleksiyonu,
   pointsService
 }));
 
@@ -901,6 +913,7 @@ async function baslat() {
   planliDersKoleksiyonu = client.db(DB_ADI).collection('planli_dersler');
   quizKoleksiyonu = client.db(DB_ADI).collection('quizler');
   quizSonucKoleksiyonu = client.db(DB_ADI).collection('quiz_sonuclari');
+  quizAttemptKoleksiyonu = client.db(DB_ADI).collection('quiz_canli_deneme');
   duyuruKoleksiyonu = client.db(DB_ADI).collection('duyurular');
   studentProfiles = client.db(DB_ADI).collection('ogrenci_profilleri');
   homeworks = client.db(DB_ADI).collection('odevler');
@@ -918,6 +931,7 @@ async function baslat() {
     client.db(DB_ADI).collection('zarif_puan_sorulari').createIndex(
       {studentId: 1, questionKey: 1}, {unique: true, name: 'uniq_student_question_points'}
     ),
+    quizSonucKoleksiyonu.createIndex({studentId: 1, quizId: 1, liveAttemptId: 1}, {name: 'student_quiz_live_result'}),
     pratikKullanim.createIndex({key: 1, ozellik: 1}, {unique: true, name: 'uniq_pratik_usage'}),
     pratikKullanim.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0, name: 'expire_pratik_usage' }),
     pratikIcerik.createIndex({tur: 1, sinif: 1, konu: 1, adet: 1}, {unique: true, name: 'uniq_pratik_content'}),

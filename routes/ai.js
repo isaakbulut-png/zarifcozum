@@ -1,6 +1,7 @@
 const express = require('express');
 const { rateLimit } = require('express-rate-limit');
 const { ObjectId } = require('mongodb');
+const { prepareQuestion } = require('../lib/quiz-content');
 
 const { SINIF_KONULARI, TUM_KONULAR } = require('../lib/konu-haritasi');
 
@@ -62,6 +63,13 @@ function isValidQuestion(question) {
     secenekler.includes(question.answer) &&
     (!question.explanation ||
       typeof question.explanation === 'string' && question.explanation.length <= 1000);
+}
+
+function prepareAIQuestion(question) {
+  return {
+    ...prepareQuestion(question),
+    explanation: typeof question.explanation === 'string' ? question.explanation.trim() : ''
+  };
 }
 
 function soruSemasi() {
@@ -206,21 +214,21 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       return res.status(502).json({ mesaj: 'Üretilen sorular doğrulanamadı. Lütfen yeniden deneyin.' });
     }
 
+    let preparedQuestions;
+    try {
+      preparedQuestions = result.questions.map(prepareAIQuestion);
+    } catch (error) {
+      if (!(error instanceof TypeError)) throw error;
+      return res.status(502).json({ mesaj: 'Üretilen sorular doğrulanamadı. Lütfen yeniden deneyin.' });
+    }
+
     const quiz = {
       title: `${topic} — ${difficulty} seviye (Yapay zeka)`,
       description: `${count} soruluk yapay zeka destekli çalışma testi.`,
       topic,
       grade,
       difficulty,
-      questions: result.questions.map(question => ({
-        text: question.text.trim(),
-        options: Object.fromEntries(secenekler.map(letter => [
-          letter,
-          question.options[letter].trim()
-        ])),
-        answer: question.answer,
-        explanation: (question.explanation || '').trim()
-      }))
+      questions: preparedQuestions
     };
 
     res.json({
@@ -241,14 +249,23 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     const difficulty = typeof req.body?.difficulty === 'string' ? req.body.difficulty : '';
     const title = typeof req.body?.title === 'string' ? req.body.title.trim() : '';
     const description = typeof req.body?.description === 'string' ? req.body.description.trim() : '';
-    const question = req.body?.question;
+    const questions = req.body?.questions !== undefined ? req.body.questions : [req.body?.question];
     const grade = req.body?.grade === undefined ? null : Number(req.body.grade);
 
     if (!konular.has(topic) || !zorluklar.has(difficulty) ||
         (grade !== null && !SINIF_KONULARI[grade]) ||
         !title || title.length > 150 || description.length > 500 ||
-        !isValidQuestion(question)) {
+        !Array.isArray(questions) || questions.length < 1 || questions.length > 50 ||
+        !questions.every(isValidQuestion)) {
       return res.status(400).json({ mesaj: 'Test başlığı, konu, zorluk veya soru verileri geçersiz.' });
+    }
+
+    let preparedQuestions;
+    try {
+      preparedQuestions = questions.map(prepareAIQuestion);
+    } catch (error) {
+      if (error instanceof TypeError) return res.status(400).json({ mesaj: error.message });
+      throw error;
     }
 
     const quiz = {
@@ -257,15 +274,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       topic,
       ...(grade !== null && { grade }),
       difficulty,
-      questions: [{
-        text: question.text.trim(),
-        options: Object.fromEntries(secenekler.map(letter => [
-          letter,
-          question.options[letter].trim()
-        ])),
-        answer: question.answer,
-        explanation: (question.explanation || '').trim()
-      }],
+      questions: preparedQuestions,
       source: 'ai',
       published: true,
       createdBy: req.session.user.id,
@@ -275,8 +284,10 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     try {
       const inserted = await getQuizCollection().insertOne(quiz);
       res.status(201).json({
-        mesaj: 'Soru veritabanına eklendi ve öğrencilere yayınlandı.',
-        quiz: { id: inserted.insertedId.toString(), title: quiz.title, soruSayisi: 1 }
+        mesaj: questions.length === 1
+          ? 'Soru veritabanına eklendi ve öğrencilere yayınlandı.'
+          : 'Test veritabanına eklendi ve öğrencilere yayınlandı.',
+        quiz: { id: inserted.insertedId.toString(), title: quiz.title, soruSayisi: questions.length }
       });
     } catch (error) {
       console.error('Yapay zeka sorusu yayınlanamadı:', error);
@@ -286,7 +297,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
 
   router.delete('/questions/:id', requireRole('teacher'), async (req, res) => {
     if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ mesaj: 'Geçersiz soru numarası.' });
+      return res.status(400).json({ mesaj: 'Geçersiz test numarası.' });
     }
 
     try {
@@ -296,7 +307,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         published: true
       });
       if (result.deletedCount === 0) {
-        return res.status(404).json({ mesaj: 'Yayınlanmış yapay zeka sorusu bulunamadı.' });
+        return res.status(404).json({ mesaj: 'Yayınlanmış yapay zeka testi bulunamadı.' });
       }
       await AdminLog.create({
         actorId: req.session.user.id,
@@ -306,10 +317,10 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         entityId: req.params.id,
         details: { source: 'ai' }
       });
-      res.json({ mesaj: 'Soru veritabanından silindi.' });
+      res.json({ mesaj: 'Test veritabanından silindi.' });
     } catch (error) {
-      console.error('Yapay zeka sorusu silinemedi veya işlem kaydı oluşturulamadı:', error);
-      res.status(500).json({ mesaj: 'Soru silinemedi veya işlem kaydı oluşturulamadı.' });
+      console.error('Yapay zeka testi silinemedi veya işlem kaydı oluşturulamadı:', error);
+      res.status(500).json({ mesaj: 'Test silinemedi veya işlem kaydı oluşturulamadı.' });
     }
   });
 

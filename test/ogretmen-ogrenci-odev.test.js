@@ -341,9 +341,29 @@ test('linked online tests are graded automatically and complete only their assig
     const assigned = (await (await fetch(`${base}/api/student/homeworks`, {
       headers: studentHeaders('online-test-student')
     })).json()).homeworks[0];
+    for (let i = 0; i < 2; i++) {
+      assert.equal((await fetch(`${base}/api/student/homeworks/${assigned.assignmentId}/start`, {
+        method: 'POST', headers: studentHeaders('online-test-student')
+      })).status, 200);
+    }
+    const resultId = new ObjectId();
+    workspace.collections.results.rows.push({
+      _id: resultId, quizId, studentId: 'online-test-student', answers: ['A', 'B']
+    });
+    const unauthorizedResultId = new ObjectId();
+    workspace.collections.results.rows.push({
+      _id: unauthorizedResultId, quizId, studentId: 'another-student', answers: ['A', 'B']
+    });
+    assert.equal((await fetch(`${base}/api/student/homeworks/${assigned.assignmentId}/quiz-submission`, jsonOptions('POST', {
+      quizId: String(quizId), answers: ['A', 'B']
+    }, studentHeaders('online-test-student')))).status, 400);
+    assert.equal((await fetch(`${base}/api/student/homeworks/${assigned.assignmentId}/quiz-submission`, jsonOptions('POST', {
+      quizId: String(quizId), resultId: String(unauthorizedResultId)
+    }, studentHeaders('online-test-student')))).status, 400);
     const response = await fetch(`${base}/api/student/homeworks/${assigned.assignmentId}/quiz-submission`, jsonOptions('POST', {
       quizId: String(quizId),
-      answers: ['A', 'B']
+      resultId: String(resultId),
+      answers: ['B', 'A']
     }, studentHeaders('online-test-student')));
     assert.equal(response.status, 201);
     const result = await response.json();
@@ -352,7 +372,7 @@ test('linked online tests are graded automatically and complete only their assig
     assert.equal(workspace.collections.assignments.rows[0].score, 100);
     assert.equal((await fetch(`${base}/api/student/homeworks/${assigned.assignmentId}/quiz-submission`, jsonOptions('POST', {
       quizId: String(quizId),
-      answers: ['A', 'B']
+      resultId: String(resultId)
     }, studentHeaders('online-test-student')))).status, 409);
   } finally {
     await workspace.close();

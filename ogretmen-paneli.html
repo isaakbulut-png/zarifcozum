@@ -648,6 +648,8 @@ td.net{font-weight:700;color:var(--navy-900)}
   let yonetim = {dersler: [], quizler: [], duyurular: [], sonuclar: []};
   let taslak = [];
   let aiDraft = null;
+  let aiPublishing = false;
+  let aiPublished = false;
 
   // ---- Oturumlu sunucu isteği ----
   async function api(yol, ayar = {}) {
@@ -758,7 +760,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     $('quizList').innerHTML = yonetim.quizler.length
       ? yonetim.quizler.map(quiz => `<article class="data-item">
           <div><strong>${esc(quiz.title)}</strong><p>${quiz.soruSayisi} soru · ${tarihSaat(quiz.createdAt)}</p></div>
-          ${quiz.aiYayin ? `<button class="btn light" type="button" data-delete-ai-quiz="${esc(quiz.id)}">Soruyu sil</button>` : ''}
+          ${quiz.aiYayin ? `<button class="btn light" type="button" data-delete-ai-quiz="${esc(quiz.id)}">Testi sil</button>` : ''}
         </article>`).join('')
       : '<p class="empty">Henüz yayınlanmış test yok.</p>';
     $('announcementList').innerHTML = yonetim.duyurular.length
@@ -821,7 +823,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     const quizId = button.dataset.deleteAiQuiz;
     const quiz = yonetim.quizler.find(item => item.id === quizId && item.aiYayin);
     if (!quiz) return;
-    if (!confirm(`"${quiz.title}" öğrencilerin panelinden ve veritabanından kalıcı olarak silinecek. Devam edilsin mi?`)) return;
+    if (!confirm(`"${quiz.title}" testi içindeki tüm sorularla birlikte öğrencilerin panelinden ve veritabanından kalıcı olarak silinecek. Devam edilsin mi?`)) return;
 
     button.disabled = true;
     button.textContent = 'Siliniyor…';
@@ -833,8 +835,8 @@ td.net{font-weight:700;color:var(--navy-900)}
       durumYaz('quizListStatus', result.mesaj, 'ok');
     } catch (error) {
       button.disabled = false;
-      button.textContent = 'Soruyu sil';
-      durumYaz('quizListStatus', 'Soru silinemedi: ' + error.message, 'error');
+      button.textContent = 'Testi sil';
+      durumYaz('quizListStatus', 'Test silinemedi: ' + error.message, 'error');
     }
   });
 
@@ -1254,8 +1256,10 @@ td.net{font-weight:700;color:var(--navy-900)}
   $('aiQuestionForm').addEventListener('submit', async event => {
     event.preventDefault();
     const button = $('generateAiQuestions');
+    if (button.disabled || aiPublishing) return;
     button.disabled = true;
     aiDraft = null;
+    aiPublished = false;
     $('aiQuestionList').replaceChildren();
     durumYaz('aiQuestionStatus', 'Sorular hazırlanıyor…');
 
@@ -1270,11 +1274,17 @@ td.net{font-weight:700;color:var(--navy-900)}
         })
       });
       aiDraft = quiz;
-      $('aiQuestionList').innerHTML = quiz.questions.map((question, index) => `
+      $('aiQuestionList').innerHTML = `
+        <div class="field">
+          <label for="aiTestTitle">Test başlığı</label>
+          <input id="aiTestTitle" maxlength="150" value="${esc(quiz.topic + ' - Test 1')}" required>
+        </div>
+        <p class="hint">Kontrol ettiğiniz soruları onaylayın; seçilenler tek bir test olarak yayınlanır.</p>
+        ${quiz.questions.map((question, index) => `
         <article class="question-card" data-ai-question="${index}">
           <div class="question-top">
             <strong>Soru ${index + 1}</strong>
-            <button class="btn" type="button" data-ai-publish="${index}">Veritabanına Ekle / Yayınla</button>
+            <label><input type="checkbox" data-ai-approved="${index}"> Soruyu onayla</label>
           </div>
           <p>${esc(question.text)}</p>
           <div class="question-options">
@@ -1284,8 +1294,12 @@ td.net{font-weight:700;color:var(--navy-900)}
           </div>
           <p><strong>Doğru cevap:</strong> ${esc(question.answer)}</p>
           <p><strong>Açıklama:</strong> ${esc(question.explanation || 'Açıklama bulunmuyor.')}</p>
-          <p class="status ai-publish-status" role="status"></p>
-        </article>`).join('');
+          <div class="field"><label for="ai-outcome-${index}">MEB kazanım kodu (isteğe bağlı)</label>
+            <input id="ai-outcome-${index}" data-ai-outcome="${index}" value="${esc(question.outcomeCode || '')}" placeholder="MAT.6.1.1">
+          </div>
+        </article>`).join('')}
+        <div class="button-row"><button class="btn" type="button" data-ai-publish>Onaylı soruları test olarak yayınla</button></div>
+        <p class="status ai-publish-status" role="status" aria-live="polite"></p>`;
       durumYaz('aiQuestionStatus', `${quiz.soruSayisi} soru hazır. Yayınlamadan önce her soruyu kontrol edin.`, 'ok');
     } catch (error) {
       durumYaz('aiQuestionStatus', 'Sorular üretilemedi: ' + error.message, 'error');
@@ -1296,14 +1310,27 @@ td.net{font-weight:700;color:var(--navy-900)}
 
   $('aiQuestionList').addEventListener('click', async event => {
     const button = event.target.closest('[data-ai-publish]');
-    if (!button || !aiDraft) return;
-    const index = Number(button.dataset.aiPublish);
-    const question = aiDraft.questions[index];
-    if (!question) return;
+    if (!button || !aiDraft || aiPublishing || aiPublished) return;
+    const status = $('aiQuestionList').querySelector('.ai-publish-status');
+    const title = $('aiTestTitle').value.trim();
+    const cards = [...$('aiQuestionList').querySelectorAll('[data-ai-question]')];
+    const questions = cards.filter(card => card.querySelector('[data-ai-approved]').checked).map(card => {
+      const question = aiDraft.questions[Number(card.dataset.aiQuestion)];
+      const outcomeCode = card.querySelector('[data-ai-outcome]').value.trim();
+      return {...question, outcomeCode};
+    });
+    if (!title || title.length > 150 || !questions.length) {
+      status.textContent = 'Test başlığı girin ve en az bir soruyu onaylayın.';
+      status.className = 'status ai-publish-status error';
+      return;
+    }
 
+    aiPublishing = true;
     button.disabled = true;
-    const status = button.closest('.question-card').querySelector('.ai-publish-status');
-    status.textContent = 'Soru yayınlanıyor…';
+    $('generateAiQuestions').disabled = true;
+    const inputs = [...$('aiQuestionList').querySelectorAll('input')];
+    inputs.forEach(input => { input.disabled = true; });
+    status.textContent = 'Test yayınlanıyor…';
     status.className = 'status ai-publish-status';
     try {
       const result = await api('/api/ai/questions/publish', {
@@ -1312,11 +1339,12 @@ td.net{font-weight:700;color:var(--navy-900)}
           topic: aiDraft.topic,
           grade: aiDraft.grade,
           difficulty: aiDraft.difficulty,
-          title: `${aiDraft.grade}. Sınıf · ${aiDraft.topic} · ${aiDraft.difficulty} · Soru ${index + 1}`,
-          description: `${aiDraft.topic} konusunda yapay zeka destekli ${aiDraft.difficulty.toLocaleLowerCase('tr-TR')} seviye soru.`,
-          question
+          title,
+          description: `${aiDraft.topic} konusunda yapay zeka destekli ${aiDraft.difficulty.toLocaleLowerCase('tr-TR')} seviye test.`,
+          questions
         })
       });
+      aiPublished = true;
       button.textContent = 'Yayınlandı';
       status.textContent = result.mesaj;
       status.className = 'status ai-publish-status ok';
@@ -1324,13 +1352,17 @@ td.net{font-weight:700;color:var(--navy-900)}
         yonetim = await api('/api/ogretmen/yonetim');
         yonetimCiz();
       } catch (error) {
-        status.textContent = `Soru yayınlandı; test listesi yenilenemedi: ${error.message}`;
+        status.textContent = `Test yayınlandı; test listesi yenilenemedi: ${error.message}`;
         status.className = 'status ai-publish-status error';
       }
     } catch (error) {
-      status.textContent = 'Soru yayınlanamadı: ' + error.message;
+      status.textContent = 'Test yayınlanamadı: ' + error.message;
       status.className = 'status ai-publish-status error';
       button.disabled = false;
+      inputs.forEach(input => { input.disabled = false; });
+    } finally {
+      aiPublishing = false;
+      $('generateAiQuestions').disabled = false;
     }
   });
 

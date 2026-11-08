@@ -681,7 +681,7 @@ function createTeacherStudentHomeworkRouters({
     const result = await assignments().updateOne({
       _id: id,
       studentUserId: req.session.user.id,
-      status: {$in: ['Görüntülendi', 'Atandı', 'Teslim edilmedi', 'Eksik']}
+      status: {$in: ['Görüntülendi', 'Atandı', 'Devam ediyor', 'Teslim edilmedi', 'Eksik']}
     }, {$set: {status: 'Devam ediyor', startedAt: new Date(), updatedAt: new Date()}});
     if (!result.matchedCount) return res.status(404).json({mesaj: 'Devam edebileceğiniz ödev bulunamadı.'});
     res.json({mesaj: 'Ödev çalışmaya başlandı.'});
@@ -701,7 +701,11 @@ function createTeacherStudentHomeworkRouters({
       return res.status(409).json({mesaj: 'Bu ödev için teslim zaten alınmış.'});
     }
     const quiz = await quizzes().findOne({_id: quizId, createdBy: assignment.teacherId});
-    const answers = req.body?.answers;
+    const resultId = objectId(req.body?.resultId);
+    const completedResult = resultId && await getStudentQuizResultsCollection().findOne({
+      _id: resultId, quizId, studentId: req.session.user.id
+    });
+    const answers = completedResult?.answers;
     if (!quiz || !Array.isArray(answers) || answers.length !== quiz.questions.length ||
         !answers.every((answer, index) => answer === null ||
           ['A', 'B', 'C', 'D'].includes(answer) && quiz.questions[index].options[answer])) {

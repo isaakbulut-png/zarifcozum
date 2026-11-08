@@ -156,6 +156,19 @@ export async function kazanimaOzelIpucu({outcomeCode, question, selected}) {
   return response.text.trim();
 }
 
+export async function genelSokratikIpucu({question, selected}) {
+  const response = await aiClient.models.generateContent({
+    model: 'gemini-4-argon',
+    contents: `Soru: ${question.text}\nÖğrencinin seçtiği cevap: ${selected}) ${question.options[selected]}`,
+    config: {
+      systemInstruction: `Sen bir matematik mentörüsün. Cevabı veya doğru şıkkı söylemeden, öğrencinin seçimini sorgulamasına yardımcı olan kısa ve Sokratik bir ipucu ver. Bir kazanım veya kaynak doğrulandığını iddia etme. ${visualInstruction}`,
+      temperature: 0.2
+    }
+  });
+  if (!response.text?.trim()) throw new Error('İpucu oluşturulamadı.');
+  return response.text.trim();
+}
+
 /**
  * Yeni yüklenen Pinecone metadata yapısına uygun kural metni oluşturur
  */
