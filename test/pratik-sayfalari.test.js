@@ -23,6 +23,15 @@ test('kazanım testi sayfası demo panel yerine gerçek kazanım bileşenini aç
   assert.equal((page.match(/src="\/assets\/site-footer\.js"/g) || []).length, 1);
 });
 
+test('asistanla soru çöz sayfası öğrenci oturumuna açık bir GET rotasıdır', () => {
+  const server = read('server.js');
+  const page = read('asistanla-soru-coz.html');
+  assert.match(server, /'asistanla-soru-coz\.html'/);
+  assert.match(server, /\['ogrenci-paneli\.html', 'asistanla-soru-coz\.html'\]\.includes\(page\)/);
+  assert.match(page, /ZarifPratik\.mount\([^;]*mod:\s*"asistan"/);
+  assert.match(page, /id="pratik-mount"/);
+});
+
 test('tüm sınıf bağlantıları dinamik konu sayfasını açar', () => {
   const homepage = read('index.html');
   for (let grade = 5; grade <= 12; grade++) {

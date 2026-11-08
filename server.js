@@ -303,7 +303,7 @@ app.get('/api/homepage-assets', async (req, res) => {
 });
 
 const sitePages = [
-  'index.html', 'dene.html', 'asistan.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html', 'yasal.html',
+  'index.html', 'dene.html', 'asistan.html', 'asistanla-soru-coz.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html', 'yasal.html',
   'ogrenci-paneli.html', 'ogretmen-paneli.html', 'veli-panel.html', 'kayit-giris.html', 'hakkimizda.html',
   'Platform Ayrıcalıkları.html',   'Paketler.html', 'deneme-sinavi-optik.html'
 ];
@@ -313,7 +313,7 @@ sitePages.forEach(page => {
     ? /^\/Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1\.html$/i
     : `/${page}`;
   app.get(route, async (req, res, next) => {
-    const role = page === 'ogrenci-paneli.html' ? 'student'
+    const role = ['ogrenci-paneli.html', 'asistanla-soru-coz.html'].includes(page) ? 'student'
       : page === 'ogretmen-paneli.html' ? 'teacher'
       : page === 'veli-panel.html' ? 'parent'
       : null;
