@@ -34,6 +34,12 @@
     return dugum;
   }
 
+  function matematikMetni(metin) {
+    const dugum = el('span');
+    dugum.innerHTML = window.zarifMathText.format(metin);
+    return dugum;
+  }
+
   async function api(yol, govde) {
     const secenekler = govde
       ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(govde) }
@@ -481,10 +487,10 @@
             if (harf === soru.answer) sinifAd += ' dogru';
             else if (secili === harf) sinifAd += ' yanlis';
           }
-          return el('button', { type: 'button', class: sinifAd, onclick: () => onSec(harf) }, `${harf}) ${soru.options[harf]}`);
+          return el('button', { type: 'button', class: sinifAd, onclick: () => onSec(harf) }, `${harf}) `, matematikMetni(soru.options[harf]));
         }));
       if (kilitle) secenekler.querySelectorAll('button').forEach(button => { button.disabled = true; });
-      return el('div', {}, el('p', { class: 'zp-soru' }, soru.text), secenekler);
+      return el('div', {}, el('p', { class: 'zp-soru' }, matematikMetni(soru.text)), secenekler);
     }
 
     function pratikCalistir(sorular, konu) {
@@ -507,7 +513,7 @@
           }, cevap !== null, cevap !== null),
           cevap !== null ? el('div', { class: dogru ? 'zp-dogru-mesaj' : 'zp-hata' },
             dogru ? 'Doğru cevap!' : `Bu kez olmadı. Doğru cevap: ${soru.answer}.`,
-            el('p', { class: 'zp-cozum' }, soru.explanation || '')) : '',
+            el('p', { class: 'zp-cozum' }, matematikMetni(soru.explanation || ''))) : '',
           cevap !== null ? el('button', {
             class: 'zp-btn',
             type: 'button',
@@ -554,7 +560,7 @@
           el('p', { class: 'zp-puan' }, `${dogru} doğru · ${sorular.length - dogru - bos} yanlış · ${bos} boş`),
           sorular.map((s, n) => el('div', { class: 'zp-inceleme' },
             soruKarti(s, cevaplar[n], () => {}, true),
-            el('p', { class: 'zp-cozum' }, s.explanation || ''))),
+            el('p', { class: 'zp-cozum' }, matematikMetni(s.explanation || '')))),
           el('div', { class: 'zp-aksiyon' },
             el('button', { class: 'zp-btn', type: 'button', onclick: secimEkrani }, 'Başka konu seç'),
             durum && !durum.limitYok && durum.ozellikler[mod].kalan === 0
@@ -579,7 +585,7 @@
           el('p', { class: 'zp-kucuk' }, `Soru ${i + 1} / ${sorular.length}`),
           soruKarti(soru, secili, harf => { if (!acikla) ciz(harf, harf === soru.answer ? deneme : deneme + 1); }, acikla),
           mesaj ? el('p', { class: cozuldu ? 'zp-dogru-mesaj' : 'zp-hata' }, mesaj) : '',
-          acikla ? el('p', { class: 'zp-cozum' }, soru.explanation || '') : '',
+          acikla ? el('p', { class: 'zp-cozum' }, matematikMetni(soru.explanation || '')) : '',
           acikla ? el('div', { class: 'zp-aksiyon' }, el('button', {
             class: 'zp-btn', type: 'button', onclick: () => {
               if (cozuldu && deneme === 0) dogru += 1;

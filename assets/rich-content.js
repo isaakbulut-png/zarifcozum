@@ -7,7 +7,14 @@
 
   function copySafeNode(source, target) {
     if (source.nodeType === Node.TEXT_NODE) {
-      target.append(document.createTextNode(source.nodeValue || ''));
+      const text = source.nodeValue || '';
+      if (window.zarifMathText && text.includes('^')) {
+        const span = document.createElement('span');
+        span.innerHTML = window.zarifMathText.format(text);
+        target.append(span);
+      } else {
+        target.append(document.createTextNode(text));
+      }
       return;
     }
     if (source.nodeType !== Node.ELEMENT_NODE) return;

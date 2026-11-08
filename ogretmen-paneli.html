@@ -636,6 +636,7 @@ td.net{font-weight:700;color:var(--navy-900)}
 
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js" integrity="sha384-reiVBUvj2HgLgCZalqLFSMBVD9LdtiwGyybRGCq2AfP8Rgebz5DxEnwKp4FpagKV" crossorigin="anonymous"></script>
+<script src="assets/math-text.js"></script>
 <script src="assets/safe-svg.js"></script>
 <script src="assets/matematik-mufredati.js"></script>
 <script src="assets/curriculum-tree-view.js"></script>
@@ -1299,14 +1300,14 @@ td.net{font-weight:700;color:var(--navy-900)}
             <strong>Soru ${index + 1}</strong>
             <label><input type="checkbox" data-ai-approved="${index}"> Soruyu onayla</label>
           </div>
-          <p>${esc(question.text)}</p>
+          <p>${window.zarifMathText.format(question.text)}</p>
           <div class="question-options">
             ${['A', 'B', 'C', 'D'].map(letter => `
-              <p><strong>${letter})</strong> ${esc(question.options[letter])}</p>
+              <p><strong>${letter})</strong> ${window.zarifMathText.format(question.options[letter])}</p>
             `).join('')}
           </div>
           <p><strong>Doğru cevap:</strong> ${esc(question.answer)}</p>
-          <p><strong>Açıklama:</strong> ${esc(question.explanation || 'Açıklama bulunmuyor.')}</p>
+          <p><strong>Açıklama:</strong> ${window.zarifMathText.format(question.explanation || 'Açıklama bulunmuyor.')}</p>
           <div class="field"><label for="ai-outcome-${index}">MEB kazanım kodu (isteğe bağlı)</label>
             <input id="ai-outcome-${index}" data-ai-outcome="${index}" value="${esc(question.outcomeCode || '')}" placeholder="MAT.6.1.1">
           </div>

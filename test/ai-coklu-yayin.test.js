@@ -110,7 +110,8 @@ test('öğretmen onaylıları tek test gönderir, tekrar tıklamayı ve yeniden 
   };
   const context = {
     $: id => elements[id], api, durumYaz() {}, yonetimCiz() {},
-    esc: value => String(value), aiDraft: null, aiPublishing: false, aiPublished: false, yonetim: {}
+    esc: value => String(value), window: {zarifMathText: require('../assets/math-text')},
+    aiDraft: null, aiPublishing: false, aiPublished: false, yonetim: {}
   };
   vm.runInNewContext(code, context);
   await submit({preventDefault() {}});

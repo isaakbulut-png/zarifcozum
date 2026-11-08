@@ -487,6 +487,7 @@ button,select{font:inherit}
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+<script src="assets/math-text.js"></script>
 <script src="assets/rich-content.js"></script>
 <script src="assets/safe-svg.js"></script>
 <script src="assets/ai-visual.js"></script>
@@ -782,11 +783,11 @@ button,select{font:inherit}
       $('quizAttemptForm').innerHTML = quiz.questions.map((question, index) => `
         <fieldset class="quiz-question">
           <legend>${index + 1} / ${quiz.questions.length}. Soru</legend>
-          <div class="quiz-rich-content">${question.html ? '' : esc(question.text)}</div>
+          <div class="quiz-rich-content">${question.html ? '' : window.zarifMathText.format(question.text)}</div>
           <div class="quiz-svg"></div>
           ${['A','B','C','D'].map(letter => `<label class="quiz-option">
             <input type="radio" name="answer-${index}" value="${letter}">
-            <span><strong>${letter})</strong> ${esc(question.options[letter])}</span>
+            <span><strong>${letter})</strong> ${window.zarifMathText.format(question.options[letter])}</span>
           </label>`).join('')}
           <div class="quiz-actions">
             <button class="btn-join" type="button" data-quiz-check="${index}">Cevabı kontrol et</button>
@@ -805,7 +806,7 @@ button,select{font:inherit}
             if (question.html) {
               const target = fieldset.querySelector('.quiz-rich-content');
               if (!window.zarifRichContent || !window.zarifRichContent.render(target, question.html)) {
-                target.textContent = question.text;
+                target.innerHTML = window.zarifMathText.format(question.text);
               }
             }
             if (question.svg) {
@@ -1068,7 +1069,7 @@ button,select{font:inherit}
         $('quizReview').innerHTML = result.review.map((item, index) => `
           <article class="feed-card">
             <h3>${index + 1}. soru · Doğru cevap: ${esc(item.answer)}</h3>
-            <p>${esc(item.explanation || 'Açıklama bulunmuyor.')}</p>
+            <p>${window.zarifMathText.format(item.explanation || 'Açıklama bulunmuyor.')}</p>
             ${item.ipucuVar ? `<button class="btn-join" type="button" data-mentor-result="${esc(result.id)}" data-mentor-index="${index}">AI ipucu iste</button><div class="mentor-hint" role="status" aria-live="polite"></div>` : ''}
           </article>`).join('');
         $('quizRunner').hidden = true;
