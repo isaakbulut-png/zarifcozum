@@ -1,0 +1,34 @@
+.teacher-layout .teacher-content { width:100%; }
+#maarif-tree, #curriculumTreeView { min-width:0; }
+.ctv-intro { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin:4px 0 16px; color:#74675e; font-size:.8rem; }
+.ctv-legend { padding:6px 10px; border-radius:20px; background:#f6f1ec; color:#715640; font-size:.72rem; }
+.ctv-columns { display:grid; grid-template-columns:repeat(4,minmax(210px,1fr)); overflow-x:auto; border:1px solid #e8dfd8; border-radius:14px; background:#fff; }
+.ctv-column { min-width:210px; min-height:310px; padding:16px 12px; border-right:1px solid #eee8e2; }
+.ctv-column:last-child { border-right:0; background:#fcfaf8; }
+.ctv-column-head { min-height:76px; padding:0 3px 12px; border-bottom:1px solid #eee8e2; }
+.ctv-column-head > div { display:flex; align-items:center; gap:8px; }
+.ctv-column-head h3 { margin:0; color:#3e3025; font:600 .85rem var(--head); }
+.ctv-column-head p { margin:7px 0 0; color:#81766e; font-size:.73rem; overflow-wrap:anywhere; }
+.ctv-step { color:#b79b82; font:700 .7rem var(--head); letter-spacing:.06em; }
+.ctv-stage { margin-top:14px; }
+.ctv-stage-title { padding:0 8px; color:#887365; font-size:.7rem; font-weight:700; letter-spacing:.04em; }
+.ctv-item { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; margin-top:8px; padding:11px; border:1px solid transparent; border-radius:10px; background:#faf8f6; color:#403126; text-align:left; transition:background .15s,border-color .15s; }
+.ctv-item:hover { border-color:#cfbaaa; background:#f7f0eb; }
+.ctv-item.is-selected { border-color:#9c7355; background:#f3e7dd; box-shadow:inset 3px 0 #805a3b; }
+.ctv-item.is-empty { border-color:#e8bc73; background:#fff9eb; opacity:.72; }
+.ctv-item.is-empty.is-selected { opacity:1; }
+.ctv-item-content { display:grid; gap:3px; min-width:0; }
+.ctv-item-title { font-size:.77rem; font-weight:600; overflow-wrap:anywhere; }
+.ctv-code { color:#93755f; font-size:.66rem; font-weight:700; overflow-wrap:anywhere; }
+.ctv-badge { flex:none; padding:4px 7px; border-radius:20px; background:#ede7e2; color:#6b5648; font-size:.62rem; font-weight:700; white-space:nowrap; }
+.ctv-item.is-empty .ctv-badge { background:#faeac9; color:#82500c; }
+.ctv-empty,.ctv-status { margin:15px 3px; color:#81766e; font-size:.77rem; line-height:1.55; }
+.ctv-detail-code { display:inline-block; margin:18px 0 8px; padding:5px 8px; border-radius:7px; background:#eee3da; color:#76543b; font-size:.7rem; font-weight:700; overflow-wrap:anywhere; }
+.ctv-detail-title { color:#3e3025; font:600 .9rem var(--head); line-height:1.5; overflow-wrap:anywhere; }
+.ctv-detail-heading { margin-top:22px; color:#604c3e; font-size:.74rem; }
+.ctv-skills { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; padding:0; list-style:none; }
+.ctv-skills li { padding:6px 9px; border-radius:8px; background:#f1ebe5; color:#684e3b; font-size:.72rem; }
+.ctv-error { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px; border:1px solid #edc9b9; border-radius:10px; background:#fff5ee; color:#923e26; font-size:.85rem; }
+.ctv-retry { padding:8px 12px; border:1px solid #bd8f75; border-radius:8px; background:#fff; color:#71432d; font-weight:600; }
+@media (max-width:800px) { .ctv-columns { grid-template-columns:repeat(4,minmax(230px,75vw)); scroll-snap-type:x proximity; } .ctv-column { scroll-snap-align:start; } }
+@media (prefers-reduced-motion:reduce) { .ctv-item { transition:none; } }

@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/ogretmen-yonetim.css">
 <link rel="stylesheet" href="assets/ogrenci-gelisim.css">
+<link rel="stylesheet" href="assets/curriculum-tree-view.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" integrity="sha384-ecIckRi4QlKYya/FQUbBUjS4qp65jF/J87Guw5uzTbO1C1Jfa/6kYmd6dXUF6D7i" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
 <style>
@@ -206,6 +207,7 @@ td.net{font-weight:700;color:var(--navy-900)}
   <strong>YÖNETİM MENÜSÜ</strong>
   <nav aria-label="Öğretmen paneli bölümleri">
     <a href="#overview" aria-current="page"><span>⌂</span>Ana sayfa</a>
+    <a href="#maarif-tree"><span>▤</span>Maarif gezgini</a>
     <a href="#curriculum"><span>▤</span>Ders ve müfredat</a>
     <a href="#students"><span>♙</span>Öğrenciler</a>
     <a href="#assignments"><span>☑</span>Ödev yönetimi</a>
@@ -265,6 +267,11 @@ td.net{font-weight:700;color:var(--navy-900)}
         <a href="#quiz-builder"><span>✎</span><b>Test hazırla</b><small>Soru bankasından seç</small></a>
         <a href="#students"><span>♙</span><b>Öğrenci ekle</b><small>Öğrenci listeni düzenle</small></a>
       </div>
+    </section>
+
+    <section class="card module-card" id="maarif-tree">
+      <div class="section-title"><div><p class="eyebrow">İÇERİK HAVUZU</p><h2>Maarif müfredat gezgini</h2><p class="hint">Sınıftan öğrenme çıktısına, dört adımda ilerleyin.</p></div><span class="module-badge">Müfredat ağacı</span></div>
+      <div id="curriculumTreeView"></div>
     </section>
 
     <section class="card module-card" id="curriculum">
@@ -628,6 +635,7 @@ td.net{font-weight:700;color:var(--navy-900)}
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js" integrity="sha384-reiVBUvj2HgLgCZalqLFSMBVD9LdtiwGyybRGCq2AfP8Rgebz5DxEnwKp4FpagKV" crossorigin="anonymous"></script>
 <script src="assets/safe-svg.js"></script>
 <script src="assets/matematik-mufredati.js"></script>
+<script src="assets/curriculum-tree-view.js"></script>
 <script src="assets/ogretmen-yonetim.js"></script>
 <script src="assets/ogrenci-gelisim.js"></script>
 <script src="assets/ogretmen-canli.js"></script>
@@ -687,6 +695,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     $('teacherSidebar').hidden = false;
     document.querySelector('.teacher-layout').classList.add('authenticated');
     $('giris').hidden = true; $('panel').hidden = false;
+    window.dispatchEvent(new CustomEvent('curriculum-tree:open'));
     $('cikis').hidden = false;
     $('changePasswordButton').hidden = false;
     canliYonetim.yenile();
@@ -706,6 +715,7 @@ td.net{font-weight:700;color:var(--navy-900)}
   }
 
   async function cikis() {
+    window.dispatchEvent(new CustomEvent('curriculum-tree:close'));
     $('giris').hidden = false; $('panel').hidden = true;
     $('sinav').hidden = true; $('cikis').hidden = true;
     $('changePasswordButton').hidden = true;

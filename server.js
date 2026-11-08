@@ -53,6 +53,7 @@ const { studentQuestion } = require('./lib/quiz-content');
 const { createTeacherQuizHandler, createStudentQuizSubmissionHandler, createLiveQuizHandlers } = require('./routes/quizler');
 const { createPointsService } = require('./lib/leaderboard');
 const { createLeaderboardRouter } = require('./routes/leaderboard');
+const { createCurriculumRouter } = require('./routes/curriculum');
 const { createMentorHintRouter } = require('./routes/mentor-ipucu');
 const AiFaq = require('./models/AiFaq');
 
@@ -433,6 +434,9 @@ let supportTickets;
 const ogrenciKontrol = requireRole('student');
 const ogretmenKontrol = requireRole('teacher');
 const veliKontrol = requireRole('parent');
+app.use('/api/v1/curriculum', createCurriculumRouter({
+  requireStaff: requireRole('teacher', 'admin'), getDb: () => mongoClient.db(DB_ADI)
+}));
 app.use('/api/leaderboard', createLeaderboardRouter({requireStudent: ogrenciKontrol, pointsService}));
 app.use('/api/mentor-ipucu', createMentorHintRouter({
   requireStudent: ogrenciKontrol, limiter: chatLimiter,

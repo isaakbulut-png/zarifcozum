@@ -1,0 +1,46 @@
+import os
+from functools import lru_cache
+from pathlib import Path
+
+from dotenv import load_dotenv
+from pymongo import ASCENDING, MongoClient
+from pymongo.collection import Collection
+from pymongo.database import Database
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def load_config() -> None:
+    for name in (".env", "baglanti_adresi.env"):
+        load_dotenv(ROOT / name, override=False)
+
+
+@lru_cache(maxsize=1)
+def get_client() -> MongoClient:
+    load_config()
+    uri = os.environ.get("MONGODB_URI")
+    if not uri:
+        raise RuntimeError("MONGODB_URI is required")
+    return MongoClient(uri, serverSelectionTimeoutMS=5000)
+
+
+def get_database() -> Database:
+    client = get_client()
+    return client[os.environ.get("DB_ADI") or "etut_merkezi"]
+
+
+def ensure_indexes(collection: Collection) -> None:
+    collection.create_index(
+        [("parent_id", ASCENDING), ("order_index", ASCENDING), ("_id", ASCENDING)],
+        name="curriculum_parent_order",
+    )
+    collection.database["sorular"].create_index(
+        [("curriculum_node_id", ASCENDING)], name="curriculum_node_id"
+    )
+    collection.database["quizler"].create_index(
+        [("questions.curriculum_node_id", ASCENDING)], name="quiz_question_curriculum_node_id"
+    )
+
+
+def get_collection() -> Collection:
+    return get_database()["curriculum_nodes"]

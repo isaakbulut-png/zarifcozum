@@ -9,6 +9,7 @@ const soruSchema = new mongoose.Schema({
   // Cloudinary'e yüklenen resimlerde dolu; klasörden taranan kayıtlarda hiç yazılmaz (sparse indeks).
   cloudinaryPublicId: { type: String, maxlength: 200, index: { unique: true, sparse: true } },
   answer: { type: String, enum: ['A', 'B', 'C', 'D', 'E', null], default: null },
+  curriculum_node_id: { type: mongoose.Schema.Types.ObjectId },
   createdBy: { type: String, default: 'script', maxlength: 60 }
 }, { timestamps: true, collection: 'sorular' });
 
