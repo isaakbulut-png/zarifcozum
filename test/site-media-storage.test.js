@@ -3,7 +3,12 @@ const test = require('node:test');
 const {Readable} = require('node:stream');
 const express = require('express');
 const {PutObjectCommand, GetObjectCommand, DeleteObjectCommand} = require('@aws-sdk/client-s3');
-const {createR2MediaStorage, createConfiguredMediaStorage} = require('../lib/site-media-storage');
+const {
+  createR2MediaStorage,
+  createR2PrivateDocumentStorage,
+  createConfiguredMediaStorage,
+  createConfiguredPrivateDocumentStorage
+} = require('../lib/site-media-storage');
 const {createSiteMediaFilesRouter} = require('../routes/site-media-files');
 
 const config = {
@@ -34,6 +39,25 @@ test('R2 storage validates keys and sends the expected object operations', async
   assert.throws(() => createConfiguredMediaStorage({SITE_MEDIA_STORAGE: 'other'}, {}), /local veya r2/);
 });
 
+test('private document storage uses its own bucket and rejects public media keys', async () => {
+  const commands = [];
+  const storage = createR2PrivateDocumentStorage({
+    ...config,
+    bucket: 'private-documents',
+    client: {send: async command => { commands.push(command); return {}; }}
+  });
+  const key = 'submissions/0123456789abcdef01234567/12345678-1234-4234-8234-123456789abc.pdf';
+  await storage.put(key, Buffer.from('%PDF-1.7'));
+  assert.ok(commands[0] instanceof PutObjectCommand);
+  assert.equal(commands[0].input.Bucket, 'private-documents');
+  assert.equal(commands[0].input.ContentType, 'application/pdf');
+  assert.equal(commands[0].input.CacheControl, 'private, no-store');
+  await assert.rejects(storage.put('site-media/1234abcd.png', Buffer.from('image')), /Geçersiz/);
+  await assert.rejects(storage.put('submissions/0123456789abcdef01234567/not-a-uuid.pdf', Buffer.from('%PDF-1.7')), /Geçersiz/);
+  assert.equal(createConfiguredPrivateDocumentStorage({}), null);
+  assert.throws(() => createConfiguredPrivateDocumentStorage({R2_PRIVATE_BUCKET: 'private-documents'}), /eksik/);
+});
+
 test('media proxy returns only allowed media and reports missing or unavailable objects', async () => {
   const app = express();
   app.use('/uploads', createSiteMediaFilesRouter({
@@ -56,6 +80,7 @@ test('media proxy returns only allowed media and reports missing or unavailable 
     assert.equal((await fetch(`${base}/homepage/404.png`)).status, 404);
     assert.equal((await fetch(`${base}/homepage/500.png`)).status, 503);
     assert.equal((await fetch(`${base}/private/abcdef.pdf`)).status, 404);
+    assert.equal((await fetch(`${base}/submissions/0123456789abcdef01234567/12345678-1234-4234-8234-123456789abc.pdf`)).status, 404);
   } finally {
     await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
   }

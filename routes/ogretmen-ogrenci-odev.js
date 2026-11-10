@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const express = require('express');
 const multer = require('multer');
 const { ObjectId } = require('mongodb');
+const {pipeline} = require('node:stream/promises');
 
 const ODEv_DURUMLARI = ['Atandı', 'Görüntülendi', 'Devam ediyor', 'Teslim edildi', 'Geç teslim', 'Kontrol edildi', 'Eksik', 'Teslim edilmedi'];
 const DOSYA_LIMITI = 4 * 1024 * 1024;
@@ -63,6 +64,49 @@ function asyncRoute(handler) {
   return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 }
 
+function privateDocumentKey(folder, ownerId, type) {
+  const extension = {'application/pdf': 'pdf', 'image/png': 'png', 'image/jpeg': 'jpg'}[type];
+  if (!extension || !ObjectId.isValid(ownerId)) throw new TypeError('Özel belge anahtarı oluşturulamadı.');
+  return `${folder}/${String(ownerId)}/${crypto.randomUUID()}.${extension}`;
+}
+
+function documentHeaders(res, file) {
+  res.set({
+    'Content-Type': file.type,
+    'Content-Disposition': `attachment; filename="${encodeURIComponent(file.name)}"`,
+    'Cache-Control': 'private, no-store',
+    'X-Content-Type-Options': 'nosniff'
+  });
+}
+
+async function sendPrivateDocument(res, storage, file, missingMessage) {
+  if (!file) return res.status(404).json({mesaj: missingMessage});
+  try {
+    if (file.key) {
+      if (!storage) return res.status(503).json({mesaj: 'Özel belge deposu yapılandırılmamış.'});
+      const object = await storage.get(file.key);
+      if (!object.Body || typeof object.Body.pipe !== 'function') throw new Error('Özel belge akışı alınamadı.');
+      documentHeaders(res, file);
+      if (Number.isSafeInteger(object.ContentLength)) res.set('Content-Length', String(object.ContentLength));
+      await pipeline(object.Body, res);
+      return;
+    }
+    if (Buffer.isBuffer(file.data)) {
+      documentHeaders(res, file);
+      res.set('Content-Length', String(file.size));
+      return res.send(file.data);
+    }
+    return res.status(404).json({mesaj: missingMessage});
+  } catch (error) {
+    if (res.headersSent) throw error;
+    if (error.name === 'NoSuchKey' || error.$metadata?.httpStatusCode === 404) {
+      return res.status(404).json({mesaj: missingMessage});
+    }
+    console.error('Özel belge deposundan dosya alınamadı:', error);
+    return res.status(503).json({mesaj: 'Özel belge deposuna ulaşılamadı.'});
+  }
+}
+
 function createTeacherStudentHomeworkRouters({
   requireTeacher,
   requireStudent,
@@ -75,7 +119,8 @@ function createTeacherStudentHomeworkRouters({
   getStudentQuizResultsCollection,
   getCurriculumAssignmentsCollection,
   notifyParent,
-  pointsService
+  pointsService,
+  privateDocumentStorage
 }) {
   const teacher = express.Router();
   const student = express.Router();
@@ -456,7 +501,7 @@ function createTeacherStudentHomeworkRouters({
         return res.status(400).json({mesaj: 'Ödev kaynağı yalnızca doğrulanmış PDF olabilir.'});
       }
       const name = normalizeText(req.file.originalname, 120).replace(/[^\p{L}\p{N}._-]/gu, '_') || 'odev-kaynagi.pdf';
-      resourceFile = {data: req.file.buffer, type: 'application/pdf', name, size: req.file.size};
+      resourceFile = {type: 'application/pdf', name, size: req.file.size};
     }
     if (type === 'pdf' && !resourceFile) {
       return res.status(400).json({mesaj: 'PDF türündeki ödevler için öğrenciye verilecek PDF dosyasını ekleyin.'});
@@ -480,7 +525,14 @@ function createTeacherStudentHomeworkRouters({
     if (!recipients.length) return res.status(400).json({mesaj: 'Bu sınıf ve şubede etkin öğrenci bulunamadı.'});
 
     const now = new Date();
+    const homeworkId = new ObjectId();
+    if (resourceFile) {
+      if (!privateDocumentStorage) return res.status(503).json({mesaj: 'Özel belge deposu yapılandırılmamış.'});
+      resourceFile.key = privateDocumentKey('homeworks', homeworkId, resourceFile.type);
+      await privateDocumentStorage.put(resourceFile.key, req.file.buffer);
+    }
     const homeworkRecord = {
+      _id: homeworkId,
       teacherId: req.session.user.id,
       title,
       description,
@@ -496,8 +548,6 @@ function createTeacherStudentHomeworkRouters({
       createdAt: now,
       updatedAt: now
     };
-    const homeworkResult = await homeworks().insertOne(homeworkRecord);
-    const homeworkId = homeworkResult.insertedId;
     const assignmentRecords = recipients.map(profile => ({
       teacherId: req.session.user.id,
       homeworkId,
@@ -513,6 +563,7 @@ function createTeacherStudentHomeworkRouters({
       feedback: ''
     }));
     try {
+      await homeworks().insertOne(homeworkRecord);
       await assignments().insertMany(assignmentRecords, {ordered: true});
       await recordAudit(req, 'homework.published', 'homework', homeworkId, {
         title, grade, section, recipientCount: recipients.length, studentIds: recipients.map(item => String(item._id))
@@ -520,6 +571,7 @@ function createTeacherStudentHomeworkRouters({
     } catch (error) {
       await assignments().deleteMany({homeworkId});
       await homeworks().deleteOne({_id: homeworkId, teacherId: req.session.user.id});
+      if (resourceFile?.key) await privateDocumentStorage.remove(resourceFile.key).catch(() => {});
       throw error;
     }
     const [created] = await teacherHomeworkRows(req.session.user.id, homeworkId);
@@ -553,30 +605,14 @@ function createTeacherStudentHomeworkRouters({
     const id = objectId(req.params.assignmentId);
     if (!id) return res.status(400).json({mesaj: 'Ödev ataması geçersiz.'});
     const assignment = await assignments().findOne({_id: id, teacherId: req.session.user.id});
-    if (!assignment?.submissionFile?.data) return res.status(404).json({mesaj: 'Teslim dosyası bulunamadı.'});
-    res.set({
-      'Content-Type': assignment.submissionFile.type,
-      'Content-Length': String(assignment.submissionFile.size),
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(assignment.submissionFile.name)}"`,
-      'Cache-Control': 'private, no-store',
-      'X-Content-Type-Options': 'nosniff'
-    });
-    res.send(assignment.submissionFile.data);
+    await sendPrivateDocument(res, privateDocumentStorage, assignment?.submissionFile, 'Teslim dosyası bulunamadı.');
   }));
 
   teacher.get('/odevler/:id/resource', asyncRoute(async (req, res) => {
     const id = objectId(req.params.id);
     if (!id) return res.status(400).json({mesaj: 'Ödev numarası geçersiz.'});
     const homework = await homeworks().findOne({_id: id, teacherId: req.session.user.id});
-    if (!homework?.resourceFile?.data) return res.status(404).json({mesaj: 'Ödev PDF dosyası bulunamadı.'});
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Length': String(homework.resourceFile.size),
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(homework.resourceFile.name)}"`,
-      'Cache-Control': 'private, no-store',
-      'X-Content-Type-Options': 'nosniff'
-    });
-    res.send(homework.resourceFile.data);
+    await sendPrivateDocument(res, privateDocumentStorage, homework?.resourceFile, 'Ödev PDF dosyası bulunamadı.');
   }));
 
   student.use(requireStudent);
@@ -798,11 +834,13 @@ function createTeacherStudentHomeworkRouters({
     if (!id) return res.status(400).json({mesaj: 'Ödev ataması geçersiz.'});
     const text = normalizeText(req.body?.text, 10000);
     let file = null;
+    let uploadBuffer = null;
     if (req.file) {
       const type = fileType(req.file.buffer);
       if (!type) return res.status(400).json({mesaj: 'Yalnızca doğrulanmış PDF, PNG veya JPEG dosyaları kabul edilir.'});
       const safeName = normalizeText(req.file.originalname, 120).replace(/[^\p{L}\p{N}._-]/gu, '_') || 'odev-dosyasi';
-      file = {data: req.file.buffer, type, name: safeName, size: req.file.size};
+      file = {type, name: safeName, size: req.file.size};
+      uploadBuffer = req.file.buffer;
     }
     if (!text && !file) return res.status(400).json({mesaj: 'Bir çalışma açıklaması yazın veya dosya ekleyin.'});
     const assignment = await assignments().findOne({
@@ -812,6 +850,11 @@ function createTeacherStudentHomeworkRouters({
     if (!assignment) return res.status(404).json({mesaj: 'Ödev bulunamadı.'});
     if (['Kontrol edildi', 'Teslim edildi', 'Geç teslim'].includes(assignment.status)) {
       return res.status(409).json({mesaj: 'Bu ödev için teslim zaten alınmış.'});
+    }
+    if (file) {
+      if (!privateDocumentStorage) return res.status(503).json({mesaj: 'Özel belge deposu yapılandırılmamış.'});
+      file.key = privateDocumentKey('submissions', id, file.type);
+      await privateDocumentStorage.put(file.key, uploadBuffer);
     }
     const now = new Date();
     const late = now > new Date(assignment.dueAt) || assignment.status === 'Teslim edilmedi';
@@ -823,12 +866,21 @@ function createTeacherStudentHomeworkRouters({
       submittedAt: now,
       updatedAt: now
     }};
-    const result = await assignments().updateOne({
-      _id: id,
-      studentUserId: req.session.user.id,
-      status: {$nin: ['Kontrol edildi', 'Teslim edildi', 'Geç teslim']}
-    }, update);
-    if (!result.modifiedCount) return res.status(409).json({mesaj: 'Teslim durumu aynı anda değiştirildi; ödev listesini yenileyin.'});
+    let result;
+    try {
+      result = await assignments().updateOne({
+        _id: id,
+        studentUserId: req.session.user.id,
+        status: {$nin: ['Kontrol edildi', 'Teslim edildi', 'Geç teslim']}
+      }, update);
+    } catch (error) {
+      if (file?.key) await privateDocumentStorage.remove(file.key).catch(() => {});
+      throw error;
+    }
+    if (!result.modifiedCount) {
+      if (file?.key) await privateDocumentStorage.remove(file.key).catch(() => {});
+      return res.status(409).json({mesaj: 'Teslim durumu aynı anda değiştirildi; ödev listesini yenileyin.'});
+    }
     await audit().insertOne({
       teacherId: assignment.teacherId,
       actorId: req.session.user.id,
@@ -845,15 +897,7 @@ function createTeacherStudentHomeworkRouters({
     const id = objectId(req.params.assignmentId);
     if (!id) return res.status(400).json({mesaj: 'Ödev ataması geçersiz.'});
     const assignment = await assignments().findOne({_id: id, studentUserId: req.session.user.id});
-    if (!assignment?.submissionFile?.data) return res.status(404).json({mesaj: 'Teslim dosyası bulunamadı.'});
-    res.set({
-      'Content-Type': assignment.submissionFile.type,
-      'Content-Length': String(assignment.submissionFile.size),
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(assignment.submissionFile.name)}"`,
-      'Cache-Control': 'private, no-store',
-      'X-Content-Type-Options': 'nosniff'
-    });
-    res.send(assignment.submissionFile.data);
+    await sendPrivateDocument(res, privateDocumentStorage, assignment?.submissionFile, 'Teslim dosyası bulunamadı.');
   }));
 
   student.get('/homeworks/:assignmentId/resource', asyncRoute(async (req, res) => {
@@ -862,15 +906,7 @@ function createTeacherStudentHomeworkRouters({
     const assignment = await assignments().findOne({_id: id, studentUserId: req.session.user.id});
     if (!assignment) return res.status(404).json({mesaj: 'Ödev bulunamadı.'});
     const homework = await homeworks().findOne({_id: assignment.homeworkId, teacherId: assignment.teacherId});
-    if (!homework?.resourceFile?.data) return res.status(404).json({mesaj: 'Ödev PDF dosyası bulunamadı.'});
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Length': String(homework.resourceFile.size),
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(homework.resourceFile.name)}"`,
-      'Cache-Control': 'private, no-store',
-      'X-Content-Type-Options': 'nosniff'
-    });
-    res.send(homework.resourceFile.data);
+    await sendPrivateDocument(res, privateDocumentStorage, homework?.resourceFile, 'Ödev PDF dosyası bulunamadı.');
   }));
 
   const apiError = (error, req, res, next) => {

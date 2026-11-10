@@ -23,7 +23,7 @@ const { createAIRouter } = require('./routes/ai');
 const { createPaymentRouter } = require('./routes/payments');
 const { createAdminRouter } = require('./routes/admin');
 const { createSiteMediaFilesRouter } = require('./routes/site-media-files');
-const { createConfiguredMediaStorage } = require('./lib/site-media-storage');
+const { createConfiguredMediaStorage, createConfiguredPrivateDocumentStorage } = require('./lib/site-media-storage');
 const SiteMediaTargets = require('./assets/site-media-targets');
 const { createSorularRouter } = require('./routes/sorular');
 const { createCozumluSorularRouters } = require('./routes/cozumlu-sorular');
@@ -69,6 +69,7 @@ const mediaStorage = createConfiguredMediaStorage(process.env, {
   homepageDir: path.join(__dirname, 'uploads', 'homepage'),
   siteMediaDir: path.join(__dirname, 'uploads', 'site-media')
 });
+const privateDocumentStorage = createConfiguredPrivateDocumentStorage(process.env);
 const curriculumService = createCurriculumService();
 const parentPanelDemoMode = isParentPanelDemoEnabled();
 const MONGODB_URI = process.env.MONGODB_URI;           // .env dosyasından okunur
@@ -537,7 +538,8 @@ const teacherStudentHomeworkRouters = createTeacherStudentHomeworkRouters({
   getStudentQuizResultsCollection: () => quizSonucKoleksiyonu,
   getCurriculumAssignmentsCollection: () => mongoClient.db(DB_ADI).collection('curriculum_assignments'),
   notifyParent: event => curriculumService.sendNotification(event),
-  pointsService
+  pointsService,
+  privateDocumentStorage
 });
 const gelisimRouters = createGelisimRouters({
   requireTeacher: requireRole('teacher', 'admin'),

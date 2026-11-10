@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const express = require('express');
 const test = require('node:test');
 const {ObjectId} = require('mongodb');
+const {Readable} = require('node:stream');
 const {createTeacherStudentHomeworkRouters, hashToken} = require('../routes/ogretmen-ogrenci-odev');
 
 function equal(left, right) {
@@ -100,6 +101,16 @@ function setup() {
     results: memoryCollection()
   };
   const notifications = [];
+  const privateFiles = new Map();
+  const privateDocumentStorage = {
+    async put(key, buffer) { privateFiles.set(key, Buffer.from(buffer)); },
+    async get(key) {
+      const data = privateFiles.get(key);
+      if (!data) throw Object.assign(new Error('missing'), {name: 'NoSuchKey'});
+      return {Body: Readable.from([data]), ContentLength: data.length};
+    },
+    async remove(key) { privateFiles.delete(key); }
+  };
   const UserModel = {
     findById: () => ({select: () => ({lean: async () => null})})
   };
@@ -122,7 +133,8 @@ function setup() {
       notifications.push(event);
       return {status: 202, data: {status: 'queued'}};
     },
-    pointsService: {transaction: operation => operation({}), award: async () => 0}
+    pointsService: {transaction: operation => operation({}), award: async () => 0},
+    privateDocumentStorage
   });
   const app = express();
   app.use(express.json());
@@ -136,7 +148,7 @@ function setup() {
   app.use('/api/student', routers.student);
   const server = app.listen(0);
   const base = new Promise(resolve => server.once('listening', () => resolve(`http://127.0.0.1:${server.address().port}`)));
-  return {collections, notifications, base, close: () => new Promise(resolve => server.close(resolve))};
+  return {collections, notifications, privateFiles, base, close: () => new Promise(resolve => server.close(resolve))};
 }
 
 function teacherHeaders() {
@@ -300,6 +312,10 @@ test('PDF homework resources and student submission files are private to assigne
     const homework = (await createdHomework.json()).homework;
     assert.equal(homework.hasResourceFile, true);
     assert.equal(homework.recipientCount, 1);
+    const storedHomework = workspace.collections.homeworks.rows[0];
+    assert.match(storedHomework.resourceFile.key, /^homeworks\/[a-f0-9]{24}\/[a-f0-9-]{36}\.pdf$/i);
+    assert.equal('data' in storedHomework.resourceFile, false);
+    assert.equal(workspace.privateFiles.has(storedHomework.resourceFile.key), true);
     assert.equal((await linkProfile(base, createdStudent.data.invitationCode, 'student-file-owner')).status, 200);
     const task = (await (await fetch(`${base}/api/student/homeworks`, {headers: studentHeaders('student-file-owner')})).json()).homeworks[0];
     assert.equal((await fetch(`${base}/api/student/homeworks/${task.assignmentId}/resource`, {
@@ -315,8 +331,21 @@ test('PDF homework resources and student submission files are private to assigne
     assert.equal((await fetch(`${base}/api/student/homeworks/${task.assignmentId}/submissions`, {
       method: 'POST', headers: studentHeaders('student-file-owner'), body: submission
     })).status, 201);
+    const storedSubmission = workspace.collections.assignments.rows[0].submissionFile;
+    assert.match(storedSubmission.key, /^submissions\/[a-f0-9]{24}\/[a-f0-9-]{36}\.pdf$/i);
+    assert.equal('data' in storedSubmission, false);
+    assert.equal(workspace.privateFiles.has(storedSubmission.key), true);
     assert.equal((await fetch(`${base}/api/student/homeworks/${task.assignmentId}/file`, {
       headers: studentHeaders('another-student')
+    })).status, 404);
+    assert.equal((await fetch(`${base}/api/student/homeworks/${task.assignmentId}/file`, {
+      headers: studentHeaders('student-file-owner')
+    })).status, 200);
+    assert.equal((await fetch(`${base}/api/ogretmen/odevler/atamalar/${task.assignmentId}/file`, {
+      headers: teacherHeaders()
+    })).status, 200);
+    assert.equal((await fetch(`${base}/api/ogretmen/odevler/atamalar/${task.assignmentId}/file`, {
+      headers: {'x-role': 'teacher', 'x-user': 'teacher-2'}
     })).status, 404);
   } finally {
     await workspace.close();
