@@ -33,6 +33,7 @@
 <script src="/assets/live-ai-panel.js"></script>
 <script>
 (() => {
+  if (new URLSearchParams(location.search).has('siteMediaDesigner')) return;
   const status = document.getElementById('status');
   const isHost = new URLSearchParams(location.search).get('role') === 'host';
   const api = async (path, options = {}) => {
@@ -90,5 +91,7 @@
 })();
 </script>
 <script src="/assets/site-footer.js"></script>
+<script src="/assets/site-media-targets.js"></script>
+<script src="/assets/site-media.js"></script>
 </body>
 </html>

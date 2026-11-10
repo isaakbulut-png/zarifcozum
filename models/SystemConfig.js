@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const {createHash} = require('node:crypto');
 
 const DEFAULT_VISITOR_SETTINGS = Object.freeze({
   questionLimit: 3,
@@ -25,7 +26,11 @@ const systemConfigSchema = new mongoose.Schema({
     animation: { type: String, default: null },
     heroImage: { type: String, default: null },
     featureImage: { type: String, default: null }
-  }
+  },
+  pagePath: {type: String, default: null},
+  targetKey: {type: String, default: null},
+  assetType: {type: String, enum: ['image', 'animation', null], default: null},
+  url: {type: String, default: null}
 }, { timestamps: true, collection: 'system_configs', versionKey: false });
 
 systemConfigSchema.statics.getVisitorSettings = async function () {
@@ -72,6 +77,23 @@ systemConfigSchema.statics.saveHomepageAsset = async function (slot, url) {
     { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
   );
   return this.getHomepageAssets();
+};
+
+systemConfigSchema.statics.getSiteMediaPlacements = function () {
+  return this.find({_id: /^site-media-/})
+    .select('_id pagePath targetKey assetType url')
+    .sort({pagePath: 1})
+    .lean();
+};
+
+systemConfigSchema.statics.saveSiteMediaPlacement = async function ({pagePath, targetKey, assetType, url}) {
+  const id = `site-media-${createHash('sha256').update(`${pagePath}\0${targetKey}`).digest('hex')}`;
+  await this.findOneAndUpdate(
+    {_id: id},
+    {$set: {pagePath, targetKey, assetType, url}, $setOnInsert: {_id: id}},
+    {upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true}
+  );
+  return this.findById(id).select('_id pagePath targetKey assetType url').lean();
 };
 
 module.exports = mongoose.models.SystemConfig || mongoose.model('SystemConfig', systemConfigSchema);

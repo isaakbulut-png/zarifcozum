@@ -66,6 +66,9 @@
     .settings-grid label{display:grid;gap:6px;color:#6a5242;font-size:.9rem}
     .asset-preview{display:block;max-width:min(100%,320px);max-height:180px;margin-top:10px;object-fit:contain;border:1px solid #ecd9c6;border-radius:8px;background:#fff}
     .asset-path{overflow-wrap:anywhere;color:#6a5242;font-size:.82rem}
+    #siteMediaTargetPreview{display:block;width:100%;height:420px;margin-top:14px;border:1px solid #d9d3c3;border-radius:8px;background:#fff}
+    .site-media-current{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #ecd9c6;overflow-wrap:anywhere}
+    .site-media-current img{width:100px;height:70px;object-fit:contain;background:#fff;border:1px solid #ecd9c6;border-radius:6px}
     .toggle-list{display:grid;gap:12px;margin-top:18px}
     .toggle-list label{display:flex;align-items:center;gap:10px;color:#523520}
     .rbac-loading{visibility:hidden}
@@ -332,6 +335,33 @@
         </div>
         <p class="msg" id="homepageImageMsg" role="alert"></p>
       </div>
+      <div class="panel" id="siteMediaManager">
+        <h3>Sayfa ve butona medya yerleştir</h3>
+        <p>Sayfayı seçin, önizlemede hedef butona tıklayın veya hedef listesinden seçin. Buton tıklamaları önizlemede çalıştırılmaz.</p>
+        <form id="siteMediaForm">
+          <div class="settings-grid">
+            <label for="siteMediaPage">Sayfa
+              <select id="siteMediaPage" required><option value="">Sayfa seçin</option></select>
+            </label>
+            <label for="siteMediaTarget">Buton / bağlantı hedefi
+              <select id="siteMediaTarget" required disabled><option value="">Önce sayfa seçin</option></select>
+            </label>
+            <label for="siteMediaType">Medya türü
+              <select id="siteMediaType"><option value="image">Görsel</option><option value="animation">Lottie animasyonu</option></select>
+            </label>
+            <label for="siteMediaFile">Dosya
+              <input id="siteMediaFile" type="file" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp" required>
+            </label>
+          </div>
+          <div class="toolbar" style="margin-top:12px">
+            <button class="btn primary" type="submit" id="uploadSiteMedia" disabled>Seçilen hedefe yerleştir</button>
+            <span class="asset-path" id="siteMediaTargetDescription" role="status">Sayfa ve hedef seçin.</span>
+          </div>
+          <p class="msg" id="siteMediaMsg" role="alert"></p>
+        </form>
+        <iframe id="siteMediaTargetPreview" title="Medya yerleşim hedefi seçme önizlemesi" hidden></iframe>
+        <div id="siteMediaCurrent" aria-live="polite"></div>
+      </div>
     </section>
 
     <section id="view-education-lessons" hidden>
@@ -390,6 +420,7 @@
   <script src="/assets/cozumlu-sorular-admin.js"></script>
   <script src="/assets/rich-content.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js" integrity="sha384-reiVBUvj2HgLgCZalqLFSMBVD9LdtiwGyybRGCq2AfP8Rgebz5DxEnwKp4FpagKV" crossorigin="anonymous"></script>
+  <script src="/assets/site-media-targets.js"></script>
   <script>
     (() => {
       const $ = id => document.getElementById(id);
@@ -852,6 +883,173 @@
           button.disabled = false;
         }
       }
+
+      const siteMediaTargetMap = new Map();
+      let siteMediaPlacements = [];
+
+      function currentSiteMediaTarget() {
+        return siteMediaTargetMap.get($('siteMediaTarget').value) || null;
+      }
+
+      function renderSiteMediaCurrent() {
+        const container = $('siteMediaCurrent');
+        container.replaceChildren();
+        const target = currentSiteMediaTarget();
+        if (!target) return;
+        const placement = siteMediaPlacements.find(item =>
+          item.pagePath === $('siteMediaPage').value && item.targetKey === target.key);
+        if (!placement) {
+          container.textContent = 'Bu hedefte henüz medya yok.';
+          return;
+        }
+        const row = document.createElement('div');
+        row.className = 'site-media-current';
+        if (placement.assetType === 'image') {
+          const image = document.createElement('img');
+          image.src = placement.url;
+          image.alt = 'Mevcut yerleşim görseli';
+          row.append(image);
+        } else {
+          const animation = document.createElement('span');
+          animation.textContent = 'Lottie animasyonu';
+          row.append(animation);
+        }
+        const link = document.createElement('a');
+        link.href = placement.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = placement.url;
+        row.append(link);
+        container.append(row);
+      }
+
+      async function loadSiteMediaPlacements() {
+        try {
+          const data = await api('/api/admin/site-media');
+          siteMediaPlacements = data.placements;
+          renderSiteMediaCurrent();
+        } catch (error) {
+          $('siteMediaMsg').textContent = error.message;
+        }
+      }
+
+      function selectSiteMediaTarget(target) {
+        if (!target || !SiteMediaTargets.validTargetKey(target.key)) return;
+        siteMediaTargetMap.set(target.key, target);
+        const select = $('siteMediaTarget');
+        const existing = [...select.options].some(option => option.value === target.key);
+        if (!existing) {
+          const context = target.context ? `${target.context} · ` : '';
+          const label = `${context}${target.tag === 'a' ? 'Bağlantı' : 'Buton'}: ${target.label}`;
+          select.add(new Option(label, target.key));
+        }
+        select.value = target.key;
+        $('siteMediaTargetDescription').textContent = `Seçilen hedef: ${target.context ? `${target.context} · ` : ''}${target.label}`;
+        $('uploadSiteMedia').disabled = false;
+        renderSiteMediaCurrent();
+      }
+
+      for (const page of SiteMediaTargets.PAGES) {
+        $('siteMediaPage').add(new Option(page.label, page.path));
+      }
+
+      $('siteMediaPage').addEventListener('change', () => {
+        const pagePath = $('siteMediaPage').value;
+        const targetSelect = $('siteMediaTarget');
+        const preview = $('siteMediaTargetPreview');
+        siteMediaTargetMap.clear();
+        targetSelect.replaceChildren(new Option(pagePath ? 'Hedef yükleniyor…' : 'Önce sayfa seçin', ''));
+        targetSelect.disabled = true;
+        $('uploadSiteMedia').disabled = true;
+        $('siteMediaTargetDescription').textContent = pagePath
+          ? 'Önizlemede hedef butona tıklayın veya listeden seçin.'
+          : 'Sayfa ve hedef seçin.';
+        $('siteMediaCurrent').replaceChildren();
+        if (!pagePath) {
+          preview.hidden = true;
+          preview.removeAttribute('src');
+          return;
+        }
+        const url = new URL(pagePath, window.location.origin);
+        url.searchParams.set('siteMediaDesigner', '1');
+        preview.hidden = false;
+        preview.src = url.pathname + url.search;
+        loadSiteMediaPlacements();
+      });
+
+      $('siteMediaTarget').addEventListener('change', () => {
+        const target = currentSiteMediaTarget();
+        if (target) selectSiteMediaTarget(target);
+      });
+
+      $('siteMediaType').addEventListener('change', () => {
+        $('siteMediaFile').accept = $('siteMediaType').value === 'animation'
+          ? '.json,application/json'
+          : '.png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp';
+      });
+
+      window.addEventListener('message', event => {
+        if (event.origin !== window.location.origin ||
+            event.source !== $('siteMediaTargetPreview').contentWindow) return;
+        const data = event.data;
+        if (!data || data.pagePath !== $('siteMediaPage').value) return;
+        const select = $('siteMediaTarget');
+        if (data.type === 'site-media-targets' && Array.isArray(data.targets)) {
+          const previous = select.value;
+          siteMediaTargetMap.clear();
+          select.replaceChildren(new Option(data.targets.length ? 'Buton veya hedef seçin' : 'Bu sayfada hedef bulunamadı', ''));
+          for (const target of data.targets) {
+            if (!SiteMediaTargets.validTargetKey(target.key)) continue;
+            siteMediaTargetMap.set(target.key, target);
+            const context = target.context ? `${target.context} · ` : '';
+            select.add(new Option(`${context}${target.tag === 'a' ? 'Bağlantı' : 'Buton'}: ${target.label}`, target.key));
+          }
+          select.disabled = !siteMediaTargetMap.size;
+          if (siteMediaTargetMap.has(previous)) select.value = previous;
+          renderSiteMediaCurrent();
+        } else if (data.type === 'site-media-target-selected') {
+          selectSiteMediaTarget(data.target);
+        }
+      });
+
+      $('siteMediaForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const target = currentSiteMediaTarget();
+        const file = $('siteMediaFile').files[0];
+        const message = $('siteMediaMsg');
+        const button = $('uploadSiteMedia');
+        message.className = 'msg';
+        message.textContent = '';
+        if (!target || !file) {
+          message.textContent = 'Sayfa, hedef ve dosya seçin.';
+          return;
+        }
+        const formData = new FormData();
+        formData.set('pagePath', $('siteMediaPage').value);
+        formData.set('targetKey', target.key);
+        formData.set('assetType', $('siteMediaType').value);
+        formData.set('file', file);
+        button.disabled = true;
+        try {
+          const response = await fetch('/api/admin/site-media/upload', {
+            method: 'POST', credentials: 'same-origin', body: formData
+          });
+          if (response.status === 401) {
+            window.location.assign('/yonetim');
+            throw new Error('Oturum sona erdi.');
+          }
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.mesaj || 'Yükleme tamamlanamadı.');
+          $('siteMediaFile').value = '';
+          message.className = 'msg ok';
+          message.textContent = data.mesaj;
+          await loadSiteMediaPlacements();
+        } catch (error) {
+          message.textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
 
       async function loadLessons() {
         const message = $('lessonsMsg');

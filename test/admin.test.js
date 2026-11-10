@@ -7,6 +7,7 @@ const { ObjectId } = require('mongodb');
 const test = require('node:test');
 const { createAdminRouter } = require('../routes/admin');
 const { DEFAULT_VISITOR_SETTINGS } = require('../models/SystemConfig');
+const SiteMediaTargets = require('../assets/site-media-targets');
 
 function fakeQuery(rows) {
   const query = {
@@ -20,6 +21,7 @@ function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_
   const filters = [];
   const faqs = [];
   const homepageAssets = { animation: null, heroImage: null, featureImage: null };
+  const siteMediaPlacements = [];
   const auditLogs = [];
   let faqInvalidations = 0;
   const User = {
@@ -99,6 +101,15 @@ function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_
     saveHomepageAsset: async (slot, url) => {
       homepageAssets[slot] = url;
       return { ...homepageAssets };
+    },
+    getSiteMediaPlacements: async () => [...siteMediaPlacements],
+    saveSiteMediaPlacement: async placement => {
+      const current = siteMediaPlacements.find(item =>
+        item.pagePath === placement.pagePath && item.targetKey === placement.targetKey);
+      if (current) Object.assign(current, placement);
+      else siteMediaPlacements.push({_id: `placement-${siteMediaPlacements.length + 1}`, ...placement});
+      return {...siteMediaPlacements.find(item =>
+        item.pagePath === placement.pagePath && item.targetKey === placement.targetKey)};
     }
   };
   const AdminLog = {
@@ -117,11 +128,13 @@ function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_
   return {
     filters,
     homepageAssets,
+    siteMediaPlacements,
     faqs,
     auditLogs,
     get faqInvalidations() { return faqInvalidations; },
     router: createAdminRouter({
       User, Payment, SystemConfig, AdminLog, uploadDir: options.uploadDir,
+      siteMediaUploadDir: options.siteMediaUploadDir,
       getAnnouncementCollection: () => collection,
       getFaqModel: () => faqModel,
       invalidateFaqCache: async () => { faqInvalidations += 1; },
@@ -311,6 +324,50 @@ test('superadmin can upload validated homepage images and Lottie animations', as
     });
   } finally {
     await fs.rm(uploadDir, { recursive: true, force: true });
+  }
+});
+
+test('superadmin can place validated media on a selected site page and target', async () => {
+  const uploadDir = await fs.mkdtemp(path.join(os.tmpdir(), 'zarifcozum-site-media-'));
+  const siteMediaUploadDir = path.join(uploadDir, 'site-media');
+  const {router, siteMediaPlacements, auditLogs} = buildRouter([], undefined, {
+    uploadDir: path.join(uploadDir, 'homepage'),
+    siteMediaUploadDir
+  });
+  const png = await fs.readFile(path.join(__dirname, '..', 'assets', 'brand-mark.png'));
+  const targetKey = JSON.stringify(['a', 'package-demo', 'Öğrenci demosunu aç', 'Paket yapısını incele', 0]);
+  assert.equal(SiteMediaTargets.validTargetKey(targetKey), true);
+
+  try {
+    await withServer(router, {id: 'admin', role: 'admin'}, async base => {
+      const upload = (pagePath, target, file = png) => {
+        const form = new FormData();
+        form.set('pagePath', pagePath);
+        form.set('targetKey', target);
+        form.set('assetType', 'image');
+        form.set('file', new Blob([file], {type: 'image/png'}), 'placement.png');
+        return fetch(`${base}/site-media/upload`, {method: 'POST', body: form});
+      };
+
+      const first = await upload('/Paketler.html', targetKey);
+      assert.equal(first.status, 201);
+      const firstPlacement = (await first.json()).placement;
+      assert.equal(firstPlacement.pagePath, '/Paketler.html');
+      assert.equal(firstPlacement.targetKey, targetKey);
+      assert.match(firstPlacement.url, /^\/uploads\/site-media\/[a-f0-9-]+\.png$/);
+      assert.deepEqual(await fs.readFile(path.join(siteMediaUploadDir, path.basename(firstPlacement.url))), png);
+
+      const second = await upload('/Paketler.html', targetKey);
+      assert.equal(second.status, 201);
+      assert.equal(siteMediaPlacements.length, 1);
+      assert.notEqual(siteMediaPlacements[0].url, firstPlacement.url);
+      assert.equal((await (await fetch(`${base}/site-media`)).json()).placements.length, 1);
+      assert.equal((await upload('/admin-paneli.html', targetKey)).status, 400);
+      assert.equal((await upload('/Paketler.html', '<script>alert(1)</script>')).status, 400);
+      assert.equal(auditLogs.length, 2);
+    });
+  } finally {
+    await fs.rm(uploadDir, {recursive: true, force: true});
   }
 });
 

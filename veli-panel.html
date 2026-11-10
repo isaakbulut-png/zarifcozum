@@ -109,6 +109,7 @@
   <script>
     (() => {
       const $ = id => document.getElementById(id);
+      if (new URLSearchParams(location.search).has('siteMediaDesigner')) return;
       const esc = value => String(value ?? '').replace(/[&<>"']/g, character => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
       })[character]);
@@ -229,5 +230,7 @@
       });
     })();
   </script>
+  <script src="/assets/site-media-targets.js"></script>
+  <script src="/assets/site-media.js"></script>
 </body>
 </html>

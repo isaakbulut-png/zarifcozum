@@ -9,6 +9,7 @@ const { validateImage } = require('../lib/resim-dogrula');
 const { PLANS } = require('../lib/subscription-plans');
 const { normalizeFaqQuestion } = require('../lib/faq-service');
 const { sanitizeFaqHtml } = require('../lib/rich-content');
+const SiteMediaTargets = require('../assets/site-media-targets');
 
 const PAGE_SIZE = 25;
 const MAX_ANIMATION_BYTES = 5 * 1024 * 1024;
@@ -81,14 +82,16 @@ function validateAnimation(buffer) {
 }
 
 function createAdminRouter({
-  User, Payment, SystemConfig, AdminLog, uploadDir = path.join(__dirname, '..', 'uploads', 'homepage'),
+  User, Payment, SystemConfig, AdminLog,
+  uploadDir = path.join(__dirname, '..', 'uploads', 'homepage'),
+  siteMediaUploadDir = path.join(__dirname, '..', 'uploads', 'site-media'),
   getAnnouncementCollection, getFaqModel, invalidateFaqCache,
   getQuizCollection, getLessonCollection, getSupportTicketCollection
 }) {
   const router = express.Router();
   const mediaUpload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: MAX_IMAGE_BYTES, files: 1, fields: 2, fieldSize: 64 },
+    limits: { fileSize: MAX_IMAGE_BYTES, files: 1, fields: 3, fieldSize: 1024 },
     fileFilter: (req, file, callback) => {
       const extension = path.extname(file.originalname).toLowerCase();
       const allowedMimes = ALLOWED_MEDIA_TYPES.get(extension);
@@ -168,6 +171,70 @@ function createAdminRouter({
       });
       console.error('Ana sayfa medyası kaydedilemedi:', error);
       res.status(500).json({ mesaj: 'Ana sayfa medyası kaydedilemedi.' });
+    }
+  });
+
+  router.get('/site-media', allow('superadmin'), async (req, res) => {
+    try {
+      res.json({placements: await SystemConfig.getSiteMediaPlacements()});
+    } catch (error) {
+      console.error('Sayfa medya yerleşimleri alınamadı:', error);
+      res.status(500).json({mesaj: 'Sayfa medya yerleşimleri alınamadı.'});
+    }
+  });
+
+  router.post('/site-media/upload', allow('superadmin'), (req, res, next) => {
+    mediaUpload.single('file')(req, res, error => {
+      if (!error) return next();
+      const status = error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+      res.status(status).json({
+        mesaj: status === 413 ? 'Dosya boyutu izin verilen sınırı aşıyor.' : error.message
+      });
+    });
+  }, async (req, res) => {
+    if (!req.file) return res.status(400).json({mesaj: 'Yüklenecek dosyayı seçin.'});
+    const pagePath = SiteMediaTargets.normalizePagePath(req.body?.pagePath);
+    const targetKey = req.body?.targetKey;
+    const assetType = req.body?.assetType;
+    const extension = path.extname(req.file.originalname).toLowerCase();
+    const isAnimation = assetType === 'animation';
+    if (!pagePath || !SiteMediaTargets.validTargetKey(targetKey) ||
+        !['image', 'animation'].includes(assetType) ||
+        (isAnimation && extension !== '.json') ||
+        (!isAnimation && !['.png', '.jpg', '.jpeg', '.webp'].includes(extension))) {
+      return res.status(400).json({mesaj: 'Sayfa, hedef ve medya türü eşleşmiyor.'});
+    }
+    if (req.file.size > (isAnimation ? MAX_ANIMATION_BYTES : MAX_IMAGE_BYTES)) {
+      return res.status(413).json({mesaj: 'Dosya boyutu izin verilen sınırı aşıyor.'});
+    }
+    if (isAnimation) {
+      const errorMessage = validateAnimation(req.file.buffer);
+      if (errorMessage) return res.status(400).json({mesaj: errorMessage});
+    } else if (!validateImage(req.file.buffer, extension)) {
+      return res.status(400).json({mesaj: 'Dosyanın içeriği seçilen görsel türüyle eşleşmiyor.'});
+    }
+
+    const filename = `${randomUUID()}${extension}`;
+    const destination = path.join(siteMediaUploadDir, filename);
+    const publicPath = `/uploads/site-media/${filename}`;
+    let saved = false;
+    try {
+      await fs.mkdir(siteMediaUploadDir, {recursive: true});
+      await fs.writeFile(destination, req.file.buffer, {flag: 'wx'});
+      const placement = await SystemConfig.saveSiteMediaPlacement({
+        pagePath, targetKey, assetType, url: publicPath
+      });
+      saved = true;
+      await audit(req, 'site_media.updated', 'site_media', placement._id, {
+        pagePath, targetKey, assetType, filename
+      });
+      res.status(201).json({mesaj: 'Medya seçilen sayfa ve hedefe yerleştirildi.', placement});
+    } catch (error) {
+      if (!saved) await fs.unlink(destination).catch(unlinkError => {
+        if (unlinkError.code !== 'ENOENT') console.error('Yüklenen medya temizlenemedi:', unlinkError);
+      });
+      console.error('Sayfa medyası kaydedilemedi:', error);
+      res.status(500).json({mesaj: 'Sayfa medyası kaydedilemedi.'});
     }
   });
 

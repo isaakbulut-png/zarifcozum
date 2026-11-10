@@ -22,6 +22,7 @@ const { router: authRouter, requireRole, redirectForRole } = require('./routes/a
 const { createAIRouter } = require('./routes/ai');
 const { createPaymentRouter } = require('./routes/payments');
 const { createAdminRouter } = require('./routes/admin');
+const SiteMediaTargets = require('./assets/site-media-targets');
 const { createSorularRouter } = require('./routes/sorular');
 const { createCozumluSorularRouters } = require('./routes/cozumlu-sorular');
 const { createDenemelerRouters } = require('./routes/denemeler');
@@ -305,6 +306,22 @@ app.get('/api/homepage-assets', async (req, res) => {
     res.status(500).json({ mesaj: 'Ana sayfa medya ayarları alınamadı.' });
   }
 });
+app.get('/api/site-media', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const pagePath = SiteMediaTargets.normalizePagePath(req.query.page);
+  if (!pagePath) return res.status(400).json({mesaj: 'Sayfa medya hedefi geçersiz.'});
+  try {
+    const placements = await SystemConfig.getSiteMediaPlacements();
+    res.json({
+      placements: placements
+        .filter(item => item.pagePath === pagePath)
+        .map(({targetKey, assetType, url}) => ({targetKey, assetType, url}))
+    });
+  } catch (error) {
+    console.error('Sayfa medyaları alınamadı:', error);
+    res.status(500).json({mesaj: 'Sayfa medyaları alınamadı.'});
+  }
+});
 
 const sitePages = [
   'index.html', 'dene.html', 'asistan.html', 'asistanla-soru-coz.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html', 'yasal.html',
@@ -321,6 +338,10 @@ sitePages.forEach(page => {
       : page === 'ogretmen-paneli.html' ? 'teacher'
       : page === 'veli-panel.html' ? 'parent'
       : null;
+    if (role && req.query.siteMediaDesigner === '1' &&
+        req.session.user?.role === 'admin' && req.session.user.adminRole === 'superadmin') {
+      return res.sendFile(path.join(__dirname, page));
+    }
     // Öğretmen giriş bağlantısı mevcut oturumu kapatıp parola ekranını gösterir.
     if (page === 'kayit-giris.html' && req.query.mode !== 'register') {
       const current = req.session.user?.role;

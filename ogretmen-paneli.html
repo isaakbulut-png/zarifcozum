@@ -1425,12 +1425,14 @@ td.net{font-weight:700;color:var(--navy-900)}
 
   const bugun = new Date();
   $('lessonDate').min = `${bugun.getFullYear()}-${pad(bugun.getMonth() + 1)}-${pad(bugun.getDate())}`;
-  setInterval(() => {
-    if (!$('teacherSidebar').hidden) canliPlanlariYukle().catch(error => {
-      $('lessonStatus').textContent = 'Canlı ders listesi yenilenemedi: ' + error.message;
-    });
-    if (!$('teacherSidebar').hidden) canliYonetim.yenile();
-  }, 30000);
+  if (!new URLSearchParams(location.search).has('siteMediaDesigner')) {
+    setInterval(() => {
+      if (!$('teacherSidebar').hidden) canliPlanlariYukle().catch(error => {
+        $('lessonStatus').textContent = 'Canlı ders listesi yenilenemedi: ' + error.message;
+      });
+      if (!$('teacherSidebar').hidden) canliYonetim.yenile();
+    }, 30000);
+  }
 
   // ---- Sınav seçici ----
   function sinavListesi() {
@@ -1561,15 +1563,19 @@ td.net{font-weight:700;color:var(--navy-900)}
   });
 
   soruEkle();
-  yukle().catch(err => {
-    console.error('Öğretmen oturumu doğrulanamadı:', err);
-    $('girisHata').textContent = err.message.includes('fetch')
-      ? 'Sunucuya ulaşılamadı. npm start komutuyla server.js çalıştırın.'
-      : 'Öğretmen oturumu doğrulanamadı. Lütfen öğretmen hesabınızla giriş yapın.';
-  });
+  if (!new URLSearchParams(location.search).has('siteMediaDesigner')) {
+    yukle().catch(err => {
+      console.error('Öğretmen oturumu doğrulanamadı:', err);
+      $('girisHata').textContent = err.message.includes('fetch')
+        ? 'Sunucuya ulaşılamadı. npm start komutuyla server.js çalıştırın.'
+        : 'Öğretmen oturumu doğrulanamadı. Lütfen öğretmen hesabınızla giriş yapın.';
+    });
+  }
 })();
 </script>
 <script src="/assets/site-footer.js"></script>
 <script src="/assets/breadcrumb.js"></script>
+  <script src="/assets/site-media-targets.js"></script>
+  <script src="/assets/site-media.js"></script>
 </body>
 </html>

@@ -494,6 +494,7 @@ button,select{font:inherit}
 <script>
   (() => {
     const $ = id => document.getElementById(id);
+    if (new URLSearchParams(location.search).has('siteMediaDesigner')) return;
     const esc = value => String(value ?? '').replace(/[&<>"']/g, char =>
       ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     let activeQuiz = null;
@@ -1245,5 +1246,7 @@ button,select{font:inherit}
 </script>
 <script src="/assets/site-footer.js"></script>
 <script src="/assets/breadcrumb.js"></script>
+  <script src="/assets/site-media-targets.js"></script>
+  <script src="/assets/site-media.js"></script>
 </body>
 </html>
