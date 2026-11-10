@@ -1,5 +1,6 @@
 node_modules/
 uploads/homepage/
+uploads/site-media/
 baglanti_adresi.env
 .env
 .env.*

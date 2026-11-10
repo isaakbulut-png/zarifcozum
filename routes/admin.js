@@ -1,6 +1,5 @@
 const express = require('express');
 const { ObjectId } = require('mongodb');
-const fs = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const multer = require('multer');
@@ -10,6 +9,7 @@ const { PLANS } = require('../lib/subscription-plans');
 const { normalizeFaqQuestion } = require('../lib/faq-service');
 const { sanitizeFaqHtml } = require('../lib/rich-content');
 const SiteMediaTargets = require('../assets/site-media-targets');
+const {createLocalMediaStorage} = require('../lib/site-media-storage');
 
 const PAGE_SIZE = 25;
 const MAX_ANIMATION_BYTES = 5 * 1024 * 1024;
@@ -85,6 +85,7 @@ function createAdminRouter({
   User, Payment, SystemConfig, AdminLog,
   uploadDir = path.join(__dirname, '..', 'uploads', 'homepage'),
   siteMediaUploadDir = path.join(__dirname, '..', 'uploads', 'site-media'),
+  mediaStorage = createLocalMediaStorage({homepageDir: uploadDir, siteMediaDir: siteMediaUploadDir}),
   getAnnouncementCollection, getFaqModel, invalidateFaqCache,
   getQuizCollection, getLessonCollection, getSupportTicketCollection
 }) {
@@ -152,12 +153,11 @@ function createAdminRouter({
     }
 
     const filename = `${randomUUID()}${extension}`;
-    const destination = path.join(uploadDir, filename);
+    const key = `homepage/${filename}`;
     const publicPath = `/uploads/homepage/${filename}`;
     let saved = false;
     try {
-      await fs.mkdir(uploadDir, { recursive: true });
-      await fs.writeFile(destination, req.file.buffer, { flag: 'wx' });
+      await mediaStorage.put(key, req.file.buffer);
       const homepageAssets = await SystemConfig.saveHomepageAsset(slot, publicPath);
       saved = true;
       await audit(req, 'homepage_asset.updated', 'homepage_asset', slot, {
@@ -166,8 +166,8 @@ function createAdminRouter({
       });
       res.json({ mesaj: 'Ana sayfa medyası güncellendi.', homepageAssets });
     } catch (error) {
-      if (!saved) await fs.unlink(destination).catch(unlinkError => {
-        if (unlinkError.code !== 'ENOENT') console.error('Yüklenen dosya temizlenemedi:', unlinkError);
+      if (!saved) await mediaStorage.remove(key).catch(unlinkError => {
+        console.error('Yüklenen dosya temizlenemedi:', unlinkError);
       });
       console.error('Ana sayfa medyası kaydedilemedi:', error);
       res.status(500).json({ mesaj: 'Ana sayfa medyası kaydedilemedi.' });
@@ -215,12 +215,11 @@ function createAdminRouter({
     }
 
     const filename = `${randomUUID()}${extension}`;
-    const destination = path.join(siteMediaUploadDir, filename);
+    const key = `site-media/${filename}`;
     const publicPath = `/uploads/site-media/${filename}`;
     let saved = false;
     try {
-      await fs.mkdir(siteMediaUploadDir, {recursive: true});
-      await fs.writeFile(destination, req.file.buffer, {flag: 'wx'});
+      await mediaStorage.put(key, req.file.buffer);
       const placement = await SystemConfig.saveSiteMediaPlacement({
         pagePath, targetKey, assetType, url: publicPath
       });
@@ -230,8 +229,8 @@ function createAdminRouter({
       });
       res.status(201).json({mesaj: 'Medya seçilen sayfa ve hedefe yerleştirildi.', placement});
     } catch (error) {
-      if (!saved) await fs.unlink(destination).catch(unlinkError => {
-        if (unlinkError.code !== 'ENOENT') console.error('Yüklenen medya temizlenemedi:', unlinkError);
+      if (!saved) await mediaStorage.remove(key).catch(unlinkError => {
+        console.error('Yüklenen medya temizlenemedi:', unlinkError);
       });
       console.error('Sayfa medyası kaydedilemedi:', error);
       res.status(500).json({mesaj: 'Sayfa medyası kaydedilemedi.'});

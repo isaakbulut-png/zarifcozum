@@ -22,6 +22,8 @@ const { router: authRouter, requireRole, redirectForRole } = require('./routes/a
 const { createAIRouter } = require('./routes/ai');
 const { createPaymentRouter } = require('./routes/payments');
 const { createAdminRouter } = require('./routes/admin');
+const { createSiteMediaFilesRouter } = require('./routes/site-media-files');
+const { createConfiguredMediaStorage } = require('./lib/site-media-storage');
 const SiteMediaTargets = require('./assets/site-media-targets');
 const { createSorularRouter } = require('./routes/sorular');
 const { createCozumluSorularRouters } = require('./routes/cozumlu-sorular');
@@ -63,6 +65,10 @@ const { createMentorHintRouter } = require('./routes/mentor-ipucu');
 const AiFaq = require('./models/AiFaq');
 
 const PORT = process.env.PORT || 3000;
+const mediaStorage = createConfiguredMediaStorage(process.env, {
+  homepageDir: path.join(__dirname, 'uploads', 'homepage'),
+  siteMediaDir: path.join(__dirname, 'uploads', 'site-media')
+});
 const curriculumService = createCurriculumService();
 const parentPanelDemoMode = isParentPanelDemoEnabled();
 const MONGODB_URI = process.env.MONGODB_URI;           // .env dosyasından okunur
@@ -295,6 +301,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
   index: false,
   fallthrough: true
 }));
+if (mediaStorage.get) app.use('/uploads', createSiteMediaFilesRouter(mediaStorage));
 app.use('/logo', express.static(path.join(__dirname, 'logo')));
 app.use('/pages', express.static(path.join(__dirname, 'pages'), { extensions: ['html'] }));
 app.get('/api/homepage-assets', async (req, res) => {
@@ -504,6 +511,7 @@ app.use('/api/admin', createAdminRouter({
   Payment,
   SystemConfig,
   AdminLog,
+  mediaStorage,
   getAnnouncementCollection: () => duyuruKoleksiyonu,
   getFaqModel: () => AiFaq,
   invalidateFaqCache: faqService.invalidate,

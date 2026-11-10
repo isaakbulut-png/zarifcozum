@@ -135,6 +135,7 @@ function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_
     router: createAdminRouter({
       User, Payment, SystemConfig, AdminLog, uploadDir: options.uploadDir,
       siteMediaUploadDir: options.siteMediaUploadDir,
+      mediaStorage: options.mediaStorage,
       getAnnouncementCollection: () => collection,
       getFaqModel: () => faqModel,
       invalidateFaqCache: async () => { faqInvalidations += 1; },
@@ -369,6 +370,46 @@ test('superadmin can place validated media on a selected site page and target', 
   } finally {
     await fs.rm(uploadDir, {recursive: true, force: true});
   }
+});
+
+test('admin media uploads use the configured storage and report storage failures', async () => {
+  const files = new Map();
+  const mediaStorage = {
+    put: async (key, buffer) => { files.set(key, buffer); },
+    remove: async key => { files.delete(key); }
+  };
+  const {router, homepageAssets, siteMediaPlacements} = buildRouter([], undefined, {mediaStorage});
+  const png = await fs.readFile(path.join(__dirname, '..', 'assets', 'brand-mark.png'));
+  await withServer(router, {id: 'admin', role: 'admin'}, async base => {
+    const form = new FormData();
+    form.set('assetType', 'image');
+    form.set('slot', 'heroImage');
+    form.set('file', new Blob([png], {type: 'image/png'}), 'hero.png');
+    assert.equal((await fetch(`${base}/homepage-assets/upload`, {method: 'POST', body: form})).status, 200);
+    assert.deepEqual(files.get(homepageAssets.heroImage.replace('/uploads/', '')), png);
+
+    const placement = new FormData();
+    placement.set('pagePath', '/Paketler.html');
+    placement.set('targetKey', JSON.stringify(['a', 'id', 'Hedef', '', 0]));
+    placement.set('assetType', 'image');
+    placement.set('file', new Blob([png], {type: 'image/png'}), 'placement.png');
+    assert.equal((await fetch(`${base}/site-media/upload`, {method: 'POST', body: placement})).status, 201);
+    assert.deepEqual(files.get(siteMediaPlacements[0].url.replace('/uploads/', '')), png);
+  });
+
+  const unavailable = buildRouter([], undefined, {mediaStorage: {
+    put: async () => { throw new Error('test storage unavailable'); },
+    remove: async () => {}
+  }});
+  await withServer(unavailable.router, {id: 'admin', role: 'admin'}, async base => {
+    const form = new FormData();
+    form.set('assetType', 'image');
+    form.set('slot', 'heroImage');
+    form.set('file', new Blob([png], {type: 'image/png'}), 'hero.png');
+    const response = await fetch(`${base}/homepage-assets/upload`, {method: 'POST', body: form});
+    assert.equal(response.status, 500);
+    assert.equal(unavailable.homepageAssets.heroImage, null);
+  });
 });
 
 test('editor and support roles are restricted to their allowed admin sections', async () => {
