@@ -713,7 +713,7 @@
             [...$('assignmentStudents').options].forEach(option => { option.selected = option.value === profile.id; });
             $('assignmentTargetMode').value = 'students';
             $('assignmentStudentsField').hidden = false;
-            $('assignments').scrollIntoView({behavior: 'smooth'});
+            window.teacherPanelNavigation.open('assignments');
           }
         } else if (homeworkButton) {
           renderHomeworkDetail((await teacherApi(`/api/ogretmen/odevler/${encodeURIComponent(homeworkButton.dataset.homeworkDetail)}`)).homework);
@@ -731,6 +731,7 @@
         } else if (closeInvitation) {
           $('studentInvitePanel').hidden = true;
         } else if (recommend) {
+          window.teacherPanelNavigation.open('assignments');
           const matches = state.students.filter(item => item.name === recommend.dataset.recommend && item.active !== false);
           if (matches.length !== 1) {
             setStatus('assignmentStatus', matches.length ? 'Aynı isimde birden fazla öğrenci var; ödev formundan doğru öğrenciyi seçin.' : 'Bu öğrenci öğretmen listesinde bulunamadı.', 'error');
@@ -743,7 +744,6 @@
             $('assignmentTargetMode').value = 'students';
             $('assignmentStudentsField').hidden = false;
             $('assignmentTitle').value = `${matches[0].name} için konu tekrarı`;
-            $('assignments').scrollIntoView({behavior: 'smooth'});
           }
         }
       } catch (error) {

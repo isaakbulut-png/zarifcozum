@@ -234,6 +234,7 @@ td.net{font-weight:700;color:var(--navy-900)}
 
   <!-- Panel -->
   <div id="panel" hidden>
+    <div data-panel-view="overview">
     <section class="dashboard-head" id="overview">
       <div><p class="eyebrow">EĞİTİM YÖNETİMİ</p><h2>Merhaba, Öğretmen 👋</h2><p>Derslerinizi, öğrencilerinizi ve içeriklerinizi tek yerden yönetin.</p></div>
       <div class="dashboard-date" id="dashboardDate"></div>
@@ -269,7 +270,8 @@ td.net{font-weight:700;color:var(--navy-900)}
       </div>
     </section>
 
-    <section class="card module-card" id="maarif-tree">
+    </div>
+    <section class="card module-card" id="maarif-tree" data-panel-view="maarif-tree">
       <div class="section-title"><div><p class="eyebrow">İÇERİK HAVUZU</p><h2>Maarif müfredat gezgini</h2><p class="hint">Sınıftan öğrenme çıktısına, dört adımda ilerleyin.</p></div><span class="module-badge">Müfredat ağacı</span></div>
       <div class="curriculum-workspace-layout">
         <div id="curriculumTreeView"></div>
@@ -277,7 +279,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       </div>
     </section>
 
-    <section class="card module-card" id="curriculum">
+    <section class="card module-card" id="curriculum" data-panel-view="curriculum">
       <div class="section-title"><div><p class="eyebrow">İÇERİK STÜDYOSU</p><h2>Ders ve müfredat yönetimi</h2><p class="hint">Sınıf → ünite → konu → ön koşullar ve ilişkili materyaller</p></div><span class="module-badge">1–12. sınıflar</span></div>
       <div class="notice curriculum-notice"><strong>Müfredat taslağı:</strong> 5–11. sınıf konu başlıkları paylaştığınız 2026–2027 içerik haritasından aktarılmıştır. Belge, kesin müfredat olarak kullanılmadan önce güncel MEB programıyla doğrulanmalıdır. 1–4 ve 12. sınıf içerikleri belgede bulunmadığından öğretmen tarafından eklenebilir.</div>
       <div class="curriculum-filters">
@@ -313,7 +315,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       <p class="storage-note">İçerikler, ön koşullar ve materyal bağlantıları bu tarayıcıda saklanır; mevcut öğrenci ders sayfasına henüz yayınlanmaz.</p>
     </section>
 
-    <section class="card module-card" id="students">
+    <section class="card module-card" id="students" data-panel-view="students">
       <div class="section-title"><div><p class="eyebrow">ÖĞRENCİ TAKİBİ</p><h2>Öğrenci yönetimi</h2><p class="hint">Sınıf, seviye ve kişiye özel çalışma takibi</p></div></div>
       <form class="inline-create-form" id="studentForm">
         <div class="form-grid">
@@ -336,7 +338,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       <p class="storage-note">Öğrenci kayıtları öğretmen hesabına bağlı olarak veritabanında saklanır. Hesap bağlantısı tek kullanımlık davet koduyla yapılır.</p>
     </section>
 
-    <section class="card module-card" id="assignments">
+    <section class="card module-card" id="assignments" data-panel-view="assignments">
       <div class="section-title"><div><p class="eyebrow">ÇALIŞMA VE DEĞERLENDİRME</p><h2>Ödev ve çalışma yönetimi</h2><p class="hint">Sınıfa veya öğrenciye özel çalışma oluşturun ve teslim tarihini planlayın.</p></div></div>
       <form class="inline-create-form" id="assignmentForm">
         <div class="form-grid">
@@ -360,14 +362,14 @@ td.net{font-weight:700;color:var(--navy-900)}
       <p class="storage-note">Her ödev, seçilen aktif öğrenciler için ayrı takip kaydı oluşturur. Öğrenci panelindeki teslimler ve öğretmen değerlendirmeleri bu kayıtlara bağlıdır.</p>
     </section>
 
-    <section class="card module-card" id="analytics">
+    <section class="card module-card" id="analytics" data-panel-view="analytics">
       <div class="section-title"><div><p class="eyebrow">ÖĞRENME VERİSİ</p><h2>Öğrenci başarı analizi</h2><p class="hint">Mevcut test sonuçları ve öğretmenin konu-hedefli çalışma önerileri</p></div><button class="btn light" id="printAnalytics" type="button">Raporu yazdır / PDF kaydet</button></div>
       <div class="analytics-summary" id="analyticsSummary"></div>
       <div class="analytics-panels"><article><h3>Test puanlarının dağılımı</h3><div id="scoreChart" class="score-chart"></div></article><article><h3>Çalışma önerileri</h3><p class="hint">Puanı %60'ın altında olan sonuçlar için ilgili konu seçip hedefli çalışma atayabilirsiniz.</p><div id="recommendationList" class="dashboard-list"></div></article></div>
       <p class="storage-note">Mevcut test API’si konu bazlı cevap analizi sunmadığı için konu eksikleri otomatik tahmin edilmez. Öneriler gerçek test puanlarından üretilir; konu eşleştirmesini öğretmen yapar.</p>
     </section>
 
-    <section class="card module-card" id="library">
+    <section class="card module-card" id="library" data-panel-view="library">
       <div class="section-title"><div><p class="eyebrow">ÖĞRETMEN KAYNAKLARI</p><h2>PDF ve doküman kütüphanesi</h2><p class="hint">Çalışma kâğıtları, konu özetleri ve sınıfa özel kaynaklar</p></div></div>
       <form class="inline-create-form" id="documentForm">
         <div class="form-grid">
@@ -383,7 +385,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       <p class="storage-note">Bu alan PDF dosyasını sunucuya yüklemez; güvenli bir dosya depolama entegrasyonu eklenene kadar doküman bağlantılarını saklar.</p>
     </section>
 
-    <section class="card module-card" id="teacher-settings">
+    <section class="card module-card" id="teacher-settings" data-panel-view="teacher-settings">
       <div class="section-title"><div><p class="eyebrow">HESAP</p><h2>Öğretmen profili ve ayarları</h2><p class="hint">Branş, sınıf seviyeleri ve kişisel panel tercihleri</p></div></div>
       <form class="inline-create-form" id="teacherProfileForm">
         <div class="form-grid">
@@ -397,7 +399,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       <p class="storage-note">Profil tercihleri yalnızca bu tarayıcıda saklanır. Şifre ve hesap güvenliği mevcut giriş sistemi üzerinden yönetilir.</p>
     </section>
 
-    <section class="card" id="lessons">
+    <section class="card" id="lessons" data-panel-view="lessons">
       <div class="section-title"><div><h2>Canlı ders oluştur</h2><p class="hint">Tarih ve saati belirleyin. Öğrenciler kendi panellerinde dersi bekler; ders saati geldiğinde buradan başlatabilirsiniz.</p></div></div>
       <form id="lessonForm">
         <div class="form-grid">
@@ -429,7 +431,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       </div>
     </section>
 
-    <section class="card" id="quiz-builder">
+    <section class="card" id="quiz-builder" data-panel-view="quiz-builder">
       <div class="section-title"><div><h2>Dinamik test oluşturucu</h2><p class="hint">Testler yayınlandığında öğrencilerin panelinde görünür.</p></div></div>
       <form id="quizForm">
         <div class="form-grid">
@@ -466,7 +468,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       </div>
     </section>
 
-    <section class="card" id="image-questions">
+    <section class="card" id="image-questions" data-panel-view="image-questions">
       <div class="section-title"><div><h2>Soru ekle / Resim yükle (resimli deneme)</h2><p class="hint">Soru resimlerini bilgisayarınızdan seçin; her biri bulut depolamaya (Cloudinary) yüklenir ve soru olarak kaydedilir. PNG, JPG veya WEBP, en fazla 5 MB.</p></div></div>
       <form id="imageQuestionForm" method="post" action="/api/sorular/yukle" enctype="multipart/form-data">
         <div class="form-grid">
@@ -495,7 +497,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       </div>
     </section>
 
-    <section class="card" id="ai-question-wizard">
+    <section class="card" id="ai-question-wizard" data-panel-view="ai-question-wizard">
       <div class="section-title"><div><h2>Yapay Zeka Soru Sihirbazı</h2><p class="hint">Soruları gözden geçirin; her soruyu ayrı ayrı onaylayıp öğrencilerle paylaşabilirsiniz.</p></div></div>
       <form id="aiQuestionForm">
         <div class="form-grid">
@@ -546,7 +548,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       <div class="question-list" id="aiQuestionList" aria-live="polite"></div>
     </section>
 
-    <section class="card" id="student-results">
+    <section class="card" id="student-results" data-panel-view="student-results">
       <div class="section-title"><div><h2>Öğrenci test sonuçları</h2><p class="hint">Test, öğrenci ve puan bilgileri.</p></div></div>
       <div class="table-wrap"><table class="management-table">
         <thead><tr><th>Öğrenci</th><th>Test</th><th>Puan</th><th>Tarih</th></tr></thead>
@@ -554,7 +556,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       </table></div>
     </section>
 
-    <section class="card" id="announcements">
+    <section class="card" id="announcements" data-panel-view="announcements">
       <div class="section-title"><div><h2>Öğrencilere duyuru</h2><p class="hint">Duyurular tüm öğrencilerin panelinde yayınlanır.</p></div></div>
       <form id="announcementForm">
         <div class="field"><label for="announcementText">Duyuru metni</label><textarea id="announcementText" maxlength="1000" required placeholder="Öğrencilerinizle paylaşmak istediğiniz mesaj..."></textarea></div>
@@ -563,6 +565,7 @@ td.net{font-weight:700;color:var(--navy-900)}
       <div class="data-list" id="announcementList"></div>
     </section>
 
+    <div data-panel-view="student-results">
     <div class="notice" id="anahtarUyari" hidden>Bu sınav için <strong>cevap anahtarı</strong> girilmemiş. Aşağıdan anahtarı girip kaydedin; doğru, yanlış ve net sayıları otomatik hesaplanır.</div>
 
     <section class="stats" id="stats"></section>
@@ -600,6 +603,7 @@ td.net{font-weight:700;color:var(--navy-900)}
         </table>
       </div>
     </section>
+    </div>
   </div>
 </main>
 </div>
@@ -640,6 +644,7 @@ td.net{font-weight:700;color:var(--navy-900)}
 <script src="assets/safe-svg.js"></script>
 <script src="assets/matematik-mufredati.js"></script>
 <script src="assets/curriculum-tree-view.js"></script>
+<script src="assets/ogretmen-gezinme.js"></script>
 <script src="assets/ogretmen-yonetim.js"></script>
 <script src="assets/ogrenci-gelisim.js"></script>
 <script src="assets/ogretmen-canli.js"></script>
