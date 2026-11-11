@@ -200,7 +200,7 @@ td.net{font-weight:700;color:var(--navy-900)}
   <p class="teacher-live-status" id="sidebarLiveStatus" role="status" aria-live="polite"></p>
   <p class="teacher-live-status" id="sidebarAktifCanliBilgi" role="status" aria-live="polite">Canlı ders durumu yükleniyor…</p>
   <div id="sidebarAktifCanliIslemler" hidden>
-    <a class="teacher-live-cta secondary" href="/canli.html?host=1">Derse dön</a>
+    <button class="teacher-live-cta secondary" type="button" data-open-live> Dersi Zoom'da aç</button>
     <button class="teacher-live-cta" id="sidebarCanliSonlandir" type="button">Dersi sonlandır</button>
   </div>
   <p class="teacher-live-status" id="sidebarAktifCanliHata" role="status" aria-live="polite"></p>
@@ -401,6 +401,19 @@ td.net{font-weight:700;color:var(--navy-900)}
 
     <section class="card" id="lessons" data-panel-view="lessons">
       <div class="section-title"><div><h2>Canlı ders oluştur</h2><p class="hint">Tarih ve saati belirleyin. Öğrenciler kendi panellerinde dersi bekler; ders saati geldiğinde buradan başlatabilirsiniz.</p></div></div>
+      <div class="inline-create-form" aria-label="Canlı ders hedef kitlesi">
+        <h3>Derse katılacak öğrenciler</h3>
+        <div class="form-grid">
+          <div class="field"><label for="liveGrade">Sınıf</label><select id="liveGrade"><option value="">Sınıf seçin</option></select></div>
+          <div class="field"><label for="liveSection">Şube</label><select id="liveSection"><option value="">Tüm şubeler</option></select></div>
+          <div class="field"><label for="liveTargetMode">Katılımcılar</label><select id="liveTargetMode"><option value="class">Sınıfın tamamı</option><option value="students">Seçili öğrenciler</option></select></div>
+          <div class="field" id="liveStudentsField" hidden><label for="liveStudents">Öğrenciler</label><select id="liveStudents" multiple size="5"></select><small>Birden fazla öğrenci için Ctrl / ⌘ kullanın.</small></div>
+        </div>
+        <p class="status" id="liveAudienceStatus" role="status"></p>
+        <p class="hint">Yalnızca hesabı öğretmene bağlanmış etkin öğrenciler derse katılabilir.</p>
+      </div>
+      <p class="status" id="zoomOpenStatus" role="status"></p>
+      <a class="btn light" id="zoomOpenFallback" target="_blank" rel="noopener noreferrer" hidden>Zoom'u aç</a>
       <form id="lessonForm">
         <div class="form-grid">
           <div class="field full"><label for="lessonTitle">Ders adı / konusu</label><input id="lessonTitle" name="title" maxlength="200" required placeholder="Örn. Denklem çözme soru saati"></div>
@@ -415,7 +428,8 @@ td.net{font-weight:700;color:var(--navy-900)}
         <h3>Mevcut canlı ders</h3>
         <p id="aktifCanliBilgi" role="status" aria-live="polite">Canlı ders durumu yükleniyor…</p>
         <div class="tools" id="aktifCanliIslemler" hidden>
-          <a class="btn light" href="/canli.html?host=1">Derse dön</a>
+          <button class="btn light" type="button" data-open-live>Dersi Zoom'da aç</button>
+          <a class="btn light" href="/canli.html?host=1">Ders AI Mentörü</a>
           <button class="btn" id="canliSonlandir" type="button">Dersi sonlandır</button>
         </div>
         <p class="err" id="aktifCanliHata" role="status" aria-live="polite"></p>
@@ -696,7 +710,12 @@ td.net{font-weight:700;color:var(--navy-900)}
       { bilgi: $('sidebarAktifCanliBilgi'), islemler: $('sidebarAktifCanliIslemler'),
         hata: $('sidebarAktifCanliHata'), sonlandir: $('sidebarCanliSonlandir') }
     ],
-    onSonlandir: () => canliPlanlariYukle()
+    onSonlandir: () => {
+      $('zoomOpenFallback').hidden = true;
+      $('zoomOpenFallback').removeAttribute('href');
+      $('zoomOpenStatus').textContent = '';
+      return canliPlanlariYukle();
+    }
   });
 
   async function yukle() {
@@ -709,6 +728,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     $('cikis').hidden = false;
     $('changePasswordButton').hidden = false;
     canliYonetim.yenile();
+    canliHedefleriniYukle();
     try {
       veri = await api('/api/ogretmen/veri');
       yonetim = await api('/api/ogretmen/yonetim');
@@ -803,19 +823,22 @@ td.net{font-weight:700;color:var(--navy-900)}
     const {dersler} = await api('/api/ogretmen/canli/planlar');
     $('lessonList').innerHTML = dersler.length
       ? dersler.map(lesson => {
-          const baslatilabilir = lesson.status === 'scheduled' && new Date(lesson.startsAt) <= new Date();
+          const baslatilabilir = lesson.status === 'scheduled' && lesson.audience && new Date(lesson.startsAt) <= new Date();
           const bekliyor = lesson.status === 'scheduled' && !baslatilabilir;
+          const hedef = lesson.audience
+            ? `${lesson.audience.grade}. sınıf${lesson.audience.section ? ` / ${lesson.audience.section}` : ''} · ${lesson.audience.mode === 'students' ? `${lesson.audience.studentIds.length} seçili öğrenci` : 'Tüm öğrenciler'}`
+            : 'Hedef kitlesi yok; yeni ders planlayın.';
           const durum = lesson.status === 'active' ? 'Canlı yayın başladı'
             : lesson.status === 'completed' ? 'Tamamlandı'
             : baslatilabilir ? 'Ders saati geldi · Öğrenciler başlatmanızı bekliyor'
             : `Planlandı · ${tarihSaat(lesson.startsAt)}`;
           return `<article class="data-item">
-            <div><strong>${esc(lesson.title)}</strong><p>${esc(durum)}</p></div>
+            <div><strong>${esc(lesson.title)}</strong><p>${esc(durum)}</p><p>${esc(hedef)}</p></div>
             ${baslatilabilir
               ? `<button class="btn" type="button" data-start-live-lesson="${esc(lesson.id)}">Canlı dersi başlat</button>`
               : lesson.status === 'active'
-                ? '<a class="btn light" href="canli.html?host=1">Derse dön</a>'
-                : `<button class="btn light" type="button" disabled>${bekliyor ? 'Ders saatini bekleyin' : 'Ders tamamlandı'}</button>`}
+                ? '<button class="btn light" type="button" data-open-live>Dersi Zoom&#39;da aç</button>'
+                : `<button class="btn light" type="button" disabled>${!lesson.audience && lesson.status === 'scheduled' ? 'Hedef seçilmemiş' : bekliyor ? 'Ders saatini bekleyin' : 'Ders tamamlandı'}</button>`}
           </article>`;
         }).join('')
       : '<p class="empty">Henüz planlanmış canlı ders yok.</p>';
@@ -824,13 +847,18 @@ td.net{font-weight:700;color:var(--navy-900)}
   $('lessonList').addEventListener('click', async event => {
     const button = event.target.closest('[data-start-live-lesson]');
     if (!button) return;
+    const zoomWindow = pencereAc();
     button.disabled = true;
     button.textContent = 'Ders başlatılıyor…';
     try {
       const result = await api(`/api/ogretmen/canli/planlar/${encodeURIComponent(button.dataset.startLiveLesson)}/baslat`, {method: 'POST'});
-      if (result.startUrl) location.href = result.startUrl;
-      else location.href = 'canli.html?host=1';
+      zoomBaslat(result.startUrl, zoomWindow);
+      canliYonetim.yenile();
+      canliPlanlariYukle().catch(error => {
+        $('lessonStatus').textContent = `Ders başladı, ancak liste yenilenemedi: ${error.message}`;
+      });
     } catch (error) {
+      if (zoomWindow) zoomWindow.close();
       $('lessonStatus').textContent = 'Canlı ders başlatılamadı: ' + error.message;
       if (error.status === 409) canliYonetim.yenile();
       await canliPlanlariYukle();
@@ -876,7 +904,8 @@ td.net{font-weight:700;color:var(--navy-900)}
         body: JSON.stringify({
           title: $('lessonTitle').value,
           startsAt: startsAt.toISOString(),
-          duration: Number($('lessonDuration').value)
+          duration: Number($('lessonDuration').value),
+          audience: canliHedefi()
         })
       });
       form.reset();
@@ -1408,26 +1437,126 @@ td.net{font-weight:700;color:var(--navy-900)}
     }
   });
 
+  let canliOgrencileri = [];
+
+  async function canliHedefleriniYukle() {
+    try {
+      const result = await api('/api/ogretmen/ogrenciler');
+      canliOgrencileri = result.students.filter(student => student.active);
+      const grade = $('liveGrade').value;
+      const grades = [...new Set(canliOgrencileri.map(student => student.grade))].sort((a, b) => a - b);
+      $('liveGrade').replaceChildren(new Option('Sınıf seçin', ''), ...grades.map(value => new Option(`${value}. sınıf`, value)));
+      $('liveGrade').value = grades.some(value => String(value) === grade) ? grade : '';
+      canliHedefleriniCiz();
+      $('liveAudienceStatus').textContent = grades.length ? '' : 'Önce öğrenci yönetiminden etkin öğrenci ekleyin.';
+    } catch (error) {
+      canliOgrencileri = [];
+      $('liveGrade').replaceChildren(new Option('Sınıf seçin', ''));
+      canliHedefleriniCiz();
+      $('liveAudienceStatus').textContent = `Öğrenci listesi yüklenemedi: ${error.message}`;
+    }
+  }
+
+  function canliHedefleriniCiz() {
+    const grade = $('liveGrade').value;
+    const previousSection = $('liveSection').value;
+    const students = canliOgrencileri.filter(student => String(student.grade) === grade);
+    const sections = [...new Set(students.map(student => student.section).filter(Boolean))].sort();
+    $('liveSection').replaceChildren(new Option('Tüm şubeler', ''), ...sections.map(value => new Option(value, value)));
+    $('liveSection').value = sections.includes(previousSection) ? previousSection : '';
+    const section = $('liveSection').value;
+    const selected = new Set([...$('liveStudents').selectedOptions].map(option => option.value));
+    $('liveStudents').replaceChildren(...students.filter(student => !section || student.section === section).map(student => {
+      const option = new Option(`${student.name} (${student.section})${student.linked ? '' : ' — hesap bağlantısı yok'}`, student.id);
+      option.selected = selected.has(student.id);
+      return option;
+    }));
+    $('liveStudentsField').hidden = $('liveTargetMode').value !== 'students';
+  }
+
+  function canliHedefi() {
+    const grade = Number($('liveGrade').value);
+    const mode = $('liveTargetMode').value;
+    const studentIds = mode === 'students' ? [...$('liveStudents').selectedOptions].map(option => option.value) : [];
+    if (!grade || (mode === 'students' && !studentIds.length)) throw new Error('Sınıf ve katılacak öğrencileri seçin.');
+    return {grade, section: $('liveSection').value, mode, studentIds};
+  }
+
+  $('liveGrade').addEventListener('change', canliHedefleriniCiz);
+  $('liveSection').addEventListener('change', canliHedefleriniCiz);
+  $('liveTargetMode').addEventListener('change', canliHedefleriniCiz);
+
+  function pencereAc() {
+    const pencere = window.open('about:blank', '_blank');
+    if (pencere) pencere.opener = null;
+    return pencere;
+  }
+
+  function zoomBaslat(url, pencere) {
+    $('zoomOpenFallback').hidden = true;
+    $('zoomOpenFallback').removeAttribute('href');
+    if (!url) {
+      if (pencere) pencere.close();
+      $('zoomOpenStatus').textContent = 'Zoom başlatma bağlantısı alınamadı. Dersi Zoom’da açmayı tekrar deneyin.';
+      return;
+    }
+    $('zoomOpenFallback').href = url;
+    $('zoomOpenFallback').hidden = false;
+    $('zoomOpenStatus').textContent = pencere ? 'Zoom ayrı sekmede açıldı.' : 'Tarayıcı yeni sekmeyi engelledi. Zoom’u aç bağlantısını kullanın.';
+    if (pencere) pencere.location.replace(url);
+  }
+
+  document.addEventListener('click', async event => {
+    const button = event.target.closest('[data-open-live]');
+    if (!button) return;
+    const pencere = pencereAc();
+    button.disabled = true;
+    try {
+      const result = await api('/api/ogretmen/canli/durum');
+      if (!result.aktif) throw new Error('Aktif canlı ders bulunamadı.');
+      window.teacherPanelNavigation.open('lessons');
+      zoomBaslat(result.startUrl, pencere);
+    } catch (error) {
+      if (pencere) pencere.close();
+      window.teacherPanelNavigation.open('lessons');
+      $('zoomOpenStatus').textContent = `Zoom açılamadı: ${error.message}`;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
   async function anindaCanliBaslat(dugme, durum) {
+    let audience;
+    try { audience = canliHedefi(); }
+    catch (error) { durum.textContent = error.message; return; }
+    const pencere = pencereAc();
     dugme.disabled = true;
     durum.textContent = 'Zoom toplantısı oluşturuluyor…';
     try {
-      await api('/api/ogretmen/canli/baslat', {
+      const result = await api('/api/ogretmen/canli/baslat', {
         method: 'POST',
-        body: JSON.stringify({topic: $('canliKonu').value})
+        body: JSON.stringify({topic: $('canliKonu').value, audience})
       });
-      location.href = 'canli.html?host=1';
+      zoomBaslat(result.startUrl, pencere);
+      durum.textContent = 'Canlı ders oluşturuldu.';
+      canliYonetim.yenile();
     } catch (err) {
+      if (pencere) pencere.close();
       durum.textContent = 'Canlı ders başlatılamadı: ' + err.message;
       if (err.status === 409) canliYonetim.yenile();
+    } finally {
       dugme.disabled = false;
     }
   }
 
   $('canliBaslat').addEventListener('click', event =>
     anindaCanliBaslat(event.currentTarget, $('canliDurum')));
-  $('sidebarQuickLive').addEventListener('click', event =>
-    anindaCanliBaslat(event.currentTarget, $('sidebarLiveStatus')));
+  $('sidebarQuickLive').addEventListener('click', () => {
+    window.teacherPanelNavigation.open('lessons');
+    $('liveGrade').focus();
+    canliHedefleriniYukle();
+    $('sidebarLiveStatus').textContent = 'Sınıf ve katılımcıları seçip Anında başlat düğmesine basın.';
+  });
 
   const bugun = new Date();
   $('lessonDate').min = `${bugun.getFullYear()}-${pad(bugun.getMonth() + 1)}-${pad(bugun.getDate())}`;

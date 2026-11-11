@@ -23,11 +23,13 @@ function createUser(id, role) {
 function createRealtimeFixture() {
   const users = new Map([
     ['student-1', createUser('student-1', 'student')],
+    ['student-2', createUser('student-2', 'student')],
     ['teacher-1', createUser('teacher-1', 'teacher')]
   ]);
   const sessions = new Map();
   const messages = [];
   const attendances = [];
+  const eligibleStudents = new Set(['student-1']);
   const replies = [];
   const httpServer = http.createServer();
   const io = new Server(httpServer);
@@ -56,7 +58,16 @@ function createRealtimeFixture() {
       findOne: async () => ({
         meetingId: 'meeting-123',
         meetingNumber: '123456789',
+        createdBy: 'teacher-1',
+        audience: {grade: 6, section: 'A', mode: 'class', studentIds: []},
         expiresAt: new Date(Date.now() + 60_000)
+      })
+    }),
+    getStudentCollection: () => ({
+      find: ({linkedUserId}) => ({
+        toArray: async () => eligibleStudents.has(linkedUserId)
+          ? [{_id: new ObjectId(), teacherId: 'teacher-1', grade: 6, section: 'A', active: true}]
+          : []
       })
     }),
     ChatMessageModel: {
@@ -124,7 +135,7 @@ function createRealtimeFixture() {
     }
   });
 
-  return { httpServer, io, replies, sessions, messages, attendances };
+  return { httpServer, io, replies, sessions, messages, attendances, eligibleStudents };
 }
 
 async function listen(server) {
@@ -153,6 +164,21 @@ function emitWithAck(socket, event, payload) {
     });
   });
 }
+
+test('canlı sohbet erişimi öğrenci sınıftan çıkarıldığında iptal edilir', async t => {
+  const fixture = createRealtimeFixture();
+  const url = await listen(fixture.httpServer);
+  const student = await connect(url, 'student-1');
+  t.after(async () => {
+    student.disconnect();
+    await new Promise(resolve => fixture.io.close(resolve));
+  });
+  assert.equal((await emitWithAck(student, 'join-room', '123456789')).success, true);
+  fixture.eligibleStudents.delete('student-1');
+  const result = await emitWithAck(student, 'load-history', '123456789');
+  assert.equal(result.success, false);
+  assert.equal(result.status, 403);
+});
 
 test('AI chat input is normalized and bounded for REST and Socket.IO', () => {
   assert.deepEqual(normalizeAiChatRequest({
@@ -221,12 +247,16 @@ test('Socket.IO authenticates sessions and keeps persisted room history private'
   parentSocket.disconnect();
 
   const student = await connect(url, 'student-1');
+  const otherStudent = await connect(url, 'student-2');
   const teacher = await connect(url, 'teacher-1');
-  sockets.push(student, teacher);
+  sockets.push(student, otherStudent, teacher);
 
   const denied = await emitWithAck(student, 'join-room', { roomId: 'another-meeting' });
   assert.equal(denied.success, false);
   assert.equal(denied.status, 404, denied.error);
+  const wrongAudience = await emitWithAck(otherStudent, 'join-room', '123456789');
+  assert.equal(wrongAudience.success, false);
+  assert.equal(wrongAudience.status, 403);
   const studentJoin = await emitWithAck(student, 'join-room', '123456789');
   assert.equal(studentJoin.success, true);
   assert.deepEqual(studentJoin.messages, []);

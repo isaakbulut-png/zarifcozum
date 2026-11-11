@@ -33,6 +33,7 @@ const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogren
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
 const { createPratikRouter } = require('./routes/pratik');
 const { createLiveLessonsRouter } = require('./routes/live-lessons');
+const { studentLessonFilter, matchesAudience, studentProfiles: getStudentProfiles } = require('./lib/live-lesson-audience');
 const { createParentRouter } = require('./routes/parent');
 const { createZoomMeeting } = require('./lib/zoom');
 const { uretSorular } = require('./lib/ai-icerik');
@@ -134,6 +135,7 @@ attachRealtimeChat(io, {
   SystemConfigModel: SystemConfig,
   isSubscriptionRequired: abonelikZorunluMu,
   getActiveCollection: () => canliDersKoleksiyonu,
+  getStudentCollection: () => studentProfiles,
   ChatMessageModel: ChatMessage,
   LessonAttendanceModel: LessonAttendance,
   generateReply: generateAssistantReply
@@ -670,13 +672,9 @@ async function aktifCanliDersiAl() {
 
 app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async (req, res) => {
   try {
+    const profiles = await getStudentProfiles(studentProfiles, req.session.user.id);
     const [dersler, quizler, duyurular, sonuclar, aktifDers, parentConnectionCode] = await Promise.all([
-      planliDersKoleksiyonu.find({
-        $or: [
-          { startsAt: { $gte: new Date() } },
-          { kind: 'live', status: 'scheduled' }
-        ]
-      })
+      planliDersKoleksiyonu.find(studentLessonFilter(profiles))
         .sort({ startsAt: 1 }).limit(50).toArray(),
       quizKoleksiyonu.find({
         source: { $ne: 'curriculum_assignment' },
@@ -702,7 +700,7 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
     const tamamlananQuizler = new Set(sonuclar.map(result => result.quizId.toString()));
     res.json({
       parentConnectionCode,
-      aktifDers: aktifDers ? {
+      aktifDers: aktifDers && profiles.some(profile => matchesAudience(aktifDers, profile)) ? {
         title: aktifDers.topic,
         startsAt: aktifDers.startedAt,
         link: '/canli.html'
@@ -870,6 +868,7 @@ app.use(createLiveLessonsRouter({
   requireStudent: ogrenciKontrol,
   getScheduledCollection: () => planliDersKoleksiyonu,
   getActiveCollection: () => canliDersKoleksiyonu,
+  getStudentCollection: () => studentProfiles,
   createMeeting: createZoomMeeting,
   getHostStartUrl: ogretmenBaslatmaBaglantisiAl,
   endMeeting: async lesson => {

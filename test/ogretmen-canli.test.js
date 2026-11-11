@@ -12,7 +12,7 @@ test('the teacher sidebar contains the active lesson controls', () => {
   assert.ok(sidebar);
   assert.match(sidebar[0], /id="sidebarAktifCanliIslemler" hidden/);
   assert.match(sidebar[0], /id="sidebarCanliSonlandir"[^>]*>Dersi sonlandır<\/button>/);
-  assert.match(sidebar[0], /href="\/canli\.html\?host=1">Derse dön<\/a>/);
+  assert.match(sidebar[0], /data-open-live> Dersi Zoom'da aç<\/button>/);
 });
 
 function setup(api, onSonlandir = async () => {}) {

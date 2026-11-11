@@ -1,18 +1,20 @@
 const express = require('express');
 const { ObjectId } = require('mongodb');
 const { ZOOM_HOST_USER_ID } = require('../lib/zoom');
+const { studentCanAccess, validateAudience } = require('../lib/live-lesson-audience');
 
 function asyncRoute(handler) {
   return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 }
 
-function publicLesson({ _id, title, startsAt, status, duration }) {
+function publicLesson({ _id, title, startsAt, status, duration, audience }) {
   return {
     id: String(_id),
     title,
     startsAt,
     status,
-    duration
+    duration,
+    audience: audience || null
   };
 }
 
@@ -31,6 +33,7 @@ function createLiveLessonsRouter({
   requireStudent,
   getScheduledCollection,
   getActiveCollection,
+  getStudentCollection,
   createMeeting,
   getHostStartUrl,
   endMeeting
@@ -64,6 +67,7 @@ function createLiveLessonsRouter({
       return res.status(400).json({ mesaj: 'Ders adı, gelecekte bir tarih/saat ve 5–300 dakika süre girin.' });
     }
 
+    const audience = await validateAudience(getStudentCollection(), req.session.user.id, req.body?.audience);
     const meeting = await createMeeting({ topic: title, startTime: startsAt, duration });
     if (!meeting?.id || !meeting.joinUrl) {
       const error = new Error('Zoom planlı ders bilgileri eksik döndü; ders kaydedilemedi.');
@@ -83,6 +87,7 @@ function createLiveLessonsRouter({
       hostUserId: ZOOM_HOST_USER_ID,
       status: 'scheduled',
       createdBy: req.session.user.id,
+      audience,
       createdAt: new Date()
     };
     const result = await getScheduledCollection().insertOne(lesson);
@@ -102,6 +107,9 @@ function createLiveLessonsRouter({
     if (lesson.status !== 'scheduled') {
       return res.status(409).json({ mesaj: 'Bu canlı ders başlatılamaz; durumu değişmiş.' });
     }
+    if (!lesson.audience) {
+      return res.status(409).json({ mesaj: 'Bu eski dersin hedef kitlesi yok. Sınıf seçerek yeni ders planlayın.' });
+    }
     if (new Date(lesson.startsAt) > new Date()) {
       return res.status(409).json({ mesaj: 'Canlı ders, planlanan tarih ve saatte başlatılabilir.' });
     }
@@ -118,6 +126,8 @@ function createLiveLessonsRouter({
       topic: lesson.topic,
       joinUrl: lesson.joinUrl,
       hostUserId: lesson.hostUserId,
+      createdBy: lesson.createdBy,
+      audience: lesson.audience,
       scheduledLessonId: lesson._id,
       startedAt,
       expiresAt: new Date(startedAt.getTime() + 8 * 60 * 60 * 1000)
@@ -140,6 +150,7 @@ function createLiveLessonsRouter({
     if (existing) {
       return res.status(409).json({ mesaj: 'Zaten aktif bir canlı ders var.', ...meetingSummary(existing) });
     }
+    const audience = await validateAudience(getStudentCollection(), req.session.user.id, req.body?.audience);
     const meeting = await createMeeting({ topic });
     if (!meeting?.id || !meeting.joinUrl) {
       const error = new Error('Zoom toplantı bilgileri eksik döndü; canlı ders başlatılamadı.');
@@ -155,6 +166,8 @@ function createLiveLessonsRouter({
       topic: meeting.topic || topic,
       joinUrl: meeting.joinUrl || '',
       hostUserId: ZOOM_HOST_USER_ID,
+      createdBy: req.session.user.id,
+      audience,
       startedAt,
       expiresAt: new Date(startedAt.getTime() + 8 * 60 * 60 * 1000)
     };
@@ -184,7 +197,9 @@ function createLiveLessonsRouter({
 
   router.get('/api/canli/katilim', requireStudent, asyncRoute(async (req, res) => {
     const lesson = await activeMeeting();
-    if (!lesson) return res.status(404).json({ mesaj: 'Şu anda aktif bir canlı ders yok.' });
+    if (!lesson || !await studentCanAccess(getStudentCollection(), req.session.user.id, lesson)) {
+      return res.status(404).json({ mesaj: 'Şu anda katılabileceğiniz aktif bir canlı ders yok.' });
+    }
     res.json(meetingSummary(lesson));
   }));
 

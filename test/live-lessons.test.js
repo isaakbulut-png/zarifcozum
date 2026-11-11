@@ -10,7 +10,9 @@ function same(left, right) {
 }
 
 function matches(document, filter) {
-  return Object.entries(filter).every(([key, value]) => same(document[key], value));
+  return Object.entries(filter).every(([key, value]) => value && value.$in
+    ? value.$in.some(item => same(document[key], item))
+    : same(document[key], value));
 }
 
 function collection() {
@@ -54,6 +56,11 @@ function collection() {
 async function setup(endMeeting = async () => {}) {
   const scheduled = collection();
   const active = collection();
+  const students = collection();
+  students.rows.push({
+    _id: new ObjectId('507f1f77bcf86cd799439011'), teacherId: 'teacher-1',
+    linkedUserId: 'teacher-1', grade: 6, section: 'A', active: true
+  });
   const app = express();
   app.use(express.json());
   app.use((req, res, next) => {
@@ -72,6 +79,7 @@ async function setup(endMeeting = async () => {}) {
     requireStudent: roleGuard('student'),
     getScheduledCollection: () => scheduled,
     getActiveCollection: () => active,
+    getStudentCollection: () => students,
     createMeeting: async options => ({
       id: 'meeting-123',
       topic: options.topic,
@@ -91,6 +99,7 @@ async function setup(endMeeting = async () => {}) {
   return {
     scheduled,
     active,
+    students,
     async request(path, role, method = 'GET', body, userId) {
       const requestHeaders = {'Content-Type': 'application/json'};
       if (role) requestHeaders['x-role'] = role;
@@ -105,6 +114,8 @@ async function setup(endMeeting = async () => {}) {
     close: () => new Promise(resolve => server.close(resolve))
   };
 }
+
+const classAudience = {grade: 6, section: 'A', mode: 'class', studentIds: []};
 
 test('Zoom toplantısı bulunamadığında yalnız açık onayla aynı dersin kaydı temizlenir', async () => {
   let calls = 0;
@@ -172,7 +183,8 @@ test('scheduled Zoom lesson waits until its time and is joinable only after teac
     const created = await app.request('/api/ogretmen/canli/planla', 'teacher', 'POST', {
       title: 'Kesirler canlı ders',
       startsAt: startsAt.toISOString(),
-      duration: 45
+      duration: 45,
+      audience: classAudience
     });
     assert.equal(created.response.status, 201);
     assert.equal(created.data.ders.status, 'scheduled');
@@ -203,6 +215,8 @@ test('scheduled Zoom lesson waits until its time and is joinable only after teac
     assert.equal(started.response.status, 200);
     assert.equal(started.data.startUrl, 'https://zoom.example/start');
     assert.equal(app.active.rows[0].hostUserId, ZOOM_HOST_USER_ID);
+    assert.deepEqual(app.active.rows[0].audience, classAudience);
+    assert.equal(app.active.rows[0].createdBy, 'teacher-1');
 
     const joined = await app.request('/api/canli/katilim', 'student');
     assert.equal(joined.response.status, 200);
@@ -225,7 +239,8 @@ test('teacher can start an immediate lesson and students can join it', async () 
     const forbidden = await app.request('/api/ogretmen/canli/ozet', 'student');
     assert.equal(forbidden.response.status, 403);
     const started = await app.request('/api/ogretmen/canli/baslat', 'teacher', 'POST', {
-      topic: 'Anında canlı ders'
+      topic: 'Anında canlı ders',
+      audience: classAudience
     });
     assert.equal(started.response.status, 201);
     assert.equal(started.data.startUrl, 'https://zoom.example/start');
@@ -257,7 +272,8 @@ test('scheduled live lessons require a future time and can only be started by th
     const created = await app.request('/api/ogretmen/canli/planla', 'teacher', 'POST', {
       title: 'Öğretmen dersi',
       startsAt: new Date(Date.now() + 60_000).toISOString(),
-      duration: 60
+      duration: 60,
+      audience: classAudience
     });
     const otherTeacher = await app.request(
       `/api/ogretmen/canli/planlar/${created.data.ders.id}/baslat`,
@@ -274,6 +290,81 @@ test('scheduled live lessons require a future time and can only be started by th
       duration: 60
     });
     assert.equal(anonymous.response.status, 401);
+  } finally {
+    await app.close();
+  }
+});
+
+test('hedef sınıf ve seçilen öğrenciler doğrulanır ve yetkisiz öğrenci katılamaz', async () => {
+  const app = await setup();
+  try {
+    const first = app.students.rows[0];
+    app.students.rows.push({
+      _id: new ObjectId('507f1f77bcf86cd799439012'), teacherId: 'teacher-1',
+      linkedUserId: 'student-2', grade: 6, section: 'A', active: true
+    });
+    app.students.rows.push({
+      _id: new ObjectId('507f1f77bcf86cd799439014'), teacherId: 'teacher-2',
+      linkedUserId: 'student-4', grade: 6, section: 'A', active: true
+    });
+    const audience = {...classAudience, mode: 'students', studentIds: [String(first._id)]};
+    const invalid = await app.request('/api/ogretmen/canli/baslat', 'teacher', 'POST', {
+      topic: 'Ders', audience: {...audience, studentIds: ['507f1f77bcf86cd799439014']}
+    });
+    assert.equal(invalid.response.status, 400);
+    assert.equal(app.active.rows.length, 0);
+    const started = await app.request('/api/ogretmen/canli/baslat', 'teacher', 'POST', {
+      topic: 'Ders', audience
+    });
+    assert.equal(started.response.status, 201);
+    assert.equal((await app.request('/api/canli/katilim', 'student')).response.status, 200);
+    const denied = await app.request('/api/canli/katilim', 'student', 'GET', undefined, 'student-2');
+    assert.equal(denied.response.status, 404);
+    assert.equal(denied.data.joinUrl, undefined);
+    first.active = false;
+    assert.equal((await app.request('/api/canli/katilim', 'student')).response.status, 404);
+  } finally {
+    await app.close();
+  }
+});
+
+test('sınıf hedefi güncel öğrenci kayıtlarını kullanır ve eski hedefsiz dersler gizlenir', async () => {
+  const app = await setup();
+  try {
+    app.active.rows.push({
+      _id: 'aktif', meetingId: 'legacy', expiresAt: new Date(Date.now() + 60_000)
+    });
+
+    assert.equal((await app.request('/api/canli/katilim', 'student')).response.status, 404);
+    app.active.rows.length = 0;
+    const started = await app.request('/api/ogretmen/canli/baslat', 'teacher', 'POST', {
+      topic: 'Sınıf dersi', audience: classAudience
+    });
+    assert.equal(started.response.status, 201);
+    app.students.rows.push({
+      _id: new ObjectId('507f1f77bcf86cd799439013'), teacherId: 'teacher-1',
+      linkedUserId: 'student-3', grade: 6, section: 'A', active: true
+    });
+    assert.equal((await app.request('/api/canli/katilim', 'student', 'GET', undefined, 'student-3')).response.status, 200);
+    app.students.rows[1].section = 'B';
+    assert.equal((await app.request('/api/canli/katilim', 'student', 'GET', undefined, 'student-3')).response.status, 404);
+  } finally {
+    await app.close();
+  }
+});
+
+test('hedefi olmayan eski planlı ders başlatılmaz', async () => {
+  const app = await setup();
+  try {
+    const id = new ObjectId();
+    app.scheduled.rows.push({
+      _id: id, kind: 'live', createdBy: 'teacher-1',
+      status: 'scheduled', startsAt: new Date(Date.now() - 1000)
+    });
+    const result = await app.request(`/api/ogretmen/canli/planlar/${id}/baslat`, 'teacher', 'POST');
+    assert.equal(result.response.status, 409);
+    assert.match(result.data.mesaj, /hedef kitlesi yok/);
+    assert.equal(app.active.rows.length, 0);
   } finally {
     await app.close();
   }
