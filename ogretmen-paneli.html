@@ -401,7 +401,7 @@ td.net{font-weight:700;color:var(--navy-900)}
 
     <section class="card" id="lessons" data-panel-view="lessons">
       <div class="section-title"><div><h2>Canlı ders oluştur</h2><p class="hint">Tarih ve saati belirleyin. Öğrenciler kendi panellerinde dersi bekler; ders saati geldiğinde buradan başlatabilirsiniz.</p></div></div>
-      <div class="inline-create-form" aria-label="Canlı ders hedef kitlesi">
+      <div id="liveAudienceHome"><div class="inline-create-form" id="liveAudienceControls" aria-label="Canlı ders hedef kitlesi">
         <h3>Derse katılacak öğrenciler</h3>
         <div class="form-grid">
           <div class="field"><label for="liveGrade">Sınıf</label><select id="liveGrade"><option value="">Sınıf seçin</option></select></div>
@@ -411,6 +411,7 @@ td.net{font-weight:700;color:var(--navy-900)}
         </div>
         <p class="status" id="liveAudienceStatus" role="status"></p>
         <p class="hint">Yalnızca hesabı öğretmene bağlanmış etkin öğrenciler derse katılabilir.</p>
+        </div>
       </div>
       <p class="status" id="zoomOpenStatus" role="status"></p>
       <a class="btn light" id="zoomOpenFallback" target="_blank" rel="noopener noreferrer" hidden>Zoom'u aç</a>
@@ -621,6 +622,16 @@ td.net{font-weight:700;color:var(--navy-900)}
   </div>
 </main>
 </div>
+
+<dialog class="password-dialog" id="liveAudienceDialog" aria-labelledby="liveAudienceTitle">
+  <h2 id="liveAudienceTitle">Canlı ders katılımcıları</h2>
+  <p>Sınıfı ve derse katılacak öğrencileri seçin.</p>
+  <div id="liveAudienceDialogContent"></div>
+  <div class="button-row">
+    <button class="btn light" type="button" id="cancelLiveAudience">Vazgeç</button>
+    <button class="btn" type="button" id="confirmLiveAudience">Canlı dersi başlat</button>
+  </div>
+</dialog>
 
 <dialog class="password-dialog" id="changePasswordDialog" aria-labelledby="changePasswordTitle">
   <form id="changePasswordForm">
@@ -1438,10 +1449,16 @@ td.net{font-weight:700;color:var(--navy-900)}
   });
 
   let canliOgrencileri = [];
+  let canliHedefIstek = 0;
+  let oncekiCanliHedefi = null;
 
   async function canliHedefleriniYukle() {
+    const request = ++canliHedefIstek;
+    $('confirmLiveAudience').disabled = true;
+    $('liveAudienceStatus').textContent = 'Öğrenci listesi yükleniyor…';
     try {
       const result = await api('/api/ogretmen/ogrenciler');
+      if (request !== canliHedefIstek) return;
       canliOgrencileri = result.students.filter(student => student.active);
       const grade = $('liveGrade').value;
       const grades = [...new Set(canliOgrencileri.map(student => student.grade))].sort((a, b) => a - b);
@@ -1450,10 +1467,13 @@ td.net{font-weight:700;color:var(--navy-900)}
       canliHedefleriniCiz();
       $('liveAudienceStatus').textContent = grades.length ? '' : 'Önce öğrenci yönetiminden etkin öğrenci ekleyin.';
     } catch (error) {
+      if (request !== canliHedefIstek) return;
       canliOgrencileri = [];
       $('liveGrade').replaceChildren(new Option('Sınıf seçin', ''));
       canliHedefleriniCiz();
       $('liveAudienceStatus').textContent = `Öğrenci listesi yüklenemedi: ${error.message}`;
+    } finally {
+      if (request === canliHedefIstek) $('confirmLiveAudience').disabled = false;
     }
   }
 
@@ -1525,10 +1545,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     }
   });
 
-  async function anindaCanliBaslat(dugme, durum) {
-    let audience;
-    try { audience = canliHedefi(); }
-    catch (error) { durum.textContent = error.message; return; }
+  async function anindaCanliBaslat(dugme, durum, audience) {
     const pencere = pencereAc();
     dugme.disabled = true;
     durum.textContent = 'Zoom toplantısı oluşturuluyor…';
@@ -1549,14 +1566,60 @@ td.net{font-weight:700;color:var(--navy-900)}
     }
   }
 
-  $('canliBaslat').addEventListener('click', event =>
-    anindaCanliBaslat(event.currentTarget, $('canliDurum')));
-  $('sidebarQuickLive').addEventListener('click', () => {
-    window.teacherPanelNavigation.open('lessons');
+  function canliHedefPenceresiniAc() {
+    if ($('canliBaslat').disabled || $('liveAudienceDialog').open) return;
+    oncekiCanliHedefi = {
+      grade: $('liveGrade').value,
+      section: $('liveSection').value,
+      mode: $('liveTargetMode').value,
+      studentIds: [...$('liveStudents').selectedOptions].map(option => option.value),
+      status: $('liveAudienceStatus').textContent
+    };
+    $('liveAudienceDialogContent').appendChild($('liveAudienceControls'));
+    $('liveAudienceDialog').showModal();
     $('liveGrade').focus();
     canliHedefleriniYukle();
-    $('sidebarLiveStatus').textContent = 'Sınıf ve katılımcıları seçip Anında başlat düğmesine basın.';
+  }
+
+  function canliHedefPenceresiniKapat(onaylandi) {
+    if (!oncekiCanliHedefi) return;
+    $('liveAudienceHome').appendChild($('liveAudienceControls'));
+    if (!onaylandi) {
+      canliHedefIstek++;
+      $('confirmLiveAudience').disabled = false;
+      $('liveGrade').value = oncekiCanliHedefi.grade;
+      $('liveTargetMode').value = oncekiCanliHedefi.mode;
+      canliHedefleriniCiz();
+      $('liveSection').value = oncekiCanliHedefi.section;
+      canliHedefleriniCiz();
+      [...$('liveStudents').options].forEach(option => {
+        option.selected = oncekiCanliHedefi.studentIds.includes(option.value);
+      });
+      $('liveAudienceStatus').textContent = oncekiCanliHedefi.status;
+    } else {
+      $('liveAudienceStatus').textContent = '';
+    }
+    oncekiCanliHedefi = null;
+    if ($('liveAudienceDialog').open) $('liveAudienceDialog').close();
+  }
+  $('liveAudienceDialog').addEventListener('cancel', event => {
+    event.preventDefault();
+    canliHedefPenceresiniKapat(false);
   });
+  $('liveAudienceDialog').addEventListener('close', () => {
+    if (!$('liveAudienceDialog').open) canliHedefPenceresiniKapat(false);
+  });
+  $('cancelLiveAudience').addEventListener('click', () => canliHedefPenceresiniKapat(false));
+  $('confirmLiveAudience').addEventListener('click', () => {
+    let audience;
+    try { audience = canliHedefi(); }
+    catch (error) { $('liveAudienceStatus').textContent = error.message; return; }
+    canliHedefPenceresiniKapat(true);
+    window.teacherPanelNavigation.open('lessons');
+    anindaCanliBaslat($('canliBaslat'), $('canliDurum'), audience);
+  });
+  $('canliBaslat').addEventListener('click', canliHedefPenceresiniAc);
+  $('sidebarQuickLive').addEventListener('click', canliHedefPenceresiniAc);
 
   const bugun = new Date();
   $('lessonDate').min = `${bugun.getFullYear()}-${pad(bugun.getMonth() + 1)}-${pad(bugun.getDate())}`;

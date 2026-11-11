@@ -145,3 +145,94 @@ test('a summary requested during termination cannot restore stale controls', asy
   assert.equal(state.islemler.hidden, true);
   assert.equal(state.bilgi.textContent, 'Canlı ders sonlandırıldı.');
 });
+
+function audienceSetup(loadStudents = async () => ({
+  students: [{id: 'student-1', name: 'Öğrenci', grade: 6, section: 'A', active: true, linked: true}]
+})) {
+  const section = html.slice(html.indexOf('  let canliOgrencileri = []'), html.indexOf('  const bugun = new Date();'));
+  const elements = {};
+  const calls = [];
+  function element(id) {
+    if (elements[id]) return elements[id];
+    const handlers = {};
+    return elements[id] = {
+      id, handlers, value: '', options: [], textContent: '', disabled: false, hidden: false, open: false,
+      get selectedOptions() { return this.options.filter(option => option.selected); },
+      addEventListener(event, callback) { handlers[event] = callback; },
+      click() { return handlers.click({currentTarget: this}); },
+      replaceChildren(...options) { this.options = options; },
+      appendChild(child) { child.parentElement = this; },
+      focus() {}, removeAttribute() {},
+      showModal() { this.open = true; },
+      close() { this.open = false; }
+    };
+  }
+  const window = {
+    teacherPanelNavigation: {open: id => calls.push({navigation: id})},
+    open: () => ({location: {replace: url => calls.push({zoom: url})}, close() {}})
+  };
+  const api = async (url, options) => {
+    if (url.endsWith('/ogrenciler')) return loadStudents();
+    calls.push({url, body: JSON.parse(options.body)});
+    return {startUrl: 'https://zoom.example/start'};
+  };
+  function Option(text, value) { this.text = text; this.value = String(value); this.selected = false; }
+  element('liveTargetMode').value = 'class';
+  vm.runInNewContext(section, {
+    $: element, api, Option, window, document: {addEventListener() {}},
+    canliYonetim: {yenile() {}}
+  });
+  return {element, calls};
+}
+
+const settle = () => new Promise(resolve => setImmediate(resolve));
+
+test('her iki anlık başlatma düğmesi seçim penceresini açar; geçersiz seçim istek göndermez', async () => {
+  for (const button of ['sidebarQuickLive', 'canliBaslat']) {
+    const page = audienceSetup();
+    page.element(button).click();
+    await settle();
+    assert.equal(page.element('liveAudienceDialog').open, true);
+    assert.equal(page.element('liveAudienceControls').parentElement.id, 'liveAudienceDialogContent');
+    page.element('confirmLiveAudience').click();
+    assert.match(page.element('liveAudienceStatus').textContent, /Sınıf/);
+    assert.equal(page.calls.length, 0);
+  }
+});
+
+test('iptal önceki seçimi korur ve bekleyen öğrenci listesi sonucu seçimi bozmaz', async () => {
+  let resolveStudents;
+  const page = audienceSetup(() => new Promise(resolve => { resolveStudents = resolve; }));
+  page.element('liveGrade').value = '6';
+  page.element('liveTargetMode').value = 'class';
+  page.element('sidebarQuickLive').click();
+  page.element('liveGrade').value = '7';
+  page.element('cancelLiveAudience').click();
+  resolveStudents({students: [{id: 'student-2', grade: 7, active: true}]});
+  await settle();
+  assert.equal(page.element('liveGrade').value, '6');
+  assert.equal(page.element('liveAudienceControls').parentElement.id, 'liveAudienceHome');
+  assert.equal(page.element('liveAudienceDialog').open, false);
+  assert.equal(page.calls.length, 0);
+});
+
+test('onaylanan öğrenci hedefi gönderilir ve Zoom açılır', async () => {
+  const page = audienceSetup();
+  page.element('canliBaslat').click();
+  await settle();
+  page.element('liveGrade').value = '6';
+  page.element('liveGrade').handlers.change();
+  page.element('liveSection').value = 'A';
+  page.element('liveSection').handlers.change();
+  page.element('liveTargetMode').value = 'students';
+  page.element('liveTargetMode').handlers.change();
+  page.element('liveStudents').options[0].selected = true;
+  page.element('confirmLiveAudience').click();
+  await settle();
+  const request = page.calls.find(call => call.url);
+  assert.deepEqual(JSON.parse(JSON.stringify(request.body.audience)), {
+    grade: 6, section: 'A', mode: 'students', studentIds: ['student-1']
+  });
+  assert.ok(page.calls.some(call => call.zoom === 'https://zoom.example/start'));
+  assert.equal(page.element('liveAudienceControls').parentElement.id, 'liveAudienceHome');
+});
