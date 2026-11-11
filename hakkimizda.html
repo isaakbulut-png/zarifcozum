@@ -15,7 +15,13 @@
 <header class="site-header">
   <div class="wrap">
     <a class="brand" href="index.html"><img class="brand-logo" src="assets/brand-mark.png" alt="">ZarifÇözüm</a>
-    <nav class="site-nav" aria-label="Site">
+    <button class="menu-toggle" type="button" aria-controls="site-navigation" aria-expanded="false" aria-label="Menüyü aç">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Menü</span>
+    </button>
+    <nav class="site-nav" id="site-navigation" aria-label="Site">
       <a href="hakkimizda.html" aria-current="page">Hakkımızda</a>
       <a href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html">Platform Ayrıcalıkları</a>
       <a href="Paketler.html">Paketler</a>
@@ -87,5 +93,6 @@
 <script src="/assets/breadcrumb.js"></script>
   <script src="/assets/site-media-targets.js"></script>
   <script src="/assets/site-media.js"></script>
+  <script src="assets/mobile-menu.js" defer></script>
 </body>
 </html>

@@ -495,3 +495,106 @@ section.block { padding-block: clamp(var(--space-12), 7vw, var(--space-24)); }
 .conf.t { background: var(--color-warning-highlight); color: var(--color-warning); }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+/* Mobil ve tablet menüsü */
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.menu-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.menu-toggle:focus-visible,
+.site-nav a:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+@media (max-width: 1100px) {
+  .site-header .wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    padding-block: var(--space-2);
+  }
+
+  .site-header .brand {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .site-header .menu-toggle {
+    display: inline-flex;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .site-header .site-nav {
+    display: none;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    padding: var(--space-3);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .site-header .site-nav.is-open {
+    display: flex;
+  }
+
+  .site-header .site-nav a {
+    display: block;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+  }
+
+  .site-header .site-nav a:hover {
+    background: var(--color-surface-offset);
+  }
+
+  .site-header .wrap > .row {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .site-header .wrap > .btn {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 600px) {
+  .site-header .site-nav {
+    padding: var(--space-2);
+  }
+
+  .site-header .wrap > .row .btn {
+    flex: 0 0 auto;
+  }
+
+  .site-header .wrap > .btn {
+    justify-self: start;
+  }
+}
