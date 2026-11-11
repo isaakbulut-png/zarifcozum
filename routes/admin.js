@@ -29,7 +29,8 @@ const VISITOR_SETTING_FIELDS = new Set([
   'practiceEnabled',
   'assistantEnabled',
   'fullTestEnabled',
-  'subscriptionRequired'
+  'subscriptionRequired',
+  'registrationEnabled'
 ]);
 const VISITOR_SETTING_RANGES = {
   questionLimit: [0, 500],

@@ -287,6 +287,7 @@
           </label>
         </div>
         <div class="toggle-list">
+          <label><input id="registrationEnabled" type="checkbox"> Yeni üyelik kayıtlarını kabul et</label>
           <label><input id="visitorSummaryEnabled" type="checkbox"> Sınırlı erişimli giriş yapmış kullanıcılar konu anlatımlarını görebilsin</label>
           <p>Giriş yapmamış ziyaretçiler konu başlıklarını görebilir; konu içerikleri için giriş gerekir.</p>
           <label><input id="visitorPracticeEnabled" type="checkbox"> Ziyaretçiler pratik test çözebilsin</label>
@@ -814,6 +815,7 @@
           $('visitorAssistantEnabled').checked = settings.assistantEnabled;
           $('visitorFullTestEnabled').checked = settings.fullTestEnabled;
           $('subscriptionRequired').checked = settings.subscriptionRequired;
+          $('registrationEnabled').checked = settings.registrationEnabled;
         } catch (error) { message.textContent = error.message; }
         await loadHomepageAssets();
       }
@@ -1247,7 +1249,8 @@
           practiceEnabled: $('visitorPracticeEnabled').checked,
           assistantEnabled: $('visitorAssistantEnabled').checked,
           fullTestEnabled: $('visitorFullTestEnabled').checked,
-          subscriptionRequired: $('subscriptionRequired').checked
+          subscriptionRequired: $('subscriptionRequired').checked,
+          registrationEnabled: $('registrationEnabled').checked
         };
         try {
           const data = await api('/api/admin/settings', {

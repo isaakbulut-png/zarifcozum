@@ -261,12 +261,16 @@ test('admin can read and update visitor access settings with validation', async 
     });
     assert.equal((await post({ ziyaretciHaklari: { questionLimit: 501 } })).status, 400);
     assert.equal((await post({ ziyaretciHaklari: { fullTestEnabled: 'true' } })).status, 400);
+    assert.equal((await post({ ziyaretciHaklari: { registrationEnabled: 'false' } })).status, 400);
     assert.equal((await post({ ziyaretciHaklari: { unknown: true } })).status, 400);
 
-    const saved = await post({ ziyaretciHaklari: { questionLimit: 8, fullTestEnabled: true } });
+    const saved = await post({
+      ziyaretciHaklari: { questionLimit: 8, fullTestEnabled: true, registrationEnabled: false }
+    });
     assert.equal(saved.status, 200);
     assert.equal(settings.questionLimit, 8);
     assert.equal(settings.fullTestEnabled, true);
+    assert.equal(settings.registrationEnabled, false);
     assert.equal(settings.topicLimit, DEFAULT_VISITOR_SETTINGS.topicLimit);
   });
 });

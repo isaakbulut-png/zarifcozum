@@ -3,8 +3,10 @@ const crypto = require('node:crypto');
 const express = require('express');
 const test = require('node:test');
 const nodemailer = require('nodemailer');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const Parent = require('../models/Parent');
+const SystemConfig = require('../models/SystemConfig');
 const { createRequireRole, redirectForRole, router } = require('../routes/auth');
 
 function withServer(sessionUser, callback) {
@@ -96,6 +98,9 @@ test('parent registration validates the connection code and creates a parent ses
     assert.equal(password, 'parent-password');
     return parent;
   });
+  const restoreSettings = stub(SystemConfig, 'getVisitorSettings', async () => ({
+    registrationEnabled: true
+  }));
   try {
     await withServer(undefined, async base => {
       const invalid = await fetch(`${base}/parent/register`, post({
@@ -124,9 +129,124 @@ test('parent registration validates the connection code and creates a parent ses
       assert.equal(result.redirectTo, '/veli-panel.html');
     });
   } finally {
+    restoreSettings();
     restoreCreate();
     restoreParentFind();
     restoreUserFind();
+  }
+});
+
+test('closed registration blocks new password and parent accounts', async () => {
+  const restore = stub(SystemConfig, 'getVisitorSettings', async () => ({
+    registrationEnabled: false
+  }));
+  try {
+    await withServer(undefined, async base => {
+      const student = await fetch(`${base}/register`, post({
+        name: 'Deniz',
+        email: 'deniz@example.com',
+        phone: '05551112233',
+        password: 'student-password',
+        passwordConfirmation: 'student-password',
+        role: 'student'
+      }));
+      assert.equal(student.status, 403);
+      assert.deepEqual(await student.json(), {mesaj: 'Yeni üyelik kayıtları şu anda kapalıdır.'});
+
+      const parent = await fetch(`${base}/parent/register`, post({
+        name: 'Ayşe',
+        surname: 'Yılmaz',
+        email: 'ayse@example.com',
+        phone: '05551112233',
+        password: 'parent-password',
+        passwordConfirmation: 'parent-password',
+        parentConnectionCode: 'ZRF123'
+      }));
+      assert.equal(parent.status, 403);
+    });
+  } finally {
+    restore();
+  }
+});
+
+test('closed registration blocks new Google accounts but permits existing Google login', async () => {
+  const previousClientId = process.env.GOOGLE_CLIENT_ID;
+  process.env.GOOGLE_CLIENT_ID = 'test-client-id';
+  const restoreSettings = stub(SystemConfig, 'getVisitorSettings', async () => ({
+    registrationEnabled: false
+  }));
+  const restoreVerify = stub(OAuth2Client.prototype, 'verifyIdToken', async () => ({
+    getPayload: () => ({
+      sub: 'google-subject',
+      email: 'student@example.com',
+      email_verified: true,
+      iss: 'accounts.google.com',
+      name: 'Student'
+    })
+  }));
+  let existingUser = null;
+  const restoreFindUser = stub(User, 'findOne', filter => ({
+    select: async () => filter.googleId && existingUser ? existingUser : null
+  }));
+  const restoreParentExists = stub(Parent, 'exists', async () => false);
+  try {
+    await withServer(undefined, async base => {
+      const registration = await fetch(`${base}/auth/google`, post({
+        credential: 'verified-test-token',
+        intent: 'register',
+        role: 'student'
+      }));
+      assert.equal(registration.status, 403);
+
+      existingUser = {
+        _id: {toString: () => 'student-id'},
+        name: 'Student',
+        email: 'student@example.com',
+        role: 'student',
+        restricted: false
+      };
+      const login = await fetch(`${base}/auth/google`, post({
+        credential: 'verified-test-token',
+        intent: 'login'
+      }));
+      assert.equal(login.status, 200);
+      assert.equal((await login.json()).user.id, 'student-id');
+    });
+  } finally {
+    restoreParentExists();
+    restoreFindUser();
+    restoreVerify();
+    restoreSettings();
+    if (previousClientId === undefined) delete process.env.GOOGLE_CLIENT_ID;
+    else process.env.GOOGLE_CLIENT_ID = previousClientId;
+  }
+});
+
+test('closed registration does not prevent password login', async () => {
+  const restoreSettings = stub(SystemConfig, 'getVisitorSettings', async () => ({
+    registrationEnabled: false
+  }));
+  const user = {
+    _id: {toString: () => 'student-id'},
+    name: 'Student',
+    email: 'student@example.com',
+    role: 'student',
+    restricted: false,
+    verifyPassword: async password => password === 'student-password'
+  };
+  const restoreFindUser = stub(User, 'findOne', () => ({select: async () => user}));
+  try {
+    await withServer(undefined, async base => {
+      const login = await fetch(`${base}/login`, post({
+        email: 'student@example.com',
+        password: 'student-password'
+      }));
+      assert.equal(login.status, 200);
+      assert.equal((await login.json()).user.id, 'student-id');
+    });
+  } finally {
+    restoreFindUser();
+    restoreSettings();
   }
 });
 

@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const Parent = require('../models/Parent');
+const SystemConfig = require('../models/SystemConfig');
 const { adminRoleOf } = require('../lib/admin-rbac');
 
 const router = express.Router();
@@ -101,6 +102,18 @@ function restrictionMessage(user) {
     : 'Hesabınız yönetici tarafından kısıtlanmıştır.';
 }
 
+async function ensureRegistrationEnabled(res) {
+  try {
+    const settings = await SystemConfig.getVisitorSettings();
+    if (settings.registrationEnabled) return true;
+    res.status(403).json({ mesaj: 'Yeni üyelik kayıtları şu anda kapalıdır.' });
+  } catch (error) {
+    console.error('Üyelik kayıt ayarı alınamadı:', error);
+    res.status(500).json({ mesaj: 'Üyelik kayıt durumu kontrol edilemedi.' });
+  }
+  return false;
+}
+
 function publicUser(user) {
   const role = user.role || 'parent';
   const adminRole = adminRoleOf(user);
@@ -129,6 +142,7 @@ function redirectForRole(role, adminRole) {
 }
 
 router.post('/register', registerLimiter, async (req, res) => {
+  if (!await ensureRegistrationEnabled(res)) return;
   const body = req.body || {};
   const name = typeof body.name === 'string' ? body.name.trim() : '';
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
@@ -218,6 +232,7 @@ router.post('/login', loginLimiter, (req, res) => loginHandler(req, res));
 router.post('/parent/login', loginLimiter, (req, res) => loginHandler(req, res, true));
 
 router.post('/parent/register', registerLimiter, async (req, res) => {
+  if (!await ensureRegistrationEnabled(res)) return;
   const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
   const surname = typeof req.body?.surname === 'string' ? req.body.surname.trim() : '';
   const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
@@ -332,6 +347,7 @@ router.post('/auth/google', (req, res, next) => {
         if (intent !== 'register') {
           return res.status(404).json({ mesaj: 'Bu Google hesabıyla kayıtlı hesap bulunamadı. Önce hesap oluşturun.' });
         }
+        if (!await ensureRegistrationEnabled(res)) return;
         if (!['student', 'teacher'].includes(requestedRole)) {
           return res.status(400).json({ mesaj: 'Geçerli bir kullanıcı tipi seçin.' });
         }
