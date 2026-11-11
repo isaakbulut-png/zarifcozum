@@ -191,15 +191,36 @@ function createLiveLessonsRouter({
   router.post('/api/ogretmen/canli/sonlandir', requireTeacher, asyncRoute(async (req, res) => {
     const lesson = await activeMeeting();
     if (!lesson) return res.status(404).json({ mesaj: 'Aktif canlı ders bulunamadı.' });
-    await endMeeting(lesson);
+    const confirmed = req.body?.zoomdaBittiginiOnayliyorum === true;
+    if (confirmed && req.body.meetingId !== lesson.meetingId) {
+      return res.status(409).json({ mesaj: 'Aktif ders değişti. Ders durumunu yenileyip tekrar deneyin.' });
+    }
+    let clearedWithoutZoom = false;
+    try {
+      await endMeeting(lesson);
+    } catch (error) {
+      if (error.zoomStatus !== 404) throw error;
+      console.error('Zoom toplantısı bulunamadı:', error.message);
+      if (!confirmed) {
+        return res.status(409).json({
+          kod: 'ZOOM_MEETING_NOT_FOUND',
+          mesaj: 'Zoom toplantısı bulunamadı. Toplantının sona erdiğinden emin olun.',
+          meetingId: lesson.meetingId
+        });
+      }
+      clearedWithoutZoom = true;
+    }
     if (lesson.scheduledLessonId) {
       await getScheduledCollection().updateOne(
         { _id: lesson.scheduledLessonId },
         { $set: { status: 'completed', endedAt: new Date() } }
       );
     }
-    await getActiveCollection().deleteOne({ _id: 'aktif' });
-    res.json({ mesaj: 'Canlı ders sonlandırıldı.' });
+    const deleted = await getActiveCollection().deleteOne({ _id: 'aktif', meetingId: lesson.meetingId });
+    if (!deleted.deletedCount) {
+      return res.status(409).json({ mesaj: 'Aktif ders değişti. Ders durumunu yenileyip tekrar deneyin.' });
+    }
+    res.json({ mesaj: clearedWithoutZoom ? 'Sitedeki aktif ders kaydı sonlandırıldı.' : 'Canlı ders sonlandırıldı.' });
   }));
 
   router.use((error, req, res, next) => {

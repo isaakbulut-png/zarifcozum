@@ -51,7 +51,7 @@ function collection() {
   };
 }
 
-async function setup() {
+async function setup(endMeeting = async () => {}) {
   const scheduled = collection();
   const active = collection();
   const app = express();
@@ -82,7 +82,7 @@ async function setup() {
       password: 'pass'
     }),
     getHostStartUrl: async () => 'https://zoom.example/start',
-    endMeeting: async () => {}
+    endMeeting
   }));
   const server = await new Promise(resolve => {
     const listening = app.listen(0, () => resolve(listening));
@@ -105,6 +105,65 @@ async function setup() {
     close: () => new Promise(resolve => server.close(resolve))
   };
 }
+
+test('Zoom toplantısı bulunamadığında yalnız açık onayla aynı dersin kaydı temizlenir', async () => {
+  let calls = 0;
+  const app = await setup(async () => {
+    calls++;
+    throw Object.assign(new Error('Meeting does not exist'), {zoomStatus: 404});
+  });
+  try {
+    const lessonId = new ObjectId();
+    app.scheduled.rows.push({_id: lessonId, status: 'active'});
+    app.active.rows.push({
+      _id: 'aktif', meetingId: 'meeting-123', scheduledLessonId: lessonId,
+      expiresAt: new Date(Date.now() + 60_000)
+    });
+
+    const first = await app.request('/api/ogretmen/canli/sonlandir', 'teacher', 'POST');
+    assert.equal(first.response.status, 409);
+    assert.equal(first.data.kod, 'ZOOM_MEETING_NOT_FOUND');
+    assert.equal(first.data.meetingId, 'meeting-123');
+    assert.equal(app.active.rows.length, 1);
+    assert.equal(app.scheduled.rows[0].status, 'active');
+
+    const wrongMeeting = await app.request('/api/ogretmen/canli/sonlandir', 'teacher', 'POST', {
+      zoomdaBittiginiOnayliyorum: true, meetingId: 'different'
+    });
+    assert.equal(wrongMeeting.response.status, 409);
+    assert.equal(calls, 1);
+    assert.equal(app.active.rows.length, 1);
+
+    const confirmed = await app.request('/api/ogretmen/canli/sonlandir', 'teacher', 'POST', {
+      zoomdaBittiginiOnayliyorum: true, meetingId: 'meeting-123'
+    });
+    assert.equal(confirmed.response.status, 200);
+    assert.match(confirmed.data.mesaj, /Sitedeki aktif ders kaydı/);
+    assert.equal(calls, 2);
+    assert.equal(app.active.rows.length, 0);
+    assert.equal(app.scheduled.rows[0].status, 'completed');
+  } finally {
+    await app.close();
+  }
+});
+
+test('onay verilse bile diğer Zoom hatalarında aktif ders kaydı korunur', async () => {
+  const app = await setup(async () => {
+    throw Object.assign(new Error('Zoom bağlantı hatası'), {status: 502, zoomStatus: 503});
+  });
+  try {
+    app.active.rows.push({
+      _id: 'aktif', meetingId: 'meeting-123', expiresAt: new Date(Date.now() + 60_000)
+    });
+    const response = await app.request('/api/ogretmen/canli/sonlandir', 'teacher', 'POST', {
+      zoomdaBittiginiOnayliyorum: true, meetingId: 'meeting-123'
+    });
+    assert.equal(response.response.status, 502);
+    assert.equal(app.active.rows.length, 1);
+  } finally {
+    await app.close();
+  }
+});
 
 test('scheduled Zoom lesson waits until its time and is joinable only after teacher starts it', async () => {
   const app = await setup();

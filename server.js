@@ -652,6 +652,7 @@ async function zoomApiIstegiYap(belirteci, method, yol, govde) {
     const detay = typeof veri.message === 'string' ? `: ${veri.message}` : '';
     const hata = new Error(`Zoom API isteği başarısız (${yanit.status})${detay}`);
     hata.status = 502;
+    hata.zoomStatus = yanit.status;
     throw hata;
   }
   return veri;

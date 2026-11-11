@@ -2,9 +2,31 @@ const express = require('express');
 const { createCurriculumService } = require('../lib/curriculumService');
 const { ObjectId } = require('mongodb');
 
+const TREE_CACHE_TTL_MS = 60 * 1000;
+
 function createCurriculumRouter({ requireStaff, service = createCurriculumService(), getDb }) {
   const router = express.Router();
   router.use(requireStaff);
+  let cachedTree = null;
+  let cachedTreeExpiresAt = 0;
+  let treeRequest = null;
+
+  function getRootTree() {
+    if (cachedTree && Date.now() < cachedTreeExpiresAt) return Promise.resolve(cachedTree);
+    if (!treeRequest) {
+      treeRequest = Promise.resolve()
+        .then(() => service.getTree())
+        .then(response => {
+          if (response.status >= 200 && response.status < 300) {
+            cachedTree = response;
+            cachedTreeExpiresAt = Date.now() + TREE_CACHE_TTL_MS;
+          }
+          return response;
+        })
+        .finally(() => { treeRequest = null; });
+    }
+    return treeRequest;
+  }
 
   async function forward(res, operation) {
     try {
@@ -43,7 +65,9 @@ function createCurriculumRouter({ requireStaff, service = createCurriculumServic
     }
   }
 
-  router.get('/tree', (req, res) => forward(res, () => service.getTree(req.query.parent_id)));
+  router.get('/tree', (req, res) => req.query.parent_id === undefined
+    ? forward(res, getRootTree)
+    : forward(res, () => service.getTree(req.query.parent_id)));
   router.post('/nodes', (req, res) => forward(res, () => service.createNode(req.body)));
 
   async function link(req, res, kind) {

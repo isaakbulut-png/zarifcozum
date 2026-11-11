@@ -55,6 +55,52 @@ test('müfredat ağ geçidi rol kontrolü, iletimi ve servis hatalarını uygula
   assert.doesNotMatch(JSON.stringify(await failed.json()), /secret/);
 });
 
+test('ana müfredat ağacının başarılı yanıtını kısa süre önbelleğe alır ve eşzamanlı istekleri birleştirir', async t => {
+  let requests = 0;
+  const tree = [{ id: 'root', children: [] }];
+  const app = express();
+  app.use('/api/v1/curriculum', createCurriculumRouter({
+    requireStaff: (_req, _res, next) => next(),
+    service: {
+      getTree: async () => {
+        requests++;
+        await new Promise(resolve => setTimeout(resolve, 30));
+        return { status: 200, data: tree };
+      }
+    }
+  }));
+  const base = `${await listen(app, t)}/api/v1/curriculum/tree`;
+
+  const [first, concurrent] = await Promise.all([fetch(base), fetch(base)]);
+  assert.deepEqual(await first.json(), tree);
+  assert.deepEqual(await concurrent.json(), tree);
+  assert.deepEqual(await (await fetch(base)).json(), tree);
+  assert.equal(requests, 1);
+});
+
+test('429 yanıtı iletilir ancak başarılı ağaç önbelleğine alınmaz', async t => {
+  let requests = 0;
+  const app = express();
+  app.use('/api/v1/curriculum', createCurriculumRouter({
+    requireStaff: (_req, _res, next) => next(),
+    service: {
+      getTree: async () => {
+        requests++;
+        return requests === 1
+          ? { status: 429, data: { mesaj: 'Daha sonra tekrar deneyin.' } }
+          : { status: 200, data: [] };
+      }
+    }
+  }));
+  const base = `${await listen(app, t)}/api/v1/curriculum/tree`;
+
+  const limited = await fetch(base);
+  assert.equal(limited.status, 429);
+  assert.deepEqual(await limited.json(), { mesaj: 'Daha sonra tekrar deneyin.' });
+  assert.deepEqual(await (await fetch(base)).json(), []);
+  assert.equal(requests, 2);
+});
+
 test('servis anahtarı eksikse istek gönderilmez', async () => {
   const service = createCurriculumService({ token: '' });
   await assert.rejects(service.getTree(), { code: 'CURRICULUM_NOT_CONFIGURED' });

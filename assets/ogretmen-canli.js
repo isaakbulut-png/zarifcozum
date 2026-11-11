@@ -31,8 +31,21 @@
       guncelle('sonlandir', 'disabled', true);
       guncelle('hata', 'textContent', '');
       try {
-        await api('/api/ogretmen/canli/sonlandir', { method: 'POST' });
-        guncelle('bilgi', 'textContent', 'Canlı ders sonlandırıldı.');
+        let sonuc;
+        try {
+          sonuc = await api('/api/ogretmen/canli/sonlandir', { method: 'POST' });
+        } catch (error) {
+          if (error.data?.kod !== 'ZOOM_MEETING_NOT_FOUND' || !error.data.meetingId) throw error;
+          if (!window.confirm('Zoom toplantısı bulunamadı. Toplantının Zoom’da bittiğinden eminseniz yalnızca sitedeki aktif ders kaydı sonlandırılacak. Devam edilsin mi?')) {
+            guncelle('hata', 'textContent', 'Sitedeki aktif ders kaydı korunuyor.');
+            return;
+          }
+          sonuc = await api('/api/ogretmen/canli/sonlandir', {
+            method: 'POST',
+            body: JSON.stringify({ zoomdaBittiginiOnayliyorum: true, meetingId: error.data.meetingId })
+          });
+        }
+        guncelle('bilgi', 'textContent', sonuc.mesaj);
         guncelle('islemler', 'hidden', true);
         try {
           await onSonlandir();

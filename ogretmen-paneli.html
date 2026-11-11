@@ -677,6 +677,7 @@ td.net{font-weight:700;color:var(--navy-900)}
     if (!r.ok) {
       const error = new Error(d.mesaj || ('Sunucu hatası (' + r.status + ')'));
       error.status = r.status;
+      error.data = d;
       throw error;
     }
     return d;

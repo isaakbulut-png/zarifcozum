@@ -77,6 +77,43 @@ test('cancellation and API failures preserve the active lesson controls', async 
   assert.match(state.sidebar.hata.textContent, /Zoom hatası/);
 });
 
+test('Zoom 404 sonrasında açık onayla aynı dersin site kaydı temizlenir', async () => {
+  const calls = [];
+  const state = setup(async (url, options) => {
+    calls.push({url, options});
+    if (calls.length === 1) {
+      throw Object.assign(new Error('Zoom toplantısı bulunamadı'), {
+        data: {kod: 'ZOOM_MEETING_NOT_FOUND', meetingId: '123'}
+      });
+    }
+    return {mesaj: 'Sitedeki aktif ders kaydı sonlandırıldı.'};
+  });
+  await state.sonlandir.click();
+  assert.equal(calls.length, 2);
+  assert.deepEqual(JSON.parse(calls[1].options.body), {
+    zoomdaBittiginiOnayliyorum: true, meetingId: '123'
+  });
+  assert.equal(state.islemler.hidden, true);
+  assert.match(state.bilgi.textContent, /Sitedeki aktif ders kaydı/);
+});
+
+test('Zoom 404 sonrası onay iptal edilirse kayıt temizleme isteği gönderilmez', async () => {
+  let calls = 0;
+  let confirmations = 0;
+  const state = setup(async () => {
+    calls++;
+    throw Object.assign(new Error('Zoom toplantısı bulunamadı'), {
+      data: {kod: 'ZOOM_MEETING_NOT_FOUND', meetingId: '123'}
+    });
+  });
+  state.islemler.hidden = false;
+  state.window.confirm = () => ++confirmations === 1;
+  await state.sonlandir.click();
+  assert.equal(calls, 1);
+  assert.equal(state.islemler.hidden, false);
+  assert.match(state.hata.textContent, /korunuyor/);
+});
+
 test('summary failure is shown and empty summary hides controls', async () => {
   let fail = true;
   const state = setup(async () => {
@@ -101,7 +138,7 @@ test('a summary requested during termination cannot restore stale controls', asy
   });
   const ending = state.sonlandir.click();
   const refreshing = state.yonetim.yenile();
-  resolveEnd({});
+  resolveEnd({mesaj: 'Canlı ders sonlandırıldı.'});
   await ending;
   resolveSummary({ aktif: true, topic: 'Eski ders', meetingNumber: '123' });
   await refreshing;
