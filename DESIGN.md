@@ -12,8 +12,17 @@ colors:
   chestnut-primary: "#7a4f2d"
   chestnut-hover: "#6b4a2f"
   chestnut-active: "#523520"
-  amber-base: "#d6a85f"
-  amber-homepage: "#c9955c"
+  accent-coral: "#D6452B"
+  accent-coral-soft: "#FBE0D8"
+  accent-coral-button: "#B73520"
+  accent-emerald: "#17805F"
+  accent-emerald-soft: "#D8F0E6"
+  accent-cobalt: "#2F5FD0"
+  accent-cobalt-soft: "#DCE6FA"
+  feedback-correct: "#276B43"
+  feedback-correct-soft: "#E0F0E5"
+  feedback-incorrect: "#B93838"
+  feedback-incorrect-soft: "#F8DEDE"
   soft-border: "#d9d3c3"
   warm-divider: "#ecd9c6"
 typography:
@@ -63,14 +72,14 @@ spacing:
   space-24: "6rem"
 components:
   button-primary:
-    backgroundColor: "{colors.chestnut-primary}"
+    backgroundColor: "var(--page-cta)"
     textColor: "#ffffff"
     typography: "{typography.body}"
     rounded: "{rounded.md}"
     padding: "0.75rem 1.25rem"
     height: "44px"
   button-primary-hover:
-    backgroundColor: "{colors.chestnut-hover}"
+    backgroundColor: "color-mix(in srgb, var(--page-cta) 90%, black)"
   button-ghost:
     backgroundColor: "transparent"
     textColor: "{colors.cocoa-ink}"
@@ -83,8 +92,8 @@ components:
     rounded: "{rounded.lg}"
     padding: "1.25rem"
   chip-default:
-    backgroundColor: "{colors.soft-sand}"
-    textColor: "{colors.muted-cocoa}"
+    backgroundColor: "var(--page-accent-soft)"
+    textColor: "{colors.cocoa-ink}"
     typography: "{typography.label}"
     rounded: "{rounded.full}"
     padding: "0.2rem 0.6rem"
@@ -97,8 +106,8 @@ components:
     textColor: "{colors.muted-cocoa}"
     typography: "{typography.body}"
   notice-info:
-    backgroundColor: "{colors.soft-sand}"
-    textColor: "{colors.chestnut-active}"
+    backgroundColor: "var(--page-accent-soft)"
+    textColor: "{colors.cocoa-ink}"
     rounded: "{rounded.md}"
     padding: "0.75rem 1rem"
 ---
@@ -109,7 +118,7 @@ components:
 
 **Creative North Star: "Krem kâğıtlı matematik çalışma odası"**
 
-ZarifÇözüm's interface pairs warm paper-like surfaces with cocoa text and chestnut actions. The intended feeling is warm, calm, and trustworthy: clear enough for study, with a quietly editorial character rather than a cold technology aesthetic. The existing ZarifÇözüm logo remains part of the identity.
+ZarifÇözüm's interface pairs warm paper-like surfaces and cocoa headings with a role-based accent system. The intended feeling is warm, calm, and trustworthy: clear enough for study, with a quietly editorial character rather than a cold technology aesthetic. Keep the existing cream background, dark-brown headings, and ZarifÇözüm logo fixed.
 
 The shared stylesheet and homepage have related but distinct implementations. Shared page display headings use Clash Display and a restrained chestnut palette; the homepage switches its headings to a Georgia-led serif, softens surfaces, and uses pill-shaped calls to action. Preserve those as observed surface variations rather than flattening them into one invented component style.
 
@@ -121,16 +130,16 @@ The shared stylesheet and homepage have related but distinct implementations. Sh
 
 ## Colors
 
-The palette is built around warm cream, ivory, sand, cocoa, and chestnut; amber is a supporting accent, not a neon signal.
+The fixed foundation is warm cream, ivory, sand, cocoa, and chestnut. Accent colors are assigned by learning context, not mixed freely.
 
-### Primary
-- **Kestane Mürekkebi** (`{colors.chestnut-primary}`): Primary actions and emphasis in the shared system.
-- **Kestane Hover** (`{colors.chestnut-hover}`): Hover state for primary buttons.
-- **Koyu Kestane** (`{colors.chestnut-active}`): Pressed and high-emphasis text states.
+### Brand Foundation
+- **Kestane Mürekkebi** (`{colors.chestnut-primary}`): Fixed dark-brown brand tone for headings and identity details.
+- **Kestane Hover** (`{colors.chestnut-hover}`) and **Koyu Kestane** (`{colors.chestnut-active}`): Retain for existing chestnut-specific states; they are not additional page accents.
 
-### Secondary
-- **Bal Amberi** (`{colors.amber-homepage}`): Homepage accent for highlights and selected visual details.
-- **Taban Kehribarı** (`{colors.amber-base}`): Accent in the shared stylesheet; retain as a distinct token from the homepage override.
+### Accent Roles
+- **Mercan** (`{colors.accent-coral}`, soft `{colors.accent-coral-soft}`): Entry and primary CTA, home and registration flows, and grades 5–8.
+- **Zümrüt** (`{colors.accent-emerald}`, soft `{colors.accent-emerald-soft}`): Progress, success states, test results, parent dashboard, and grades 9–12.
+- **Kobalt** (`{colors.accent-cobalt}`, soft `{colors.accent-cobalt-soft}`): Learning assistant, lesson explanations, and live classes.
 
 ### Neutral
 - **Sıcak Krem** (`{colors.warm-cream}`): Main page background.
@@ -143,7 +152,45 @@ The palette is built around warm cream, ivory, sand, cocoa, and chestnut; amber 
 - **Yumuşak Kenarlık** (`{colors.soft-border}`): Shared component outlines.
 - **Sıcak Ayraç** (`{colors.warm-divider}`): Section and navigation separators.
 
-Semantic success, warning, error, and live colors remain state-specific. Keep them legible and functional; do not promote them to decorative brand accents.
+**One accent per page.** A page selects one of coral, emerald, or cobalt, and uses that accent with its matching soft tone. The homepage is the sole exception: it may use all three, scoped to the roles above. Never recolor the cream foundation, cocoa headings, or logo.
+
+Correct/incorrect answer feedback is independent of page accents and stays consistent everywhere: use `{colors.feedback-correct}` / `{colors.feedback-correct-soft}` for correct, and `{colors.feedback-incorrect}` / `{colors.feedback-incorrect-soft}` for incorrect. Do not derive answer feedback from `--page-accent`.
+
+**CSS variable contract:** define the palette once, then set the page's accent with one `data-accent` value. Components consume `--page-accent`, `--page-accent-soft`, and `--page-cta`; the homepage may scope role-specific overrides to its sections.
+
+```css
+:root {
+  --accent-coral: #D6452B;
+  --accent-coral-soft: #FBE0D8;
+  --accent-coral-button: #B73520;
+  --accent-emerald: #17805F;
+  --accent-emerald-soft: #D8F0E6;
+  --accent-cobalt: #2F5FD0;
+  --accent-cobalt-soft: #DCE6FA;
+  --feedback-correct: #276B43;
+  --feedback-correct-soft: #E0F0E5;
+  --feedback-incorrect: #B93838;
+  --feedback-incorrect-soft: #F8DEDE;
+}
+
+body[data-accent="coral"] {
+  --page-accent: var(--accent-coral);
+  --page-accent-soft: var(--accent-coral-soft);
+  --page-cta: var(--accent-coral-button);
+}
+body[data-accent="emerald"] {
+  --page-accent: var(--accent-emerald);
+  --page-accent-soft: var(--accent-emerald-soft);
+  --page-cta: var(--accent-emerald);
+}
+body[data-accent="cobalt"] {
+  --page-accent: var(--accent-cobalt);
+  --page-accent-soft: var(--accent-cobalt-soft);
+  --page-cta: var(--accent-cobalt);
+}
+```
+
+For example, switch a page with one line: `<body data-accent="emerald">`. White button text must meet at least 4.5:1 contrast. The supplied coral `#D6452B` is 4.43:1 against white, so coral buttons use the darker `#B73520` variant (5.93:1); emerald is 4.90:1 and cobalt is 5.72:1 with white.
 
 **The Warm Paper Rule.** Keep the cream-and-cocoa identity recognizable across surfaces; distinguish page-specific token overrides instead of silently normalizing them.
 
@@ -191,7 +238,8 @@ Shared controls use compact rounded corners (6px small, 10px medium); cards and 
 
 ### Buttons
 - **Shape:** Shared buttons use a 10px radius; homepage CTA buttons use a pill silhouette.
-- **Primary:** Chestnut fill with white text in the shared system; homepage primary actions use a warm chestnut gradient and a soft shadow.
+- **Primary:** Page primary actions use `var(--page-cta)` with white text; the page's assigned accent provides the color.
+- **Button contrast:** Coral uses the darker `#B73520` button variant for white labels; emerald and cobalt use their canonical colors.
 - **Hover / Focus:** Darken the primary fill; use the global 2px focus outline with a 2px offset. Homepage cards and controls use a small lift where defined.
 - **Secondary / Ghost:** Transparent fill with a fine warm border in the shared system; the homepage uses a softly tinted paper fill.
 - **Sizing:** Shared default height is at least 44px; compact buttons may be 36px. Large buttons use the next spacing step.
@@ -206,6 +254,8 @@ Shared controls use compact rounded corners (6px small, 10px medium); cards and 
 - **Background:** Ivory or surface-offset paper tones with a fine border.
 - **Shadow Strategy:** Resting cards use the quiet surface shadow; hoverable homepage tiles may lift slightly.
 - **Internal Padding:** 20px for shared cards; feature cards use 24px.
+- **Homepage class paths:** Two paper-toned cards sit immediately below the hero for grades 5–8 and 9–12. Each offers direct grade links with 44px minimum touch targets.
+- **Class path accents:** The 5–8 path uses coral and the 9–12 path uses emerald, as the homepage-only multi-accent exception.
 
 ### Inputs / Fields
 - **Style:** Registration fields use an ivory background, a 1px neutral border, 8px corners, and 12px padding.

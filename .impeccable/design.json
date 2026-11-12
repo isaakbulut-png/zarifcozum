@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-12T11:07:40.1468321+03:00",
+  "generatedAt": "2026-11-12T11:41:38+03:00",
   "title": "Design System: ZarifÇözüm",
   "extensions": {
     "colorMeta": {
@@ -64,17 +64,71 @@
         "canonical": "#523520",
         "tonalRamp": ["#110905", "#2d1e14", "#4b3526", "#6a4e3b", "#8a6a53", "#a88872", "#c3a896", "#f6ece6"]
       },
-      "amber-base": {
+      "accent-coral": {
         "role": "secondary",
-        "displayName": "Taban Kehribarı",
-        "canonical": "#d6a85f",
-        "tonalRamp": ["#140900", "#311d00", "#513400", "#724d00", "#936818", "#b18742", "#caa874", "#f9eddb"]
+        "displayName": "Mercan",
+        "canonical": "#d6452b",
+        "tonalRamp": ["#150704", "#4b180f", "#80291a", "#b63b25", "#d6452b", "#dc614b", "#e68f80", "#fbecea"]
       },
-      "amber-homepage": {
+      "accent-coral-soft": {
         "role": "secondary",
-        "displayName": "Bal Amberi",
-        "canonical": "#c9955c",
-        "tonalRamp": ["#140800", "#321c01", "#533206", "#754b16", "#97662c", "#b5844f", "#cda67c", "#faecde"]
+        "displayName": "Mercan Açık Ton",
+        "canonical": "#fbe0d8",
+        "tonalRamp": ["#191616", "#584e4c", "#978682", "#d5beb8", "#fbe0d8", "#fce5de", "#fdece8", "#fffcfb"]
+      },
+      "accent-coral-button": {
+        "role": "secondary",
+        "displayName": "Mercan CTA",
+        "canonical": "#b73520",
+        "tonalRamp": ["#120503", "#40130b", "#6e2013", "#9c2d1b", "#b73520", "#c25341", "#d48679", "#f8ebe9"]
+      },
+      "accent-emerald": {
+        "role": "secondary",
+        "displayName": "Zümrüt",
+        "canonical": "#17805f",
+        "tonalRamp": ["#020d09", "#082d21", "#0e4d39", "#146d51", "#17805f", "#3a9377", "#74b39f", "#e8f2ef"]
+      },
+      "accent-emerald-soft": {
+        "role": "secondary",
+        "displayName": "Zümrüt Açık Ton",
+        "canonical": "#d8f0e6",
+        "tonalRamp": ["#161817", "#4c5451", "#82908a", "#b8ccc4", "#d8f0e6", "#def2ea", "#e8f6f0", "#fbfefd"]
+      },
+      "accent-cobalt": {
+        "role": "secondary",
+        "displayName": "Kobalt",
+        "canonical": "#2f5fd0",
+        "tonalRamp": ["#050915", "#102149", "#1c397d", "#2851b1", "#2f5fd0", "#4e77d7", "#829fe3", "#eaeffa"]
+      },
+      "accent-cobalt-soft": {
+        "role": "secondary",
+        "displayName": "Kobalt Açık Ton",
+        "canonical": "#dce6fa",
+        "tonalRamp": ["#161719", "#4d5158", "#848a96", "#bbc4d5", "#dce6fa", "#e1eafb", "#eaf0fc", "#fcfdff"]
+      },
+      "feedback-correct": {
+        "role": "semantic",
+        "displayName": "Doğru Yanıt",
+        "canonical": "#276b43",
+        "tonalRamp": ["#040b07", "#0e2517", "#174028", "#215b39", "#276b43", "#47815f", "#7da68e", "#e9f0ec"]
+      },
+      "feedback-correct-soft": {
+        "role": "semantic",
+        "displayName": "Doğru Yanıt Açık Ton",
+        "canonical": "#e0f0e5",
+        "tonalRamp": ["#161817", "#4e5450", "#869089", "#beccc3", "#e0f0e5", "#e5f2e9", "#ecf6ef", "#fcfefc"]
+      },
+      "feedback-incorrect": {
+        "role": "semantic",
+        "displayName": "Yanlış Yanıt",
+        "canonical": "#b93838",
+        "tonalRamp": ["#120606", "#411414", "#6f2222", "#9d3030", "#b93838", "#c45656", "#d58888", "#f8ebeb"]
+      },
+      "feedback-incorrect-soft": {
+        "role": "semantic",
+        "displayName": "Yanlış Yanıt Açık Ton",
+        "canonical": "#f8dede",
+        "tonalRamp": ["#191616", "#574e4e", "#958585", "#d3bdbd", "#f8dede", "#f9e3e3", "#fbebeb", "#fefcfc"]
       },
       "soft-border": {
         "role": "neutral",
@@ -179,17 +233,33 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Shared chestnut primary action with a clear keyboard focus state.",
+      "description": "Primary action uses the selected page accent with a clear keyboard focus state.",
       "html": "<button class=\"ds-btn-primary\" type=\"button\">Öğrenci demosunu aç</button>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; padding: var(--space-3) var(--space-5); border: 1px solid transparent; border-radius: var(--radius-md); background: var(--color-primary); color: #fff; font: 600 var(--text-sm)/1.2 var(--font-body); transition: background var(--transition), transform var(--transition); } .ds-btn-primary:hover { background: var(--color-primary-hover); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; } .ds-btn-primary:active { transform: translateY(1px); }"
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; padding: var(--space-3) var(--space-5); border: 1px solid transparent; border-radius: var(--radius-md); background: var(--page-cta); color: #fff; font: 600 var(--text-sm)/1.2 var(--font-body); transition: filter var(--transition), transform var(--transition); } .ds-btn-primary:hover { filter: brightness(0.9); } .ds-btn-primary:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 2px; } .ds-btn-primary:active { transform: translateY(1px); }"
     },
     {
       "name": "Homepage Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Homepage-only pill CTA with a warm gradient and a soft shadow.",
+      "description": "Homepage hero and conversion-card pill CTA with Vurgu Mercanı and a soft shadow.",
       "html": "<a class=\"ds-btn-home-primary\" href=\"#sinif-sec\">Hemen keşfet</a>",
-      "css": ".ds-btn-home-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: var(--space-4) var(--space-6); border-radius: 9999px; background: linear-gradient(135deg, #8a5a34, #6b4a2f); color: #fff; font: 600 var(--text-base)/1.2 var(--font-body); box-shadow: 0 4px 12px rgba(90, 55, 30, 0.25); transition: background var(--transition), transform var(--transition); } .ds-btn-home-primary:hover { background: linear-gradient(135deg, #7a4f2d, #5a3a22); } .ds-btn-home-primary:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; } .ds-btn-home-primary:active { transform: translateY(1px); }"
+      "css": ".ds-btn-home-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: var(--space-4) var(--space-6); border-radius: 9999px; background: var(--page-cta); color: #fff; font: 600 var(--text-base)/1.2 var(--font-body); box-shadow: 0 4px 12px rgba(90, 55, 30, 0.2); transition: filter var(--transition), transform var(--transition); } .ds-btn-home-primary:hover { filter: brightness(0.9); } .ds-btn-home-primary:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 2px; } .ds-btn-home-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Homepage Grade Paths",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Two paper-toned cards provide direct grade links for 5–8 and 9–12 below the homepage hero.",
+      "html": "<nav class=\"ds-grade-paths\" aria-label=\"Sınıf aralığını seç\"><article class=\"path-coral\"><h2>5–8. sınıf</h2><a href=\"konu.html?sinif=5\">5. sınıf</a><a href=\"konu.html?sinif=8\">8. sınıf</a></article><article class=\"path-emerald\"><h2>9–12. sınıf</h2><a href=\"konu.html?sinif=9\">9. sınıf</a><a href=\"konu.html?sinif=12\">12. sınıf</a></article></nav>",
+      "css": ".ds-grade-paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); } .ds-grade-paths article { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-4) var(--space-5); border: 1px solid #ead3bd; border-radius: var(--radius-lg); background: #fffaf5; box-shadow: var(--shadow-sm); } .ds-grade-paths .path-coral { --path-accent: var(--accent-coral); --path-accent-soft: var(--accent-coral-soft); } .ds-grade-paths .path-emerald { --path-accent: var(--accent-emerald); --path-accent-soft: var(--accent-emerald-soft); } .ds-grade-paths h2 { color: var(--path-accent); } .ds-grade-paths a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: var(--space-2); border-radius: 9999px; background: var(--path-accent-soft); color: var(--color-text); } @media (max-width: 560px) { .ds-grade-paths { grid-template-columns: 1fr; } }"
+    },
+    {
+      "name": "Homepage Success Message",
+      "kind": "custom",
+      "refersTo": "notice-success",
+      "description": "Emerald completion panel for celebratory success, separate from correct-answer feedback.",
+      "html": "<h2 class=\"ds-success-message\">Tebrikler! Testi Tamamladın! 🎉</h2>",
+      "css": ".ds-success-message { max-width: calc(100vw - 2rem); margin-inline: 1rem; padding: 0.8rem 1.25rem; border: 1px solid var(--accent-emerald); border-radius: 1rem; background: var(--accent-emerald); color: #fff; font-family: var(--font-body); font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem); line-height: 1.2; text-align: center; box-shadow: 0 8px 22px rgba(58, 38, 24, 0.28); }"
     },
     {
       "name": "Ghost Button",
@@ -211,9 +281,9 @@
       "name": "Status Chip",
       "kind": "chip",
       "refersTo": "chip-default",
-      "description": "Compact pill label; semantic colors distinguish status.",
+      "description": "Compact pill label using the selected page's soft accent tone and fixed cocoa text.",
       "html": "<span class=\"ds-chip\">KONU TAKİBİ</span>",
-      "css": ".ds-chip { display: inline-flex; align-items: center; gap: var(--space-1); padding: 0.2rem 0.6rem; border-radius: 9999px; background: var(--color-primary-highlight); color: var(--color-primary-active); font: 600 var(--text-xs)/1.3 var(--font-body); white-space: nowrap; } .ds-chip:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }"
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: var(--space-1); padding: 0.2rem 0.6rem; border-radius: 9999px; background: var(--page-accent-soft); color: var(--color-text); font: 600 var(--text-xs)/1.3 var(--font-body); white-space: nowrap; } .ds-chip:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 2px; }"
     },
     {
       "name": "Content Card",
@@ -237,12 +307,12 @@
       "refersTo": "notice-info",
       "description": "Soft highlighted notice for explanatory information.",
       "html": "<aside class=\"ds-notice\" role=\"note\"><span aria-hidden=\"true\">i</span><p>Bu sürüm demo deneyimidir.</p></aside>",
-      "css": ".ds-notice { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid #dbcfc5; border-radius: var(--radius-md); background: var(--color-primary-highlight); color: var(--color-primary-active); font: 400 var(--text-sm)/1.6 var(--font-body); } .ds-notice span { display: grid; width: 18px; height: 18px; flex: none; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-weight: 700; } .ds-notice p { margin: 0; }"
+      "css": ".ds-notice { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid var(--page-accent); border-radius: var(--radius-md); background: var(--page-accent-soft); color: var(--color-text); font: 400 var(--text-sm)/1.6 var(--font-body); } .ds-notice span { display: grid; width: 18px; height: 18px; flex: none; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-weight: 700; } .ds-notice p { margin: 0; }"
     }
   ],
   "narrative": {
     "northStar": "Krem kâğıtlı matematik çalışma odası",
-    "overview": "ZarifÇözüm's interface pairs warm paper-like surfaces with cocoa text and chestnut actions. The intended feeling is warm, calm, and trustworthy: clear enough for study, with a quietly editorial character rather than a cold technology aesthetic. The existing ZarifÇözüm logo remains part of the identity.\n\nThe shared stylesheet and homepage have related but distinct implementations. Shared page display headings use Clash Display and a restrained chestnut palette; the homepage switches its headings to a Georgia-led serif, softens surfaces, and uses pill-shaped calls to action. Preserve those as observed surface variations rather than flattening them into one invented component style.",
+    "overview": "ZarifÇözüm's interface keeps warm paper-like surfaces, cocoa headings, and the existing logo fixed while assigning one of three accents by learning context: coral for entry and grades 5–8, emerald for progress and grades 9–12, and cobalt for lessons, live classes, and the learning assistant. The intended feeling is warm, calm, and trustworthy rather than a cold technology aesthetic.\n\nThe shared stylesheet and homepage have related but distinct implementations. Shared page display headings use Clash Display; the homepage switches its headings to a Georgia-led serif and may combine the three role-scoped accents. Preserve those as observed surface variations rather than flattening them into one invented component style.",
     "keyCharacteristics": [
       "Warm cream and cocoa form the visual foundation.",
       "Serif display type and sans-serif reading text create the main hierarchy.",
@@ -253,6 +323,16 @@
       {
         "name": "The Warm Paper Rule",
         "body": "Keep the cream-and-cocoa identity recognizable across surfaces; distinguish page-specific token overrides instead of silently normalizing them.",
+        "section": "colors"
+      },
+      {
+        "name": "The Single Accent Rule",
+        "body": "Use one page accent at a time; the homepage is the only multi-accent exception and scopes colors to their assigned roles.",
+        "section": "colors"
+      },
+      {
+        "name": "The Feedback Color Rule",
+        "body": "Correct and incorrect answer feedback uses fixed semantic tokens, independent of the page accent.",
         "section": "colors"
       },
       {
