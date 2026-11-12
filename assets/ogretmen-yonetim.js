@@ -19,6 +19,7 @@
     profile: {name: '', branch: 'Matematik', grades: [], notifications: true}
   });
 
+  let localWorkspaceLoaded = true;
   function readState() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
@@ -45,6 +46,7 @@
         profile: {...initial.profile, ...(saved.profile || {})}
       };
     } catch (error) {
+      localWorkspaceLoaded = false;
       console.error('Öğretmen çalışma alanı kayıtları okunamadı:', error);
       return defaultState();
     }
@@ -52,6 +54,7 @@
 
   let state = readState();
   let management = {dersler: [], quizler: [], sonuclar: []};
+  let managementLoaded = false;
   let serverWorkspaceLoaded = false;
   let studentLoadError = '';
   let homeworkLoadError = '';
@@ -89,6 +92,7 @@
       refreshAssignmentStudents();
     } catch (error) {
       console.error('Öğrenci ve ödev verileri yüklenemedi:', error);
+      serverWorkspaceLoaded = false;
       state.students = [];
       state.assignments = [];
       state.serverSummary = null;
@@ -104,6 +108,7 @@
   function persist(statusId, successMessage) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({...state, students: [], assignments: []}));
+      localWorkspaceLoaded = true;
       if (statusId && $(statusId)) setStatus(statusId, successMessage || 'Kaydedildi.', 'ok');
       renderDashboard();
       renderStudents();
@@ -415,6 +420,13 @@
     return date >= monday && date < nextMonday;
   }
 
+  function dashboardEmptyState(message, action, href) {
+    return `<div class="dashboard-empty-state">
+      <p>${escapeHtml(message)}</p>
+      <a class="dashboard-empty-action" href="${escapeHtml(href)}">${escapeHtml(action)}</a>
+    </div>`;
+  }
+
   function renderDashboard() {
     $('dashboardDate').textContent = new Date().toLocaleDateString('tr-TR', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
@@ -434,6 +446,61 @@
     );
     $('kpiExams').textContent = String(upcomingExams);
 
+    const summaryValues = [
+      state.students.length,
+      activeClasses.size,
+      state.content.length,
+      published,
+      Number($('kpiAssignments').textContent),
+      upcomingExams
+    ];
+    const showStarterChecklist = localWorkspaceLoaded && serverWorkspaceLoaded &&
+      summaryValues.filter(value => value === 0).length >= 4;
+    $('starterChecklist').hidden = !showStarterChecklist;
+    $('teacherKpis').classList.toggle('is-compact', showStarterChecklist);
+
+    const upcomingLiveLessons = managementLoaded
+      ? (management.dersler || []).filter(lesson => {
+        const startsAt = Date.parse(lesson.startsAt);
+        return Number.isFinite(startsAt) && startsAt >= Date.now();
+      }).length
+      : null;
+    const updateSetupStep = (name, loaded, complete, detail) => {
+      const step = document.querySelector(`[data-setup-step="${name}"]`);
+      if (!step) return;
+      step.classList.toggle('is-complete', loaded && complete);
+      step.querySelector('[data-setup-status]').textContent = loaded
+        ? complete ? 'Tamamlandı' : 'Sırada'
+        : 'Veri bekleniyor';
+      step.querySelector('[data-setup-detail]').textContent = detail;
+    };
+    updateSetupStep(
+      'students',
+      serverWorkspaceLoaded,
+      state.students.length > 0,
+      serverWorkspaceLoaded ? `${state.students.length} kayıt` : 'Öğrenciler yükleniyor…'
+    );
+    updateSetupStep(
+      'content',
+      localWorkspaceLoaded,
+      state.content.length > 0,
+      localWorkspaceLoaded ? `${state.content.length} içerik` : 'İçerik verileri okunamadı'
+    );
+    updateSetupStep(
+      'lessons',
+      managementLoaded,
+      upcomingLiveLessons > 0,
+      managementLoaded
+        ? upcomingLiveLessons > 0 ? `${upcomingLiveLessons} planlı ders` : 'İlk canlı dersini planla'
+        : 'Ders planları yükleniyor…'
+    );
+    updateSetupStep(
+      'assignments',
+      serverWorkspaceLoaded,
+      state.assignments.length > 0,
+      serverWorkspaceLoaded ? `${state.assignments.length} ödev` : 'Ödev verileri yükleniyor…'
+    );
+
     const lessons = (management.dersler || []).filter(lesson => withinCurrentWeek(lesson.startsAt));
     const weekExams = state.exams.filter(exam => withinCurrentWeek(`${exam.date}T12:00:00`));
     const schedule = [
@@ -443,13 +510,13 @@
     $('dashboardSchedule').innerHTML = schedule.length ? schedule.slice(0, 6).map(item => `<div class="dashboard-item">
       <div><strong>${escapeHtml(item.title)}</strong><small>${item.kind}${item.link ? ` · <a class="text-link" href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer">Katıl ↗</a>` : ''}</small></div>
       <time>${new Date(item.when).toLocaleDateString('tr-TR', {weekday: 'short', day: 'numeric', month: 'short'})} ${new Date(item.when).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})}</time>
-    </div>`).join('') : '<p class="dashboard-empty">Bu hafta için planlanmış ders veya sınav yok.</p>';
+    </div>`).join('') : dashboardEmptyState('Bu hafta için planlanmış ders veya sınav yok.', 'İlk dersini planla', '#lessons');
 
     const activities = [...(management.sonuclar || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
     $('dashboardActivity').innerHTML = activities.length ? activities.map(item => `<div class="dashboard-item">
       <div><strong>${escapeHtml(item.studentName || 'Öğrenci')} · ${escapeHtml(item.testTitle || 'Test')}</strong><small>${new Date(item.createdAt).toLocaleDateString('tr-TR')}</small></div>
       <time>${item.score === null ? '—' : `%${Number(item.score)}`}</time>
-    </div>`).join('') : '<p class="dashboard-empty">Henüz öğrenci etkinliği bulunmuyor.</p>';
+    </div>`).join('') : dashboardEmptyState('Henüz öğrenci etkinliği bulunmuyor.', 'Öğrenci ekle', '#students');
   }
 
   function initializeProfile() {
@@ -925,7 +992,9 @@
   }
 
   window.addEventListener('teacher-dashboard:data', event => {
-    management = {...management, ...(event.detail || {})};
+    const nextManagement = event.detail || {};
+    if (Array.isArray(nextManagement.dersler)) managementLoaded = true;
+    management = {...management, ...nextManagement};
     renderDashboard();
     renderAnalytics();
     renderQuizOptions();
