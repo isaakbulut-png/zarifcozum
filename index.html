@@ -53,53 +53,22 @@
 
 <main>
   <div class="wrap">
-    <section class="hero">
-      <div class="hero-copy-slides" aria-live="polite">
-        <article class="hero-copy-slide is-active" data-hero-copy aria-label="1 / 4">
-          <span class="chip chip-primary">KİŞİYE ÖZEL ÇALIŞMA PLANI</span>
-          <h1>Bu hafta 5 hedef, <em>sen kaçını bitireceksin?</em></h1>
-          <p class="lead">Konu hedeflerini takip et, çalışma düzenini koru ve matematikte bir sonraki adımını Bul, çöz, bitir.</p>
+    <section class="hero" data-accent="coral">
+      <div class="hero-copy-slides">
+        <article class="hero-copy-slide is-active">
+          <h1>Dün 6 doğru, bugün 8. <em>Hadi 10'a!</em></h1>
+          <p class="lead">Konu çalış, test çöz, serini koru.</p>
           <div class="cta">
-            <a class="btn btn-primary btn-lg" href="pages/ogrenci-paneli-tanitim.html">Öğrenci panelini gör</a>
-            <a class="btn btn-ghost btn-lg" href="kayit-giris.html?mode=register">Hemen ücretsiz kaydol</a>
+            <a class="btn btn-primary btn-lg" href="kayit-giris.html?mode=register">Ücretsiz başla</a>
+            <a class="btn btn-ghost btn-lg" href="pages/ogrenci-paneli-tanitim.html">Öğrenci panelini gör</a>
           </div>
-          <p class="small muted hero-footnote">Çalışma planı, konu takibi ve ilerleme tek yerde.</p>
-        </article>
-        <article class="hero-copy-slide" data-hero-copy aria-label="2 / 4" aria-hidden="true">
-          <span class="chip chip-primary">KONU ANLATIMI</span>
-          <h1>Matematiği adım adım <em>öğren.</em></h1>
-          <p class="lead">Maarif Modeli kazanımlarıyla hizalı konu anlatımlarını incele, örnekleri çöz ve öğrendiklerini hemen pekiştir.</p>
-          <div class="cta">
-            <a class="btn btn-primary btn-lg" href="pages/konulari-kesfet-tanitim.html">Konuları keşfet</a>
-            <a class="btn btn-ghost btn-lg" href="kayit-giris.html?mode=register">Hemen ücretsiz kaydol</a>
-          </div>
-          <p class="small muted hero-footnote">Konu, örnek ve pratik bir öğrenme akışında.</p>
-        </article>
-        <article class="hero-copy-slide" data-hero-copy aria-label="3 / 4" aria-hidden="true">
-          <span class="chip chip-success">DENEME VE GELİŞİM</span>
-          <h1>Dün 6 doğru <em>bugün 8. Haydi 10'a!</em></h1>
-          <p class="lead">Optik deneme sınavını çöz, doğru ve yanlışlarını gör; tekrar etmen gereken konuları belirle.</p>
-          <div class="cta">
-            <a class="btn btn-primary btn-lg" href="deneme-sinavi-optik.html">Test Çöz</a>
-            <a class="btn btn-ghost btn-lg" href="kayit-giris.html?mode=register">Hemen ücretsiz kaydol</a>
-          </div>
-          <p class="small muted hero-footnote">Sonuçlarını gör, tekrarını planla, gelişimini izle.</p>
-        </article>
-        <article class="hero-copy-slide" data-hero-copy aria-label="4 / 4" aria-hidden="true">
-          <span class="chip chip-primary">ÖĞRENME ASİSTANI</span>
-          <h1>Takıldın mı? <em>Cevabı vermem, ama yolu gösteririm.</em></h1>
-          <p class="lead">Sorunun cevabını ararken adım adım düşün. Öğrenme asistanı matematik pratiğine destek olsun.</p>
-          <div class="cta">
-            <a class="btn btn-primary btn-lg" href="pages/asistanla-soru-coz-tanitim.html">Asistanla soru çöz</a>
-            <a class="btn btn-ghost btn-lg" href="kayit-giris.html?mode=register">Hemen ücretsiz kaydol</a>
-          </div>
-          <p class="small muted hero-footnote">Kendi hızında dene, ipuçlarıyla çözümünü geliştir.</p>
         </article>
       </div>
       <div class="hero-visual">
         <img id="homepage-hero-image" class="homepage-hero-image" alt="ZarifÇözüm ana sayfa görseli" hidden>
         <div class="device">
           <div class="device-screen">
+            <span class="sample-data-label">Örnek veri</span>
             <section class="home-carousel" data-home-carousel role="region" aria-roledescription="carousel" aria-label="Öğrenme panosu">
               <div class="carousel-slides" aria-live="polite">
                 <article class="carousel-slide is-active" data-carousel-slide role="group" aria-roledescription="slayt" aria-label="1 / 4">
@@ -140,7 +109,7 @@
                   </div>
                 </article>
                 <article class="carousel-slide" data-carousel-slide role="group" aria-roledescription="slayt" aria-label="4 / 4" aria-hidden="true">
-                  <div class="mini-row carousel-slide-heading"><span class="chip chip-primary">ÖĞRENME ASİSTANI</span><span class="xs muted">Adım adım destek</span></div>
+                  <div class="mini-row carousel-slide-heading"><span class="chip assistant-accent">ÖĞRENME ASİSTANI</span><span class="xs muted">Adım adım destek</span></div>
                   <div class="carousel-question">
                     <span class="xs muted">SORU</span>
                     <strong>36'nın asal çarpanlarını bul.</strong>
@@ -163,8 +132,8 @@
             </section>
           </div>
         </div>
-        <div class="float-card a"><strong>Asistan:</strong> 36'nın asal çarpanlarını bul. Önce en küçük asalı dene.</div>
-        <div class="float-card b"><strong>Test tamamlandı</strong> · 8/10 · 2 soru tekrara alındı</div>
+        <div class="float-card a"><strong class="assistant-label">Asistan:</strong> 36'nın asal çarpanlarını bul. Önce en küçük asalı dene.</div>
+        <div class="float-card b"><span class="sample-data-label sample-data-label-inline">Örnek veri</span> <strong>Test tamamlandı</strong> · 8/10 · 2 soru tekrara alındı</div>
       </div>
       <div class="hero-carousel-arrows" aria-label="Ana sayfa slayt geçişleri">
         <button class="carousel-arrow" type="button" data-carousel-prev aria-label="Önceki ana sayfa slaytı">
@@ -177,95 +146,76 @@
     </section>
   </div>
 
-  <nav class="home-benefits" aria-label="Öğrenme Özellikleri">
-    <div class="home-benefits-inner">
-        
-        <!-- 1. Buton: Planlı Çalışma -->
-        <a class="home-benefit direct-link" href="planli-calisma.html">
-            <span class="home-benefit-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"></path></svg>
-            </span>
-            <span><strong>Planlı çalışma</strong><small>Kişisel hedeflerini takip et</small></span>
-        </a>
-
-        <!-- 2. Buton: Soru Çözme -->
-        <a class="home-benefit direct-link" href="deneme-sinavi-optik.html">
-            <span class="home-benefit-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"></path></svg>
-            </span>
-            <span><strong>Soru çözme</strong><small>Kazanımını pratikle pekiştir</small></span>
-        </a>
-
-        <!-- 3. Buton: Deneme Sınavı -->
-        <a class="home-benefit direct-link" href="pages/deneme-sinavi-tanitim.html">
-            <span class="home-benefit-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"></path></svg>
-            </span>
-            <span><strong>Deneme sınavı</strong><small>Sınav pratiğini deneyimle</small></span>
-        </a>
-
-        <!-- 4. Buton: Başarı Odaklı Sistem -->
-        <a class="home-benefit direct-link" href="basari-odakli-sistem.html">
-            <span class="home-benefit-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"></path></svg>
-            </span>
-            <span><strong>Başarı odaklı sistem</strong><small>Gelişimini gör, hedefe ilerle</small></span>
-        </a>
-
-    </div>
-</nav>
-
   <section class="home-section grade-section" id="sinif-sec" aria-labelledby="sinif-sec-title">
     <div class="wrap">
       <header class="section-head">
-        <h2 id="sinif-sec-title">Sınıfını Seç, Öğrenmeye Başla</h2>
-        <p>İhtiyacın olan matematik konularına kolayca ulaş.</p>
+        <h2 id="sinif-sec-title">Sınıfını seç</h2>
       </header>
+      <div class="grade-path-grid">
+        <article class="grade-path-card grade-path-card--middle">
+          <h3>5-8. sınıf: Matematiği keşfet</h3>
+          <a class="btn btn-primary btn-sm" href="#grade-5">Keşfetmeye başla</a>
+        </article>
+        <article class="grade-path-card grade-path-card--high">
+          <h3>9-12. sınıf: Hedefine odaklan</h3>
+          <a class="btn btn-primary btn-sm" href="#grade-9">Planımı oluştur</a>
+        </article>
+      </div>
       <div class="grade-grid">
-        <a class="grade-tile" href="konu.html?sinif=5"><strong>5</strong><span>Sınıf</span></a>
-        <a class="grade-tile" href="konu.html?sinif=6"><strong>6</strong><span>Sınıf</span></a>
-        <a class="grade-tile" href="konu.html?sinif=7"><strong>7</strong><span>Sınıf</span></a>
-        <a class="grade-tile" href="konu.html?sinif=8"><strong>8</strong><span>Sınıf</span></a>
-        <a class="grade-tile" href="konu.html?sinif=9"><strong>9</strong><span>Sınıf</span></a>
-        <a class="grade-tile" href="konu.html?sinif=10"><strong>10</strong><span>Sınıf</span></a>
-        <a class="grade-tile" href="konu.html?sinif=11"><strong>11</strong><span>Sınıf</span></a>
-        <a class="grade-tile" href="konu.html?sinif=12"><strong>12</strong><span>Sınıf</span></a>
+        <a class="grade-tile" id="grade-5" href="konu.html?sinif=5" aria-label="5. sınıf, Maarif"><strong>5</strong><span>Sınıf</span><small>Maarif</small></a>
+        <a class="grade-tile" href="konu.html?sinif=6" aria-label="6. sınıf, Maarif"><strong>6</strong><span>Sınıf</span><small>Maarif</small></a>
+        <a class="grade-tile" href="konu.html?sinif=7" aria-label="7. sınıf, Maarif yeni program"><strong>7</strong><span>Sınıf</span><small>Maarif · yeni</small></a>
+        <a class="grade-tile grade-tile--previous" href="konu.html?sinif=8" aria-label="8. sınıf, önceki program"><strong>8</strong><span>Sınıf</span><small>Önceki program</small></a>
+        <a class="grade-tile" id="grade-9" href="konu.html?sinif=9" aria-label="9. sınıf, Maarif"><strong>9</strong><span>Sınıf</span><small>Maarif</small></a>
+        <a class="grade-tile" href="konu.html?sinif=10" aria-label="10. sınıf, Maarif"><strong>10</strong><span>Sınıf</span><small>Maarif</small></a>
+        <a class="grade-tile" href="konu.html?sinif=11" aria-label="11. sınıf, Maarif yeni program"><strong>11</strong><span>Sınıf</span><small>Maarif · yeni</small></a>
+        <a class="grade-tile grade-tile--previous" href="konu.html?sinif=12" aria-label="12. sınıf, önceki program"><strong>12</strong><span>Sınıf</span><small>Önceki program</small></a>
+      </div>
+      <div class="curriculum-note" id="siniflar">
+        <p>Maarif Modeli kademeli uygulanıyor. 8. ve 12. sınıf bu yıl hâlâ önceki programda ve 2027 LGS'ye eski programla girecek; bu yüzden 8. ve 12. sınıf içeriği ayrı bir müfredat ağacı gerektirir.</p>
+        <div class="notice notice-warning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+          <p>Demo içeriği 6. sınıf MAT.6.1 teması üzerinden kurgulanmıştır. Tüm metin ve sorular özgündür; MEB/EBA kaynaklarından kopyalanmamıştır. Gerekçesi için <a href="mimari.html#icerik">İçerik stratejisi</a> bölümüne bakın.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="home-section why-section" aria-labelledby="neden-title">
+  <section class="home-section how-section" id="nasil" aria-labelledby="nasil-title" data-accent="cobalt">
     <div class="wrap">
       <header class="section-head">
-        <h2 id="neden-title">Neden Zarif Çözüm?</h2>
-        <p>Öğrenmeyi kolaylaştıran ayrıcalıklı eğitim deneyimi.</p>
+        <h2 id="nasil-title">Öğren, dene, takıl, çöz.</h2>
       </header>
-      <div class="why-grid">
-        <a class="why-card" href="pages/konu_anlatimlari.html">
-    <span class="why-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">...</svg></span>
-    <strong>Konu Anlatımları</strong><small>Adım adım öğrenme</small>
-</a>
-        <a class="why-card" href="pages/cozumlu-sorular-tanitim.html">
-    <span class="why-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">...</svg></span>
-    <strong>Çözümlü Sorular</strong><small>Örneklerle pekiştirme</small>
-</a>
-        <a class="why-card" href="pages/test-ve-etkinlikler-tanitim.html">
-    <span class="why-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">...</svg></span>
-    <strong>Test ve Etkinlikler</strong><small>Bilgini ölçme</small>
-</a>
-        <a class="why-card" href="pages/ilerlemeni-takip-et-tanitim.html">
-    <span class="why-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor">...</svg></span>
-    <strong>Başarı Takibi</strong><small>Gelişimini izleme</small>
-</a>
+      <div class="steps">
+        <div class="step"><h3>Konu anlatımı</h3><p>Her tema MEB öğrenme çıktısı koduyla etiketli. Metin, video ve çözümlü örnek aynı sayfada.</p></div>
+        <div class="step"><h3>Kazanım testi</h3><p>Çoktan seçmeli, süreli, her şıkkın açıklaması var. Yanlışlar otomatik tekrar listesine düşer.</p></div>
+        <div class="step"><h3>Canlı ders</h3><p>Haftalık canlı dersler platform içinden açılır. Öğretmen tahtası, anket ve soru kuyruğu entegre.</p></div>
+        <div class="step"><h3>Asistanla alıştırma</h3><p>Cevabı vermez, sorar. Sokratik ipuçlarıyla seni adım adım çözüme götürür; müfredat dışına çıkmaz.</p></div>
       </div>
-    </div>
-  </section>
-
-  <section class="home-section band-section" aria-label="Örnek soru ve keşfet">
-    <div class="wrap band-grid">
-      <article class="band-card example-card">
-        <div class="example-text">
-          <h3>Örnek Soru: Geometrik Şekiller</h3>
+      <nav class="home-benefits" aria-label="Öğrenme kısayolları">
+        <div class="home-benefits-inner">
+          <a class="home-benefit direct-link" href="planli-calisma.html">
+            <span class="home-benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m-12 5 2 2 4-4"/></svg></span>
+            <span><strong>Planlı çalışma</strong><small>Kişisel hedeflerini takip et</small></span>
+          </a>
+          <a class="home-benefit direct-link" href="deneme-sinavi-optik.html">
+            <span class="home-benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v12H9l-5 4z"/><path d="M9 9h6m-6 4h3"/></svg></span>
+            <span><strong>Soru çözme</strong><small>Kazanımını pratikle pekiştir</small></span>
+          </a>
+          <a class="home-benefit direct-link" href="pages/deneme-sinavi-tanitim.html">
+            <span class="home-benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6m-6 4h6m-6 4h2"/></svg></span>
+            <span><strong>Deneme sınavı</strong><small>Sınav pratiğini deneyimle</small></span>
+          </a>
+          <a class="home-benefit direct-link" href="basari-odakli-sistem.html">
+            <span class="home-benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5m0 14h16"/><path d="M8 16v-4m4 4V9m4 7V6m-8 3 3-3 3 2 4-4"/></svg></span>
+            <span><strong>Başarı odaklı sistem</strong><small>Gelişimini gör, hedefe ilerle</small></span>
+          </a>
+        </div>
+      </nav>
+      <article class="practice-example">
+        <div>
+          <span class="example-label">Örnek soru</span>
+          <h3>x açısını sen bul!</h3>
           <p>Bir üçgenin iç açılarının ölçüleri 60°, 70° ve x olduğuna göre, x kaç derecedir?</p>
           <button type="button" class="btn btn-primary btn-sm" id="ornek-cozum-btn" aria-expanded="false" aria-controls="ornek-cozum">Çözümü Gör</button>
           <p class="example-answer" id="ornek-cozum" hidden>Üçgenin iç açıları toplamı 180°'dir: x = 180° − (60° + 70°) = 50°.</p>
@@ -276,13 +226,6 @@
           <text x="36" y="116" font-size="14" fill="currentColor">60°</text>
           <text x="160" y="116" font-size="14" fill="currentColor">70°</text>
         </svg>
-      </article>
-      <article class="band-card cta-card">
-        <h3>Zarif Çözüm ile Matematikte Yeni Bir Başlangıç Yap.</h3>
-        <p>Kendi sınıfını seç ve öğrenme yolculuğuna katıl.</p>
-        <a class="btn btn-primary btn-sm" href="#sinif-sec">Hemen Keşfet</a>
-        <img id="homepage-feature-image" class="homepage-feature-image" src="assets/brand-mark.png" alt="ZarifÇözüm öne çıkan görseli">
-        <div id="lottie-oyun-alani" class="math-animation" role="img" aria-label="Hareketli matematik şekilleri" hidden></div>
       </article>
     </div>
   </section>
@@ -299,63 +242,104 @@
     })();
   </script>
 
-  <section class="block" id="nasil" style="background:var(--color-surface);border-block:1px solid var(--color-divider)">
+  <section class="home-section why-section" aria-labelledby="neden-title" data-accent="cobalt">
     <div class="wrap">
-      <p class="eyebrow">Nasıl çalışır</p>
-      <h2 class="section-title">Her kazanım için aynı döngü: öğren, dene, konuş, pekiştir.</h2>
-      <div class="steps" style="margin-top:var(--space-8)">
-        <div class="step"><h3>Konu anlatımı</h3><p>Her tema MEB öğrenme çıktısı koduyla etiketli. Metin, video ve çözümlü örnek aynı sayfada.</p></div>
-        <div class="step"><h3>Kazanım testi</h3><p>Çoktan seçmeli, süreli, her şıkkın açıklaması var. Yanlışlar otomatik tekrar listesine düşer.</p></div>
-        <div class="step"><h3>Canlı ders</h3><p>Haftalık canlı dersler platform içinden açılır. Öğretmen tahtası, anket ve soru kuyruğu entegre.</p></div>
-        <div class="step"><h3>Asistanla alıştırma</h3><p>Cevabı vermez, sorar. Sokratik ipuçlarıyla seni adım adım çözüme götürür; müfredat dışına çıkmaz.</p></div>
+      <header class="section-head">
+        <h2 id="neden-title">Konuyu öğren, soruyu çöz, gelişimini gör.</h2>
+        <p>Öğrenmeyi kolaylaştıran ayrıcalıklı eğitim deneyimi.</p>
+      </header>
+      <div class="why-grid">
+        <a class="why-card" href="pages/konu_anlatimlari.html">
+          <span class="why-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 6.5c-1.6-1.1-3.5-1.6-6-1.6H4v13h2c2.5 0 4.4.5 6 1.6m0-13c1.6-1.1 3.5-1.6 6-1.6h2v13h-2c-2.5 0-4.4.5-6 1.6m0-13v13"/>
+            </svg>
+          </span>
+          <strong>Konu Anlatımları</strong><small>Adım adım öğrenme</small>
+        </a>
+        <a class="why-card" href="pages/cozumlu-sorular-tanitim.html">
+          <span class="why-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 3.5h8l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20z"/>
+              <path d="M14 3.5v4h4M8.5 13l2.2 2.2 4.8-4.8"/>
+            </svg>
+          </span>
+          <strong>Çözümlü Sorular</strong><small>Örneklerle pekiştirme</small>
+        </a>
+        <a class="why-card" href="pages/test-ve-etkinlikler-tanitim.html">
+          <span class="why-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="4" width="14" height="17" rx="2"/>
+              <path d="M9 4.5h6M8 10h1m3 0h4M8 14h1m3 0h4M8 18h1m3 0h4"/>
+            </svg>
+          </span>
+          <strong>Test ve Etkinlikler</strong><small>Bilgini ölçme</small>
+        </a>
+        <a class="why-card" href="pages/ilerlemeni-takip-et-tanitim.html">
+          <span class="why-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19V5m0 14h16"/>
+              <path d="M8 16v-4m4 4V9m4 7V6m-8 3 3-3 3 2 4-4"/>
+            </svg>
+          </span>
+          <strong>Başarı Takibi</strong><small>Gelişimini izleme</small>
+        </a>
       </div>
     </div>
   </section>
 
-  <section class="block" id="siniflar">
-    <div class="wrap">
-      <p class="eyebrow">Kapsam</p>
-      <h2 class="section-title">2026-27'de hangi sınıf hangi programda?</h2>
-      <p class="muted" style="margin-top:var(--space-3)">Maarif Modeli kademeli uygulanıyor. 8. ve 12. sınıf bu yıl hâlâ önceki programda ve 2027 LGS'ye eski programla girecek; bu yüzden 8. ve 12. sınıf içeriği ayrı bir müfredat ağacı gerektirir.</p>
-      <div class="grade-strip" style="margin-top:var(--space-8)">
-        <div class="grade maarif"><strong>5</strong><span class="xs">Maarif</span></div>
-        <div class="grade maarif"><strong>6</strong><span class="xs">Maarif</span></div>
-        <div class="grade maarif"><strong>7</strong><span class="xs">Maarif · yeni</span></div>
-        <div class="grade old"><strong>8</strong><span class="xs">Önceki program</span></div>
-        <div class="grade maarif"><strong>9</strong><span class="xs">Maarif</span></div>
-        <div class="grade maarif"><strong>10</strong><span class="xs">Maarif</span></div>
-        <div class="grade maarif"><strong>11</strong><span class="xs">Maarif · yeni</span></div>
-        <div class="grade maarif"><strong>12</strong><span class="xs">Önceki program</span></div>
+  <section class="home-section assistant-section" id="asistan" aria-labelledby="asistan-title" data-accent="cobalt">
+    <div class="wrap assistant-layout">
+      <div>
+        <h2 id="asistan-title">Takıldın mı? Cevabı vermem, yolu gösteririm.</h2>
+        <p>İpuçlarıyla adım adım düşün; soruyu kendin çöz.</p>
+        <a class="btn btn-primary btn-lg" href="pages/asistanla-soru-coz-tanitim.html">Asistanla dene</a>
       </div>
-      <div class="notice notice-warning" style="margin-top:var(--space-6)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-        <p>Demo içeriği 6. sınıf MAT.6.1 teması üzerinden kurgulanmıştır. Tüm metin ve sorular özgündür; MEB/EBA kaynaklarından kopyalanmamıştır. Gerekçesi için <a href="mimari.html#icerik" style="text-decoration:underline">İçerik stratejisi</a> bölümüne bakın.</p>
+      <div class="assistant-demo" role="group" aria-label="Örnek asistan konuşması">
+        <p><strong>Soru</strong>36'nın asal çarpanlarını bul.</p>
+        <p><strong>İpucu</strong>Önce en küçük asal sayıya bölmeyi dene.</p>
       </div>
     </div>
   </section>
 
-  <section class="block" style="background:var(--color-surface);border-block:1px solid var(--color-divider)">
+  <section class="home-section success-section" id="basari-takibi" aria-labelledby="basari-title" data-accent="emerald">
     <div class="wrap">
-      <p class="eyebrow">Özellikler</p>
-      <h2 class="section-title">Dört modül, tek hesap, her cihaz.</h2>
-      <div class="grid grid-4" style="margin-top:var(--space-8)">
-        <div class="card feature"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 1 2-2h13"/></svg></div><h3>Konu anlatımı</h3><p>Tema → öğrenme çıktısı → ders. Her ders 8-12 dakikalık parçalara bölünmüş.</p></div>
-        <div class="card feature"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div><h3>Test motoru</h3><p>Soru havuzu kazanım koduyla etiketli; zorluk ve yanlış-tekrar algoritması ile kişisel set.</p></div>
-        <div class="card feature"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></div><h3>Canlı sınıf</h3><p>Video SDK ile platform içinde; kayıt, yoklama ve anket otomatik olarak derse işlenir.</p></div>
-        <div class="card feature"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 17h6"/></svg></div><h3>Yapay zekâ asistanı</h3><p>Sadece seçili kazanım kapsamında çalışır, cevabı doğrudan vermez, her adımı kontrol eder.</p></div>
-      </div>
+      <h2 id="basari-title">Gelişimini gör, hedefine ilerle.</h2>
+      <p>Test sonuçlarını incele, tekrar edeceğin konuları belirle ve çalışma planındaki sonraki adıma geç.</p>
+      <a class="btn btn-primary btn-lg" href="pages/ilerlemeni-takip-et-tanitim.html">Başarı takibini gör</a>
+    </div>
+  </section>
+
+  <section class="home-section parent-section" id="veli-guveni" aria-labelledby="veli-title" data-accent="emerald">
+    <div class="wrap parent-layout">
+      <h2 id="veli-title">Velin de ilerlemeni görsün.</h2>
+      <p>Veli panelinde çalışma planını ve gelişim raporlarını birlikte takip edin.</p>
+      <a class="btn btn-primary btn-lg" href="kayit-giris.html?role=parent">Veli girişine git</a>
     </div>
   </section>
 
   <section class="block faq" id="sss" style="background:var(--color-surface);border-block:1px solid var(--color-divider)">
     <div class="wrap" style="max-width:800px">
       <p class="eyebrow">Sık sorulanlar</p>
-      <h2 class="section-title" style="margin-bottom:var(--space-8)">Açık cevaplar.</h2>
+      <h2 class="section-title" style="margin-bottom:var(--space-8)">Aklındaki sorulara cevap bul.</h2>
       <details><summary>İçerikler MEB'den mi alınıyor?</summary><p>Hayır. MEB'in OGM Materyal ve EBA içerikleri "hiçbir şekilde ticari amaçla kullanılamaz" ibaresiyle yayımlanıyor. Müfredat yapısını (tema, öğrenme çıktısı kodları) MEB programından referans alıyoruz; anlatım ve soruların tamamı platform için özgün üretiliyor ya da lisanslanıyor.</p></details>
       <details><summary>Canlı dersler Zoom'da mı yapılıyor?</summary><p>Zoom'un Video SDK altyapısı platformun içine gömülüdür; öğrenci ayrı bir uygulama indirmez, Zoom hesabı açmaz. Ders linki, yoklama ve kayıt platformda kalır.</p></details>
       <details><summary>Yapay zekâ asistanı cevabı söylüyor mu?</summary><p>Varsayılan modda hayır. Asistan yalnızca seçili kazanım kapsamında, adım adım soru sorarak ilerler. Cevap açıklaması, öğrenci iki denemeden sonra isterse gösterilir ve veli raporuna işlenir.</p></details>
       <details><summary>18 yaş altı öğrenciler için veri koruması nasıl?</summary><p>Hesap veli e-postası/telefonu ile açılır, veli onayı alınmadan öğrenci profili etkinleşmez (KVKK). Sohbet kayıtları yalnızca öğrenci-veli-öğretmen üçgeninde görünür; model eğitiminde kullanılmaz.</p></details>
       <details><summary>Hangi cihazlarda çalışır?</summary><p>Modern tarayıcıya sahip her cihazda. Telefon ve tablet için ana ekrana eklenebilen PWA; isteğe bağlı olarak mağaza uygulaması aynı kod tabanından üretilir.</p></details>
+    </div>
+  </section>
+
+  <section class="home-section closing-section" aria-labelledby="closing-title" data-accent="coral">
+    <div class="wrap closing-layout">
+      <div>
+        <h2 id="closing-title">İlk testin 10 dakika. Hadi başla.</h2>
+        <a class="btn btn-primary btn-lg" href="kayit-giris.html?mode=register">Ücretsiz başla</a>
+      </div>
+      <div class="closing-visual">
+        <img id="homepage-feature-image" class="homepage-feature-image" src="assets/brand-mark.png" alt="ZarifÇözüm öne çıkan görseli">
+        <div id="lottie-oyun-alani" class="math-animation" role="img" aria-label="Hareketli matematik şekilleri" hidden></div>
+      </div>
     </div>
   </section>
 </main>
@@ -868,7 +852,7 @@
 <!-- Başarı Durumunda Açılacak Gizli Animasyon Katmanı -->
 <div id="basari-katmani" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
     <div id="lottie-tebrik" style="width: 400px; height: 400px;"></div>
-    <h2 style="color: #10ac84; font-family: sans-serif; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">Tebrikler! Testi Tamamladın! 🎉</h2>
+    <h2 class="success-message">Tebrikler! Testi Tamamladın! 🎉</h2>
 </div>
 <script>
   (() => {

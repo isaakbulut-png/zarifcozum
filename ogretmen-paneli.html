@@ -120,11 +120,11 @@ td.net{font-weight:700;color:var(--navy-900)}
 .teacher-layout{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:22px;max-width:1480px;margin:0 auto}
 .teacher-layout.authenticated{grid-template-columns:250px minmax(0,1fr)}
 .teacher-sidebar{position:sticky;top:18px;margin:24px 0 24px 8px;padding:18px 12px;background:var(--navy-900);border-radius:16px;color:#fff}
-.teacher-live-cta{display:block;width:100%;margin:0 0 9px;padding:12px 10px;border:0;border-radius:9px;background:#d93043;color:#fff;text-align:center;text-decoration:none;font-size:.86rem;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.2)}
-.teacher-live-cta:hover{background:#bd2637}
+.teacher-live-cta{display:block;width:100%;margin:0 0 9px;padding:12px 10px;border:0;border-radius:9px;background:var(--orange);color:#fff;text-align:center;text-decoration:none;font-size:.86rem;font-weight:700;box-shadow:none}
+.teacher-live-cta:hover{background:var(--orange-dark)}
 .teacher-live-cta:disabled{opacity:.65;cursor:wait}
-.teacher-live-cta.secondary{background:#76543a}
-.teacher-live-cta.secondary:hover{background:#8b6444}
+.teacher-live-cta.secondary{background:transparent}
+.teacher-live-cta.secondary:hover{background:var(--orange-dark)}
 .teacher-live-status{min-height:1.2em;margin:0 2px 12px;color:#f4d7c1;font-size:.75rem}
 .teacher-sidebar strong{display:block;padding:4px 10px 14px;font-family:var(--head);font-size:.92rem}
 .teacher-sidebar nav{display:grid;gap:5px}
@@ -178,13 +178,613 @@ td.net{font-weight:700;color:var(--navy-900)}
 .exam-create h3{font-family:var(--head);font-size:1rem;color:var(--navy-900)}
 @media(max-width:900px){.teacher-layout.authenticated{grid-template-columns:1fr}.teacher-sidebar{position:static;margin:16px 16px 0}.teacher-sidebar nav{display:flex;overflow:auto}.teacher-sidebar a{white-space:nowrap}.teacher-content{padding-top:0}}
 @media(max-width:560px){.form-grid,.question-options{grid-template-columns:1fr}.field.full{grid-column:auto}.data-item{align-items:flex-start;flex-direction:column}}
+
+:root {
+  --accent-cobalt: #2F5FD0;
+  --accent-cobalt-soft: #DCE6FA;
+  --feedback-correct: #276B43;
+  --feedback-correct-soft: #E0F0E5;
+}
+body[data-accent="cobalt"] {
+  --page-accent: var(--accent-cobalt);
+  --page-accent-soft: var(--accent-cobalt-soft);
+  --page-cta: var(--accent-cobalt);
+  --orange: var(--page-cta);
+  --orange-dark: #2449A8;
+  --orange-soft: var(--page-accent-soft);
+  --teacher-ink: #3a2618;
+  --teacher-muted: #6a5242;
+  --teacher-green: var(--page-accent);
+  --teacher-green-dark: #3a2618;
+  --teacher-border: #d9d3c3;
+  --teacher-surface: #fffaf5;
+  --teacher-background: #fbf1e8;
+  --ok: var(--feedback-correct);
+}
+.bar h1,
+.teacher-content h1,
+.teacher-content h2,
+.teacher-content h3,
+.teacher-content h4 {
+  font-family: Georgia, "Times New Roman", serif;
+}
+.teacher-content a,
+.bar a {
+  color: inherit;
+  text-decoration: none;
+}
+.teacher-content a:visited,
+.bar a:visited {
+  color: inherit;
+}
+.teacher-content a.btn:visited,
+.bar a.btn:visited {
+  color: #fff;
+}
+.teacher-content a.text-link,
+.teacher-content a.text-link:visited {
+  color: var(--page-accent);
+}
+main .site-breadcrumb {
+  max-width: 100%;
+  flex-wrap: nowrap;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  white-space: nowrap;
+}
+main .site-breadcrumb .current {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+main .site-breadcrumb a:hover,
+main .site-breadcrumb a:focus-visible {
+  color: var(--page-accent);
+}
+.teacher-content a:hover,
+.teacher-content a:focus-visible,
+.bar a:hover,
+.bar a:focus-visible {
+  text-decoration: none;
+}
+.bar {
+  background: #3a2618;
+  border-bottom-color: var(--page-accent);
+}
+.bar h1 small {
+  font-size: .8rem;
+  color: #f0e5dc;
+}
+.teacher-sidebar {
+  background: #3a2618;
+}
+.teacher-brand-mark {
+  background: var(--page-accent-soft);
+  color: #3a2618;
+}
+.teacher-brand small,
+.teacher-sidebar > strong {
+  font-size: .75rem;
+}
+.teacher-sidebar > strong {
+  color: #d4c6b8;
+}
+.teacher-sidebar .teacher-live-cta {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 10px 12px;
+  border: 1px solid var(--page-cta);
+  border-radius: 9px;
+  background: var(--page-cta);
+  box-shadow: none;
+  color: #fff;
+  font-size: .9rem;
+  text-decoration: none;
+}
+.teacher-sidebar .teacher-live-cta:hover {
+  border-color: #2449A8;
+  background: #2449A8;
+  color: #fff;
+}
+.teacher-sidebar .teacher-live-cta svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+.teacher-sidebar .teacher-live-cta.secondary {
+  border-color: #9db4ec;
+  background: transparent;
+  color: #fff;
+}
+.teacher-sidebar .teacher-live-cta.secondary:hover {
+  border-color: var(--page-accent);
+  background: var(--page-accent);
+}
+.teacher-live-status {
+  color: #f0e5dc;
+  font-size: .75rem;
+}
+.teacher-sidebar nav {
+  display: grid;
+  gap: 9px;
+  overflow: visible;
+}
+.teacher-nav-group {
+  padding-bottom: 7px;
+  border-bottom: 1px solid #5b4b3b;
+}
+.teacher-nav-group > summary {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  color: #e8ded4;
+  cursor: pointer;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  list-style: none;
+}
+.teacher-nav-group > summary::-webkit-details-marker {
+  display: none;
+}
+.teacher-nav-group > summary::after {
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  content: "";
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform .18s ease;
+}
+.teacher-nav-group[open] > summary::after {
+  transform: rotate(225deg) translate(-2px, -1px);
+}
+.teacher-nav-links {
+  display: grid;
+  gap: 3px;
+  margin-top: 3px;
+}
+.teacher-sidebar .teacher-nav-links a {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 10px;
+  border-left: 3px solid transparent;
+  border-radius: 8px;
+  color: #eee6de;
+  font-size: .88rem;
+  text-decoration: none;
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+.teacher-sidebar .teacher-nav-links a > svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+.teacher-sidebar .teacher-nav-links a:hover,
+.teacher-sidebar .teacher-nav-links a:focus-visible {
+  background: rgb(47 95 208 / 22%);
+  color: #fff;
+}
+.teacher-sidebar .teacher-nav-links a[aria-current="page"] {
+  border-left-color: var(--page-accent);
+  background: var(--page-accent);
+  color: #fff;
+}
+.teacher-sidebar .nav-label {
+  min-width: 0;
+}
+.teacher-sidebar .nav-label small {
+  margin-top: 2px;
+  color: #e8ded4;
+  font-size: .75rem;
+}
+.teacher-sidebar-note {
+  color: #e8ded4;
+  font-size: .75rem;
+}
+.teacher-status-dot {
+  background: #9db4ec;
+  box-shadow: 0 0 0 3px rgb(47 95 208 / 22%);
+}
+.dashboard-head {
+  margin-bottom: 16px;
+}
+.dashboard-head h2 {
+  color: #3a2618;
+}
+.eyebrow,
+.dashboard-date {
+  font-size: .75rem;
+}
+.quick-actions {
+  margin: 0 0 18px;
+  padding: 18px;
+}
+.quick-action-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.quick-action-grid a,
+.quick-action-grid a:visited {
+  min-height: 82px;
+  padding: 13px;
+  border-color: var(--teacher-border);
+  background: #fffaf5;
+  color: var(--teacher-ink);
+  text-decoration: none;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.quick-action-grid a:hover,
+.quick-action-grid a:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--page-accent);
+  background: #fffaf5;
+  box-shadow: 0 6px 18px rgb(58 38 24 / 8%);
+  color: var(--teacher-ink);
+}
+.quick-action-grid a > span {
+  background: var(--page-accent-soft);
+  color: var(--page-accent);
+}
+.quick-action-grid a > span svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+.quick-action-grid b {
+  font-size: .88rem;
+}
+.quick-action-grid small,
+.teacher-kpi small,
+.kpi-label,
+.dashboard-item small,
+.dashboard-item time,
+.dashboard-empty,
+.text-link {
+  font-size: .75rem;
+}
+.teacher-kpis {
+  margin-bottom: 18px;
+}
+.teacher-kpi {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.teacher-kpi:hover,
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  border-color: #c9d6f5;
+  box-shadow: 0 6px 18px rgb(58 38 24 / 8%);
+}
+.kpi-icon {
+  background: var(--page-accent-soft);
+  color: var(--page-accent);
+}
+.teacher-kpi strong {
+  color: #3a2618;
+}
+.teacher-kpis.is-compact {
+  gap: 10px;
+}
+.teacher-kpis.is-compact .teacher-kpi {
+  min-height: 96px;
+  padding: 12px 14px;
+  background: #fffaf5;
+  box-shadow: none;
+}
+.teacher-kpis.is-compact .teacher-kpi strong {
+  font-size: 1.4rem;
+}
+.teacher-kpis.is-compact .kpi-icon {
+  width: 30px;
+  height: 30px;
+}
+.dashboard-card {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.dashboard-card .text-link:hover,
+.dashboard-card .text-link:focus-visible {
+  color: #2449A8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.dashboard-empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 18px 10px;
+  text-align: center;
+}
+.dashboard-empty-state p {
+  max-width: 36ch;
+  color: var(--teacher-muted);
+  font-size: .88rem;
+}
+.dashboard-empty-action {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 14px;
+  border: 1px solid var(--page-accent);
+  border-radius: 8px;
+  background: var(--page-accent);
+  color: #fff !important;
+  font-size: .85rem;
+  font-weight: 700;
+}
+.dashboard-empty-action:visited,
+.dashboard-empty-action:hover,
+.dashboard-empty-action:focus-visible {
+  color: #fff !important;
+}
+.dashboard-empty-action:hover {
+  border-color: #2449A8;
+  background: #2449A8;
+}
+.starter-checklist {
+  margin-bottom: 16px;
+  padding: 16px 18px;
+  border-color: #c8d6f3;
+  background: #f8faff;
+}
+.starter-checklist h2 {
+  color: #3a2618;
+  font-size: 1.15rem;
+}
+.starter-checklist > p {
+  margin-top: 3px;
+  color: var(--teacher-muted);
+  font-size: .8rem;
+}
+.setup-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+  list-style: none;
+}
+.setup-step {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.setup-mark {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #9a8b7b;
+  border-radius: 50%;
+}
+.setup-step.is-complete .setup-mark {
+  border-color: var(--feedback-correct);
+  background: var(--feedback-correct);
+}
+.setup-step.is-complete .setup-mark::after {
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  width: 5px;
+  height: 8px;
+  border-right: 1.5px solid #fff;
+  border-bottom: 1.5px solid #fff;
+  content: "";
+  transform: rotate(45deg);
+}
+.setup-step-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+.setup-step-copy strong {
+  color: #3a2618;
+  font-size: .8rem;
+}
+.setup-step-copy small {
+  overflow: hidden;
+  color: var(--teacher-muted);
+  font-size: .75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.setup-step-status {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #eee7df;
+  color: #594637;
+  font-size: .75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.setup-step.is-complete .setup-step-status {
+  background: var(--feedback-correct-soft);
+  color: var(--feedback-correct);
+}
+.teacher-mobile-toolbar {
+  display: none;
+}
+.teacher-menu-toggle {
+  display: none;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 11px;
+  border: 1px solid var(--teacher-border);
+  border-radius: 8px;
+  background: #fffaf5;
+  color: #3a2618;
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 700;
+}
+.teacher-menu-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 1.8;
+}
+.teacher-sidebar-backdrop {
+  display: none;
+  visibility: hidden;
+}
+body.teacher-menu-open {
+  overflow: hidden;
+}
+@media (max-width: 1120px) {
+  .quick-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  .teacher-mobile-toolbar {
+    display: flex;
+    margin-bottom: 12px;
+  }
+  .teacher-menu-toggle {
+    display: inline-flex;
+  }
+  .teacher-sidebar {
+    position: fixed;
+    z-index: 31;
+    inset: 0 auto 0 0;
+    width: min(320px, 86vw);
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 20px 14px;
+    border-radius: 0 16px 16px 0;
+    transform: translateX(-105%);
+    transition: transform .22s ease-out;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .teacher-layout.is-sidebar-open .teacher-sidebar {
+    transform: translateX(0);
+  }
+  .teacher-brand,
+  .teacher-sidebar > strong,
+  .teacher-sidebar-note {
+    display: flex;
+  }
+  .teacher-sidebar > strong {
+    display: block;
+    padding: 4px 10px 8px;
+    color: #d4c6b8;
+    font-size: .75rem;
+  }
+  .teacher-sidebar nav {
+    display: grid;
+    gap: 9px;
+    overflow: visible;
+  }
+  .teacher-sidebar .teacher-nav-links {
+    display: grid;
+    overflow: visible;
+  }
+  .teacher-sidebar .teacher-nav-links a {
+    flex: initial;
+    white-space: normal;
+  }
+  .teacher-sidebar .teacher-nav-links a[aria-current="page"] {
+    box-shadow: none;
+  }
+  .teacher-sidebar .teacher-nav-links a > svg {
+    width: 18px;
+  }
+  .teacher-sidebar-backdrop {
+    position: fixed;
+    z-index: 30;
+    inset: 0;
+    display: block;
+    border: 0;
+    background: rgb(35 24 16 / 48%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .22s ease-out, visibility .22s ease-out;
+  }
+  .teacher-layout.is-sidebar-open .teacher-sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+  .teacher-content {
+    padding-top: 20px;
+  }
+  .quick-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .setup-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .dashboard-head {
+    align-items: flex-start;
+  }
+  .dashboard-head > div:first-child {
+    flex: 1;
+  }
+  .teacher-menu-toggle {
+    flex: none;
+  }
+  .teacher-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .quick-action-grid,
+  .setup-steps {
+    grid-template-columns: 1fr;
+  }
+  .setup-step {
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+  }
+  .dashboard-empty-action {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .teacher-sidebar,
+  .teacher-sidebar-backdrop,
+  .quick-action-grid a,
+  .teacher-kpi,
+  .dashboard-card,
+  .teacher-nav-group > summary::after {
+    transition: none;
+  }
+}
 </style>
 </head>
-<body>
+<body data-accent="cobalt">
 
 <header class="bar">
   <div class="bar-in">
-    <h1>Eğitim Yönetim Paneli<small>Öğretmen çalışma alanı · ZarifÇözüm</small></h1>
+    <h1>Eğitim Yönetim Paneli</h1>
     <a class="btn ghost" href="index.html">Ana sayfa</a>
     <select id="sinav" aria-label="Sınav seçin" hidden></select>
     <button class="btn ghost" id="changePasswordButton" type="button" hidden>Şifre değiştir</button>
@@ -195,8 +795,14 @@ td.net{font-weight:700;color:var(--navy-900)}
 <div class="teacher-layout">
 <aside class="teacher-sidebar" id="teacherSidebar" hidden>
   <div class="teacher-brand"><span class="teacher-brand-mark">Z</span><span>Zarif Çözüm<small>Öğretmen çalışma alanı</small></span></div>
-  <a class="teacher-live-cta" href="#lessons">● Canlı Ders Oluştur</a>
-  <button class="teacher-live-cta secondary" id="sidebarQuickLive" type="button">● Anında Canlı Ders Başlat</button>
+  <a class="teacher-live-cta" href="#lessons">
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    <span>Canlı Ders Oluştur</span>
+  </a>
+  <button class="teacher-live-cta secondary" id="sidebarQuickLive" type="button">
+    <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="m10 8 6 4-6 4z"/></svg>
+    <span>Anında Canlı Ders Başlat</span>
+  </button>
   <p class="teacher-live-status" id="sidebarLiveStatus" role="status" aria-live="polite"></p>
   <p class="teacher-live-status" id="sidebarAktifCanliBilgi" role="status" aria-live="polite">Canlı ders durumu yükleniyor…</p>
   <div id="sidebarAktifCanliIslemler" hidden>
@@ -206,22 +812,53 @@ td.net{font-weight:700;color:var(--navy-900)}
   <p class="teacher-live-status" id="sidebarAktifCanliHata" role="status" aria-live="polite"></p>
   <strong>YÖNETİM MENÜSÜ</strong>
   <nav aria-label="Öğretmen paneli bölümleri">
-    <a href="#overview" aria-current="page"><span>⌂</span>Ana sayfa</a>
-    <a href="#maarif-tree"><span>▤</span>Maarif gezgini</a>
-    <a href="#curriculum"><span>▤</span>Ders ve müfredat</a>
-    <a href="#students"><span>♙</span>Öğrenciler</a>
-    <a href="#assignments"><span>☑</span>Ödev yönetimi</a>
-    <a href="#quiz-builder"><span aria-hidden="true">∑</span><span class="nav-label">Formüllü soru editörü<small>(Sınav ve testler)</small></span></a>
-    <a href="#analytics"><span>▥</span>Başarı analizi</a>
-    <a href="#image-questions"><span>▦</span>Soru bankası</a>
-    <a href="#ai-question-wizard"><span>✦</span>Yapay Zeka İle Soru Üret</a>
-    <a href="#lessons"><span>◷</span>Canlı dersler</a>
-    <a href="#library"><span>▧</span>PDF kütüphanesi</a>
-    <a href="#announcements"><span>♧</span>Duyurular</a>
-    <a href="#teacher-settings"><span>⚙</span>Profil ve ayarlar</a>
+    <details class="teacher-nav-group" open>
+      <summary>Genel</summary>
+      <div class="teacher-nav-links">
+        <a href="#overview" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Ana sayfa</a>
+      </div>
+    </details>
+    <details class="teacher-nav-group" open>
+      <summary>İçerik</summary>
+      <div class="teacher-nav-links">
+        <a href="#maarif-tree"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/></svg>Maarif gezgini</a>
+        <a href="#curriculum"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/></svg>Ders ve müfredat</a>
+      </div>
+    </details>
+    <details class="teacher-nav-group" open>
+      <summary>Öğrenciler</summary>
+      <div class="teacher-nav-links">
+        <a href="#students"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20v-1.5a7 7 0 0 1 14 0V20z"/></svg>Öğrenciler</a>
+        <a href="#assignments"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 4h8l2 2h3v15H3V6h3z"/><path d="M8 4V2h8v4M7 11h10M7 15l2 2 4-4"/></svg>Ödev yönetimi</a>
+      </div>
+    </details>
+    <details class="teacher-nav-group" open>
+      <summary>Ölçme ve analiz</summary>
+      <div class="teacher-nav-links">
+        <a href="#quiz-builder"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="m8 9 2 2 4-4M8 16h8"/></svg><span class="nav-label">Formüllü soru editörü<small>(Sınav ve testler)</small></span></a>
+        <a href="#analytics"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20V4M4 20h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>Başarı analizi</a>
+        <a href="#image-questions"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h.01M21 15l-5-5L5 21"/></svg>Soru bankası</a>
+        <a href="#ai-question-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6z"/></svg>Yapay Zeka İle Soru Üret</a>
+      </div>
+    </details>
+    <details class="teacher-nav-group" open>
+      <summary>Canlı ders</summary>
+      <div class="teacher-nav-links">
+        <a href="#lessons"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Canlı dersler</a>
+      </div>
+    </details>
+    <details class="teacher-nav-group" open>
+      <summary>Kütüphane ve ayarlar</summary>
+      <div class="teacher-nav-links">
+        <a href="#library"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 3h12a2 2 0 0 1 2 2v16H7a2 2 0 0 1-2-2z"/><path d="M5 17a2 2 0 0 1 2-2h12M9 7h6M9 10h6"/></svg>PDF kütüphanesi</a>
+        <a href="#announcements"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 14V9a2 2 0 0 1 2-2h4l8-4v17l-8-4H6a2 2 0 0 1-2-2z"/><path d="m8 16 1.5 5h4L12 17M21 8v7"/></svg>Duyurular</a>
+        <a href="#teacher-settings"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.1h-2.6v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6.4v-2.6h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.1H15v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1V14h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Profil ve ayarlar</a>
+      </div>
+    </details>
   </nav>
   <div class="teacher-sidebar-note"><span class="teacher-status-dot"></span> Eğitim yönetim paneli</div>
 </aside>
+<button class="teacher-sidebar-backdrop" id="teacherSidebarBackdrop" type="button" aria-label="Menüyü kapat" tabindex="-1"></button>
 <main class="wrap teacher-content">
 
   <!-- Giriş -->
@@ -234,13 +871,56 @@ td.net{font-weight:700;color:var(--navy-900)}
 
   <!-- Panel -->
   <div id="panel" hidden>
+      <div class="teacher-mobile-toolbar">
+        <button class="teacher-menu-toggle" id="teacherMenuToggle" type="button" aria-controls="teacherSidebar" aria-expanded="false">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          Menü
+        </button>
+      </div>
     <div data-panel-view="overview">
     <section class="dashboard-head" id="overview">
-      <div><p class="eyebrow">EĞİTİM YÖNETİMİ</p><h2>Merhaba, Öğretmen 👋</h2><p>Derslerinizi, öğrencilerinizi ve içeriklerinizi tek yerden yönetin.</p></div>
+      <div><h2>Merhaba, Öğretmen</h2><p>Derslerinizi, öğrencilerinizi ve içeriklerinizi tek yerden yönetin.</p></div>
       <div class="dashboard-date" id="dashboardDate"></div>
     </section>
 
-    <section class="teacher-kpis" aria-label="Eğitim yönetimi özeti">
+    <section class="card quick-actions">
+      <div class="section-title"><div><h2>Hızlı işlemler</h2><p class="hint">Sık kullandığınız araçlara doğrudan ulaşın.</p></div></div>
+      <div class="quick-action-grid">
+        <a href="#curriculum"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><b>Yeni ders oluştur</b><small>Konu ve içerik ekle</small></a>
+        <a href="#library"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg></span><b>PDF yükle</b><small>Doküman kütüphanesi</small></a>
+        <a href="#quiz-builder"><span aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h4M8 16h5"/></svg></span><b>Test hazırla</b><small>Soru bankasından seç</small></a>
+        <a href="#students"><span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.5a6.5 6.5 0 0 1 13 0V20M19 8v8M15 12h8"/></svg></span><b>Öğrenci ekle</b><small>Öğrenci listeni düzenle</small></a>
+      </div>
+    </section>
+
+    <section class="card starter-checklist" id="starterChecklist" aria-labelledby="starterChecklistTitle" aria-live="polite" hidden>
+      <h2 id="starterChecklistTitle">Başlangıç adımları</h2>
+      <p>İlk adımlarını tamamla; ilerlemen mevcut kayıtlarından gösterilir.</p>
+      <ul class="setup-steps">
+        <li class="setup-step" data-setup-step="students">
+          <span class="setup-mark" aria-hidden="true"></span>
+          <span class="setup-step-copy"><strong>Öğrenci ekle</strong><small data-setup-detail></small></span>
+          <span class="setup-step-status" data-setup-status></span>
+        </li>
+        <li class="setup-step" data-setup-step="content">
+          <span class="setup-mark" aria-hidden="true"></span>
+          <span class="setup-step-copy"><strong>İçerik hazırla</strong><small data-setup-detail></small></span>
+          <span class="setup-step-status" data-setup-status></span>
+        </li>
+        <li class="setup-step" data-setup-step="lessons">
+          <span class="setup-mark" aria-hidden="true"></span>
+          <span class="setup-step-copy"><strong>Canlı ders planla</strong><small data-setup-detail></small></span>
+          <span class="setup-step-status" data-setup-status></span>
+        </li>
+        <li class="setup-step" data-setup-step="assignments">
+          <span class="setup-mark" aria-hidden="true"></span>
+          <span class="setup-step-copy"><strong>Ödev ver</strong><small data-setup-detail></small></span>
+          <span class="setup-step-status" data-setup-status></span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="teacher-kpis" id="teacherKpis" aria-label="Eğitim yönetimi özeti">
       <article class="teacher-kpi"><span class="kpi-icon">♙</span><span class="kpi-label">Toplam öğrenci</span><strong id="kpiStudents">0</strong><small>Öğrenci listeniz</small></article>
       <article class="teacher-kpi"><span class="kpi-icon">▦</span><span class="kpi-label">Aktif sınıflar</span><strong id="kpiClasses">0</strong><small>1–12. sınıf</small></article>
       <article class="teacher-kpi"><span class="kpi-icon">▤</span><span class="kpi-label">Hazırlanan ders</span><strong id="kpiLessons">0</strong><small>İçerik ve konu</small></article>
@@ -258,16 +938,6 @@ td.net{font-weight:700;color:var(--navy-900)}
         <div class="section-title"><div><h2>Son öğrenci etkinlikleri</h2><p class="hint">En son test sonuçları</p></div><a class="text-link" href="#student-results">Tüm sonuçlar →</a></div>
         <div class="dashboard-list" id="dashboardActivity"></div>
       </article>
-    </section>
-
-    <section class="card quick-actions">
-      <div class="section-title"><div><h2>Hızlı işlemler</h2><p class="hint">Sık kullandığınız araçlara doğrudan ulaşın.</p></div></div>
-      <div class="quick-action-grid">
-        <a href="#curriculum"><span>＋</span><b>Yeni ders oluştur</b><small>Konu ve içerik ekle</small></a>
-        <a href="#library"><span>⇧</span><b>PDF yükle</b><small>Doküman kütüphanesi</small></a>
-        <a href="#quiz-builder"><span>✎</span><b>Test hazırla</b><small>Soru bankasından seç</small></a>
-        <a href="#students"><span>♙</span><b>Öğrenci ekle</b><small>Öğrenci listeni düzenle</small></a>
-      </div>
     </section>
 
     </div>
@@ -1769,6 +2439,57 @@ td.net{font-weight:700;color:var(--navy-900)}
         : 'Öğretmen oturumu doğrulanamadı. Lütfen öğretmen hesabınızla giriş yapın.';
     });
   }
+})();
+</script>
+<script>
+(() => {
+  const layout = document.querySelector('.teacher-layout');
+  const sidebar = document.getElementById('teacherSidebar');
+  const toggle = document.getElementById('teacherMenuToggle');
+  const backdrop = document.getElementById('teacherSidebarBackdrop');
+  if (!layout || !sidebar || !toggle || !backdrop) return;
+
+  function closeMenu(restoreFocus = false) {
+    layout.classList.remove('is-sidebar-open');
+    document.body.classList.remove('teacher-menu-open');
+    toggle.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) toggle.focus({preventScroll: true});
+  }
+
+  toggle.addEventListener('click', () => {
+    const isOpen = layout.classList.toggle('is-sidebar-open');
+    document.body.classList.toggle('teacher-menu-open', isOpen);
+    toggle.setAttribute('aria-expanded', String(isOpen));
+    if (isOpen) sidebar.querySelector('nav a')?.focus({preventScroll: true});
+  });
+  backdrop.addEventListener('click', () => closeMenu(true));
+  sidebar.addEventListener('click', event => {
+    if (event.target.closest('a[href^="#"], #sidebarQuickLive')) closeMenu();
+  });
+  document.addEventListener('keydown', event => {
+    if (!layout.classList.contains('is-sidebar-open')) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeMenu(true);
+      return;
+    }
+    if (event.key === 'Tab') {
+      const focusable = [...sidebar.querySelectorAll('a[href], button:not([disabled]), summary')]
+        .filter(element => element.getClientRects().length);
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    }
+  });
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 900 && layout.classList.contains('is-sidebar-open')) closeMenu();
+  });
 })();
 </script>
 <script src="/assets/site-footer.js"></script>
