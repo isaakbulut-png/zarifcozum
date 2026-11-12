@@ -1,0 +1,283 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-12T11:07:40.1468321+03:00",
+  "title": "Design System: ZarifÇözüm",
+  "extensions": {
+    "colorMeta": {
+      "warm-cream": {
+        "role": "neutral",
+        "displayName": "Sıcak Krem",
+        "canonical": "#fbf1e8",
+        "tonalRamp": ["#0d0b09", "#25211d", "#3f3934", "#5b544d", "#787068", "#968d86", "#b4aca6", "#f0eeec"]
+      },
+      "ivory-paper": {
+        "role": "neutral",
+        "displayName": "Fildişi Kâğıt",
+        "canonical": "#fffaf5",
+        "tonalRamp": ["#0c0b0a", "#23211f", "#3d3a37", "#585551", "#75716c", "#938e8a", "#b1adaa", "#efeeed"]
+      },
+      "soft-sand": {
+        "role": "neutral",
+        "displayName": "Yumuşak Kum",
+        "canonical": "#f3e1cf",
+        "tonalRamp": ["#0e0a07", "#272019", "#43382e", "#605345", "#7e6e5e", "#9c8c7c", "#b8ab9f", "#f2eee9"]
+      },
+      "secondary-surface": {
+        "role": "neutral",
+        "displayName": "İkincil Yüzey",
+        "canonical": "#f8f6f0",
+        "tonalRamp": ["#0c0b0a", "#22221f", "#3c3a37", "#575551", "#73716c", "#918f8a", "#afaeaa", "#efeeed"]
+      },
+      "homepage-surface": {
+        "role": "neutral",
+        "displayName": "Ana Sayfa Yüzeyi",
+        "canonical": "#f8ebdd",
+        "tonalRamp": ["#0d0b08", "#26211b", "#413931", "#5d5349", "#7b6f63", "#988d81", "#b5aca2", "#f1eeea"]
+      },
+      "cocoa-ink": {
+        "role": "neutral",
+        "displayName": "Kakao Mürekkebi",
+        "canonical": "#3a2618",
+        "tonalRamp": ["#100a06", "#2a1f18", "#47372c", "#655143", "#846c5c", "#a18a7a", "#bdaa9d", "#f4ede8"]
+      },
+      "muted-cocoa": {
+        "role": "neutral",
+        "displayName": "Soluk Kakao",
+        "canonical": "#6a5242",
+        "tonalRamp": ["#100a06", "#2a1f17", "#47362b", "#665042", "#856c5b", "#a28979", "#bea99c", "#f4ede8"]
+      },
+      "chestnut-primary": {
+        "role": "primary",
+        "displayName": "Kestane Mürekkebi",
+        "canonical": "#7a4f2d",
+        "tonalRamp": ["#130802", "#301c0c", "#51331b", "#724b2d", "#936644", "#b18463", "#caa68b", "#f9ece2"]
+      },
+      "chestnut-hover": {
+        "role": "primary",
+        "displayName": "Kestane Hover",
+        "canonical": "#6b4a2f",
+        "tonalRamp": ["#120904", "#2d1e11", "#4c3522", "#6c4e36", "#8c694d", "#aa876c", "#c4a892", "#f7ece5"]
+      },
+      "chestnut-active": {
+        "role": "primary",
+        "displayName": "Koyu Kestane",
+        "canonical": "#523520",
+        "tonalRamp": ["#110905", "#2d1e14", "#4b3526", "#6a4e3b", "#8a6a53", "#a88872", "#c3a896", "#f6ece6"]
+      },
+      "amber-base": {
+        "role": "secondary",
+        "displayName": "Taban Kehribarı",
+        "canonical": "#d6a85f",
+        "tonalRamp": ["#140900", "#311d00", "#513400", "#724d00", "#936818", "#b18742", "#caa874", "#f9eddb"]
+      },
+      "amber-homepage": {
+        "role": "secondary",
+        "displayName": "Bal Amberi",
+        "canonical": "#c9955c",
+        "tonalRamp": ["#140800", "#321c01", "#533206", "#754b16", "#97662c", "#b5844f", "#cda67c", "#faecde"]
+      },
+      "soft-border": {
+        "role": "neutral",
+        "displayName": "Yumuşak Kenarlık",
+        "canonical": "#d9d3c3",
+        "tonalRamp": ["#0c0b08", "#24211b", "#3e3a31", "#5a5549", "#777163", "#948f81", "#b2aea2", "#f0eeea"]
+      },
+      "warm-divider": {
+        "role": "neutral",
+        "displayName": "Sıcak Ayraç",
+        "canonical": "#ecd9c6",
+        "tonalRamp": ["#0e0a06", "#282018", "#43382d", "#615244", "#7f6e5d", "#9d8c7b", "#b9ab9e", "#f2ede9"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Georgia-led Display",
+        "purpose": "Expressive homepage hero headlines."
+      },
+      "headline": {
+        "displayName": "Clash Display",
+        "purpose": "Shared page headings."
+      },
+      "body": {
+        "displayName": "General Sans",
+        "purpose": "Readable interface and long-form copy."
+      },
+      "mono": {
+        "displayName": "JetBrains Mono",
+        "purpose": "Curriculum codes, counters, and tabular figures."
+      }
+    },
+    "shadows": [
+      {
+        "name": "quiet-surface",
+        "value": "0 1px 2px oklch(0.3 0.03 150 / 0.06)",
+        "purpose": "Resting elevation for shared cards."
+      },
+      {
+        "name": "lifted-surface",
+        "value": "0 6px 18px oklch(0.3 0.03 150 / 0.08)",
+        "purpose": "Shared emphasis and hover elevation."
+      },
+      {
+        "name": "homepage-resting-card",
+        "value": "0 1px 2px rgba(90, 55, 30, 0.08)",
+        "purpose": "Soft resting depth for homepage cards."
+      },
+      {
+        "name": "homepage-lifted-card",
+        "value": "0 8px 22px rgba(90, 55, 30, 0.12)",
+        "purpose": "Slight hover and focus lift on homepage tiles."
+      }
+    ],
+    "motion": [
+      {
+        "name": "standard-transition",
+        "value": "180ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Short state changes for controls."
+      },
+      {
+        "name": "homepage-carousel",
+        "value": "220ms ease",
+        "purpose": "Compact slide transitions."
+      },
+      {
+        "name": "hero-copy-transition",
+        "value": "300ms ease",
+        "purpose": "Homepage hero-copy changes."
+      },
+      {
+        "name": "live-chip-pulse",
+        "value": "1.4s infinite",
+        "purpose": "Subtle live-status indicator pulse."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-to-single-hero",
+        "value": "900px"
+      },
+      {
+        "name": "mobile-navigation",
+        "value": "760px"
+      },
+      {
+        "name": "single-column-grid",
+        "value": "600px"
+      },
+      {
+        "name": "compact-homepage",
+        "value": "560px"
+      },
+      {
+        "name": "narrow-homepage",
+        "value": "420px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Shared chestnut primary action with a clear keyboard focus state.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Öğrenci demosunu aç</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; padding: var(--space-3) var(--space-5); border: 1px solid transparent; border-radius: var(--radius-md); background: var(--color-primary); color: #fff; font: 600 var(--text-sm)/1.2 var(--font-body); transition: background var(--transition), transform var(--transition); } .ds-btn-primary:hover { background: var(--color-primary-hover); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Homepage Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Homepage-only pill CTA with a warm gradient and a soft shadow.",
+      "html": "<a class=\"ds-btn-home-primary\" href=\"#sinif-sec\">Hemen keşfet</a>",
+      "css": ".ds-btn-home-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: var(--space-4) var(--space-6); border-radius: 9999px; background: linear-gradient(135deg, #8a5a34, #6b4a2f); color: #fff; font: 600 var(--text-base)/1.2 var(--font-body); box-shadow: 0 4px 12px rgba(90, 55, 30, 0.25); transition: background var(--transition), transform var(--transition); } .ds-btn-home-primary:hover { background: linear-gradient(135deg, #7a4f2d, #5a3a22); } .ds-btn-home-primary:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; } .ds-btn-home-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "A quiet outlined secondary action.",
+      "html": "<a class=\"ds-btn-ghost\" href=\"#sinif-sec\">Ana sayfaya dön</a>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: var(--space-3) var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: transparent; color: var(--color-text); font: 600 var(--text-sm)/1.2 var(--font-body); transition: background var(--transition), border-color var(--transition); } .ds-btn-ghost:hover { background: var(--color-surface-offset); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; } .ds-btn-ghost:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Registration field with a warm border and explicit focus ring.",
+      "html": "<input class=\"ds-input\" type=\"email\" aria-label=\"E-posta\" placeholder=\"ornek@posta.com\">",
+      "css": ".ds-input { width: 100%; padding: 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); color: var(--color-text); font: inherit; transition: border-color var(--transition); } .ds-input:focus-visible { outline: 3px solid rgba(125, 90, 60, 0.3); border-color: var(--color-primary); } .ds-input:disabled { opacity: 0.55; cursor: not-allowed; }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "chip-default",
+      "description": "Compact pill label; semantic colors distinguish status.",
+      "html": "<span class=\"ds-chip\">KONU TAKİBİ</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: var(--space-1); padding: 0.2rem 0.6rem; border-radius: 9999px; background: var(--color-primary-highlight); color: var(--color-primary-active); font: 600 var(--text-xs)/1.3 var(--font-body); white-space: nowrap; } .ds-chip:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }"
+    },
+    {
+      "name": "Content Card",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Paper-toned container for grouped lesson or account content.",
+      "html": "<article class=\"ds-card\"><h2>Öğrenme hedefi</h2><p>Bu haftaki ilerlemeni gör.</p></article>",
+      "css": ".ds-card { padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-sm); } .ds-card h2 { margin: 0 0 var(--space-2); font: 600 var(--text-lg)/1.15 var(--font-display); } .ds-card p { margin: 0; color: var(--color-text-muted); font: 400 var(--text-sm)/1.6 var(--font-body); }"
+    },
+    {
+      "name": "Site Navigation",
+      "kind": "nav",
+      "refersTo": "site-nav",
+      "description": "Muted, horizontally spaced links beneath a translucent sticky header.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Site\"><a href=\"#nasil\">Nasıl çalışır</a><a href=\"#siniflar\">Sınıflar</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; gap: var(--space-5); font: 500 var(--text-sm)/1.4 var(--font-body); color: var(--color-text-muted); } .ds-nav a { color: inherit; text-decoration: none; transition: color var(--transition); } .ds-nav a:hover, .ds-nav a:focus-visible { color: var(--color-text); } .ds-nav a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: var(--radius-sm); }"
+    },
+    {
+      "name": "Information Notice",
+      "kind": "custom",
+      "refersTo": "notice-info",
+      "description": "Soft highlighted notice for explanatory information.",
+      "html": "<aside class=\"ds-notice\" role=\"note\"><span aria-hidden=\"true\">i</span><p>Bu sürüm demo deneyimidir.</p></aside>",
+      "css": ".ds-notice { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid #dbcfc5; border-radius: var(--radius-md); background: var(--color-primary-highlight); color: var(--color-primary-active); font: 400 var(--text-sm)/1.6 var(--font-body); } .ds-notice span { display: grid; width: 18px; height: 18px; flex: none; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-weight: 700; } .ds-notice p { margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Krem kâğıtlı matematik çalışma odası",
+    "overview": "ZarifÇözüm's interface pairs warm paper-like surfaces with cocoa text and chestnut actions. The intended feeling is warm, calm, and trustworthy: clear enough for study, with a quietly editorial character rather than a cold technology aesthetic. The existing ZarifÇözüm logo remains part of the identity.\n\nThe shared stylesheet and homepage have related but distinct implementations. Shared page display headings use Clash Display and a restrained chestnut palette; the homepage switches its headings to a Georgia-led serif, softens surfaces, and uses pill-shaped calls to action. Preserve those as observed surface variations rather than flattening them into one invented component style.",
+    "keyCharacteristics": [
+      "Warm cream and cocoa form the visual foundation.",
+      "Serif display type and sans-serif reading text create the main hierarchy.",
+      "Rounded controls, paper-toned cards, and soft ambient shadows keep the interface approachable.",
+      "New work is mobile-first and favors clear, breathable layouts."
+    ],
+    "rules": [
+      {
+        "name": "The Warm Paper Rule",
+        "body": "Keep the cream-and-cocoa identity recognizable across surfaces; distinguish page-specific token overrides instead of silently normalizing them.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Voice Rule",
+        "body": "Keep the serif homepage display and the shared Clash Display heading stack as distinct existing roles; do not apply the homepage override globally without an explicit redesign.",
+        "section": "typography"
+      },
+      {
+        "name": "The Quiet Depth Rule",
+        "body": "Use a soft shadow to clarify a surface or interaction state, never as a dark decorative effect.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve the existing ZarifÇözüm logo and cream/chestnut identity.",
+      "Do build new surfaces mobile-first and leave enough breathing room around learning content.",
+      "Do use mathematics-themed hand-drawn illustrations such as rulers, set squares, and graph paper when useful.",
+      "Do use subtle, purposeful animation and respect reduced-motion preferences.",
+      "Do keep color variants and typography overrides scoped to the surfaces where the code currently uses them."
+    ],
+    "donts": [
+      "Don't shift the product into a cold blue-purple technology aesthetic.",
+      "Don't use hard dark shadows, neon colors, or crowded, high-density layouts.",
+      "Don't use success, warning, error, or live colors as decorative substitutes for the warm brand palette.",
+      "Don't flatten the homepage's serif and pill-button treatment into every shared page without an explicit redesign."
+    ]
+  }
+}

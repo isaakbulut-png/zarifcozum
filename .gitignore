@@ -14,3 +14,18 @@ __pycache__/
 *.py[cod]
 .venv/
 .pytest_cache/
+
+# Impeccable: keep shared project configuration trackable
+.impeccable/config.local.json
+.impeccable/questions/
+.impeccable/mocks/
+.impeccable/review/
+.impeccable/build/
+.impeccable/critique/*
+!.impeccable/critique/ignore.md
+.impeccable/live/roots.json
+.impeccable/live/inject-journal.json
+.impeccable/live/sessions/
+
+# Claude Code per-developer settings
+.claude/settings.local.json
