@@ -1,0 +1,1 @@
+Branch ve PR kullanılmaz, doğrudan main'de çalışılır. Değişiklikler önce yerelde kullanıcı tarafından kontrol edilir, onay gelmeden commit ve push yapılmaz. Her görev ayrı küçük commit olur. İşe başlamadan önce plan gösterilir. Giriş, yetki, rota, veri ve backend mantığına izin istenmeden dokunulmaz.
