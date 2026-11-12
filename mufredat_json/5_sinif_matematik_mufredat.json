@@ -540,7 +540,20 @@
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "official_description": "Kategorik veri ile çalışabilme ve veriye dayalı karar verebilme",
       "process_components": [],
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Daire grafiği yalnızca parça-bütün ilişkisi üzerinden ele alınır.",
+          "source_page": 59
+        },
+        {
+          "statement": "Daire grafiği oluşturulurken dilimlerin açıları hesaplanmaz.",
+          "source_page": 59
+        },
+        {
+          "statement": "Dağılım incelemeleri veri setinin bütünüyle sınırlandırılır; merkez kavramına girilmez.",
+          "source_page": 60
+        }
+      ],
       "editorial_cautions": [
         "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],

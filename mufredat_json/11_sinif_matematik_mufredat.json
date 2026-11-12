@@ -14,7 +14,12 @@
       "grade": 11,
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "official_description": "İki nicel değişkenli veri ile çalışabilme ve iki nicel değişken arasındaki ilişkililiğe dayalı karar verebilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "İstatistiksel araştırma sorusu ölçütü olan değişebilirlik incelenirken değişebilirlik türlerine değinilmez.",
+          "source_page": 132
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -56,7 +61,12 @@
       "grade": 11,
       "unit_topic": "Geometrik Şekiller",
       "official_description": "Üçgenlerde açı, benzerlik ve alan özelliklerinden yola çıkarak dörtgenlerin açı, kenar, köşegen, simetri ve alan özelliklerine ilişkin muhakeme yapabilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Yalnızca dışbükey dörtgenlerin özellikleri incelenir.",
+          "source_page": 137
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -182,7 +192,12 @@
       "grade": 11,
       "unit_topic": "Nicelikler ve Değişimler",
       "official_description": "Trigonometrik fonksiyonlarla ifade edilebilen denklemleri içeren problemleri çözebilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Bu kazanımda kullanılan trigonometrik denklemler trigonometrik fonksiyonların birinci kuvvetleriyle sınırlıdır.",
+          "source_page": 146
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -287,7 +302,16 @@
       "grade": 11,
       "unit_topic": "Nicelikler ve Değişimler",
       "official_description": "Fonksiyonların bileşkelerine ilişkin muhakeme yapabilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Keyfî fonksiyonlar üzerinden bileşke işleminin ve ters fonksiyonun özelliklerine değinilmez.",
+          "source_page": 159
+        },
+        {
+          "statement": "Bu bağlamda yalnızca gerçek sayılarda tanımlı ve değerli fonksiyonlar ele alınır.",
+          "source_page": 159
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],

@@ -39,7 +39,12 @@
       "grade": 9,
       "unit_topic": "Sayılar",
       "official_description": "Gerçek sayı aralıklarının gösteriminde ve aralıklarla ilgili işlemlerde küme sembol ve işlemlerinden yararlanabilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Küme kavramına ilişkin formel bir tanıma girilmez; temel bilgiler, semboller ve işlemler ele alınır.",
+          "source_page": 47
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -139,7 +144,12 @@
       "grade": 9,
       "unit_topic": "Nicelikler ve Değişimler",
       "official_description": "Gerçek sayılarda f(x) = x şeklinde tanımlı doğrusal referans fonksiyonun nitel özellikleri ile bu fonksiyondan türetilen g(x) = a ∙ f(x ± r) ± k, (a, r, k ∈ ℝ, a ≠ 0) doğrusal fonksiyonların nitel özelliklerine ilişkin matematiksel muhakeme yapabilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Doğrusal fonksiyonlarda örtenlik ve teklik-çiftlik nitel özelliklerine değinilmez.",
+          "source_page": 52
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -339,7 +349,12 @@
       "grade": 9,
       "unit_topic": "Algoritma ve Bilişim",
       "official_description": "Algoritma temelli yaklaşımlarla problem çözebilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Çizge kuramıyla ilgili teoremlere girilmez ve çizge sınıflandırmaları yapılmaz.",
+          "source_page": 70
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -414,7 +429,12 @@
       "grade": 9,
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "official_description": "Tek nicel değişkenli veri dağılımları ile çalışabilme ve tek nicel değişken içeren veriye dayalı karar verebilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Standart sapma formülle hesaplanmaz, kavramsal olarak ele alınır; değeri teknolojik araçlarla belirlenebilir.",
+          "source_page": 77
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -489,7 +509,12 @@
       "grade": 9,
       "unit_topic": "Veriden Olasılığa",
       "official_description": "Olayların olasılığına ilişkin tümevarımsal akıl yürütebilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Koşullu olasılık yorumlaması gerektiren olaylara değinilmez.",
+          "source_page": 83
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],

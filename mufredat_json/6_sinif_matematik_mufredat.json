@@ -206,7 +206,12 @@
       "unit_topic": "Sayılar ve Nicelikler",
       "official_description": "Karşılaştığı günlük hayat ya da matematiksel durumlarda standart uzunluk ölçme birimlerini değerlendirebilme",
       "process_components": [],
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Standart uzunluk ölçme birimleri arasındaki dönüşümler metre-kilometre ve metre-desimetre-santimetre-milimetre ile sınırlandırılır.",
+          "source_page": 80
+        }
+      ],
       "editorial_cautions": [
         "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -414,7 +419,12 @@
       "unit_topic": "Geometrik Nicelikler",
       "official_description": "Uzunluk ve alan ölçme birimleri arasındaki ilişkilerle ilgili analojik akıl yürüte - bilme",
       "process_components": [],
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Standart alan ölçme birimleri arasındaki dönüşümler metrekare-kilometrekare ve metrekare-desimetrekare-santimetrekare-milimetrekare ile sınırlandırılır.",
+          "source_page": 99
+        }
+      ],
       "editorial_cautions": [
         "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],

@@ -175,7 +175,12 @@
       "unit_topic": "Sayılar ve Nicelikler",
       "official_description": "Gerçek yaşam durumları üzerinden doğru orantılı durumlara ilişkin problemleri çözebilme",
       "process_components": [],
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Bu sınıf düzeyinde gerçek yaşam problemleri yalnızca doğru orantılı durumlar üzerinden ele alınır.",
+          "source_page": 128
+        }
+      ],
       "editorial_cautions": [
         "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -669,7 +674,12 @@
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "official_description": "Kategorik veya nicel (sürekli) veri ile çalışabilme ve veriye dayalı karar verebil - me",
       "process_components": [],
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Veri setinden bir verinin çıkarılması veya verilmemesi durumlarında değişebilirlik, araştırma sorusu ve karar verme süreçleriyle ilişkilendirilerek hesaplamalara girilmeden incelenir.",
+          "source_page": 165
+        }
+      ],
       "editorial_cautions": [
         "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -721,7 +731,12 @@
       "unit_topic": "Veriden Olasılığa",
       "official_description": "Bir olayın ve tümleyeninin olasılığına ilişkin tümevarımsal akıl yürütebilme",
       "process_components": [],
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Teorik olasılık hesaplamalarında hile içeren örneklere yer verilmez.",
+          "source_page": 170
+        }
+      ],
       "editorial_cautions": [
         "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -773,7 +788,12 @@
       "unit_topic": "Veriden Olasılığa",
       "official_description": "Olayları ayrık olma ve ayrık olmama durumlarına göre sınıflandırabilme",
       "process_components": [],
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Bu temada iki veya daha fazla olaylı deneylere girilmez.",
+          "source_page": 172
+        }
+      ],
       "editorial_cautions": [
         "Programda açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],

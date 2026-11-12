@@ -98,7 +98,12 @@
       "grade": 10,
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "official_description": "İki kategorik değişkenli veri ile çalışabilme ve iki kategorik değişken arasındaki ilişkililiğe dayalı karar verebilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "İstatistiksel araştırma sorusu ölçütü olan değişebilirlik incelenirken değişebilirlik türlerine değinilmez.",
+          "source_page": 95
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -203,7 +208,12 @@
       "grade": 10,
       "unit_topic": "Nicelikler ve Değişimler",
       "official_description": "Gerçek sayılarda fonksiyon olma şartları ile gerçek sayılarda tanımlı fonksi - yonların nitel özelliklerini matematiksel temsillerle değerlendirebilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Fonksiyon kavramının keyfî kümeler bağlamındaki tanımına değinilmez.",
+          "source_page": 108
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -308,7 +318,20 @@
       "grade": 10,
       "unit_topic": "Nicelikler ve Değişimler",
       "official_description": "Doğrusal, karesel, karekök, rasyonel referans fonksiyonlar ve bunlardan türe - tilen fonksiyonlarla ifade edilebilen denklem ve eşitsizlikler içeren problemleri çöze - bilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Bu kazanımda kullanılan denklem ve eşitsizliklerin cebirsel formları en fazla ikinci dereceden olmalıdır.",
+          "source_page": 111
+        },
+        {
+          "statement": "Karesel ifadeleri çarpanlara ayırmak için katsayıların çarpanlarından yararlanmaya dayalı yöntemlere yer verilmez.",
+          "source_page": 112
+        },
+        {
+          "statement": "Fonksiyonların değişim ve dönüşümünün önüne geçen diskriminant yöntemi, kök-katsayı ilişkileri ve kökler toplamı veya çarpımı gibi özel formül ve kurallara yer verilmez.",
+          "source_page": 112
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],
@@ -329,7 +352,16 @@
       "grade": 10,
       "unit_topic": "Sayma, Algoritma ve Bilişim",
       "official_description": "Sayma stratejileri kullanarak problem çözebilme",
-      "official_boundaries": [],
+      "official_boundaries": [
+        {
+          "statement": "Nesnelerden bir kısmının sıralama sayısı formel tanımlamaya girilmeden çarparak sayma stratejisiyle ele alınır.",
+          "source_page": 117
+        },
+        {
+          "statement": "Doğal sayılarda tanımlı faktöriyel gösterimi yalnızca sayma bağlamında ele alınır.",
+          "source_page": 117
+        }
+      ],
       "editorial_cautions": [
         "Açıkça yazılmayan konu yasakları çıkarım yoluyla eklenmemiştir."
       ],

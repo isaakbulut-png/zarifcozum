@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "language": "tr",
+  "grade": 11,
+  "course": "Matematik (Temel Düzey)",
+  "program_version": "Matematik Dersi Öğretim Programı (2018), Temel Düzey",
+  "implementation_status": "Referans kaydıdır; 2026 Maarif Modeli 11. sınıf kayıtlarıyla karıştırılmamalıdır.",
+  "record_count": 2,
+  "records": [
+    {
+      "outcome_code": "TD.11.4.1.1",
+      "grade": 11,
+      "unit_topic": "Çemberin Temel Elemanları",
+      "official_description": "Çemberin temel elemanlarını tanır.",
+      "official_boundaries": [
+        {
+          "statement": "Çap, yay, teğet, kiriş, kavramları verilir ancak bu kavramların özelliklerine girilmez",
+          "source_page": 45
+        }
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018, Temel Düzey",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 45
+      }
+    },
+    {
+      "outcome_code": "TD.11.4.2.1",
+      "grade": 11,
+      "unit_topic": "Çemberde Açılar",
+      "official_description": "Çemberlerde açıların özelliklerini kullanarak işlemler yapar.",
+      "official_boundaries": [
+        {
+          "statement": "Sadece merkez ve çevre açı verilir",
+          "source_page": 45
+        }
+      ],
+      "provenance": {
+        "document": "Ortaöğretim Matematik Dersi Öğretim Programı (9-12), 2018, Temel Düzey",
+        "source_url": "https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf",
+        "pdf_page": 45
+      }
+    }
+  ]
+}

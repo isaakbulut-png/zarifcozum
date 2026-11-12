@@ -726,16 +726,7 @@
       "grade": 12,
       "unit_topic": "Çemberin Analitik İncelenmesi",
       "official_description": "Denklemleri verilen doğru ile çemberin birbirine göre durumlarını belirleyerek işlemler yapar",
-      "official_boundaries": [
-        {
-          "statement": "Çap, yay, teğet, kiriş, kavramları verilir ancak bu kavramların özelliklerine girilmez",
-          "source_page": 41
-        },
-        {
-          "statement": "Sadece merkez ve çevre açı verilir",
-          "source_page": 41
-        }
-      ],
+      "official_boundaries": [],
       "editorial_cautions": [
         "Bu dosya, 2026-27 döneminde 12. sınıf için yürürlükte kalan 2018 matematik programını kullanır. Programda ayrıca yazılmayan yasaklar eklenmemiştir."
       ],
