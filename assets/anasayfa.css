@@ -542,7 +542,6 @@ body.homepage .why-section .why-icon {
   color: var(--accent-cobalt);
 }
 body.homepage .assistant-layout,
-body.homepage .parent-layout,
 body.homepage .closing-layout {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -550,13 +549,11 @@ body.homepage .closing-layout {
   gap: clamp(1.5rem, 4vw, 3rem);
 }
 body.homepage .assistant-layout > div:first-child,
-body.homepage .success-section .wrap,
-body.homepage .parent-layout {
+body.homepage .success-section .wrap {
   --section-accent: var(--accent-cobalt);
 }
 body.homepage .assistant-layout h2,
 body.homepage .success-section h2,
-body.homepage .parent-layout h2,
 body.homepage .closing-layout h2 {
   max-width: 18ch;
   margin-bottom: 0.75rem;
@@ -565,8 +562,7 @@ body.homepage .closing-layout h2 {
   line-height: 1.15;
 }
 body.homepage .assistant-layout p,
-body.homepage .success-section p,
-body.homepage .parent-layout p {
+body.homepage .success-section p {
   max-width: 56ch;
   margin-bottom: 1.25rem;
   color: var(--color-text-muted);
@@ -594,12 +590,10 @@ body.homepage .assistant-demo strong {
   color: var(--accent-cobalt);
   font-size: 0.75rem;
 }
-body.homepage .success-section .wrap,
-body.homepage .parent-layout {
+body.homepage .success-section .wrap {
   --section-accent: var(--accent-emerald);
 }
-body.homepage .success-section .btn-primary,
-body.homepage .parent-section .btn-primary {
+body.homepage .success-section .btn-primary {
   background: var(--accent-emerald);
   color: #fff;
 }
@@ -624,7 +618,6 @@ body.homepage .faq {
 @media (max-width: 760px) {
   body.homepage .grade-path-grid,
   body.homepage .assistant-layout,
-  body.homepage .parent-layout,
   body.homepage .closing-layout {
     grid-template-columns: 1fr;
   }
