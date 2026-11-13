@@ -34,6 +34,62 @@
     return dugum;
   }
 
+  // Konu anlatımı ekranındaki sınıfa özel tanıtım panosu (yalnızca görsel içerik).
+  const SINIF_PANOLARI = {
+    5: { renk: '#C2570C', esya: 'cetvel', baslik: ['Sayılar ve şekiller ', { vurgu: 'korkutmasın' }, '.'],
+      metin: 'Bilge Baykuş ile her konu kısa anlatım ve çözümlü örneklerle, adım adım.' },
+    6: { renk: '#B73520', esya: 'cetvel', baslik: ['Ezberleme, ', { vurgu: 'mantığını yakala' }, '.'],
+      metin: 'Her konunun neden öyle olduğunu gör; kural kendiliğinden aklında kalsın.' },
+    7: { renk: '#A8326B', esya: 'pergel', baslik: ['Cebirsel düşünmeye ', { vurgu: 'sağlam bir adım' }, '.'],
+      metin: 'Yeni konularla ilk tanışmayı kendi hızında, örnek örnek yap.' },
+    8: { renk: '#8E2A2A', esya: 'kep', baslik: ['LGS yolunda konular ', { vurgu: 'tek tek, sırayla' }, '.'],
+      metin: 'Eksik kalan konuyu seç, anlatımı oku, takıldığın yeri netleştir.' },
+    9: { renk: '#0E7C86', esya: 'pergel', baslik: ['Liseye ', { vurgu: 'sağlam bir başlangıç' }, ' yap.'],
+      metin: 'Temeli baştan doğru kur; sonraki yılların konuları bunun üstüne gelir.' },
+    10: { renk: '#17805F', esya: 'grafik', baslik: ['Analitik düşün, ', { vurgu: 'grafiği oku' }, '.'],
+      metin: 'Konuyu anlatım ve çözümlü örneklerle adım adım izle.' },
+    11: { renk: '#2F5FD0', esya: 'grafik', baslik: ['Zor konular ', { vurgu: 'parça parça' }, ' çözülür.'],
+      metin: 'Her adımın gerekçesini gör; ezber yerine kavrayarak ilerle.' },
+    12: { renk: '#3B3A8F', esya: 'kep', baslik: ['YKS yolunda ', { vurgu: 'eksik konu kalmasın' }, '.'],
+      metin: 'Tekrar etmek istediğin konuyu seç, anlatımla eksiğini kapat.' }
+  };
+  const BAYKUS_ESYALARI = {
+    cetvel: '<g transform="rotate(-24 100 76)"><rect x="93" y="44" width="14" height="62" rx="2" fill="#ffe9c2" stroke="#2b2118" stroke-width="2"/><path d="M93 54h6M93 64h8M93 74h6M93 84h8M93 94h6" stroke="#2b2118" stroke-width="2"/></g>',
+    pergel: '<g fill="none" stroke="#2b2118" stroke-width="3" stroke-linecap="round"><path d="M100 46 90 100M100 46l12 54"/><path d="M92 86a22 22 0 0 0 18 2" stroke-dasharray="3 4" stroke-width="2"/></g><circle cx="100" cy="45" r="5" fill="#ffe9c2" stroke="#2b2118" stroke-width="2"/>',
+    grafik: '<rect x="84" y="58" width="32" height="38" rx="4" fill="#fffaf3" stroke="#2b2118" stroke-width="2"/><path d="M92 58v38M100 58v38M108 58v38M84 70h32M84 82h32" stroke="#d9c6ae" stroke-width="1"/><path d="m88 90 8-10 7 4 9-18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
+    kep: '<path d="M60 8 96 21 60 34 24 21z" fill="#2b2118"/><path d="M42 27v9c9 6 27 6 36 0v-9l-18 7z" fill="#2b2118"/><path d="M96 21v16" stroke="#E8A33D" stroke-width="3" stroke-linecap="round"/><circle cx="96" cy="40" r="4" fill="#E8A33D"/>'
+  };
+
+  function baykusCiz(esya) {
+    const kap = el('div', { class: 'zp-pano-yuz', 'aria-hidden': 'true' });
+    kap.innerHTML = '<svg viewBox="0 0 120 120" focusable="false">' +
+      '<path d="M34 40 30 20l18 10zM86 40l4-20-18 10z" fill="currentColor"/>' +
+      '<ellipse cx="60" cy="68" rx="36" ry="40" fill="currentColor"/>' +
+      '<ellipse cx="34" cy="78" rx="8" ry="19" fill="#000" opacity=".18"/>' +
+      '<ellipse cx="60" cy="82" rx="22" ry="23" fill="#fff4e6"/>' +
+      '<path d="M50 78q5 5 10 0q5 5 10 0M50 88q5 5 10 0q5 5 10 0" fill="none" stroke="currentColor" stroke-width="2" opacity=".45"/>' +
+      '<circle cx="46" cy="54" r="13" fill="#fff"/><circle cx="74" cy="54" r="13" fill="#fff"/>' +
+      '<circle cx="48" cy="55" r="5.5" fill="#2b2118"/><circle cx="72" cy="55" r="5.5" fill="#2b2118"/>' +
+      '<circle cx="50" cy="53" r="2" fill="#fff"/><circle cx="74" cy="53" r="2" fill="#fff"/>' +
+      '<path d="M60 60l-6 8h12z" fill="#E8A33D"/>' +
+      '<ellipse cx="50" cy="108" rx="7" ry="4" fill="#E8A33D"/><ellipse cx="70" cy="108" rx="7" ry="4" fill="#E8A33D"/>' +
+      (BAYKUS_ESYALARI[esya] || '') + '</svg>';
+    return kap;
+  }
+
+  function sinifPanosu(sinif, girisYapti) {
+    const pano = SINIF_PANOLARI[sinif];
+    if (!pano) return '';
+    return el('aside', { class: 'zp-pano', 'aria-label': `${sinif}. sınıf tanıtımı` },
+      baykusCiz(pano.esya),
+      el('div', { class: 'zp-pano-govde' },
+        el('span', { class: 'zp-pano-etiket' }, `${sinif}. sınıf · Bilge Baykuş öneriyor`),
+        el('p', { class: 'zp-pano-baslik' }, pano.baslik.map(parca =>
+          typeof parca === 'string' ? parca : el('span', { class: 'zp-pano-vurgu' }, parca.vurgu))),
+        el('p', { class: 'zp-pano-metin' }, pano.metin)),
+      girisYapti ? '' : el('a', { class: 'zp-pano-btn', href: 'kayit-giris.html' }, 'Ücretsiz dene'));
+  }
+
   function matematikMetni(metin) {
     const dugum = el('span');
     dugum.innerHTML = window.zarifMathText.format(metin);
@@ -379,8 +435,10 @@
             }, (kilitli ? '🔒 ' : '') + konu);
           }))));
       }
+      if (mod === 'konu' && SINIF_PANOLARI[sinif]) kok.style.setProperty('--zp-sinif-renk', SINIF_PANOLARI[sinif].renk);
       kok.append(el('div', { class: 'zp-kart' },
         el('h3', {}, mod === 'konu' ? `${sinif}. sınıf konu anlatımları` : BASLIKLAR[mod]), durumSerit(),
+        mod === 'konu' ? sinifPanosu(sinif, Boolean(durum && durum.girisYapti)) : '',
         el('p', { class: 'zp-kucuk' }, SECIM_MODLARI[mod]
           ? SECIM_MODLARI[mod].aciklama
           : 'Sınıfını seç, sonra bir konu seç.'),
