@@ -120,7 +120,7 @@ td.net{font-weight:700;color:var(--navy-900)}
 .teacher-layout{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:22px;max-width:1480px;margin:0 auto}
 .teacher-layout.authenticated{grid-template-columns:250px minmax(0,1fr)}
 .teacher-sidebar{position:sticky;top:18px;margin:24px 0 24px 8px;padding:18px 12px;background:var(--navy-900);border-radius:16px;color:#fff}
-.teacher-live-cta{display:flex;width:100%;margin:0 0 5px;padding:12px 10px;align-items:center;justify-content:center;gap:8px;border:0;border-radius:9px;background:var(--orange);color:#fff;text-align:center;text-decoration:none;font-size:.86rem;font-weight:700;box-shadow:none;min-height:42px}
+.teacher-live-cta{display:block;width:100%;margin:0 0 9px;padding:12px 10px;border:0;border-radius:9px;background:var(--orange);color:#fff;text-align:center;text-decoration:none;font-size:.86rem;font-weight:700;box-shadow:none}
 .teacher-live-cta:hover{background:var(--orange-dark)}
 .teacher-live-cta:disabled{opacity:.65;cursor:wait}
 .teacher-live-cta.secondary{background:transparent}
@@ -180,8 +180,8 @@ td.net{font-weight:700;color:var(--navy-900)}
 @media(max-width:560px){.form-grid,.question-options{grid-template-columns:1fr}.field.full{grid-column:auto}.data-item{align-items:flex-start;flex-direction:column}}
 
 :root {
-  --accent-cobalt: #FF7F50;
-  --accent-cobalt-soft: #FFE5D9;
+  --accent-cobalt: #2F5FD0;
+  --accent-cobalt-soft: #DCE6FA;
   --feedback-correct: #276B43;
   --feedback-correct-soft: #E0F0E5;
 }
@@ -285,8 +285,8 @@ main .site-breadcrumb a:focus-visible {
   text-decoration: none;
 }
 .teacher-sidebar .teacher-live-cta:hover {
-  border-color: #FF6B35;
-  background: #FF6B35;
+  border-color: #2449A8;
+  background: #2449A8;
   color: #fff;
 }
 .teacher-sidebar .teacher-live-cta svg {
@@ -300,13 +300,13 @@ main .site-breadcrumb a:focus-visible {
   stroke-width: 1.8;
 }
 .teacher-sidebar .teacher-live-cta.secondary {
-  border-color: rgba(255, 127, 80, 0.5);
-  background: rgba(255, 127, 80, 0.12);
+  border-color: #9db4ec;
+  background: transparent;
   color: #fff;
 }
 .teacher-sidebar .teacher-live-cta.secondary:hover {
-  border-color: #FF7F50;
-  background: rgba(255, 127, 80, 0.22);
+  border-color: var(--page-accent);
+  background: var(--page-accent);
 }
 .teacher-live-status {
   color: #f0e5dc;

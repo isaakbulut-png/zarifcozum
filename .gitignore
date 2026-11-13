@@ -29,9 +29,3 @@ __pycache__/
 
 # Claude Code per-developer settings
 .claude/settings.local.json
-
-# Playwright
-test-results/
-playwright-report/
-blob-report/
-playwright/.cache/
