@@ -635,3 +635,29 @@ body.homepage .faq {
   body.homepage .home-benefits-inner { grid-template-columns: 1fr; }
   body.homepage .hero .cta .btn { flex: 1 1 100%; }
 }
+
+/* Sınıf renkleri: her sınıfın öğrenci profiline göre kendi tonu */
+body.homepage .grade-tile[data-grade="5"] { --grade-color: #C2570C; }
+body.homepage .grade-tile[data-grade="6"] { --grade-color: #B73520; }
+body.homepage .grade-tile[data-grade="7"] { --grade-color: #A8326B; }
+body.homepage .grade-tile[data-grade="8"] { --grade-color: #8E2A2A; }
+body.homepage .grade-tile[data-grade="9"] { --grade-color: #0E7C86; }
+body.homepage .grade-tile[data-grade="10"] { --grade-color: #17805F; }
+body.homepage .grade-tile[data-grade="11"] { --grade-color: #2F5FD0; }
+body.homepage .grade-tile[data-grade="12"] { --grade-color: #3B3A8F; }
+body.homepage .grade-tile[data-grade] {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--grade-color) 7%, #fffaf5);
+  border-color: color-mix(in srgb, var(--grade-color) 28%, #ead3bd);
+}
+body.homepage .grade-tile[data-grade]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 5px;
+  background: var(--grade-color);
+}
+body.homepage .grade-tile[data-grade] strong { color: var(--grade-color); font-size: 2.2rem; }
+body.homepage .grade-tile[data-grade]:hover,
+body.homepage .grade-tile[data-grade]:focus-visible { border-color: var(--grade-color); }
