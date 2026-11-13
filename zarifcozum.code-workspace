@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../superpowers-main"
+		},
+		{
+			"path": "../../Belgeler/GitHub/superpowers-main"
 		}
 	],
 	"settings": {}
