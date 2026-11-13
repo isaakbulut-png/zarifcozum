@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const root = path.join(__dirname, '..', 'mufredat_json');
+const root = path.join(__dirname, '..', 'mufredat_donusturucu', 'kazanimlar');
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 
 test('temel düzey çember sınırları yalnızca doğru program ve kazanımlara bağlıdır', () => {

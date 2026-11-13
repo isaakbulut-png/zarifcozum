@@ -1,5 +1,5 @@
 // Kullanım: node uploadMufredat.js
-// mufredat_json klasöründeki tüm kazanımları vektörleştirip Pinecone 'meb-mufredat' index'ine yükler.
+// mufredat_donusturucu/kazanimlar klasöründeki tüm kazanımları vektörleştirip Pinecone 'meb-mufredat' index'ine yükler.
 const fs = require('fs');
 const path = require('path');
 // server.js ile aynı: .env öncelikli, eksikler baglanti_adresi.env'den tamamlanır
@@ -10,7 +10,7 @@ for (const file of ['.env', 'baglanti_adresi.env']) {
 const { GoogleGenAI } = require('@google/genai');
 const { Pinecone } = require('@pinecone-database/pinecone');
 
-const KLASOR = path.join(__dirname, 'mufredat_json');
+const KLASOR = path.join(__dirname, 'mufredat_donusturucu', 'kazanimlar');
 const INDEX_ADI = 'meb-mufredat';
 // text-embedding-004 kapatıldı; aiService.mjs ile aynı model ve boyut kullanılmalı
 const EMBEDDING_MODELI = 'gemini-embedding-001';
