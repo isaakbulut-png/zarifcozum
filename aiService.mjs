@@ -170,11 +170,12 @@ export async function genelSokratikIpucu({question, selected}) {
 }
 
 const KLAVUZ_NAMESPACE = 'klavuz';
+const DERS_KITABI_NAMESPACE = 'ders_kitabi';
 
 /**
  * Yeni yüklenen Pinecone metadata yapısına uygun kural metni oluşturur
  */
-function buildConstraintText(metadata = {}, klavuzMatches = []) {
+function buildConstraintText(metadata = {}, klavuzMatches = [], kitapMatches = []) {
   const { grade, unit_topic, text, outcome_code } = metadata;
   const parts = [];
 
@@ -191,13 +192,21 @@ function buildConstraintText(metadata = {}, klavuzMatches = []) {
     parts.push(`[MAARİF MODELİ KLAVUZ TALİMATLARI]\n${klavuzMetinleri.join('\n---\n')}`);
   }
 
+  const kitapMetinleri = kitapMatches
+    .map((m) => m?.metadata?.text)
+    .filter(Boolean)
+    .slice(0, 2);
+  if (kitapMetinleri.length) {
+    parts.push(`[MAARİF MODELİ DERS KİTABI ÖRNEKLERİ]\n${kitapMetinleri.join('\n---\n')}`);
+  }
+
   return parts.length
     ? parts.join('\n\n')
     : "Genel 5-12. sınıf Türkiye Yüzyılı Maarif Modeli matematik müfredat sınırlarına ve pedagojisine sadık kal.";
 }
 
 /**
- * Öğrenci mesajına göre Pinecone'dan ilgili kazanımı ve kılavuz talimatlarını bulur (RAG).
+ * Öğrenci mesajına göre Pinecone'dan ilgili kazanımı, kılavuzu ve ders kitabı örneklerini bulur (RAG).
  */
 async function getMebConstraints(ogrenciMesaji, grade) {
   try {
@@ -228,17 +237,19 @@ async function getMebConstraints(ogrenciMesaji, grade) {
       ...(grade && { filter: filterQuery }),
     };
 
-    // 3. Pinecone'da hem kazanımları hem de kılavuz talimatlarını paralel aratıyoruz
-    const [searchResults, klavuzResults] = await Promise.all([
+    // 3. Pinecone'da kazanımları, kılavuz talimatlarını ve ders kitabı sayfalarını paralel aratıyoruz
+    const [searchResults, klavuzResults, kitapResults] = await Promise.all([
       pineconeIndex.query(queryOptions),
       pineconeIndex.namespace(KLAVUZ_NAMESPACE).query(queryOptions).catch(() => ({ matches: [] })),
+      pineconeIndex.namespace(DERS_KITABI_NAMESPACE).query(queryOptions).catch(() => ({ matches: [] })),
     ]);
 
     const ilkKazanim = searchResults.matches?.[0]?.metadata || {};
     const klavuzMatches = klavuzResults?.matches || [];
+    const kitapMatches = kitapResults?.matches || [];
 
-    if (searchResults.matches?.length > 0 || klavuzMatches.length > 0) {
-      return buildConstraintText(ilkKazanim, klavuzMatches);
+    if (searchResults.matches?.length > 0 || klavuzMatches.length > 0 || kitapMatches.length > 0) {
+      return buildConstraintText(ilkKazanim, klavuzMatches, kitapMatches);
     }
     
     return "Genel 5-12. sınıf Türkiye Yüzyılı Maarif Modeli matematik müfredat sınırlarına ve pedagojisine sadık kal.";
