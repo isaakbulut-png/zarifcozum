@@ -13,6 +13,17 @@ for (const dosya of ['.env', 'baglanti_adresi.env']) {
   if (fs.existsSync(envYolu)) dotenv.config({ path: envYolu, quiet: true });
 }
 
+// Model Router (Yönlendirici): İstek türüne göre uygun modeli seçer
+export const DISCOVERY_MODEL = 'gemini-4-argon';
+export const STANDARD_MODEL = process.env.AI_FLASH_MODEL || 'gemini-3.8-flash';
+
+export function resolveAIModel(gorevTuru) {
+  if (gorevTuru === 'discovery_game') {
+    return DISCOVERY_MODEL;
+  }
+  return STANDARD_MODEL;
+}
+
 // Google Gen AI ve Pinecone Başlatma
 const aiClient = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -77,7 +88,7 @@ export async function konuOzetiGetir(grade, topic) {
   if (!hamMetin) return '';
 
   const response = await aiClient.models.generateContent({
-    model: 'gemini-4-argon',
+    model: resolveAIModel('konu_ozeti'),
     contents: [
       `Sınıf seviyesi: ${grade}. sınıf`,
       `Konu/kazanım: ${topic}`,
@@ -113,7 +124,7 @@ export async function konuAnlatimiZenginlestir(grade, topic) {
   if (!hamIcerik) throw new Error('Bu sınıf ve konu için Pinecone’da ham müfredat içeriği bulunamadı.');
 
   const response = await aiClient.models.generateContent({
-    model: 'gemini-4-argon',
+    model: resolveAIModel('ders_notu'),
     contents: [
       `Sınıf seviyesi: ${grade}. sınıf`,
       `Konu/kazanım: ${topic}`,
@@ -145,7 +156,7 @@ export async function konuAnlatimiZenginlestir(grade, topic) {
 export async function kazanimaOzelIpucu({outcomeCode, question, selected}) {
   const metadata = await outcome.findExactOutcome(pineconeIndex, outcomeCode);
   const response = await aiClient.models.generateContent({
-    model: 'gemini-4-argon',
+    model: resolveAIModel('mentor_ipucu'),
     contents: `Soru: ${question.text}\nÖğrencinin seçtiği cevap: ${selected}) ${question.options[selected]}`,
     config: {
       systemInstruction: `Sen bir matematik mentörüsün. Yalnızca aşağıdaki MEB kazanımına sadık kal, sorunun cevabını veya doğru şıkkını söyleme. Öğrencinin seçimini düşünmesine yardımcı olacak kısa, kişiselleştirilmiş bir ipucu ver. ${visualInstruction}\n[DOĞRULANMIŞ MEB KAZANIMI]\n${buildConstraintText(metadata)}`,
@@ -158,7 +169,7 @@ export async function kazanimaOzelIpucu({outcomeCode, question, selected}) {
 
 export async function genelSokratikIpucu({question, selected}) {
   const response = await aiClient.models.generateContent({
-    model: 'gemini-4-argon',
+    model: resolveAIModel('sohbet'),
     contents: `Soru: ${question.text}\nÖğrencinin seçtiği cevap: ${selected}) ${question.options[selected]}`,
     config: {
       systemInstruction: `Sen bir matematik mentörüsün. Cevabı veya doğru şıkkı söylemeden, öğrencinin seçimini sorgulamasına yardımcı olan kısa ve Sokratik bir ipucu ver. Bir kazanım veya kaynak doğrulandığını iddia etme. ${visualInstruction}`,
@@ -270,10 +281,20 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
   const mebSiniri = await getMebConstraints(ogrenciMesaji, grade);
 
   let systemInstruction = "";
-  let selectedModel = "gemini-4-argon"; // Ücretli hattınızın en zeki akıl yürütme modeli
+  let selectedModel = resolveAIModel(gorevTuru);
 
   // 2. Adım: Göreve göre yapay zekaya rol biçme
-  if (gorevTuru === 'ai_mentor') {
+  if (gorevTuru === 'discovery_game') {
+    systemInstruction = `
+      Sen Türkiye Yüzyılı Maarif Modeli matematik müfredatına dayalı Keşif Oyunu (Discovery Game) tasarlayan uzman bir eğitim tasarımcısısın.
+      Öğrencinin kavramı soru sorarak, hipotez kurarak ve deneyerek adım adım keşfetmesini sağlayan interaktif ve eğlenceli bir senaryo sun.
+      Doğrudan cevabı veya formülü verme; yönlendirici adımlarla akıl yürütmesini sağla.
+      ${visualInstruction}
+      
+      [RESMİ MÜFREDAT BAĞLAMI]
+      ${mebSiniri}
+    `;
+  } else if (gorevTuru === 'ai_mentor') {
     systemInstruction = `
       Sen Türkiye Yüzyılı Maarif Modeline tamamen hakim, uzman bir Matematik AI Mentörüsün.
       Öğrenciye matematik sorusunun cevabını asla doğrudan söyleme.
