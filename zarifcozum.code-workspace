@@ -4,8 +4,10 @@
 			"path": "."
 		},
 		{
-			"path": "../superpowers-main"
+			"path": "../superpowers-main/superpowers-main"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "zarifcozum"
+	}
 }
