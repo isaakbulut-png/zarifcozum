@@ -116,7 +116,8 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
           const sonuc = byQuiz.get(_id.toString());
           return {
             id: _id.toString(), title, description, soruSayisi: soruIds.length, createdAt,
-            tamamlandi: Boolean(sonuc), score: sonuc ? sonuc.score : null
+            tamamlandi: Boolean(sonuc), score: sonuc ? sonuc.score : null,
+            aiAnaliz: sonuc ? (sonuc.aiAnaliz || null) : null
           };
         })
       });
@@ -185,9 +186,43 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
       });
       if (!yazim.upsertedCount) return res.status(409).json({ mesaj: 'Bu denemeyi zaten tamamladınız.' });
 
+      // AI Soru Psikoloğu & Teşhis Analizi (Arka planda çalıştırılıp veritabanına eklenir)
+      let aiAnaliz = null;
+      try {
+        const { denemePsikologuAnalizi } = await import('../aiService.mjs');
+        const harcananSureDk = req.body?.harcananSureDk ? Number(req.body.harcananSureDk) : null;
+        aiAnaliz = await denemePsikologuAnalizi({
+          denemeBasligi: deneme.title,
+          grade: deneme.grade || (req.session?.user?.grade ? Number(req.session.user.grade) : 8),
+          totalCount,
+          correctCount,
+          wrongCount,
+          blankCount,
+          score,
+          harcananSureDk,
+          sorular: sorular.map((soru, i) => ({
+            no: i + 1,
+            secilen: answers[i],
+            dogru: soru.answer,
+            outcomeCode: soru.outcomeCode || soru.kazanimKodu,
+            topic: soru.topic || soru.konu
+          }))
+        });
+
+        if (aiAnaliz) {
+          await getResultCollection().updateOne(
+            { quizId: new ObjectId(deneme._id.toString()), studentId: req.session.user.id, type: 'deneme' },
+            { $set: { aiAnaliz } }
+          );
+        }
+      } catch (analizHatasi) {
+        console.warn('⚠️ AI Deneme Analizi oluşturulurken hata (akış kesilmedi):', analizHatasi.message);
+      }
+
       res.status(201).json({
         mesaj: 'Deneme sonucu kaydedildi.',
         score, correctCount, wrongCount, blankCount, totalCount, kazanilanPuan,
+        aiAnaliz,
         review: sorular.map((soru, i) => ({ no: i + 1, secilen: answers[i], dogru: soru.answer }))
       });
     } catch (err) {

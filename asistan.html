@@ -18,6 +18,10 @@
 .ai-chat-btn:not(.active):hover { background: var(--color-primary-highlight); filter: none; }
 .ai-chat-btn:not(.active) small { color: var(--color-text-muted); }
 .ai-ornekler { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.ai-roles-bar { display: flex; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-3) var(--space-4); background: var(--color-surface-subtle, #f8fafc); border-bottom: 1px solid var(--color-border); }
+.ai-role-pill { border: 1px solid var(--color-border); background: var(--color-surface); padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all .15s ease; color: var(--color-text); }
+.ai-role-pill:hover { border-color: var(--color-primary); background: var(--color-primary-highlight, rgba(79,70,229,.06)); }
+.ai-role-pill.active { border-color: var(--color-primary); background: var(--color-primary); color: #fff; font-weight: 600; box-shadow: 0 2px 8px rgba(79,70,229,.25); }
 .ai-svg { display:block; overflow:auto; }
 .ai-svg svg { max-width:100%; height:auto; max-height:300px; }
 </style>
@@ -70,6 +74,12 @@
         <div class="chat-head">
           <div class="row"><span class="avatar alt" style="background:var(--color-primary)" id="tavatar">🤖</span><div><strong id="ttitle">AI Mentör</strong><br><span class="xs muted" id="tsub">Serbest sohbet</span></div></div>
           <div class="row"><button class="btn btn-ghost btn-sm" id="historyDelete" type="button">Geçmişi sil</button><button class="btn btn-ghost btn-sm" id="restart">Baştan</button><button class="btn btn-soft btn-sm" id="hintbtn" style="display:none">İpucu</button></div>
+        </div>
+        <div class="ai-roles-bar" id="aiRolesBar">
+          <button type="button" class="ai-role-pill active" data-role="ai_mentor">🧠 Sokratik Mentör (Bana Buldur)</button>
+          <button type="button" class="ai-role-pill" data-role="ogretmen_ikizi">👨‍🏫 Öğretmen İkizi (Farklı Anlat)</button>
+          <button type="button" class="ai-role-pill" data-role="soru_cozum">📝 Adım Adım Çözüm</button>
+          <button type="button" class="ai-role-pill" data-role="ai_koc">🎯 AI Koç (Çalışma Planı & Motivasyon)</button>
         </div>
         <button id="historyOlder" class="btn btn-ghost btn-sm" type="button" hidden>Daha eski mesajları yükle</button>
         <div class="chat-body" id="body"></div>
@@ -136,6 +146,13 @@
   };
 
   let topic = 'asal', step = 0, tries = 0, finished = false;
+  let activeRole = 'ai_mentor';
+  const ROLE_NAMES = {
+    ai_mentor: 'AI Mentör',
+    ogretmen_ikizi: 'Öğretmen İkizi',
+    soru_cozum: 'Soru Çözüm Asistanı',
+    ai_koc: 'AI Öğrenci Koçu'
+  };
   const body = $('body');
   const AI_TOPIC = 'ai';
   let bekliyor = false;
@@ -147,9 +164,29 @@
   function status() {
     const ai = topic === AI_TOPIC;
     $('hintbtn').style.display = ai ? 'none' : '';
+    const rolesBar = $('aiRolesBar');
+    if (rolesBar) rolesBar.style.display = ai ? 'flex' : 'none';
     $('tavatar').textContent = ai ? '🤖' : '∑';
-    $('inp').placeholder = ai ? 'Matematik sorunu buraya yaz…' : 'Cevabını yaz… (ör. 2)';
-    if (ai) { $('ttitle').textContent = 'AI Mentör'; $('tsub').textContent = 'Serbest sohbet'; return; }
+    $('inp').placeholder = ai
+      ? (activeRole === 'ogretmen_ikizi'
+          ? 'Anlamadığın konuyu yaz (ör: Oran orantıyı hiç anlamadım)…'
+          : activeRole === 'soru_cozum'
+          ? 'Çözülmesini istediğin soruyu yaz…'
+          : activeRole === 'ai_koc'
+          ? 'Çalışma hedefin veya sınav kaygın hakkında bir şey sor…'
+          : 'Matematik sorunu buraya yaz…')
+      : 'Cevabını yaz… (ör. 2)';
+    if (ai) {
+      $('ttitle').textContent = ROLE_NAMES[activeRole] || 'AI Mentör';
+      $('tsub').textContent = activeRole === 'ogretmen_ikizi'
+        ? 'Farklı açılardan anlatım modu'
+        : activeRole === 'soru_cozum'
+        ? 'Adım adım ayrıntılı çözüm modu'
+        : activeRole === 'ai_koc'
+        ? 'Motivasyon & çalışma stratejisi'
+        : 'Sokratik sohbet (Bana buldur)';
+      return;
+    }
     $('ttitle').textContent = T[topic].title; $('tsub').textContent = finished ? 'Tamamlandı' : `Adım ${step + 1} / ${T[topic].steps.length}`;
   }
   const ORNEK_SORULAR = ['3-4-5 üçgeninde sin A kaçtır?', '2x + 6 = 14 denklemini nasıl çözerim?', 'EBOB ile EKOK arasındaki fark nedir?'];
@@ -238,7 +275,7 @@
       const sinif = Number(new URLSearchParams(location.search).get('sinif'));
       const data = await window.zarifAiChat.sendMessage({
         ogrenciMesaji: mesaj,
-        gorevTuru: 'ai_mentor',
+        gorevTuru: activeRole || 'ai_mentor',
         grade: Number.isInteger(sinif) && sinif >= 5 && sinif <= 12 ? sinif : undefined
       });
       metin = data.yanit;
@@ -250,8 +287,9 @@
     } finally {
       t.remove(); bekliyor = false;
     }
-    if (richHtml) addRichBot(richHtml, 'AI Mentör');
-    else addAiBot(metin, 'AI Mentör');
+    const etiket = ROLE_NAMES[activeRole] || 'AI Mentör';
+    if (richHtml) addRichBot(richHtml, etiket);
+    else addAiBot(metin, etiket);
   }
 
   $('form').addEventListener('submit', e => {
@@ -267,6 +305,15 @@
   $('hintbtn').addEventListener('click', hint);
   $('restart').addEventListener('click', () => startTopic(topic));
   document.querySelectorAll('.topic-btn').forEach(b => b.addEventListener('click', () => startTopic(b.dataset.topic)));
+  document.querySelectorAll('.ai-role-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.ai-role-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeRole = pill.dataset.role || 'ai_mentor';
+      status();
+      $('inp').focus();
+    });
+  });
   startTopic(AI_TOPIC);
   window.addEventListener('zarif-chat-message', event => {
     const data = event.detail;

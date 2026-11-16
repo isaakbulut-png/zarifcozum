@@ -305,6 +305,39 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
       [RESMİ MÜFREDAT BAĞLAMI]
       ${mebSiniri}
     `;
+  } else if (gorevTuru === 'ogretmen_ikizi') {
+    systemInstruction = `
+      Sen öğrencinin "Anlamadım" dediği konuyu farklı açılardan kavratan uzman bir "AI Öğretmen İkizi"sin.
+      Klasik ders kitabı tanımını ASLA papağan gibi tekrarlama!
+      Öğrenciye konuyu şu 3 pedagojik yaklaşımla, sıcak ve cana yakın bir dille sun:
+      1) GÜNLÜK HAYAT BENZETMESİ: Somut, akılda kalıcı bir metafor/örnek (yemek tarifi, spor, oyun, alışveriş vb.).
+      2) GÖRSEL CANLANDIRMA: Gerekirse basit ve anlaşılır bir <svg>...</svg> şemasıyla mantığı görselleştir.
+      3) KAVRATICI MİKRO SORU: Konunun can alıcı püf noktasını yoklayan, öğrencinin kolayca cevaplayabileceği 1 adet mini pekiştirme sorusu.
+      ${visualInstruction}
+      Yalnızca resmi müfredat kazanım sınırlarına sadık kal:
+      
+      [RESMİ MÜFREDAT BAĞLAMI]
+      ${mebSiniri}
+    `;
+  } else if (gorevTuru === 'soru_cozum') {
+    systemInstruction = `
+      Sen Türkiye Yüzyılı Maarif Modeli pedagojisine uygun adım adım soru çözen uzman bir matematik öğretmenisin.
+      Sorunun çözümünü doğrudan sonuca atlamadan;
+      - 1. Adım: Verilenleri ve İsteneni Belirleme
+      - 2. Adım: Matematiksel Strateji / Model Kurma
+      - 3. Adım: İşlem Adımları (Gerekirse ${visualInstruction})
+      - 4. Adım: Çözümün Sağlaması ve Püf Noktası
+      şeklinde net, anlaşılır ve pedagojik başlıklarla açıkla. Üst sınıf kurallarını kullanma:
+      
+      [RESMİ MÜFREDAT BAĞLAMI]
+      ${mebSiniri}
+    `;
+  } else if (gorevTuru === 'ai_koc') {
+    systemInstruction = `
+      Sen Türkiye Yüzyılı Maarif Modeli odaklı şefkatli, motive edici ve stratejik bir "Matematik AI Öğrenci Koçu"sun.
+      Öğrencinin motivasyonunu artır, ders çalışma alışkanlıkları, hedef belirleme ve kaygı yönetimi konularında somut, uygulanabilir ve pozitif rehberlik tavsiyeleri ver.
+      Klişe öğütler yerine öğrencinin sınıf düzeyine (${grade ? grade + '. sınıf' : 'ilgili sınıf'}) uygun günlük/haftalık mikro hedefler sun.
+    `;
   } else if (gorevTuru === 'soru_uretme') {
     systemInstruction = `
       Sen Türkiye Yüzyılı Maarif Modeli matematik müfredat standartlarında özgün sorular yazan profesyonel bir yazarsın.
@@ -330,5 +363,73 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
   } catch (error) {
     console.error("❌ Gemini API Gerçek Hata Logu:", error);
     throw new Error('AI Mentör yanıtı şu anda üretilemedi.');
+  }
+}
+
+/**
+ * AI Soru Psikoloğu & Deneme Teşhis Motoru
+ * Öğrencinin deneme/test sonucunu analiz eder; yanlışların bilgi eksikliğinden mi,
+ * süre/zaman baskısından mı, yoksa dikkatsizlikten mi kaynaklandığını teşhis eder.
+ * @param {Object} veri - { denemeBasligi, grade, totalCount, correctCount, wrongCount, blankCount, score, sorular, harcananSureDk }
+ */
+export async function denemePsikologuAnalizi(veri) {
+  const {
+    denemeBasligi = 'Deneme Sınavı',
+    grade = 8,
+    totalCount = 0,
+    correctCount = 0,
+    wrongCount = 0,
+    blankCount = 0,
+    score = 0,
+    sorular = [],
+    harcananSureDk = null,
+  } = veri;
+
+  const soruDetaylari = sorular.map((s, i) => {
+    const durum = s.secilen === s.dogru ? 'DOĞRU' : (s.secilen === null || s.secilen === undefined ? 'BOŞ' : 'YANLIŞ');
+    return `Soru ${s.no || i + 1}: ${durum} (Kazanım: ${s.outcomeCode || s.topic || 'Belirtilmemiş'}, Öğrenci Şıkkı: ${s.secilen || '-'}, Doğru: ${s.dogru || '-'})`;
+  }).join('\n');
+
+  const prompt = `Aşağıda ${grade}. sınıf öğrencisinin "${denemeBasligi}" deneme sınavı sonuç verileri yer almaktadır:
+- Toplam Soru: ${totalCount}
+- Doğru: ${correctCount}, Yanlış: ${wrongCount}, Boş: ${blankCount}
+- Puan: ${score} / 100
+${harcananSureDk ? `- Harcanan Süre: ${harcananSureDk} dakika` : ''}
+
+Soru Bazlı Durum:
+${soruDetaylari || 'Detay bulunmuyor.'}
+
+Öğrencinin bu denemedeki hatalarını bir "Matematik Eğitim Psikoloğu & Ölçme Değerlendirme Uzmanı" gözüyle analiz et ve sadece şu JSON formatında yanıt ver:
+{
+  "ana_teshis": "BİLGİ_EKSİKLİĞİ | SÜRE_YÖNETİMİ | DİKKAT_VE_ODAKLANMA | DENGELİ",
+  "teshis_basligi": "Öğrenciye hitap eden kısa ve motive edici başlık (örn: 'Süre Baskısı Son Sorularda Seni Zorlamış')",
+  "detayli_analiz": "Hataların temel nedenini açıklayan, öğrenciyi yargılamayan, pedagojik ve samimi 2-3 paragraflık değerlendirme.",
+  "tespit_edilen_eksik_kazanimlar": ["En çok hata yapılan 1-3 kritik konu veya kazanım adı"],
+  "psikolojik_tavsiye": "Sınav anı kaygısı, süre paniği veya soruya yaklaşım tarzı için 1-2 somut taktik.",
+  "hedef_eylem_plani": ["Hemen bugün yapılması önerilen 3 somut mikro adım"]
+}`;
+
+  try {
+    const response = await aiClient.models.generateContent({
+      model: resolveAIModel('ai_psikolog'),
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        temperature: 0.2,
+      },
+    });
+
+    const raw = (response.text || '').trim();
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error('❌ AI Soru Psikoloğu hatası:', err);
+    return {
+      ana_teshis: 'BİLGİ_EKSİKLİĞİ',
+      teshis_basligi: 'Deneme Analizin Hazırlandı',
+      detayli_analiz: `Denemede ${correctCount} doğru, ${wrongCount} yanlış ve ${blankCount} boş cevabın bulunuyor. Eksik olduğun konuları tespit edip üzerine giderek puanını hızla artırabilirsin.`,
+      tespit_edilen_eksik_kazanimlar: [],
+      psikolojik_tavsiye: 'Yanlış yaptığın sorularda pes etme; her hata aslında yeni bir öğrenme fırsatıdır.',
+      hedef_eylem_plani: ['Yanlış yaptığın soruların çözümlerini AI Mentör ile adım adım incele.', 'Eksik konularla ilgili 10 pratik soru çöz.']
+    };
   }
 }

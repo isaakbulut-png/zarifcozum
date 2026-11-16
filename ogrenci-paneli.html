@@ -457,6 +457,7 @@ button,select{font:inherit}
       <p class="hint" id="imageExamDescription"></p>
       <form id="imageExamForm"></form>
       <p class="feed-status" id="imageExamStatus" role="status"></p>
+      <div id="imageExamAiCard" style="display:none;margin-top:var(--space-4);padding:var(--space-4);background:var(--color-surface-subtle,#f8fafc);border:1px solid var(--color-border);border-radius:12px"></div>
       <div id="imageExamReview"></div>
     </section>
 
@@ -1210,6 +1211,48 @@ button,select{font:inherit}
         $('imageExamStatus').textContent = `Sınav tamamlandı: %${result.score} · ${result.correctCount} doğru · ${result.wrongCount} yanlış · ${result.blankCount} boş.`;
         $('imageExamStatus').className = 'feed-status ok';
         $('imageExamForm').replaceChildren();
+
+        // AI Soru Psikoloğu Teşhis Kartı Gösterimi
+        const aiCard = $('imageExamAiCard');
+        if (result.aiAnaliz && aiCard) {
+          const analiz = result.aiAnaliz;
+          const rozetRenk = analiz.ana_teshis === 'SÜRE_YÖNETİMİ' ? '#F59E0B' : (analiz.ana_teshis === 'DİKKAT_VE_ODAKLANMA' ? '#3B82F6' : '#EF4444');
+          aiCard.style.display = 'block';
+          aiCard.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:24px">🩺</span>
+                <strong style="font-size:16px;color:var(--color-text)">AI Soru Psikoloğu & Teşhis Raporu</strong>
+              </div>
+              <span style="display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:${rozetRenk};color:#fff">
+                ${esc(analiz.ana_teshis.replace(/_/g, ' '))}
+              </span>
+            </div>
+            <h3 style="font-size:15px;margin-bottom:8px;color:var(--color-primary)">${esc(analiz.teshis_basligi || '')}</h3>
+            <p style="white-space:pre-wrap;line-height:1.6;margin-bottom:14px;color:var(--color-text)">${esc(analiz.detayli_analiz || '')}</p>
+            ${analiz.tespit_edilen_eksik_kazanimlar && analiz.tespit_edilen_eksik_kazanimlar.length ? `
+              <div style="margin-bottom:12px">
+                <strong style="font-size:13px;display:block;margin-bottom:6px">🎯 Öncelikli Eksik Konuların:</strong>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  ${analiz.tespit_edilen_eksik_kazanimlar.map(k => `<span style="padding:4px 8px;background:rgba(239,68,68,.1);color:#DC2626;border-radius:6px;font-size:12px;font-weight:600">${esc(k)}</span>`).join('')}
+                </div>
+              </div>` : ''}
+            ${analiz.psikolojik_tavsiye ? `
+              <div style="padding:10px 14px;background:rgba(59,130,246,.08);border-left:4px solid #3B82F6;border-radius:4px;margin-bottom:12px;font-size:13px;color:var(--color-text)">
+                <strong>💡 Psikolojik Taktik:</strong> ${esc(analiz.psikolojik_tavsiye)}
+              </div>` : ''}
+            ${analiz.hedef_eylem_plani && analiz.hedef_eylem_plani.length ? `
+              <div>
+                <strong style="font-size:13px;display:block;margin-bottom:6px">📋 Hemen Bugün 3 Adım Eylem Planı:</strong>
+                <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.5">
+                  ${analiz.hedef_eylem_plani.map(adim => `<li>${esc(adim)}</li>`).join('')}
+                </ul>
+              </div>` : ''}
+          `;
+        } else if (aiCard) {
+          aiCard.style.display = 'none';
+        }
+
         $('imageExamReview').innerHTML = result.review.map(item => `
           <article class="feed-card">
             <h3>${item.no}. soru</h3>
