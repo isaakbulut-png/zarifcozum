@@ -53,6 +53,14 @@ test('AI yayın API tek belgeye soruları kaydeder, eski istek ve doğrulamalar�
   response = await send({...payload, question: question('A', {html: '<p>İçerik</p><script>alert(1)</script>'})});
   assert.equal(response.status, 201);
   assert.doesNotMatch(rows[2].questions[0].html, /script/);
+  const validSvg = {
+    tag: 'svg',
+    attrs: {viewBox: '0 0 500 200'},
+    children: [{tag: 'rect', attrs: {x: '10', y: '10', width: '100', height: '50', fill: '#2563eb'}, children: []}]
+  };
+  response = await send({...payload, question: question('A', {svg: validSvg})});
+  assert.equal(response.status, 201);
+  assert.deepEqual(rows[3].questions[0].svg, validSvg);
 
   const invalid = [
     {questions: []}, {questions: Array(51).fill(question())}, {questions: 'invalid'},
@@ -68,7 +76,7 @@ test('AI yayın API tek belgeye soruları kaydeder, eski istek ve doğrulamalar�
     response = await send({...payload, ...bad});
     assert.equal(response.status, 400, JSON.stringify(bad));
   }
-  assert.equal(rows.length, 3);
+  assert.equal(rows.length, 4);
 });
 
 test('öğretmen onaylıları tek test gönderir, tekrar tıklamayı ve yeniden denemeyi yönetir', async () => {

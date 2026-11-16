@@ -2,6 +2,7 @@ const express = require('express');
 const { rateLimit } = require('express-rate-limit');
 const { ObjectId } = require('mongodb');
 const { prepareQuestion } = require('../lib/quiz-content');
+const safeSvg = require('../assets/safe-svg');
 
 const { SINIF_KONULARI, TUM_KONULAR } = require('../lib/konu-haritasi');
 
@@ -53,7 +54,7 @@ function isValidQuestion(question) {
   return question &&
     typeof question.text === 'string' &&
     question.text.trim().length > 0 &&
-    question.text.length <= 1000 &&
+    question.text.length <= 1500 &&
     question.options &&
     secenekler.every(letter =>
       typeof question.options[letter] === 'string' &&
@@ -62,13 +63,25 @@ function isValidQuestion(question) {
     ) &&
     secenekler.includes(question.answer) &&
     (!question.explanation ||
-      typeof question.explanation === 'string' && question.explanation.length <= 1000);
+      (typeof question.explanation === 'string' && question.explanation.length <= 1000)) &&
+    (question.svg === undefined || question.svg === null ||
+      (typeof question.svg === 'string' && question.svg.length <= 10000) ||
+      (typeof question.svg === 'object' && !Array.isArray(question.svg)));
 }
 
 function prepareAIQuestion(question) {
+  let cleanSvg;
+  if (typeof question.svg === 'string' && question.svg.trim()) {
+    cleanSvg = question.svg.trim();
+  } else if (question.svg && typeof question.svg === 'object') {
+    cleanSvg = safeSvg.validate(question.svg);
+  }
+  const { svg, ...rest } = question;
+  const base = prepareQuestion(cleanSvg && typeof cleanSvg === 'object' ? { ...rest, svg: cleanSvg } : rest);
   return {
-    ...prepareQuestion(question),
-    explanation: typeof question.explanation === 'string' ? question.explanation.trim() : ''
+    ...base,
+    explanation: typeof question.explanation === 'string' ? question.explanation.trim() : '',
+    ...(cleanSvg ? { svg: cleanSvg } : {})
   };
 }
 
@@ -87,6 +100,10 @@ function soruSemasi() {
           type: 'OBJECT',
           properties: {
             text: { type: 'STRING' },
+            svg: {
+              type: 'STRING',
+              description: 'Görsel, şema veya tablo gerektiren sorularda geçerli ve renkli <svg viewBox="0 0 W H" xmlns="http://www.w3.org/2000/svg">...</svg> kodu; görsel gerekmiyorsa boş metin.'
+            },
             options: secenekSemasi,
             answer: { type: 'STRING', enum: secenekler },
             explanation: { type: 'STRING' }
@@ -124,13 +141,20 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     }
 
     const prompt = [
-      'Türkçe eğitim platformu için özgün, pedagojik olarak doğru matematik soruları hazırla.',
+      'Türkçe eğitim platformu için özgün, pedagojik olarak doğru, yeni nesil matematik soruları hazırla.',
       `Sınıf düzeyi: ${grade}. sınıf (MEB Türkiye Yüzyılı Maarif Modeli). Konu: ${topic}. Zorluk: ${difficulty}. Tam olarak ${count} soru üret.`,
       `Sorular yalnızca ${grade}. sınıf kazanımları ve ön koşulları içinde kalsın; üst sınıf konu veya formüllerini kullanma.`,
+      'GÖRSEL VE ŞEMA KURALI: Basamak ve bölük tabloları, abaküs, sayı doğrusu, modelleme, geometrik şekiller, kesir modelleri, veri tabloları veya şema içeren yeni nesil sorularda "svg" alanına pedagojik, canlı renkli ve net bir SVG kodu ekle. Şema gerektirmeyen sorularda "svg" alanını boş string ("") yap.',
+      'SVG KURALLARI (ZORUNLU):',
+      '- Kök etiket: <svg viewBox="0 0 W H" xmlns="http://www.w3.org/2000/svg"> (örn: viewBox="0 0 520 220").',
+      '- Yalnızca şu güvenli etiketleri kullan: <svg>, <g>, <rect>, <circle>, <ellipse>, <line>, <polyline>, <polygon>, <path>, <text>. Asla <style>, <defs>, <linearGradient>, <tspan>, <image> veya HTML etiketleri kullanma.',
+      '- Sayısal özniteliklere (width, height, x, y, cx, cy, r, rx, ry, x1, y1, x2, y2, stroke-width, font-size) ASLA "px" veya birim yazma; yalnızca saf sayı yaz (örn: width="520", font-size="14", stroke-width="2").',
+      '- Renkler (fill, stroke): Canlı ve modern renkler kullan (örn: mavi #2563eb, yeşil #16a34a, turuncu #ea580c, sarı #f59e0b, mor #7c3aed, kırmızı #dc2626, nötr zemin #f8fafc, çerçeve #cbd5e1). Sadece hex (#...) veya temel isim (none, black, white, red, blue, green, gray, orange, purple, yellow) kabul edilir.',
+      '- <text> etiketi içine metni doğrudan yaz (örn: <text x="100" y="50" fill="#1e293b" font-size="14" text-anchor="middle">Milyonlar Bölüğü</text>).',
       'Her soru dört seçenekli (A, B, C, D) olsun ve yalnızca bir doğru cevap içersin.',
-      'Sayıları, işlemleri ve doğru seçeneği dikkatle doğrula; belirsiz veya birden fazla doğru cevabı olan soru yazma.',
+      'Sayıları, işlemleri, şemadaki değerleri ve doğru seçeneği birbiriyle %100 tutarlı olacak şekilde dikkatle doğrula.',
       'Açıklama alanında çözümün kısa ve anlaşılır adımlarını ver.',
-      'Yalnızca istenen JSON şemasına uyan JSON döndür; Markdown veya başka metin ekleme.'
+      'Yalnızca istenen JSON şemasına uyan JSON döndür; Markdown veya fazladan metin ekleme.'
     ].join('\n');
 
     let response;
