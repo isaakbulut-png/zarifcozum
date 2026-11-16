@@ -6,6 +6,16 @@
 .zp-kucuk{font-size:.9rem;color:#6b5a4a}
 .zp-serit{background:#f4e8d8;border-radius:8px;padding:8px 12px;margin:0 0 12px;font-size:.92rem}
 .zp-serit.zp-uye{background:#dff1e6;color:#1e5a37}
+.zp-serit.zp-uyari{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+.zp-serit.zp-serit-ucretsiz{background:#f5eedf;color:#6b4c30;border:1px solid #e7d6c1}
+.zp-cagri-kutusu{display:flex;gap:14px;align-items:flex-start;background:linear-gradient(135deg,#fffbf2,#f9f0e2);border:1.5px solid #e9d3a5;border-radius:12px;padding:16px 18px;margin:12px 0 16px;box-shadow:0 4px 14px rgba(184,138,40,.09)}
+.zp-cagri-ikon{font-size:26px;flex-shrink:0;line-height:1}
+.zp-cagri-icerik{flex-grow:1}
+.zp-cagri-icerik h4{margin:0 0 5px;font-family:Georgia,serif;font-size:1.05rem;color:#493020}
+.zp-cagri-icerik p{margin:0 0 12px;font-size:.86rem;color:#6a5342;line-height:1.45}
+.zp-cagri-butonlar{display:flex;gap:10px;flex-wrap:wrap}
+.zp-btn-vurgu{background:linear-gradient(135deg,#c59734,#9f731c)!important;color:#fff!important;font-weight:700!important;box-shadow:0 2px 8px rgba(184,138,40,.25)}
+.zp-btn-vurgu:hover{background:linear-gradient(135deg,#b88a28,#8a6214)!important}
 .zp-siniflar{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
 .zp-sinif,.zp-konu,.zp-secenek{font:inherit;cursor:pointer;border:1px solid var(--zp-cizgi);background:#fff;border-radius:10px;padding:8px 14px;color:var(--zp-yazi)}
 .zp-sinif.aktif{background:var(--zp-ana);border-color:var(--zp-ana);color:#fff}

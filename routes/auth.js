@@ -549,7 +549,7 @@ router.get('/me', async (req, res) => {
     const isParent = req.session.user.role === 'parent';
     const accountModel = isParent ? Parent : User;
     const user = await accountModel.findById(req.session.user.id)
-      .select(isParent ? 'name surname email restricted' : 'name email role adminRole');
+      .select(isParent ? 'name surname email restricted' : 'name email role adminRole subscriptionStatus subscriptionPlan expiresAt');
     if (!user) {
       req.session.destroy(error => {
         if (error) return res.status(500).json({ mesaj: 'Oturum kapatılamadı.' });
@@ -557,13 +557,17 @@ router.get('/me', async (req, res) => {
       });
       return;
     }
+    const hasActivePlan = !isParent && Boolean(user.subscriptionStatus === 'active' && (!user.expiresAt || new Date(user.expiresAt) > new Date()));
     res.json({
       user: {
         id: user._id.toString(),
         name: isParent ? `${user.name} ${user.surname}`.trim() : user.name,
         email: user.email,
         role: isParent ? 'parent' : user.role,
-        adminRole: isParent ? null : adminRoleOf(user)
+        adminRole: isParent ? null : adminRoleOf(user),
+        subscriptionStatus: user.subscriptionStatus || null,
+        subscriptionPlan: user.subscriptionPlan || null,
+        hasActivePlan
       }
     });
   } catch (error) {

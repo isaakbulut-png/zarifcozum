@@ -260,38 +260,88 @@
       if (!durum) return el('div');
       if (durum.girisYapti && durum.uye) return el('div', { class: 'zp-serit zp-uye' }, 'Üyelik aktif: sınırsız erişim');
       if (durum.girisYapti && durum.limitYok) return el('div', { class: 'zp-serit zp-uye' }, 'Giriş yapıldı: sınırsız erişim');
-      const soruKalan = durum.ziyaretciHaklari.soru.kalan;
+      const soruKalan = durum.ziyaretciHaklari ? durum.ziyaretciHaklari.soru.kalan : 0;
       if (mod === 'konu') {
         if (!durum.girisYapti) return el('div', { class: 'zp-serit' },
-          'Konu başlıklarını inceleyebilirsin. Konu anlatımlarını açmak için üye ol veya giriş yap.');
-        const kalanKonu = durum.ozellikler.konu.kalan;
+          'Konu başlıklarını inceleyebilirsin. Konu anlatımlarını açmak için ücretsiz üye ol veya giriş yap.');
+        const kalanKonu = durum.ozellikler && durum.ozellikler.konu ? durum.ozellikler.konu.kalan : 0;
         return el('div', { class: 'zp-serit' },
-          durum.ziyaretciHaklari.ozetGorebilir
+          durum.ziyaretciHaklari && durum.ziyaretciHaklari.ozetGorebilir
             ? `Ücretsiz deneme: konu özetleri açık; ${kalanKonu} konu hakkın ve ${soruKalan} soru hakkın kaldı.`
             : 'Konu özetlerini görmek için üye girişi yap.');
       }
-      return el('div', { class: 'zp-serit' },
+      if (!durum.girisYapti) {
+        return el('div', { class: 'zp-serit' + (soruKalan === 0 ? ' zp-uyari' : '') },
+          soruKalan > 0
+            ? `Ücretsiz deneme sürümü: ${soruKalan} soru hakkın kaldı.`
+            : 'Ziyaretçi soru hakkın doldu; devam etmek için ücretsiz üye ol veya giriş yap.');
+      }
+      return el('div', { class: 'zp-serit zp-serit-ucretsiz' },
         soruKalan > 0
-          ? `Ücretsiz deneme sürümü: ${soruKalan} soru hakkın kaldı.`
-          : 'Soru hakkın doldu; devam etmek için üye girişi yap.');
+          ? `Ücretsiz öğrenci planı: ${soruKalan} soru hakkın kaldı. Sınırsız pratik için paketleri incele.`
+          : 'Ücretsiz plan soru kotan doldu; sınırsız pratik için paketleri incele.');
+    }
+
+    function kayitVeyaYukseltmeCagrisi() {
+      if (!durum) return el('div');
+      const soruKalan = durum.ziyaretciHaklari ? durum.ziyaretciHaklari.soru.kalan : 0;
+      const kilitli = !durum.limitYok && durum.ozellikler && durum.ozellikler[mod] && durum.ozellikler[mod].kalan === 0;
+
+      // Ziyaretçi (oturum açmamış ve hakkı bitmiş)
+      if (!durum.girisYapti && (soruKalan === 0 || kilitli)) {
+        return el('div', { class: 'zp-cagri-kutusu' },
+          el('div', { class: 'zp-cagri-ikon' }, '🎁'),
+          el('div', { class: 'zp-cagri-icerik' },
+            el('h4', {}, 'Pratik Yapmak İçin Ücretsiz Üye Olun'),
+            el('p', {}, 'Ziyaretçi deneme hakkınız tamamlandı. Soru çözmeye devam etmek, başarı puanınızı kaydetmek ve yapay zekâ çözümlerini incelemek için hemen ücretsiz öğrenci hesabı açabilirsiniz.'),
+            el('div', { class: 'zp-cagri-butonlar' },
+              el('a', { class: 'zp-btn zp-btn-vurgu', href: '/kayit-giris.html?mode=register&role=student' }, '✨ Hemen Ücretsiz Üye Ol'),
+              el('a', { class: 'zp-btn zp-ikincil', href: '/kayit-giris.html?role=student' }, 'Giriş Yap')
+            )
+          )
+        );
+      }
+
+      // Paketsiz Öğrenci (giriş yapmış ama paketsiz ve kotası bitmiş)
+      if (durum.girisYapti && !durum.uye && kilitli) {
+        return el('div', { class: 'zp-cagri-kutusu' },
+          el('div', { class: 'zp-cagri-ikon' }, '⭐'),
+          el('div', { class: 'zp-cagri-icerik' },
+            el('h4', {}, 'Sınırsız Pratik İçin Paketinizi Seçin'),
+            el('p', {}, 'Ücretsiz öğrenci planındaki soru kotanızı tamamladınız. Sınırsız pratik soru bankası, Türkiye Geneli deneme sınavları ve yapay zekâ asistanı için avantajlı paketlerimizi inceleyin.'),
+            el('div', { class: 'zp-cagri-butonlar' },
+              el('a', { class: 'zp-btn zp-btn-vurgu', href: '/Paketler.html' }, 'Üyelik Paketlerini İncele ↗')
+            )
+          )
+        );
+      }
+
+      return el('div');
     }
 
     function paywall(hata) {
       temizle();
       const adres = hata.yonlendir || (durum && durum.uyelikAdresi) || '/Paketler.html';
-      const giris = hata.girisYapti === false
-        ? el('p', { class: 'zp-kucuk' }, 'Hesabın varsa ',
-          el('a', { href: '/kayit-giris.html?returnTo=' + encodeURIComponent(location.pathname + location.search) }, 'giriş yap'), '.')
-        : '';
+      if (durum && !durum.girisYapti) {
+        kok.append(el('div', { class: 'zp-kart zp-paywall' },
+          el('h3', {}, 'Pratik yapmak için ücretsiz üye olun'),
+          el('p', {}, 'Ziyaretçi deneme hakkınız doldu. Soru çözmeye devam etmek ve çözümleri görmek için hemen ücretsiz öğrenci hesabı oluşturabilirsiniz.'),
+          el('div', { style: 'display:flex;gap:10px;justify-content:center;margin:16px 0;flex-wrap:wrap' },
+            el('a', { class: 'zp-btn zp-btn-vurgu', href: '/kayit-giris.html?mode=register&role=student' }, '✨ Hemen Ücretsiz Üye Ol'),
+            el('a', { class: 'zp-btn zp-ikincil', href: '/kayit-giris.html?role=student' }, 'Giriş Yap')
+          ),
+          el('button', { class: 'zp-btn zp-ikincil', type: 'button', onclick: secimEkrani }, 'Geri dön')));
+        return;
+      }
       let saniye = 8;
       const sayac = el('span', {}, saniye);
       const iptal = el('button', { class: 'zp-btn zp-ikincil', type: 'button', onclick: () => { clearInterval(yonlendirmeSayaci); bilgi.textContent = 'Yönlendirme iptal edildi.'; } }, 'Yönlendirmeyi iptal et');
       const bilgi = el('p', { class: 'zp-kucuk' }, 'Üyelik sayfasına ', sayac, ' saniye içinde yönlendiriliyorsun.');
       kok.append(el('div', { class: 'zp-kart zp-paywall' },
         el('h3', {}, 'Ücretsiz deneme hakkın doldu'),
-        el('p', {}, hata.message),
-        el('a', { class: 'zp-btn', href: adres }, 'Üyelik paketlerini incele'),
-        giris, bilgi, iptal,
+        el('p', {}, hata.message || 'Sınırsız soru çözmek için üyeliğinizi yükseltin.'),
+        el('a', { class: 'zp-btn zp-btn-vurgu', href: adres }, 'Üyelik paketlerini incele'),
+        bilgi, iptal,
         el('button', { class: 'zp-btn zp-ikincil', type: 'button', onclick: secimEkrani }, 'Geri dön')));
       yonlendirmeSayaci = setInterval(() => {
         saniye -= 1;
@@ -437,7 +487,7 @@
       }
       if (mod === 'konu' && SINIF_PANOLARI[sinif]) kok.style.setProperty('--zp-sinif-renk', SINIF_PANOLARI[sinif].renk);
       kok.append(el('div', { class: 'zp-kart' },
-        el('h3', {}, mod === 'konu' ? `${sinif}. sınıf konu anlatımları` : BASLIKLAR[mod]), durumSerit(),
+        el('h3', {}, mod === 'konu' ? `${sinif}. sınıf konu anlatımları` : BASLIKLAR[mod]), durumSerit(), kayitVeyaYukseltmeCagrisi(),
         mod === 'konu' ? sinifPanosu(sinif, Boolean(durum && durum.girisYapti)) : '',
         el('p', { class: 'zp-kucuk' }, SECIM_MODLARI[mod]
           ? SECIM_MODLARI[mod].aciklama
