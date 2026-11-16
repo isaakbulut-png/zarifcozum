@@ -426,13 +426,70 @@ function createAdminRouter({
     }
   });
 
+  router.put('/users/:id/role', allow('superadmin'), async (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ mesaj: 'Geçersiz kullanıcı kimliği.' });
+    }
+    const { role, adminRole } = req.body || {};
+    if (!['student', 'teacher', 'admin'].includes(role)) {
+      return res.status(400).json({ mesaj: 'Geçerli bir hesap rolü seçin (Öğrenci, Öğretmen veya Yönetici).' });
+    }
+    const cleanAdminRole = (!adminRole || adminRole === 'none') ? null : adminRole;
+    if (cleanAdminRole && !['superadmin', 'editor', 'support'].includes(cleanAdminRole)) {
+      return res.status(400).json({ mesaj: 'Geçerli bir yönetim rolü seçin.' });
+    }
+    if (role === 'student' && cleanAdminRole) {
+      return res.status(400).json({ mesaj: 'Öğrenci hesaplarına yönetim rolü atanamaz.' });
+    }
+
+    try {
+      const target = await User.findById(req.params.id).select('role adminRole name email');
+      if (!target) {
+        return res.status(404).json({ mesaj: 'Kullanıcı bulunamadı.' });
+      }
+
+      const wasSuperAdmin = adminRoleOf(target) === 'superadmin';
+      const willBeSuperAdmin = role === 'admin'
+        ? (!cleanAdminRole || cleanAdminRole === 'superadmin')
+        : (cleanAdminRole === 'superadmin');
+
+      if (wasSuperAdmin && !willBeSuperAdmin) {
+        const superAdminCount = await User.countDocuments({
+          $or: [{ adminRole: 'superadmin' }, { role: 'admin', adminRole: null }]
+        });
+        if (superAdminCount <= 1) {
+          return res.status(409).json({ mesaj: 'Sistemde en az bir Süper Admin bulunmalıdır.' });
+        }
+      }
+
+      target.role = role;
+      target.adminRole = role === 'student' ? null : cleanAdminRole;
+      await target.save();
+
+      await audit(req, 'user.role.updated', 'user', target._id.toString(), {
+        role: target.role,
+        adminRole: target.adminRole
+      });
+
+      res.json({
+        mesaj: 'Kullanıcı rolü başarıyla güncellendi.',
+        role: target.role,
+        adminRole: target.adminRole
+      });
+    } catch (error) {
+      console.error('Kullanıcı rolü güncellenemedi:', error);
+      res.status(500).json({ mesaj: 'Kullanıcı rolü güncellenemedi.' });
+    }
+  });
+
   router.put('/users/:id/admin-role', allow('superadmin'), async (req, res) => {
-    const adminRole = req.body?.adminRole;
+    const rawRole = req.body?.adminRole;
+    const adminRole = (!rawRole || rawRole === 'none') ? null : rawRole;
     if (!ObjectId.isValid(req.params.id) ||
-        !['superadmin', 'editor', 'support'].includes(adminRole)) {
+        (adminRole && !['superadmin', 'editor', 'support'].includes(adminRole))) {
       return res.status(400).json({ mesaj: 'Geçerli kullanıcı ve yönetim rolü seçin.' });
     }
-    if (req.params.id === req.adminUser._id.toString()) {
+    if (req.params.id === req.adminUser._id.toString() && !adminRole) {
       return res.status(400).json({ mesaj: 'Kendi yönetim rolünüzü değiştiremezsiniz.' });
     }
     try {

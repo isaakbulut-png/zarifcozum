@@ -1368,36 +1368,103 @@
             const tr = document.createElement('tr');
             cell(tr, user.name);
             cell(tr, user.email);
-            cell(tr, roleNames[user.role] || user.role, user.role === 'admin' ? 'warn' : '');
-            const roleCell = cell(tr, adminRoleNames[user.adminRole] || '—');
-            if (activeAdminRole === 'superadmin' && user.id !== activeAdminId && ['admin', 'teacher'].includes(user.role)) {
-              const selector = document.createElement('select');
-              selector.setAttribute('aria-label', `${user.name} yönetim rolü`);
-              const placeholder = document.createElement('option');
-              placeholder.value = '';
-              placeholder.textContent = 'Rol ata...';
-              selector.append(placeholder);
-              for (const [value, label] of Object.entries(adminRoleNames)) {
-                const option = document.createElement('option');
-                option.value = value;
-                option.textContent = label;
-                selector.append(option);
+
+            const isEditable = activeAdminRole === 'superadmin' && user.id !== activeAdminId;
+
+            // Hesap rolü (student, teacher, admin)
+            const roleCell = cell(tr, '');
+            let roleSelect = null;
+            if (isEditable) {
+              roleSelect = document.createElement('select');
+              roleSelect.setAttribute('aria-label', `${user.name} hesap rolü`);
+              roleSelect.style.padding = '5px 8px';
+              roleSelect.style.fontSize = '0.82rem';
+              roleSelect.style.borderRadius = '6px';
+              roleSelect.style.border = '1px solid #d9d3c3';
+              roleSelect.style.background = '#fffaf5';
+              for (const [val, lbl] of [['student', 'Öğrenci'], ['teacher', 'Öğretmen'], ['admin', 'Yönetici']]) {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = lbl;
+                roleSelect.append(opt);
               }
-              selector.value = user.adminRole || '';
-              selector.addEventListener('change', async () => {
-                if (!selector.value) return;
-                try {
-                  await api(`/api/admin/users/${encodeURIComponent(user.id)}/admin-role`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ adminRole: selector.value })
-                  });
-                  loadUsers();
-                } catch (error) {
-                  $('usersMsg').textContent = error.message;
-                  loadUsers();
+              roleSelect.value = user.role || 'student';
+              roleCell.replaceChildren(roleSelect);
+            } else {
+              roleCell.textContent = roleNames[user.role] || user.role;
+              if (user.role === 'admin') roleCell.className = 'warn';
+            }
+
+            // Yönetim rolü (superadmin, editor, support, none) + Kaydet butonu
+            const adminRoleCell = cell(tr, '');
+            if (isEditable) {
+              const wrap = document.createElement('div');
+              wrap.style.display = 'inline-flex';
+              wrap.style.alignItems = 'center';
+              wrap.style.gap = '6px';
+
+              const adminSelect = document.createElement('select');
+              adminSelect.setAttribute('aria-label', `${user.name} yönetim rolü`);
+              adminSelect.style.padding = '5px 8px';
+              adminSelect.style.fontSize = '0.82rem';
+              adminSelect.style.borderRadius = '6px';
+              adminSelect.style.border = '1px solid #d9d3c3';
+              adminSelect.style.background = '#fffaf5';
+
+              const optNone = document.createElement('option');
+              optNone.value = 'none';
+              optNone.textContent = 'Rol Yok (—)';
+              adminSelect.append(optNone);
+
+              for (const [val, lbl] of Object.entries(adminRoleNames)) {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = lbl;
+                adminSelect.append(opt);
+              }
+              adminSelect.value = user.adminRole || 'none';
+              adminSelect.disabled = roleSelect.value === 'student';
+
+              roleSelect.addEventListener('change', () => {
+                if (roleSelect.value === 'student') {
+                  adminSelect.value = 'none';
+                  adminSelect.disabled = true;
+                } else {
+                  adminSelect.disabled = false;
                 }
               });
-              roleCell.replaceChildren(selector);
+
+              const saveBtn = document.createElement('button');
+              saveBtn.className = 'btn sm primary';
+              saveBtn.type = 'button';
+              saveBtn.textContent = '💾 Kaydet';
+              saveBtn.title = 'Seçilen hesap ve yönetim rolünü kaydet';
+              saveBtn.addEventListener('click', async () => {
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Kaydediliyor…';
+                try {
+                  const res = await api(`/api/admin/users/${encodeURIComponent(user.id)}/role`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                      role: roleSelect.value,
+                      adminRole: adminSelect.value === 'none' ? null : adminSelect.value
+                    })
+                  });
+                  $('usersMsg').className = 'msg ok';
+                  $('usersMsg').textContent = res.mesaj || 'Rol başarıyla kaydedildi.';
+                  loadUsers();
+                } catch (error) {
+                  saveBtn.disabled = false;
+                  saveBtn.textContent = '💾 Kaydet';
+                  $('usersMsg').className = 'msg';
+                  $('usersMsg').textContent = error.message;
+                }
+              });
+
+              wrap.append(adminSelect, saveBtn);
+              adminRoleCell.replaceChildren(wrap);
+            } else {
+              adminRoleCell.textContent = adminRoleNames[user.adminRole] || '—';
             }
             cell(tr, subNames[user.subscriptionStatus] || '—', user.subscriptionStatus === 'active' ? 'ok' : '');
             cell(tr, user.subscriptionStatus === 'active'

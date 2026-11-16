@@ -493,6 +493,25 @@ test('superadmin can delete user and clear test data; editor can delete quizzes 
     const validDel = await fetch(`${base}/users/507f191e810c19729de860ea`, { method: 'DELETE' });
     assert.equal(validDel.status, 200);
 
+    // Kullanıcı rolünü ve yönetim rolünü güncelleyebilir
+    const roleRes = await fetch(`${base}/users/507f191e810c19729de860ea/role`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'teacher', adminRole: 'editor' })
+    });
+    assert.equal(roleRes.status, 200);
+    const roleJson = await roleRes.json();
+    assert.equal(roleJson.role, 'teacher');
+    assert.equal(roleJson.adminRole, 'editor');
+
+    // Geçersiz rol 400 döner
+    const invalidRoleRes = await fetch(`${base}/users/507f191e810c19729de860ea/role`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'invalid_role' })
+    });
+    assert.equal(invalidRoleRes.status, 400);
+
     // Öğrenci test verilerini temizleyebilir
     const clearRes = await fetch(`${base}/users/507f191e810c19729de860ea/clear-test-data`, { method: 'POST' });
     assert.equal(clearRes.status, 200);

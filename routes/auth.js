@@ -206,7 +206,7 @@ async function loginHandler(req, res, parentOnly = false) {
   try {
     const accountModel = parentOnly ? Parent : User;
     const user = await accountModel.findOne({ email }).select('+passwordHash');
-    if (!user || (!parentOnly && user.role === 'admin') || !(await user.verifyPassword(password))) {
+    if (!user || !(await user.verifyPassword(password))) {
       return res.status(401).json({ mesaj: 'E-posta veya şifre hatalı.' });
     }
     if (user.restricted) {
