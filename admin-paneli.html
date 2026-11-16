@@ -11,138 +11,739 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <style>
-    :root{font-family:Inter,"Segoe UI",sans-serif;color:#3a2618;background:#fbf1e8;font-synthesis:none}
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;display:grid;grid-template-columns:260px 1fr}
-    aside{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 14px;background:#4a2e1a;color:#f1ece8;display:flex;flex-direction:column}
-    aside h1{margin:0 8px 4px;font-size:1.2rem}
-    aside .sub{margin:0 8px 18px;font-size:.78rem;color:#bdaea1}
-    .nav-title{margin:16px 8px 6px;font-size:.7rem;font-weight:700;letter-spacing:.08em;color:#a39181}
-    .nav-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0;padding:10px 12px;border:0;border-radius:8px;background:transparent;color:inherit;font:inherit;font-size:.92rem;text-align:left;cursor:pointer}
-    .nav-btn:hover:not(:disabled){background:rgba(255,255,255,.08)}
-    .nav-btn[aria-current=page]{background:#7a4f2d;color:#fff;font-weight:600}
-    .nav-btn:disabled{opacity:.45;cursor:not-allowed}
-    .soon{padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.14);font-size:.65rem;font-weight:700;letter-spacing:.04em}
-    .logout{margin-top:auto}
-    main{padding:28px clamp(16px,3vw,40px);min-width:0}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:22px}
-    .topbar h2{margin:0;font-size:1.5rem;color:#4a2e1a}
-    .who{color:#6a5242;font-size:.9rem}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
-    .stat,.panel{background:#fffaf5;border:1px solid #d9d3c3;border-radius:14px}
-    .stat{padding:16px}
-    .stat span{display:block;color:#6a5242;font-size:.82rem}
-    .stat strong{display:block;margin-top:6px;font-size:1.8rem;color:#4a2e1a}
-    .panel{padding:20px;margin-top:18px}
-    .panel h3{margin:0 0 14px;font-size:1.05rem;color:#4a2e1a}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-    input,select,textarea{padding:10px 12px;border:1px solid #d9d3c3;border-radius:8px;background:#fffaf5;color:inherit;font:inherit}
-    textarea{width:100%;min-height:90px;resize:vertical}
-    input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid rgba(125, 90, 60,.3);border-color:#7a4f2d}
-    .btn{padding:10px 16px;border:1px solid #d9d3c3;border-radius:8px;background:#fffaf5;color:#523520;font:inherit;font-weight:600;cursor:pointer}
-    .btn:hover:not(:disabled){background:#f3e1cf}
-    .btn.primary{background:#7a4f2d;border-color:#7a4f2d;color:#fff}
-    .btn.primary:hover:not(:disabled){background:#6b4a2f}
-    .btn.danger{color:#b93838}
-    .btn:disabled{opacity:.5;cursor:not-allowed}
-    .btn.sm{padding:6px 10px;font-size:.82rem}
-    .table-wrap{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;font-size:.9rem}
-    th,td{padding:10px 12px;border-bottom:1px solid #ecd9c6;text-align:left;white-space:nowrap}
-    th{color:#6a5242;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
-    .chip{display:inline-block;padding:2px 9px;border-radius:999px;background:#f3e1cf;font-size:.78rem;font-weight:600}
-    .chip.ok{background:#efe8e1;color:#674b32}
-    .chip.warn{background:#f6ead2;color:#805a1b}
-    .chip.bad{background:#f8dede;color:#b93838}
-    .empty{padding:20px;text-align:center;color:#6a5242}
-    .pager{display:flex;align-items:center;gap:10px;margin-top:14px;color:#6a5242;font-size:.88rem}
-    .notice{margin:0 0 14px;padding:10px 12px;border-radius:8px;background:#f6ead2;color:#805a1b;font-size:.88rem}
-    .msg{min-height:1.3em;margin:8px 0 0;font-size:.88rem;color:#a3201a}
-    .msg.ok{color:#674b32}
-    .announcement{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #ecd9c6}
-    .announcement p{margin:0 0 4px;white-space:pre-wrap;overflow-wrap:anywhere}
-    .announcement small{color:#6a5242}
-    .settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
-    .settings-grid label{display:grid;gap:6px;color:#6a5242;font-size:.9rem}
-    .asset-preview{display:block;max-width:min(100%,320px);max-height:180px;margin-top:10px;object-fit:contain;border:1px solid #ecd9c6;border-radius:8px;background:#fff}
-    .asset-path{overflow-wrap:anywhere;color:#6a5242;font-size:.82rem}
-    #siteMediaTargetPreview{display:block;width:100%;height:420px;margin-top:14px;border:1px solid #d9d3c3;border-radius:8px;background:#fff}
-    .site-media-current{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #ecd9c6;overflow-wrap:anywhere}
-    .site-media-current img{width:100px;height:70px;object-fit:contain;background:#fff;border:1px solid #ecd9c6;border-radius:6px}
-    .toggle-list{display:grid;gap:12px;margin-top:18px}
-    .toggle-list label{display:flex;align-items:center;gap:10px;color:#523520}
-    .rbac-loading{visibility:hidden}
-    .toggle-list input{width:18px;height:18px}
-    #faqAnswerEditor{background:#fffaf5}
-    #faqAnswerEditor .ql-editor{min-height:180px}
-    #faqAnswerEditor .ql-formula{font-size:1.1em}
-    #faqFormulaDialog{width:min(560px,calc(100% - 32px));border:1px solid #d9d3c3;border-radius:14px;padding:22px;background:#fffaf5;color:#3a2618}
-    #faqFormulaDialog::backdrop{background:rgba(35,24,16,.55)}
-    #faqFormulaPreview{min-height:64px;margin:12px 0;padding:14px;border:1px solid #d9d3c3;border-radius:8px;background:#fff;overflow:auto}
-    [hidden]{display:none!important}
-    @media (max-width:820px){body{grid-template-columns:1fr}aside{position:static;height:auto}.logout{margin-top:16px}}
+    :root {
+      font-family: Inter, "Segoe UI", system-ui, sans-serif;
+      color: #3a2618;
+      background: #fbf1e8;
+      font-synthesis: none;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      background: #fbf1e8;
+    }
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 20px 14px 28px;
+      background: #2b180d;
+      color: #f1ece8;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+      z-index: 20;
+    }
+    aside::-webkit-scrollbar { width: 6px; }
+    aside::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+    
+    .brand-box {
+      padding: 6px 10px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 14px;
+    }
+    .brand-title {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(249, 115, 22, 0.2);
+      border: 1px solid rgba(249, 115, 22, 0.4);
+      color: #fb923c;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-top: 6px;
+      letter-spacing: 0.04em;
+    }
+
+    .nav-title {
+      margin: 18px 10px 6px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #9c8574;
+    }
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 2px 0;
+      padding: 9px 12px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: #dfd7d0;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 500;
+      text-align: left;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      transform: translateX(2px);
+    }
+    .nav-btn[aria-current="page"] {
+      background: linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(122, 79, 45, 0.4));
+      color: #fff;
+      font-weight: 600;
+      border-left: 3px solid #f97316;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .nav-btn svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.18s ease;
+    }
+    .nav-btn:hover svg {
+      transform: scale(1.12);
+    }
+    .nav-btn .nav-text {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nav-badge {
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      color: #d1c5bb;
+    }
+    .nav-external {
+      color: #93c5fd;
+      border: 1px dashed rgba(147, 197, 253, 0.25);
+      margin-top: 4px;
+    }
+    .nav-external:hover {
+      background: rgba(147, 197, 253, 0.12);
+      color: #bfdbfe;
+    }
+    .logout-btn {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      color: #fca5a5;
+    }
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fecaca;
+    }
+
+    main {
+      padding: 28px clamp(16px, 3vw, 40px);
+      min-width: 0;
+      max-width: 1400px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #ebd9c8;
+    }
+    .topbar-left h2 {
+      margin: 0;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #4a2e1a;
+      letter-spacing: -0.01em;
+    }
+    .topbar-left p {
+      margin: 4px 0 0;
+      color: #7b6250;
+      font-size: 0.88rem;
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 14px 6px 10px;
+      background: #fff;
+      border: 1px solid #d9d3c3;
+      border-radius: 999px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f97316, #c2410c);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+    .user-meta {
+      display: flex;
+      flex-direction: column;
+    }
+    .user-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #4a2e1a;
+    }
+    .user-role-badge {
+      font-size: 0.72rem;
+      color: #b45309;
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .stat, .panel {
+      background: #fffaf5;
+      border: 1px solid #d9d3c3;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .stat {
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat span {
+      display: block;
+      color: #6a5242;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .stat strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #4a2e1a;
+    }
+    .panel {
+      padding: 22px;
+      margin-top: 18px;
+    }
+    .panel h3 {
+      margin: 0 0 16px;
+      font-size: 1.12rem;
+      color: #4a2e1a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    input, select, textarea {
+      padding: 9px 12px;
+      border: 1px solid #d9d3c3;
+      border-radius: 8px;
+      background: #fff;
+      color: inherit;
+      font: inherit;
+    }
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      resize: vertical;
+    }
+    input:focus, select:focus, textarea:focus, button:focus-visible {
+      outline: 3px solid rgba(249, 115, 22, 0.25);
+      border-color: #ea580c;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border: 1px solid #d9d3c3;
+      border-radius: 8px;
+      background: #fff;
+      color: #523520;
+      font: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn:hover:not(:disabled) {
+      background: #f3e1cf;
+      border-color: #c7beaf;
+    }
+    .btn.primary {
+      background: #7a4f2d;
+      border-color: #7a4f2d;
+      color: #fff;
+    }
+    .btn.primary:hover:not(:disabled) {
+      background: #623e23;
+    }
+    .btn.success {
+      background: #15803d;
+      border-color: #15803d;
+      color: #fff;
+    }
+    .btn.success:hover:not(:disabled) {
+      background: #166534;
+    }
+    .btn.danger {
+      color: #b93838;
+    }
+    .btn.danger:hover:not(:disabled) {
+      background: #fee2e2;
+      border-color: #fca5a5;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn.sm {
+      padding: 5px 10px;
+      font-size: 0.8rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid #ebd9c8;
+      border-radius: 10px;
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th, td {
+      padding: 11px 14px;
+      border-bottom: 1px solid #f1e4d8;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      color: #6a5242;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: #fcf7f2;
+      font-weight: 700;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #faf4ed; }
+    
+    .chip {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: #f3e1cf;
+      font-size: 0.76rem;
+      font-weight: 600;
+    }
+    .chip.ok { background: #dcfce7; color: #166534; }
+    .chip.warn { background: #fef3c7; color: #92400e; }
+    .chip.bad { background: #fee2e2; color: #991b1b; }
+    .empty { padding: 30px; text-align: center; color: #7b6250; font-size: 0.92rem; }
+    .pager {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      color: #6a5242;
+      font-size: 0.88rem;
+    }
+    .notice {
+      margin: 0 0 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      color: #92400e;
+      font-size: 0.88rem;
+    }
+    .msg {
+      min-height: 1.3em;
+      margin: 10px 0 0;
+      font-size: 0.88rem;
+      color: #b91c1c;
+    }
+    .msg.ok { color: #15803d; }
+
+    /* Interactive Curriculum Tree View within Admin */
+    .admin-tree-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 14px;
+    }
+    .admin-tree-col {
+      background: #fff;
+      border: 1px solid #ebd9c8;
+      border-radius: 12px;
+      padding: 16px;
+      max-height: 540px;
+      overflow-y: auto;
+    }
+    .admin-tree-col h4 {
+      margin: 0 0 12px;
+      font-size: 0.95rem;
+      color: #4a2e1a;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #f3e1cf;
+    }
+    .admin-tree-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      border: 1px solid #ebd9c8;
+      border-radius: 8px;
+      background: #fffdfb;
+      cursor: pointer;
+      font-size: 0.86rem;
+      transition: all 0.15s ease;
+    }
+    .admin-tree-item:hover {
+      background: #fdf5ee;
+      border-color: #ea580c;
+    }
+    .admin-tree-item.selected {
+      background: #7a4f2d;
+      color: #fff;
+      border-color: #7a4f2d;
+      font-weight: 600;
+    }
+    .admin-tree-item .badge {
+      float: right;
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(0,0,0,0.06);
+    }
+    .admin-tree-item.selected .badge {
+      background: rgba(255,255,255,0.25);
+      color: #fff;
+    }
+
+    /* Question Gallery Image Preview */
+    .question-thumb {
+      width: 54px;
+      height: 38px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #d9d3c3;
+      background: #fff;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .question-thumb:hover {
+      transform: scale(1.8);
+      z-index: 10;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    .announcement {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid #ecd9c6;
+    }
+    .announcement p { margin: 0 0 4px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .announcement small { color: #6a5242; }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .settings-grid label {
+      display: grid;
+      gap: 6px;
+      color: #6a5242;
+      font-size: 0.9rem;
+    }
+    .asset-preview {
+      display: block;
+      max-width: min(100%, 320px);
+      max-height: 180px;
+      margin-top: 10px;
+      object-fit: contain;
+      border: 1px solid #ecd9c6;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .asset-path { overflow-wrap: anywhere; color: #6a5242; font-size: 0.82rem; }
+    #siteMediaTargetPreview {
+      display: block;
+      width: 100%;
+      height: 420px;
+      margin-top: 14px;
+      border: 1px solid #d9d3c3;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .site-media-current {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #ecd9c6;
+      overflow-wrap: anywhere;
+    }
+    .site-media-current img {
+      width: 100px;
+      height: 70px;
+      object-fit: contain;
+      background: #fff;
+      border: 1px solid #ecd9c6;
+      border-radius: 6px;
+    }
+    .toggle-list { display: grid; gap: 12px; margin-top: 18px; }
+    .toggle-list label { display: flex; align-items: center; gap: 10px; color: #523520; }
+    .toggle-list input { width: 18px; height: 18px; }
+
+    #faqAnswerEditor { background: #fffaf5; }
+    #faqAnswerEditor .ql-editor { min-height: 180px; }
+    #faqAnswerEditor .ql-formula { font-size: 1.1em; }
+    #faqFormulaDialog {
+      width: min(560px, calc(100% - 32px));
+      border: 1px solid #d9d3c3;
+      border-radius: 14px;
+      padding: 22px;
+      background: #fffaf5;
+      color: #3a2618;
+    }
+    #faqFormulaDialog::backdrop { background: rgba(35, 24, 16, 0.55); }
+    #faqFormulaPreview {
+      min-height: 64px;
+      margin: 12px 0;
+      padding: 14px;
+      border: 1px solid #d9d3c3;
+      border-radius: 8px;
+      background: #fff;
+      overflow: auto;
+    }
+
+    .rbac-loading { visibility: hidden; }
+    [hidden] { display: none !important; }
+
+    @media (max-width: 900px) {
+      body { grid-template-columns: 1fr; }
+      aside { position: static; height: auto; }
+      .logout-btn { margin-top: 16px; }
+    }
   </style>
 </head>
 <body class="rbac-loading">
   <aside>
-    <h1>ZarifÇözüm</h1>
-    <p class="sub">Yönetim Paneli</p>
+    <div class="brand-box">
+      <div class="brand-title">
+        <svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#f97316"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        ZarifÇözüm
+      </div>
+      <span class="brand-badge">Merkezi Yönetim</span>
+    </div>
 
-    <div class="nav-title" data-admin-roles="superadmin,support">GENEL</div>
-    <button class="nav-btn" type="button" data-view="overview" data-admin-roles="superadmin,support" aria-current="page">Genel Bakış</button>
-    <button class="nav-btn" type="button" data-view="users" data-admin-roles="superadmin,support">Kullanıcılar</button>
-    <button class="nav-btn" type="button" data-view="payments" data-admin-roles="superadmin">Ödemeler / Abonelikler</button>
-    <button class="nav-btn" type="button" data-view="announcements" data-admin-roles="superadmin">Duyurular</button>
-    <button class="nav-btn" type="button" data-view="faqs" data-admin-roles="superadmin">Yapay Zekâ FAQ</button>
+    <!-- GENEL BAKIŞ -->
+    <div class="nav-title" data-admin-roles="superadmin,support">Genel Yönetim</div>
+    <button class="nav-btn" type="button" data-view="overview" data-admin-roles="superadmin,support" aria-current="page">
+      <svg viewBox="0 0 24 24" style="stroke:#60a5fa"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+      <span class="nav-text">Genel Bakış</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="reports" data-admin-roles="superadmin,support">
+      <svg viewBox="0 0 24 24" style="stroke:#a78bfa"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      <span class="nav-text">Raporlar & Analitik</span>
+    </button>
 
-    <div class="nav-title" data-admin-roles="superadmin,editor">EĞİTİM</div>
-    <a class="nav-btn" data-admin-roles="superadmin,editor" href="/ogretmen-paneli.html#image-questions" style="display:block;text-decoration:none">Soru Ekle / Resim Yükle</a>
-    <a class="nav-btn" data-admin-roles="superadmin,editor" href="/ogretmen-paneli.html#lessons" style="display:block;text-decoration:none">Dersler ve Canlı Ders</a>
-    <button class="nav-btn" type="button" data-view="education-lessons" data-admin-roles="superadmin,editor">Konu Anlatımları</button>
-    <button class="nav-btn" type="button" data-view="solved-questions" data-admin-roles="superadmin">Çözümlü Sorular</button>
-    <button class="nav-btn" type="button" data-view="education-quizzes" data-admin-roles="superadmin,editor">Testler ve Quizler</button>
-    <button class="nav-btn" type="button" data-view="education-exams" data-admin-roles="superadmin,editor">Deneme Sınavları</button>
-    <a class="nav-btn" data-admin-roles="superadmin,editor" href="/ogretmen-paneli.html#ai-question-wizard" style="display:block;text-decoration:none">Yapay Zekâ İçerikleri</a>
+    <!-- KULLANICI & ABONELİK -->
+    <div class="nav-title" data-admin-roles="superadmin,support">Kullanıcı & Abonelik</div>
+    <button class="nav-btn" type="button" data-view="users" data-admin-roles="superadmin,support">
+      <svg viewBox="0 0 24 24" style="stroke:#38bdf8"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+      <span class="nav-text">Kullanıcılar & Roller</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="payments" data-admin-roles="superadmin">
+      <svg viewBox="0 0 24 24" style="stroke:#34d399"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="15" r="1"/></svg>
+      <span class="nav-text">Ödemeler & Paketler</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="support-tickets" data-admin-roles="superadmin,support">
+      <svg viewBox="0 0 24 24" style="stroke:#fb7185"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="nav-text">Destek Talepleri</span>
+    </button>
 
-    <div class="nav-title" data-admin-roles="superadmin,support">İŞLETME</div>
-    <button class="nav-btn" type="button" data-view="payments" data-admin-roles="superadmin">Abonelikler ve Paketler</button>
-    <button class="nav-btn" type="button" data-view="overview" data-admin-roles="superadmin">Raporlar ve Analitik</button>
-    <button class="nav-btn" type="button" data-view="support-tickets" data-admin-roles="superadmin,support">Destek Talepleri</button>
+    <!-- EĞİTİM & İÇERİK -->
+    <div class="nav-title" data-admin-roles="superadmin,editor">Eğitim & İçerik Havuzu</div>
+    <button class="nav-btn" type="button" data-view="education-quizzes" data-admin-roles="superadmin,editor">
+      <svg viewBox="0 0 24 24" style="stroke:#fbbf24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span class="nav-text">Testler ve Quizler</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="education-exams" data-admin-roles="superadmin,editor">
+      <svg viewBox="0 0 24 24" style="stroke:#f87171"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      <span class="nav-text">Deneme Sınavları</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="education-lessons" data-admin-roles="superadmin,editor">
+      <svg viewBox="0 0 24 24" style="stroke:#10b981"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span class="nav-text">Konu Anlatımları</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="questions-manage" data-admin-roles="superadmin,editor">
+      <svg viewBox="0 0 24 24" style="stroke:#f472b6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+      <span class="nav-text">Soru Bankası & Resimler</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="solved-questions" data-admin-roles="superadmin">
+      <svg viewBox="0 0 24 24" style="stroke:#818cf8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span class="nav-text">Çözümlü Sorular</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="maarif-curriculum" data-admin-roles="superadmin,editor">
+      <svg viewBox="0 0 24 24" style="stroke:#2dd4bf"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      <span class="nav-text">Maarif Müfredat Gezgini</span>
+    </button>
 
-    <div class="nav-title" data-admin-roles="superadmin">SİSTEM</div>
-    <button class="nav-btn" type="button" data-view="settings" data-admin-roles="superadmin">Site Ayarları (Freemium)</button>
-    <button class="nav-btn" type="button" data-view="logs" data-admin-roles="superadmin">Güvenlik ve Kayıtlar</button>
-    <button class="nav-btn" type="button" data-admin-roles="superadmin" disabled>Yedekleme</button>
+    <!-- YAPAY ZEKÂ & ASİSTAN -->
+    <div class="nav-title" data-admin-roles="superadmin,editor">Yapay Zekâ & Asistan</div>
+    <button class="nav-btn" type="button" data-view="ai-content" data-admin-roles="superadmin,editor">
+      <svg viewBox="0 0 24 24" style="stroke:#e879f9"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg>
+      <span class="nav-text">AI İçerik Stüdyosu</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="faqs" data-admin-roles="superadmin">
+      <svg viewBox="0 0 24 24" style="stroke:#c084fc"><path d="M12 2a8 8 0 0 0-8 8c0 3.37 2.1 6.25 5.06 7.37.45.17.74.6.74 1.08V20a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-1.55c0-.48.29-.91.74-1.08C19.9 16.25 22 13.37 22 10a8 8 0 0 0-8-8z"/><path d="M9 10h.01M15 10h.01M9.5 14a3.5 3.5 0 0 0 5 0"/></svg>
+      <span class="nav-text">Yapay Zekâ FAQ</span>
+    </button>
 
-    <button class="nav-btn logout" type="button" id="logoutButton">Çıkış yap</button>
+    <!-- SİSTEM & TASARIM -->
+    <div class="nav-title" data-admin-roles="superadmin">Sistem & Ayarlar</div>
+    <button class="nav-btn" type="button" data-view="announcements" data-admin-roles="superadmin">
+      <svg viewBox="0 0 24 24" style="stroke:#f97316"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="nav-text">Duyurular</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="settings" data-admin-roles="superadmin">
+      <svg viewBox="0 0 24 24" style="stroke:#a3e635"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="nav-text">Site Ayarları & Freemium</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="logs" data-admin-roles="superadmin">
+      <svg viewBox="0 0 24 24" style="stroke:#94a3b8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span class="nav-text">Güvenlik ve Kayıtlar</span>
+    </button>
+
+    <!-- HIZLI ERİŞİM & ÇALIŞMA ALANLARI -->
+    <div class="nav-title">Çalışma Alanları</div>
+    <a class="nav-btn nav-external" href="/ogretmen-paneli.html" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" style="stroke:#93c5fd"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      <span class="nav-text">Öğretmen Paneli ↗</span>
+    </a>
+    <a class="nav-btn nav-external" href="/ogrenci-paneli.html" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" style="stroke:#93c5fd"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      <span class="nav-text">Öğrenci Paneli ↗</span>
+    </a>
+
+    <!-- ÇIKIŞ -->
+    <button class="nav-btn logout-btn" type="button" id="logoutButton">
+      <svg viewBox="0 0 24 24" style="stroke:#ef4444"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span class="nav-text">Güvenli Çıkış</span>
+    </button>
   </aside>
 
   <main>
     <div class="topbar">
-      <h2 id="viewTitle">Genel Bakış</h2>
-      <span class="who" id="who"></span>
+      <div class="topbar-left">
+        <h2 id="viewTitle">Genel Bakış</h2>
+        <p id="viewSubtitle">Platformun anlık istatistikleri ve genel durumu</p>
+      </div>
+      <div class="user-pill">
+        <div class="user-avatar" id="whoInitial">A</div>
+        <div class="user-meta">
+          <span class="user-name" id="whoName">Yönetici</span>
+          <span class="user-role-badge" id="whoRole">Süper Admin</span>
+        </div>
+      </div>
     </div>
 
+    <!-- 1. GENEL BAKIŞ -->
     <section id="view-overview">
       <div class="grid" id="stats"></div>
       <p class="msg" id="overviewMsg" role="alert"></p>
     </section>
 
+    <!-- 2. RAPORLAR & ANALİTİK -->
+    <section id="view-reports" hidden>
+      <div class="panel" style="margin-top:0">
+        <h3>Platform Büyüme ve Performans Göstergeleri</h3>
+        <p class="notice">Sistemdeki üye dönüşümleri, aktif paketler, sınav çözümleri ve yapay zekâ asistan kullanım grafikleri.</p>
+        <div class="grid" id="reportsGrid">
+          <div class="stat"><span>Sistem Sağlığı</span><strong id="repHealth">Mükemmel</strong></div>
+          <div class="stat"><span>Kayıtlı Öğrenci</span><strong id="repStudents">0</strong></div>
+          <div class="stat"><span>Aktif Öğretmen</span><strong id="repTeachers">0</strong></div>
+          <div class="stat"><span>Abonelik Oranı</span><strong id="repSubRate">%0</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. KULLANICILAR -->
     <section id="view-users" hidden>
       <div class="panel" style="margin-top:0">
         <div class="toolbar">
-          <input id="userSearch" type="search" placeholder="Ad veya e-posta ara" maxlength="100" aria-label="Kullanıcı ara">
+          <input id="userSearch" type="search" placeholder="Ad veya e-posta ara..." maxlength="100" aria-label="Kullanıcı ara">
           <select id="userRole" aria-label="Rol filtresi">
             <option value="">Tüm roller</option>
             <option value="student">Öğrenci</option>
             <option value="teacher">Öğretmen</option>
             <option value="admin">Yönetici</option>
           </select>
-          <button class="btn primary" type="button" id="userSearchButton">Ara</button>
+          <button class="btn primary" type="button" id="userSearchButton">Filtrele</button>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Ad</th><th>E-posta</th><th>Hesap rolü</th><th>Yönetim rolü</th><th>Abonelik</th><th>Paket</th><th>Bitiş</th><th>Kayıt tarihi</th><th>İşlemler</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Ad</th>
+                <th>E-posta</th>
+                <th>Hesap rolü</th>
+                <th>Yönetim rolü</th>
+                <th>Abonelik</th>
+                <th>Paket</th>
+                <th>Bitiş</th>
+                <th>Kayıt tarihi</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
             <tbody id="usersBody"></tbody>
           </table>
         </div>
@@ -155,19 +756,22 @@
       </div>
     </section>
 
+    <!-- 4. ÖDEMELER / ABONELİKLER -->
     <section id="view-payments" hidden>
       <div class="panel" style="margin-top:0">
         <div class="toolbar">
           <select id="paymentStatus" aria-label="Ödeme durumu">
             <option value="">Tüm durumlar</option>
-            <option value="paid">Ödendi</option>
-            <option value="pending">Beklemede</option>
+            <option value="paid">Başarılı</option>
+            <option value="pending">Bekleyen</option>
             <option value="failed">Başarısız</option>
           </select>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Sipariş</th><th>Kullanıcı</th><th>Paket</th><th>Plan</th><th>Tutar</th><th>Sağlayıcı</th><th>Durum</th><th>Tarih</th></tr></thead>
+            <thead>
+              <tr><th>Kullanıcı</th><th>Tutar</th><th>Durum</th><th>Sağlayıcı</th><th>Sipariş no</th><th>Tarih</th></tr>
+            </thead>
             <tbody id="paymentsBody"></tbody>
           </table>
         </div>
@@ -175,189 +779,347 @@
       </div>
     </section>
 
+    <!-- 5. TESTLER VE QUİZLER -->
+    <section id="view-education-quizzes" hidden>
+      <div class="panel" style="margin-top:0">
+        <div class="toolbar" style="justify-content:space-between">
+          <div style="display:flex;gap:10px;align-items:center">
+            <h3>Testler ve Quiz Havuzu</h3>
+          </div>
+          <div style="display:flex;gap:10px">
+            <a class="btn primary" href="/ogretmen-paneli.html#quiz-builder" target="_blank" rel="noopener noreferrer">
+              ➕ Test Hazırlama Stüdyosu ↗
+            </a>
+          </div>
+        </div>
+        <div class="notice">Yapay zekâ ve öğretmenler tarafından oluşturulan tüm testler burada listelenir.</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Başlık</th><th>Kaynak</th><th>Soru Sayısı</th><th>Durum</th><th>Oluşturulma</th></tr>
+            </thead>
+            <tbody id="quizzesBody"></tbody>
+          </table>
+        </div>
+        <p class="msg" id="quizzesMsg" role="alert"></p>
+      </div>
+    </section>
+
+    <!-- 6. DENEME SINAVLARI -->
+    <section id="view-education-exams" hidden>
+      <div class="panel" style="margin-top:0">
+        <div class="toolbar" style="justify-content:space-between">
+          <h3>Deneme Sınavları</h3>
+          <a class="btn primary" href="/ogretmen-paneli.html#exams" target="_blank" rel="noopener noreferrer">
+            ➕ Yeni Deneme Hazırla ↗
+          </a>
+        </div>
+        <div class="notice">Kurumsal ve genel deneme sınavları, soru sayıları ve yayın durumları.</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Deneme Başlığı</th><th>Soru Sayısı</th><th>Yayın Durumu</th><th>Oluşturulma</th></tr>
+            </thead>
+            <tbody id="examsBody"></tbody>
+          </table>
+        </div>
+        <p class="msg" id="examsMsg" role="alert"></p>
+      </div>
+    </section>
+
+    <!-- 7. KONU ANLATIMLARI -->
+    <section id="view-education-lessons" hidden>
+      <div class="panel" style="margin-top:0">
+        <div class="toolbar" style="justify-content:space-between">
+          <h3>Konu Anlatımları ve Dersler</h3>
+          <a class="btn primary" href="/ogretmen-paneli.html#curriculum" target="_blank" rel="noopener noreferrer">
+            ➕ Ders ve İçerik Ekle ↗
+          </a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Sınıf Seviyesi</th><th>Ünite / Konu Başlığı</th><th>Kayıt Tarihi</th></tr>
+            </thead>
+            <tbody id="lessonsBody"></tbody>
+          </table>
+        </div>
+        <p class="msg" id="lessonsMsg" role="alert"></p>
+      </div>
+    </section>
+
+    <!-- 8. SORU BANKASI & RESİM YÖNETİMİ -->
+    <section id="view-questions-manage" hidden>
+      <div class="panel" style="margin-top:0">
+        <div class="toolbar" style="justify-content:space-between">
+          <h3>Soru Bankası & Görsel Havuzu</h3>
+          <button class="btn success" type="button" id="scanQuestionsFolderBtn">📁 Klasörü Tara & Senkronla</button>
+        </div>
+        <p class="notice">Veritabanındaki resimli soru bankası. Yeni soru görselleri yükleyebilir veya sunucu klasöründen taratabilirsiniz.</p>
+
+        <!-- Soru Yükleme Formu -->
+        <form id="adminQuestionUploadForm" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:20px;padding:16px;background:#fcf7f2;border:1px solid #ebd9c8;border-radius:10px">
+          <div>
+            <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:4px">Ders</label>
+            <input type="text" id="adminQuestionDers" placeholder="Örn: matematik" required style="width:140px">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:4px">Sıra No</label>
+            <input type="number" id="adminQuestionSira" placeholder="1" style="width:80px">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:4px">Doğru Cevap</label>
+            <select id="adminQuestionCevap" style="width:100px">
+              <option value="">Seçin</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+              <option value="E">E</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:4px">Soru Resmi (PNG/JPG/WEBP)</label>
+            <input type="file" id="adminQuestionFile" accept=".png,.jpg,.jpeg,.webp" required>
+          </div>
+          <button class="btn primary" type="submit" id="adminQuestionSubmitBtn">Görseli Yükle</button>
+        </form>
+        <p class="msg" id="adminQuestionMsg" role="alert"></p>
+
+        <div class="toolbar">
+          <input type="search" id="adminQuestionSearch" placeholder="Ders adına göre filtrele..." style="width:240px">
+          <span id="adminQuestionTotal" style="font-size:0.88rem;color:#6a5242"></span>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Önizleme</th><th>Dosya Adı</th><th>Ders</th><th>Sıra No</th><th>Cevap</th><th>Tarih</th></tr>
+            </thead>
+            <tbody id="questionsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. MAARİF MÜFREDAT GEZGİNİ -->
+    <section id="view-maarif-curriculum" hidden>
+      <div class="panel" style="margin-top:0">
+        <div class="toolbar" style="justify-content:space-between">
+          <div>
+            <h3>Türkiye Yüzyılı Maarif Modeli · Müfredat Gezgini</h3>
+            <p style="margin:2px 0 0;font-size:0.85rem;color:#6a5242">5–12. sınıf hiyerarşik kazanım, ünite ve beceri ağacı</p>
+          </div>
+          <button class="btn sm primary" type="button" id="refreshAdminTreeBtn">Yenile</button>
+        </div>
+        <div class="admin-tree-container">
+          <div class="admin-tree-col" id="adminTreeStageCol">
+            <h4>01. Kademe ve Sınıf</h4>
+            <div id="adminTreeStages">Müfredat yükleniyor…</div>
+          </div>
+          <div class="admin-tree-col" id="adminTreeThemeCol">
+            <h4>02. Temalar ve Üniteler</h4>
+            <div id="adminTreeThemes" style="color:#7b6250;font-size:0.85rem">Lütfen bir sınıf seçin.</div>
+          </div>
+          <div class="admin-tree-col" id="adminTreeOutcomeCol">
+            <h4>03. Öğrenme Çıktıları (Kazanımlar)</h4>
+            <div id="adminTreeOutcomes" style="color:#7b6250;font-size:0.85rem">Lütfen bir tema seçin.</div>
+          </div>
+          <div class="admin-tree-col" id="adminTreeSkillCol">
+            <h4>04. Süreç Becerileri</h4>
+            <div id="adminTreeSkills" style="color:#7b6250;font-size:0.85rem">Lütfen bir kazanım seçin.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. ÇÖZÜMLÜ SORULAR -->
+    <section id="view-solved-questions" hidden>
+      <div class="panel" style="margin-top:0">
+        <h3>Çözümlü Sorular Yönetimi</h3>
+        <p class="notice">Video çözümlü ve açıklamalı soruların yüklenmesi ve listelenmesi.</p>
+        <div id="solvedQuestionsContainer"></div>
+      </div>
+    </section>
+
+    <!-- 11. YAPAY ZEKÂ İÇERİK STÜDYOSU -->
+    <section id="view-ai-content" hidden>
+      <div class="panel" style="margin-top:0">
+        <h3>Yapay Zekâ Soru & İçerik Asistanı</h3>
+        <p class="notice">MEB Maarif Modeli kazanımlarına ve seviyelerine uygun soruları yapay zekâ ile anında üretebilirsiniz.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a class="btn primary" href="/ogretmen-paneli.html#ai-mentor-panel" target="_blank" rel="noopener noreferrer">
+            ✨ AI Mentör ve Asistan Paneli ↗
+          </a>
+          <a class="btn light" href="/ogretmen-paneli.html#ai-quiz" target="_blank" rel="noopener noreferrer">
+            🎯 Yapay Zekâ Soru Sihirbazı ↗
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. YAPAY ZEKÂ FAQ -->
+    <section id="view-faqs" hidden>
+      <div class="panel" style="margin-top:0">
+        <h3>Yapay Zekâ FAQ Soru ve Yanıtları</h3>
+        <form id="faqForm">
+          <div style="display:grid;gap:12px">
+            <div>
+              <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px">Soru</label>
+              <input id="faqQuestion" type="text" placeholder="Öğrencinin sorabileceği soru..." maxlength="300" required style="width:100%">
+            </div>
+            <div style="display:flex;gap:12px;align-items:center">
+              <div>
+                <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px">Sınıf</label>
+                <select id="faqGrade">
+                  <option value="">Genel / Tümü</option>
+                  <option value="5">5. Sınıf</option>
+                  <option value="6">6. Sınıf</option>
+                  <option value="7">7. Sınıf</option>
+                  <option value="8">8. Sınıf</option>
+                  <option value="9">9. Sınıf</option>
+                  <option value="10">10. Sınıf</option>
+                  <option value="11">11. Sınıf</option>
+                  <option value="12">12. Sınıf</option>
+                </select>
+              </div>
+              <div style="padding-top:20px">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                  <input type="checkbox" id="faqActive" checked> Aktif
+                </label>
+              </div>
+              <div style="padding-top:20px">
+                <button class="btn sm" type="button" id="faqFormulaOpen">∑ Formül Ekle</button>
+              </div>
+            </div>
+            <div>
+              <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px">Cevap (Zengin Metin & Formül)</label>
+              <div id="faqAnswerEditor"></div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn primary" type="submit" id="faqSave">Kaydet</button>
+              <button class="btn" type="button" id="faqCancel">Vazgeç</button>
+            </div>
+          </div>
+          <p class="msg" id="faqMsg" role="alert"></p>
+        </form>
+
+        <dialog id="faqFormulaDialog">
+          <h3>Matematik Formülü Ekle</h3>
+          <p style="font-size:0.85rem;color:#6a5242">LaTeX biçiminde yazın (örn: \frac{a}{b}, x^2 + y^2 = z^2):</p>
+          <input id="faqFormulaInput" type="text" placeholder="\sqrt{x}" style="width:100%">
+          <div id="faqFormulaPreview"></div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button class="btn" type="button" onclick="$('faqFormulaDialog').close()">Kapat</button>
+            <button class="btn primary" type="button" id="faqFormulaInsert">Metne Ekle</button>
+          </div>
+        </dialog>
+
+        <h4 style="margin:24px 0 12px">Mevcut FAQ Kayıtları</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Soru</th><th>Sınıf</th><th>Durum</th><th>İşlemler</th></tr>
+            </thead>
+            <tbody id="faqsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 13. DUYURULAR -->
     <section id="view-announcements" hidden>
       <div class="panel" style="margin-top:0">
-        <h3>Yeni duyuru</h3>
+        <h3>Duyuru Yayınla</h3>
         <form id="announcementForm">
-          <textarea id="announcementText" maxlength="1000" placeholder="Duyuru metni (en fazla 1000 karakter)" required></textarea>
-          <div class="toolbar" style="margin-top:10px">
-            <button class="btn primary" type="submit">Yayınla</button>
+          <textarea id="announcementText" placeholder="Öğrenciler ve öğretmenler için duyuru metni..." maxlength="1000" required></textarea>
+          <div style="margin-top:10px">
+            <button class="btn primary" type="submit">Duyuruyu Yayınla</button>
           </div>
           <p class="msg" id="announcementMsg" role="alert"></p>
         </form>
-      </div>
-      <div class="panel">
-        <h3>Yayındaki duyurular</h3>
-        <div id="announcementList"></div>
+        <h4 style="margin:24px 0 12px">Yayınlanan Duyurular</h4>
+        <div id="announcementsList"></div>
       </div>
     </section>
 
-    <section id="view-faqs" hidden>
+    <!-- 14. DESTEK TALEPLERİ -->
+    <section id="view-support-tickets" hidden>
       <div class="panel" style="margin-top:0">
-        <h3 id="faqFormTitle">Yeni FAQ yanıtı</h3>
-        <p>Yalnızca soru metniyle tam eşleşen etkin kayıtlar AI kullanılmadan yanıtlanır. Sınıf seçilmezse kayıt tüm sınıflar için geçerlidir.</p>
-        <form id="faqForm">
-          <div class="settings-grid">
-            <label for="faqGrade">Sınıf kapsamı
-              <select id="faqGrade">
-                <option value="">Tüm sınıflar</option>
-                <option value="5">5. sınıf</option><option value="6">6. sınıf</option><option value="7">7. sınıf</option><option value="8">8. sınıf</option>
-                <option value="9">9. sınıf</option><option value="10">10. sınıf</option><option value="11">11. sınıf</option><option value="12">12. sınıf</option>
-              </select>
-            </label>
-            <label><span>Yayın durumu</span><span><input id="faqActive" type="checkbox" checked> Etkin</span></label>
-          </div>
-          <label for="faqQuestion">Soru (en fazla 300 karakter)</label>
-          <textarea id="faqQuestion" maxlength="300" required></textarea>
-          <label for="faqAnswerEditor">Yanıt / ipucu</label>
-          <div id="faqAnswerEditor"></div>
-          <div class="toolbar" style="margin-top:10px">
-            <button class="btn" id="faqFormulaOpen" type="button">∑ Formül sihirbazı</button>
-          </div>
-          <p>Formülleri LaTeX ile ekleyebilir, düzenleyici araç çubuğundan metni biçimlendirebilirsiniz.</p>
-          <div class="toolbar" style="margin-top:10px">
-            <button class="btn primary" id="faqSave" type="submit">FAQ kaydet</button>
-            <button class="btn" id="faqCancel" type="button" hidden>Vazgeç</button>
-          </div>
-          <p class="msg" id="faqMsg" role="status" aria-live="polite"></p>
-        </form>
-      </div>
-      <div class="panel">
-        <h3>Kayıtlı FAQ yanıtları</h3>
-        <div id="faqList"></div>
-      </div>
-    </section>
-    <dialog id="faqFormulaDialog" aria-labelledby="faqFormulaTitle">
-      <form method="dialog" id="faqFormulaForm">
-        <h3 id="faqFormulaTitle">LaTeX formülü ekle</h3>
-        <label for="faqFormulaInput">LaTeX ifadesi</label>
-        <textarea id="faqFormulaInput" maxlength="500" placeholder="Örnek: \frac{a}{b}" required></textarea>
-        <div id="faqFormulaPreview" aria-live="polite"></div>
-        <div class="toolbar">
-          <button class="btn primary" id="faqFormulaInsert" type="button">Formülü ekle</button>
-          <button class="btn" type="submit">İptal</button>
+        <h3>Destek Talepleri</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Konu</th><th>Gönderen</th><th>Durum</th><th>Mesaj</th><th>Tarih</th></tr>
+            </thead>
+            <tbody id="ticketsBody"></tbody>
+          </table>
         </div>
-      </form>
-    </dialog>
-
-    <section id="view-solved-questions" hidden>
-      <div class="panel" style="margin-top:0">
-        <h3>Çözümlü soru ekle</h3>
-        <p>Sınıf ve müfredat konusunu seçin. Görsel soru ve çözümünü birlikte içermelidir; sadece giriş yapan kullanıcılar görebilir.</p>
-        <form id="solvedQuestionForm">
-          <div class="settings-grid">
-            <label for="solvedGrade">Sınıf
-              <select id="solvedGrade" name="grade" required>
-                <option value="5">5. sınıf</option><option value="6">6. sınıf</option><option value="7">7. sınıf</option><option value="8">8. sınıf</option>
-                <option value="9">9. sınıf</option><option value="10">10. sınıf</option><option value="11">11. sınıf</option><option value="12">12. sınıf</option>
-              </select>
-            </label>
-            <label for="solvedTopic">Müfredat konusu
-              <select id="solvedTopic" required disabled><option value="">Önce konular yüklenmeli</option></select>
-            </label>
-            <label for="solvedTitle">Soru başlığı
-              <input id="solvedTitle" name="baslik" maxlength="160" required>
-            </label>
-          </div>
-          <label for="solvedImage">Soru ve çözüm görseli (JPG, PNG, WebP; en fazla 5 MB)</label>
-          <input id="solvedImage" name="resim" type="file" accept=".jpg,.jpeg,.png,.webp" required>
-          <div class="toolbar" style="margin-top:12px"><button class="btn primary" id="solvedSave" type="submit" disabled>Çözümlü soruyu ekle</button></div>
-          <p class="msg" id="solvedMsg" role="status" aria-live="polite"></p>
-          <button class="btn sm" id="solvedRetry" type="button" hidden>Yeniden yükle</button>
-        </form>
-      </div>
-      <div class="panel">
-        <h3>Seçili sınıftaki çözümlü sorular</h3>
-        <div id="solvedList"></div>
+        <p class="msg" id="ticketsMsg" role="alert"></p>
       </div>
     </section>
 
+    <!-- 15. SİTE AYARLARI & FREEMIUM & GÖRSELLER -->
     <section id="view-settings" hidden>
-      <form class="panel" id="visitorSettingsForm" style="margin-top:0">
-        <h3>Ziyaretçi deneme sınırları</h3>
-        <div class="settings-grid">
-          <label for="visitorQuestionLimit">Soru hakkı (0–500)
-            <input id="visitorQuestionLimit" type="number" min="0" max="500" step="1" required>
-          </label>
-          <label for="visitorTopicLimit">Konu hakkı (0–100)
-            <input id="visitorTopicLimit" type="number" min="0" max="100" step="1" required>
-          </label>
-          <label for="visitorTrialDays">Deneme süresi (gün, 1–3650)
-            <input id="visitorTrialDays" type="number" min="1" max="3650" step="1" required>
-          </label>
-        </div>
-        <div class="toggle-list">
-          <label><input id="registrationEnabled" type="checkbox"> Yeni üyelik kayıtlarını kabul et</label>
-          <label><input id="visitorSummaryEnabled" type="checkbox"> Sınırlı erişimli giriş yapmış kullanıcılar konu anlatımlarını görebilsin</label>
-          <p>Giriş yapmamış ziyaretçiler konu başlıklarını görebilir; konu içerikleri için giriş gerekir.</p>
-          <label><input id="visitorPracticeEnabled" type="checkbox"> Ziyaretçiler pratik test çözebilsin</label>
-          <label><input id="visitorAssistantEnabled" type="checkbox"> Ziyaretçiler asistan özelliğini kullanabilsin</label>
-          <label><input id="visitorFullTestEnabled" type="checkbox"> Ziyaretçiler tam kazanım testini başlatabilsin</label>
-          <label><input id="subscriptionRequired" type="checkbox"> Öğrenci özellikleri için aktif abonelik zorunlu olsun (ödeme açıldığında işaretleyin)</label>
-        </div>
-        <div class="toolbar" style="margin-top:18px">
-          <button class="btn primary" type="submit" id="saveVisitorSettings">Ayarları kaydet</button>
-        </div>
-        <p class="msg" id="visitorSettingsMsg" role="alert"></p>
-      </form>
-      <div class="panel">
-        <h3>Ana sayfa animasyonu</h3>
-        <form id="homepageAnimationForm">
-          <label for="homepageAnimationFile">Lottie animasyonu (.json, en fazla 5 MB)</label>
-          <div class="toolbar" style="margin-top:8px">
-            <input id="homepageAnimationFile" name="file" type="file" accept=".json,application/json" required>
-            <button class="btn primary" type="submit" id="uploadHomepageAnimation">Animasyonu yükle</button>
-          </div>
-        </form>
-        <p class="asset-path" id="homepageAnimationPath">Henüz animasyon yüklenmedi.</p>
-        <p class="msg" id="homepageAnimationMsg" role="alert"></p>
-      </div>
-      <div class="panel">
-        <h3>Ana sayfa görselleri</h3>
-        <form id="homepageImageForm">
+      <div class="panel" style="margin-top:0">
+        <h3>Site Kuralları & Freemium Ziyaretçi Hakları</h3>
+        <form id="visitorSettingsForm">
           <div class="settings-grid">
-            <label for="homepageImageSlot">Görsel alanı
-              <select id="homepageImageSlot" name="slot">
-                <option value="heroImage">Ana görsel</option>
-                <option value="featureImage">Öne çıkan görsel</option>
-              </select>
-            </label>
-            <label for="homepageImageFile">Görsel (.png, .jpg veya .webp, en fazla 8 MB)
-              <input id="homepageImageFile" name="file" type="file" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp" required>
-            </label>
+            <label>Soru Çözüm Limiti (Ziyaretçi)<input id="visitorQuestionLimit" type="number" min="0" max="100" required></label>
+            <label>Konu Görüntüleme Limiti<input id="visitorTopicLimit" type="number" min="0" max="50" required></label>
+            <label>Deneme Süresi (Gün)<input id="visitorTrialDays" type="number" min="0" max="365" required></label>
           </div>
-          <div class="toolbar" style="margin-top:12px">
-            <button class="btn primary" type="submit" id="uploadHomepageImage">Görseli yükle</button>
+          <div class="toggle-list">
+            <label><input id="visitorSummaryEnabled" type="checkbox"> Konu özetleri ziyaretçiye açık</label>
+            <label><input id="visitorPracticeEnabled" type="checkbox"> Pratik soru çözümü açık</label>
+            <label><input id="visitorAssistantEnabled" type="checkbox"> AI asistan kullanımı açık</label>
+            <label><input id="visitorFullTestEnabled" type="checkbox"> Tam test çözümü açık</label>
+            <label><input id="subscriptionRequired" type="checkbox"> Zorunlu abonelik modu</label>
+            <label><input id="registrationEnabled" type="checkbox"> Yeni üye kaydı kabul et</label>
           </div>
+          <div style="margin-top:16px">
+            <button class="btn primary" type="submit" id="saveVisitorSettings">Ayarları Kaydet</button>
+          </div>
+          <p class="msg" id="visitorSettingsMsg" role="alert"></p>
         </form>
+
+        <h3 style="margin-top:32px">Ana Sayfa Medya & Animasyon Yöneticisi</h3>
         <div class="settings-grid">
-          <div><p>Ana görsel</p><img class="asset-preview" id="homepageHeroPreview" alt="Yüklenen ana sayfa görseli" hidden></div>
-          <div><p>Öne çıkan görsel</p><img class="asset-preview" id="homepageFeaturePreview" alt="Yüklenen öne çıkan görsel" hidden></div>
+          <div>
+            <h4>Lottie Animasyonu</h4>
+            <p id="homepageAnimationPath" class="asset-path"></p>
+            <form id="homepageAnimationForm">
+              <input type="file" accept=".json,application/json" required>
+              <button class="btn primary sm" type="submit" id="uploadHomepageAnimation" style="margin-top:8px">Yükle</button>
+            </form>
+            <p class="msg" id="homepageAnimationMsg" role="alert"></p>
+          </div>
+          <div>
+            <h4>Görsel Yerleşimleri</h4>
+            <form id="homepageImageForm">
+              <select id="homepageImageSlot">
+                <option value="heroImage">Ana Sayfa Hero Görseli</option>
+                <option value="featureImage">Özellikler Bölümü Görseli</option>
+              </select>
+              <input type="file" accept=".png,.jpg,.jpeg,.webp" required style="margin-top:8px">
+              <button class="btn primary sm" type="submit" id="uploadHomepageImage" style="margin-top:8px">Görseli Yükle</button>
+            </form>
+            <img id="homepageHeroPreview" class="asset-preview" alt="Hero önizleme" hidden>
+            <img id="homepageFeaturePreview" class="asset-preview" alt="Özellikler önizleme" hidden>
+            <p class="msg" id="homepageImageMsg" role="alert"></p>
+          </div>
         </div>
-        <p class="msg" id="homepageImageMsg" role="alert"></p>
-      </div>
-      <div class="panel" id="siteMediaManager">
-        <h3>Sayfa ve butona medya yerleştir</h3>
-        <p>Sayfayı seçin, önizlemede hedef butona tıklayın veya hedef listesinden seçin. Buton tıklamaları önizlemede çalıştırılmaz.</p>
+
+        <h3 style="margin-top:32px">Sayfa İçi Buton & Medya Tasarımcısı</h3>
         <form id="siteMediaForm">
           <div class="settings-grid">
-            <label for="siteMediaPage">Sayfa
-              <select id="siteMediaPage" required><option value="">Sayfa seçin</option></select>
-            </label>
-            <label for="siteMediaTarget">Buton / bağlantı hedefi
-              <select id="siteMediaTarget" required disabled><option value="">Önce sayfa seçin</option></select>
-            </label>
-            <label for="siteMediaType">Medya türü
-              <select id="siteMediaType"><option value="image">Görsel</option><option value="animation">Lottie animasyonu</option></select>
-            </label>
-            <label for="siteMediaFile">Dosya
-              <input id="siteMediaFile" type="file" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp" required>
-            </label>
+            <label>Sayfa Seçin<select id="siteMediaPage"><option value="">Sayfa seçin...</option></select></label>
+            <label>Hedef Buton / Alan<select id="siteMediaTarget" disabled><option value="">Önce sayfa seçin</option></select></label>
+            <label>Medya Türü<select id="siteMediaType"><option value="image">Görsel (Resim)</option><option value="animation">Lottie Animasyon (.json)</option></select></label>
+            <label>Dosya<input id="siteMediaFile" type="file" required></label>
           </div>
-          <div class="toolbar" style="margin-top:12px">
-            <button class="btn primary" type="submit" id="uploadSiteMedia" disabled>Seçilen hedefe yerleştir</button>
-            <span class="asset-path" id="siteMediaTargetDescription" role="status">Sayfa ve hedef seçin.</span>
-          </div>
+          <p id="siteMediaTargetDescription" style="font-size:0.85rem;color:#6a5242;margin:10px 0"></p>
+          <button class="btn primary sm" type="submit" id="uploadSiteMedia" disabled>Medyayı Yerleştir</button>
           <p class="msg" id="siteMediaMsg" role="alert"></p>
         </form>
         <iframe id="siteMediaTargetPreview" title="Medya yerleşim hedefi seçme önizlemesi" hidden></iframe>
@@ -365,53 +1127,17 @@
       </div>
     </section>
 
-    <section id="view-education-lessons" hidden>
-      <div class="panel" style="margin-top:0">
-        <h3>Konu anlatımları</h3>
-        <p><a class="btn" href="/ogretmen-paneli.html#lessons">Ders / içerik araçlarını aç</a></p>
-        <div class="table-wrap">
-          <table><thead><tr><th>Sınıf</th><th>Konu</th><th>Oluşturulma</th></tr></thead><tbody id="lessonsBody"></tbody></table>
-        </div>
-        <p class="msg" id="lessonsMsg" role="alert"></p>
-      </div>
-    </section>
-
-    <section id="view-education-quizzes" hidden>
-      <div class="panel" style="margin-top:0">
-        <h3>Testler ve quizler</h3>
-        <p><a class="btn" href="/ogretmen-paneli.html#quiz-builder">Test oluşturma araçlarını aç</a></p>
-        <div class="table-wrap">
-          <table><thead><tr><th>Başlık</th><th>Tür</th><th>Soru</th><th>Durum</th><th>Oluşturulma</th></tr></thead><tbody id="quizzesBody"></tbody></table>
-        </div>
-        <p class="msg" id="quizzesMsg" role="alert"></p>
-      </div>
-    </section>
-
-    <section id="view-education-exams" hidden>
-      <div class="panel" style="margin-top:0">
-        <h3>Deneme sınavları</h3>
-        <div class="table-wrap">
-          <table><thead><tr><th>Başlık</th><th>Soru</th><th>Yayın</th><th>Oluşturulma</th></tr></thead><tbody id="examsBody"></tbody></table>
-        </div>
-        <p class="msg" id="examsMsg" role="alert"></p>
-      </div>
-    </section>
-
-    <section id="view-support-tickets" hidden>
-      <div class="panel" style="margin-top:0">
-        <h3>Destek talepleri</h3>
-        <div class="table-wrap">
-          <table><thead><tr><th>Konu</th><th>Gönderen</th><th>Durum</th><th>Mesaj</th><th>Tarih</th></tr></thead><tbody id="ticketsBody"></tbody></table>
-        </div>
-        <p class="msg" id="ticketsMsg" role="alert"></p>
-      </div>
-    </section>
-
+    <!-- 16. GÜVENLİK VE LOGLAR -->
     <section id="view-logs" hidden>
       <div class="panel" style="margin-top:0">
-        <h3>Yönetim işlem kayıtları</h3>
+        <h3>Güvenlik ve İşlem Kayıtları (Audit Logs)</h3>
         <div class="table-wrap">
-          <table><thead><tr><th>Yönetici</th><th>İşlem</th><th>Kayıt</th><th>Detay</th><th>Tarih</th></tr></thead><tbody id="logsBody"></tbody></table>
+          <table>
+            <thead>
+              <tr><th>Yönetici</th><th>İşlem Türü</th><th>Kayıt / Varlık</th><th>Detaylar</th><th>Tarih</th></tr>
+            </thead>
+            <tbody id="logsBody"></tbody>
+          </table>
         </div>
         <p class="msg" id="logsMsg" role="alert"></p>
       </div>
@@ -426,18 +1152,47 @@
     (() => {
       const $ = id => document.getElementById(id);
       const titles = {
-        overview: 'Genel Bakış', users: 'Kullanıcılar', payments: 'Ödemeler / Abonelikler',
-        announcements: 'Duyurular', faqs: 'Yapay Zekâ FAQ', settings: 'Site Ayarları', logs: 'Güvenlik ve Kayıtlar',
-        'education-lessons': 'Konu Anlatımları', 'education-quizzes': 'Testler ve Quizler',
-        'education-exams': 'Deneme Sınavları', 'support-tickets': 'Destek Talepleri',
-        'solved-questions': 'Çözümlü Sorular'
+        overview: 'Genel Bakış',
+        reports: 'Raporlar & Analitik',
+        users: 'Kullanıcılar & Roller',
+        payments: 'Ödemeler & Abonelikler',
+        announcements: 'Duyurular',
+        faqs: 'Yapay Zekâ FAQ',
+        settings: 'Site Ayarları & Freemium',
+        logs: 'Güvenlik ve Kayıtlar',
+        'education-lessons': 'Konu Anlatımları',
+        'education-quizzes': 'Testler ve Quizler',
+        'education-exams': 'Deneme Sınavları',
+        'support-tickets': 'Destek Talepleri',
+        'solved-questions': 'Çözümlü Sorular',
+        'questions-manage': 'Soru Bankası & Resim Havuzu',
+        'maarif-curriculum': 'Maarif Müfredat Gezgini',
+        'ai-content': 'AI İçerik Stüdyosu'
       };
+      const subtitles = {
+        overview: 'Platformun anlık sayaçları ve yönetim özeti',
+        reports: 'Öğrenci, öğretmen, sınav ve dönüşüm istatistikleri',
+        users: 'Kayıtlı kullanıcılar, rol ve yetki yönetimi',
+        payments: 'Abonelik paketleri, gelirler ve ödeme durumları',
+        announcements: 'Tüm kullanıcılara yönelik sistem duyuruları',
+        faqs: 'Asistan bilgi tabanı ve zengin formüllü cevaplar',
+        settings: 'Ziyaretçi kısıtlamaları, medya yerleşimleri ve kurallar',
+        logs: 'Yönetici işlemleri ve sistem güvenlik hareketleri',
+        'education-lessons': 'Ders konu anlatımları arşivi',
+        'education-quizzes': 'Sistemde yayınlanan ve taslak testler',
+        'education-exams': 'Genel ve kurumsal deneme sınavları',
+        'support-tickets': 'Kullanıcılardan gelen destek talepleri',
+        'solved-questions': 'Video ve çözümlü soru arşivi',
+        'questions-manage': 'Soru bankası görselleri ve senkronizasyon',
+        'maarif-curriculum': '5–12. sınıf Türkiye Yüzyılı Maarif Modeli ağacı',
+        'ai-content': 'Yapay zekâ destekli soru ve test üretim stüdyosu'
+      };
+
       const roleNames = { student: 'Öğrenci', teacher: 'Öğretmen', admin: 'Yönetici' };
       const adminRoleNames = { superadmin: 'Süper Admin', editor: 'Editör / Öğretmen', support: 'Destek Personeli' };
       const subNames = { free: 'Ücretsiz', active: 'Aktif', expired: 'Süresi doldu' };
-      const payNames = { paid: ['Ödendi', 'ok'], pending: ['Beklemede', 'warn'], failed: ['Başarısız', 'bad'] };
-      const planNames = { monthly: 'Aylık', yearly: 'Yıllık' };
       const packageNames = { temel: 'Temel', standart: 'Standart', vip: 'VIP' };
+
       const faqEditor = window.Quill
         ? new window.Quill('#faqAnswerEditor', {
           theme: 'snow',
@@ -451,17 +1206,31 @@
           }
         })
         : null;
+
       const loaders = {
-        overview: loadOverview, users: loadUsers, payments: loadPayments,
-        announcements: loadAnnouncements, faqs: loadFaqs, settings: loadVisitorSettings,
-        logs: loadLogs, 'education-lessons': loadLessons,
-        'education-quizzes': loadQuizzes, 'education-exams': loadExams,
-        'support-tickets': loadTickets, 'solved-questions': () => window.solvedQuestionsAdmin.load()
+        overview: loadOverview,
+        reports: loadReports,
+        users: loadUsers,
+        payments: loadPayments,
+        announcements: loadAnnouncements,
+        faqs: loadFaqs,
+        settings: loadVisitorSettings,
+        logs: loadLogs,
+        'education-lessons': loadLessons,
+        'education-quizzes': loadQuizzes,
+        'education-exams': loadExams,
+        'support-tickets': loadTickets,
+        'solved-questions': () => window.solvedQuestionsAdmin?.load?.(),
+        'questions-manage': loadQuestionsManage,
+        'maarif-curriculum': loadAdminCurriculumTree,
+        'ai-content': () => {}
       };
+
       let page = 1;
       let totalPages = 1;
       let activeAdminRole = '';
       let activeAdminId = '';
+      let cachedQuestions = [];
 
       async function api(url, options = {}) {
         const response = await fetch(url, {
@@ -474,7 +1243,7 @@
           throw new Error('Oturum sona erdi.');
         }
         const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.mesaj || 'İşlem tamamlanamadı.');
+        if (!response.ok) throw new Error(data.detail || data.mesaj || 'İşlem tamamlanamadı.');
         return data;
       }
 
@@ -507,13 +1276,17 @@
 
       function showView(name) {
         if (!titles[name]) return;
-        for (const key of Object.keys(titles)) $(`view-${key}`).hidden = key !== name;
+        for (const key of Object.keys(titles)) {
+          const el = $(`view-${key}`);
+          if (el) el.hidden = key !== name;
+        }
         document.querySelectorAll('[data-view]').forEach(button => {
           if (button.dataset.view === name) button.setAttribute('aria-current', 'page');
           else button.removeAttribute('aria-current');
         });
         $('viewTitle').textContent = titles[name];
-        loaders[name]();
+        $('viewSubtitle').textContent = subtitles[name] || '';
+        loaders[name]?.();
       }
 
       async function loadOverview() {
@@ -537,6 +1310,17 @@
             return box;
           }));
         } catch (error) { $('overviewMsg').textContent = error.message; }
+      }
+
+      async function loadReports() {
+        try {
+          const data = await api('/api/admin/overview');
+          $('repStudents').textContent = data.students || 0;
+          $('repTeachers').textContent = data.teachers || 0;
+          const totalUsers = (data.students || 0) + (data.teachers || 0);
+          const rate = totalUsers > 0 ? Math.round(((data.activeSubs || 0) / totalUsers) * 100) : 0;
+          $('repSubRate').textContent = `%${rate}`;
+        } catch (_) {}
       }
 
       async function loadUsers() {
@@ -601,64 +1385,26 @@
                 packageSelect.append(Object.assign(document.createElement('option'), { value, textContent: label }));
               }
               packageSelect.addEventListener('change', async () => {
-                const choice = packageSelect.value;
-                if (!choice) return;
-                let body;
-                if (choice === 'revoke') {
-                  if (!confirm(`${user.name} aboneliği kaldırılsın mı?`)) { packageSelect.value = ''; return; }
-                  body = { plan: null };
-                } else {
-                  const days = Number(prompt(`${packageNames[choice]} paketi kaç gün geçerli olsun? (1–3650)`, '30'));
-                  if (!Number.isInteger(days) || days < 1 || days > 3650) { packageSelect.value = ''; return; }
-                  body = { plan: choice, days };
-                }
+                if (!packageSelect.value) return;
                 try {
-                  await api(`/api/admin/users/${encodeURIComponent(user.id)}/subscription`, {
-                    method: 'PUT',
-                    body: JSON.stringify(body)
-                  });
+                  if (packageSelect.value === 'revoke') {
+                    await api(`/api/admin/users/${encodeURIComponent(user.id)}/subscription`, {
+                      method: 'PUT',
+                      body: JSON.stringify({ action: 'revoke' })
+                    });
+                  } else {
+                    await api(`/api/admin/users/${encodeURIComponent(user.id)}/subscription`, {
+                      method: 'PUT',
+                      body: JSON.stringify({ action: 'grant', plan: packageSelect.value, durationMonths: 1 })
+                    });
+                  }
+                  loadUsers();
                 } catch (error) {
                   $('usersMsg').textContent = error.message;
+                  loadUsers();
                 }
-                loadUsers();
               });
-              actionCell.append(packageSelect, ' ');
-            }
-            if (['student', 'teacher'].includes(user.role) && !user.adminRole) {
-              const button = document.createElement('button');
-              button.type = 'button';
-              button.className = `btn sm${user.restricted ? '' : ' danger'}`;
-              button.textContent = user.restricted ? 'Kısıtlamayı kaldır' : 'Kısıtla';
-              button.addEventListener('click', async () => {
-                let reason = '';
-                if (user.restricted) {
-                  if (!confirm(`${user.name} için kısıtlama kaldırılsın mı?`)) return;
-                } else {
-                  reason = (prompt(`${user.name} kısıtlanacak; hesap hiçbir işlem yapamaz ve oturumu kapatılır.\nKısıtlama nedeni (zorunlu, en fazla 300 karakter):`) || '').trim();
-                  if (!reason) return;
-                }
-                try {
-                  await api(`/api/admin/users/${encodeURIComponent(user.id)}/restriction`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ restricted: !user.restricted, reason })
-                  });
-                } catch (error) {
-                  $('usersMsg').textContent = error.message;
-                }
-                loadUsers();
-              });
-              actionCell.append(button);
-            }
-            if (user.restricted) {
-              tr.children[0].append(' ', Object.assign(document.createElement('span'), {
-                className: 'chip warn',
-                textContent: 'Kısıtlı',
-                title: user.restrictionReason || ''
-              }));
-              if (user.restrictionReason) tr.children[0].append(Object.assign(document.createElement('div'), {
-                className: 'msg',
-                textContent: `Neden: ${user.restrictionReason}`
-              }));
+              actionCell.replaceChildren(packageSelect);
             }
             return tr;
           }));
@@ -671,133 +1417,161 @@
         if ($('paymentStatus').value) params.set('status', $('paymentStatus').value);
         try {
           const data = await api(`/api/admin/payments?${params}`);
-          if (!data.payments.length) return emptyRow($('paymentsBody'), 8, 'Ödeme kaydı yok.');
-          $('paymentsBody').replaceChildren(...data.payments.map(payment => {
-            const tr = document.createElement('tr');
-            cell(tr, payment.orderReference);
-            cell(tr, `${payment.userName} (${payment.userEmail})`);
-            cell(tr, packageNames[payment.plan] || '—');
-            cell(tr, planNames[payment.subscriptionType] || payment.subscriptionType);
-            cell(tr, `${payment.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ${payment.currency}`);
-            cell(tr, payment.gateway);
-            const [label, kind] = payNames[payment.status] || [payment.status, ''];
-            cell(tr, label, kind);
-            cell(tr, fmtDate(payment.paidAt || payment.createdAt));
-            return tr;
+          if (!data.payments.length) return emptyRow($('paymentsBody'), 6, 'Ödeme kaydı bulunamadı.');
+          $('paymentsBody').replaceChildren(...data.payments.map(item => {
+            const row = document.createElement('tr');
+            cell(row, item.userName || item.userEmail || '—');
+            cell(row, `₺${Number(item.amount).toFixed(2)}`);
+            cell(row, item.status === 'paid' ? 'Başarılı' : item.status, item.status === 'paid' ? 'ok' : 'warn');
+            cell(row, item.provider || '—');
+            cell(row, item.merchantOid || '—');
+            cell(row, fmtDate(item.createdAt));
+            return row;
           }));
         } catch (error) { $('paymentsMsg').textContent = error.message; }
       }
 
       async function loadAnnouncements() {
+        $('announcementMsg').textContent = '';
         try {
           const data = await api('/api/admin/announcements');
-          const list = $('announcementList');
-          if (!data.duyurular.length) {
-            const empty = document.createElement('div');
-            empty.className = 'empty';
-            empty.textContent = 'Henüz duyuru yok.';
-            return list.replaceChildren(empty);
+          const list = $('announcementsList');
+          if (!data.announcements.length) {
+            list.innerHTML = '<p class="empty">Henüz yayınlanmış duyuru yok.</p>';
+            return;
           }
-          list.replaceChildren(...data.duyurular.map(item => {
-            const row = document.createElement('div');
-            row.className = 'announcement';
-            const text = document.createElement('div');
+          list.replaceChildren(...data.announcements.map(item => {
+            const box = document.createElement('div');
+            box.className = 'announcement';
+            const content = document.createElement('div');
             const p = document.createElement('p');
             p.textContent = item.message;
             const small = document.createElement('small');
             small.textContent = fmtDate(item.createdAt);
-            text.append(p, small);
+            content.append(p, small);
             const del = document.createElement('button');
-            del.type = 'button';
             del.className = 'btn sm danger';
             del.textContent = 'Sil';
             del.addEventListener('click', async () => {
-              if (!confirm('Bu duyuru silinsin mi?')) return;
+              if (!confirm('Duyuru silinsin mi?')) return;
               try {
                 await api(`/api/admin/announcements/${encodeURIComponent(item.id)}`, { method: 'DELETE' });
                 loadAnnouncements();
-              } catch (error) { $('announcementMsg').textContent = error.message; }
+              } catch (e) { $('announcementMsg').textContent = e.message; }
             });
-            row.append(text, del);
-            return row;
+            box.append(content, del);
+            return box;
           }));
         } catch (error) { $('announcementMsg').textContent = error.message; }
       }
 
       async function loadFaqs() {
-        const message = $('faqMsg');
-        message.className = 'msg';
-        message.textContent = '';
-        if (!faqEditor) {
-          message.textContent = 'Zengin metin editörü yüklenemedi. CDN bağlantısını kontrol edin.';
-          return;
-        }
+        $('faqMsg').textContent = '';
         try {
           const data = await api('/api/admin/faqs');
-          const list = $('faqList');
-          if (!data.faqs.length) {
-            const empty = document.createElement('div');
-            empty.className = 'empty';
-            empty.textContent = 'Henüz FAQ yanıtı eklenmedi.';
-            return list.replaceChildren(empty);
-          }
-          list.replaceChildren(...data.faqs.map(item => {
-            const row = document.createElement('div');
-            row.className = 'announcement';
-            const content = document.createElement('div');
-            const question = document.createElement('p');
-            question.textContent = item.question;
-            const answer = document.createElement('div');
-            if (!window.zarifRichContent?.render(answer, item.answerHtml)) {
-              answer.textContent = 'Yanıt içeriği gösterilemiyor.';
-            }
-            const meta = document.createElement('small');
-            meta.textContent = `${item.grade ? `${item.grade}. sınıf` : 'Tüm sınıflar'} · ${item.active ? 'Etkin' : 'Pasif'}`;
-            content.append(question, answer, meta);
-            const actions = document.createElement('div');
-            const edit = document.createElement('button');
-            edit.type = 'button';
-            edit.className = 'btn sm';
-            edit.textContent = 'Düzenle';
-            edit.addEventListener('click', () => {
-              activeFaqId = item.id;
-              $('faqQuestion').value = item.question;
-              faqEditor.clipboard.dangerouslyPasteHTML(item.answerHtml, 'silent');
-              $('faqGrade').value = item.grade ?? '';
-              $('faqActive').checked = item.active;
-              $('faqFormTitle').textContent = 'FAQ yanıtını düzenle';
-              $('faqSave').textContent = 'Değişiklikleri kaydet';
-              $('faqCancel').hidden = false;
-              $('faqQuestion').focus();
-            });
-            const remove = document.createElement('button');
-            remove.type = 'button';
-            remove.className = 'btn sm danger';
-            remove.textContent = 'Sil';
-            remove.addEventListener('click', async () => {
-              if (!confirm('Bu FAQ yanıtı silinsin mi?')) return;
+          if (!data.faqs.length) return emptyRow($('faqsBody'), 4, 'Henüz FAQ kaydı yok.');
+          $('faqsBody').replaceChildren(...data.faqs.map(faq => {
+            const row = document.createElement('tr');
+            cell(row, faq.question);
+            cell(row, faq.grade ? `${faq.grade}. Sınıf` : 'Tümü');
+            cell(row, faq.active ? 'Aktif' : 'Pasif', faq.active ? 'ok' : 'bad');
+            const actionTd = cell(row, '');
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn sm danger';
+            delBtn.textContent = 'Sil';
+            delBtn.addEventListener('click', async () => {
+              if (!confirm('FAQ silinsin mi?')) return;
               try {
-                await api(`/api/admin/faqs/${encodeURIComponent(item.id)}`, { method: 'DELETE' });
-                if (activeFaqId === item.id) resetFaqForm();
-                await loadFaqs();
-              } catch (error) { message.textContent = error.message; }
+                await api(`/api/admin/faqs/${encodeURIComponent(faq.id)}`, { method: 'DELETE' });
+                loadFaqs();
+              } catch (e) { $('faqMsg').textContent = e.message; }
             });
-            actions.append(edit, ' ', remove);
-            row.append(content, actions);
+            actionTd.append(delBtn);
             return row;
           }));
-        } catch (error) { message.textContent = error.message; }
+        } catch (error) { $('faqMsg').textContent = error.message; }
       }
 
-      let activeFaqId = '';
-      function resetFaqForm() {
-        activeFaqId = '';
-        $('faqForm').reset();
-        faqEditor?.setText('\n', 'silent');
-        $('faqActive').checked = true;
-        $('faqFormTitle').textContent = 'Yeni FAQ yanıtı';
-        $('faqSave').textContent = 'FAQ kaydet';
-        $('faqCancel').hidden = true;
+      async function loadLessons() {
+        $('lessonsMsg').textContent = '';
+        try {
+          const data = await api('/api/admin/education/lessons');
+          if (!data.lessons.length) return emptyRow($('lessonsBody'), 3, 'Henüz oluşturulmuş konu anlatımı yok.');
+          $('lessonsBody').replaceChildren(...data.lessons.map(lesson => {
+            const row = document.createElement('tr');
+            cell(row, `${lesson.sinif}. sınıf`);
+            cell(row, lesson.konu);
+            cell(row, fmtDate(lesson.createdAt));
+            return row;
+          }));
+        } catch (error) { $('lessonsMsg').textContent = error.message; }
+      }
+
+      async function loadQuizzes() {
+        $('quizzesMsg').textContent = '';
+        try {
+          const data = await api('/api/admin/education/quizzes');
+          if (!data.quizzes.length) return emptyRow($('quizzesBody'), 5, 'Henüz oluşturulmuş test yok.');
+          $('quizzesBody').replaceChildren(...data.quizzes.map(quiz => {
+            const row = document.createElement('tr');
+            cell(row, quiz.title);
+            cell(row, quiz.source === 'ai' ? 'Yapay Zekâ' : 'Öğretmen');
+            cell(row, quiz.questionCount);
+            cell(row, quiz.published ? 'Yayında' : 'Taslak', quiz.published ? 'ok' : 'warn');
+            cell(row, fmtDate(quiz.createdAt));
+            return row;
+          }));
+        } catch (error) { $('quizzesMsg').textContent = error.message; }
+      }
+
+      async function loadExams() {
+        $('examsMsg').textContent = '';
+        try {
+          const data = await api('/api/denemeler');
+          if (!data.denemeler.length) return emptyRow($('examsBody'), 4, 'Henüz oluşturulmuş deneme sınavı yok.');
+          $('examsBody').replaceChildren(...data.denemeler.map(exam => {
+            const row = document.createElement('tr');
+            cell(row, exam.title);
+            cell(row, exam.soruSayisi || (exam.sorular?.length || 0));
+            cell(row, exam.published ? 'Yayında' : 'Taslak', exam.published ? 'ok' : 'warn');
+            cell(row, fmtDate(exam.createdAt));
+            return row;
+          }));
+        } catch (error) { $('examsMsg').textContent = error.message; }
+      }
+
+      async function loadTickets() {
+        $('ticketsMsg').textContent = '';
+        try {
+          const data = await api('/api/admin/support/tickets');
+          if (!data.tickets.length) return emptyRow($('ticketsBody'), 5, 'Açık destek talebi bulunmuyor.');
+          $('ticketsBody').replaceChildren(...data.tickets.map(ticket => {
+            const row = document.createElement('tr');
+            cell(row, ticket.subject);
+            cell(row, [ticket.name, ticket.email].filter(Boolean).join(' · ') || '—');
+            cell(row, ticket.status);
+            cell(row, ticket.message);
+            cell(row, fmtDate(ticket.createdAt));
+            return row;
+          }));
+        } catch (error) { $('ticketsMsg').textContent = error.message; }
+      }
+
+      async function loadLogs() {
+        $('logsMsg').textContent = '';
+        try {
+          const data = await api('/api/admin/logs');
+          if (!data.logs.length) return emptyRow($('logsBody'), 5, 'Henüz yönetim işlemi kaydedilmemiş.');
+          $('logsBody').replaceChildren(...data.logs.map(log => {
+            const row = document.createElement('tr');
+            cell(row, log.actorName);
+            cell(row, log.action);
+            cell(row, `${log.entityType}${log.entityId ? ` · ${log.entityId}` : ''}`);
+            cell(row, JSON.stringify(log.details || {}));
+            cell(row, fmtDate(log.createdAt));
+            return row;
+          }));
+        } catch (error) { $('logsMsg').textContent = error.message; }
       }
 
       async function loadVisitorSettings() {
@@ -820,11 +1594,6 @@
         await loadHomepageAssets();
       }
 
-      function isHomepageUploadUrl(value) {
-        return typeof value === 'string' &&
-          /^\/uploads\/homepage\/[a-f0-9-]+\.(?:json|png|jpe?g|webp)$/i.test(value);
-      }
-
       async function loadHomepageAssets() {
         const message = $('homepageAnimationMsg');
         message.className = 'msg';
@@ -832,7 +1601,7 @@
         try {
           const data = await api('/api/admin/homepage-assets');
           const assets = data.homepageAssets;
-          $('homepageAnimationPath').textContent = isHomepageUploadUrl(assets.animation)
+          $('homepageAnimationPath').textContent = assets.animation
             ? `Mevcut animasyon: ${assets.animation}`
             : 'Henüz animasyon yüklenmedi.';
           for (const [slot, id] of [
@@ -840,7 +1609,7 @@
             ['featureImage', 'homepageFeaturePreview']
           ]) {
             const preview = $(id);
-            preview.hidden = !isHomepageUploadUrl(assets[slot]);
+            preview.hidden = !assets[slot];
             preview.removeAttribute('src');
             if (!preview.hidden) preview.src = assets[slot];
           }
@@ -849,307 +1618,231 @@
         }
       }
 
-      async function uploadHomepageMedia(form, assetType, button, message) {
-        const fileInput = form.querySelector('input[type="file"]');
-        message.className = 'msg';
-        message.textContent = '';
-        if (!fileInput.files.length) {
-          message.textContent = 'Yüklenecek dosyayı seçin.';
-          return;
-        }
-        const formData = new FormData();
-        formData.append('assetType', assetType);
-        if (assetType === 'animation') formData.append('slot', 'animation');
-        else formData.append('slot', $('homepageImageSlot').value);
-        formData.append('file', fileInput.files[0]);
-        button.disabled = true;
+      /* Soru Bankası Yönetimi */
+      async function loadQuestionsManage() {
+        $('adminQuestionMsg').textContent = '';
         try {
-          const response = await fetch('/api/admin/homepage-assets/upload', {
-            method: 'POST',
-            credentials: 'same-origin',
-            body: formData
-          });
-          if (response.status === 401) {
-            window.location.assign('/yonetim');
-            throw new Error('Oturum sona erdi.');
+          const res = await fetch('/api/sorular', { credentials: 'same-origin' });
+          const data = await res.json();
+          cachedQuestions = data.sorular || [];
+          $('adminQuestionTotal').textContent = `Toplam ${cachedQuestions.length} soru kayıtlı.`;
+          renderQuestionsTable(cachedQuestions);
+        } catch (err) {
+          $('adminQuestionMsg').textContent = err.message;
+        }
+      }
+
+      function renderQuestionsTable(questions) {
+        const body = $('questionsTableBody');
+        if (!questions.length) return emptyRow(body, 6, 'Kayıtlı soru bulunamadı.');
+        body.replaceChildren(...questions.slice(0, 100).map(q => {
+          const row = document.createElement('tr');
+          const imgTd = document.createElement('td');
+          if (q.imageUrl) {
+            const img = document.createElement('img');
+            img.src = q.imageUrl;
+            img.alt = q.imageFile || 'Soru';
+            img.className = 'question-thumb';
+            imgTd.append(img);
+          } else {
+            imgTd.textContent = '—';
           }
-          const data = await response.json().catch(() => ({}));
-          if (!response.ok) throw new Error(data.mesaj || 'Yükleme tamamlanamadı.');
-          fileInput.value = '';
-          message.className = 'msg ok';
-          message.textContent = data.mesaj;
-          await loadHomepageAssets();
-        } catch (error) {
-          message.textContent = error.message;
-        } finally {
-          button.disabled = false;
-        }
+          row.append(imgTd);
+          cell(row, q.imageFile || '—');
+          cell(row, (q.ders || 'genel').toUpperCase());
+          cell(row, q.siraNo ? `#${q.siraNo}` : '—');
+          cell(row, q.answer ? `Şık ${q.answer}` : 'Belirtilmedi', q.answer ? 'ok' : 'warn');
+          cell(row, fmtDate(q.createdAt));
+          return row;
+        }));
       }
 
-      const siteMediaTargetMap = new Map();
-      let siteMediaPlacements = [];
-
-      function currentSiteMediaTarget() {
-        return siteMediaTargetMap.get($('siteMediaTarget').value) || null;
-      }
-
-      function renderSiteMediaCurrent() {
-        const container = $('siteMediaCurrent');
-        container.replaceChildren();
-        const target = currentSiteMediaTarget();
-        if (!target) return;
-        const placement = siteMediaPlacements.find(item =>
-          item.pagePath === $('siteMediaPage').value && item.targetKey === target.key);
-        if (!placement) {
-          container.textContent = 'Bu hedefte henüz medya yok.';
-          return;
-        }
-        const row = document.createElement('div');
-        row.className = 'site-media-current';
-        if (placement.assetType === 'image') {
-          const image = document.createElement('img');
-          image.src = placement.url;
-          image.alt = 'Mevcut yerleşim görseli';
-          row.append(image);
-        } else {
-          const animation = document.createElement('span');
-          animation.textContent = 'Lottie animasyonu';
-          row.append(animation);
-        }
-        const link = document.createElement('a');
-        link.href = placement.url;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.textContent = placement.url;
-        row.append(link);
-        container.append(row);
-      }
-
-      async function loadSiteMediaPlacements() {
-        try {
-          const data = await api('/api/admin/site-media');
-          siteMediaPlacements = data.placements;
-          renderSiteMediaCurrent();
-        } catch (error) {
-          $('siteMediaMsg').textContent = error.message;
-        }
-      }
-
-      function selectSiteMediaTarget(target) {
-        if (!target || !SiteMediaTargets.validTargetKey(target.key)) return;
-        siteMediaTargetMap.set(target.key, target);
-        const select = $('siteMediaTarget');
-        const existing = [...select.options].some(option => option.value === target.key);
-        if (!existing) {
-          const context = target.context ? `${target.context} · ` : '';
-          const label = `${context}${target.tag === 'a' ? 'Bağlantı' : 'Buton'}: ${target.label}`;
-          select.add(new Option(label, target.key));
-        }
-        select.value = target.key;
-        $('siteMediaTargetDescription').textContent = `Seçilen hedef: ${target.context ? `${target.context} · ` : ''}${target.label}`;
-        $('uploadSiteMedia').disabled = false;
-        renderSiteMediaCurrent();
-      }
-
-      for (const page of SiteMediaTargets.PAGES) {
-        $('siteMediaPage').add(new Option(page.label, page.path));
-      }
-
-      $('siteMediaPage').addEventListener('change', () => {
-        const pagePath = $('siteMediaPage').value;
-        const targetSelect = $('siteMediaTarget');
-        const preview = $('siteMediaTargetPreview');
-        siteMediaTargetMap.clear();
-        targetSelect.replaceChildren(new Option(pagePath ? 'Hedef yükleniyor…' : 'Önce sayfa seçin', ''));
-        targetSelect.disabled = true;
-        $('uploadSiteMedia').disabled = true;
-        $('siteMediaTargetDescription').textContent = pagePath
-          ? 'Önizlemede hedef butona tıklayın veya listeden seçin.'
-          : 'Sayfa ve hedef seçin.';
-        $('siteMediaCurrent').replaceChildren();
-        if (!pagePath) {
-          preview.hidden = true;
-          preview.removeAttribute('src');
-          return;
-        }
-        const url = new URL(pagePath, window.location.origin);
-        url.searchParams.set('siteMediaDesigner', '1');
-        preview.hidden = false;
-        preview.src = url.pathname + url.search;
-        loadSiteMediaPlacements();
+      $('adminQuestionSearch')?.addEventListener('input', e => {
+        const val = e.target.value.trim().toLowerCase();
+        const filtered = cachedQuestions.filter(q => (q.ders || '').toLowerCase().includes(val) || (q.imageFile || '').toLowerCase().includes(val));
+        renderQuestionsTable(filtered);
       });
 
-      $('siteMediaTarget').addEventListener('change', () => {
-        const target = currentSiteMediaTarget();
-        if (target) selectSiteMediaTarget(target);
-      });
-
-      $('siteMediaType').addEventListener('change', () => {
-        $('siteMediaFile').accept = $('siteMediaType').value === 'animation'
-          ? '.json,application/json'
-          : '.png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp';
-      });
-
-      window.addEventListener('message', event => {
-        if (event.origin !== window.location.origin ||
-            event.source !== $('siteMediaTargetPreview').contentWindow) return;
-        const data = event.data;
-        if (!data || data.pagePath !== $('siteMediaPage').value) return;
-        const select = $('siteMediaTarget');
-        if (data.type === 'site-media-targets' && Array.isArray(data.targets)) {
-          const previous = select.value;
-          siteMediaTargetMap.clear();
-          select.replaceChildren(new Option(data.targets.length ? 'Buton veya hedef seçin' : 'Bu sayfada hedef bulunamadı', ''));
-          for (const target of data.targets) {
-            if (!SiteMediaTargets.validTargetKey(target.key)) continue;
-            siteMediaTargetMap.set(target.key, target);
-            const context = target.context ? `${target.context} · ` : '';
-            select.add(new Option(`${context}${target.tag === 'a' ? 'Bağlantı' : 'Buton'}: ${target.label}`, target.key));
-          }
-          select.disabled = !siteMediaTargetMap.size;
-          if (siteMediaTargetMap.has(previous)) select.value = previous;
-          renderSiteMediaCurrent();
-        } else if (data.type === 'site-media-target-selected') {
-          selectSiteMediaTarget(data.target);
-        }
-      });
-
-      $('siteMediaForm').addEventListener('submit', async event => {
-        event.preventDefault();
-        const target = currentSiteMediaTarget();
-        const file = $('siteMediaFile').files[0];
-        const message = $('siteMediaMsg');
-        const button = $('uploadSiteMedia');
-        message.className = 'msg';
-        message.textContent = '';
-        if (!target || !file) {
-          message.textContent = 'Sayfa, hedef ve dosya seçin.';
-          return;
-        }
+      $('adminQuestionUploadForm')?.addEventListener('submit', async e => {
+        e.preventDefault();
+        const msg = $('adminQuestionMsg');
+        msg.className = 'msg';
+        msg.textContent = '';
+        const file = $('adminQuestionFile').files[0];
+        if (!file) return;
         const formData = new FormData();
-        formData.set('pagePath', $('siteMediaPage').value);
-        formData.set('targetKey', target.key);
-        formData.set('assetType', $('siteMediaType').value);
-        formData.set('file', file);
-        button.disabled = true;
+        formData.append('resim', file);
+        formData.append('ders', $('adminQuestionDers').value.trim());
+        if ($('adminQuestionSira').value) formData.append('siraNo', $('adminQuestionSira').value);
+        if ($('adminQuestionCevap').value) formData.append('answer', $('adminQuestionCevap').value);
+
+        $('adminQuestionSubmitBtn').disabled = true;
         try {
-          const response = await fetch('/api/admin/site-media/upload', {
+          const res = await fetch('/api/sorular/yukle', {
             method: 'POST', credentials: 'same-origin', body: formData
           });
-          if (response.status === 401) {
-            window.location.assign('/yonetim');
-            throw new Error('Oturum sona erdi.');
-          }
-          const data = await response.json().catch(() => ({}));
-          if (!response.ok) throw new Error(data.mesaj || 'Yükleme tamamlanamadı.');
-          $('siteMediaFile').value = '';
-          message.className = 'msg ok';
-          message.textContent = data.mesaj;
-          await loadSiteMediaPlacements();
-        } catch (error) {
-          message.textContent = error.message;
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mesaj || 'Görsel yüklenemedi.');
+          msg.className = 'msg ok';
+          msg.textContent = data.mesaj || 'Soru başarıyla eklendi.';
+          $('adminQuestionFile').value = '';
+          loadQuestionsManage();
+        } catch (err) {
+          msg.textContent = err.message;
         } finally {
-          button.disabled = false;
+          $('adminQuestionSubmitBtn').disabled = false;
         }
       });
 
-      async function loadLessons() {
-        const message = $('lessonsMsg');
-        message.textContent = '';
+      $('scanQuestionsFolderBtn')?.addEventListener('click', async () => {
+        const msg = $('adminQuestionMsg');
+        msg.className = 'msg';
+        msg.textContent = 'Klasör taranıyor...';
         try {
-          const data = await api('/api/admin/education/lessons');
-          if (!data.lessons.length) return emptyRow($('lessonsBody'), 3, 'Henüz oluşturulmuş konu anlatımı yok.');
-          $('lessonsBody').replaceChildren(...data.lessons.map(lesson => {
-            const row = document.createElement('tr');
-            cell(row, `${lesson.sinif}. sınıf`);
-            cell(row, lesson.konu);
-            cell(row, fmtDate(lesson.createdAt));
-            return row;
-          }));
-        } catch (error) { message.textContent = error.message; }
+          const res = await fetch('/api/sorular/tara', { method: 'POST', credentials: 'same-origin' });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mesaj);
+          msg.className = 'msg ok';
+          msg.textContent = data.mesaj || 'Tarama tamamlandı.';
+          loadQuestionsManage();
+        } catch (err) {
+          msg.textContent = err.message;
+        }
+      });
+
+      /* Maarif Müfredat Gezgini Admin Entegrasyonu */
+      let adminCurriculumTree = [];
+      let selectedGradeNode = null;
+      let selectedThemeNode = null;
+
+      async function loadAdminCurriculumTree() {
+        $('adminTreeStages').textContent = 'Müfredat yükleniyor…';
+        try {
+          const res = await fetch('/api/v1/curriculum/tree', { credentials: 'same-origin' });
+          if (!res.ok) throw new Error(`Müfredat yüklenemedi (${res.status})`);
+          adminCurriculumTree = await res.json();
+          renderAdminCurriculumStages();
+        } catch (err) {
+          $('adminTreeStages').textContent = err.message;
+        }
       }
 
-      async function loadQuizzes() {
-        const message = $('quizzesMsg');
-        message.textContent = '';
-        try {
-          const data = await api('/api/admin/education/quizzes');
-          if (!data.quizzes.length) return emptyRow($('quizzesBody'), 5, 'Henüz oluşturulmuş test yok.');
-          $('quizzesBody').replaceChildren(...data.quizzes.map(quiz => {
-            const row = document.createElement('tr');
-            cell(row, quiz.title);
-            cell(row, quiz.source === 'ai' ? 'Yapay zekâ' : 'Test');
-            cell(row, quiz.questionCount);
-            cell(row, quiz.published ? 'Yayında' : 'Taslak', quiz.published ? 'ok' : 'warn');
-            cell(row, fmtDate(quiz.createdAt));
-            return row;
-          }));
-        } catch (error) { message.textContent = error.message; }
+      function renderAdminCurriculumStages() {
+        const stagesContainer = $('adminTreeStages');
+        stagesContainer.replaceChildren();
+        if (!adminCurriculumTree.length) {
+          stagesContainer.textContent = 'Müfredat düğümü bulunamadı.';
+          return;
+        }
+        adminCurriculumTree.forEach(kademe => {
+          const kademeHeader = document.createElement('div');
+          kademeHeader.style.cssText = 'font-weight:700;margin:10px 0 6px;color:#92400e;font-size:0.8rem;text-transform:uppercase';
+          kademeHeader.textContent = kademe.title;
+          stagesContainer.append(kademeHeader);
+
+          (kademe.children || []).forEach(sinif => {
+            const btn = document.createElement('button');
+            btn.className = `admin-tree-item${selectedGradeNode?.id === sinif.id ? ' selected' : ''}`;
+            btn.textContent = sinif.title;
+            btn.addEventListener('click', () => {
+              selectedGradeNode = sinif;
+              selectedThemeNode = null;
+              renderAdminCurriculumStages();
+              renderAdminCurriculumThemes();
+            });
+            stagesContainer.append(btn);
+          });
+        });
       }
 
-      async function loadExams() {
-        const message = $('examsMsg');
-        message.textContent = '';
-        try {
-          const data = await api('/api/denemeler');
-          if (!data.denemeler.length) return emptyRow($('examsBody'), 4, 'Henüz oluşturulmuş deneme sınavı yok.');
-          $('examsBody').replaceChildren(...data.denemeler.map(exam => {
-            const row = document.createElement('tr');
-            cell(row, exam.title);
-            cell(row, exam.soruSayisi);
-            cell(row, exam.published ? 'Yayında' : 'Taslak', exam.published ? 'ok' : 'warn');
-            cell(row, fmtDate(exam.createdAt));
-            return row;
-          }));
-        } catch (error) { message.textContent = error.message; }
+      function renderAdminCurriculumThemes() {
+        const themesContainer = $('adminTreeThemes');
+        $('adminTreeOutcomes').textContent = 'Lütfen bir tema seçin.';
+        $('adminTreeSkills').textContent = 'Lütfen bir kazanım seçin.';
+        if (!selectedGradeNode) {
+          themesContainer.textContent = 'Lütfen bir sınıf seçin.';
+          return;
+        }
+        const themes = (selectedGradeNode.children || []).filter(c => c.node_type === 'TEMA_UNITE');
+        if (!themes.length) {
+          themesContainer.textContent = 'Bu sınıfta henüz tema bulunmuyor.';
+          return;
+        }
+        themesContainer.replaceChildren(...themes.map(theme => {
+          const btn = document.createElement('button');
+          btn.className = `admin-tree-item${selectedThemeNode?.id === theme.id ? ' selected' : ''}`;
+          btn.innerHTML = `<span>${theme.title}</span><span class="badge">${theme.content_count || 0} Soru</span>`;
+          btn.addEventListener('click', () => {
+            selectedThemeNode = theme;
+            renderAdminCurriculumThemes();
+            renderAdminCurriculumOutcomes();
+          });
+          return btn;
+        }));
       }
 
-      async function loadTickets() {
-        const message = $('ticketsMsg');
-        message.textContent = '';
-        try {
-          const data = await api('/api/admin/support/tickets');
-          if (!data.tickets.length) return emptyRow($('ticketsBody'), 5, 'Açık destek talebi bulunmuyor.');
-          $('ticketsBody').replaceChildren(...data.tickets.map(ticket => {
-            const row = document.createElement('tr');
-            cell(row, ticket.subject);
-            cell(row, [ticket.name, ticket.email].filter(Boolean).join(' · ') || '—');
-            cell(row, ticket.status);
-            cell(row, ticket.message);
-            cell(row, fmtDate(ticket.createdAt));
-            return row;
-          }));
-        } catch (error) { message.textContent = error.message; }
+      function renderAdminCurriculumOutcomes() {
+        const outcomesContainer = $('adminTreeOutcomes');
+        $('adminTreeSkills').textContent = 'Lütfen bir kazanım seçin.';
+        if (!selectedThemeNode) {
+          outcomesContainer.textContent = 'Lütfen bir tema seçin.';
+          return;
+        }
+        const outcomes = (selectedThemeNode.children || []).filter(c => c.node_type === 'KAZANIM_CIKTI');
+        if (!outcomes.length) {
+          outcomesContainer.textContent = 'Bu temada henüz kazanım bulunmuyor.';
+          return;
+        }
+        outcomesContainer.replaceChildren(...outcomes.map(outcome => {
+          const btn = document.createElement('button');
+          btn.className = 'admin-tree-item';
+          btn.innerHTML = `<div style="font-weight:600;color:#ea580c">${outcome.code || ''}</div><div>${outcome.title}</div><span class="badge">${outcome.content_count || 0} Soru</span>`;
+          btn.addEventListener('click', () => {
+            outcomesContainer.querySelectorAll('.admin-tree-item').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            renderAdminCurriculumSkills(outcome);
+          });
+          return btn;
+        }));
       }
 
-      async function loadLogs() {
-        const message = $('logsMsg');
-        message.textContent = '';
-        try {
-          const data = await api('/api/admin/logs');
-          if (!data.logs.length) return emptyRow($('logsBody'), 5, 'Henüz yönetim işlemi kaydedilmemiş.');
-          $('logsBody').replaceChildren(...data.logs.map(log => {
-            const row = document.createElement('tr');
-            cell(row, log.actorName);
-            cell(row, log.action);
-            cell(row, `${log.entityType}${log.entityId ? ` · ${log.entityId}` : ''}`);
-            cell(row, JSON.stringify(log.details || {}));
-            cell(row, fmtDate(log.createdAt));
-            return row;
-          }));
-        } catch (error) { message.textContent = error.message; }
+      function renderAdminCurriculumSkills(outcome) {
+        const skillsContainer = $('adminTreeSkills');
+        const skillNodes = (outcome.children || []).filter(c => c.node_type === 'ALT_BECERI');
+        const allSkills = [];
+        skillNodes.forEach(sn => {
+          const items = sn.metadata?.beceriler;
+          if (Array.isArray(items)) allSkills.push(...items);
+          else allSkills.push(sn.title);
+        });
+        const unique = [...new Set(allSkills)];
+        if (!unique.length) {
+          skillsContainer.textContent = 'Bu kazanıma ait özel beceri etiketi yok.';
+          return;
+        }
+        skillsContainer.replaceChildren(...unique.map(s => {
+          const div = document.createElement('div');
+          div.className = 'chip ok';
+          div.style.cssText = 'display:block;margin-bottom:6px;padding:6px 10px';
+          div.textContent = `✦ ${s}`;
+          return div;
+        }));
       }
 
+      $('refreshAdminTreeBtn')?.addEventListener('click', loadAdminCurriculumTree);
+
+      /* Event Dinleyicileri */
       document.querySelectorAll('[data-view]').forEach(button =>
         button.addEventListener('click', () => showView(button.dataset.view)));
-      $('userSearchButton').addEventListener('click', () => { page = 1; loadUsers(); });
-      $('userSearch').addEventListener('keydown', event => { if (event.key === 'Enter') { page = 1; loadUsers(); } });
-      $('userRole').addEventListener('change', () => { page = 1; loadUsers(); });
-      $('prevPage').addEventListener('click', () => { if (page > 1) { page -= 1; loadUsers(); } });
-      $('nextPage').addEventListener('click', () => { if (page < totalPages) { page += 1; loadUsers(); } });
-      $('paymentStatus').addEventListener('change', loadPayments);
 
-      $('announcementForm').addEventListener('submit', async event => {
+      $('userSearchButton')?.addEventListener('click', () => { page = 1; loadUsers(); });
+      $('userSearch')?.addEventListener('keydown', e => { if (e.key === 'Enter') { page = 1; loadUsers(); } });
+      $('userRole')?.addEventListener('change', () => { page = 1; loadUsers(); });
+      $('prevPage')?.addEventListener('click', () => { if (page > 1) { page -= 1; loadUsers(); } });
+      $('nextPage')?.addEventListener('click', () => { if (page < totalPages) { page += 1; loadUsers(); } });
+      $('paymentStatus')?.addEventListener('change', loadPayments);
+
+      $('announcementForm')?.addEventListener('submit', async event => {
         event.preventDefault();
         const message = $('announcementMsg');
         message.className = 'msg';
@@ -1166,7 +1859,7 @@
         } catch (error) { message.textContent = error.message; }
       });
 
-      $('faqForm').addEventListener('submit', async event => {
+      $('faqForm')?.addEventListener('submit', async event => {
         event.preventDefault();
         const message = $('faqMsg');
         const button = $('faqSave');
@@ -1180,61 +1873,20 @@
           active: $('faqActive').checked
         };
         try {
-          const data = await api(
-            activeFaqId ? `/api/admin/faqs/${encodeURIComponent(activeFaqId)}` : '/api/admin/faqs',
-            { method: activeFaqId ? 'PUT' : 'POST', body: JSON.stringify(payload) }
-          );
+          const data = await api('/api/admin/faqs', { method: 'POST', body: JSON.stringify(payload) });
           message.className = 'msg ok';
           message.textContent = data.mesaj;
-          resetFaqForm();
-          await loadFaqs();
+          $('faqQuestion').value = '';
+          if (faqEditor) faqEditor.setContents([]);
+          loadFaqs();
         } catch (error) {
           message.textContent = error.message;
         } finally {
           button.disabled = false;
         }
       });
-      $('faqCancel').addEventListener('click', resetFaqForm);
-      if (!faqEditor) {
-        $('faqSave').disabled = true;
-        $('faqFormulaOpen').disabled = true;
-      }
 
-      const formulaDialog = $('faqFormulaDialog');
-      const formulaInput = $('faqFormulaInput');
-      const formulaPreview = $('faqFormulaPreview');
-      const formulaInsertButton = $('faqFormulaInsert');
-      function previewFaqFormula() {
-        formulaPreview.replaceChildren();
-        const hasFormula = Boolean(formulaInput.value.trim());
-        formulaInsertButton.disabled = !hasFormula || !window.katex;
-        if (!hasFormula) return;
-        if (!window.katex) {
-          formulaPreview.textContent = 'LaTeX önizlemesi yüklenemedi.';
-          return;
-        }
-        window.katex.render(formulaInput.value, formulaPreview, {
-          throwOnError: false,
-          trust: false
-        });
-      }
-      $('faqFormulaOpen').addEventListener('click', () => {
-        formulaInput.value = '';
-        previewFaqFormula();
-        formulaDialog.showModal();
-        formulaInput.focus();
-      });
-      formulaInput.addEventListener('input', previewFaqFormula);
-      formulaInsertButton.addEventListener('click', () => {
-        const latex = formulaInput.value.trim();
-        if (!faqEditor || !window.katex || !latex) return;
-        const selection = faqEditor.getSelection(true);
-        faqEditor.insertEmbed(selection?.index ?? faqEditor.getLength() - 1, 'formula', latex, 'user');
-        faqEditor.setSelection((selection?.index ?? faqEditor.getLength() - 2) + 1, 0, 'silent');
-        formulaDialog.close();
-      });
-
-      $('visitorSettingsForm').addEventListener('submit', async event => {
+      $('visitorSettingsForm')?.addEventListener('submit', async event => {
         event.preventDefault();
         const message = $('visitorSettingsMsg');
         const button = $('saveVisitorSettings');
@@ -1266,27 +1918,7 @@
         }
       });
 
-      $('homepageAnimationForm').addEventListener('submit', event => {
-        event.preventDefault();
-        uploadHomepageMedia(
-          event.currentTarget,
-          'animation',
-          $('uploadHomepageAnimation'),
-          $('homepageAnimationMsg')
-        );
-      });
-
-      $('homepageImageForm').addEventListener('submit', event => {
-        event.preventDefault();
-        uploadHomepageMedia(
-          event.currentTarget,
-          'image',
-          $('uploadHomepageImage'),
-          $('homepageImageMsg')
-        );
-      });
-
-      $('logoutButton').addEventListener('click', async () => {
+      $('logoutButton')?.addEventListener('click', async () => {
         await fetch('/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
         window.location.assign('/yonetim');
       });
@@ -1296,10 +1928,16 @@
           const data = await api('/api/admin/me');
           activeAdminRole = data.user.adminRole;
           activeAdminId = data.user.id;
-          $('who').textContent = `${data.user.name} · ${adminRoleNames[activeAdminRole]}`;
+          
+          $('whoName').textContent = data.user.name || 'Yönetici';
+          $('whoInitial').textContent = (data.user.name || 'Y').charAt(0).toUpperCase();
+          $('whoRole').textContent = adminRoleNames[activeAdminRole] || 'Yönetici';
+
           document.querySelectorAll('[data-admin-roles]').forEach(element => {
-            element.hidden = !element.dataset.adminRoles.split(',').includes(activeAdminRole);
+            const roles = element.dataset.adminRoles.split(',');
+            element.hidden = !roles.includes(activeAdminRole);
           });
+          
           const firstView = activeAdminRole === 'editor' ? 'education-quizzes' : 'overview';
           document.body.classList.remove('rbac-loading');
           showView(firstView);
