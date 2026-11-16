@@ -1,0 +1,1082 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fbf1e7">
+  <title>Örnek Sınav Akışı ve Canlı Simülatör | Zarif Çözüm</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --cream: #fbf1e7;
+      --paper: #fffaf5;
+      --peach: #f5e2d0;
+      --peach2: #f8eadc;
+      --brown: #493020;
+      --brown2: #67472f;
+      --muted: #806b5c;
+      --gold: #b88a28;
+      --gold2: #e9d3a5;
+      --line: #ead8c5;
+      --green: #2e7d32;
+      --green-bg: #e8f5e9;
+      --red: #c62828;
+      --red-bg: #ffebee;
+      --blue: #1565c0;
+      --blue-bg: #e3f2fd;
+      --shadow: 0 16px 40px rgba(76,48,27,.08);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--brown);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 90% 0%, #fff9f1 0, transparent 40%), var(--cream);
+      line-height: 1.6;
+    }
+    a { color: inherit; }
+    .wrap {
+      width: min(1140px, calc(100% - 36px));
+      margin: auto;
+    }
+    .topbar {
+      height: 82px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(184,138,40,.18);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .brand img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      mix-blend-mode: multiply;
+    }
+    .brand strong {
+      font: 600 19px Georgia, serif;
+    }
+    .brand strong span { color: var(--gold); }
+    .crumb {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .crumb b {
+      color: var(--gold);
+      font-weight: 650;
+    }
+
+    /* Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 36px;
+      align-items: center;
+      padding: 44px 0 28px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: #fff8ee;
+      border: 1px solid var(--gold2);
+      border-radius: 99px;
+      color: #8c6c2c;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .eyebrow:before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+    h1 {
+      font: 600 clamp(32px, 4.5vw, 48px)/1.12 Georgia, serif;
+      letter-spacing: -.03em;
+      margin: 16px 0 14px;
+    }
+    h1 em {
+      color: var(--gold);
+      font-style: normal;
+    }
+    .lead {
+      max-width: 590px;
+      font-size: 16px;
+      color: #705c4d;
+      margin: 0 0 20px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fffaf5;
+      font-size: 12px;
+      color: #715b49;
+      font-weight: 500;
+    }
+    .hero-art {
+      min-height: 250px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #edd9c3;
+      border-radius: 24px;
+      background: linear-gradient(145deg, #fffaf4, #f5e2ce);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+    .hero-art:before, .hero-art:after {
+      content: "";
+      position: absolute;
+      border: 1px solid rgba(184,138,40,.2);
+      border-radius: 50%;
+      width: 220px;
+      height: 220px;
+      right: -70px;
+      top: -100px;
+    }
+    .hero-art:after {
+      width: 160px;
+      height: 160px;
+      right: -40px;
+      top: -70px;
+    }
+    .art-inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 24px;
+    }
+    .art-icon {
+      width: 86px;
+      height: 86px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #fffaf5;
+      border: 1px solid #ead8c5;
+      color: var(--gold);
+      font-size: 38px;
+      box-shadow: 0 10px 25px rgba(76,48,27,.06);
+    }
+    .art-inner strong {
+      display: block;
+      font: 600 18px Georgia, serif;
+    }
+    .art-inner small {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    /* Stepper / Timeline */
+    .flow-stepper {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 28px 0;
+    }
+    .flow-step-tab {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .flow-step-tab:hover {
+      background: #fffdfa;
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+    .flow-step-tab.active {
+      background: #fff;
+      border-color: var(--gold);
+      box-shadow: 0 6px 20px rgba(184,138,40,0.14);
+      border-top: 4px solid var(--gold);
+    }
+    .step-num {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+    }
+    .step-name {
+      display: block;
+      font: 600 14px Georgia, serif;
+      margin-top: 4px;
+      color: var(--brown);
+    }
+    .step-desc {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    /* Live Exam Simulation Box */
+    .sim-container {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: 0 12px 36px rgba(76,48,27,.06);
+      overflow: hidden;
+      margin: 24px 0 36px;
+    }
+    .sim-header {
+      background: #3e2617;
+      color: #fff;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .sim-header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .sim-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.15);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .sim-timer {
+      background: #b88a28;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+    }
+
+    .sim-body {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      min-height: 480px;
+    }
+
+    /* Left: Question Area */
+    .sim-question-area {
+      padding: 24px 28px;
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+    }
+    .question-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .question-code {
+      font-weight: 700;
+      color: var(--gold);
+      background: #fcf6ec;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--gold2);
+    }
+    .question-text {
+      font-size: 15px;
+      line-height: 1.65;
+      color: #3e2617;
+      margin-bottom: 18px;
+    }
+    
+    /* Geometry illustration */
+    .question-diagram {
+      background: #fffdf9;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Options */
+    .options-grid {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .option-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fffaf5;
+      color: var(--brown);
+      cursor: pointer;
+      font: inherit;
+      font-size: 14px;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+    .option-btn:hover {
+      background: #fbf0e4;
+      border-color: var(--gold);
+    }
+    .option-btn.selected {
+      background: #f5e4cb;
+      border-color: var(--gold);
+      color: #3a220f;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(184,138,40,0.18);
+    }
+    .option-key {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--brown2);
+      flex-shrink: 0;
+    }
+    .option-btn.selected .option-key {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #fff;
+    }
+
+    /* Bottom action bar */
+    .question-actions {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--brown);
+      color: #fffaf5;
+      text-decoration: none;
+      font: 700 13px ui-sans-serif, system-ui;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn:hover { background: var(--brown2); }
+    .btn.secondary {
+      background: #f5e5d5;
+      border: 1px solid var(--line);
+      color: var(--brown);
+    }
+    .btn.secondary:hover { background: #ecdac6; }
+    .btn.gold {
+      background: linear-gradient(135deg, #b88a28, #9a721c);
+      color: #fff;
+    }
+    .btn.gold:hover { opacity: 0.92; }
+
+    /* Right: Optical Sheet Simulator */
+    .sim-optical-area {
+      background: #faf4ed;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    .optical-title {
+      font: 600 15px Georgia, serif;
+      margin: 0 0 4px;
+      color: var(--brown);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .optical-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 0 0 14px;
+    }
+    .optical-grid {
+      display: grid;
+      gap: 6px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .optical-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 6px;
+      border-radius: 6px;
+      background: #fff;
+      border: 1px solid #ebd8c5;
+      font-size: 11px;
+    }
+    .optical-row.current {
+      border-color: var(--gold);
+      background: #fff9f0;
+    }
+    .optical-num {
+      width: 20px;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: right;
+    }
+    .optical-bubbles {
+      display: flex;
+      gap: 6px;
+    }
+    .optical-bubble {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid #cfb8a0;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #715b49;
+      cursor: pointer;
+      user-select: none;
+    }
+    .optical-bubble.filled {
+      background: #3e2617;
+      border-color: #3e2617;
+      color: #fff;
+    }
+    .optical-legend {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* Modal / Tooltip for AI Hint */
+    .ai-hint-box {
+      margin: 12px 0 0;
+      padding: 12px 14px;
+      border-left: 3px solid #b88a28;
+      border-radius: 0 10px 10px 0;
+      background: #fff6e8;
+      font-size: 13px;
+      color: #6a4a15;
+      display: none;
+    }
+    .ai-hint-box.show { display: block; animation: fadeIn 0.2s ease; }
+
+    /* Results Showcase Card */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin: 32px 0;
+    }
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 6px 20px rgba(76,48,27,.04);
+    }
+    .card h3 {
+      font: 600 20px Georgia, serif;
+      margin: 0 0 10px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 99px;
+      background: #f4e8d9;
+      color: #7d612d;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      margin-bottom: 8px;
+    }
+
+    .score-banner {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      text-align: center;
+      margin: 16px 0;
+    }
+    .score-item {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 8px;
+    }
+    .score-item span {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .score-item strong {
+      font-size: 22px;
+      color: var(--brown);
+      display: block;
+      margin-top: 4px;
+    }
+
+    /* Outcome progress bars */
+    .outcome-item {
+      margin: 10px 0;
+    }
+    .outcome-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .outcome-bar {
+      height: 8px;
+      background: #eedecf;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .outcome-fill {
+      height: 100%;
+      border-radius: inherit;
+    }
+    .fill-green { background: #2e7d32; }
+    .fill-orange { background: #f59e0b; }
+    .fill-red { background: #c62828; }
+
+    /* AI Psychologist Diagnosis Card */
+    .ai-diagnosis-card {
+      background: linear-gradient(145deg, #fffaf5, #f5e7d8);
+      border: 1px solid #ebd4bc;
+      border-radius: 18px;
+      padding: 22px;
+      position: relative;
+    }
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: #7a4f2d;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .faq-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 24px 0 32px;
+    }
+    .faq-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+    .faq-card h4 {
+      margin: 0 0 6px;
+      font: 600 15px Georgia, serif;
+      color: var(--brown);
+    }
+    .faq-card p {
+      margin: 0;
+      font-size: 12.5px;
+      color: #705c4d;
+    }
+
+    .cta-banner {
+      background: linear-gradient(135deg, #493020, #2b180d);
+      color: #fff;
+      border-radius: 20px;
+      padding: 32px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 36px 0;
+      box-shadow: var(--shadow);
+    }
+    .cta-banner h3 {
+      font: 600 24px Georgia, serif;
+      margin: 0 0 6px;
+      color: #fff;
+    }
+    .cta-banner p {
+      margin: 0;
+      font-size: 14px;
+      color: #e5d5c5;
+    }
+
+    .footer {
+      margin-top: 36px;
+      padding: 20px 0 32px;
+      border-top: 1px solid rgba(184,138,40,.2);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .footer strong { font: 600 14px Georgia, serif; color: var(--brown); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; gap: 24px; padding: 32px 0 20px; }
+      .sim-body { grid-template-columns: 1fr; }
+      .sim-optical-area { border-top: 1px solid var(--line); }
+      .flow-stepper { grid-template-columns: repeat(2, 1fr); }
+      .results-grid { grid-template-columns: 1fr; }
+      .faq-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .flow-stepper { grid-template-columns: 1fr; }
+      .score-banner { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body data-home="/" data-breadcrumb="Örnek Sınav Akışı">
+
+  <!-- Topbar -->
+  <header class="wrap topbar">
+    <a class="brand" href="/" aria-label="ZarifÇözüm ana sayfa">
+      <img class="brand-logo" src="../assets/brand-mark.png" alt="ZarifÇözüm">
+      <strong>Zarif<span>Çözüm</span></strong>
+    </a>
+    <div class="crumb">
+      Öğrenme Alanı › <a href="/pages/deneme-sinavi-tanitim.html" style="text-decoration:none">Deneme Sınavı</a> › <b>Örnek Sınav Akışı</b>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div>
+        <span class="eyebrow">CANLI ETKİLEŞİMLİ DENEYİM</span>
+        <h1>Örnek Sınav Akışı ve <em>Canlı Simülatör</em></h1>
+        <p class="lead">Zarif Çözüm Türkiye Geneli Deneme Sınavı'nda öğrenciyi bekleyen tüm adımları keşfedin. Sınava hazırlıktan optik forma, anlık net hesabından AI Deneme Psikoloğu analizine kadar tüm süreci interaktif olarak deneyimleyin.</p>
+        <div class="chips">
+          <span class="chip">🎯 5–12. Sınıf Düzeyleri</span>
+          <span class="chip">⏱️ Geri Sayım & Canlı Optik</span>
+          <span class="chip">📊 MEB Maarif Modeli Kazanımları</span>
+          <span class="chip">🧠 AI Deneme Psikoloğu Teşhisi</span>
+        </div>
+      </div>
+      <div class="hero-art">
+        <div class="art-inner">
+          <div class="art-icon">⏱️</div>
+          <strong>Canlı Sınav Deneyimi</strong>
+          <small>Odaklan · Zamanı Yönet · Eksiklerini Kapat</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 Adımlı Süreç Akış Çizelgesi (Tabs) -->
+    <div class="flow-stepper" role="tablist">
+      <div class="flow-step-tab active" id="tabStep1" onclick="switchStep(1)">
+        <span class="step-num">01. ADIM</span>
+        <span class="step-name">Giriş & Kurallar</span>
+        <span class="step-desc">Sınıf seviyesi, süre ve dikkat edilecek kurallar</span>
+      </div>
+      <div class="flow-step-tab" id="tabStep2" onclick="switchStep(2)">
+        <span class="step-num">02. ADIM</span>
+        <span class="step-name">Canlı Soru & Optik</span>
+        <span class="step-desc">Geri sayım, soru çözümü ve otomatik optik kodlama</span>
+      </div>
+      <div class="flow-step-tab" id="tabStep3" onclick="switchStep(3)">
+        <span class="step-num">03. ADIM</span>
+        <span class="step-name">Karne & Netler</span>
+        <span class="step-desc">Doğru, yanlış, boş ve Türkiye geneli sıralama</span>
+      </div>
+      <div class="flow-step-tab" id="tabStep4" onclick="switchStep(4)">
+        <span class="step-num">04. ADIM</span>
+        <span class="step-name">AI Deneme Psikoloğu</span>
+        <span class="step-desc">Zaman yönetimi, stres analizi ve çalışma haritası</span>
+      </div>
+    </div>
+
+    <!-- Canlı Sınav Simülatörü Kutusu -->
+    <section class="sim-container" id="examSimulatorSection">
+      <div class="sim-header">
+        <div class="sim-header-left">
+          <span class="sim-badge">📋 Türkiye Geneli 9. Sınıf Matematik Denemesi (Örnek)</span>
+          <span class="sim-badge" style="background:rgba(255,255,255,0.08)">Soru 3 / 20</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-size:12px;opacity:0.85">Kalan Süre:</span>
+          <div class="sim-timer" id="simTimer">38:45</div>
+        </div>
+      </div>
+
+      <div class="sim-body">
+        <!-- Sol: Soru Alanı -->
+        <div class="sim-question-area">
+          <div class="question-meta">
+            <div>
+              <span class="question-code">MAT.9.1.1</span>
+              <span style="margin-left:8px">Gerçek Sayılar ve Geometrik Modellemeler</span>
+            </div>
+            <span style="font-weight:600;color:#92400e">Orta Seviye · 5 Puan</span>
+          </div>
+
+          <div class="question-text">
+            Bir kenar uzunluğu \(x\) birim olan kare şeklindeki bir arsanın alanı ile boyutları \((x - 3)\) ve \((x + 5)\) birim olan dikdörtgen şeklindeki komşu arsanın alanı karşılaştırılmaktadır.
+            <br><br>
+            <b>Buna göre, kare arsanın alanı ile dikdörtgen arsanın alanı arasındaki fark aşağıdakilerden hangisine eşittir?</b>
+          </div>
+
+          <!-- Geometrik Şema Görseli (SVG) -->
+          <div class="question-diagram">
+            <svg viewBox="0 0 460 140" style="max-width:100%;height:130px">
+              <!-- Kare -->
+              <rect x="30" y="20" width="100" height="100" rx="4" fill="#fdf6ec" stroke="#b88a28" stroke-width="2"/>
+              <text x="80" y="75" text-anchor="middle" font-family="Georgia" font-size="16" fill="#493020">Alan = x²</text>
+              <text x="80" y="15" text-anchor="middle" font-size="13" font-weight="600" fill="#715b49">x birim</text>
+              <text x="18" y="75" text-anchor="middle" font-size="13" font-weight="600" fill="#715b49">x</text>
+
+              <!-- Karşılaştırma oku -->
+              <text x="175" y="75" text-anchor="middle" font-size="20" fill="#b88a28">→</text>
+
+              <!-- Dikdörtgen -->
+              <rect x="220" y="30" width="180" height="80" rx="4" fill="#f2f8f4" stroke="#2e7d32" stroke-width="2"/>
+              <text x="310" y="75" text-anchor="middle" font-family="Georgia" font-size="15" fill="#1b4d20">Alan = (x - 3)(x + 5)</text>
+              <text x="310" y="22" text-anchor="middle" font-size="13" font-weight="600" fill="#2e7d32">(x + 5) birim</text>
+              <text x="425" y="75" text-anchor="middle" font-size="13" font-weight="600" fill="#2e7d32">(x - 3)</text>
+            </svg>
+          </div>
+
+          <!-- Şıklar -->
+          <div class="options-grid">
+            <button class="option-btn" type="button" onclick="selectOption('A')">
+              <span class="option-key">A</span>
+              <span>\(2x - 15\)</span>
+            </button>
+            <button class="option-btn selected" type="button" onclick="selectOption('B')" id="btnOptB">
+              <span class="option-key">B</span>
+              <span>\(15 - 2x\)</span>
+            </button>
+            <button class="option-btn" type="button" onclick="selectOption('C')">
+              <span class="option-key">C</span>
+              <span>\(x + 15\)</span>
+            </button>
+            <button class="option-btn" type="button" onclick="selectOption('D')">
+              <span class="option-key">D</span>
+              <span>\(15\)</span>
+            </button>
+            <button class="option-btn" type="button" onclick="selectOption('E')">
+              <span class="option-key">E</span>
+              <span>\(2x^2 - 15\)</span>
+            </button>
+          </div>
+
+          <!-- AI İpucu Balonu -->
+          <div class="ai-hint-box" id="aiHintBox">
+            💡 <b>AI Mentör İpucu:</b> Karenin alanı \(x^2\), dikdörtgenin alanı ise \((x-3)(x+5) = x^2 + 2x - 15\) birimkaredir. İki alanın farkını alırken: \(x^2 - (x^2 + 2x - 15) = x^2 - x^2 - 2x + 15 = 15 - 2x\) formuna ulaşabilirsin.
+          </div>
+
+          <!-- Soru Alt Butonları -->
+          <div class="question-actions">
+            <div style="display:flex;gap:8px">
+              <button class="btn secondary" type="button" onclick="alert('Örnek sınav simülatöründe 3. soru görüntülenmektedir.')">← Önceki Soru</button>
+              <button class="btn secondary" type="button" onclick="toggleHint()">💡 AI İpucu Al</button>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn secondary" type="button" onclick="alert('3. soru işaretlendi; sonraki soruya geçildi.')">Sonraki Soru →</button>
+              <button class="btn gold" type="button" onclick="finishSimulation()">✓ Sınavı Tamamla</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sağ: Optik Form Simülatörü -->
+        <aside class="sim-optical-area">
+          <div class="optical-title">
+            <span>Optik Form</span>
+            <span style="font-size:11px;color:var(--gold);font-weight:700">CANLI KODLAMA</span>
+          </div>
+          <p class="optical-sub">Cevap şıkkına tıkladığınızda optik forma anında işaretlenir.</p>
+
+          <div class="optical-grid">
+            <!-- 1. Soru -->
+            <div class="optical-row">
+              <span class="optical-num">1</span>
+              <div class="optical-bubbles">
+                <span class="optical-bubble filled">A</span>
+                <span class="optical-bubble">B</span>
+                <span class="optical-bubble">C</span>
+                <span class="optical-bubble">D</span>
+                <span class="optical-bubble">E</span>
+              </div>
+            </div>
+            <!-- 2. Soru -->
+            <div class="optical-row">
+              <span class="optical-num">2</span>
+              <div class="optical-bubbles">
+                <span class="optical-bubble">A</span>
+                <span class="optical-bubble">B</span>
+                <span class="optical-bubble filled">C</span>
+                <span class="optical-bubble">D</span>
+                <span class="optical-bubble">E</span>
+              </div>
+            </div>
+            <!-- 3. Soru (Aktif) -->
+            <div class="optical-row current">
+              <span class="optical-num" style="color:var(--gold)">3</span>
+              <div class="optical-bubbles">
+                <span class="optical-bubble" id="optBubbleA">A</span>
+                <span class="optical-bubble filled" id="optBubbleB">B</span>
+                <span class="optical-bubble" id="optBubbleC">C</span>
+                <span class="optical-bubble" id="optBubbleD">D</span>
+                <span class="optical-bubble" id="optBubbleE">E</span>
+              </div>
+            </div>
+            <!-- 4-10 sorular -->
+            <div class="optical-row"><span class="optical-num">4</span><div class="optical-bubbles"><span class="optical-bubble">A</span><span class="optical-bubble">B</span><span class="optical-bubble">C</span><span class="optical-bubble filled">D</span><span class="optical-bubble">E</span></div></div>
+            <div class="optical-row"><span class="optical-num">5</span><div class="optical-bubbles"><span class="optical-bubble">A</span><span class="optical-bubble">B</span><span class="optical-bubble">C</span><span class="optical-bubble">D</span><span class="optical-bubble">E</span></div></div>
+            <div class="optical-row"><span class="optical-num">6</span><div class="optical-bubbles"><span class="optical-bubble filled">A</span><span class="optical-bubble">B</span><span class="optical-bubble">C</span><span class="optical-bubble">D</span><span class="optical-bubble">E</span></div></div>
+            <div class="optical-row"><span class="optical-num">7</span><div class="optical-bubbles"><span class="optical-bubble">A</span><span class="optical-bubble filled">B</span><span class="optical-bubble">C</span><span class="optical-bubble">D</span><span class="optical-bubble">E</span></div></div>
+            <div class="optical-row"><span class="optical-num">8</span><div class="optical-bubbles"><span class="optical-bubble">A</span><span class="optical-bubble">B</span><span class="optical-bubble">C</span><span class="optical-bubble">D</span><span class="optical-bubble">E</span></div></div>
+            <div class="optical-row"><span class="optical-num">9</span><div class="optical-bubbles"><span class="optical-bubble">A</span><span class="optical-bubble">B</span><span class="optical-bubble filled">C</span><span class="optical-bubble">D</span><span class="optical-bubble">E</span></div></div>
+            <div class="optical-row"><span class="optical-num">10</span><div class="optical-bubbles"><span class="optical-bubble">A</span><span class="optical-bubble">B</span><span class="optical-bubble">C</span><span class="optical-bubble">D</span><span class="optical-bubble">E</span></div></div>
+          </div>
+
+          <div class="optical-legend">
+            <span>● İşaretli: 5 Soru</span>
+            <span>○ Boş: 15 Soru</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Sınav Sonucu ve Karne Analizi Önizlemesi -->
+    <section class="section" id="resultsSection">
+      <div style="margin-bottom:18px">
+        <span class="tag">03 & 04. ADIM ÖNİZLEMESİ</span>
+        <h2 style="font:600 26px Georgia,serif;margin:6px 0 4px">Sınav Bittiğinde Öğrenciyi Ne Bekler?</h2>
+        <p style="color:var(--muted);font-size:14px;margin:0">Sadece bir net puanı değil; konu kazanımları ve psikolojik sınav analizi içeren kapsamlı bir dijital karne oluşturulur.</p>
+      </div>
+
+      <div class="results-grid">
+        <!-- 1. Puan & Sıralama Karnesi -->
+        <article class="card">
+          <span class="tag">DİJİTAL KARNE ÖRNEĞİ</span>
+          <h3>Puan & Başarı Karnesi</h3>
+          <p>Öğrencinin anlık net hesabı ve katılan öğrenciler arasındaki tahmini başarı yüzdesi hesaplanır.</p>
+
+          <div class="score-banner">
+            <div class="score-item"><span>Doğru</span><strong style="color:#2e7d32">17</strong></div>
+            <div class="score-item"><span>Yanlış</span><strong style="color:#c62828">2</strong></div>
+            <div class="score-item"><span>Boş</span><strong style="color:#b45309">1</strong></div>
+            <div class="score-item"><span>Net Puan</span><strong style="color:#b88a28">16.50</strong></div>
+          </div>
+
+          <div style="background:#fcf8f2;border:1px solid #ebd9c8;border-radius:12px;padding:14px;margin-top:12px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px">
+              <span>Türkiye Geneli Yüzdelik Dilim</span>
+              <span style="color:#b88a28">% 4.2 (İlk 1.500)</span>
+            </div>
+            <div class="outcome-bar"><div class="outcome-fill fill-green" style="width:95%"></div></div>
+            <small style="display:block;margin-top:6px;color:var(--muted);font-size:11px">Toplam katılım sağlayan 34.200 öğrenci verisine göre hesaplanmıştır.</small>
+          </div>
+
+          <h4 style="margin:20px 0 10px;font-size:14px">Kazanım Başarı Durumu</h4>
+          <div class="outcome-item">
+            <div class="outcome-header"><span>Gerçek Sayılar (MAT.9.1.1)</span><span style="font-weight:700;color:#2e7d32">%100 Başarı</span></div>
+            <div class="outcome-bar"><div class="outcome-fill fill-green" style="width:100%"></div></div>
+          </div>
+          <div class="outcome-item">
+            <div class="outcome-header"><span>Fonksiyonlar ve Değişim (MAT.9.2.1)</span><span style="font-weight:700;color:#f59e0b">%80 Başarı</span></div>
+            <div class="outcome-bar"><div class="outcome-fill fill-orange" style="width:80%"></div></div>
+          </div>
+          <div class="outcome-item">
+            <div class="outcome-header"><span>Üçgenlerde Eşlik ve Benzerlik (MAT.9.4.1)</span><span style="font-weight:700;color:#c62828">%40 - Tekrar Önerilir</span></div>
+            <div class="outcome-bar"><div class="outcome-fill fill-red" style="width:40%"></div></div>
+          </div>
+        </article>
+
+        <!-- 2. AI Deneme Psikoloğu & Koç Raporu -->
+        <article class="ai-diagnosis-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span class="ai-badge">✨ YAPAY ZEKÂ ANALİZİ</span>
+            <small style="color:var(--muted);font-weight:600">Model: Deneme Psikoloğu v2.4</small>
+          </div>
+          <h3 style="margin-top:4px">Yapay Zekâ Koçluk & Stres Teşhisi</h3>
+          <p style="font-size:13.5px;color:#5a3f29">Sınav esnasındaki süre kullanımı, tereddüt edilen sorular ve işlem hataları yapay zekâ tarafından analiz edilir.</p>
+
+          <div style="background:#fff;border:1px solid #ead6c2;border-radius:12px;padding:16px;margin:16px 0">
+            <h4 style="margin:0 0 8px;font-size:13.5px;color:#7a4f2d">🧠 Odaklanma & Süre Yönetimi Analizi</h4>
+            <p style="margin:0;font-size:12.5px;color:#674e3b;line-height:1.55">
+              "İlk 12 soruyu ortalama 1.4 dakikada çözerek yüksek bir dikkat performansı sergiledin. Ancak 15. Geometri sorusunda 4 dakika harcayarak sonraki sorulara geçerken hafif bir zaman kaygısı yaşadın. Geometri sorularında formül eksikliğin yok; sadece parantez eksi işaretini dağıtırken dikkatsizlik yapılmış."
+            </p>
+          </div>
+
+          <div style="background:#fff;border:1px solid #ead6c2;border-radius:12px;padding:16px">
+            <h4 style="margin:0 0 8px;font-size:13.5px;color:#7a4f2d">🎯 Kişiye Özel 3 Günlük İyileştirme Planı</h4>
+            <ul style="margin:0;padding-left:18px;font-size:12.5px;color:#674e3b;line-height:1.6">
+              <li><b>1. Gün:</b> Eşlik ve Benzerlik konusundaki 10 dakikalık özet videoyu incele.</li>
+              <li><b>2. Gün:</b> AI Soru Çözüm Asistanı ile benzer 4 geometri sorusu çöz.</li>
+              <li><b>3. Gün:</b> 15 soruluk mini pekiştirme testini tamamlayarak eksiklerini kapat.</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Sıkça Sorulan Sorular -->
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>Sıkça Sorulan Sorular</h2>
+          <p>Online deneme sınavı oturumları ve değerlendirme hakkında merak edilenler.</p>
+        </div>
+      </div>
+      <div class="faq-grid">
+        <div class="faq-card">
+          <h4>Deneme sınavı esnasında internet koparsa ne olur?</h4>
+          <p>Optik forma işaretlediğiniz her şık anlık olarak sunucuya kaydedilir. İnternetiniz geri geldiğinde kaldığınız sorudan ve kalan sürenizden devam edebilirsiniz.</p>
+        </div>
+        <div class="faq-card">
+          <h4>Sınav sonuçları ne zaman açıklanır?</h4>
+          <p>Sınav süreniz biter bitmez anlık karne oluşturulur. Türkiye geneli kesin sıralama ise sınav takvimi tamamlandıktan sonra açıklanır.</p>
+        </div>
+        <div class="faq-card">
+          <h4>Öğretmenim veya velim sonuçlarımı görebilir mi?</h4>
+          <p>Evet, öğrenci hesabınıza bağlı veliniz ve sınıf öğretmeniniz, detaylı karneye ve yapay zekâ analiz raporuna kendi panellerinden ulaşabilir.</p>
+        </div>
+        <div class="faq-card">
+          <h4>Sınava cep telefonundan veya tabletten katılabilir miyim?</h4>
+          <p>Zarif Çözüm deneme sınavı arayüzü telefon, tablet ve bilgisayar ekranlarıyla %100 uyumludur; dokunmatik ekranda kolayca çözülebilir.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Banner -->
+    <section class="cta-banner">
+      <div>
+        <h3>Kendini Türkiye Geneli Sınavda Dene!</h3>
+        <p>Hemen ücretsiz üye ol, seviyene uygun örnek soruları çöz ve gelişim yolculuğuna başla.</p>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a class="btn secondary" href="/pages/deneme-sinavi-tanitim.html">← Tanıtım Sayfasına Dön</a>
+        <a class="btn gold" href="/kayit-giris.html">Ücretsiz Kayıt Ol & Sınava Katıl →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <div><strong>Zarif Çözüm</strong><br>Her adımda daha güçlü öğrenme.</div>
+    <a href="#top" style="color:var(--gold);font-weight:600">Başa dön ↑</a>
+  </footer>
+
+  <script>
+    // Tab geçişi
+    function switchStep(step) {
+      document.querySelectorAll('.flow-step-tab').forEach((t, i) => {
+        if (i + 1 === step) t.classList.add('active');
+        else t.classList.remove('active');
+      });
+      if (step === 1 || step === 2) {
+        document.getElementById('examSimulatorSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    // Şık seçimi ve optik form senkronizasyonu
+    function selectOption(key) {
+      document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+
+      // 3. sorunun optik balonunu güncelle
+      ['A', 'B', 'C', 'D', 'E'].forEach(k => {
+        const bubble = document.getElementById('optBubble' + k);
+        if (bubble) {
+          if (k === key) bubble.classList.add('filled');
+          else bubble.classList.remove('filled');
+        }
+      });
+    }
+
+    // AI İpucu açıp kapatma
+    function toggleHint() {
+      const box = document.getElementById('aiHintBox');
+      if (box.classList.contains('show')) {
+        box.classList.remove('show');
+      } else {
+        box.classList.add('show');
+      }
+    }
+
+    // Sınav Tamamlama butonu simülasyonu
+    function finishSimulation() {
+      alert('Tebrikler! Örnek sınav simülasyonunu tamamladınız. Aşağıdaki karne ve AI Deneme Psikoloğu analizini inceleyebilirsiniz.');
+      switchStep(3);
+    }
+
+    // Sayaç simülasyonu
+    let secondsLeft = 38 * 60 + 45;
+    setInterval(() => {
+      if (secondsLeft > 0) {
+        secondsLeft--;
+        const mins = Math.floor(secondsLeft / 60);
+        const secs = secondsLeft % 60;
+        const timerEl = document.getElementById('simTimer');
+        if (timerEl) timerEl.textContent = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+      }
+    }, 1000);
+  </script>
+  <script src="../assets/breadcrumb.js"></script>
+  <script src="/assets/site-media-targets.js"></script>
+  <script src="/assets/site-media.js"></script>
+</body>
+</html>

@@ -26,6 +26,7 @@
     {path: '/pages/asistanla-soru-coz-tanitim.html', label: 'Asistanla Soru Çöz Tanıtımı'},
     {path: '/pages/cozumlu-sorular-tanitim.html', label: 'Çözümlü Sorular Tanıtımı'},
     {path: '/pages/deneme-sinavi-tanitim.html', label: 'Deneme Sınavı Tanıtımı'},
+    {path: '/pages/ornek-sinav-akisi.html', label: 'Örnek Sınav Akışı'},
     {path: '/pages/ilerlemeni-takip-et-tanitim.html', label: 'İlerlemeni Takip Et Tanıtımı'},
     {path: '/pages/konu_anlatimlari.html', label: 'Konu Anlatımları Tanıtımı'},
     {path: '/pages/konulari-kesfet-tanitim.html', label: 'Konuları Keşfet Tanıtımı'},

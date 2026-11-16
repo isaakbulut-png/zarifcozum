@@ -39,43 +39,115 @@ button,select{font:inherit}
 .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
 #menu-toggle{position:absolute;opacity:0;pointer-events:none}
 
-/* ---------- Sol menü ---------- */
+/* ---------- Sol menü (Öğrenci Paneli) ---------- */
 .sidebar{
-  background:var(--navy-900);color:#fff;
+  background:linear-gradient(180deg, #3d2414 0%, #29170a 100%);color:#fff;
   display:flex;flex-direction:column;
-  padding:22px 14px;position:sticky;top:0;height:100vh;overflow-y:auto;overscroll-behavior:contain;
-  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.25) transparent;
+  padding:20px 14px;position:sticky;top:0;height:100vh;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent;
+  box-shadow:2px 0 16px rgba(0,0,0,0.12);
 }
+.sidebar::-webkit-scrollbar{width:5px}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:99px}
 .sidebar > *{flex-shrink:0}
-.sidebar .brand{padding:0 10px 16px}
-.brand{display:flex;align-items:center;gap:12px;padding:0 10px 28px}
-.brand-logo{width:42px;height:42px;flex:none;object-fit:contain;border-radius:10px}
+.sidebar .brand{display:flex;align-items:center;gap:12px;padding:0 6px 14px}
+.brand-logo{width:42px;height:42px;flex:none;object-fit:contain;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.2)}
 .brand-mark{
   width:42px;height:42px;border-radius:12px;background:var(--orange);
   display:grid;place-items:center;font-family:var(--head);font-weight:700;font-size:1.25rem;color:#fff;
 }
-.brand-name{font-family:var(--head);font-weight:600;font-size:1rem;line-height:1.25}
+.brand-name{font-family:var(--head);font-weight:700;font-size:1.05rem;line-height:1.2;color:#fff}
 .brand-name small{display:block;font-family:var(--body);font-weight:400;font-size:.75rem;color:#d5cdc6}
-
-.nav{display:flex;flex-direction:column;gap:2px;list-style:none;margin:0;padding:0}
-.nav a{
-  display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:10px;
-  color:#e3dcd6;font-weight:500;font-size:.9rem;
-  border-left:3px solid transparent;transition:background .2s,color .2s;
+.student-badge{
+  display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:2px 8px;border-radius:999px;
+  background:rgba(249,115,22,0.2);border:1px solid rgba(249,115,22,0.35);color:#fb923c;
+  font-family:var(--body);font-size:.72rem;font-weight:600;letter-spacing:.02em;
 }
-.nav a:hover{background:var(--navy-800);color:#fff}
-.nav a[aria-current="page"]{background:var(--navy-700);color:#fff;border-left-color:var(--orange)}
-.nav a.gz-cta{background:var(--orange);color:#fff;font-weight:700;padding:12px;margin-bottom:10px;box-shadow:0 4px 14px rgba(0,0,0,.25);justify-content:center;text-align:center}
-.nav a.gz-cta:hover{background:var(--orange-dark)}
-.nav svg{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.live-dot{margin-left:auto;font-size:.7rem;font-weight:600;background:var(--orange);color:#fff;padding:2px 8px;border-radius:999px}
-.home-link{display:block;margin:0 0 18px;padding:10px 12px;border:1px solid var(--navy-700);border-radius:9px;color:#fff;font-size:.9rem;font-weight:600}
-.home-link:hover{border-color:var(--orange);background:var(--navy-800)}
 
-.side-footer{margin-top:auto;padding:16px 12px;border-top:1px solid var(--navy-700);display:flex;align-items:center;gap:12px}
-.avatar{width:38px;height:38px;border-radius:50%;background:var(--navy-700);border:2px solid var(--orange);display:grid;place-items:center;font-weight:600;font-size:.85rem}
-.side-footer p{font-size:.85rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
-.side-footer small{color:#d5cdc6;font-weight:400}
+.home-link{
+  display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:8px 12px;
+  border:1px solid rgba(255,255,255,0.12);border-radius:10px;background:rgba(255,255,255,0.04);
+  color:#e5ded8;font-size:.84rem;font-weight:600;text-decoration:none;transition:all .18s ease;
+}
+.home-link:hover{
+  border-color:rgba(249,115,22,0.5);background:rgba(255,255,255,0.09);color:#fff;transform:translateX(2px);
+}
+.home-link svg{width:17px;height:17px;flex-shrink:0;stroke:#fb923c;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* AI Mentör CTA - Öğrencilere Hitap Eden Canlı Kart */
+.nav a.gz-cta{
+  display:flex;align-items:center;gap:11px;padding:12px 14px;margin:0 0 14px;
+  border-radius:12px;background:linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  color:#fff;text-decoration:none;box-shadow:0 6px 18px rgba(124,58,237,0.35);
+  border:1px solid rgba(255,255,255,0.25);position:relative;overflow:hidden;transition:all .22s ease;
+}
+.nav a.gz-cta::before{
+  content:'';position:absolute;top:-50%;right:-50%;width:100%;height:200%;
+  background:radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 60%);pointer-events:none;
+}
+.nav a.gz-cta:hover{
+  background:linear-gradient(135deg, #6d28d9 0%, #4338ca 100%);transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(124,58,237,0.5);border-color:rgba(255,255,255,0.4);
+}
+.nav a.gz-cta .gz-cta-sparkle{
+  width:32px;height:32px;flex-shrink:0;border-radius:9px;background:rgba(255,255,255,0.2);
+  display:grid;place-items:center;
+}
+.nav a.gz-cta .gz-cta-sparkle svg{
+  width:19px;height:19px;fill:none;stroke:#fff;stroke-width:2;filter:drop-shadow(0 0 4px rgba(255,255,255,0.6));
+}
+.nav a.gz-cta .gz-cta-content{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.nav a.gz-cta strong{font-family:var(--head);font-size:.88rem;font-weight:700;color:#fff;line-height:1.2}
+.nav a.gz-cta small{font-size:.72rem;color:rgba(255,255,255,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav a.gz-cta .gz-cta-arrow{font-size:1rem;font-weight:700;color:rgba(255,255,255,0.8);transition:transform .2s ease}
+.nav a.gz-cta:hover .gz-cta-arrow{transform:translateX(3px);color:#fff}
+
+/* Navigasyon Listesi ve Kategoriler */
+.nav{display:flex;flex-direction:column;gap:3px;list-style:none;margin:0;padding:0}
+.gz-side-label{
+  display:flex;align-items:center;gap:6px;margin:16px 8px 6px;
+  font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#b7aba0;font-weight:700;list-style:none;
+}
+.gz-label-dot{width:5px;height:5px;border-radius:50%;background:#f97316;opacity:.85}
+
+.nav a{
+  display:flex;align-items:center;gap:11px;padding:8px 11px;border-radius:10px;
+  color:#e5ded8;font-weight:500;font-size:.87rem;line-height:1.3;text-decoration:none;
+  border-left:3px solid transparent;transition:all .18s ease;
+}
+.nav a:hover{
+  background:rgba(255,255,255,0.08);color:#fff;transform:translateX(2px);
+}
+.nav a[aria-current="page"]{
+  background:linear-gradient(135deg, rgba(249,115,22,0.28), rgba(122,79,45,0.45));
+  color:#fff;font-weight:600;border-left-color:#f97316;box-shadow:0 4px 12px rgba(0,0,0,0.18);
+}
+.nav a > svg{
+  width:19px;height:19px;flex-shrink:0;fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;transition:transform .18s ease, filter .18s ease;
+}
+.nav a:hover > svg{transform:scale(1.14)}
+.nav-text{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-dot{
+  margin-left:auto;font-size:.68rem;font-weight:700;background:#ef4444;color:#fff;
+  padding:2px 7px;border-radius:999px;letter-spacing:.04em;animation:pulse-dot 1.8s infinite;
+}
+@keyframes pulse-dot{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.85;transform:scale(1.06)}
+}
+
+/* Alt Profil & Butonlar */
+.side-footer{
+  margin-top:auto;padding:14px 10px;border-top:1px solid rgba(255,255,255,0.1);
+  display:flex;align-items:center;gap:12px;
+}
+.avatar{
+  width:38px;height:38px;border-radius:50%;background:#523520;border:2px solid #f97316;
+  display:grid;place-items:center;font-weight:700;font-size:.9rem;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+.side-footer p{font-size:.84rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.side-footer small{color:#b7aba0;font-weight:400;font-size:.74rem}
 
 /* ---------- Üst çubuk (mobil) ---------- */
 .topbar{display:none}
@@ -107,11 +179,20 @@ button,select{font:inherit}
 .date-box b{display:block;padding:7px 0;font-size:1.15rem;color:var(--navy-900)}
 .date small{color:var(--muted);font-size:.8rem;line-height:1.3}
 .btn-join{
-  background:var(--orange);color:#fff;border:0;border-radius:8px;padding:9px 14px;
-  font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;transition:background .2s;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  background:linear-gradient(135deg, #8a5732 0%, #6b4427 100%);color:#fff;border:0;border-radius:9px;padding:9px 15px;
+  font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;box-shadow:0 3px 10px rgba(74,46,26,.18);transition:all .18s ease;
 }
-.btn-join:hover{background:var(--orange-dark)}
-.btn-join:disabled{cursor:not-allowed;opacity:.65}
+.btn-join svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.btn-join:hover{background:linear-gradient(135deg, #9d643b 0%, #7d4f2e 100%);transform:translateY(-1px);box-shadow:0 5px 14px rgba(74,46,26,.26)}
+.btn-join:disabled{cursor:not-allowed;opacity:.65;transform:none;box-shadow:none}
+.gz-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  background:linear-gradient(135deg, #8a5732 0%, #6b4427 100%);color:#fff;border:0;border-radius:9px;padding:9px 15px;
+  font-weight:600;font-size:.85rem;cursor:pointer;white-space:nowrap;box-shadow:0 3px 10px rgba(74,46,26,.18);transition:all .18s ease;
+}
+.gz-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.gz-btn:hover{background:linear-gradient(135deg, #9d643b 0%, #7d4f2e 100%);transform:translateY(-1px);box-shadow:0 5px 14px rgba(74,46,26,.26)}
 .exam h3{font-family:var(--head);font-size:1.05rem;color:var(--navy-900);font-weight:600}
 .exam p{color:var(--muted);font-size:.9rem;margin-top:2px}
 .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
@@ -147,8 +228,15 @@ button,select{font:inherit}
 .feed-card.is-live{border-color:var(--orange);box-shadow:0 6px 20px rgba(125, 90, 60,.12)}
 .feed-card .btn-join{display:inline-block;margin-top:8px}
 .panel-view[hidden]{display:none!important}
-.logout-button{width:100%;margin-top:12px;padding:9px 12px;border:1px solid #74665a;border-radius:8px;background:transparent;color:#fff;text-align:left;font-weight:600}
-.logout-button:hover{border-color:var(--orange);color:#e8c987}
+.logout-button{
+  width:100%;margin-top:8px;padding:8px 12px;border:1px solid rgba(255,255,255,0.14);border-radius:9px;
+  background:rgba(255,255,255,0.04);color:#e5ded8;display:flex;align-items:center;gap:9px;
+  font-weight:600;font-size:.82rem;cursor:pointer;transition:all .18s ease;
+}
+.logout-button svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logout-button:hover{background:rgba(255,255,255,0.1);border-color:rgba(249,115,22,0.5);color:#fff;transform:translateX(2px)}
+.logout-button.danger{color:#fca5a5;border-color:rgba(239,68,68,0.25)}
+.logout-button.danger:hover{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.45);color:#fee2e2}
 .password-dialog{width:min(calc(100% - 32px),440px);padding:24px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);box-shadow:0 20px 60px rgba(49,36,24,.25)}
 .password-dialog::backdrop{background:rgba(16,30,42,.55)}
 .password-dialog h2{margin-bottom:6px;color:var(--navy-900);font-family:var(--head)}
@@ -234,53 +322,89 @@ button,select{font:inherit}
   <!-- Sol menü -->
   <aside class="sidebar">
     <div class="brand">
-      <img class="brand-logo" src="assets/brand-mark.png" alt="">
-      <div class="brand-name">ZarifÇözüm<small>Öğrenci Paneli</small></div>
+      <img class="brand-logo" src="assets/brand-mark.png" alt="ZarifÇözüm">
+      <div>
+        <div class="brand-name">ZarifÇözüm</div>
+        <span class="student-badge">✨ Öğrenci Başarı Alanı</span>
+      </div>
     </div>
-    <a class="home-link" href="index.html">← Ana Sayfaya Dön</a>
+    <a class="home-link" href="index.html">
+      <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      <span>Ana Sayfaya Dön</span>
+    </a>
 
     <nav aria-label="Ana menü">
       <ul class="nav">
-        <li><a class="gz-cta" href="asistan.html">🤖 AI Mentör ile Serbest Sohbet</a></li>
-        <li class="gz-side-label">Gelişim merkezi</li>
+        <li>
+          <a class="gz-cta" href="asistan.html" title="AI Mentör ile Serbest Sohbet">
+            <div class="gz-cta-sparkle">
+              <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM9 13a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
+            </div>
+            <div class="gz-cta-content">
+              <strong>AI Mentör İle Sohbet</strong>
+              <small>7/24 Soru &amp; Konu Asistanı</small>
+            </div>
+            <span class="gz-cta-arrow">→</span>
+          </a>
+        </li>
+        <li class="gz-side-label"><span class="gz-label-dot"></span> Gelişim merkezi</li>
         <li><a href="#genel-durum">
-          <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
-          Genel Durum</a></li>
+          <svg viewBox="0 0 24 24" style="stroke:#38bdf8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+          <span class="nav-text">Genel Durum</span></a></li>
         <li><a href="#kazanim-takibi">
-          <svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m8 15 3-4 3 2 5-6"/></svg>
-          Konu ve Kazanım</a></li>
+          <svg viewBox="0 0 24 24" style="stroke:#34d399"><path d="M4 19V5"/><path d="M4 19h16"/><path d="m8 15 3-4 3 2 5-6"/></svg>
+          <span class="nav-text">Konu ve Kazanım</span></a></li>
         <li><a href="#student-tasks">
-          <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h9"/></svg>
-          Ödevlerim</a></li>
+          <svg viewBox="0 0 24 24" style="stroke:#fbbf24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h9"/></svg>
+          <span class="nav-text">Ödevlerim</span></a></li>
         <li><a href="#testlerim">
-          <svg viewBox="0 0 24 24"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M8 6H6a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2"/></svg>
-          Sınav ve Testlerim</a></li>
+          <svg viewBox="0 0 24 24" style="stroke:#a78bfa"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M8 6H6a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2"/></svg>
+          <span class="nav-text">Sınav ve Testlerim</span></a></li>
         <li><a href="#ders-takvimim">
-          <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
-          Ders Takvimim</a></li>
+          <svg viewBox="0 0 24 24" style="stroke:#f472b6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+          <span class="nav-text">Ders Takvimim</span></a></li>
         <li><a href="#basari-raporlarim">
-          <svg viewBox="0 0 24 24"><path d="M5 21V10M12 21V4M19 21v-8"/></svg>
-          Başarı Raporlarım</a></li>
-        <li class="gz-side-label">Çalışma merkezi</li>
-        <li><a href="#konu-anlatimlari">Konu Anlatımları</a></li>
-        <li><a href="#test-coz">Test Çöz</a></li>
-        <li><a href="#kazanim-testi">Kazanım Testi</a></li>
-        <li><a href="asistanla-soru-coz.html">Asistanla Soru Çöz</a></li>
-        <li class="gz-side-label">Dersler ve içerik</li>
+          <svg viewBox="0 0 24 24" style="stroke:#2dd4bf"><path d="M5 21V10M12 21V4M19 21v-8"/></svg>
+          <span class="nav-text">Başarı Raporlarım</span></a></li>
+        <li class="gz-side-label"><span class="gz-label-dot" style="background:#fb923c"></span> Çalışma merkezi</li>
+        <li><a href="#konu-anlatimlari">
+          <svg viewBox="0 0 24 24" style="stroke:#fb923c"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg>
+          <span class="nav-text">Konu Anlatımları</span></a></li>
+        <li><a href="#test-coz">
+          <svg viewBox="0 0 24 24" style="stroke:#4ade80"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <span class="nav-text">Test Çöz</span></a></li>
+        <li><a href="#kazanim-testi">
+          <svg viewBox="0 0 24 24" style="stroke:#f87171"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          <span class="nav-text">Kazanım Testi</span></a></li>
+        <li><a href="asistanla-soru-coz.html">
+          <svg viewBox="0 0 24 24" style="stroke:#c084fc"><path d="m12 3 1.9 5.8a2 2 0 0 1 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 1-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 1-1.3-1.3L3 12l5.8-1.9a2 2 0 0 1 1.3-1.3z"/></svg>
+          <span class="nav-text">Asistanla Soru Çöz</span></a></li>
+        <li class="gz-side-label"><span class="gz-label-dot" style="background:#ef4444"></span> Dersler ve içerik</li>
         <li><a href="#live-lessons">
-          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          Canlı Ders</a></li>
-        <li><a href="#schedule">Ders Programı</a></li>
+          <svg viewBox="0 0 24 24" style="stroke:#ef4444"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          <span class="nav-text">Canlı Ders</span>
+          <span class="live-dot" id="studentLiveDot" hidden>CANLI</span></a></li>
+        <li><a href="#schedule">
+          <svg viewBox="0 0 24 24" style="stroke:#60a5fa"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span class="nav-text">Ders Programı</span></a></li>
         <li><a href="#denemeler">
-          <svg viewBox="0 0 24 24"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M8 6H6a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-2"/><path d="m9 14 2 2 4-4"/></svg>
-          Deneme Sınavları</a></li>
-        <li><a href="#planli-dersler">Planlı Canlı Dersler</a></li>
-        <li><a href="#ogretmen-testleri">Öğretmen Testleri</a></li>
-        <li><a href="#duyurular">Duyurular</a></li>
-        <li><a href="#test-sonuclarim">Test Sonuçlarım</a></li>
+          <svg viewBox="0 0 24 24" style="stroke:#eab308"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
+          <span class="nav-text">Deneme Sınavları</span></a></li>
+        <li><a href="#planli-dersler">
+          <svg viewBox="0 0 24 24" style="stroke:#06b6d4"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          <span class="nav-text">Planlı Canlı Dersler</span></a></li>
+        <li><a href="#ogretmen-testleri">
+          <svg viewBox="0 0 24 24" style="stroke:#818cf8"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          <span class="nav-text">Öğretmen Testleri</span></a></li>
+        <li><a href="#duyurular">
+          <svg viewBox="0 0 24 24" style="stroke:#f97316"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="nav-text">Duyurular</span></a></li>
+        <li><a href="#test-sonuclarim">
+          <svg viewBox="0 0 24 24" style="stroke:#10b981"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <span class="nav-text">Test Sonuçlarım</span></a></li>
         <li><a href="konu.html">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5z"/></svg>
-          Video Dersler</a></li>
+          <svg viewBox="0 0 24 24" style="stroke:#ec4899"><circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+          <span class="nav-text">Video Dersler</span></a></li>
       </ul>
     </nav>
 
@@ -288,8 +412,14 @@ button,select{font:inherit}
       <div class="avatar" id="studentAvatar">Ö</div>
       <p><span id="studentName">Öğrenci</span><br><small id="studentEmail">Hesap bilgileri yükleniyor…</small></p>
     </div>
-    <button class="logout-button" id="changePasswordButton" type="button">Şifre değiştir</button>
-    <button class="logout-button" id="logoutButton" type="button">Çıkış yap</button>
+    <button class="logout-button" id="changePasswordButton" type="button">
+      <svg viewBox="0 0 24 24" style="stroke:#cbd5e1"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>Şifre değiştir</span>
+    </button>
+    <button class="logout-button danger" id="logoutButton" type="button">
+      <svg viewBox="0 0 24 24" style="stroke:#f87171"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span>Çıkış yap</span>
+    </button>
     <p class="feed-status" id="logoutStatus" role="status" aria-live="polite"></p>
   </aside>
 
@@ -318,7 +448,7 @@ button,select{font:inherit}
           <div id="gzWeek"></div>
           <form id="gzGoalForm" class="gz-inline">
             <label>Haftalık hedef (dakika)<input id="gzGoalMinutes" type="number" min="30" max="4200" step="5" required placeholder="Örn. 300"></label>
-            <button class="gz-btn" type="submit">Hedefi kaydet</button>
+            <button class="gz-btn" type="submit"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg><span>Hedefi kaydet</span></button>
           </form>
           <p class="gz-status" id="gzGoalStatus" role="status"></p>
         </article>
@@ -328,7 +458,7 @@ button,select{font:inherit}
             <label>Süre (dakika)<input name="minutes" type="number" min="1" max="600" required placeholder="Örn. 45"></label>
             <label>Konu (isteğe bağlı)<input name="topic" maxlength="200" placeholder="Örn. Bölünebilme kuralları"></label>
             <label>Gün<input name="day" type="date"></label>
-            <button class="gz-btn" type="submit">Kaydet</button>
+            <button class="gz-btn" type="submit"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Kaydet</span></button>
           </form>
           <p class="gz-status" id="gzStudyStatus" role="status"></p>
           <div id="gzLogs"></div>
@@ -367,7 +497,7 @@ button,select{font:inherit}
         <label>Hatırlatıcı<input name="title" maxlength="150" required placeholder="Örn. Kesirler tekrarı"></label>
         <label>Tarih ve saat<input name="startsAt" type="datetime-local" required></label>
         <label>Not<input name="note" maxlength="500"></label>
-        <button class="gz-btn" type="submit">Hatırlatıcı ekle</button>
+        <button class="gz-btn" type="submit"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Hatırlatıcı ekle</span></button>
       </form>
       <p class="gz-status" id="gzReminderStatus" role="status"></p>
       <div id="gzTakvim"></div>
@@ -412,7 +542,7 @@ button,select{font:inherit}
         <form id="studentLinkForm" class="student-link-form">
           <label for="studentInvitationCode">Davet kodu</label>
           <input id="studentInvitationCode" name="invitationCode" maxlength="32" autocomplete="one-time-code" required>
-          <button class="btn-join" type="submit">Profili bağla</button>
+          <button class="btn-join" type="submit"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><span>Profili bağla</span></button>
         </form>
         <p class="feed-status" id="studentLinkStatus" role="status" aria-live="polite"></p>
         <div id="linkedStudentProfiles" class="linked-student-profiles"></div>
@@ -482,8 +612,8 @@ button,select{font:inherit}
     <label for="newPasswordConfirmation">Yeni şifreyi tekrar girin</label>
     <input id="newPasswordConfirmation" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" required>
     <p class="feed-status" id="changePasswordStatus" role="status" aria-live="polite"></p>
-    <button class="btn-join" type="submit">Şifreyi güncelle</button>
-    <button class="logout-button" id="cancelPasswordChange" type="button">Vazgeç</button>
+    <button class="btn-join" type="submit"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Şifreyi güncelle</span></button>
+    <button class="logout-button" id="cancelPasswordChange" type="button"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span>Vazgeç</span></button>
   </form>
 </dialog>
 
@@ -570,6 +700,7 @@ button,select{font:inherit}
     });
 
     function renderLiveLessons(content) {
+      if ($('studentLiveDot')) $('studentLiveDot').hidden = !content.aktifDers;
       const activeLesson = content.aktifDers
         ? `<article class="feed-card is-live">
             <span class="chip hot">CANLI</span>
