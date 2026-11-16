@@ -616,6 +616,10 @@
       <svg viewBox="0 0 24 24" style="stroke:#fbbf24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       <span class="nav-text">Testler ve Quizler</span>
     </button>
+    <button class="nav-btn" type="button" data-view="education-homeworks" data-admin-roles="superadmin,editor">
+      <svg viewBox="0 0 24 24" style="stroke:#fb923c"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span class="nav-text">Öğrenci Ödevleri</span>
+    </button>
     <button class="nav-btn" type="button" data-view="education-exams" data-admin-roles="superadmin,editor">
       <svg viewBox="0 0 24 24" style="stroke:#f87171"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
       <span class="nav-text">Deneme Sınavları</span>
@@ -796,12 +800,34 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Başlık</th><th>Kaynak</th><th>Soru Sayısı</th><th>Durum</th><th>Oluşturulma</th></tr>
+              <tr><th>Başlık</th><th>Kaynak</th><th>Soru Sayısı</th><th>Durum</th><th>Oluşturulma</th><th>İşlemler</th></tr>
             </thead>
             <tbody id="quizzesBody"></tbody>
           </table>
         </div>
         <p class="msg" id="quizzesMsg" role="alert"></p>
+      </div>
+    </section>
+
+    <!-- 5B. ÖĞRENCİ ÖDEVLERİ -->
+    <section id="view-education-homeworks" hidden>
+      <div class="panel" style="margin-top:0">
+        <div class="toolbar" style="justify-content:space-between">
+          <div style="display:flex;gap:10px;align-items:center">
+            <h3>Öğrenci Ödev ve Görev Havuzu</h3>
+          </div>
+          <button class="btn" type="button" id="refreshHomeworksBtn">🔄 Yenile</button>
+        </div>
+        <div class="notice">Öğrencilere tanımlanmış tüm ödevler ve görevler burada listelenir. Test için açılmış ödevleri buradan kalıcı olarak silebilirsiniz.</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Ödev Başlığı</th><th>Tür</th><th>Sınıf</th><th>Öğrenci</th><th>Durum</th><th>Teslim Tarihi</th><th>Oluşturulma</th><th>İşlemler</th></tr>
+            </thead>
+            <tbody id="homeworksBody"></tbody>
+          </table>
+        </div>
+        <p class="msg" id="homeworksMsg" role="alert"></p>
       </div>
     </section>
 
@@ -814,11 +840,11 @@
             ➕ Yeni Deneme Hazırla ↗
           </a>
         </div>
-        <div class="notice">Kurumsal ve genel deneme sınavları, soru sayıları ve yayın durumları.</div>
+        <div class="notice">Kurumsal ve genel deneme sınavları, soru sayıları ve yayın durumları. Test amaçlı denemeleri silebilirsiniz.</div>
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Deneme Başlığı</th><th>Soru Sayısı</th><th>Yayın Durumu</th><th>Oluşturulma</th></tr>
+              <tr><th>Deneme Başlığı</th><th>Soru Sayısı</th><th>Yayın Durumu</th><th>Oluşturulma</th><th>İşlemler</th></tr>
             </thead>
             <tbody id="examsBody"></tbody>
           </table>
@@ -1162,6 +1188,7 @@
         logs: 'Güvenlik ve Kayıtlar',
         'education-lessons': 'Konu Anlatımları',
         'education-quizzes': 'Testler ve Quizler',
+        'education-homeworks': 'Öğrenci Ödevleri & Görevler',
         'education-exams': 'Deneme Sınavları',
         'support-tickets': 'Destek Talepleri',
         'solved-questions': 'Çözümlü Sorular',
@@ -1180,6 +1207,7 @@
         logs: 'Yönetici işlemleri ve sistem güvenlik hareketleri',
         'education-lessons': 'Ders konu anlatımları arşivi',
         'education-quizzes': 'Sistemde yayınlanan ve taslak testler',
+        'education-homeworks': 'Öğrencilere tanımlanan ödevler ve test görevleri',
         'education-exams': 'Genel ve kurumsal deneme sınavları',
         'support-tickets': 'Kullanıcılardan gelen destek talepleri',
         'solved-questions': 'Video ve çözümlü soru arşivi',
@@ -1218,6 +1246,7 @@
         logs: loadLogs,
         'education-lessons': loadLessons,
         'education-quizzes': loadQuizzes,
+        'education-homeworks': loadHomeworks,
         'education-exams': loadExams,
         'support-tickets': loadTickets,
         'solved-questions': () => window.solvedQuestionsAdmin?.load?.(),
@@ -1377,6 +1406,11 @@
             cell(tr, user.expiresAt ? fmtDate(user.expiresAt) : '—');
             cell(tr, fmtDate(user.createdAt));
             const actionCell = cell(tr, '');
+            const actionsWrap = document.createElement('div');
+            actionsWrap.style.display = 'inline-flex';
+            actionsWrap.style.gap = '6px';
+            actionsWrap.style.alignItems = 'center';
+
             if (activeAdminRole === 'superadmin' && user.role === 'student') {
               const packageSelect = document.createElement('select');
               packageSelect.setAttribute('aria-label', `${user.name} paket işlemi`);
@@ -1404,8 +1438,50 @@
                   loadUsers();
                 }
               });
-              actionCell.replaceChildren(packageSelect);
+              actionsWrap.append(packageSelect);
+
+              const clearBtn = document.createElement('button');
+              clearBtn.className = 'btn sm';
+              clearBtn.type = 'button';
+              clearBtn.textContent = '🧹 Test Sıfırla';
+              clearBtn.title = 'Öğrencinin test ödevlerini ve test sonuçlarını sıfırla';
+              clearBtn.addEventListener('click', async () => {
+                if (!confirm(`"${user.name}" adlı öğrencinin tüm test ödevleri ve test sonuçları sıfırlanacaktır. Kullanıcı hesabı silinmeyecektir. Onaylıyor musunuz?`)) return;
+                try {
+                  const res = await api(`/api/admin/users/${encodeURIComponent(user.id)}/clear-test-data`, { method: 'POST' });
+                  $('usersMsg').className = 'msg ok';
+                  $('usersMsg').textContent = res.mesaj || 'Test verileri temizlendi.';
+                  loadUsers();
+                } catch (error) {
+                  $('usersMsg').className = 'msg';
+                  $('usersMsg').textContent = error.message;
+                }
+              });
+              actionsWrap.append(clearBtn);
             }
+
+            if (activeAdminRole === 'superadmin' && user.id !== activeAdminId) {
+              const deleteBtn = document.createElement('button');
+              deleteBtn.className = 'btn danger sm';
+              deleteBtn.type = 'button';
+              deleteBtn.textContent = '🗑️ Sil';
+              deleteBtn.title = 'Kullanıcıyı ve ilişkili tüm test kayıtlarını sistemden tamamen sil';
+              deleteBtn.addEventListener('click', async () => {
+                if (!confirm(`"${user.name}" (${user.email}) kullanıcısı ve bu kullanıcıya ait tüm test/ödev kayıtları kalıcı olarak silinecektir. Emin misiniz?`)) return;
+                try {
+                  const res = await api(`/api/admin/users/${encodeURIComponent(user.id)}`, { method: 'DELETE' });
+                  $('usersMsg').className = 'msg ok';
+                  $('usersMsg').textContent = res.mesaj || 'Kullanıcı başarıyla silindi.';
+                  loadUsers();
+                } catch (error) {
+                  $('usersMsg').className = 'msg';
+                  $('usersMsg').textContent = error.message;
+                }
+              });
+              actionsWrap.append(deleteBtn);
+            }
+
+            actionCell.replaceChildren(actionsWrap);
             return tr;
           }));
         } catch (error) { $('usersMsg').textContent = error.message; }
@@ -1511,7 +1587,7 @@
         $('quizzesMsg').textContent = '';
         try {
           const data = await api('/api/admin/education/quizzes');
-          if (!data.quizzes.length) return emptyRow($('quizzesBody'), 5, 'Henüz oluşturulmuş test yok.');
+          if (!data.quizzes.length) return emptyRow($('quizzesBody'), 6, 'Henüz oluşturulmuş test yok.');
           $('quizzesBody').replaceChildren(...data.quizzes.map(quiz => {
             const row = document.createElement('tr');
             cell(row, quiz.title);
@@ -1519,22 +1595,101 @@
             cell(row, quiz.questionCount);
             cell(row, quiz.published ? 'Yayında' : 'Taslak', quiz.published ? 'ok' : 'warn');
             cell(row, fmtDate(quiz.createdAt));
+            const actCell = cell(row, '');
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn danger sm';
+            delBtn.type = 'button';
+            delBtn.textContent = '🗑️ Sil';
+            delBtn.title = 'Testi ve çözümlerini kalıcı olarak sil';
+            delBtn.addEventListener('click', async () => {
+              if (!confirm(`"${quiz.title}" testini ve bu teste ait tüm kayıtları silmek istediğinize emin misiniz?`)) return;
+              try {
+                const res = await api(`/api/admin/education/quizzes/${encodeURIComponent(quiz.id)}`, { method: 'DELETE' });
+                $('quizzesMsg').className = 'msg ok';
+                $('quizzesMsg').textContent = res.mesaj || 'Test silindi.';
+                loadQuizzes();
+              } catch (error) {
+                $('quizzesMsg').className = 'msg';
+                $('quizzesMsg').textContent = error.message;
+              }
+            });
+            actCell.replaceChildren(delBtn);
             return row;
           }));
         } catch (error) { $('quizzesMsg').textContent = error.message; }
+      }
+
+      async function loadHomeworks() {
+        $('homeworksMsg').textContent = '';
+        try {
+          const data = await api('/api/admin/education/homeworks');
+          if (!data.homeworks.length) return emptyRow($('homeworksBody'), 8, 'Henüz atanmış ödev veya görev bulunmuyor.');
+          $('homeworksBody').replaceChildren(...data.homeworks.map(hw => {
+            const row = document.createElement('tr');
+            cell(row, hw.title);
+            cell(row, hw.type || 'Ödev');
+            cell(row, hw.grade && hw.grade !== '—' ? `${hw.grade}. sınıf` : '—');
+            cell(row, hw.studentName || '—');
+            cell(row, hw.status || 'Atandı', ['Kontrol edildi', 'Teslim edildi'].includes(hw.status) ? 'ok' : 'warn');
+            cell(row, hw.dueAt ? fmtDate(hw.dueAt) : '—');
+            cell(row, fmtDate(hw.createdAt));
+            const actCell = cell(row, '');
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn danger sm';
+            delBtn.type = 'button';
+            delBtn.textContent = '🗑️ Sil';
+            delBtn.title = 'Ödevi ve atamasını sil';
+            delBtn.addEventListener('click', async () => {
+              if (!confirm(`"${hw.title}" ödevini ve atamasını silmek istediğinize emin misiniz?`)) return;
+              try {
+                const res = await api(`/api/admin/education/homeworks/${encodeURIComponent(hw.id)}`, { method: 'DELETE' });
+                $('homeworksMsg').className = 'msg ok';
+                $('homeworksMsg').textContent = res.mesaj || 'Ödev silindi.';
+                loadHomeworks();
+              } catch (error) {
+                $('homeworksMsg').className = 'msg';
+                $('homeworksMsg').textContent = error.message;
+              }
+            });
+            actCell.replaceChildren(delBtn);
+            return row;
+          }));
+        } catch (error) {
+          $('homeworksMsg').className = 'msg';
+          $('homeworksMsg').textContent = error.message;
+        }
       }
 
       async function loadExams() {
         $('examsMsg').textContent = '';
         try {
           const data = await api('/api/denemeler');
-          if (!data.denemeler.length) return emptyRow($('examsBody'), 4, 'Henüz oluşturulmuş deneme sınavı yok.');
+          if (!data.denemeler.length) return emptyRow($('examsBody'), 5, 'Henüz oluşturulmuş deneme sınavı yok.');
           $('examsBody').replaceChildren(...data.denemeler.map(exam => {
             const row = document.createElement('tr');
             cell(row, exam.title);
             cell(row, exam.soruSayisi || (exam.sorular?.length || 0));
             cell(row, exam.published ? 'Yayında' : 'Taslak', exam.published ? 'ok' : 'warn');
             cell(row, fmtDate(exam.createdAt));
+            const actCell = cell(row, '');
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn danger sm';
+            delBtn.type = 'button';
+            delBtn.textContent = '🗑️ Sil';
+            delBtn.title = 'Deneme sınavını sil';
+            delBtn.addEventListener('click', async () => {
+              if (!confirm(`"${exam.title}" deneme sınavını silmek istediğinize emin misiniz?`)) return;
+              try {
+                const res = await api(`/api/admin/education/exams/${encodeURIComponent(exam.id)}`, { method: 'DELETE' });
+                $('examsMsg').className = 'msg ok';
+                $('examsMsg').textContent = res.mesaj || 'Deneme sınavı silindi.';
+                loadExams();
+              } catch (error) {
+                $('examsMsg').className = 'msg';
+                $('examsMsg').textContent = error.message;
+              }
+            });
+            actCell.replaceChildren(delBtn);
             return row;
           }));
         } catch (error) { $('examsMsg').textContent = error.message; }
@@ -1830,6 +1985,7 @@
       }
 
       $('refreshAdminTreeBtn')?.addEventListener('click', loadAdminCurriculumTree);
+      $('refreshHomeworksBtn')?.addEventListener('click', loadHomeworks);
 
       /* Event Dinleyicileri */
       document.querySelectorAll('[data-view]').forEach(button =>

@@ -26,6 +26,7 @@ function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_
   let faqInvalidations = 0;
   const User = {
     countDocuments: async () => 3,
+    findByIdAndDelete: async id => ({ _id: id }),
     findById: id => ({
       select: async () => ({
         _id: { toString: () => id }, name: 'Admin', email: 'admin@example.com',
@@ -139,9 +140,15 @@ function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_
       getAnnouncementCollection: () => collection,
       getFaqModel: () => faqModel,
       invalidateFaqCache: async () => { faqInvalidations += 1; },
-      getQuizCollection: () => listCollection([]),
-      getLessonCollection: () => listCollection([]),
-      getSupportTicketCollection: () => listCollection([])
+      getQuizCollection: options.getQuizCollection || (() => listCollection([])),
+      getLessonCollection: options.getLessonCollection || (() => listCollection([])),
+      getSupportTicketCollection: options.getSupportTicketCollection || (() => listCollection([])),
+      getHomeworkCollection: options.getHomeworkCollection,
+      getAssignmentCollection: options.getAssignmentCollection,
+      getResultCollection: options.getResultCollection,
+      getAttemptCollection: options.getAttemptCollection,
+      getStudentCollection: options.getStudentCollection,
+      getDenemeModel: options.getDenemeModel
     })
   };
 }
@@ -437,5 +444,80 @@ test('editor and support roles are restricted to their allowed admin sections', 
     assert.equal((await fetch(`${base}/faqs`)).status, 403);
     assert.equal((await fetch(`${base}/education/quizzes`)).status, 403);
     assert.equal((await fetch(`${base}/logs`)).status, 403);
+  });
+});
+
+test('superadmin can delete user and clear test data; editor can delete quizzes and homeworks', async () => {
+  const quizId = new ObjectId();
+  const homeworkId = new ObjectId();
+  const quizzes = [{ _id: quizId, title: 'Test Quiz', questions: [] }];
+  const homeworkAssignments = [{ _id: homeworkId, homeworkId, title: 'Deneme Ödevi', status: 'Atandı' }];
+  let deletedAssignments = 0;
+
+  const mockQuizColl = {
+    find: () => ({ project() { return this; }, sort() { return this; }, limit() { return this; }, toArray: async () => quizzes }),
+    findOne: async filter => quizzes.find(q => q._id.equals(filter._id)) || null,
+    deleteOne: async filter => {
+      const idx = quizzes.findIndex(q => q._id.equals(filter._id));
+      if (idx >= 0) { quizzes.splice(idx, 1); return { deletedCount: 1 }; }
+      return { deletedCount: 0 };
+    }
+  };
+
+  const mockAssignmentColl = {
+    find: () => ({ sort() { return this; }, limit() { return this; }, toArray: async () => homeworkAssignments }),
+    deleteOne: async filter => {
+      const idx = homeworkAssignments.findIndex(a => a._id.equals(filter._id));
+      if (idx >= 0) { homeworkAssignments.splice(idx, 1); return { deletedCount: 1 }; }
+      return { deletedCount: 0 };
+    },
+    deleteMany: async () => {
+      deletedAssignments += homeworkAssignments.length;
+      homeworkAssignments.length = 0;
+      return { deletedCount: deletedAssignments };
+    }
+  };
+
+  const router = buildRouter([], undefined, {
+    getQuizCollection: () => mockQuizColl,
+    getAssignmentCollection: () => mockAssignmentColl
+  }).router;
+
+  // 1. Superadmin testleri
+  await withServer(router, { id: 'admin', role: 'admin' }, async base => {
+    // Kendi hesabını silemez
+    const selfDel = await fetch(`${base}/users/admin`, { method: 'DELETE' });
+    assert.equal(selfDel.status, 400);
+
+    // Başka kullanıcıyı silebilir
+    const validDel = await fetch(`${base}/users/507f191e810c19729de860ea`, { method: 'DELETE' });
+    assert.equal(validDel.status, 200);
+
+    // Öğrenci test verilerini temizleyebilir
+    const clearRes = await fetch(`${base}/users/507f191e810c19729de860ea/clear-test-data`, { method: 'POST' });
+    assert.equal(clearRes.status, 200);
+    const clearJson = await clearRes.json();
+    assert.ok(clearJson.mesaj.includes('temizlendi'));
+  });
+
+  // 2. Editor rolü quiz ve ödev silebilir ancak kullanıcı silemez
+  await withServer(router, { id: 'teacher', role: 'teacher', adminRole: 'editor' }, async base => {
+    // Kullanıcı silmeye yetkisi yok (403)
+    const delUser = await fetch(`${base}/users/507f191e810c19729de860ea`, { method: 'DELETE' });
+    assert.equal(delUser.status, 403);
+
+    // Ödev listeleme (200)
+    const listHw = await fetch(`${base}/education/homeworks`);
+    assert.equal(listHw.status, 200);
+
+    // Quiz silme (200)
+    const delQuiz = await fetch(`${base}/education/quizzes/${quizId.toString()}`, { method: 'DELETE' });
+    assert.equal(delQuiz.status, 200);
+    assert.equal(quizzes.length, 0);
+
+    // Ödev silme (200)
+    const delHw = await fetch(`${base}/education/homeworks/${homeworkId.toString()}`, { method: 'DELETE' });
+    assert.equal(delHw.status, 200);
+    assert.equal(homeworkAssignments.length, 0);
   });
 });

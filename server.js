@@ -48,6 +48,7 @@ const LessonAttendance = require('./models/LessonAttendance');
 const { PLANS, featureDecision } = require('./lib/subscription-plans');
 const AdminLog = require('./models/AdminLog');
 const CozumluSoru = require('./models/CozumluSoru');
+const Deneme = require('./models/Deneme');
 const { createWebhookRouter } = require('./routes/webhooks');
 const { attachRealtimeChat } = require('./lib/realtime-chat');
 const { normalizeAiChatRequest, createAiChatReply } = require('./lib/ai-chat');
@@ -530,7 +531,13 @@ app.use('/api/admin', createAdminRouter({
   invalidateFaqCache: faqService.invalidate,
   getQuizCollection: () => quizKoleksiyonu,
   getLessonCollection: () => pratikIcerik,
-  getSupportTicketCollection: () => supportTickets
+  getSupportTicketCollection: () => supportTickets,
+  getHomeworkCollection: () => homeworks,
+  getAssignmentCollection: () => homeworkAssignments,
+  getResultCollection: () => quizSonucKoleksiyonu,
+  getAttemptCollection: () => quizAttemptKoleksiyonu,
+  getStudentCollection: () => studentProfiles,
+  getDenemeModel: () => Deneme
 }));
 app.use('/api/payments', createPaymentRouter({ requireStudent: ogrenciKontrol }));
 app.use('/api/ai', createAIRouter({

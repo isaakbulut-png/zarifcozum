@@ -88,7 +88,9 @@ function createAdminRouter({
   siteMediaUploadDir = path.join(__dirname, '..', 'uploads', 'site-media'),
   mediaStorage = createLocalMediaStorage({homepageDir: uploadDir, siteMediaDir: siteMediaUploadDir}),
   getAnnouncementCollection, getFaqModel, invalidateFaqCache,
-  getQuizCollection, getLessonCollection, getSupportTicketCollection
+  getQuizCollection, getLessonCollection, getSupportTicketCollection,
+  getHomeworkCollection, getAssignmentCollection, getResultCollection,
+  getAttemptCollection, getStudentCollection, getDenemeModel
 }) {
   const router = express.Router();
   const mediaUpload = multer({
@@ -456,6 +458,116 @@ function createAdminRouter({
     }
   });
 
+  router.delete('/users/:id', allow('superadmin'), async (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ mesaj: 'Geçersiz kullanıcı kimliği.' });
+    }
+    if (req.params.id === req.adminUser._id.toString()) {
+      return res.status(400).json({ mesaj: 'Kendi hesabınızı silemezsiniz.' });
+    }
+    try {
+      const target = typeof User.findById(req.params.id)?.select === 'function'
+        ? await User.findById(req.params.id).select('name email role adminRole')
+        : await User.findById(req.params.id);
+      if (!target) {
+        return res.status(404).json({ mesaj: 'Kullanıcı bulunamadı.' });
+      }
+
+      if (adminRoleOf(target) === 'superadmin') {
+        const superAdminCount = await User.countDocuments({
+          $or: [{ adminRole: 'superadmin' }, { role: 'admin', adminRole: null }]
+        });
+        if (superAdminCount <= 1) {
+          return res.status(409).json({ mesaj: 'Sistemdeki tek Süper Admin silinemez.' });
+        }
+      }
+
+      const targetIdStr = target._id.toString();
+
+      if (typeof User.findByIdAndDelete === 'function') {
+        await User.findByIdAndDelete(req.params.id);
+      } else if (typeof User.deleteOne === 'function') {
+        await User.deleteOne({ _id: target._id });
+      }
+
+      // İlişkili test/öğrenci verilerini temizle
+      if (typeof getAssignmentCollection === 'function') {
+        await getAssignmentCollection()?.deleteMany({
+          $or: [{ studentUserId: targetIdStr }, { teacherId: targetIdStr }]
+        }).catch(() => {});
+      }
+      if (typeof getHomeworkCollection === 'function') {
+        await getHomeworkCollection()?.deleteMany({ teacherId: targetIdStr }).catch(() => {});
+      }
+      if (typeof getResultCollection === 'function') {
+        await getResultCollection()?.deleteMany({ studentId: targetIdStr }).catch(() => {});
+      }
+      if (typeof getAttemptCollection === 'function') {
+        await getAttemptCollection()?.deleteMany({ studentId: targetIdStr }).catch(() => {});
+      }
+      if (typeof getStudentCollection === 'function') {
+        await getStudentCollection()?.deleteMany({
+          $or: [{ linkedUserId: targetIdStr }, { teacherId: targetIdStr }]
+        }).catch(() => {});
+      }
+
+      await audit(req, 'user.deleted', 'user', targetIdStr, {
+        name: target.name,
+        email: target.email,
+        role: target.role
+      });
+
+      res.json({ mesaj: 'Kullanıcı ve ilişkili verileri başarıyla silindi.', id: targetIdStr });
+    } catch (error) {
+      console.error('Kullanıcı silinemedi:', error);
+      res.status(500).json({ mesaj: 'Kullanıcı silinemedi.' });
+    }
+  });
+
+  router.post('/users/:id/clear-test-data', allow('superadmin'), async (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ mesaj: 'Geçersiz kullanıcı kimliği.' });
+    }
+    try {
+      const target = typeof User.findById(req.params.id)?.select === 'function'
+        ? await User.findById(req.params.id).select('name email role')
+        : await User.findById(req.params.id);
+      if (!target) {
+        return res.status(404).json({ mesaj: 'Kullanıcı bulunamadı.' });
+      }
+
+      const targetIdStr = target._id.toString();
+      let clearedAssignments = 0;
+      let clearedResults = 0;
+
+      if (typeof getAssignmentCollection === 'function') {
+        const r1 = await getAssignmentCollection()?.deleteMany({ studentUserId: targetIdStr }).catch(() => ({ deletedCount: 0 }));
+        clearedAssignments = r1?.deletedCount || 0;
+      }
+      if (typeof getResultCollection === 'function') {
+        const r2 = await getResultCollection()?.deleteMany({ studentId: targetIdStr }).catch(() => ({ deletedCount: 0 }));
+        clearedResults = r2?.deletedCount || 0;
+      }
+      if (typeof getAttemptCollection === 'function') {
+        await getAttemptCollection()?.deleteMany({ studentId: targetIdStr }).catch(() => {});
+      }
+
+      await audit(req, 'user.test_data.cleared', 'user', targetIdStr, {
+        clearedAssignments,
+        clearedResults
+      });
+
+      res.json({
+        mesaj: `Öğrencinin test içerikleri temizlendi (${clearedAssignments} ödev, ${clearedResults} test sonucu silindi).`,
+        clearedAssignments,
+        clearedResults
+      });
+    } catch (error) {
+      console.error('Test verileri temizlenemedi:', error);
+      res.status(500).json({ mesaj: 'Test verileri temizlenemedi.' });
+    }
+  });
+
   router.get('/payments', allow('superadmin'), async (req, res) => {
     try {
       const filter = {};
@@ -664,6 +776,133 @@ function createAdminRouter({
     } catch (error) {
       console.error('Yönetim testleri alınamadı:', error);
       res.status(500).json({ mesaj: 'Testler alınamadı.' });
+    }
+  });
+
+  router.delete('/education/quizzes/:id', allow('superadmin', 'editor'), async (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ mesaj: 'Geçersiz test kimliği.' });
+    }
+    try {
+      const quizIdObj = new ObjectId(req.params.id);
+      const quizColl = typeof getQuizCollection === 'function' ? getQuizCollection() : null;
+      if (!quizColl) return res.status(500).json({ mesaj: 'Test veritabanı bulunamadı.' });
+
+      const quiz = await quizColl.findOne({ _id: quizIdObj });
+      if (!quiz) return res.status(404).json({ mesaj: 'Test bulunamadı.' });
+
+      await quizColl.deleteOne({ _id: quizIdObj });
+
+      if (typeof getResultCollection === 'function') {
+        await getResultCollection()?.deleteMany({ quizId: quizIdObj }).catch(() => {});
+      }
+      if (typeof getAttemptCollection === 'function') {
+        await getAttemptCollection()?.deleteMany({ quizId: quizIdObj }).catch(() => {});
+      }
+      if (typeof getAssignmentCollection === 'function') {
+        await getAssignmentCollection()?.deleteMany({ quizId: req.params.id }).catch(() => {});
+      }
+
+      await audit(req, 'quiz.deleted', 'quiz', req.params.id, { title: quiz.title });
+      res.json({ mesaj: `"${quiz.title || 'Test'}" başarıyla silindi.` });
+    } catch (error) {
+      console.error('Test silinemedi:', error);
+      res.status(500).json({ mesaj: 'Test silinemedi.' });
+    }
+  });
+
+  router.get('/education/homeworks', allow('superadmin', 'editor'), async (req, res) => {
+    try {
+      const assignmentColl = typeof getAssignmentCollection === 'function' ? getAssignmentCollection() : null;
+      if (!assignmentColl) return res.json({ homeworks: [] });
+
+      const homeworkColl = typeof getHomeworkCollection === 'function' ? getHomeworkCollection() : null;
+      const studentColl = typeof getStudentCollection === 'function' ? getStudentCollection() : null;
+
+      const assignments = await assignmentColl.find({})
+        .sort({ createdAt: -1 })
+        .limit(200)
+        .toArray();
+
+      const homeworkIds = [...new Set(assignments.map(a => a.homeworkId?.toString()).filter(Boolean))].map(id => new ObjectId(id));
+      const studentProfileIds = [...new Set(assignments.map(a => a.studentProfileId?.toString()).filter(Boolean))].map(id => new ObjectId(id));
+
+      const [homeworkList, studentList] = await Promise.all([
+        homeworkColl && homeworkIds.length ? homeworkColl.find({ _id: { $in: homeworkIds } }).toArray() : [],
+        studentColl && studentProfileIds.length ? studentColl.find({ _id: { $in: studentProfileIds } }).toArray() : []
+      ]);
+
+      const homeworkMap = new Map(homeworkList.map(h => [h._id.toString(), h]));
+      const studentMap = new Map(studentList.map(s => [s._id.toString(), s]));
+
+      const items = assignments.map(a => {
+        const hw = homeworkMap.get(a.homeworkId?.toString());
+        const st = studentMap.get(a.studentProfileId?.toString());
+        return {
+          id: a._id.toString(),
+          homeworkId: a.homeworkId?.toString() || '',
+          title: hw?.title || 'Ödev Ataması',
+          type: hw?.type || 'Ödev',
+          grade: hw?.grade || st?.grade || '—',
+          studentName: st ? `${st.firstName} ${st.lastName}` : (a.studentUserId || 'Öğrenci'),
+          teacherId: a.teacherId?.toString() || hw?.teacherId?.toString() || '',
+          status: a.status || 'Atandı',
+          dueAt: a.dueAt || hw?.dueAt || null,
+          createdAt: a.createdAt || hw?.createdAt || new Date()
+        };
+      });
+
+      res.json({ homeworks: items });
+    } catch (error) {
+      console.error('Ödevler listelenemedi:', error);
+      res.status(500).json({ mesaj: 'Ödevler listelenemedi.' });
+    }
+  });
+
+  router.delete('/education/homeworks/:id', allow('superadmin', 'editor'), async (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ mesaj: 'Geçersiz ödev kimliği.' });
+    }
+    try {
+      const idObj = new ObjectId(req.params.id);
+      const assignmentColl = typeof getAssignmentCollection === 'function' ? getAssignmentCollection() : null;
+      const homeworkColl = typeof getHomeworkCollection === 'function' ? getHomeworkCollection() : null;
+
+      let deletedCount = 0;
+      if (assignmentColl) {
+        const res1 = await assignmentColl.deleteOne({ _id: idObj });
+        deletedCount += res1.deletedCount;
+        if (!res1.deletedCount) {
+          const res2 = await assignmentColl.deleteMany({ homeworkId: idObj });
+          deletedCount += res2.deletedCount;
+        }
+      }
+      if (homeworkColl) {
+        await homeworkColl.deleteOne({ _id: idObj }).catch(() => {});
+      }
+
+      await audit(req, 'homework.deleted', 'homework_assignment', req.params.id);
+      res.json({ mesaj: 'Ödev ataması başarıyla silindi.' });
+    } catch (error) {
+      console.error('Ödev silinemedi:', error);
+      res.status(500).json({ mesaj: 'Ödev silinemedi.' });
+    }
+  });
+
+  router.delete('/education/exams/:id', allow('superadmin', 'editor'), async (req, res) => {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ mesaj: 'Geçersiz deneme kimliği.' });
+    }
+    try {
+      const DenemeModel = typeof getDenemeModel === 'function' ? getDenemeModel() : null;
+      if (DenemeModel) {
+        await DenemeModel.findByIdAndDelete(req.params.id);
+      }
+      await audit(req, 'exam.deleted', 'deneme', req.params.id);
+      res.json({ mesaj: 'Deneme sınavı başarıyla silindi.' });
+    } catch (error) {
+      console.error('Deneme sınavı silinemedi:', error);
+      res.status(500).json({ mesaj: 'Deneme sınavı silinemedi.' });
     }
   });
 
