@@ -432,9 +432,18 @@ function adminSayfasiGonder(dosya) {
     res.sendFile(path.join(__dirname, dosya));
   };
 }
-app.get(['/yonetim', '/admin-giris.html'], (req, res, next) => {
-  if (req.session.user?.role === 'admin' || req.session.user?.adminRole) {
-    return res.redirect(redirectForRole(req.session.user.role, req.session.user.adminRole));
+app.get(['/yonetim', '/admin-giris.html'], async (req, res, next) => {
+  if (req.session.user?.id) {
+    try {
+      const user = await User.findById(req.session.user.id).select('name role adminRole');
+      const adminRole = adminRoleOf(user);
+      if (adminRole || user?.role === 'admin') {
+        req.session.user = { ...req.session.user, name: user.name, role: user.role, adminRole };
+        return res.redirect('/admin-paneli.html');
+      }
+    } catch (e) {
+      // Hata durumunda devam et
+    }
   }
   next();
 }, adminSayfasiGonder('admin-giris.html'));
