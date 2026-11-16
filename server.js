@@ -484,7 +484,8 @@ app.use('/api/v1/curriculum', createCurriculumRouter({
   requireStaff: requireRole('teacher', 'admin'), getDb: () => mongoClient.db(DB_ADI)
 }));
 app.use('/api/v1/assignments', createCurriculumAssignmentsRouter({
-  requireTeacher: ogretmenKontrol, getStudents: () => studentProfiles
+  requireTeacher: ogretmenKontrol, getStudents: () => studentProfiles,
+  getDb: () => mongoClient.db(DB_ADI)
 }));
 app.use('/api/student', createStudentRecommendationsRouter({
   requireRoles: requireRole('student', 'parent', 'teacher'),
@@ -1027,6 +1028,16 @@ async function baslat() {
     homeworkAssignments.createIndex({studentUserId: 1, status: 1, dueAt: 1}, {name: 'student_homework_status'}),
     homeworkAudits.createIndex({teacherId: 1, createdAt: -1}, {name: 'teacher_student_homework_audit'})
   ]);
+  try {
+    const { seedCurriculumNodes } = require('./lib/seedCurriculumNodes');
+    const currCount = await client.db(DB_ADI).collection('curriculum_nodes').countDocuments();
+    if (currCount < 200) {
+      console.log('Müfredat düğümleri eksik; otomatik yükleme başlatılıyor...');
+      await seedCurriculumNodes(client.db(DB_ADI));
+    }
+  } catch (err) {
+    console.warn('Müfredat ağacı otomatik yükleme atlandı:', err.message);
+  }
   if (redisClient) {
     redisClient.connect().catch(error => {
       console.error('Redis bağlantısı kurulamadı; FAQ aramaları MongoDB üzerinden sürdürülecek:', error);

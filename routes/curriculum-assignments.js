@@ -1,7 +1,8 @@
 const express = require('express');
 const {createCurriculumService} = require('../lib/curriculumService');
+const { ObjectId } = require('mongodb');
 
-function createCurriculumAssignmentsRouter({requireTeacher, getStudents, service = createCurriculumService()}) {
+function createCurriculumAssignmentsRouter({requireTeacher, getStudents, service = createCurriculumService(), getDb}) {
   const router = express.Router();
   router.use(requireTeacher);
 
@@ -28,10 +29,11 @@ function createCurriculumAssignmentsRouter({requireTeacher, getStudents, service
   });
 
   router.post('/', async (req, res) => {
+    const {grade, section, curriculum_node_ids, due_date} = req.body || {};
+    const teacherId = req.session.user.id;
     try {
-      const {grade, section, curriculum_node_ids, due_date} = req.body || {};
       const response = await service.createAssignment({
-        grade, section, curriculum_node_ids, due_date, teacher_id: req.session.user.id
+        grade, section, curriculum_node_ids, due_date, teacher_id: teacherId
       });
       if (response.status < 200 || response.status >= 500 || (response.status >= 300 && response.status < 400) || response.status === 401) {
         console.error('Ödev servisi başarısız:', response.status);
@@ -39,6 +41,33 @@ function createCurriculumAssignmentsRouter({requireTeacher, getStudents, service
       }
       return res.status(response.status).json(response.data);
     } catch (error) {
+      // Fallback when service is not running or unconfigured
+      if (typeof getDb === 'function') {
+        const db = getDb();
+        if (db) {
+          try {
+            const recipients = await db.collection('ogrenci_profilleri').find({
+              teacherId, grade: Number(grade), section: String(section), active: true
+            }).toArray();
+            if (!recipients.length) {
+              return res.status(400).json({ detail: 'Bu sınıf ve şubede kayıtlı etkin öğrenci bulunamadı.' });
+            }
+            const nodeIds = (curriculum_node_ids || []).map(id => {
+              try { return new ObjectId(id); } catch { return null; }
+            }).filter(Boolean);
+            const questionFilter = {
+              'questions.curriculum_node_id': { $in: nodeIds },
+              source: { $ne: 'curriculum_assignment' }
+            };
+            const hasQuestions = await db.collection('quizler').findOne(questionFilter);
+            if (!hasQuestions) {
+              return res.status(400).json({ detail: 'Seçilen kazanımlara bağlı soru bulunamadı. Lütfen soru bankasından soru ekleyin veya farklı bir kazanım seçin.' });
+            }
+          } catch (dbErr) {
+            console.error('Ödev MongoDB denetim hatası:', dbErr);
+          }
+        }
+      }
       console.error('Ödev servisine erişilemedi:', error.code || error.message);
       return res.status(503).json({mesaj: 'Ödev servisine erişilemiyor.'});
     }

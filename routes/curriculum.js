@@ -1,5 +1,6 @@
 const express = require('express');
 const { createCurriculumService } = require('../lib/curriculumService');
+const { buildCurriculumTreeFromMongo } = require('../lib/curriculumMongoTree');
 const { ObjectId } = require('mongodb');
 
 const TREE_CACHE_TTL_MS = 60 * 1000;
@@ -11,21 +12,52 @@ function createCurriculumRouter({ requireStaff, service = createCurriculumServic
   let cachedTreeExpiresAt = 0;
   let treeRequest = null;
 
-  function getRootTree() {
-    if (cachedTree && Date.now() < cachedTreeExpiresAt) return Promise.resolve(cachedTree);
+  async function getRootTree() {
+    if (cachedTree && Date.now() < cachedTreeExpiresAt) return cachedTree;
     if (!treeRequest) {
       treeRequest = Promise.resolve()
         .then(() => service.getTree())
         .then(response => {
-          if (response.status >= 200 && response.status < 300) {
+          if (response && response.status >= 200 && response.status < 300) {
             cachedTree = response;
             cachedTreeExpiresAt = Date.now() + TREE_CACHE_TTL_MS;
           }
           return response;
         })
+        .catch(async error => {
+          if (typeof getDb === 'function') {
+            const db = getDb();
+            if (db) {
+              const data = await buildCurriculumTreeFromMongo(db, null);
+              const fallbackResponse = { status: 200, data };
+              cachedTree = fallbackResponse;
+              cachedTreeExpiresAt = Date.now() + TREE_CACHE_TTL_MS;
+              return fallbackResponse;
+            }
+          }
+          throw error;
+        })
         .finally(() => { treeRequest = null; });
     }
     return treeRequest;
+  }
+
+  async function getTreeWithFallback(parentId) {
+    if (parentId === undefined) {
+      return getRootTree();
+    }
+    try {
+      return await service.getTree(parentId);
+    } catch (error) {
+      if (typeof getDb === 'function') {
+        const db = getDb();
+        if (db) {
+          const data = await buildCurriculumTreeFromMongo(db, parentId);
+          return { status: 200, data };
+        }
+      }
+      throw error;
+    }
   }
 
   async function forward(res, operation) {
@@ -65,9 +97,7 @@ function createCurriculumRouter({ requireStaff, service = createCurriculumServic
     }
   }
 
-  router.get('/tree', (req, res) => req.query.parent_id === undefined
-    ? forward(res, getRootTree)
-    : forward(res, () => service.getTree(req.query.parent_id)));
+  router.get('/tree', (req, res) => forward(res, () => getTreeWithFallback(req.query.parent_id)));
   router.post('/nodes', (req, res) => forward(res, () => service.createNode(req.body)));
 
   async function link(req, res, kind) {
