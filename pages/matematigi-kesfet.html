@@ -1,0 +1,951 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fbf1e7">
+  <title>5-8. Sınıf: Matematiği Keşfet | Zarif Çözüm</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --cream: #fbf1e7;
+      --paper: #fffaf5;
+      --peach: #f5e2d0;
+      --peach2: #f8eadc;
+      --brown: #493020;
+      --brown2: #67472f;
+      --muted: #806b5c;
+      --gold: #b88a28;
+      --gold2: #e9d3a5;
+      --line: #ead8c5;
+      --green: #2e7d32;
+      --green-bg: #e8f5e9;
+      --blue: #1565c0;
+      --blue-bg: #e3f2fd;
+      --purple: #6a1b9a;
+      --purple-bg: #f3e5f5;
+      --orange: #e65100;
+      --orange-bg: #fff3e0;
+      --shadow: 0 16px 40px rgba(76,48,27,.08);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--brown);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 90% 0%, #fff9f1 0, transparent 40%), var(--cream);
+      line-height: 1.6;
+    }
+    a { color: inherit; }
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    .topbar {
+      padding: 16px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+    .brand strong {
+      font: 600 20px Georgia, serif;
+      letter-spacing: -.02em;
+    }
+    .brand strong span { color: var(--gold); }
+    .crumb {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .crumb a { text-decoration: none; }
+    .crumb a:hover { text-decoration: underline; color: var(--brown); }
+    .crumb b { color: var(--gold); font-weight: 600; }
+
+    /* Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 32px;
+      align-items: center;
+      padding: 36px 0 28px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: #fff8ee;
+      border: 1px solid var(--gold2);
+      border-radius: 99px;
+      color: #8c6c2c;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+    h1 {
+      font: 600 clamp(32px, 4.5vw, 44px)/1.15 Georgia, serif;
+      letter-spacing: -.03em;
+      margin: 16px 0 12px;
+    }
+    h1 em {
+      color: var(--gold);
+      font-style: normal;
+    }
+    .lead {
+      font-size: 16px;
+      color: #705c4d;
+      margin: 0 0 20px;
+      max-width: 580px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: var(--paper);
+      font-size: 12px;
+      color: #715b49;
+      font-weight: 500;
+    }
+    .hero-art {
+      min-height: 270px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(145deg, #fffaf4, #f5e2ce);
+      border: 1px solid #edd9c3;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-art::before {
+      content: "";
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: rgba(184,138,40,.08);
+      pointer-events: none;
+    }
+    .hero-art-icon {
+      font-size: 44px;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 4px 12px rgba(184,138,40,.25));
+    }
+    .hero-art h3 {
+      font: 600 20px Georgia, serif;
+      margin: 0 0 6px;
+    }
+    .hero-art p {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0 0 16px;
+      max-width: 280px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 18px;
+      border-radius: 12px;
+      background: var(--brown);
+      color: #fffaf5;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      border: none;
+      transition: all .2s ease;
+    }
+    .btn:hover {
+      background: var(--brown2);
+      transform: translateY(-1px);
+    }
+    .btn.secondary {
+      background: #f5e5d5;
+      border: 1px solid var(--line);
+      color: var(--brown);
+    }
+    .btn.secondary:hover {
+      background: #ebd8c5;
+    }
+    .btn.gold {
+      background: linear-gradient(135deg, #c59734, #9f731c);
+      color: #fff;
+    }
+    .btn.gold:hover {
+      background: linear-gradient(135deg, #b88a28, #8a6214);
+    }
+    .btn.sm {
+      padding: 8px 14px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+
+    /* Section & Cards */
+    .section {
+      padding: 32px 0;
+    }
+    .section-head {
+      margin-bottom: 24px;
+    }
+    .section-head h2 {
+      font: 600 clamp(24px, 3.2vw, 32px) Georgia, serif;
+      letter-spacing: -.02em;
+      margin: 0 0 6px;
+    }
+    .section-head p {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+    }
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 4px 16px rgba(76,48,27,.04);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .card:hover {
+      box-shadow: 0 8px 24px rgba(76,48,27,.08);
+    }
+
+    /* Interactive Lab */
+    .lab-container {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .lab-tabs {
+      display: flex;
+      background: #f4e8dc;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+    }
+    .lab-tab {
+      padding: 14px 20px;
+      border: none;
+      background: transparent;
+      font-weight: 700;
+      font-size: 13px;
+      color: #7a6352;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all .2s;
+    }
+    .lab-tab:hover {
+      color: var(--brown);
+      background: rgba(255,255,255,.4);
+    }
+    .lab-tab.active {
+      color: var(--brown);
+      background: var(--paper);
+      border-bottom-color: var(--gold);
+    }
+    .lab-content {
+      padding: 28px;
+    }
+    .lab-panel {
+      display: none;
+    }
+    .lab-panel.active {
+      display: block;
+    }
+
+    /* Simulator 1: Fractions */
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: center;
+    }
+    .sim-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .control-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .control-row label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #614a38;
+      display: flex;
+      justify-content: space-between;
+    }
+    .sim-range {
+      width: 100%;
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+    .sim-display {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .fraction-bar-box {
+      width: 100%;
+      height: 38px;
+      background: #f0e6dc;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      border: 2px solid var(--line);
+    }
+    .fraction-bar-part {
+      height: 100%;
+      transition: background-color .2s;
+      border-right: 1px solid rgba(255,255,255,.6);
+    }
+    .fraction-bar-part.filled {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+    .fraction-badge {
+      font: 700 24px Georgia, serif;
+      color: var(--brown);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .fraction-math {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      line-height: 1;
+      font-size: 20px;
+    }
+    .fraction-math span:first-child {
+      border-bottom: 2px solid var(--brown);
+      padding-bottom: 2px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* Simulator 2: Angle */
+    .angle-canvas-wrap {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .angle-info-box {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      width: 100%;
+      margin-top: 8px;
+    }
+    .angle-pill {
+      background: #fdf5ea;
+      border: 1px solid var(--gold2);
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 12px;
+      text-align: center;
+    }
+    .angle-pill strong {
+      display: block;
+      color: var(--gold);
+      font-size: 15px;
+    }
+
+    /* Simulator 3: Ratio recipe */
+    .recipe-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .recipe-item {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+    .recipe-item b {
+      display: block;
+      font-size: 18px;
+      color: var(--brown);
+      margin-top: 4px;
+    }
+
+    /* Grade Grid */
+    .grade-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .grade-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .grade-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(76,48,27,.09);
+    }
+    .grade-num {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font: 700 20px Georgia, serif;
+      margin-bottom: 12px;
+    }
+    .grade-num.c5 { background: #e0f2fe; color: #0369a1; }
+    .grade-num.c6 { background: #fef3c7; color: #b45309; }
+    .grade-num.c7 { background: #dcfce7; color: #15803d; }
+    .grade-num.c8 { background: #fee2e2; color: #b91c1c; }
+    .grade-card h3 {
+      font: 600 17px Georgia, serif;
+      margin: 0 0 6px;
+    }
+    .grade-card p {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 16px;
+      flex-grow: 1;
+    }
+    .grade-card .tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 99px;
+      background: #f5e8d9;
+      color: #7b5b29;
+      display: inline-block;
+      margin-bottom: 8px;
+      align-self: flex-start;
+    }
+
+    /* FAQ Q&A */
+    .qa-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .qa-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px 20px;
+    }
+    .qa-card h4 {
+      margin: 0 0 8px;
+      font: 600 16px Georgia, serif;
+      color: var(--brown);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .qa-card h4::before {
+      content: "💡";
+      font-size: 16px;
+    }
+    .qa-card p {
+      font-size: 13px;
+      color: #6a5647;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* CTA Section */
+    .cta-banner {
+      background: linear-gradient(135deg, #493020, #2f1d11);
+      color: #fffaf5;
+      border-radius: 24px;
+      padding: 36px 32px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      margin-top: 16px;
+    }
+    .cta-banner h2 {
+      font: 600 clamp(24px, 3.5vw, 34px) Georgia, serif;
+      margin: 0 0 10px;
+    }
+    .cta-banner p {
+      max-width: 540px;
+      margin: 0 auto 24px;
+      font-size: 15px;
+      color: #d8c4b2;
+    }
+    .cta-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Responsive */
+    @media (max-width: 820px) {
+      .hero { grid-template-columns: 1fr; }
+      .sim-grid { grid-template-columns: 1fr; }
+      .grade-cards { grid-template-columns: 1fr 1fr; }
+      .qa-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .grade-cards { grid-template-columns: 1fr; }
+      .recipe-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-home="/" data-breadcrumb="Matematiği Keşfet">
+
+  <!-- Topbar -->
+  <header class="wrap topbar">
+    <a class="brand" href="/" aria-label="ZarifÇözüm ana sayfa">
+      <img class="brand-logo" src="../assets/brand-mark.png" alt="ZarifÇözüm">
+      <strong>Zarif<span>Çözüm</span></strong>
+    </a>
+    <div class="crumb">
+      <a href="/">Ana Sayfa</a> › 5-8. Sınıf › <b>Matematiği Keşfet</b>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div>
+        <span class="eyebrow">EZBERE SON · KEŞİF ODAKLI MATEMATİK</span>
+        <h1>Matematiği Korkmadan, <em>Görerek Keşfet.</em></h1>
+        <p class="lead">5, 6, 7 ve 8. sınıf öğrencileri için formülleri ezberlemek yerine arkasındaki mantığı keşfetme alanı. İnteraktif görsel deneyler, günlük hayat modellemeleri ve LGS yeni nesil düşünme alışkanlığı tek çatı altında.</p>
+        <div class="chips">
+          <span class="chip">🎯 Görsel Simülasyonlar</span>
+          <span class="chip">📐 Maarif Modeli Uyumlu</span>
+          <span class="chip">🧩 LGS Beceri Temelli</span>
+          <span class="chip">🤖 Zarif AI Asistanı</span>
+        </div>
+      </div>
+      <div class="hero-art">
+        <div class="hero-art-icon">🔬</div>
+        <h3>Matematik Laboratuvarı</h3>
+        <p>Sayıları, şekilleri ve oranları hareket ettir; kuralların nasıl çalıştığını gözünle gör.</p>
+        <a class="btn gold" href="#kesif-laboratuvari">Laboratuvarı Dene ↓</a>
+      </div>
+    </section>
+
+    <!-- Interactive Discovery Lab -->
+    <section class="section" id="kesif-laboratuvari">
+      <div class="section-head">
+        <h2>İnteraktif Keşif Laboratuvarı</h2>
+        <p>Formülleri ezberleme; kaydırıcıları hareket ettir ve matematiğin ardındaki ritmi anında keşfet.</p>
+      </div>
+
+      <div class="lab-container">
+        <div class="lab-tabs" role="tablist">
+          <button class="lab-tab active" type="button" data-tab="tab-fractions" role="tab" aria-selected="true">
+            🍰 1. Kesir & Dilim Simülatörü
+          </button>
+          <button class="lab-tab" type="button" data-tab="tab-angles" role="tab" aria-selected="false">
+            🧭 2. Açı & Pusula Deneyi
+          </button>
+          <button class="lab-tab" type="button" data-tab="tab-ratio" role="tab" aria-selected="false">
+            🥣 3. Maarif Günlük Hayat (Oran-Orantı)
+          </button>
+        </div>
+
+        <div class="lab-content">
+          <!-- Tab 1: Fractions -->
+          <div class="lab-panel active" id="tab-fractions" role="tabpanel">
+            <div class="sim-grid">
+              <div class="sim-controls">
+                <div class="control-row">
+                  <label for="fractionDenom">Bütün Kaç Eşit Parçaya Bölünsün? (Payda): <span id="valDenom" style="color:var(--gold)">4</span></label>
+                  <input class="sim-range" id="fractionDenom" type="range" min="2" max="12" value="4">
+                </div>
+                <div class="control-row">
+                  <label for="fractionNum">Kaç Parça Alındı? (Pay): <span id="valNum" style="color:var(--gold)">3</span></label>
+                  <input class="sim-range" id="fractionNum" type="range" min="1" max="4" value="3">
+                </div>
+                <div style="background:#fffaf3;padding:12px;border-radius:10px;border:1px dashed var(--gold2);font-size:13px;color:#715b49">
+                  💡 <b>Keşif Notu:</b> Bir bütünü ne kadar çok parçaya bölerseniz (payda büyürse), her bir dilimin boyutu o kadar küçülür!
+                </div>
+              </div>
+
+              <div class="sim-display">
+                <div class="fraction-badge">
+                  <span>Değer:</span>
+                  <div class="fraction-math">
+                    <span id="dispNum">3</span>
+                    <span id="dispDenom">4</span>
+                  </div>
+                  <span style="font-size:16px;color:var(--muted)">= %<span id="dispPercent">75</span></span>
+                </div>
+                <!-- Visual Bar -->
+                <div class="fraction-bar-box" id="fractionBar"></div>
+                <div style="font-size:12px;color:var(--muted)">Görsel Şerit Modeli (Boyalı alan alınan payı temsil eder)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Angles -->
+          <div class="lab-panel" id="tab-angles" role="tabpanel">
+            <div class="sim-grid">
+              <div class="sim-controls">
+                <div class="control-row">
+                  <label for="angleRange">Açı Derecesi: <span id="valAngle" style="color:var(--gold)">90°</span></label>
+                  <input class="sim-range" id="angleRange" type="range" min="10" max="180" step="5" value="90">
+                </div>
+                <div class="angle-info-box">
+                  <div class="angle-pill">
+                    Açı Türü
+                    <strong id="dispAngleType">Dik Açı</strong>
+                  </div>
+                  <div class="angle-pill">
+                    Günlük Hayat Örneği
+                    <strong id="dispAngleReal">Oda Köşesi</strong>
+                  </div>
+                </div>
+                <div style="background:#fffaf3;padding:12px;border-radius:10px;border:1px dashed var(--gold2);font-size:13px;color:#715b49">
+                  🧭 <b>Keşif Notu:</b> 90 dereceden küçük açılar <i>dar</i>, 90 derece <i>dik</i>, 90-180 arası <i>geniş</i>, 180 derece ise <i>doğru</i> açıdır.
+                </div>
+              </div>
+
+              <div class="sim-display">
+                <div class="angle-canvas-wrap">
+                  <svg viewBox="0 0 180 180" width="180" height="180" style="overflow:visible">
+                    <!-- Base line -->
+                    <line x1="90" y1="90" x2="160" y2="90" stroke="#493020" stroke-width="4" stroke-linecap="round"/>
+                    <!-- Angle Arc -->
+                    <path id="angleArc" fill="rgba(184,138,40,0.2)" stroke="#b88a28" stroke-width="2"/>
+                    <!-- Rotating line -->
+                    <line id="angleArm" x1="90" y1="90" x2="90" y2="20" stroke="#b88a28" stroke-width="4" stroke-linecap="round"/>
+                    <!-- Center dot -->
+                    <circle cx="90" cy="90" r="5" fill="#493020"/>
+                  </svg>
+                </div>
+                <div style="font-size:14px;font-weight:700;color:var(--brown)">
+                  Ölçü: <span id="dispAngleBig" style="color:var(--gold)">90°</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 3: Ratio & Proportion (Daily Life) -->
+          <div class="lab-panel" id="tab-ratio" role="tabpanel">
+            <div class="sim-grid">
+              <div class="sim-controls">
+                <div class="control-row">
+                  <label for="portionRange">Kişi Sayısı: <span id="valPortion" style="color:var(--gold)">4 Kişi</span></label>
+                  <input class="sim-range" id="portionRange" type="range" min="1" max="12" value="4">
+                </div>
+                <p style="font-size:13px;color:#614a38;margin:0">
+                  Bir kek tarifi 4 kişiliktir. Misafir sayısı arttığında tüm malzemelerin <b>doğru orantı</b> ile aynı oranda artması gerekir.
+                </p>
+                <div style="background:#fffaf3;padding:12px;border-radius:10px;border:1px dashed var(--gold2);font-size:13px;color:#715b49">
+                  🥣 <b>Maarif Yaklaşımı:</b> Oran, iki çokluğun bölme yoluyla karşılaştırılmasıdır. Bir katı artırırken diğerini unutursak denge bozulur!
+                </div>
+              </div>
+
+              <div class="sim-display">
+                <div style="font-weight:700;font-size:15px;color:var(--brown)">Ölçeklenmiş Malzeme Listesi:</div>
+                <div class="recipe-grid">
+                  <div class="recipe-item">
+                    <span>🥚 Yumurta</span>
+                    <b id="itemEgg">2 Adet</b>
+                  </div>
+                  <div class="recipe-item">
+                    <span>🌾 Un</span>
+                    <b id="itemFlour">200 gr</b>
+                  </div>
+                  <div class="recipe-item">
+                    <span>🥛 Süt</span>
+                    <b id="itemMilk">1 Bardak</b>
+                  </div>
+                </div>
+                <div style="font-size:12px;color:var(--muted)">Orantı sabiti: Kişi başı 50 gr un & 0.5 adet yumurta</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grade Routes (5 to 8) -->
+    <section class="section">
+      <div class="section-head">
+        <h2>Kademeli Keşif Rotaları (5–8. Sınıf)</h2>
+        <p>Hangi sınıftasın? Kendi seviyene uygun konseptleri ve kazanımları keşfetmeye başla.</p>
+      </div>
+
+      <div class="grade-cards">
+        <!-- 5. Grade -->
+        <article class="grade-card">
+          <div>
+            <div class="grade-num c5">5</div>
+            <span class="tag">Temel Sayılar</span>
+            <h3>5. Sınıf: Sayıların Dünyası</h3>
+            <p>Doğal sayılar, basamak değeri, zihinden işlem stratejileri, temel geometrik kavramlar ve örüntülerin ritmini keşfet.</p>
+          </div>
+          <a class="btn sm secondary" href="../konu.html?sinif=5">5. Sınıf Konularını Gör →</a>
+        </article>
+
+        <!-- 6. Grade -->
+        <article class="grade-card">
+          <div>
+            <div class="grade-num c6">6</div>
+            <span class="tag">Maarif Modeli</span>
+            <h3>6. Sınıf: Çarpanlar ve Oran</h3>
+            <p>Asal sayılar, çarpanlar ve katlar, kesirlerle işlem, ondalık gösterim ve günlük hayat oran-orantı problemleri.</p>
+          </div>
+          <a class="btn sm secondary" href="../konu.html?sinif=6">6. Sınıf Konularını Gör →</a>
+        </article>
+
+        <!-- 7. Grade -->
+        <article class="grade-card">
+          <div>
+            <div class="grade-num c7">7</div>
+            <span class="tag">Soyut Düşünce</span>
+            <h3>7. Sınıf: Cebir ve Denklemler</h3>
+            <p>Tam sayılarla işlemler, rasyonel sayılar, cebirsel ifadelerin geometrik modelleri ve birinci dereceden denklemler.</p>
+          </div>
+          <a class="btn sm secondary" href="../konu.html?sinif=7">7. Sınıf Konularını Gör →</a>
+        </article>
+
+        <!-- 8. Grade -->
+        <article class="grade-card">
+          <div>
+            <div class="grade-num c8">8</div>
+            <span class="tag">LGS Hazırlık</span>
+            <h3>8. Sınıf: LGS ve Akıl Yürütme</h3>
+            <p>Kareköklü ifadeler, üslü sayılar, veri analizi, doğrusal denklemler ve LGS tarzı beceri temelli yeni nesil sorular.</p>
+          </div>
+          <a class="btn sm secondary" href="../konu.html?sinif=8">8. Sınıf Konularını Gör →</a>
+        </article>
+      </div>
+    </section>
+
+    <!-- Why & How: Curious Questions -->
+    <section class="section">
+      <div class="section-head">
+        <h2>Zarif AI ile Merak Köşesi: Neden ve Nasıl?</h2>
+        <p>Matematiği sadece soru çözmek için değil; evrenin mantığını anlamak için öğreniyoruz.</p>
+      </div>
+
+      <div class="qa-grid">
+        <article class="qa-card">
+          <h4>Eksi ile eksinin çarpımı neden artıdır?</h4>
+          <p>Eksi işaretini matematiksel bir <b>"yönü tersine çevirme"</b> emri olarak düşünebilirsiniz. İleriye doğru gitmek (+) iken, bir kez tersine dönmek (-) geriye gitmektir. Ters yöndeyken bir kez daha tersine dönerseniz (- × -), yönünüz yeniden ileriye (+) döner!</p>
+        </article>
+
+        <article class="qa-card">
+          <h4>Pi (π) sayısı nereden doğdu?</h4>
+          <p>Evrendeki tüm çemberler —ister bir madeni para, ister bir bisiklet tekeri, isterse Dünya'nın ekvatoru olsun— çevrelerini çaplarına böldüğünüzde hep aynı sihirli sayıyı verir: yaklaşık 3,14159... Bu değişmez oran, çemberin doğasındaki evrensel bir yasadır.</p>
+        </article>
+
+        <article class="qa-card">
+          <h4>Asal sayılar gerçek hayatta nerede işe yarar?</h4>
+          <p>Asal sayılar, sayıların atomlarıdır. Bankaların şifreleme sistemleri (RSA şifreleme), yüzlerce basamaklı iki dev asal sayının çarpılmasıyla kurulur. Bu sayıyı çarpanlarına ayırmak süper bilgisayarlar için bile yıllar alacağından paranız ve verileriniz güvende kalır!</p>
+        </article>
+
+        <article class="qa-card">
+          <h4>LGS yeni nesil soruları nasıl daha kolay çözülür?</h4>
+          <p>Soruyu uzun bir Türkçe paragraf olarak görmek yerine 3 adıma ayırın: 1) Verilenleri ve isteneni şema olarak çizin, 2) Şekil veya tabloyu okuyun, 3) Gerçek hayat hikâyesini basit bir matematiksel modele dönüştürün.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-banner">
+      <h2>Matematik Yolculuğuna Hazır Mısın?</h2>
+      <p>Hemen seviyene uygun testleri çöz, eksiklerini Zarif Asistan ile tamamla ve başarı grafiğini yükselt.</p>
+      <div class="cta-btns">
+        <a class="btn gold" href="../pratik.html">Ücretsiz Pratik Yap</a>
+        <a class="btn secondary" href="ornek-sinav-akisi.html">Örnek Sınav Akışını Gör</a>
+        <a class="btn secondary" href="konulari-kesfet-tanitim.html">Konu Kataloğunu İncele</a>
+      </div>
+    </section>
+  </main>
+
+  <footer style="text-align:center;padding:40px 20px;font-size:12px;color:var(--muted)">
+    © 2026 ZarifÇözüm · Millî Eğitim Bakanlığı Maarif Modeli Yaklaşımı ile Geliştirilmiştir.
+  </footer>
+
+  <!-- Interactive Simulator Script -->
+  <script>
+    (function initDiscoveryLab() {
+      // Tab switching
+      const tabs = document.querySelectorAll('.lab-tab');
+      const panels = document.querySelectorAll('.lab-panel');
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+          });
+          panels.forEach(p => p.classList.remove('active'));
+
+          tab.classList.add('active');
+          tab.setAttribute('aria-selected', 'true');
+          const target = document.getElementById(tab.dataset.tab);
+          if (target) target.classList.add('active');
+        });
+      });
+
+      // Simulator 1: Fractions
+      const fractionDenom = document.getElementById('fractionDenom');
+      const fractionNum = document.getElementById('fractionNum');
+      const valDenom = document.getElementById('valDenom');
+      const valNum = document.getElementById('valNum');
+      const dispNum = document.getElementById('dispNum');
+      const dispDenom = document.getElementById('dispDenom');
+      const dispPercent = document.getElementById('dispPercent');
+      const fractionBar = document.getElementById('fractionBar');
+
+      function updateFraction() {
+        const d = parseInt(fractionDenom.value, 10);
+        fractionNum.max = d;
+        if (parseInt(fractionNum.value, 10) > d) fractionNum.value = d;
+        const n = parseInt(fractionNum.value, 10);
+
+        valDenom.textContent = d;
+        valNum.textContent = n;
+        dispNum.textContent = n;
+        dispDenom.textContent = d;
+        dispPercent.textContent = Math.round((n / d) * 100);
+
+        fractionBar.replaceChildren();
+        for (let i = 0; i < d; i++) {
+          const part = document.createElement('div');
+          part.className = 'fraction-bar-part' + (i < n ? ' filled' : '');
+          part.style.flex = '1';
+          fractionBar.appendChild(part);
+        }
+      }
+
+      if (fractionDenom && fractionNum) {
+        fractionDenom.addEventListener('input', updateFraction);
+        fractionNum.addEventListener('input', updateFraction);
+        updateFraction();
+      }
+
+      // Simulator 2: Angles
+      const angleRange = document.getElementById('angleRange');
+      const valAngle = document.getElementById('valAngle');
+      const dispAngleBig = document.getElementById('dispAngleBig');
+      const dispAngleType = document.getElementById('dispAngleType');
+      const dispAngleReal = document.getElementById('dispAngleReal');
+      const angleArm = document.getElementById('angleArm');
+      const angleArc = document.getElementById('angleArc');
+
+      function updateAngle() {
+        const deg = parseInt(angleRange.value, 10);
+        valAngle.textContent = deg + '°';
+        dispAngleBig.textContent = deg + '°';
+
+        if (deg < 90) {
+          dispAngleType.textContent = 'Dar Açı (< 90°)';
+          dispAngleReal.textContent = 'Açık Makas / Çatı';
+        } else if (deg === 90) {
+          dispAngleType.textContent = 'Dik Açı (90°)';
+          dispAngleReal.textContent = 'Oda Köşesi / Kitap';
+        } else if (deg < 180) {
+          dispAngleType.textContent = 'Geniş Açı (> 90°)';
+          dispAngleReal.textContent = 'Şezlong / Yelken';
+        } else {
+          dispAngleType.textContent = 'Doğru Açı (180°)';
+          dispAngleReal.textContent = 'Cetvel Kenarı';
+        }
+
+        // Rotate arm: SVG center is (90, 90). Radius = 70.
+        const rad = (deg * Math.PI) / 180;
+        const armX = 90 + 70 * Math.cos(Math.PI - rad);
+        const armY = 90 - 70 * Math.sin(Math.PI - rad);
+        angleArm.setAttribute('x2', armX);
+        angleArm.setAttribute('y2', armY);
+
+        // Arc path
+        const arcR = 30;
+        const arcX = 90 + arcR * Math.cos(Math.PI - rad);
+        const arcY = 90 - arcR * Math.sin(Math.PI - rad);
+        const largeArc = deg > 180 ? 1 : 0;
+        angleArc.setAttribute('d', `M 120 90 A ${arcR} ${arcR} 0 ${largeArc} 0 ${arcX} ${arcY} L 90 90 Z`);
+      }
+
+      if (angleRange) {
+        angleRange.addEventListener('input', updateAngle);
+        updateAngle();
+      }
+
+      // Simulator 3: Ratio
+      const portionRange = document.getElementById('portionRange');
+      const valPortion = document.getElementById('valPortion');
+      const itemEgg = document.getElementById('itemEgg');
+      const itemFlour = document.getElementById('itemFlour');
+      const itemMilk = document.getElementById('itemMilk');
+
+      function updateRecipe() {
+        const p = parseInt(portionRange.value, 10);
+        valPortion.textContent = p + ' Kişi';
+        itemEgg.textContent = (p * 0.5) + ' Adet';
+        itemFlour.textContent = (p * 50) + ' gr';
+        itemMilk.textContent = (p * 0.25) + ' Bardak';
+      }
+
+      if (portionRange) {
+        portionRange.addEventListener('input', updateRecipe);
+        updateRecipe();
+      }
+    })();
+  </script>
+</body>
+</html>
