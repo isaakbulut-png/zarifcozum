@@ -3,7 +3,7 @@ const { ObjectId } = require('mongodb');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const multer = require('multer');
-const { adminRoleOf, yetkiKontrolEt } = require('../lib/admin-rbac');
+const { adminRoleOf, yetkiKontrolEt, PRIMARY_ADMIN_EMAIL } = require('../lib/admin-rbac');
 const { validateImage } = require('../lib/resim-dogrula');
 const { PLANS } = require('../lib/subscription-plans');
 const { normalizeFaqQuestion } = require('../lib/faq-service');
@@ -448,6 +448,10 @@ function createAdminRouter({
         return res.status(404).json({ mesaj: 'Kullanıcı bulunamadı.' });
       }
 
+      if (target.email?.toLowerCase() === PRIMARY_ADMIN_EMAIL && (role !== 'admin' || cleanAdminRole !== 'superadmin')) {
+        return res.status(403).json({ mesaj: 'Ana yönetici hesabının yetkileri değiştirilemez.' });
+      }
+
       const wasSuperAdmin = adminRoleOf(target) === 'superadmin';
       const willBeSuperAdmin = role === 'admin'
         ? (!cleanAdminRole || cleanAdminRole === 'superadmin')
@@ -493,9 +497,12 @@ function createAdminRouter({
       return res.status(400).json({ mesaj: 'Kendi yönetim rolünüzü değiştiremezsiniz.' });
     }
     try {
-      const target = await User.findById(req.params.id).select('role adminRole name');
+      const target = await User.findById(req.params.id).select('role adminRole name email');
       if (!target || !['admin', 'teacher'].includes(target.role)) {
         return res.status(404).json({ mesaj: 'Yalnızca yönetici veya öğretmen hesabına yönetim rolü atanabilir.' });
+      }
+      if (target.email?.toLowerCase() === PRIMARY_ADMIN_EMAIL && adminRole !== 'superadmin') {
+        return res.status(403).json({ mesaj: 'Ana yönetici hesabının yetkileri değiştirilemez.' });
       }
       if (adminRoleOf(target) === 'superadmin' && adminRole !== 'superadmin') {
         const superAdminCount = await User.countDocuments({
