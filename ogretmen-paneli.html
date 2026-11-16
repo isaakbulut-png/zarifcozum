@@ -314,28 +314,29 @@ main .site-breadcrumb a:focus-visible {
 .teacher-sidebar .teacher-live-cta {
   display: inline-flex;
   width: 100%;
-  min-height: 40px;
+  min-height: 42px;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 9px 12px;
-  margin-bottom: 6px;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: 10px;
   background: linear-gradient(135deg, #d6452b 0%, #b73520 100%);
   box-shadow: 0 3px 10px rgba(183, 53, 32, 0.32);
   color: #fff;
   font-family: var(--body);
-  font-size: .86rem;
+  font-size: .88rem;
   font-weight: 600;
-  line-height: 1.2;
-  text-align: center;
+  line-height: 1.25;
+  text-align: left;
   text-decoration: none;
   cursor: pointer;
   transition: all .18s ease;
+  white-space: nowrap;
 }
 .teacher-sidebar .teacher-live-cta:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.25);
   background: linear-gradient(135deg, #e0533a 0%, #c43a24 100%);
   box-shadow: 0 5px 16px rgba(183, 53, 32, 0.45);
   transform: translateY(-1px);
@@ -345,18 +346,18 @@ main .site-breadcrumb a:focus-visible {
   transform: translateY(0);
 }
 .teacher-sidebar .teacher-live-cta svg {
-  width: 17px;
-  height: 17px;
+  width: 18px;
+  height: 18px;
   flex: none;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 1.8;
+  stroke-width: 2;
 }
 .teacher-sidebar .teacher-live-cta.secondary {
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: #f5ebe3;
@@ -364,9 +365,12 @@ main .site-breadcrumb a:focus-visible {
 }
 .teacher-sidebar .teacher-live-cta.secondary:hover {
   border-color: rgba(214, 69, 43, 0.5);
-  background: rgba(214, 69, 43, 0.22);
+  background: rgba(214, 69, 43, 0.2);
   color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.teacher-sidebar .teacher-live-cta.secondary svg {
+  color: #ff917e;
 }
 .teacher-live-status {
   color: #ebdcd1;
@@ -440,26 +444,37 @@ main .site-breadcrumb a:focus-visible {
   transition: background .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease;
 }
 .teacher-sidebar .teacher-nav-links a > svg {
-  width: 17px;
-  height: 17px;
+  width: 18px;
+  height: 18px;
   flex: none;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 1.7;
-  opacity: .85;
-  transition: opacity .16s ease;
-}
-.teacher-sidebar .teacher-nav-links a:hover,
-.teacher-sidebar .teacher-nav-links a:focus-visible {
-  background: rgba(214, 69, 43, 0.14);
-  color: #fff;
+  stroke-width: 1.8;
+  opacity: .95;
+  transition: opacity .16s ease, transform .16s ease;
 }
 .teacher-sidebar .teacher-nav-links a:hover > svg,
 .teacher-sidebar .teacher-nav-links a:focus-visible > svg {
   opacity: 1;
+  transform: scale(1.08);
 }
+/* Menü ikonları için canlı tematik renkler */
+.teacher-nav-links a[href="#overview"] > svg { stroke: #60a5fa; }
+.teacher-nav-links a[href="#ai-mentor-panel"] > svg { stroke: #a78bfa; }
+.teacher-nav-links a[href="#maarif-tree"] > svg { stroke: #34d399; }
+.teacher-nav-links a[href="#curriculum"] > svg { stroke: #10b981; }
+.teacher-nav-links a[href="#students"] > svg { stroke: #38bdf8; }
+.teacher-nav-links a[href="#assignments"] > svg { stroke: #fbbf24; }
+.teacher-nav-links a[href="#quiz-builder"] > svg { stroke: #f472b6; }
+.teacher-nav-links a[href="#analytics"] > svg { stroke: #4ade80; }
+.teacher-nav-links a[href="#image-questions"] > svg { stroke: #c084fc; }
+.teacher-nav-links a[href="#ai-question-wizard"] > svg { stroke: #f97316; }
+.teacher-nav-links a[href="#lessons"] > svg { stroke: #f87171; }
+.teacher-nav-links a[href="#library"] > svg { stroke: #2dd4bf; }
+.teacher-nav-links a[href="#announcements"] > svg { stroke: #e879f9; }
+.teacher-nav-links a[href="#teacher-settings"] > svg { stroke: #94a3b8; }
 .teacher-sidebar .teacher-nav-links a[aria-current="page"] {
   border-left-color: #ff755d;
   background: linear-gradient(90deg, rgba(214, 69, 43, 0.32) 0%, rgba(183, 53, 32, 0.18) 100%);
@@ -923,6 +938,7 @@ body.teacher-menu-open {
       <summary>Genel</summary>
       <div class="teacher-nav-links">
         <a href="#overview" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Ana sayfa</a>
+        <a href="#ai-mentor-panel"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM9 13a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>AI Mentör Asistanı</a>
       </div>
     </details>
     <details class="teacher-nav-group" open>
@@ -1048,6 +1064,54 @@ body.teacher-menu-open {
     </section>
 
     </div>
+    <section class="card module-card" id="ai-mentor-panel" data-panel-view="ai-mentor-panel">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">YAPAY ZEKÂ ÇALIŞMA ALANI</p>
+          <h2>Öğretmen AI Mentör Asistanı</h2>
+          <p class="hint">MEB Türkiye Yüzyılı Maarif Modeli ve tüm ders kitapları entegrasyonuyla 4 farklı modda yapay zekâ desteği alın.</p>
+        </div>
+        <span class="module-badge">Gemini RAG Aktif</span>
+      </div>
+
+      <div style="background:var(--color-surface,#fff);border:1px solid var(--color-border,#e5e7eb);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04)">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;background:var(--color-surface-subtle,#f8fafc);border-bottom:1px solid var(--color-border,#e5e7eb)" id="teacherAiRolesBar">
+          <button type="button" class="teacher-ai-pill active" data-role="ai_mentor" style="padding:6px 14px;border-radius:999px;border:1px solid #d6452b;background:#d6452b;color:#fff;font-size:13px;font-weight:600;cursor:pointer">🧠 Sokratik Mentör (Bana Buldur)</button>
+          <button type="button" class="teacher-ai-pill" data-role="ogretmen_ikizi" style="padding:6px 14px;border-radius:999px;border:1px solid var(--color-border,#d1d5db);background:#fff;color:var(--color-text,#374151);font-size:13px;font-weight:500;cursor:pointer">👨‍🏫 Öğretmen İkizi (Farklı Anlat)</button>
+          <button type="button" class="teacher-ai-pill" data-role="soru_cozum" style="padding:6px 14px;border-radius:999px;border:1px solid var(--color-border,#d1d5db);background:#fff;color:var(--color-text,#374151);font-size:13px;font-weight:500;cursor:pointer">📝 Adım Adım Soru Çözümü</button>
+          <button type="button" class="teacher-ai-pill" data-role="ai_koc" style="padding:6px 14px;border-radius:999px;border:1px solid var(--color-border,#d1d5db);background:#fff;color:var(--color-text,#374151);font-size:13px;font-weight:500;cursor:pointer">🎯 AI Koç (Çalışma & Rehberlik)</button>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:#fff;border-bottom:1px solid var(--color-border,#e5e7eb);font-size:13px">
+          <label for="teacherAiGradeSelect" style="font-weight:600;color:var(--color-text,#374151)">Hedef Sınıf Düzeyi:</label>
+          <select id="teacherAiGradeSelect" style="padding:4px 10px;border-radius:6px;border:1px solid var(--color-border,#d1d5db);font-size:13px">
+            <option value="">Genel (5-12. Sınıf)</option>
+            <option value="5">5. Sınıf</option>
+            <option value="6">6. Sınıf</option>
+            <option value="7">7. Sınıf</option>
+            <option value="8">8. Sınıf</option>
+            <option value="9">9. Sınıf</option>
+            <option value="10">10. Sınıf</option>
+            <option value="11">11. Sınıf</option>
+            <option value="12">12. Sınıf</option>
+          </select>
+          <span style="color:#6b7280;margin-left:auto;font-size:12px" id="teacherAiRoleDesc">Sokratik yöntemle yönlendirici ipuçları ve SVG çizimleri</span>
+        </div>
+
+        <div id="teacherAiChatBody" style="height:440px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#fafafa">
+          <div style="align-self:flex-start;max-width:85%;padding:12px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;font-size:14px;line-height:1.6;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+            <strong style="color:#d6452b;display:block;margin-bottom:4px">🤖 AI Mentör Çalışma Alanı</strong>
+            Merhaba Öğretmenim! Matematik dersleriniz için pedagojik anlatımlar tasarlayabilir, soruları Maarif Modeli kazanımlarına göre adım adım çözebilir, öğrencileriniz için farklı metaforlarla zenginleştirilmiş alternatif ders notları üretebilirsiniz. Nasıl yardımcı olabilirim?
+          </div>
+        </div>
+
+        <form id="teacherAiForm" style="display:flex;gap:10px;padding:14px 16px;background:#fff;border-top:1px solid #e5e7eb">
+          <input type="text" id="teacherAiInput" placeholder="Sorunuzu, konuyu veya öğrencinin takıldığı adımı yazın…" autocomplete="off" style="flex:1;padding:10px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:14px" required>
+          <button type="submit" id="teacherAiSubmit" class="btn" style="min-width:100px;background:#d6452b;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer">Gönder</button>
+        </form>
+      </div>
+    </section>
+
     <section class="card module-card" id="maarif-tree" data-panel-view="maarif-tree">
       <div class="section-title"><div><p class="eyebrow">İÇERİK HAVUZU</p><h2>Maarif müfredat gezgini</h2><p class="hint">Sınıftan öğrenme çıktısına, dört adımda ilerleyin.</p></div><span class="module-badge">Müfredat ağacı</span></div>
       <div class="curriculum-workspace-layout">
@@ -1444,6 +1508,7 @@ body.teacher-menu-open {
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js" integrity="sha384-reiVBUvj2HgLgCZalqLFSMBVD9LdtiwGyybRGCq2AfP8Rgebz5DxEnwKp4FpagKV" crossorigin="anonymous"></script>
 <script src="assets/math-text.js"></script>
 <script src="assets/safe-svg.js"></script>
+<script src="assets/ai-visual.js"></script>
 <script src="assets/matematik-mufredati.js"></script>
 <script src="assets/curriculum-tree-view.js"></script>
 <script src="assets/ogretmen-gezinme.js"></script>
@@ -2544,6 +2609,105 @@ body.teacher-menu-open {
       $('girisHata').textContent = err.message.includes('fetch')
         ? 'Sunucuya ulaşılamadı. npm start komutuyla server.js çalıştırın.'
         : 'Öğretmen oturumu doğrulanamadı. Lütfen öğretmen hesabınızla giriş yapın.';
+    });
+  }
+
+  // ---- Öğretmen AI Mentör Çalışma Alanı ----
+  let teacherActiveRole = 'ai_mentor';
+  const roleDescs = {
+    ai_mentor: 'Sokratik yöntemle yönlendirici ipuçları ve SVG çizimleri',
+    ogretmen_ikizi: 'Farklı açılardan (günlük hayat, somut örnek, mikro soru) anlatım',
+    soru_cozum: 'Adım adım pedagojik soru çözümü ve doğrulama',
+    ai_koc: 'Öğrenci çalışma planı, motivasyon ve rehberlik desteği'
+  };
+
+  document.querySelectorAll('.teacher-ai-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.teacher-ai-pill').forEach(p => {
+        p.style.background = '#fff';
+        p.style.color = 'var(--color-text,#374151)';
+        p.style.borderColor = 'var(--color-border,#d1d5db)';
+        p.style.fontWeight = '500';
+      });
+      pill.style.background = '#d6452b';
+      pill.style.color = '#fff';
+      pill.style.borderColor = '#d6452b';
+      pill.style.fontWeight = '600';
+      teacherActiveRole = pill.dataset.role || 'ai_mentor';
+      $('teacherAiRoleDesc').textContent = roleDescs[teacherActiveRole] || '';
+      $('teacherAiInput').focus();
+    });
+  });
+
+  const teacherAiForm = $('teacherAiForm');
+  if (teacherAiForm) {
+    teacherAiForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const input = $('teacherAiInput');
+      const submitBtn = $('teacherAiSubmit');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chatBody = $('teacherAiChatBody');
+      const userBubble = document.createElement('div');
+      userBubble.style.cssText = 'align-self:flex-end;max-width:80%;padding:10px 14px;background:#d6452b;color:#fff;border-radius:12px;font-size:14px;line-height:1.5;box-shadow:0 1px 3px rgba(0,0,0,.08)';
+      userBubble.textContent = text;
+      chatBody.appendChild(userBubble);
+
+      const loadingBubble = document.createElement('div');
+      loadingBubble.style.cssText = 'align-self:flex-start;max-width:85%;padding:10px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;font-size:13px;color:#6b7280';
+      loadingBubble.textContent = 'AI Mentör yanıt hazırlıyor…';
+      chatBody.appendChild(loadingBubble);
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      input.value = '';
+      input.disabled = true;
+      submitBtn.disabled = true;
+
+      try {
+        const gradeVal = $('teacherAiGradeSelect').value;
+        const res = await api('/api/chat', {
+          method: 'POST',
+          body: JSON.stringify({
+            ogrenciMesaji: text,
+            gorevTuru: teacherActiveRole,
+            grade: gradeVal ? Number(gradeVal) : undefined
+          })
+        });
+
+        loadingBubble.remove();
+        const aiBubble = document.createElement('div');
+        aiBubble.style.cssText = 'align-self:flex-start;max-width:85%;padding:12px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;font-size:14px;line-height:1.6;box-shadow:0 1px 3px rgba(0,0,0,.05);color:#1f2937';
+        
+        const header = document.createElement('div');
+        header.style.cssText = 'font-weight:700;color:#d6452b;font-size:12px;margin-bottom:6px';
+        const roleLabels = {
+          ai_mentor: '🤖 AI Mentör',
+          ogretmen_ikizi: '👨‍🏫 Öğretmen İkizi',
+          soru_cozum: '📝 Soru Çözümü',
+          ai_koc: '🎯 AI Koç'
+        };
+        header.textContent = roleLabels[teacherActiveRole] || '🤖 AI Mentör';
+        aiBubble.appendChild(header);
+
+        const content = document.createElement('div');
+        content.style.whiteSpace = 'pre-wrap';
+        if (window.zarifAiVisual) {
+          window.zarifAiVisual.append(content, res.yanit);
+        } else {
+          content.textContent = res.yanit;
+        }
+        aiBubble.appendChild(content);
+        chatBody.appendChild(aiBubble);
+      } catch (err) {
+        loadingBubble.style.color = '#dc2626';
+        loadingBubble.textContent = 'Hata: ' + (err.message || 'AI Mentör yanıt veremedi.');
+      } finally {
+        input.disabled = false;
+        submitBtn.disabled = false;
+        input.focus();
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }
     });
   }
 })();
