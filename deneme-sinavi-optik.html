@@ -3,26 +3,364 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fbf1e7">
   <title>Matematik pratiği ve deneme sınavları | ZarifÇözüm</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/assets/style.css">
   <link rel="stylesheet" href="/assets/anasayfa.css">
   <link rel="stylesheet" href="/assets/pratik.css">
+  <style>
+    .grade-quick-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0 24px;
+    }
+    .grade-quick-pill {
+      padding: 7px 14px;
+      background: #fffaf5;
+      border: 1.5px solid var(--line, #ead8c5);
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #6a5342;
+      text-decoration: none;
+      transition: all .2s ease;
+    }
+    .grade-quick-pill:hover {
+      border-color: #b88a28;
+      color: #493020;
+      transform: translateY(-1px);
+    }
+    .grade-quick-pill.active {
+      background: #fff8ec;
+      border-color: #b88a28;
+      color: #8c6a23;
+      box-shadow: 0 0 0 2px rgba(184,138,40,.2);
+    }
+
+    /* Optical Form Simulator */
+    .optical-sim-box {
+      background: #fffaf5;
+      border: 1.5px solid #ead8c5;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 28px;
+      box-shadow: 0 8px 24px rgba(76,48,27,.05);
+    }
+    .optical-sim-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #ead8c5;
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+    }
+    .optical-timer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      color: #493020;
+    }
+    .timer-badge {
+      background: #493020;
+      color: #fffaf5;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font: 700 16px monospace;
+      letter-spacing: .05em;
+    }
+    .optical-grid {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 24px;
+      align-items: center;
+    }
+    .optical-sheet {
+      background: #fff;
+      border: 1px solid #ead8c5;
+      border-radius: 14px;
+      padding: 16px 20px;
+    }
+    .optical-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px dashed #f0e2d3;
+    }
+    .optical-row:last-child { border-bottom: none; }
+    .q-num {
+      font-weight: 700;
+      font-size: 13px;
+      color: #6a5342;
+      width: 28px;
+    }
+    .bubbles {
+      display: flex;
+      gap: 10px;
+    }
+    .bubble-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1.5px solid #b88a28;
+      background: #fff;
+      color: #6a5342;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all .15s;
+    }
+    .bubble-btn:hover {
+      background: #fff8ec;
+    }
+    .bubble-btn.filled {
+      background: #493020;
+      color: #fff;
+      border-color: #493020;
+    }
+    .optical-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .opt-score-card {
+      background: #fff8ec;
+      border: 1px solid #e9d3a5;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      font-size: 13px;
+      color: #6a5342;
+    }
+    .opt-score-card b {
+      color: #b88a28;
+      font-size: 18px;
+      display: block;
+      margin-top: 4px;
+    }
+
+    /* Panel notice */
+    .panel-card-bridge {
+      background: #fff;
+      border: 1px solid #ead8c5;
+      border-radius: 16px;
+      padding: 18px 22px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .panel-card-bridge p { margin: 0; font-size: 13px; color: #705c4d; }
+
+    @media (max-width: 768px) {
+      .optical-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body data-home="index.html" data-breadcrumb="Test Çöz">
   <main class="wrap">
     <section class="block">
       <h1 class="section-title">Matematik pratiği ve deneme sınavları</h1>
-      <p class="muted" style="margin-top:var(--space-3)">Konu pratiği için sınıf ve konu seç. Öğretmeninin yayınladığı resimli denemeleri ise öğrenci panelinde sorularla birlikte çözebilirsin.</p>
-      <p style="margin-top:var(--space-4)">
+      <p class="muted" style="margin-top:var(--space-2)">Konu pratiği için sınıf ve konu seç. Öğretmeninin yayınladığı resimli denemeleri ise öğrenci panelinde sorularla birlikte çözebilirsin.</p>
+
+      <!-- Fast Grade Switcher Bar -->
+      <nav class="grade-quick-bar" aria-label="Sınıf Seçimi">
+        <a class="grade-quick-pill" href="/deneme-sinavi-optik.html?sinif=5" data-grade="5">5. Sınıf</a>
+        <a class="grade-quick-pill" href="/deneme-sinavi-optik.html?sinif=6" data-grade="6">6. Sınıf</a>
+        <a class="grade-quick-pill" href="/deneme-sinavi-optik.html?sinif=7" data-grade="7">7. Sınıf</a>
+        <a class="grade-quick-pill" href="/deneme-sinavi-optik.html?sinif=8" data-grade="8">8. Sınıf (LGS)</a>
+        <a class="grade-quick-pill" href="/deneme-sinavi-optik.html?sinif=9" data-grade="9">9. Sınıf</a>
+        <a class="grade-quick-pill" href="/deneme-sinavi-optik.html?sinif=10" data-grade="10">10. Sınıf</a>
+        <a class="grade-quick-pill" href="/deneme-sinavi-optik.html?sinif=11" data-grade="11">11. Sınıf</a>
+        <a class="grade-quick-pill" href="/deneme-sinavi-optik.html?sinif=12" data-grade="12">12. Sınıf (YKS)</a>
+      </nav>
+
+      <!-- Interactive Optical Form Simulator -->
+      <section class="optical-sim-box" aria-label="Canlı Optik Form Simülatörü">
+        <div class="optical-sim-head">
+          <div style="font-weight:700;font-size:15px;color:#493020;display:flex;align-items:center;gap:8px">
+            <span>📝 Canlı Optik Form Simülatörü</span>
+            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:#f5e8d9;color:#7b5b29">Kitapçık A</span>
+          </div>
+          <div class="optical-timer">
+            <span>Sınav Süresi:</span>
+            <span class="timer-badge" id="optTimer">40:00</span>
+            <button class="btn btn-secondary sm" type="button" id="timerToggleBtn" style="padding:4px 8px;font-size:11px">Durdur</button>
+          </div>
+        </div>
+
+        <div class="optical-grid">
+          <div class="optical-sheet" id="opticalSheet">
+            <!-- 5 sample optical question rows -->
+            <div class="optical-row" data-q="1">
+              <span class="q-num">1.</span>
+              <div class="bubbles">
+                <button class="bubble-btn" type="button" data-val="A">A</button>
+                <button class="bubble-btn" type="button" data-val="B">B</button>
+                <button class="bubble-btn" type="button" data-val="C">C</button>
+                <button class="bubble-btn" type="button" data-val="D">D</button>
+              </div>
+            </div>
+            <div class="optical-row" data-q="2">
+              <span class="q-num">2.</span>
+              <div class="bubbles">
+                <button class="bubble-btn" type="button" data-val="A">A</button>
+                <button class="bubble-btn" type="button" data-val="B">B</button>
+                <button class="bubble-btn" type="button" data-val="C">C</button>
+                <button class="bubble-btn" type="button" data-val="D">D</button>
+              </div>
+            </div>
+            <div class="optical-row" data-q="3">
+              <span class="q-num">3.</span>
+              <div class="bubbles">
+                <button class="bubble-btn" type="button" data-val="A">A</button>
+                <button class="bubble-btn" type="button" data-val="B">B</button>
+                <button class="bubble-btn" type="button" data-val="C">C</button>
+                <button class="bubble-btn" type="button" data-val="D">D</button>
+              </div>
+            </div>
+            <div class="optical-row" data-q="4">
+              <span class="q-num">4.</span>
+              <div class="bubbles">
+                <button class="bubble-btn" type="button" data-val="A">A</button>
+                <button class="bubble-btn" type="button" data-val="B">B</button>
+                <button class="bubble-btn" type="button" data-val="C">C</button>
+                <button class="bubble-btn" type="button" data-val="D">D</button>
+              </div>
+            </div>
+            <div class="optical-row" data-q="5">
+              <span class="q-num">5.</span>
+              <div class="bubbles">
+                <button class="bubble-btn" type="button" data-val="A">A</button>
+                <button class="bubble-btn" type="button" data-val="B">B</button>
+                <button class="bubble-btn" type="button" data-val="C">C</button>
+                <button class="bubble-btn" type="button" data-val="D">D</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="optical-actions">
+            <button class="btn btn-primary" type="button" id="evalOpticBtn">Optik Formu Değerlendir</button>
+            <div class="opt-score-card" id="optScoreBox">
+              <span>İşaretlenen Soru: <strong id="optMarkedCount">0</strong> / 5</span>
+              <b id="optResultMsg">Şıkları kodlayarak başlayın.</b>
+            </div>
+            <a class="btn btn-secondary sm" href="/pages/ornek-sinav-akisi.html" style="font-size:12px;text-align:center">
+              Tam Sınav Akışı ve Simülatör ↗
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Student Panel Bridge -->
+      <div class="panel-card-bridge">
+        <div>
+          <p><strong>Kayıtlı Öğrenci misiniz?</strong></p>
+          <p class="muted">Öğretmeninizin atadığı resimli Türkiye Geneli deneme sınavlarını ve ayrıntılı karne analizlerini öğrenci panelinde çözebilirsiniz.</p>
+        </div>
         <a class="btn btn-primary" href="/ogrenci-paneli.html#denemeler">Öğrenci panelindeki denemelere git</a>
-      </p>
-      <p class="muted" style="margin-top:var(--space-3)">Giriş yapman istenirse, girişten sonra öğrenci panelinde “Deneme Sınavları” bölümünü seç.</p>
+      </div>
+
+      <!-- Practice Mount -->
       <div id="pratik-mount"></div>
     </section>
   </main>
+
   <script src="/assets/matematik-mufredati.js"></script>
   <script src="/assets/math-text.js"></script>
   <script src="/assets/pratik.js"></script>
+  <script>
+    (function () {
+      const activeGrade = new URLSearchParams(location.search).get("sinif");
+      if (activeGrade) {
+        document.querySelectorAll('.grade-quick-pill').forEach(pill => {
+          if (pill.dataset.grade === activeGrade) pill.classList.add('active');
+        });
+      }
+
+      // Optical Form Interactive Bubble Logic
+      const sheet = document.getElementById('opticalSheet');
+      const markedCountEl = document.getElementById('optMarkedCount');
+      const resultMsgEl = document.getElementById('optResultMsg');
+      const selections = {};
+
+      if (sheet) {
+        sheet.addEventListener('click', (e) => {
+          const btn = e.target.closest('.bubble-btn');
+          if (!btn) return;
+          const row = btn.closest('.optical-row');
+          const qNum = row.dataset.q;
+
+          // Clear row bubbles
+          row.querySelectorAll('.bubble-btn').forEach(b => b.classList.remove('filled'));
+
+          // If clicked already selected, deselect
+          if (selections[qNum] === btn.dataset.val) {
+            delete selections[qNum];
+          } else {
+            btn.classList.add('filled');
+            selections[qNum] = btn.dataset.val;
+          }
+
+          const count = Object.keys(selections).length;
+          markedCountEl.textContent = count;
+          resultMsgEl.textContent = `${count} soru kodlandı.`;
+        });
+      }
+
+      const evalBtn = document.getElementById('evalOpticBtn');
+      if (evalBtn) {
+        evalBtn.addEventListener('click', () => {
+          const count = Object.keys(selections).length;
+          if (count === 0) {
+            resultMsgEl.textContent = 'Henüz hiçbir şık kodlanmadı!';
+            return;
+          }
+          // Mock answer key: 1:B, 2:C, 3:A, 4:D, 5:B
+          const key = { '1': 'B', '2': 'C', '3': 'A', '4': 'D', '5': 'B' };
+          let dogru = 0;
+          let yanlis = 0;
+          Object.entries(selections).forEach(([q, val]) => {
+            if (key[q] === val) dogru++;
+            else yanlis++;
+          });
+          const net = (dogru - (yanlis / 3)).toFixed(2);
+          resultMsgEl.innerHTML = `${dogru} Doğru · ${yanlis} Yanlış · <span style="color:#b88a28">${net} Net</span>`;
+        });
+      }
+
+      // Timer Logic
+      let totalSeconds = 40 * 60;
+      let timerRunning = true;
+      const timerEl = document.getElementById('optTimer');
+      const toggleBtn = document.getElementById('timerToggleBtn');
+
+      const interval = setInterval(() => {
+        if (!timerRunning || totalSeconds <= 0) return;
+        totalSeconds--;
+        const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+        const s = String(totalSeconds % 60).padStart(2, '0');
+        if (timerEl) timerEl.textContent = `${m}:${s}`;
+      }, 1000);
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          timerRunning = !timerRunning;
+          toggleBtn.textContent = timerRunning ? 'Durdur' : 'Devam Et';
+        });
+      }
+    })();
+  </script>
   <script>ZarifPratik.mount(document.getElementById("pratik-mount"), {mod: "test", sinif: new URLSearchParams(location.search).get("sinif")});</script>
   <script src="/assets/site-footer.js"></script>
   <script src="/assets/breadcrumb.js"></script>
