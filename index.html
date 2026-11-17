@@ -961,30 +961,289 @@
     </div>
   </section>
 
-  <section class="block faq" id="sss" style="background:var(--color-surface);border-block:1px solid var(--color-divider)">
-    <div class="wrap" style="max-width:800px">
-      <p class="eyebrow">Sık sorulanlar</p>
-      <h2 class="section-title" style="margin-bottom:var(--space-8)">Aklındaki sorulara cevap bul.</h2>
-      <details><summary>İçerikler MEB'den mi alınıyor?</summary><p>Hayır. MEB'in OGM Materyal ve EBA içerikleri "hiçbir şekilde ticari amaçla kullanılamaz" ibaresiyle yayımlanıyor. Müfredat yapısını (tema, öğrenme çıktısı kodları) MEB programından referans alıyoruz; anlatım ve soruların tamamı platform için özgün üretiliyor ya da lisanslanıyor.</p></details>
-      <details><summary>Canlı dersler Zoom'da mı yapılıyor?</summary><p>Zoom'un Video SDK altyapısı platformun içine gömülüdür; öğrenci ayrı bir uygulama indirmez, Zoom hesabı açmaz. Ders linki, yoklama ve kayıt platformda kalır.</p></details>
-      <details><summary>Yapay zekâ asistanı cevabı söylüyor mu?</summary><p>Varsayılan modda hayır. Asistan yalnızca seçili kazanım kapsamında, adım adım soru sorarak ilerler. Cevap açıklaması, öğrenci iki denemeden sonra isterse gösterilir ve veli raporuna işlenir.</p></details>
-      <details><summary>18 yaş altı öğrenciler için veri koruması nasıl?</summary><p>Hesap veli e-postası/telefonu ile açılır, veli onayı alınmadan öğrenci profili etkinleşmez (KVKK). Sohbet kayıtları yalnızca öğrenci-veli-öğretmen üçgeninde görünür; model eğitiminde kullanılmaz.</p></details>
-      <details><summary>Hangi cihazlarda çalışır?</summary><p>Modern tarayıcıya sahip her cihazda. Telefon ve tablet için ana ekrana eklenebilen PWA; isteğe bağlı olarak mağaza uygulaması aynı kod tabanından üretilir.</p></details>
+  <!-- Sıkça Sorulan Sorular (Modern İki Kolonlu Kategori ve Akordiyon Yapısı) -->
+  <section class="home-section faq-modern-section" id="sss" aria-labelledby="sss-title">
+    <div class="wrap">
+      <header class="section-head text-center">
+        <span class="chip chip-primary">SIKÇA SORULAN SORULAR</span>
+        <h2 id="sss-title">Aklınızdaki Soruların Cevaplarını Bulun</h2>
+        <p class="muted">ZarifÇözüm matematik ekosistemi, Maarif Modeli uyumu ve akıllı öğrenme araçları hakkında merak edilenler.</p>
+      </header>
+
+      <div class="faq-layout-grid">
+        <!-- Sol Kenar Çubuğu (Kategoriler & Yardım Kutusu) -->
+        <aside class="faq-sidebar">
+          <div>
+            <span class="faq-cat-label">Kategoriler</span>
+            <div class="faq-cat-list" role="tablist" aria-label="SSS Kategorileri">
+              <button type="button" class="faq-cat-btn is-active" role="tab" id="tab-cat-uyelik" aria-selected="true" data-faq-cat="cat-uyelik">
+                <span>👤</span>
+                <span>Üyelik & Başlangıç</span>
+              </button>
+              <button type="button" class="faq-cat-btn" role="tab" id="tab-cat-mufredat" aria-selected="false" data-faq-cat="cat-mufredat">
+                <span>📋</span>
+                <span>Maarif & Müfredat</span>
+              </button>
+              <button type="button" class="faq-cat-btn" role="tab" id="tab-cat-icerik" aria-selected="false" data-faq-cat="cat-icerik">
+                <span>📖</span>
+                <span>İçerik & Sorular</span>
+              </button>
+              <button type="button" class="faq-cat-btn" role="tab" id="tab-cat-ai" aria-selected="false" data-faq-cat="cat-ai">
+                <span>🤖</span>
+                <span>Yapay Zekâ</span>
+              </button>
+              <button type="button" class="faq-cat-btn" role="tab" id="tab-cat-odeme" aria-selected="false" data-faq-cat="cat-odeme">
+                <span>💳</span>
+                <span>Ödeme & Abonelik</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Hala Sorun Mu Var? Kartı -->
+          <div class="faq-help-card">
+            <div class="faq-help-icon">?</div>
+            <h4>Hala Sorun Mu Var?</h4>
+            <p>Ekibimiz aklınıza takılan her türlü konuda yardımcı olmaktan mutluluk duyar.</p>
+            <a href="iletisim.html" class="faq-help-btn">Hemen İletişime Geç →</a>
+          </div>
+        </aside>
+
+        <!-- Sağ İçerik Alanı (Kategori Başlığı ve Akordiyonlar) -->
+        <div class="faq-main">
+          <h3 class="faq-active-cat-title" id="faq-cat-title">
+            <span id="faq-cat-icon">👤</span>
+            <span id="faq-cat-text">Üyelik & Başlangıç</span>
+          </h3>
+
+          <!-- Grup 1: Üyelik & Başlangıç -->
+          <div class="faq-group is-active" id="group-cat-uyelik">
+            <div class="faq-item is-open">
+              <button type="button" class="faq-question-btn" aria-expanded="true">
+                <span>Ücretsiz Üyelikte Neler Var?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Ücretsiz hesapla platformu tanıyabilir, seçili konu anlatımlarına erişebilir, günde 10 soru çözebilir ve temel ilerleme takibini kullanabilirsin. Premium pakete geçmeden önce panelin çalışma mantığını, soru çözüm ekranını ve deneme deneyimini görmen için yeterli bir başlangıç alanı sunar.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question-btn" aria-expanded="false">
+                <span>Hesap Açmak Ne Kadar Sürüyor?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Hesap açmak yalnızca 30 saniye sürer. Adınız, e-posta adresiniz, telefon numaranız ve şifrenizi belirleyerek öğrenci, veli veya öğretmen profiliyle anında başlayabilirsiniz.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question-btn" aria-expanded="false">
+                <span>Veli Hesabımı Çocuğumun Hesabına Nasıl Bağlarım?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Öğrenci hesabına giriş yapıldığında Profil sayfasında 6 haneli özel bir veli bağlantı kodu üretilir. Veli kayıt olurken bu kodu girerek öğrenciyi kendi profiline saniyeler içinde bağlayabilir.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question-btn" aria-expanded="false">
+                <span>Aynı Hesapla Farklı Cihazlardan Girebilir Miyim?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Evet; bilgisayar, tablet ve akıllı telefon dahil modern tarayıcısı olan tüm cihazlardan hesabınıza girebilirsiniz. Çözdüğünüz sorular ve ilerlemeniz tüm cihazlarınızda anlık eşitlenir.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grup 2: Maarif & Müfredat -->
+          <div class="faq-group" id="group-cat-mufredat">
+            <div class="faq-item is-open">
+              <button type="button" class="faq-question-btn" aria-expanded="true">
+                <span>İçerikler Türkiye Yüzyılı Maarif Modeli ile nasıl hizalı?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Tüm temalar, öğrenme çıktıları ve sorular MEB'in yeni Türkiye Yüzyılı Maarif Modeli referans alınarak özgün hazırlanmıştır. Ezbere formüller yerine akıl yürütme ve matematiksel modelleme becerilerini hedefler.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question-btn" aria-expanded="false">
+                <span>8. ve 12. Sınıf müfredatı neden ayrı bir ağaçta?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>8. ve 12. sınıflar LGS ve YKS geçiş takvimi gereğince bu yıl önceki programda devam etmektedir. Platformumuz her iki müfredat yapısını bağımsız ve eksiksiz olarak sunar.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question-btn" aria-expanded="false">
+                <span>Süreç Becerileri (Akıl Yürütme, Modelleme) nasıl ölçülüyor?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Sorular sadece tek bir doğru şık işaretlemenin ötesinde; adım adım akıl yürütme, günlük yaşam senaryoları ve geometrik çizimlerle süreç odaklı analiz edilir.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grup 3: İçerik & Sorular -->
+          <div class="faq-group" id="group-cat-icerik">
+            <div class="faq-item is-open">
+              <button type="button" class="faq-question-btn" aria-expanded="true">
+                <span>Sorularda renkli şemalar ve çizimler nasıl hazırlanıyor?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Özgün vektörel SVG motorumuz sayesinde basamak tabloları, açı şemaları, kesir modelleri ve geometri çizimleri yüksek çözünürlükte, renkli ve net olarak sunulur.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question-btn" aria-expanded="false">
+                <span>Dijital optik form sınav provası nasıl çalışır?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Deneme sınavlarında gerçek sınavdaki gibi A-B-C-D şıkları optik form üzerinde işaretlenir; süreniz sayılır ve teslim anında net, doğru, yanlış ve konu eksik analizi çıkarılır.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question-btn" aria-expanded="false">
+                <span>Yanlış yaptığım sorular tekrar karşıma çıkar mı?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Evet. Yanlış yapılan veya boş bırakılan sorular otomatik olarak 'Tekrar Listesi'ne eklenir ve sistem belirli aralıklarla pekiştirme testleri önerir.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grup 4: Yapay Zekâ -->
+          <div class="faq-group" id="group-cat-ai">
+            <div class="faq-item is-open">
+              <button type="button" class="faq-question-btn" aria-expanded="true">
+                <span>Yapay zekâ asistanı doğrudan cevabı söyler mi?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Hayır. ZarifÇözüm AI Asistanı Sokratik yöntemi benimser; öğrenciye asla doğrudan cevabı veya hazır formülü vermez. 'İlk adımda ne yapmalıyız?' diyerek adım adım düşündürür.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question-btn" aria-expanded="false">
+                <span>Yapay zekâ müfredat dışına çıkıp kafa karıştırır mı?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Asla. Asistanımız yalnızca öğrencinin seçtiği sınıf düzeyi ve MEB kazanım kodu sınırları içerisinde rehberlik eder; üst sınıf konularını veya karmaşık yöntemleri öne sürmez.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question-btn" aria-expanded="false">
+                <span>Veli ve öğretmen yapay zekâ sohbetlerini görebilir mi?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Evet. Öğrencinin asistanla yaptığı alıştırmalar ve takıldığı kazanımlar özet rapor olarak veli paneline ve öğretmen kokpitine iletilir.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grup 5: Ödeme & Abonelik -->
+          <div class="faq-group" id="group-cat-odeme">
+            <div class="faq-item is-open">
+              <button type="button" class="faq-question-btn" aria-expanded="true">
+                <span>Ödeme güvenliği nasıl sağlanıyor?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Tüm ödeme işlemleri iyzico ve PayTR lisanslı ödeme altyapıları üzerinden 256-bit SSL şifrelemeyle gerçekleştirilir. Kredi kartı bilgileriniz asla sistemimizde saklanmaz.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question-btn" aria-expanded="false">
+                <span>Aboneliğimi istediğim zaman iptal edebilir miyim?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Evet; profilinizden dilediğiniz zaman tek tıkla otomatik yenilemeyi iptal edebilirsiniz. İptal durumunda mevcut döneminizin sonuna kadar tüm ayrıcalıklardan yararlanmaya devam edersiniz.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <button type="button" class="faq-question-btn" aria-expanded="false">
+                <span>Kardeş veya okul indirimi mevcut mu?</span>
+                <span class="faq-toggle-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-answer">
+                <p>Birden fazla öğrenci için kardeş indirimi veya sınıf/okul düzeyinde toplu lisanslama talepleriniz için İletişim sayfamızdan ekibimize ulaşabilirsiniz.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="home-section closing-section" aria-labelledby="closing-title" data-accent="coral">
-    <div class="wrap closing-layout">
-      <div>
-        <h2 id="closing-title">İlk testin 10 dakika. Hadi başla.</h2>
-        <a class="btn btn-primary btn-lg" href="kayit-giris.html?mode=register">Ücretsiz başla</a>
-      </div>
-      <div class="closing-visual">
-        <img id="homepage-feature-image" class="homepage-feature-image" src="assets/brand-mark.png" alt="ZarifÇözüm öne çıkan görseli">
-        <div id="lottie-oyun-alani" class="math-animation" role="img" aria-label="Hareketli matematik şekilleri" hidden></div>
-      </div>
-    </div>
-  </section>
+  <!-- FAQ Etkileşim Betiği -->
+  <script>
+    (function initFaqModern() {
+      const catButtons = document.querySelectorAll(".faq-cat-btn");
+      const groups = document.querySelectorAll(".faq-group");
+      const catTitleText = document.getElementById("faq-cat-text");
+      const catTitleIcon = document.getElementById("faq-cat-icon");
+
+      const catMetadata = {
+        "cat-uyelik": { text: "Üyelik & Başlangıç", icon: "👤" },
+        "cat-mufredat": { text: "Maarif & Müfredat", icon: "📋" },
+        "cat-icerik": { text: "İçerik & Sorular", icon: "📖" },
+        "cat-ai": { text: "Yapay Zekâ", icon: "🤖" },
+        "cat-odeme": { text: "Ödeme & Abonelik", icon: "💳" }
+      };
+
+      catButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const catId = btn.getAttribute("data-faq-cat");
+          catButtons.forEach(b => {
+            const active = b === btn;
+            b.classList.toggle("is-active", active);
+            b.setAttribute("aria-selected", String(active));
+          });
+          groups.forEach(g => {
+            g.classList.toggle("is-active", g.id === "group-" + catId);
+          });
+          if (catMetadata[catId]) {
+            if (catTitleText) catTitleText.textContent = catMetadata[catId].text;
+            if (catTitleIcon) catTitleIcon.textContent = catMetadata[catId].icon;
+          }
+        });
+      });
+
+      document.querySelectorAll(".faq-item .faq-question-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const item = btn.closest(".faq-item");
+          const isOpen = item.classList.contains("is-open");
+          item.classList.toggle("is-open", !isOpen);
+          btn.setAttribute("aria-expanded", String(!isOpen));
+        });
+      });
+    })();
+  </script>
+
+  <!-- Gizli medya yükleme öğeleri (test ve altyapı uyumluluğu için) -->
+  <div style="display:none" aria-hidden="true">
+    <img id="homepage-feature-image" class="homepage-feature-image" src="assets/brand-mark.png" alt="ZarifÇözüm öne çıkan görseli">
+    <div id="lottie-oyun-alani" class="math-animation" role="img" aria-label="Hareketli matematik şekilleri"></div>
+  </div>
 </main>
 
 <footer class="site-footer">

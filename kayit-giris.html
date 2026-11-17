@@ -4,118 +4,636 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>Giriş / Kayıt | ZarifÇözüm</title>
+  <title>Giriş & Kayıt | ZarifÇözüm</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <style>
-    :root{font-family:Inter,"Segoe UI",sans-serif;color:#3a2618;background:#fbf1e8;font-synthesis:none}
-    *{box-sizing:border-box}
-    body{min-height:100vh;margin:0;display:flex;flex-direction:column}
-    body>main.card{margin:48px auto;max-width:calc(100% - 32px)}
-    body>.site-footer{width:100%;margin-top:auto}
-    .card{width:min(100%,440px);padding:32px;background:#fffaf5;border:1px solid #d9d3c3;border-radius:20px;box-shadow:0 20px 60px rgba(49, 36, 24,.12)}
-    .brand{margin:0 0 6px;font-size:1.55rem;color:#4a2e1a}
-    .intro{margin:0 0 24px;color:#6a5242}
-    .switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px;padding:5px;border-radius:10px;background:#f3e1cf}
-    .switch button{padding:10px;border:0;border-radius:7px;background:transparent;color:#6a5242;font:inherit;font-weight:600;cursor:pointer}
-    .switch button[aria-pressed=true]{background:#fffaf5;color:#523520;box-shadow:0 1px 5px rgba(49, 36, 24,.12)}
-    .parent-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:0 0 18px}
-    label{display:block;margin:15px 0 6px;font-size:.92rem;font-weight:600}
-    input,select{width:100%;padding:12px;border:1px solid #d9d3c3;border-radius:8px;background:#fffaf5;color:inherit;font:inherit}
-    input:focus,select:focus,button:focus-visible{outline:3px solid rgba(125, 90, 60,.3);border-color:#7a4f2d}
-    .primary{width:100%;margin-top:22px;padding:13px;border:0;border-radius:8px;background:#7a4f2d;color:#fff;font:inherit;font-weight:700;cursor:pointer}
-    .primary:hover{background:#6b4a2f}
-    .message{min-height:1.4em;margin:12px 0 0;color:#a3201a;font-size:.9rem}
-    .back{display:block;margin-top:18px;text-align:center;color:#6a5242;text-decoration:none}
-    .google-wrap{margin-bottom:6px}
-    #googleButton{display:flex;justify-content:center}
-    .google-disabled{margin:0;color:#6a5242;font-size:.85rem;text-align:center}
-    .divider{display:flex;align-items:center;gap:12px;margin:16px 0 4px;color:#8b7565;font-size:.85rem}
-    .divider:before,.divider:after{content:"";height:1px;flex:1;background:#e5d9c8}
-    .forgot-row{display:flex;justify-content:flex-end;margin-top:10px}
-    .text-button{padding:0;border:0;background:none;color:#7a4f2d;font:inherit;font-size:.88rem;font-weight:600;text-decoration:underline;cursor:pointer}
-    .message.success{color:#37674c}
-    .back-link{display:block;margin-top:14px;text-align:center}
-    [hidden]{display:none!important}
+    :root {
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      color: #3a2618;
+      background: #fbf1e8;
+      font-synthesis: none;
+      --navy-900: #2c1a0e;
+      --navy-800: #3a2618;
+      --terracotta: #c2570c;
+      --terracotta-hover: #a84705;
+      --cream-bg: #fbf1e8;
+      --card-bg: #fffaf5;
+      --border-color: #ead3bd;
+      --muted-text: #6a5242;
+      --gold: #c59734;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--cream-bg);
+      color: var(--navy-800);
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .auth-split-wrapper {
+      width: min(100%, 1020px);
+      margin: auto;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(58, 38, 24, 0.12);
+      overflow: hidden;
+    }
+
+    /* Sol Sütun (Branded Dark Panel) */
+    .auth-sidebar-hero {
+      background: linear-gradient(165deg, var(--navy-900) 0%, var(--navy-800) 100%);
+      color: #fff;
+      padding: 40px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+    .auth-sidebar-hero::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 80% 20%, rgba(194, 87, 12, 0.18) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .sidebar-brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sidebar-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .sidebar-brand-text strong {
+      display: block;
+      font-size: 1.25rem;
+      letter-spacing: -0.01em;
+      color: #fff;
+    }
+    .sidebar-brand-text span {
+      display: block;
+      font-size: 0.75rem;
+      color: #ebd8c8;
+    }
+
+    .sidebar-middle {
+      margin-block: 36px;
+    }
+    .sidebar-middle h2 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+
+    /* Stepper (Adımlar) */
+    .auth-stepper {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: relative;
+    }
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+    }
+    .step-item:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 15px;
+      top: 32px;
+      bottom: -14px;
+      width: 2px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .step-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.15);
+      color: #ebd8c8;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .step-item.is-active .step-circle {
+      background: #fff;
+      color: var(--navy-900);
+      box-shadow: 0 0 0 3px rgba(194, 87, 12, 0.4);
+    }
+    .step-text strong {
+      display: block;
+      font-size: 0.92rem;
+      color: #fff;
+    }
+    .step-text span {
+      display: block;
+      font-size: 0.75rem;
+      color: #ebd8c8;
+    }
+
+    /* Sol Sütun Alt İstatistikler */
+    .sidebar-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      text-align: center;
+    }
+    .stat-box strong {
+      display: block;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--gold);
+    }
+    .stat-box span {
+      display: block;
+      font-size: 0.7rem;
+      color: #ebd8c8;
+      margin-top: 2px;
+    }
+
+    /* Sağ Sütun (Form Alanı) */
+    .auth-form-card {
+      padding: 40px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: var(--card-bg);
+      position: relative;
+    }
+
+    .form-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: #f3e1cf;
+      border: 1px solid var(--border-color);
+      color: var(--navy-800);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+    .back-btn:hover {
+      background: #ead3bd;
+    }
+
+    .auth-label-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--terracotta);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .auth-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--navy-800);
+      margin: 4px 0;
+      letter-spacing: -0.01em;
+    }
+    .intro {
+      font-size: 0.92rem;
+      color: var(--muted-text);
+      margin-bottom: 20px;
+      line-height: 1.45;
+    }
+
+    /* Mode Switcher Pills */
+    .switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 18px;
+      padding: 5px;
+      border-radius: 12px;
+      background: #f3e1cf;
+    }
+    .switch button {
+      padding: 9px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted-text);
+      font: inherit;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .switch button[aria-pressed=true] {
+      background: #fff;
+      color: var(--navy-800);
+      box-shadow: 0 2px 6px rgba(58, 38, 24, 0.1);
+    }
+
+    .parent-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .text-button {
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--terracotta);
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .text-button:hover {
+      color: var(--terracotta-hover);
+    }
+
+    /* Google Button */
+    .google-wrap { margin-bottom: 8px; }
+    #googleButton { display: flex; justify-content: center; width: 100%; }
+    .google-disabled {
+      margin: 0;
+      color: var(--muted-text);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 14px 0 16px;
+      color: #8b7260;
+      font-size: 0.82rem;
+    }
+    .divider::before, .divider::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: var(--border-color);
+    }
+
+    /* Form Fields */
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .field-wrap {
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--navy-800);
+    }
+    input, select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 9px;
+      background: #fff;
+      color: inherit;
+      font: inherit;
+      font-size: 0.92rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--terracotta);
+      box-shadow: 0 0 0 3px rgba(194, 87, 12, 0.15);
+    }
+
+    /* Telefon Açıklama Notu */
+    .phone-helper {
+      display: block;
+      margin-top: 5px;
+      font-size: 0.78rem;
+      color: #8b7260;
+      line-height: 1.35;
+    }
+
+    .forgot-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 6px;
+      margin-bottom: 14px;
+    }
+
+    .primary {
+      width: 100%;
+      padding: 13px;
+      border: 0;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--terracotta), #952719);
+      color: #fff;
+      font: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(194, 87, 12, 0.25);
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+    .primary:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+    .primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Bilgilendirme Kutusu */
+    .auth-notice-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: #fdf6ee;
+      border: 1px solid var(--border-color);
+      font-size: 0.8rem;
+      color: var(--muted-text);
+      line-height: 1.4;
+    }
+
+    .message {
+      min-height: 1.4em;
+      margin: 12px 0 0;
+      color: #a3201a;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    .message.success { color: #17805f; }
+
+    .bottom-switch-link {
+      display: block;
+      margin-top: 16px;
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--muted-text);
+    }
+
+    [hidden] { display: none !important; }
+
+    /* Responsive */
+    @media (max-width: 880px) {
+      .auth-split-wrapper {
+        grid-template-columns: 1fr;
+        border-radius: 18px;
+      }
+      .auth-sidebar-hero {
+        padding: 28px 24px;
+      }
+      .sidebar-middle {
+        margin-block: 20px;
+      }
+      .auth-stepper {
+        display: none;
+      }
+      .auth-form-card {
+        padding: 32px 24px;
+      }
+    }
+    @media (max-width: 520px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
-  <main class="card">
-    <h1 class="brand">ZarifÇözüm</h1>
-    <p class="intro" id="intro">Hesabınıza giriş yapın veya yeni hesap oluşturun.</p>
-    <div id="authOptions">
-    <div class="google-wrap" id="googleWrap"><div id="googleButton"></div><p class="google-disabled" id="googleDisabled" hidden>Google ile giriş bu sitede henüz etkinleştirilmedi.</p></div>
-    <div class="divider" id="googleDivider"><span>veya e-posta ile</span></div>
-    <div class="parent-actions">
-      <button class="text-button" id="parentLoginMode" type="button">Veli Girişi</button>
-      <button class="text-button" id="parentRegisterMode" type="button">Veli Kayıt Ol</button>
-    </div>
-    <div class="switch" aria-label="İşlem seçin">
-      <button id="loginMode" type="button" aria-pressed="true">Giriş yap</button>
-      <button id="registerMode" type="button" aria-pressed="false">Kayıt ol</button>
-    </div>
-    <form id="authForm" action="/login" method="post">
-      <div id="nameField" hidden>
-        <label for="name">Ad soyad</label>
-        <input id="name" name="name" autocomplete="name" maxlength="100" disabled>
+  <div class="auth-split-wrapper">
+    <!-- Sol Sütun: Brand & Stepper -->
+    <aside class="auth-sidebar-hero">
+      <div class="sidebar-brand-row">
+        <img class="sidebar-logo" src="assets/brand-mark.png" alt="ZarifÇözüm">
+        <div class="sidebar-brand-text">
+          <strong>ZarifÇözüm</strong>
+          <span>Maarif Modeli Matematik Platformu</span>
+        </div>
       </div>
-      <label for="email">E-posta</label>
-      <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required>
-      <div id="phoneField" hidden>
-        <label for="phone">Telefon numarası</label>
-        <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" maxlength="20" disabled>
-      </div>
-      <div id="surnameField" hidden>
-        <label for="surname">Soyad</label>
-        <input id="surname" name="surname" autocomplete="family-name" maxlength="100" disabled>
-      </div>
-      <label for="password">Şifre</label>
-      <input id="password" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="72" required>
-      <div id="confirmField" hidden>
-        <label for="passwordConfirmation">Şifreyi tekrar girin</label>
-        <input id="passwordConfirmation" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" disabled>
-      </div>
-      <div id="roleField" hidden>
-        <label for="role">Kullanıcı tipi</label>
-        <select id="role" name="role" disabled>
-          <option value="student">Öğrenci</option>
-          <option value="teacher">Öğretmen</option>
-        </select>
-      </div>
-      <div id="teacherCodeField" hidden>
-        <label for="teacherCode">Öğretmen davet kodu</label>
-        <input id="teacherCode" name="teacherCode" type="password" autocomplete="off" disabled>
-      </div>
-      <div id="parentCodeField" hidden>
-        <label for="parentConnectionCode">6 karakterli veli bağlantı kodu</label>
-        <input id="parentConnectionCode" name="parentConnectionCode" autocomplete="off" autocapitalize="characters" maxlength="6" pattern="[A-Za-z0-9]{6}" disabled>
-      </div>
-      <div class="forgot-row" id="forgotRow"><button class="text-button" id="forgotLink" type="button">Şifremi unuttum</button></div>
-      <button class="primary" id="submitButton" type="submit">Giriş yap</button>
-      <p class="message" id="message" role="alert" aria-live="polite"></p>
-    </form>
-    </div>
 
-    <form id="forgotForm" hidden>
-      <p class="intro">E-posta adresinizi girin; şifre yenileme bağlantısını gönderelim.</p>
-      <label for="forgotEmail">E-posta</label>
-      <input id="forgotEmail" type="email" autocomplete="email" maxlength="254" required>
-      <button class="primary" type="submit">Sıfırlama bağlantısı gönder</button>
-      <p class="message" id="forgotMessage" role="status" aria-live="polite"></p>
-      <p class="back-link"><button class="text-button" type="button" data-mode="login">Girişe dön</button></p>
-    </form>
+      <div class="sidebar-middle">
+        <h2>Birkaç adımda hesabını oluştur, hemen başla.</h2>
+        <div class="auth-stepper">
+          <div class="step-item is-active">
+            <span class="step-circle">1</span>
+            <div class="step-text">
+              <strong>Genel Bilgiler</strong>
+              <span>Şu an buradasın</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <span class="step-circle">2</span>
+            <div class="step-text">
+              <strong>Sınıf & Profil Seçimi</strong>
+              <span>Sıradaki adım</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <span class="step-circle">3</span>
+            <div class="step-text">
+              <strong>Şifre Belirle</strong>
+              <span>Sıradaki adım</span>
+            </div>
+          </div>
+          <div class="step-item">
+            <span class="step-circle">4</span>
+            <div class="step-text">
+              <strong>Matematik Dünyasına Başla</strong>
+              <span>Sıradaki adım</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <form id="resetForm" hidden>
-      <p class="intro">Hesabınız için yeni ve güvenli bir şifre belirleyin.</p>
-      <label for="resetEmail">E-posta</label>
-      <input id="resetEmail" type="email" autocomplete="email" readonly required>
-      <label for="resetPassword">Yeni şifre</label>
-      <input id="resetPassword" type="password" autocomplete="new-password" minlength="10" maxlength="72" required>
-      <label for="resetConfirmation">Yeni şifreyi tekrar girin</label>
-      <input id="resetConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" required>
-      <button class="primary" type="submit">Şifremi yenile</button>
-      <p class="message" id="resetMessage" role="status" aria-live="polite"></p>
-    </form>
-    <a class="back" href="index.html">Ana sayfaya dön</a>
-  </main>
+      <div class="sidebar-stats-row">
+        <div class="stat-box">
+          <strong>5-12. Sınıf</strong>
+          <span>Maarif Modeli</span>
+        </div>
+        <div class="stat-box">
+          <strong>10.000+</strong>
+          <span>Kazanım Sorusu</span>
+        </div>
+        <div class="stat-box">
+          <strong>%98</strong>
+          <span>Memnuniyet</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Sağ Sütun: Form Alanı -->
+    <main class="auth-form-card">
+      <div class="form-top-bar">
+        <a class="back-btn" href="index.html">← Siteye dön</a>
+        <span class="auth-label-badge">Üyelik Paneli</span>
+      </div>
+
+      <h1 class="auth-title" id="authTitle">Hesap oluştur</h1>
+      <p class="intro" id="intro">Hesabınıza giriş yapın veya yeni hesap oluşturun.</p>
+
+      <div id="authOptions">
+        <!-- Google Girişi -->
+        <div class="google-wrap" id="googleWrap">
+          <div id="googleButton"></div>
+          <p class="google-disabled" id="googleDisabled" hidden>Google ile giriş bu sitede henüz etkinleştirilmedi.</p>
+        </div>
+        <div class="divider" id="googleDivider"><span>veya</span></div>
+
+        <!-- Veli Seçenekleri -->
+        <div class="parent-actions">
+          <button class="text-button" id="parentLoginMode" type="button">Veli Girişi</button>
+          <button class="text-button" id="parentRegisterMode" type="button">Veli Kayıt Ol</button>
+        </div>
+
+        <!-- Giriş / Kayıt Geçiş Sekmeleri -->
+        <div class="switch" aria-label="İşlem seçin">
+          <button id="loginMode" type="button" aria-pressed="true">Giriş yap</button>
+          <button id="registerMode" type="button" aria-pressed="false">Kayıt ol</button>
+        </div>
+
+        <form id="authForm" action="/login" method="post">
+          <div class="form-grid-2">
+            <div id="nameField" class="field-wrap" hidden>
+              <label for="name">Ad</label>
+              <input id="name" name="name" autocomplete="name" maxlength="100" placeholder="Adınız" disabled>
+            </div>
+            <div id="surnameField" class="field-wrap" hidden>
+              <label for="surname">Soyad</label>
+              <input id="surname" name="surname" autocomplete="family-name" maxlength="100" placeholder="Soyadınız" disabled>
+            </div>
+          </div>
+
+          <div class="field-wrap">
+            <label for="email">E-posta adresi</label>
+            <input id="email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="ornek@zarifcozum.com" required>
+          </div>
+
+          <div id="phoneField" class="field-wrap" hidden>
+            <label for="phone">Telefon numarası</label>
+            <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" maxlength="20" disabled>
+            <p class="phone-helper">05xx xxx xx xx formatında gir. Sınav ve ödeme bildirimleri için zorunludur.</p>
+          </div>
+
+          <div class="field-wrap">
+            <label for="password">Şifre</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="72" placeholder="En az 10 karakter" required>
+          </div>
+
+          <div id="confirmField" class="field-wrap" hidden>
+            <label for="passwordConfirmation">Şifreyi tekrar girin</label>
+            <input id="passwordConfirmation" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" placeholder="Şifrenizi doğrulayın" disabled>
+          </div>
+
+          <div id="roleField" class="field-wrap" hidden>
+            <label for="role">Kullanıcı profili</label>
+            <select id="role" name="role" disabled>
+              <option value="student">Öğrenci</option>
+              <option value="teacher">Öğretmen</option>
+            </select>
+          </div>
+
+          <div id="teacherCodeField" class="field-wrap" hidden>
+            <label for="teacherCode">Öğretmen davet kodu</label>
+            <input id="teacherCode" name="teacherCode" type="password" autocomplete="off" disabled>
+          </div>
+
+          <div id="parentCodeField" class="field-wrap" hidden>
+            <label for="parentConnectionCode">6 karakterli veli bağlantı kodu</label>
+            <input id="parentConnectionCode" name="parentConnectionCode" autocomplete="off" autocapitalize="characters" maxlength="6" pattern="[A-Za-z0-9]{6}" disabled>
+          </div>
+
+          <div class="forgot-row" id="forgotRow">
+            <button class="text-button" id="forgotLink" type="button">Şifremi unuttum</button>
+          </div>
+
+          <button class="primary" id="submitButton" type="submit">Giriş yap</button>
+          <p class="message" id="message" role="alert" aria-live="polite"></p>
+
+          <div class="auth-notice-card">
+            <span>📢 Gelişmelerden ve canlı derslerden haberdar olmak için platform bildirimlerini açık tutun.</span>
+          </div>
+
+          <p class="bottom-switch-link" id="switchLinkRow">
+            Zaten hesabınız var mı? <button type="button" class="text-button" id="toggleSwitchBtn">Giriş yap</button>
+          </p>
+        </form>
+      </div>
+
+      <!-- Şifremi Unuttum Formu -->
+      <form id="forgotForm" hidden>
+        <p class="intro">E-posta adresinizi girin; şifre yenileme bağlantısını gönderelim.</p>
+        <div class="field-wrap">
+          <label for="forgotEmail">E-posta adresi</label>
+          <input id="forgotEmail" type="email" autocomplete="email" maxlength="254" required>
+        </div>
+        <button class="primary" type="submit">Sıfırlama bağlantısı gönder</button>
+        <p class="message" id="forgotMessage" role="status" aria-live="polite"></p>
+        <p style="margin-top:16px;text-align:center"><button class="text-button" type="button" data-mode="login">Girişe dön</button></p>
+      </form>
+
+      <!-- Şifre Sıfırlama Formu -->
+      <form id="resetForm" hidden>
+        <p class="intro">Hesabınız için yeni ve güvenli bir şifre belirleyin.</p>
+        <div class="field-wrap">
+          <label for="resetEmail">E-posta adresi</label>
+          <input id="resetEmail" type="email" autocomplete="email" readonly required>
+        </div>
+        <div class="field-wrap">
+          <label for="resetPassword">Yeni şifre</label>
+          <input id="resetPassword" type="password" autocomplete="new-password" minlength="10" maxlength="72" required>
+        </div>
+        <div class="field-wrap">
+          <label for="resetConfirmation">Yeni şifreyi tekrar girin</label>
+          <input id="resetConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" required>
+        </div>
+        <button class="primary" type="submit">Şifremi yenile</button>
+        <p class="message" id="resetMessage" role="status" aria-live="polite"></p>
+      </form>
+    </main>
+  </div>
+
   <script>
     (() => {
       const $ = id => document.getElementById(id);
@@ -181,20 +699,45 @@
         $('teacherCodeField').hidden = !registering || parentMode || $('role').value !== 'teacher';
         $('teacherCode').disabled = $('teacherCodeField').hidden;
         $('teacherCode').required = !$('teacherCodeField').hidden;
-        $('submitButton').textContent = parentRegistration ? 'Veli hesabı oluştur' : registering ? 'Hesap oluştur' : 'Giriş yap';
+        
+        $('authTitle').textContent = parentRegistration
+          ? 'Veli Kaydı'
+          : registering
+          ? 'Hesap oluştur'
+          : parentMode
+          ? 'Veli Girişi'
+          : 'Giriş yap';
+
+        $('submitButton').textContent = parentRegistration
+          ? 'Veli hesabı oluştur'
+          : registering
+          ? 'Hesap oluştur'
+          : 'Giriş yap';
+
         $('authForm').action = parentMode
           ? parentRegistration ? '/parent/register' : '/parent/login'
           : registering ? '/register' : '/login';
         $('authForm').method = 'post';
+
         $('intro').textContent = parentMode
           ? parentRegistration
             ? 'Çocuğunuzun panelindeki bağlantı koduyla veli hesabınızı oluşturun.'
             : 'Veli hesabınızla giriş yapın.'
           : registering
-          ? 'Hesabınızı oluşturmak için bilgilerinizi girin.'
+          ? 'GYS/LGS/YKS veya okul hazırlığına doğru profille başla.'
           : params.get('role') === 'teacher'
             ? 'Öğretmen hesabınızla giriş yapın.'
             : 'Öğrenci hesabınızla giriş yapın.';
+
+        const switchPrompt = $('switchLinkRow');
+        if (switchPrompt) {
+          switchPrompt.innerHTML = registering
+            ? 'Zaten hesabınız var mı? <button type="button" class="text-button" id="toggleSwitchBtn">Giriş yap</button>'
+            : 'Hesabınız yok mu? <button type="button" class="text-button" id="toggleSwitchBtn">Kayıt ol</button>';
+          const btn = $('toggleSwitchBtn');
+          if (btn) btn.addEventListener('click', () => setMode(registering ? 'login' : 'register'));
+        }
+
         $('message').textContent = '';
       }
 
@@ -284,7 +827,7 @@
             window.google.accounts.id.initialize({client_id: config.googleClientId, callback: onGoogleCredential});
             window.google.accounts.id.renderButton($('googleButton'), {
               type: 'standard', theme: 'outline', size: 'large', text: 'continue_with',
-              shape: 'rectangular', width: 376, locale: 'tr'
+              shape: 'rectangular', width: 340, locale: 'tr'
             });
             googleReady = true;
           };
@@ -294,6 +837,7 @@
           $('googleDisabled').hidden = false;
         }
       }
+
       $('authForm').addEventListener('submit', async event => {
         event.preventDefault();
         $('submitButton').disabled = true;

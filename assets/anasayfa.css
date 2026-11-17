@@ -795,27 +795,24 @@ body.homepage .smart-panel-tabs {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.6rem;
   margin-top: 2rem;
   margin-bottom: 1.5rem;
-  padding: 0.4rem;
+  padding: 0.6rem 1.5rem;
   background: #f3e1cf;
   border: 1px solid #ead3bd;
-  border-radius: 9999px;
-  max-width: 1040px;
+  border-radius: 1.25rem;
+  max-width: 1100px;
   margin-inline: auto;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-body.homepage .smart-panel-tabs::-webkit-scrollbar {
-  display: none;
+  box-sizing: border-box;
 }
 
 body.homepage .panel-tab {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.65rem 1.15rem;
+  padding: 0.6rem 1.15rem;
   border: 0;
   border-radius: 9999px;
   background: transparent;
@@ -1735,5 +1732,250 @@ body.homepage .eco-cta:hover {
   body.homepage .ai-compare-grid,
   body.homepage .ecosystem-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+
+/* ==========================================================================
+   Modern Sıkça Sorulan Sorular (FAQ with Category Sidebar & Help Card)
+   ========================================================================== */
+body.homepage .faq-modern-section {
+  padding-block: clamp(3rem, 6vw, 5rem);
+  background: #fbf1e8;
+  border-top: 1px solid var(--color-divider);
+}
+
+body.homepage .faq-layout-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2.5rem;
+  margin-top: 3rem;
+  align-items: start;
+}
+
+/* Sol Kenar Çubuğu (Sidebar) */
+body.homepage .faq-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: sticky;
+  top: 1.5rem;
+}
+
+body.homepage .faq-cat-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6a5242;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+body.homepage .faq-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+body.homepage .faq-cat-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.15rem;
+  border: 1px solid transparent;
+  border-radius: 0.85rem;
+  background: transparent;
+  color: #6a5242;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+body.homepage .faq-cat-btn:hover {
+  background: #f3e1cf;
+  color: #3a2618;
+}
+
+body.homepage .faq-cat-btn.is-active {
+  background: #3a2618;
+  color: #fff;
+  border-color: #3a2618;
+  box-shadow: 0 4px 12px rgba(58, 38, 24, 0.2);
+}
+
+/* Soru Var Mı Yardım Kartı */
+body.homepage .faq-help-card {
+  background: #3a2618;
+  color: #fff;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  box-shadow: 0 10px 24px rgba(58, 38, 24, 0.15);
+}
+
+body.homepage .faq-help-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #f3e1cf;
+}
+
+body.homepage .faq-help-card h4 {
+  font-size: 1.05rem;
+  color: #fff;
+  margin: 0;
+}
+
+body.homepage .faq-help-card p {
+  font-size: 0.85rem;
+  color: #ebd8c8;
+  line-height: 1.45;
+  margin: 0 0 0.5rem;
+}
+
+body.homepage .faq-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #c59734, #a77c24);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+body.homepage .faq-help-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+/* Sağ İçerik Alanı (Accordions) */
+body.homepage .faq-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+body.homepage .faq-active-cat-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.45rem;
+  color: #3a2618;
+  margin: 0 0 0.5rem;
+  font-family: var(--serif);
+}
+
+body.homepage .faq-group {
+  display: none;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+body.homepage .faq-group.is-active {
+  display: flex;
+}
+
+body.homepage .faq-item {
+  background: #fffaf5;
+  border: 1px solid #ead3bd;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.homepage .faq-item:hover {
+  border-color: #c2570c;
+}
+
+body.homepage .faq-item.is-open {
+  box-shadow: 0 6px 18px rgba(90, 55, 30, 0.08);
+  border-color: #c2570c;
+}
+
+body.homepage .faq-question-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 0;
+  background: transparent;
+  color: #3a2618;
+  font-size: 1.02rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+body.homepage .faq-toggle-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f8ebdd;
+  color: #7a4f2d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+
+body.homepage .faq-item.is-open .faq-toggle-icon {
+  background: #c2570c;
+  color: #fff;
+  transform: rotate(45deg);
+}
+
+body.homepage .faq-answer {
+  display: none;
+  padding: 0 1.5rem 1.25rem;
+  color: #6a5242;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+body.homepage .faq-item.is-open .faq-answer {
+  display: block;
+}
+
+body.homepage .faq-answer p {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  body.homepage .faq-layout-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  body.homepage .faq-sidebar {
+    position: static;
+  }
+  body.homepage .faq-cat-list {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  body.homepage .faq-cat-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 }
