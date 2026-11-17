@@ -3,7 +3,184 @@
 <head>
   <meta charset="UTF-8">
 <script src="animasyon.js"></script>
+<!-- KVKK Uyumlu Gelişmiş Çerez Yönetim Sistemi (Başlangıç) -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
 
+  // Kayıtlı tercihleri kontrol et, yoksa varsayılan olarak reddet (KVKK Gereği)
+  const savedPrefs = JSON.parse(localStorage.getItem('zc_cookie_prefs'));
+  if (savedPrefs) {
+    gtag('consent', 'default', {
+      'analytics_storage': savedPrefs.analytics ? 'granted' : 'denied',
+      'ad_storage': savedPrefs.marketing ? 'granted' : 'denied',
+      'ad_user_data': savedPrefs.marketing ? 'granted' : 'denied',
+      'ad_personalization': savedPrefs.marketing ? 'granted' : 'denied'
+    });
+  } else {
+    gtag('consent', 'default', {
+      'analytics_storage': 'denied',
+      'ad_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied'
+    });
+  }
+</script>
+
+<style>
+  /* Ana Çerez Banner Tasarımı */
+  #zc-cookie-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    max-width: 580px;
+    background: #1e293b;
+    color: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 999998;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    display: none;
+  }
+  #zc-cookie-banner h4 { margin: 0 0 8px 0; font-size: 16px; color: #fff; }
+  #zc-cookie-banner p { margin: 0 0 16px 0; color: #cbd5e1; }
+  #zc-cookie-banner a { color: #38bdf8; text-decoration: underline; }
+  .zc-cookie-buttons { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+  
+  /* Buton Stilleri */
+  .zc-btn { padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
+  .zc-btn:hover { opacity: 0.9; }
+  .zc-btn-prefs { background: transparent; border: 1px solid #64748b; color: #e2e8f0; margin-right: auto; }
+  .zc-btn-reject { background: #334155; color: #e2e8f0; }
+  .zc-btn-accept { background: #2563eb; color: #fff; }
+
+  /* Tercihler Penceresi (Modal) Tasarımı */
+  #zc-prefs-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.75);
+    z-index: 999999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  .zc-modal-box {
+    background: #1e293b;
+    color: #f8fafc;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  }
+  .zc-modal-box h3 { margin: 0 0 12px 0; font-size: 18px; }
+  .zc-pref-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #334155;
+  }
+  .zc-pref-item:last-of-type { border-bottom: none; }
+  .zc-pref-info strong { display: block; font-size: 14px; color: #fff; }
+  .zc-pref-info span { font-size: 12px; color: #94a3b8; }
+  .zc-modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+</style>
+
+<!-- Alt Köşe Çerez Uyarı Kutusu -->
+<div id="zc-cookie-banner">
+  <h4>Çerez Tercihleriniz</h4>
+  <p>
+    ZarifÇözüm olarak platformumuzun güvenliğini sağlamak, ziyaretçi trafiğini analiz etmek ve size uygun eğitim içerikleri sunmak için çerezler kullanıyoruz. Detaylar için <a href="/cerez-politikasi" target="_blank">Çerez Politikamızı</a> inceleyebilirsiniz.
+  </p>
+  <div class="zc-cookie-buttons">
+    <button class="zc-btn zc-btn-prefs" onclick="openCookieModal()">Çerez Tercihleri</button>
+    <button class="zc-btn zc-btn-reject" onclick="saveCookieChoices(false, false)">Çerezleri Reddet</button>
+    <button class="zc-btn zc-btn-accept" onclick="saveCookieChoices(true, true)">Çerezleri Kabul Et</button>
+  </div>
+</div>
+
+<!-- Detaylı Çerez Tercihleri Penceresi -->
+<div id="zc-prefs-modal">
+  <div class="zc-modal-box">
+    <h3>Çerez Tercihlerini Yönet</h3>
+    <div class="zc-pref-item">
+      <div class="zc-pref-info">
+        <strong>Zorunlu Çerezler</strong>
+        <span>Oturum ve site güvenliği için gereklidir, kapatılamaz.</span>
+      </div>
+      <input type="checkbox" checked disabled>
+    </div>
+    <div class="zc-pref-item">
+      <div class="zc-pref-info">
+        <strong>Analiz ve Performans Çerezleri</strong>
+        <span>Ziyaretçi sayılarını ve popüler dersleri ölçmemizi sağlar.</span>
+      </div>
+      <input type="checkbox" id="zc-check-analytics">
+    </div>
+    <div class="zc-pref-item">
+      <div class="zc-pref-info">
+        <strong>Pazarlama ve Reklam Çerezleri</strong>
+        <span>Size özel eğitim kampanyaları sunmamızı sağlar.</span>
+      </div>
+      <input type="checkbox" id="zc-check-marketing">
+    </div>
+    <div class="zc-modal-footer">
+      <button class="zc-btn zc-btn-reject" onclick="closeCookieModal()">İptal</button>
+      <button class="zc-btn zc-btn-accept" onclick="saveCustomPreferences()">Seçimleri Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    if (!localStorage.getItem('zc_cookie_prefs')) {
+      document.getElementById('zc-cookie-banner').style.display = 'block';
+    }
+  });
+
+  function openCookieModal() {
+    document.getElementById('zc-prefs-modal').style.display = 'flex';
+  }
+
+  function closeCookieModal() {
+    document.getElementById('zc-prefs-modal').style.display = 'none';
+  }
+
+  function saveCustomPreferences() {
+    const analytics = document.getElementById('zc-check-analytics').checked;
+    const marketing = document.getElementById('zc-check-marketing').checked;
+    saveCookieChoices(analytics, marketing);
+    closeCookieModal();
+  }
+
+  function saveCookieChoices(analytics, marketing) {
+    const prefs = { analytics: analytics, marketing: marketing };
+    localStorage.setItem('zc_cookie_prefs', JSON.stringify(prefs));
+    document.getElementById('zc-cookie-banner').style.display = 'none';
+
+    gtag('consent', 'update', {
+      'analytics_storage': analytics ? 'granted' : 'denied',
+      'ad_storage': marketing ? 'granted' : 'denied',
+      'ad_user_data': marketing ? 'granted' : 'denied',
+      'ad_personalization': marketing ? 'granted' : 'denied'
+    });
+  }
+</script>
+<!-- KVKK Uyumlu Gelişmiş Çerez Yönetim Sistemi (Bitiş) -->
+
+<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-M723QS2V"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+</script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ZarifÇözüm — Maarif Modeli Matematik Platformu (Demo)</title>
