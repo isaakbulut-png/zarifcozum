@@ -2100,16 +2100,17 @@
     }
 
     async function checkBanner() {
-      let banner = null;
       try {
-        const res = await fetch('/api/announcement-banner', { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          banner = (data && (data.banner || data.active !== undefined)) ? (data.banner || data) : null;
+        let banner = null;
+        try {
+          const res = await fetch('/api/announcement-banner', { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            banner = (data && (data.banner || data.active !== undefined)) ? (data.banner || data) : null;
+          }
+        } catch (err) {
+          console.warn('Duyuru panosu API üzerinden alınamadı, yerel depoya bakılıyor:', err);
         }
-      } catch (err) {
-        console.warn('Duyuru panosu API üzerinden alınamadı, yerel depoya bakılıyor:', err);
-      }
 
       if (!banner) {
         try {
