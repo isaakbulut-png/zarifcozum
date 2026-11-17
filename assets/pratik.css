@@ -25,9 +25,11 @@
 .zp-unite{margin-bottom:14px}
 .zp-konu-alani{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:end;max-width:760px;margin-top:8px}
 .zp-konu-etiket{grid-column:1/-1;font-weight:600}
-.zp-konu-secici{width:100%;min-width:0;min-height:44px;padding:9px 12px;border:1px solid var(--zp-cizgi);border-radius:8px;background:#fff;color:var(--zp-yazi);font:inherit;text-align:left;white-space:normal;overflow-wrap:anywhere;cursor:pointer}
+.zp-konu-secici{position:relative;width:100%;min-width:0;min-height:46px;padding:10px 36px 10px 14px;border:1px solid var(--zp-cizgi);border-radius:10px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a4f2d' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;color:var(--zp-yazi);font:inherit;text-align:left;white-space:normal;overflow-wrap:anywhere;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:border-color .15s,box-shadow .15s}
+.zp-konu-secici:hover{border-color:var(--zp-ana)}
+.zp-konu-secici[aria-expanded="true"]{border-color:var(--zp-ana);box-shadow:0 0 0 3px rgba(122,79,45,.15);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a4f2d' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 15 12 9 6 15'%3E%3C/polyline%3E%3C/svg%3E")}
 .zp-konu-secici:focus-visible{outline:3px solid var(--zp-ana);outline-offset:2px}
-.zp-konu-panel{position:absolute;z-index:10;top:calc(100% + 4px);left:0;right:0;max-height:min(360px,55vh);overflow-y:auto;overflow-x:hidden;border:1px solid var(--zp-cizgi);border-radius:8px;background:#fff;box-shadow:0 6px 18px rgba(43,33,24,.18)}
+.zp-konu-panel{position:absolute;z-index:20;top:calc(100% + 6px);left:0;right:0;max-height:min(380px,55vh);overflow-y:auto;overflow-x:hidden;border:1px solid var(--zp-cizgi);border-radius:10px;background:#fff;box-shadow:0 8px 24px rgba(43,33,24,.18)}
 .zp-konu-panel[hidden]{display:none}
 .zp-konu-grup{padding:4px 10px 8px}
 .zp-konu-grup h4{margin:8px 0 4px}

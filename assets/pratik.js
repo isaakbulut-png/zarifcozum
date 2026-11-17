@@ -13,6 +13,10 @@
       aciklama: 'Sınıfını ve çalışmak istediğin konuyu seç; konu anlatımı hazır olduğunda aç.',
       baslat: 'Konu anlatımını aç'
     },
+    asistan: {
+      aciklama: 'Sınıfını seç ve çalışmak istediğin konuyu açılır menüden belirle; asistanla adım adım soru çöz.',
+      baslat: 'Asistanla soru çözmeye başla'
+    },
     test: {
       aciklama: 'Konu pratiği: Her sorudan sonra doğru cevabı ve çözümü görerek adım adım çalış.',
       baslat: 'Pratiğe başla'
@@ -250,9 +254,14 @@
       Number(baslangicSinifi) >= 5 && Number(baslangicSinifi) <= sonSinif ? Number(baslangicSinifi) : 5;
     let yonlendirmeSayaci = null;
     let secimIstegi = 0;
+    let disariTiklamaListener = null;
 
     function temizle() {
       clearInterval(yonlendirmeSayaci);
+      if (disariTiklamaListener) {
+        document.removeEventListener('click', disariTiklamaListener);
+        disariTiklamaListener = null;
+      }
       kok.replaceChildren();
     }
 
@@ -473,6 +482,13 @@
           konuSecim,
           konuPanel,
           baslat);
+        disariTiklamaListener = event => {
+          if (!konuSecici.contains(event.target) && !konuPanel.hidden) {
+            konuPanel.hidden = true;
+            konuSecim.setAttribute('aria-expanded', 'false');
+          }
+        };
+        document.addEventListener('click', disariTiklamaListener);
       } else {
         konuSecici = uniteListesi.map(u => el('div', { class: 'zp-unite' },
           el('h4', {}, u.title),
