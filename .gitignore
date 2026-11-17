@@ -35,3 +35,9 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# External AI tools / local skills
+claude-howto/
+context7/
+skills/
+superpowers/
