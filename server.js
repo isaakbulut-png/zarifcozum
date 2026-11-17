@@ -320,10 +320,11 @@ app.get('/api/homepage-assets', async (req, res) => {
 app.get('/api/announcement-banner', async (req, res) => {
   res.set('Cache-Control', 'no-store');
   try {
-    res.json(await SystemConfig.getAnnouncementBanner());
+    const banner = await SystemConfig.getAnnouncementBanner();
+    res.json({ banner, ...banner });
   } catch (error) {
     console.error('Bilgilendirme panosu alınamadı:', error);
-    res.json({ active: false, title: 'Önemli Bilgilendirme', message: '', type: 'warning' });
+    res.json({ banner: { active: false, title: 'Önemli Bilgilendirme', message: '', type: 'warning' }, active: false, title: 'Önemli Bilgilendirme', message: '', type: 'warning' });
   }
 });
 app.get('/api/site-media', async (req, res) => {
@@ -345,7 +346,7 @@ app.get('/api/site-media', async (req, res) => {
 
 const sitePages = [
   'index.html', 'dene.html', 'asistan.html', 'asistanla-soru-coz.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html', 'pratik.html', 'yasal.html',
-  'ogrenci-paneli.html', 'ogretmen-paneli.html', 'veli-panel.html', 'kayit-giris.html', 'hakkimizda.html',
+  'ogrenci-paneli.html', 'ogretmen-paneli.html', 'veli-panel.html', 'kayit-giris.html', 'hakkimizda.html', 'iletisim.html',
   'Platform Ayrıcalıkları.html',   'Paketler.html', 'deneme-sinavi-optik.html'
 ];
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));

@@ -2175,8 +2175,12 @@
             active: true,
             title: $('bannerTitle').value.trim(),
             message: $('bannerMessage').value.trim(),
-            type: $('bannerType').value
+            type: $('bannerType').value,
+            updatedAt: new Date().toISOString()
           };
+          try {
+            localStorage.setItem('zarif_announcement_banner', JSON.stringify(payload));
+          } catch (_) {}
           const res = await api('/api/admin/announcement-banner', {
             method: 'POST',
             body: JSON.stringify(payload)
@@ -2204,8 +2208,12 @@
             active: false,
             title: $('bannerTitle').value.trim(),
             message: $('bannerMessage').value.trim(),
-            type: $('bannerType').value
+            type: $('bannerType').value,
+            updatedAt: new Date().toISOString()
           };
+          try {
+            localStorage.setItem('zarif_announcement_banner', JSON.stringify(payload));
+          } catch (_) {}
           const res = await api('/api/admin/announcement-banner', {
             method: 'POST',
             body: JSON.stringify(payload)

@@ -2219,3 +2219,132 @@ body.homepage .faq-answer p {
     margin-left: 0;
   }
 }
+
+/* ==========================================================================
+   TOP ANNOUNCEMENT BANNER BAR (ÜST BİLGİLENDİRME ŞERİDİ)
+   ========================================================================== */
+.top-announcement-banner {
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  background: linear-gradient(135deg, #b45309, #d97706);
+  color: #fff;
+  font-size: 0.92rem;
+  box-shadow: 0 4px 14px rgba(180, 83, 9, 0.28);
+  position: relative;
+  z-index: 10001;
+  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.top-announcement-banner[data-type="warning"] {
+  background: linear-gradient(135deg, #b45309, #d97706);
+}
+.top-announcement-banner[data-type="danger"] {
+  background: linear-gradient(135deg, #991b1b, #dc2626);
+}
+.top-announcement-banner[data-type="info"] {
+  background: linear-gradient(135deg, #1e40af, #2563eb);
+}
+.top-announcement-banner[data-type="success"] {
+  background: linear-gradient(135deg, #15803d, #16a34a);
+}
+
+.top-announcement-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.top-announcement-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.top-announcement-icon {
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.top-announcement-text-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  line-height: 1.45;
+}
+
+.top-announcement-title {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.top-announcement-separator {
+  opacity: 0.75;
+}
+
+.top-announcement-message {
+  opacity: 0.96;
+}
+
+.top-announcement-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.top-announcement-detail-btn {
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+}
+.top-announcement-detail-btn:hover {
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.top-announcement-close {
+  background: rgba(0, 0, 0, 0.12);
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  transition: opacity 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+.top-announcement-close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.28);
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .top-announcement-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+  .top-announcement-actions {
+    align-self: flex-end;
+  }
+}

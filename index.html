@@ -16,6 +16,24 @@
 <link rel="stylesheet" href="assets/anasayfa.css">
 </head>
 <body class="homepage">
+<!-- TOP ANNOUNCEMENT BANNER -->
+<div id="homepageTopBanner" class="top-announcement-banner" style="display:none;" role="alert" aria-live="polite">
+  <div class="top-announcement-container">
+    <div class="top-announcement-content">
+      <span class="top-announcement-icon" id="topBannerIcon">📢</span>
+      <div class="top-announcement-text-wrap">
+        <strong class="top-announcement-title" id="topBannerTitle">Önemli Bilgilendirme</strong>
+        <span class="top-announcement-separator">—</span>
+        <span class="top-announcement-message" id="topBannerMessage"></span>
+      </div>
+    </div>
+    <div class="top-announcement-actions">
+      <button type="button" class="top-announcement-detail-btn" id="btnTopBannerDetail">Detayı Oku</button>
+      <button type="button" class="top-announcement-close" id="btnCloseTopBanner" aria-label="Duyuruyu Kapat">&times;</button>
+    </div>
+  </div>
+</div>
+
 <header class="site-header site-header-expanded">
   <div class="wrap">
     <a class="brand" href="index.html"><img class="brand-logo" src="assets/brand-mark.png" alt="">ZarifÇözüm</a>
@@ -33,17 +51,12 @@
       <span>Menü</span>
     </button>
     <nav class="site-nav" id="site-navigation" aria-label="Site">
-      <a href="#akilli-panel">Akıllı Panel</a>
-      <a href="#ai-mentor">AI Mentör</a>
-      <a href="#ekosistem">Ekosistem</a>
       <a href="#nasil">Nasıl çalışır</a>
-      <a href="#siniflar">Sınıflar</a>
       <a href="#sss">SSS</a>
       <a href="hakkimizda.html">Hakkımızda</a>
       <a href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html">Platform Ayrıcalıkları</a>
-      <a href="iletisim.html">İletişim</a>
       <a href="Paketler.html">Paketler</a>
-      <a href="mimari.html">Mimari</a>
+      <a href="iletisim.html">İletişim</a>
     </nav>
     <div class="row">
   <a class="btn btn-ghost btn-sm" href="kayit-giris.html?role=student">Öğrenci Girişi</a>
@@ -2042,7 +2055,12 @@
     const badgeEl = document.getElementById('modalBannerBadge');
     const dateEl = document.getElementById('modalBannerDate');
 
-    if (!modal || !box) return;
+    const topBanner = document.getElementById('homepageTopBanner');
+    const topIcon = document.getElementById('topBannerIcon');
+    const topTitle = document.getElementById('topBannerTitle');
+    const topMsg = document.getElementById('topBannerMessage');
+    const topCloseBtn = document.getElementById('btnCloseTopBanner');
+    const topDetailBtn = document.getElementById('btnTopBannerDetail');
 
     const typeConfig = {
       warning: { icon: '⚠️', badge: 'Önemli Uyarı' },
@@ -2051,32 +2069,79 @@
       success: { icon: '✨', badge: 'Müjde & Gelişme' }
     };
 
+    function openModal() {
+      if (modal) {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+    }
+
     function closeModal(bannerKey) {
-      modal.classList.remove('is-open');
-      modal.setAttribute('aria-hidden', 'true');
+      if (modal) {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+      }
       if (bannerKey) {
         try {
-          sessionStorage.setItem('dismissed_banner_' + bannerKey, '1');
+          sessionStorage.setItem('dismissed_banner_modal_' + bannerKey, '1');
+        } catch (_) {}
+      }
+    }
+
+    function closeTopBanner(bannerKey) {
+      if (topBanner) {
+        topBanner.style.display = 'none';
+      }
+      if (bannerKey) {
+        try {
+          sessionStorage.setItem('dismissed_banner_top_' + bannerKey, '1');
         } catch (_) {}
       }
     }
 
     async function checkBanner() {
+      let banner = null;
       try {
         const res = await fetch('/api/announcement-banner', { cache: 'no-store' });
-        if (!res.ok) return;
-        const data = await res.json();
-        const banner = data?.banner;
-        if (!banner || !banner.active || !banner.message) return;
+        if (res.ok) {
+          const data = await res.json();
+          banner = (data && (data.banner || data.active !== undefined)) ? (data.banner || data) : null;
+        }
+      } catch (err) {
+        console.warn('Duyuru panosu API üzerinden alınamadı, yerel depoya bakılıyor:', err);
+      }
 
-        const bannerKey = banner.updatedAt || 'active';
-        if (sessionStorage.getItem('dismissed_banner_' + bannerKey) === '1') {
-          return;
+      if (!banner) {
+        try {
+          const raw = localStorage.getItem('zarif_announcement_banner');
+          if (raw) banner = JSON.parse(raw);
+        } catch (_) {}
+      }
+
+      if (!banner || !banner.active || !banner.message) return;
+
+      const bannerKey = banner.updatedAt ? new Date(banner.updatedAt).getTime() : 'active';
+      const type = banner.type || 'warning';
+      const meta = typeConfig[type] || typeConfig.warning;
+
+        // 1. Üst Banner Çubuğunu Doldur ve Göster
+        if (topBanner) {
+          topBanner.setAttribute('data-type', type);
+          if (topIcon) topIcon.textContent = meta.icon;
+          if (topTitle) topTitle.textContent = banner.title || 'Önemli Bilgilendirme';
+          if (topMsg) {
+            const shortMsg = banner.message.length > 140 ? (banner.message.slice(0, 140) + '…') : banner.message;
+            topMsg.textContent = shortMsg;
+          }
+          if (sessionStorage.getItem('dismissed_banner_top_' + bannerKey) !== '1') {
+            topBanner.style.display = 'block';
+          }
+          topCloseBtn?.addEventListener('click', () => closeTopBanner(bannerKey));
+          topDetailBtn?.addEventListener('click', openModal);
         }
 
-        const type = banner.type || 'warning';
-        box.setAttribute('data-type', type);
-        const meta = typeConfig[type] || typeConfig.warning;
+        // 2. Açılır Modalı Doldur
+        if (box) box.setAttribute('data-type', type);
         if (iconEl) iconEl.textContent = meta.icon;
         if (badgeEl) badgeEl.textContent = meta.badge;
         if (titleEl) titleEl.textContent = banner.title || 'Bilgilendirme Panosu';
@@ -2090,19 +2155,21 @@
           }
         }
 
-        modal.classList.add('is-open');
-        modal.setAttribute('aria-hidden', 'false');
+        // İlk girişte modal göster (oturumda kapatılmadıysa)
+        if (sessionStorage.getItem('dismissed_banner_modal_' + bannerKey) !== '1') {
+          openModal();
+        }
 
         const onDismiss = () => closeModal(bannerKey);
         closeBtn?.addEventListener('click', onDismiss);
         dismissBtn?.addEventListener('click', onDismiss);
 
-        modal.addEventListener('click', (e) => {
+        modal?.addEventListener('click', (e) => {
           if (e.target === modal) onDismiss();
         });
 
         document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+          if (e.key === 'Escape' && modal?.classList.contains('is-open')) {
             onDismiss();
           }
         });

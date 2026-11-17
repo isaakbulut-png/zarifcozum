@@ -6,6 +6,7 @@
   const PAGES = [
     {path: '/index.html', label: 'Ana sayfa'},
     {path: '/hakkimizda.html', label: 'Hakkımızda'},
+    {path: '/iletisim.html', label: 'İletişim'},
     {path: '/Platform Ayrıcalıkları.html', label: 'Platform Ayrıcalıkları'},
     {path: '/Paketler.html', label: 'Paketler'},
     {path: '/mimari.html', label: 'Mimari'},
