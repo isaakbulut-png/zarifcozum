@@ -29,7 +29,7 @@
         <nav class="site-footer-group" aria-label="Kurum bağlantıları">
           <h2>Kurum</h2>
           <a href="/hakkimizda.html">Hakkımızda</a>
-          <a href="/yasal.html#iletisim">İletişim</a>
+          <a href="/iletisim.html">İletişim</a>
           <a href="/kayit-giris.html">Üye Girişi</a>
           <a href="/kayit-giris.html?mode=register">Hesap Oluştur</a>
         </nav>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Platform Ayrıcalıkları | ZarifÇözüm</title>
-<meta name="description" content="ZarifÇözüm matematik platformunda konu anlatımı, kısa test, ilerleme takibi ve rehberli soru çözümünü keşfedin.">
+<meta name="description" content="ZarifÇözüm matematik platformunun sunduğu Maarif Modeli uyumu, Sokratik AI mentör, renkli SVG şemalı sorular, optik deneme ve veli takip ayrıcalıklarını keşfedin.">
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600&f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -22,101 +22,275 @@
       <span>Menü</span>
     </button>
     <nav class="site-nav" id="site-navigation" aria-label="Site">
-      <a href="hakkimizda.html">Hakkımızda</a>
+      <a href="index.html#akilli-panel">Akıllı Panel</a>
       <a href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html" aria-current="page">Platform Ayrıcalıkları</a>
+      <a href="hakkimizda.html">Hakkımızda</a>
+      <a href="iletisim.html">İletişim</a>
       <a href="Paketler.html">Paketler</a>
       <a href="index.html#siniflar">Sınıflar</a>
       <a href="mimari.html">Mimari</a>
     </nav>
-    <div class="row"><a class="btn btn-ghost btn-sm" href="index.html">Ana sayfa</a></div>
+    <div class="row">
+      <a class="btn btn-ghost btn-sm" href="kayit-giris.html">Giriş Yap</a>
+      <a class="btn btn-primary btn-sm" href="kayit-giris.html?mode=register">Kayıt Ol</a>
+    </div>
   </div>
 </header>
-<main>
-  <div class="wrap">
-    <section class="hero">
-      <div>
-        <span class="chip chip-primary">Anla · Uygula · İlerle</span>
-        <h1 style="margin-top:var(--space-4)">Matematikte kendi öğrenme yolunu <em>adım adım kur.</em></h1>
-        <p class="lead">ZarifÇözüm; konu anlatımı, soru pratiği ve ilerleme görünümünü bir araya getirerek matematik çalışmanı daha anlaşılır ve düzenli hale getirir.</p>
-        <div class="cta">
-          <a class="btn btn-primary btn-lg" href="panel.html">Öğrenci paneli örneğini gör</a>
-          <a class="btn btn-ghost btn-lg" href="index.html#siniflar">Sınıfıma göre konuları bul</a>
-        </div>
-      </div>
-      <div class="card stack">
-        <div><span class="chip chip-primary">Örnek kapsam</span><h2 style="margin-top:var(--space-3)">Matematik · 5–12. sınıf</h2></div>
-        <p class="small muted">Konu ve etkinlik örnekleri sınıf düzeyine göre sunulur. Mevcut tanıtım ekranlarında 6. sınıf matematik akışı örneklenmiştir.</p>
-        <div class="notice notice-warning">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-          <p>Türkiye Yüzyılı Maarif Modeli kademeli uygulanır. İçerik ve kazanım kapsamı sınıf düzeyine ve ilgili eğitim öğretim yılına göre değişebilir. Bu sayfadaki ekranlar tanıtım örneğidir.</p>
-        </div>
-      </div>
-    </section>
-  </div>
 
-  <section class="block" style="background:var(--color-surface);border-block:1px solid var(--color-divider)">
+<main>
+  <!-- Hero Section -->
+  <section class="page-hero">
     <div class="wrap">
-      <p class="eyebrow">Öğrenme araçları</p>
-      <h2 class="section-title">Bir konudan sağlam öğrenmeye uzanan akış.</h2>
-      <div class="grid grid-2" style="margin-top:var(--space-8)">
-        <article class="card feature">
-          <span class="chip chip-primary">01 · Öğren</span>
-          <h3 style="margin-top:var(--space-3)">Sade konu anlatımları</h3>
-          <p>Konuyu kısa açıklamalar ve çözümlü örneklerle takip et; ardından ilgili test bağlantısıyla öğrendiklerini dene.</p>
-        </article>
-        <article class="card feature">
-          <span class="chip chip-primary">02 · Uygula</span>
-          <h3 style="margin-top:var(--space-3)">Kazanım odaklı soru pratiği</h3>
-          <p>Kısa testleri çöz, yanıtlarını gözden geçir ve hangi konuyu tekrar etmen gerektiğini fark et.</p>
-        </article>
-        <article class="card feature">
-          <span class="chip chip-primary">03 · Takip et</span>
-          <h3 style="margin-top:var(--space-3)">İlerleme görünümü</h3>
-          <p>Öğrenci panelindeki örnek görünüm; konu ilerlemesini, test çalışmalarını ve sıradaki çalışma adımını bir arada gösterir.</p>
-        </article>
-        <article class="card feature">
-          <span class="chip chip-primary">04 · Düşün</span>
-          <h3 style="margin-top:var(--space-3)">Rehberli soru çözümü</h3>
-          <p>Asistan örneği, öğrenciyi ipuçlarıyla adım adım düşünmeye yönlendirir. Gösterilen sohbet tanıtım amaçlı örnek akıştır.</p>
-        </article>
-        <article class="card feature">
-          <span class="chip chip-primary">05 · Planla</span>
-          <h3 style="margin-top:var(--space-3)">Ders ve çalışma düzeni</h3>
-          <p>Paneldeki takvim ve çalışma kartları, öğrencinin derslerini ve tekrar adımlarını düzenlemesine yardımcı olan örnek bir görünüm sunar.</p>
-        </article>
-        <article class="card feature">
-          <span class="chip chip-primary">Her ekranda</span>
-          <h3 style="margin-top:var(--space-3)">Telefon ve bilgisayarda kullanım</h3>
-          <p>Sayfa düzeni farklı ekran boyutlarına uyum sağlar; ders içeriklerine modern bir tarayıcıdan ulaşabilirsin.</p>
-        </article>
+      <span class="chip chip-primary">TÜRKİYE YÜZYILI MAARİF MODELİ İLE %100 UYUMLU</span>
+      <h1>Matematikte Ezber Değil, Kalıcı Anlama Sunan Ayrıcalıklar</h1>
+      <p class="lead">Sokratik yapay zekâ rehberliğinden renkli SVG şemalı sorulara, dijital optik denemelerden veli erken uyarı sistemine kadar matematiği sevdiren tüm özellikler ZarifÇözüm'de.</p>
+      <div class="cta">
+        <a class="btn btn-primary btn-lg" href="kayit-giris.html?mode=register">Ayrıcalıkları Ücretsiz Deneyimleyin</a>
+        <a class="btn btn-ghost btn-lg" href="index.html#akilli-panel">Akıllı Paneli İncele</a>
       </div>
-      <p class="small muted" style="margin-top:var(--space-5)">Not: Buradaki panel, test ve asistan bağlantıları mevcut örnek sayfalara gider. Sayfalardaki öğrenci bilgileri ve sonuçlar tanıtım verisidir.</p>
     </div>
   </section>
 
+  <!-- 6 Büyük Ayrıcalık Kartı -->
+  <section class="block" style="background:var(--color-surface);border-block:1px solid var(--color-divider)">
+    <div class="wrap">
+      <p class="eyebrow text-center">Neden ZarifÇözüm?</p>
+      <h2 class="section-title text-center">Matematik Başarısını Şansa Bırakmayan 6 Temel Sütun</h2>
+
+      <div class="feature-grid-3">
+        <!-- 01 Maarif Uyum -->
+        <article class="feature-card-rich">
+          <div class="feature-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+              <path d="M6 6h10M6 10h10M6 14h6"/>
+            </svg>
+          </div>
+          <span class="chip chip-primary" style="margin-bottom:0.5rem;align-self:flex-start">01 · Müfredat Esası</span>
+          <h3>%100 Maarif Modeli Kazanım Uyumu</h3>
+          <p>Her konu ve soru, MEB Türkiye Yüzyılı Maarif Modeli öğrenme çıktılarıyla birebir eşleşir. Eski tip ezberci sorular yerine süreç becerilerini hedefler.</p>
+          <ul class="feature-card-list">
+            <li><strong>Akıl Yürütme:</strong> Formül ezberletmez, mantıksal çıkarım yaptırır.</li>
+            <li><strong>Matematiksel Modelleme:</strong> Günlük hayat problemlerini formüle döker.</li>
+            <li><strong>Süreç Odaklılık:</strong> Kademeli sınıf müfredatına sadık kalır.</li>
+          </ul>
+        </article>
+
+        <!-- 02 Sokratik AI -->
+        <article class="feature-card-rich">
+          <div class="feature-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5V11h-4V9.5C8.8 8.8 8 7.5 8 6a4 4 0 0 1 4-4Z"/>
+              <path d="M9 18h6M10 22h4M5 14h14a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2Z"/>
+            </svg>
+          </div>
+          <span class="chip chip-primary" style="margin-bottom:0.5rem;align-self:flex-start">02 · Pedagojik AI</span>
+          <h3>Sokratik Yapay Zekâ Mentörü</h3>
+          <p>Standart yapay zekâlar gibi öğrencinin yerine soruyu çözüp cevabı söylemez. "İlk adımda ne yapmalıyız?" diyerek ipuçlarıyla çözümü keşfettirir.</p>
+          <ul class="feature-card-list">
+            <li><strong>Sabırlı Rehberlik:</strong> 7/24 yargılamadan, öğrencinin hızında destek.</li>
+            <li><strong>Müfredat Koruması:</strong> Üst sınıf formüllerini sunup kafa karıştırmaz.</li>
+            <li><strong>Kazanım Açığı Tespiti:</strong> Takılınan kavramları tespit edip raporlar.</li>
+          </ul>
+        </article>
+
+        <!-- 03 Renkli SVG Şemaları -->
+        <article class="feature-card-rich">
+          <div class="feature-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 2 22 22 22"/>
+              <circle cx="12" cy="14" r="3"/>
+            </svg>
+          </div>
+          <span class="chip chip-primary" style="margin-bottom:0.5rem;align-self:flex-start">03 · Görsel Anlatım</span>
+          <h3>Renkli SVG Şemaları & Geometri Çizimleri</h3>
+          <p>Düz yazıdan ibaret sıkıcı sorulara veda edin. Basamak blokları, açı yayları, kesir modelleri ve renkli sayı doğrularıyla matematik görselleşir.</p>
+          <ul class="feature-card-list">
+            <li><strong>Vektörel Netlik:</strong> Yakınlaştırıldığında bile bulanıklaşmayan SVG çizimler.</li>
+            <li><strong>Somuttan Soyuta:</strong> Zor kavramları renkli modellerle anlaşılır kılma.</li>
+            <li><strong>Göz Dostu Tasarım:</strong> Odaklanmayı artıran sıcak ve dengeli renkler.</li>
+          </ul>
+        </article>
+
+        <!-- 04 Optik Deneme -->
+        <article class="feature-card-rich">
+          <div class="feature-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          </div>
+          <span class="chip chip-primary" style="margin-bottom:0.5rem;align-self:flex-start">04 · Gerçek Sınav</span>
+          <h3>Dijital Optik Form & Süreli Denemeler</h3>
+          <p>Merkezi sınav heyecanını erkenden yenmek için dijital optik kodlama ve süre geri sayımı ile gerçek sınav simülasyonu yaşayın.</p>
+          <ul class="feature-card-list">
+            <li><strong>Optik Kodlama:</strong> Gerçek sınavdaki A-B-C-D işaretleme alışkanlığı.</li>
+            <li><strong>Anında Net Analizi:</strong> Sınav bittiği anda doğru, yanlış ve boş analizi.</li>
+            <li><strong>Eksik Konu Havuzu:</strong> Yanlış yapılan sorular otomatik tekrara eklenir.</li>
+          </ul>
+        </article>
+
+        <!-- 05 Veli Takip -->
+        <article class="feature-card-rich">
+          <div class="feature-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <span class="chip chip-primary" style="margin-bottom:0.5rem;align-self:flex-start">05 · Veli Güvencesi</span>
+          <h3>Akıllı Erken Uyarı & Haftalık Karne</h3>
+          <p>Çocuğunuzun ekranda ne yaptığını merak etmeye son. Çözülen soru sayısı, aktif süre ve kritik eksikler her hafta veliye şeffaf şekilde iletilir.</p>
+          <ul class="feature-card-list">
+            <li><strong>Akıllı Erken Uyarı:</strong> Sınav gelmeden zayıf kazanımları haber verir.</li>
+            <li><strong>Otomatik SMS & E-posta:</strong> Pazar günleri haftalık çalışma özeti.</li>
+            <li><strong>%100 Güvenli & Reklamsız:</strong> Dikkat dağıtıcı unsurlar içermez.</li>
+          </ul>
+        </article>
+
+        <!-- 06 Öğretmen Kokpiti -->
+        <article class="feature-card-rich">
+          <div class="feature-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <span class="chip chip-primary" style="margin-bottom:0.5rem;align-self:flex-start">06 · Öğretmen Gücü</span>
+          <h3>Ödev Sepeti & Yerleşik Canlı Derslik</h3>
+          <p>Öğretmenler müfredat ağacından dilediği soruyu seçip saniyeler içinde sınıf ödevi oluşturur; harici programa gerek kalmadan canlı ders tahtasını açar.</p>
+          <ul class="feature-card-list">
+            <li><strong>Sürükle-Bırak Sepet:</strong> Maarif koduna göre tek tıkla test hazırlama.</li>
+            <li><strong>Sınıf Başarı Grafiği:</strong> Hangi öğrencinin hangi soruda takıldığını görme.</li>
+            <li><strong>Entegre Canlı Tahta:</strong> Video SDK altyapısıyla anında interaktif ders.</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Karşılaştırma Matrisi -->
   <section class="block">
     <div class="wrap">
-      <p class="eyebrow">Kendin incele</p>
-      <h2 class="section-title">Sana uygun örnekle başla.</h2>
-      <div class="row" style="margin-top:var(--space-6);flex-wrap:wrap;gap:var(--space-3)">
-        <a class="btn btn-primary" href="konu.html">Konu anlatımını incele</a>
-        <a class="btn btn-ghost" href="test.html">Kısa test çöz</a>
-        <a class="btn btn-ghost" href="asistan.html">Asistan örneğini dene</a>
-        <a class="btn btn-ghost" href="Paketler.html">Paketleri incele</a>
+      <p class="eyebrow text-center">Farkımız Nerede?</p>
+      <h2 class="section-title text-center">Geleneksel Yöntemler ve Sıradan Sitelerle Karşılaştırma</h2>
+      <p class="muted text-center" style="max-width:60ch;margin-inline:auto;margin-top:var(--space-2)">
+        ZarifÇözüm, hem geleneksel kağıt materyallerin hem de ezberci dijital sitelerin eksiklerini kapatmak üzere tasarlandı.
+      </p>
+
+      <div class="comparison-table-wrap">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Karşılaştırma Kriteri</th>
+              <th>Geleneksel Kurs & Kitaplar</th>
+              <th>Sıradan Dijital Siteler</th>
+              <th class="col-highlight">ZarifÇözüm Maarif Ekosistemi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Müfredat Uyumu</strong></td>
+              <td>Müfredat değişiminde kitaplar hemen eskir</td>
+              <td>Eski tip formüllere dayalı sorular</td>
+              <td class="col-highlight"><span class="table-check">✓ Türkiye Yüzyılı Maarif Modeli %100 Uyum</span></td>
+            </tr>
+            <tr>
+              <td><strong>Yapay Zekâ ve Rehberlik</strong></td>
+              <td><span class="table-cross">✗ Yok, sadece ders saatinde</span></td>
+              <td>Cevabı hemen verip ezberletir</td>
+              <td class="col-highlight"><span class="table-check">✓ Sokratik Yöntem: Düşündürerek Çözdürür</span></td>
+            </tr>
+            <tr>
+              <td><strong>Soru Görselleri</strong></td>
+              <td>Siyah-beyaz basılı statik çizimler</td>
+              <td>Genellikle düz metin, şemasız</td>
+              <td class="col-highlight"><span class="table-check">✓ Renkli SVG Geometri & Basamak Şemaları</span></td>
+            </tr>
+            <tr>
+              <td><strong>Sınav Deneyimi</strong></td>
+              <td>Kağıt test, geç okuma süresi</td>
+              <td>Basit çoktan seçmeli butonlar</td>
+              <td class="col-highlight"><span class="table-check">✓ Süreli Dijital Optik Kodlama & Anlık Net</span></td>
+            </tr>
+            <tr>
+              <td><strong>Veli Bilgilendirmesi</strong></td>
+              <td>Dönem sonu veli toplantısına kadar belirsiz</td>
+              <td><span class="table-cross">✗ Veli paneli veya raporu bulunmaz</span></td>
+              <td class="col-highlight"><span class="table-check">✓ Haftalık Karne & Zayıf Kazanım Erken Uyarısı</span></td>
+            </tr>
+            <tr>
+              <td><strong>Öğretmen Araçları</strong></td>
+              <td>Fotokopi hazırlama, tek tek kağıt okuma</td>
+              <td>Dağınık PDF'ler, zor sınıf takibi</td>
+              <td class="col-highlight"><span class="table-check">✓ Sürükle-Bırak Ödev Sepeti & Canlı Tahta</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Maarif Süreç Becerileri Özeti -->
+  <section class="block" style="background:var(--color-surface);border-block:1px solid var(--color-divider)">
+    <div class="wrap">
+      <p class="eyebrow text-center">Pedagojik Derinlik</p>
+      <h2 class="section-title text-center">Maarif Modeli Matematik Süreç Becerileri</h2>
+      <div class="grid grid-4" style="margin-top:var(--space-8);gap:var(--space-4)">
+        <div class="card" style="padding:var(--space-5)">
+          <span class="chip" style="margin-bottom:0.5rem">Beceri 1</span>
+          <h4>Akıl Yürütme</h4>
+          <p class="small muted" style="margin-top:0.3rem">Matematiksel hipotezler kurma, genelleme yapma ve sonuçları gerekçelendirme kabiliyeti.</p>
+        </div>
+        <div class="card" style="padding:var(--space-5)">
+          <span class="chip" style="margin-bottom:0.5rem">Beceri 2</span>
+          <h4>Matematiksel Modelleme</h4>
+          <p class="small muted" style="margin-top:0.3rem">Gerçek yaşam durumlarını matematiksel semboller ve denklemlerle ifade etme yetisi.</p>
+        </div>
+        <div class="card" style="padding:var(--space-5)">
+          <span class="chip" style="margin-bottom:0.5rem">Beceri 3</span>
+          <h4>Problem Çözme</h4>
+          <p class="small muted" style="margin-top:0.3rem">Farklı stratejiler geliştirme, adım adım analiz etme ve çözümü doğrulama alışkanlığı.</p>
+        </div>
+        <div class="card" style="padding:var(--space-5)">
+          <span class="chip" style="margin-bottom:0.5rem">Beceri 4</span>
+          <h4>Matematiksel İletişim</h4>
+          <p class="small muted" style="margin-top:0.3rem">Matematiksel düşünceleri açık, net ve terimlerine uygun biçimde ifade edebilme gücü.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="block text-center" style="padding-block:var(--space-16)">
+    <div class="wrap" style="max-width:750px">
+      <h2 style="font-size:var(--text-xl);margin-bottom:var(--space-4)">Matematikte Başarı Hikayenizi Birlikte Yazalım</h2>
+      <p class="lead muted" style="margin-bottom:var(--space-6)">İlk testinizi 10 dakikada çözün, seviyenizi ölçün ve kişisel gelişim planınızı hemen oluşturun.</p>
+      <div class="cta" style="display:flex;justify-content:center;gap:var(--space-3)">
+        <a class="btn btn-primary btn-lg" href="kayit-giris.html?mode=register">Hemen Ücretsiz Başla</a>
+        <a class="btn btn-ghost btn-lg" href="iletisim.html">Bize Ulaşın</a>
       </div>
     </div>
   </section>
 </main>
+
 <footer class="site-footer">
   <div class="wrap">
-    <span>ZarifÇözüm · Matematik öğrenme platformu</span>
-    <div class="row"><a href="index.html">Ana sayfa</a><a href="hakkimizda.html">Hakkımızda</a><a href="Paketler.html">Paketler</a></div>
+    <span>ZarifÇözüm · Matematik Öğrenme Ekosistemi · 2026</span>
+    <div class="row">
+      <a href="index.html">Ana Sayfa</a>
+      <a href="hakkimizda.html">Hakkımızda</a>
+      <a href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html">Platform Ayrıcalıkları</a>
+      <a href="iletisim.html">İletişim</a>
+      <a href="Paketler.html">Paketler</a>
+    </div>
   </div>
 </footer>
 <script src="/assets/site-footer.js"></script>
-<script src="/assets/breadcrumb.js"></script>
-  <script src="/assets/site-media-targets.js"></script>
-  <script src="/assets/site-media.js"></script>
-  <script src="assets/mobile-menu.js" defer></script>
+<script src="/assets/site-media-targets.js"></script>
+<script src="/assets/site-media.js"></script>
+<script src="assets/mobile-menu.js" defer></script>
 </body>
 </html>

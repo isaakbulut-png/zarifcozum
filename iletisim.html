@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>İletişim & Destek | ZarifÇözüm</title>
+<meta name="description" content="ZarifÇözüm ekibiyle iletişime geçin. Öğrenci, veli ve öğretmen destek talepleri, kurumsal okul çözümleri ve geri bildirimleriniz için buradayız.">
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600&f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img class="brand-logo" src="assets/brand-mark.png" alt="">ZarifÇözüm</a>
+    <button class="menu-toggle" type="button" aria-controls="site-navigation" aria-expanded="false" aria-label="Menüyü aç">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Menü</span>
+    </button>
+    <nav class="site-nav" id="site-navigation" aria-label="Site">
+      <a href="index.html#akilli-panel">Akıllı Panel</a>
+      <a href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html">Platform Ayrıcalıkları</a>
+      <a href="hakkimizda.html">Hakkımızda</a>
+      <a href="iletisim.html" aria-current="page">İletişim</a>
+      <a href="Paketler.html">Paketler</a>
+      <a href="index.html#siniflar">Sınıflar</a>
+      <a href="mimari.html">Mimari</a>
+    </nav>
+    <div class="row">
+      <a class="btn btn-ghost btn-sm" href="kayit-giris.html">Giriş Yap</a>
+      <a class="btn btn-primary btn-sm" href="kayit-giris.html?mode=register">Kayıt Ol</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Hero Section -->
+  <section class="page-hero">
+    <div class="wrap">
+      <span class="chip chip-primary">BİZE ULAŞIN</span>
+      <h1>Sorularınız, Önerileriniz ve Destek İçin Buradayız</h1>
+      <p class="lead">Öğrenci, veli veya öğretmen olarak ZarifÇözüm ile ilgili her türlü soru, üyelik desteği ve kurumsal okul iş birliği talepleriniz için bize kolayca ulaşabilirsiniz.</p>
+    </div>
+  </section>
+
+  <!-- İletişim Formu ve Bilgiler -->
+  <section class="block" style="padding-top:0">
+    <div class="wrap">
+      <div class="contact-layout">
+        <!-- Sol: Form -->
+        <div class="contact-form-card">
+          <h2 style="font-size:var(--text-lg);color:var(--color-text);margin-bottom:var(--space-2)">Mesaj Gönderin</h2>
+          <p class="small muted">Aşağıdaki formu doldurarak bize iletebilirsiniz. Ekibimiz en geç 24 saat içinde sizinle iletişime geçecektir.</p>
+
+          <form id="contact-form" style="margin-top:var(--space-6)" onsubmit="event.preventDefault(); document.getElementById('contact-success').hidden = false; this.reset();">
+            <div class="contact-form-grid">
+              <div class="form-group">
+                <label for="contact-name">Adınız Soyadınız *</label>
+                <input type="text" id="contact-name" class="form-input" placeholder="Örn: Ahmet Yılmaz" required>
+              </div>
+              <div class="form-group">
+                <label for="contact-email">E-Posta Adresiniz *</label>
+                <input type="email" id="contact-email" class="form-input" placeholder="Örn: ahmet@example.com" required>
+              </div>
+              <div class="form-group">
+                <label for="contact-phone">Telefon Numaranız</label>
+                <input type="tel" id="contact-phone" class="form-input" placeholder="05XX XXX XX XX">
+              </div>
+              <div class="form-group">
+                <label for="contact-role">Profiliniz *</label>
+                <select id="contact-role" class="form-select" required>
+                  <option value="" disabled selected>Lütfen seçiniz</option>
+                  <option value="veli">Veli</option>
+                  <option value="ogrenci">Öğrenci</option>
+                  <option value="ogretmen">Matematik Öğretmeni</option>
+                  <option value="kurum">Okul / Eğitim Kurumu Yöneticisi</option>
+                  <option value="diger">Diğer</option>
+                </select>
+              </div>
+              <div class="form-group full-col">
+                <label for="contact-subject">Konu *</label>
+                <input type="text" id="contact-subject" class="form-input" placeholder="Örn: Üyelik aktivasyonu, Sokratik AI kullanımı..." required>
+              </div>
+              <div class="form-group full-col">
+                <label for="contact-message">Mesajınız *</label>
+                <textarea id="contact-message" class="form-textarea" placeholder="Mesajınızı buraya yazınız..." required></textarea>
+              </div>
+              <div class="full-col" style="margin-top:var(--space-2)">
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%">Mesajı Gönder</button>
+              </div>
+            </div>
+
+            <!-- Başarı Bildirimi -->
+            <div id="contact-success" class="notice notice-info" style="margin-top:var(--space-4)" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
+              <p><strong>Mesajınız başarıyla alındı!</strong> Destek ekibimiz en kısa sürede belirttiğiniz e-posta veya telefon üzerinden sizinle iletişime geçecektir.</p>
+            </div>
+          </form>
+        </div>
+
+        <!-- Sağ: Doğrudan İletişim Bilgileri -->
+        <div class="contact-info-stack">
+          <div class="contact-info-card">
+            <div class="icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </div>
+            <div>
+              <h4>E-Posta ile İletişim</h4>
+              <p>Genel Destek: <a href="mailto:destek@zarifcozum.com" style="color:var(--color-primary);font-weight:600">destek@zarifcozum.com</a></p>
+              <p>Kurumsal İş Birliği: <a href="mailto:kurumsal@zarifcozum.com" style="color:var(--color-primary);font-weight:600">kurumsal@zarifcozum.com</a></p>
+            </div>
+          </div>
+
+          <div class="contact-info-card">
+            <div class="icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <h4>Çalışma ve Yanıt Saatleri</h4>
+              <p>Pazartesi – Cumartesi: <strong>09:00 – 19:00</strong></p>
+              <p>Pazar: <em>Nöbetçi e-posta desteği</em></p>
+            </div>
+          </div>
+
+          <div class="contact-info-card">
+            <div class="icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div>
+              <h4>24 Saat İçinde Yanıt Taahhüdü</h4>
+              <p>Gelen tüm öğrenci, veli ve öğretmen destek talepleri ekibimiz tarafından en geç 24 saat içinde yanıtlanır.</p>
+            </div>
+          </div>
+
+          <div class="contact-info-card">
+            <div class="icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div>
+              <h4>Konum & Merkez</h4>
+              <p>ZarifÇözüm Eğitim Teknolojileri<br>Ankara, Türkiye</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rol Bazlı Hızlı Yardım Kutuları -->
+  <section class="block" style="background:var(--color-surface);border-block:1px solid var(--color-divider)">
+    <div class="wrap">
+      <p class="eyebrow text-center">Hızlı Çözümler</p>
+      <h2 class="section-title text-center">Kullanıcı Profilinize Özel Hızlı Destek</h2>
+
+      <div class="help-role-grid">
+        <div class="help-role-card">
+          <div class="role-avatar">👨‍👩‍👧</div>
+          <h3>Veliler İçin</h3>
+          <p>Öğrenci bağlama kodunun kullanımı, haftalık karne ayarları ve üyelik paketleri ile ilgili rehber.</p>
+          <a class="btn btn-ghost btn-sm" href="kayit-giris.html?role=parent">Veli Girişi Yap</a>
+        </div>
+
+        <div class="help-role-card">
+          <div class="role-avatar">👨‍🏫</div>
+          <h3>Öğretmenler & Okullar</h3>
+          <p>Sınıf şubesi tanımlama, sürükle-bırak ödev sepeti kullanımı ve toplu okul lisansı talepleri.</p>
+          <a class="btn btn-ghost btn-sm" href="kayit-giris.html?role=teacher">Öğretmen Girişi Yap</a>
+        </div>
+
+        <div class="help-role-card">
+          <div class="role-avatar">🎓</div>
+          <h3>Öğrenciler İçin</h3>
+          <p>Sokratik asistanla soru çözme, deneme sınavı optik form işaretleme ve şifre sıfırlama adımları.</p>
+          <a class="btn btn-ghost btn-sm" href="kayit-giris.html?role=student">Öğrenci Girişi Yap</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>ZarifÇözüm · Matematik Öğrenme Ekosistemi · 2026</span>
+    <div class="row">
+      <a href="index.html">Ana Sayfa</a>
+      <a href="hakkimizda.html">Hakkımızda</a>
+      <a href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html">Platform Ayrıcalıkları</a>
+      <a href="iletisim.html">İletişim</a>
+      <a href="Paketler.html">Paketler</a>
+    </div>
+  </div>
+</footer>
+<script src="/assets/site-footer.js"></script>
+<script src="/assets/site-media-targets.js"></script>
+<script src="/assets/site-media.js"></script>
+<script src="assets/mobile-menu.js" defer></script>
+</body>
+</html>
