@@ -26,18 +26,26 @@
     body {
       min-height: 100vh;
       margin: 0;
+      padding: 0;
       display: flex;
       flex-direction: column;
       background: var(--cream-bg);
       color: var(--navy-800);
+    }
+
+    .auth-page-body {
+      flex: 1 0 auto;
+      display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px 16px;
+      width: 100%;
+      padding: clamp(24px, 4vw, 48px) 16px clamp(36px, 5vw, 60px);
+      box-sizing: border-box;
     }
 
     .auth-split-wrapper {
       width: min(100%, 1020px);
-      margin: auto;
+      margin: 0 auto;
       display: grid;
       grid-template-columns: 380px 1fr;
       background: var(--card-bg);
@@ -45,6 +53,13 @@
       border-radius: 24px;
       box-shadow: 0 20px 60px rgba(58, 38, 24, 0.12);
       overflow: hidden;
+    }
+
+    .site-footer.site-footer-rich {
+      width: 100% !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      flex-shrink: 0;
     }
 
     /* Sol Sütun (Branded Dark Panel) */
@@ -442,7 +457,8 @@
   </style>
 </head>
 <body>
-  <div class="auth-split-wrapper">
+  <div class="auth-page-body">
+    <div class="auth-split-wrapper">
     <!-- Sol Sütun: Brand & Stepper -->
     <aside class="auth-sidebar-hero">
       <div class="sidebar-brand-row">
@@ -585,7 +601,7 @@
           </div>
 
           <div class="forgot-row" id="forgotRow">
-            <button class="text-button" id="forgotLink" type="button">Şifremi unuttum</button>
+            <button class="text-button" id="forgotLink" type="button">Şifremi unuttum / Şifre değiştir</button>
           </div>
 
           <button class="primary" id="submitButton" type="submit">Giriş yap</button>
@@ -602,37 +618,47 @@
       </div>
 
       <!-- Şifremi Unuttum Formu -->
-      <form id="forgotForm" hidden>
-        <p class="intro">E-posta adresinizi girin; şifre yenileme bağlantısını gönderelim.</p>
+      <form id="forgotForm" hidden style="margin-top: 10px;">
+        <p style="margin-bottom: 18px; color: var(--muted-text); font-size: 0.9rem; line-height: 1.55;">
+          Kayıtlı e-posta adresinizi girin; tek kullanımlık güvenli şifre sıfırlama bağlantısını hemen iletelim.
+        </p>
         <div class="field-wrap">
-          <label for="forgotEmail">E-posta adresi</label>
-          <input id="forgotEmail" type="email" autocomplete="email" maxlength="254" required>
+          <label for="forgotEmail">Kayıtlı e-posta adresi</label>
+          <input id="forgotEmail" type="email" autocomplete="email" maxlength="254" placeholder="ornek@zarifcozum.com" required>
         </div>
-        <button class="primary" type="submit">Sıfırlama bağlantısı gönder</button>
+        <button class="primary" type="submit" style="margin-top: 8px;">Sıfırlama bağlantısı gönder</button>
         <p class="message" id="forgotMessage" role="status" aria-live="polite"></p>
-        <p style="margin-top:16px;text-align:center"><button class="text-button" type="button" data-mode="login">Girişe dön</button></p>
+        <div style="margin-top: 20px; text-align: center;">
+          <button class="text-button" type="button" data-mode="login" style="font-weight: 600; color: var(--terracotta);">← Giriş ekranına dön</button>
+        </div>
       </form>
 
       <!-- Şifre Sıfırlama Formu -->
-      <form id="resetForm" hidden>
-        <p class="intro">Hesabınız için yeni ve güvenli bir şifre belirleyin.</p>
+      <form id="resetForm" hidden style="margin-top: 10px;">
+        <p style="margin-bottom: 18px; color: var(--muted-text); font-size: 0.9rem; line-height: 1.55;">
+          Hesabınız için en az 10 karakterden oluşan yeni ve güvenli bir şifre belirleyin.
+        </p>
         <div class="field-wrap">
           <label for="resetEmail">E-posta adresi</label>
           <input id="resetEmail" type="email" autocomplete="email" readonly required>
         </div>
         <div class="field-wrap">
           <label for="resetPassword">Yeni şifre</label>
-          <input id="resetPassword" type="password" autocomplete="new-password" minlength="10" maxlength="72" required>
+          <input id="resetPassword" type="password" autocomplete="new-password" minlength="10" maxlength="72" placeholder="En az 10 karakter" required>
         </div>
         <div class="field-wrap">
           <label for="resetConfirmation">Yeni şifreyi tekrar girin</label>
-          <input id="resetConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" required>
+          <input id="resetConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" placeholder="Şifrenizi doğrulayın" required>
         </div>
-        <button class="primary" type="submit">Şifremi yenile</button>
+        <button class="primary" type="submit" style="margin-top: 8px;">Yeni Şifreyi Kaydet</button>
         <p class="message" id="resetMessage" role="status" aria-live="polite"></p>
+        <div style="margin-top: 20px; text-align: center;">
+          <button class="text-button" type="button" data-mode="login" style="font-weight: 600; color: var(--terracotta);">← Giriş ekranına dön</button>
+        </div>
       </form>
     </main>
   </div>
+</div>
 
   <script>
     (() => {
@@ -674,6 +700,18 @@
         $('authOptions').hidden = forgot || resetting;
         $('forgotForm').hidden = !forgot;
         $('resetForm').hidden = !resetting;
+
+        if (forgot) {
+          $('authTitle').textContent = 'Şifremi Unuttum';
+          $('intro').textContent = 'Kayıtlı e-posta adresinize tek kullanımlık şifre sıfırlama bağlantısı göndereceğiz.';
+          return;
+        }
+
+        if (resetting) {
+          $('authTitle').textContent = 'Yeni Şifre Belirle';
+          $('intro').textContent = 'Hesabınız için yeni ve güvenli bir şifre belirleyin.';
+          return;
+        }
         $('loginMode').setAttribute('aria-pressed', String(!registering));
         $('registerMode').setAttribute('aria-pressed', String(registering));
         for (const id of ['nameField', 'phoneField', 'confirmField']) {
@@ -864,6 +902,8 @@
       if (resetToken && resetEmail) {
         $('resetEmail').value = resetEmail;
         setMode('reset');
+      } else if (params.get('mode') === 'forgot') {
+        setMode('forgot');
       } else {
         setMode(params.get('mode') === 'register' ? 'register' : 'login');
       }
