@@ -474,11 +474,21 @@
     }
 
     /* AI Asistanla Soru Çöz Sayfası Açılır Menü Önizlemesi */
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.45); border-color: #ea580c; }
+      50% { box-shadow: 0 0 0 10px rgba(234, 88, 12, 0); border-color: #c2410c; }
+      100% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); }
+    }
     .assistant-preview-card {
       background: #fff;
       border: 1px solid var(--line);
       border-radius: 14px;
       padding: 18px;
+      transition: border-color 0.3s ease;
+    }
+    .assistant-preview-card.is-highlighted {
+      animation: pulseGlow 1.2s ease;
+      border-color: #ea580c;
     }
     .assistant-select-row {
       display: grid;
@@ -580,12 +590,12 @@
         </div>
       </div>
 
-      <!-- AI Mentör Özel Buton -->
-      <a href="../asistan.html" class="ai-mentor-btn" title="Yapay Zekâ ile Soru Çöz">
+      <!-- AI Mentör Özel Buton (Tanıtım Önizlemesi) -->
+      <a href="#ai-asistan-bolumu" class="ai-mentor-btn" id="btnGoToAiSection" title="Örnek AI Mentör Bölümünü İncele">
         <div class="ai-mentor-icon">🤖</div>
         <div>
           <strong style="display:block;font-size:0.86rem;font-weight:700">AI Mentörle Çöz</strong>
-          <small style="opacity:0.85;font-size:0.72rem">Sokratik soru rehberi</small>
+          <small style="opacity:0.85;font-size:0.72rem">Sokratik soru rehberi (Önizleme)</small>
         </div>
       </a>
 
@@ -709,7 +719,7 @@
           </div>
 
           <!-- Asistanla Soru Çöz Sayfası - Açılır Menülü Güncel Tasarımımız -->
-          <div class="assistant-preview-card">
+          <div class="assistant-preview-card" id="ai-asistan-bolumu">
             <h3 style="font-size:0.92rem;font-weight:700;color:var(--navy-900);margin-bottom:10px;display:flex;align-items:center;gap:6px">
               <span>🤖 Asistanla Soru Çöz</span>
               <small style="color:var(--orange-dark);font-size:0.72rem">(Açılır Menüden Konu Seçimi)</small>
@@ -788,6 +798,18 @@
     </main>
   </div>
 
+  <script>
+    document.getElementById('btnGoToAiSection')?.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.getElementById('ai-asistan-bolumu');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.classList.remove('is-highlighted');
+        void target.offsetWidth;
+        target.classList.add('is-highlighted');
+      }
+    });
+  </script>
   <script src="../assets/breadcrumb.js"></script>
   <script src="/assets/site-media-targets.js"></script>
   <script src="/assets/site-media.js"></script>

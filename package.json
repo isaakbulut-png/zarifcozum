@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "test-hazirla": "node scripts/test-hazirla.js",
-    "test": "node --test",
+    "test": "node --test \"test/**/*.test.js\"",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",

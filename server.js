@@ -317,6 +317,15 @@ app.get('/api/homepage-assets', async (req, res) => {
     res.status(500).json({ mesaj: 'Ana sayfa medya ayarları alınamadı.' });
   }
 });
+app.get('/api/announcement-banner', async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  try {
+    res.json(await SystemConfig.getAnnouncementBanner());
+  } catch (error) {
+    console.error('Bilgilendirme panosu alınamadı:', error);
+    res.json({ active: false, title: 'Önemli Bilgilendirme', message: '', type: 'warning' });
+  }
+});
 app.get('/api/site-media', async (req, res) => {
   res.set('Cache-Control', 'no-store');
   const pagePath = SiteMediaTargets.normalizePagePath(req.query.page);

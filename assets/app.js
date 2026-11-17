@@ -31,8 +31,8 @@
         ${nav.map(n => `<a href="${n.href}" ${n.href === current ? 'aria-current="page"' : ''}>${icons[n.icon]}<span>${n.label}</span></a>`).join('')}
       </nav>
       <div class="side-user">
-        <span class="avatar">EA</span>
-        <div><strong>Elif A.</strong><br><span class="muted">6. Sınıf · Maarif Modeli</span></div>
+        <span class="avatar">KY</span>
+        <div><strong>Kerem Yılmaz</strong><br><span class="muted">6. Sınıf · Maarif Modeli</span></div>
       </div>`;
   }
   const tab = document.querySelector('[data-shell="tabbar"]');

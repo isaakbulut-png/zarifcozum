@@ -13,6 +13,14 @@ const DEFAULT_VISITOR_SETTINGS = Object.freeze({
   registrationEnabled: true
 });
 
+const DEFAULT_ANNOUNCEMENT_BANNER = Object.freeze({
+  active: false,
+  title: 'Önemli Bilgilendirme',
+  message: '',
+  type: 'warning',
+  updatedAt: new Date(0)
+});
+
 const systemConfigSchema = new mongoose.Schema({
   _id: { type: String, default: 'visitor-access' },
   questionLimit: { type: Number, min: 0, max: 500, default: DEFAULT_VISITOR_SETTINGS.questionLimit },
@@ -28,6 +36,13 @@ const systemConfigSchema = new mongoose.Schema({
     animation: { type: String, default: null },
     heroImage: { type: String, default: null },
     featureImage: { type: String, default: null }
+  },
+  announcementBanner: {
+    active: { type: Boolean, default: false },
+    title: { type: String, default: 'Önemli Bilgilendirme' },
+    message: { type: String, default: '' },
+    type: { type: String, enum: ['warning', 'danger', 'info', 'success'], default: 'warning' },
+    updatedAt: { type: Date, default: Date.now }
   },
   pagePath: {type: String, default: null},
   targetKey: {type: String, default: null},
@@ -98,5 +113,38 @@ systemConfigSchema.statics.saveSiteMediaPlacement = async function ({pagePath, t
   return this.findById(id).select('_id pagePath targetKey assetType url').lean();
 };
 
+systemConfigSchema.statics.getAnnouncementBanner = async function () {
+  const settings = await this.findById('visitor-access').lean();
+  const banner = settings?.announcementBanner;
+  if (!banner) return { ...DEFAULT_ANNOUNCEMENT_BANNER };
+  return {
+    active: Boolean(banner.active),
+    title: banner.title || DEFAULT_ANNOUNCEMENT_BANNER.title,
+    message: banner.message || '',
+    type: banner.type || 'warning',
+    updatedAt: banner.updatedAt || new Date()
+  };
+};
+
+systemConfigSchema.statics.saveAnnouncementBanner = async function ({ active, title, message, type } = {}) {
+  const cleanTitle = typeof title === 'string' && title.trim() ? title.trim().slice(0, 120) : 'Önemli Bilgilendirme';
+  const cleanMsg = typeof message === 'string' ? message.trim().slice(0, 2000) : '';
+  const cleanType = ['warning', 'danger', 'info', 'success'].includes(type) ? type : 'warning';
+  const banner = {
+    active: Boolean(active),
+    title: cleanTitle,
+    message: cleanMsg,
+    type: cleanType,
+    updatedAt: new Date()
+  };
+  await this.findOneAndUpdate(
+    { _id: 'visitor-access' },
+    { $set: { announcementBanner: banner }, $setOnInsert: { _id: 'visitor-access' } },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+  return banner;
+};
+
 module.exports = mongoose.models.SystemConfig || mongoose.model('SystemConfig', systemConfigSchema);
 module.exports.DEFAULT_VISITOR_SETTINGS = DEFAULT_VISITOR_SETTINGS;
+module.exports.DEFAULT_ANNOUNCEMENT_BANNER = DEFAULT_ANNOUNCEMENT_BANNER;

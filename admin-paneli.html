@@ -1053,10 +1053,57 @@
       </div>
     </section>
 
-    <!-- 13. DUYURULAR -->
+    <!-- 13. DUYURULAR & BİLGİLENDİRME PANOSU -->
     <section id="view-announcements" hidden>
-      <div class="panel" style="margin-top:0">
-        <h3>Duyuru Yayınla</h3>
+      <!-- ZİYARETÇİ BİLGİLENDİRME PANOSU (ANA SAYFA AÇILIŞ UYARISI) -->
+      <div class="panel" style="margin-top:0; border:2px solid #ea580c; background:#fffdfa;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:14px">
+          <div>
+            <h3 style="margin:0; display:flex; align-items:center; gap:8px;">
+              <span>📢 Ana Sayfa Ziyaretçi Bilgilendirme Panosu</span>
+              <span id="bannerStatusBadge" class="badge" style="background:#fee2e2; color:#991b1b; font-size:0.75rem; padding:3px 10px; border-radius:999px;">○ Yayında Değil (Pasif)</span>
+            </h3>
+            <p class="desc" style="margin-top:6px; font-size:0.86rem; color:#6a5242; line-height:1.45">
+              Site ilk açıldığında ziyaretçilerin karşısına çıkan açılır/modal uyarı panosunu buradan yönetebilirsiniz. <em>(Örn: Üyelik işlemlerinin durdurulması, sınav kayıt duyuruları, bakım vb.)</em>
+            </p>
+          </div>
+        </div>
+
+        <form id="bannerForm">
+          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px; margin-bottom:14px;">
+            <div>
+              <label for="bannerTitle" style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:4px">Pano Başlığı</label>
+              <input type="text" id="bannerTitle" placeholder="Örn: Önemli Bilgilendirme / Üyelik İşlemleri" maxlength="120" style="width:100%; padding:9px 12px; border:1px solid #ecd9c6; border-radius:8px;" required>
+            </div>
+            <div>
+              <label for="bannerType" style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:4px">Pano Türü (Görsel Renk)</label>
+              <select id="bannerType" style="width:100%; padding:9px 12px; border:1px solid #ecd9c6; border-radius:8px;">
+                <option value="warning" selected>⚠️ Uyarı (Turuncu / Amber)</option>
+                <option value="danger">🚨 Kritik / Acil (Kırmızı)</option>
+                <option value="info">ℹ️ Bilgi (Mavi)</option>
+                <option value="success">✨ Müjde / Başarı (Yeşil)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom:14px">
+            <label for="bannerMessage" style="display:block; font-size:0.85rem; font-weight:700; margin-bottom:4px">Bilgilendirme Mesajı Metni</label>
+            <textarea id="bannerMessage" rows="3" placeholder="Ziyaretçilerin ilk girdiğinde okuyacağı mesaj metnini yazın. (Örn: Sistem güncellemesi nedeniyle üyelik alımları geçici olarak durdurulmuştur.)" maxlength="2000" style="width:100%; padding:10px 12px; border:1px solid #ecd9c6; border-radius:8px; font-family:inherit; resize:vertical;" required></textarea>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap">
+            <div style="display:flex; gap:10px; align-items:center;">
+              <button class="btn primary" type="submit" id="btnPublishBanner" style="background:#ea580c; border-color:#ea580c;">📢 Panoyu Yayınla (Aktif Et)</button>
+              <button class="btn danger" type="button" id="btnDisableBanner">🚫 Yayından Kaldır (Kapat)</button>
+            </div>
+            <span id="bannerLastUpdated" style="font-size:0.78rem; color:#786455"></span>
+          </div>
+          <p class="msg" id="bannerMsg" role="alert" style="margin-top:10px"></p>
+        </form>
+      </div>
+
+      <div class="panel" style="margin-top:20px">
+        <h3>Öğrenci & Öğretmen Panel Duyurusu Yayınla</h3>
         <form id="announcementForm">
           <textarea id="announcementText" placeholder="Öğrenciler ve öğretmenler için duyuru metni..." maxlength="1000" required></textarea>
           <div style="margin-top:10px">
@@ -1574,7 +1621,41 @@
         } catch (error) { $('paymentsMsg').textContent = error.message; }
       }
 
+      async function loadBanner() {
+        const msg = $('bannerMsg');
+        if (msg) msg.textContent = '';
+        try {
+          const data = await api('/api/admin/announcement-banner');
+          const banner = data?.banner || {};
+          if ($('bannerTitle')) $('bannerTitle').value = banner.title || '';
+          if ($('bannerMessage')) $('bannerMessage').value = banner.message || '';
+          if ($('bannerType')) $('bannerType').value = banner.type || 'warning';
+          const badge = $('bannerStatusBadge');
+          if (badge) {
+            if (banner.active) {
+              badge.textContent = '● Yayında (Aktif)';
+              badge.style.background = '#dcfce7';
+              badge.style.color = '#15803d';
+            } else {
+              badge.textContent = '○ Yayında Değil (Pasif)';
+              badge.style.background = '#fee2e2';
+              badge.style.color = '#991b1b';
+            }
+          }
+          const updated = $('bannerLastUpdated');
+          if (updated) {
+            updated.textContent = banner.updatedAt ? `Son güncelleme: ${fmtDate(banner.updatedAt)}` : '';
+          }
+        } catch (error) {
+          if (msg) {
+            msg.className = 'msg';
+            msg.textContent = error.message;
+          }
+        }
+      }
+
       async function loadAnnouncements() {
+        loadBanner();
         $('announcementMsg').textContent = '';
         try {
           const data = await api('/api/admin/announcements');
@@ -2080,6 +2161,64 @@
           message.textContent = data.mesaj;
           loadAnnouncements();
         } catch (error) { message.textContent = error.message; }
+      });
+
+      $('bannerForm')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const message = $('bannerMsg');
+        const button = $('btnPublishBanner');
+        message.className = 'msg';
+        message.textContent = '';
+        button.disabled = true;
+        try {
+          const payload = {
+            active: true,
+            title: $('bannerTitle').value.trim(),
+            message: $('bannerMessage').value.trim(),
+            type: $('bannerType').value
+          };
+          const res = await api('/api/admin/announcement-banner', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          message.className = 'msg ok';
+          message.textContent = res.mesaj || 'Bilgilendirme panosu başarıyla yayınlandı.';
+          loadBanner();
+        } catch (err) {
+          message.className = 'msg';
+          message.textContent = err.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $('btnDisableBanner')?.addEventListener('click', async () => {
+        if (!confirm('Bilgilendirme panosu yayından kaldırılsın mı? Ziyaretçilere artık gösterilmeyecek.')) return;
+        const message = $('bannerMsg');
+        const button = $('btnDisableBanner');
+        message.className = 'msg';
+        message.textContent = '';
+        button.disabled = true;
+        try {
+          const payload = {
+            active: false,
+            title: $('bannerTitle').value.trim(),
+            message: $('bannerMessage').value.trim(),
+            type: $('bannerType').value
+          };
+          const res = await api('/api/admin/announcement-banner', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          message.className = 'msg ok';
+          message.textContent = 'Bilgilendirme panosu yayından kaldırıldı (pasif yapıldı).';
+          loadBanner();
+        } catch (err) {
+          message.className = 'msg';
+          message.textContent = err.message;
+        } finally {
+          button.disabled = false;
+        }
       });
 
       $('faqForm')?.addEventListener('submit', async event => {

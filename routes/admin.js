@@ -707,6 +707,40 @@ function createAdminRouter({
     }
   });
 
+  router.get('/announcement-banner', allow('superadmin', 'editor', 'support'), async (req, res) => {
+    try {
+      const banner = typeof SystemConfig.getAnnouncementBanner === 'function'
+        ? await SystemConfig.getAnnouncementBanner()
+        : { active: false, title: 'Önemli Bilgilendirme', message: '', type: 'warning' };
+      res.json({ banner });
+    } catch (error) {
+      console.error('Pano ayarları alınamadı:', error);
+      res.status(500).json({ mesaj: 'Pano ayarları alınamadı.' });
+    }
+  });
+
+  router.post('/announcement-banner', allow('superadmin'), async (req, res) => {
+    try {
+      const { active, title, message, type } = req.body || {};
+      const saved = typeof SystemConfig.saveAnnouncementBanner === 'function'
+        ? await SystemConfig.saveAnnouncementBanner({ active, title, message, type })
+        : { active: Boolean(active), title, message, type };
+
+      await audit(req, 'announcement_banner.updated', 'system_config', 'visitor-access', {
+        active: saved.active,
+        title: saved.title
+      });
+
+      res.json({
+        mesaj: saved.active ? 'Bilgilendirme panosu başarıyla yayınlandı.' : 'Bilgilendirme panosu yayından kaldırıldı.',
+        banner: saved
+      });
+    } catch (error) {
+      console.error('Pano kaydedilemedi:', error);
+      res.status(500).json({ mesaj: 'Pano kaydedilemedi.' });
+    }
+  });
+
   router.get('/faqs', allow('superadmin'), async (req, res) => {
     try {
       const entries = await getFaqModel().find({})

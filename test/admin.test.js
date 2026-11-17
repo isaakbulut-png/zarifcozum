@@ -95,9 +95,15 @@ function buildRouter(announcements = [], visitorSettings = { ...DEFAULT_VISITOR_
       return { deletedCount: 1 };
     }
   };
+  let announcementBanner = { active: false, title: 'Önemli Bilgilendirme', message: '', type: 'warning' };
   const SystemConfig = {
     getVisitorSettings: async () => ({ ...visitorSettings }),
     saveVisitorSettings: async updates => Object.assign(visitorSettings, updates),
+    getAnnouncementBanner: async () => ({ ...announcementBanner }),
+    saveAnnouncementBanner: async updates => {
+      announcementBanner = { ...announcementBanner, ...updates, updatedAt: new Date() };
+      return { ...announcementBanner };
+    },
     getHomepageAssets: async () => ({ ...homepageAssets }),
     saveHomepageAsset: async (slot, url) => {
       homepageAssets[slot] = url;
@@ -204,6 +210,18 @@ test('admin can publish announcements and validates input', async () => {
     assert.equal((await post({ message: 'Merhaba' })).status, 201);
     assert.equal(announcements[0].message, 'Merhaba');
     assert.equal(announcements[0].createdBy, 'admin');
+
+    const getBanner = await fetch(`${base}/announcement-banner`);
+    assert.equal(getBanner.status, 200);
+    const postBanner = await fetch(`${base}/announcement-banner`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ active: true, title: 'Bakım Bildirimi', message: 'Üyelikler durduruldu', type: 'warning' })
+    });
+    assert.equal(postBanner.status, 200);
+    const bannerJson = await postBanner.json();
+    assert.equal(bannerJson.banner.active, true);
+    assert.equal(bannerJson.banner.title, 'Bakım Bildirimi');
   });
 });
 
