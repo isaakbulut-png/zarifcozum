@@ -718,6 +718,7 @@
 
     <!-- 1. GENEL BAKIŞ -->
     <section id="view-overview">
+      <div id="systemHealthAlertBanner" hidden></div>
       <div class="grid" id="stats"></div>
       <p class="msg" id="overviewMsg" role="alert"></p>
     </section>
@@ -1396,6 +1397,34 @@
       async function loadOverview() {
         $('overviewMsg').textContent = '';
         try {
+          const alertBox = $('systemHealthAlertBanner');
+          if (alertBox) {
+            try {
+              const alertRes = await api('/api/admin/system-health/alert');
+              if (alertRes && alertRes.alert && alertRes.alert.active) {
+                alertBox.hidden = false;
+                const errList = (alertRes.alert.errors || []).join(' | ') || 'Kritik servislerde kesinti veya hata tespit edildi!';
+                alertBox.innerHTML = `
+                  <div style="background:#fef2f2; border:1px solid #f87171; border-left:6px solid #dc2626; border-radius:14px; padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:16px; box-shadow:0 4px 12px rgba(220,38,38,0.08);">
+                    <div style="display:flex; align-items:center; gap:14px;">
+                      <span style="font-size:26px;">🚨</span>
+                      <div>
+                        <strong style="color:#991b1b; font-size:14px; display:block;">Sistem Sağlığı Uyarısı (Puan: ${alertRes.alert.score}/100)</strong>
+                        <p style="color:#b91c1c; font-size:12px; margin:3px 0 0 0; line-height:1.4;">${errList}</p>
+                      </div>
+                    </div>
+                    <button type="button" class="btn" style="background:#dc2626; color:#fff; border:none; padding:7px 16px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;" onclick="document.querySelector('[data-view=\\'system-health\\']').click()">Taramayı İncele</button>
+                  </div>
+                `;
+              } else {
+                alertBox.hidden = true;
+                alertBox.innerHTML = '';
+              }
+            } catch (_) {
+              alertBox.hidden = true;
+            }
+          }
+
           const data = await api('/api/admin/overview');
           const labels = {
             students: 'Öğrenci', teachers: 'Öğretmen', admins: 'Yönetici',

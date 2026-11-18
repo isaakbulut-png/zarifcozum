@@ -1073,6 +1073,17 @@ async function baslat() {
     console.warn('REDIS_URL tanımlı değil; FAQ aramaları MongoDB üzerinden yapılacak.');
   }
   console.log(`✅ MongoDB bağlantısı hazır → veritabanı: ${DB_ADI}, koleksiyon: ${KOLEKSIYON}`);
+  try {
+    const { startDailyHealthScheduler } = require('./lib/system-health-scheduler');
+    startDailyHealthScheduler({
+      healthChecker: require('./lib/system-health-checker'),
+      SystemHealthLog: require('./models/SystemHealthLog'),
+      AdminLog: require('./models/AdminLog'),
+      SystemConfig: require('./models/SystemConfig')
+    });
+  } catch (schedErr) {
+    console.warn('Otomatik sağlık tarayıcısı başlatılamadı:', schedErr.message);
+  }
   httpServer.listen(PORT, () => {
     const adres = httpServer.address();
     console.log(typeof adres === 'string'

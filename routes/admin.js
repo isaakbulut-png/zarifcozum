@@ -755,6 +755,31 @@ function createAdminRouter({
     }
   });
 
+  router.get('/system-health/alert', allow('superadmin', 'editor', 'support'), async (req, res) => {
+    try {
+      const alert = typeof SystemConfig.getSystemHealthAlert === 'function'
+        ? await SystemConfig.getSystemHealthAlert()
+        : { active: false, score: 100, status: 'healthy', errors: [], warnings: [] };
+      res.json({ alert });
+    } catch (error) {
+      console.error('Sistem sağlığı uyarısı alınamadı:', error);
+      res.status(500).json({ mesaj: 'Sistem sağlığı uyarısı alınamadı.' });
+    }
+  });
+
+  router.post('/system-health/alert/dismiss', allow('superadmin'), async (req, res) => {
+    try {
+      if (typeof SystemConfig.dismissSystemHealthAlert === 'function') {
+        await SystemConfig.dismissSystemHealthAlert();
+      }
+      await audit(req, 'system_health.alert_dismissed', 'system_health', 'alert', {});
+      res.json({ mesaj: 'Sistem sağlığı uyarısı kapatıldı.' });
+    } catch (error) {
+      console.error('Sistem sağlığı uyarısı kapatılamadı:', error);
+      res.status(500).json({ mesaj: 'Sistem sağlığı uyarısı kapatılamadı.' });
+    }
+  });
+
   router.get('/system-health/logs', allow('superadmin'), async (req, res) => {
     try {
       const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 30));
@@ -782,6 +807,36 @@ function createAdminRouter({
         }
       } catch (dbErr) {
         console.warn('Sistem sağlığı logu veritabanına yazılamadı:', dbErr.message);
+      }
+
+      const hasErrors = scanData.status === 'error' || (Array.isArray(scanData.errors) && scanData.errors.length > 0);
+
+      if (hasErrors) {
+        try {
+          if (typeof SystemConfig.saveSystemHealthAlert === 'function') {
+            await SystemConfig.saveSystemHealthAlert({
+              active: true,
+              score: scanData.score,
+              status: scanData.status,
+              errors: scanData.errors,
+              warnings: scanData.warnings
+            });
+          }
+        } catch (confErr) {
+          console.warn('Sistem sağlığı uyarısı kaydedilemedi:', confErr.message);
+        }
+
+        await audit(req, 'system_health.failure_detected', 'system_health', 'scan', {
+          score: scanData.score,
+          status: scanData.status,
+          errors: scanData.errors
+        });
+      } else {
+        try {
+          if (typeof SystemConfig.dismissSystemHealthAlert === 'function') {
+            await SystemConfig.dismissSystemHealthAlert();
+          }
+        } catch (_) {}
       }
 
       await audit(req, 'system_health.scan_performed', 'system_health', 'scan', {

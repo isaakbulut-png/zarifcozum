@@ -21,6 +21,15 @@ const DEFAULT_ANNOUNCEMENT_BANNER = Object.freeze({
   updatedAt: new Date(0)
 });
 
+const DEFAULT_SYSTEM_HEALTH_ALERT = Object.freeze({
+  active: false,
+  score: 100,
+  status: 'healthy',
+  errors: [],
+  warnings: [],
+  updatedAt: new Date(0)
+});
+
 const systemConfigSchema = new mongoose.Schema({
   _id: { type: String, default: 'visitor-access' },
   questionLimit: { type: Number, min: 0, max: 500, default: DEFAULT_VISITOR_SETTINGS.questionLimit },
@@ -42,6 +51,14 @@ const systemConfigSchema = new mongoose.Schema({
     title: { type: String, default: 'Önemli Bilgilendirme' },
     message: { type: String, default: '' },
     type: { type: String, enum: ['warning', 'danger', 'info', 'success'], default: 'warning' },
+    updatedAt: { type: Date, default: Date.now }
+  },
+  systemHealthAlert: {
+    active: { type: Boolean, default: false },
+    score: { type: Number, default: 100 },
+    status: { type: String, default: 'healthy' },
+    errors: { type: [String], default: [] },
+    warnings: { type: [String], default: [] },
     updatedAt: { type: Date, default: Date.now }
   },
   pagePath: {type: String, default: null},
@@ -145,6 +162,48 @@ systemConfigSchema.statics.saveAnnouncementBanner = async function ({ active, ti
   return banner;
 };
 
+systemConfigSchema.statics.getSystemHealthAlert = async function () {
+  const settings = await this.findById('visitor-access').lean();
+  const alert = settings?.systemHealthAlert;
+  if (!alert) return { ...DEFAULT_SYSTEM_HEALTH_ALERT };
+  return {
+    active: Boolean(alert.active),
+    score: typeof alert.score === 'number' ? alert.score : 100,
+    status: alert.status || 'healthy',
+    errors: Array.isArray(alert.errors) ? alert.errors : [],
+    warnings: Array.isArray(alert.warnings) ? alert.warnings : [],
+    updatedAt: alert.updatedAt || new Date()
+  };
+};
+
+systemConfigSchema.statics.saveSystemHealthAlert = async function ({ active, score, status, errors = [], warnings = [] } = {}) {
+  const alert = {
+    active: Boolean(active),
+    score: typeof score === 'number' ? score : 100,
+    status: status || (active ? 'error' : 'healthy'),
+    errors: Array.isArray(errors) ? errors : [],
+    warnings: Array.isArray(warnings) ? warnings : [],
+    updatedAt: new Date()
+  };
+  await this.findOneAndUpdate(
+    { _id: 'visitor-access' },
+    { $set: { systemHealthAlert: alert }, $setOnInsert: { _id: 'visitor-access' } },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+  return alert;
+};
+
+systemConfigSchema.statics.dismissSystemHealthAlert = async function () {
+  return this.saveSystemHealthAlert({
+    active: false,
+    score: 100,
+    status: 'healthy',
+    errors: [],
+    warnings: []
+  });
+};
+
 module.exports = mongoose.models.SystemConfig || mongoose.model('SystemConfig', systemConfigSchema);
 module.exports.DEFAULT_VISITOR_SETTINGS = DEFAULT_VISITOR_SETTINGS;
 module.exports.DEFAULT_ANNOUNCEMENT_BANNER = DEFAULT_ANNOUNCEMENT_BANNER;
+module.exports.DEFAULT_SYSTEM_HEALTH_ALERT = DEFAULT_SYSTEM_HEALTH_ALERT;

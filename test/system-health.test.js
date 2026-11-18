@@ -2,6 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const express = require('express');
 const { createAdminRouter } = require('../routes/admin');
+const { calculateMsUntilNextTime, executeScheduledScan } = require('../lib/system-health-scheduler');
+const healthChecker = require('../lib/system-health-checker');
 
 function withServer(router, sessionUser, fn) {
   const app = express();
@@ -42,6 +44,12 @@ test('system-health admin endpoints require superadmin role and return scans', a
         ssl: { status: 'healthy', daysLeft: 60 },
         domain: { status: 'healthy' },
         mediaCdn: { status: 'healthy', statusCode: 200 },
+        pinecone: { status: 'healthy', durationMs: 140 },
+        github: { status: 'healthy', durationMs: 180 },
+        githubActions: { status: 'healthy', durationMs: 190 },
+        gemini: { status: 'healthy', durationMs: 220 },
+        cloudflare: { status: 'healthy', durationMs: 90 },
+        googleCloud: { status: 'healthy', durationMs: 110 },
         performance: { averageMs: 128, grade: 'A+' }
       },
       warnings: [],
@@ -62,10 +70,23 @@ test('system-health admin endpoints require superadmin role and return scans', a
     })
   };
 
+  let activeAlert = null;
+  const mockSystemConfig = {
+    getSystemHealthAlert: async () => activeAlert || { active: false, score: 100, status: 'healthy', errors: [] },
+    saveSystemHealthAlert: async (al) => {
+      activeAlert = { ...al, updatedAt: new Date() };
+      return activeAlert;
+    },
+    dismissSystemHealthAlert: async () => {
+      activeAlert = { active: false, score: 100, status: 'healthy', errors: [] };
+      return activeAlert;
+    }
+  };
+
   const router = createAdminRouter({
     User: mockUser,
     Payment: {},
-    SystemConfig: {},
+    SystemConfig: mockSystemConfig,
     AdminLog: { create: async () => ({}) },
     SystemHealthLog: mockSystemHealthLog,
     healthChecker: mockHealthChecker,
@@ -85,6 +106,10 @@ test('system-health admin endpoints require superadmin role and return scans', a
     // Initial latest is null
     const initialLatest = await (await fetch(`${base}/system-health/latest`)).json();
     assert.equal(initialLatest.scan, null);
+
+    // Initial alert is inactive
+    const alertRes0 = await (await fetch(`${base}/system-health/alert`)).json();
+    assert.equal(alertRes0.alert.active, false);
 
     // Trigger scan
     const scanRes = await fetch(`${base}/system-health/scan`, { method: 'POST' });
@@ -106,5 +131,125 @@ test('system-health admin endpoints require superadmin role and return scans', a
     const logsData = await logsRes.json();
     assert.equal(logsData.logs.length, 1);
     assert.equal(logsData.logs[0].score, 98);
+
+    // Dismiss alert endpoint works
+    const dismissRes = await fetch(`${base}/system-health/alert/dismiss`, { method: 'POST' });
+    assert.equal(dismissRes.status, 200);
   });
+});
+
+test('calculateMsUntilNextTime calculates delay to target 08:00 accurately', () => {
+  const at0730 = new Date('2026-11-18T07:30:00.000');
+  const ms1 = calculateMsUntilNextTime(8, 0, at0730);
+  assert.equal(ms1, 30 * 60 * 1000); // 30 minutes
+
+  const at0830 = new Date('2026-11-18T08:30:00.000');
+  const ms2 = calculateMsUntilNextTime(8, 0, at0830);
+  assert.equal(ms2, 23.5 * 60 * 60 * 1000); // 23.5 hours until tomorrow 08:00
+});
+
+test('executeScheduledScan handles failures, triggers audit log and sets dashboard alert', async () => {
+  const auditLogs = [];
+  let savedAlert = null;
+  let savedScanLog = null;
+
+  const mockFailChecker = {
+    runSystemHealthScan: async () => ({
+      score: 45,
+      status: 'error',
+      summary: 'Kritik servislerde kesinti var.',
+      errors: ['Pinecone: API anahtarı geçersiz', 'Cloudflare R2: Bağlantı zaman aşımı'],
+      warnings: [],
+      checks: {},
+      timestamp: new Date()
+    })
+  };
+
+  const mockSystemHealthLog = {
+    saveScan: async (doc) => {
+      savedScanLog = doc;
+      return { toObject: () => doc };
+    }
+  };
+
+  const mockAdminLog = {
+    create: async (entry) => {
+      auditLogs.push(entry);
+      return entry;
+    }
+  };
+
+  const mockSystemConfig = {
+    saveSystemHealthAlert: async (al) => {
+      savedAlert = al;
+      return al;
+    },
+    dismissSystemHealthAlert: async () => {
+      savedAlert = null;
+    }
+  };
+
+  let notifyCalled = false;
+  const result = await executeScheduledScan({
+    healthChecker: mockFailChecker,
+    SystemHealthLog: mockSystemHealthLog,
+    AdminLog: mockAdminLog,
+    SystemConfig: mockSystemConfig,
+    notifyAdmins: async () => { notifyCalled = true; }
+  });
+
+  assert.equal(result.hasErrors, true);
+  assert.equal(result.scan.score, 45);
+  assert.equal(savedScanLog.score, 45);
+  assert.equal(notifyCalled, true);
+
+  // 1. Audit Log created
+  assert.equal(auditLogs.length, 1);
+  assert.equal(auditLogs[0].action, 'system_health.failure_detected');
+  assert.equal(auditLogs[0].entityType, 'system_health');
+
+  // 2. Dashboard alert set to active
+  assert.ok(savedAlert);
+  assert.equal(savedAlert.active, true);
+  assert.equal(savedAlert.errors.length, 2);
+
+  // 3. When system is healthy, executeScheduledScan dismisses the alert
+  const mockHealthyChecker = {
+    runSystemHealthScan: async () => ({
+      score: 96,
+      status: 'healthy',
+      summary: 'Her şey çalışıyor.',
+      errors: [],
+      warnings: [],
+      checks: {},
+      timestamp: new Date()
+    })
+  };
+
+  const healthyResult = await executeScheduledScan({
+    healthChecker: mockHealthyChecker,
+    SystemHealthLog: mockSystemHealthLog,
+    AdminLog: mockAdminLog,
+    SystemConfig: mockSystemConfig
+  });
+
+  assert.equal(healthyResult.hasErrors, false);
+  assert.equal(savedAlert, null);
+});
+
+test('healthChecker exports all 13 check functions', () => {
+  assert.equal(typeof healthChecker.runSystemHealthScan, 'function');
+  assert.equal(typeof healthChecker.checkApi, 'function');
+  assert.equal(typeof healthChecker.checkDatabases, 'function');
+  assert.equal(typeof healthChecker.checkCloudflareR2, 'function');
+  assert.equal(typeof healthChecker.checkCloudinary, 'function');
+  assert.equal(typeof healthChecker.checkSsl, 'function');
+  assert.equal(typeof healthChecker.checkDomains, 'function');
+  assert.equal(typeof healthChecker.checkCloudflareMedia, 'function');
+  assert.equal(typeof healthChecker.checkPinecone, 'function');
+  assert.equal(typeof healthChecker.checkGitHubApi, 'function');
+  assert.equal(typeof healthChecker.checkGitHubActions, 'function');
+  assert.equal(typeof healthChecker.checkGemini, 'function');
+  assert.equal(typeof healthChecker.checkCloudflareApi, 'function');
+  assert.equal(typeof healthChecker.checkGoogleCloud, 'function');
 });
