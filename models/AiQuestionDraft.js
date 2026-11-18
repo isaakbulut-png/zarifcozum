@@ -2,11 +2,8 @@
 
 const draftQuestionItemSchema = new mongoose.Schema({
   text: { type: String, required: true, maxlength: 4000 },
-  options: [{
-    label: { type: String, required: true, enum: ['A', 'B', 'C', 'D', 'E'] },
-    text: { type: String, required: true, maxlength: 1000 }
-  }],
-  answer: { type: String, enum: ['A', 'B', 'C', 'D', 'E', null], default: null },
+  options: { type: mongoose.Schema.Types.Mixed, required: true },
+  answer: { type: String, default: null },
   explanation: { type: String, maxlength: 4000, default: '' },
   svg: { type: String, default: '' },
   curriculum_node_id: { type: mongoose.Schema.Types.ObjectId, default: null },
@@ -19,8 +16,15 @@ const draftQuestionItemSchema = new mongoose.Schema({
 const aiQuestionDraftSchema = new mongoose.Schema({
   title: { type: String, required: true, maxlength: 200, trim: true },
   topic: { type: String, required: true, maxlength: 200, trim: true, index: true },
-  grade: { type: Number, required: true, min: 5, max: 12, index: true },
-  difficulty: { type: String, enum: ['kolay', 'orta', 'zor'], default: 'orta', index: true },
+  grade: { type: Number, required: true, min: 1, max: 12, index: true },
+  difficulty: {
+    type: String,
+    lowercase: true,
+    trim: true,
+    enum: ['kolay', 'orta', 'zor', null],
+    default: 'orta',
+    index: true
+  },
   count: { type: Number, default: 1 },
   questions: [draftQuestionItemSchema],
   status: { type: String, enum: ['draft', 'approved', 'archived'], default: 'draft', index: true },
@@ -29,6 +33,12 @@ const aiQuestionDraftSchema = new mongoose.Schema({
 }, {
   timestamps: true,
   collection: 'ai_question_drafts'
+});
+
+aiQuestionDraftSchema.pre('validate', function() {
+  if (this.difficulty && typeof this.difficulty === 'string') {
+    this.difficulty = this.difficulty.trim().toLowerCase();
+  }
 });
 
 aiQuestionDraftSchema.index({ grade: 1, topic: 1, status: 1 });

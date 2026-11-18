@@ -280,7 +280,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         title: quiz.title,
         topic,
         grade,
-        difficulty,
+        difficulty: String(difficulty || 'orta').toLowerCase(),
         count,
         questions: preparedQuestions.map(q => ({
           text: q.text,
@@ -304,7 +304,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         ders: 'matematik',
         grade,
         topic,
-        difficulty,
+        difficulty: String(difficulty || 'orta').toLowerCase(),
         content: {
           description: quiz.description,
           questions: preparedQuestions,
@@ -452,10 +452,16 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       for (const q of draft.questions) {
         if (q.status === 'rejected') continue;
 
+        const formattedOptions = Array.isArray(q.options)
+          ? q.options
+          : (q.options && typeof q.options === 'object'
+            ? Object.entries(q.options).map(([label, text]) => ({ label, text: String(text) }))
+            : []);
+
         const soru = await Soru.create({
           format: 'text_svg',
           text: q.text,
-          options: q.options,
+          options: formattedOptions,
           explanation: q.explanation || '',
           svg: q.svg || '',
           grade: draft.grade,
@@ -506,6 +512,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       await draft.save();
 
       res.json({
+        success: true,
         mesaj: `${transferred.length} soru Soru Bankasına başarıyla aktarıldı ve Pinecone'a indekslendi.`,
         transferredCount: transferred.length,
         transferredIds: transferred

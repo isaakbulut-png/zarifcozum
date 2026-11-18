@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const optionSchema = new mongoose.Schema({
   label: { type: String, enum: ['A', 'B', 'C', 'D', 'E'], required: true },
@@ -17,7 +17,7 @@ const soruSchema = new mongoose.Schema({
   imageFile: { type: String, trim: true, maxlength: 200, default: '' },
   // Metin ve SVG tabanlı AI soruları için
   text: { type: String, maxlength: 4000, default: '' },
-  options: [optionSchema],
+  options: { type: mongoose.Schema.Types.Mixed, default: [] },
   explanation: { type: String, maxlength: 4000, default: '' },
   svg: { type: String, default: '' },
   grade: { type: Number, min: 5, max: 12, index: true },
@@ -41,11 +41,10 @@ const soruSchema = new mongoose.Schema({
 }, { timestamps: true, collection: 'sorular' });
 
 // Otomatik seçenek eşleme: { A: '...', B: '...' } nesnesi verilirse [{ label: 'A', text: '...' }] dizisine dönüştürür.
-soruSchema.pre('validate', function(next) {
+soruSchema.pre('validate', function() {
   if (this.options && typeof this.options === 'object' && !Array.isArray(this.options)) {
     this.options = Object.entries(this.options).map(([label, text]) => ({ label, text: String(text) }));
   }
-  next();
 });
 
 soruSchema.index({ grade: 1, topic: 1 });

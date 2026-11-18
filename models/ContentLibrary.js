@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const contentLibrarySchema = new mongoose.Schema({
   title: { type: String, required: true, maxlength: 250, trim: true, index: true },
@@ -60,7 +60,7 @@ contentLibrarySchema.virtual('body')
   .set(function(v) { this.content = v; });
 
 // Pre-validate hook to map aliases before mongoose validation
-contentLibrarySchema.pre('validate', function(next) {
+contentLibrarySchema.pre('validate', function() {
   if (!this.type && this.get('contentType')) this.type = this.get('contentType');
   if (!this.ders && this.get('lesson')) this.ders = this.get('lesson');
   if (!this.content && this.get('body')) this.content = this.get('body');
@@ -68,7 +68,6 @@ contentLibrarySchema.pre('validate', function(next) {
     const num = parseInt(this.grade, 10);
     this.grade = isNaN(num) ? 8 : num;
   }
-  next();
 });
 
 contentLibrarySchema.index({ type: 1, grade: 1, topic: 1 });

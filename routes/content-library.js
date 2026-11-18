@@ -109,7 +109,17 @@ function createContentLibraryRouter({ requireStaff, mediaStorage, privateDocumen
   // 4. Yeni İçerik Ekle
   router.post('/', async (req, res) => {
     try {
-      const { title, type, ders = 'matematik', grade, topic, difficulty, content, metadata = {}, status = 'approved', source = 'teacher' } = req.body;
+      const title = req.body.title;
+      const type = req.body.type || req.body.contentType;
+      const content = req.body.content || req.body.body;
+      const ders = req.body.ders || req.body.lesson || 'matematik';
+      const grade = req.body.grade;
+      const topic = req.body.topic;
+      const difficulty = req.body.difficulty;
+      const metadata = req.body.metadata || {};
+      const status = req.body.status || 'approved';
+      const source = req.body.source || 'teacher';
+
       if (!title || !type || !content) {
         return res.status(400).json({ mesaj: 'Başlık, içerik türü ve içerik zorunludur.' });
       }
@@ -117,7 +127,7 @@ function createContentLibraryRouter({ requireStaff, mediaStorage, privateDocumen
       const item = await ContentLibrary.create({
         title: title.trim(),
         type,
-        ders: ders.toLowerCase(),
+        ders: String(ders).toLowerCase(),
         grade: grade ? Number(grade) : undefined,
         topic: topic ? topic.trim() : undefined,
         difficulty: difficulty || null,
@@ -128,7 +138,7 @@ function createContentLibraryRouter({ requireStaff, mediaStorage, privateDocumen
         createdBy: req.session.user.id
       });
 
-      res.status(201).json({ mesaj: 'İçerik havuza eklendi.', id: item._id.toString() });
+      res.status(201).json({ mesaj: 'İçerik havuza eklendi.', id: item._id.toString(), item });
     } catch (err) {
       console.error('[ContentLibrary] Ekleme hatası:', err);
       res.status(500).json({ mesaj: 'İçerik kaydedilemedi.' });
@@ -307,7 +317,7 @@ function createContentLibraryRouter({ requireStaff, mediaStorage, privateDocumen
       item.status = 'archived';
       await item.save();
 
-      res.json({ mesaj: 'İçerik Cloudflare R2 üzerine başarıyla arşivlendi.', r2Key, r2Url: item.r2Url });
+      res.json({ success: true, mesaj: 'İçerik Cloudflare R2 üzerine başarıyla arşivlendi.', r2Key, r2Url: item.r2Url });
     } catch (err) {
       console.error('[ContentLibrary] R2 arşivleme hatası:', err);
       res.status(500).json({ mesaj: 'Cloudflare R2 arşivleme işlemi başarısız.' });
