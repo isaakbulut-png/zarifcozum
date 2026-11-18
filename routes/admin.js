@@ -797,6 +797,36 @@ function createAdminRouter({
     }
   });
 
+  router.get('/system-health/legal-audit', allow('superadmin', 'editor', 'support'), async (req, res) => {
+    try {
+      const auditorFn = typeof healthChecker.runLegalDocumentsAudit === 'function'
+        ? healthChecker.runLegalDocumentsAudit
+        : require('../lib/legal-documents-auditor').runLegalDocumentsAudit;
+      const auditReport = await auditorFn();
+      res.json({ auditReport });
+    } catch (error) {
+      console.error('Yasal metinler denetimi başarısız:', error);
+      res.status(500).json({ mesaj: 'Yasal metinler denetimi başarısız: ' + error.message });
+    }
+  });
+
+  router.post('/system-health/legal-audit/scan', allow('superadmin'), async (req, res) => {
+    try {
+      const auditorFn = typeof healthChecker.runLegalDocumentsAudit === 'function'
+        ? healthChecker.runLegalDocumentsAudit
+        : require('../lib/legal-documents-auditor').runLegalDocumentsAudit;
+      const auditReport = await auditorFn();
+      await audit(req, 'system_health.legal_audit_performed', 'system_health', 'legal_docs', {
+        score: auditReport.score,
+        status: auditReport.status
+      });
+      res.json({ mesaj: 'Yasal metinler denetimi başarıyla tamamlandı.', auditReport });
+    } catch (error) {
+      console.error('Yasal metinler denetimi yürütülemedi:', error);
+      res.status(500).json({ mesaj: 'Yasal metinler denetimi yürütülemedi: ' + error.message });
+    }
+  });
+
   router.post('/system-health/alert/dismiss', allow('superadmin'), async (req, res) => {
     try {
       if (typeof SystemConfig.dismissSystemHealthAlert === 'function') {

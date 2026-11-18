@@ -159,29 +159,79 @@ export interface KvkkComplianceReport {
   recommendations: string[];
 }
 
+export interface LegalDocumentItem {
+  id: string;
+  name: string;
+  title: string;
+  sectionId: string;
+  score: number;
+  status: ComplianceStatus;
+  statusLabel: string;
+  missingFields: string[];
+  placeholders: string[];
+  companyInfoNeeded: string[];
+  kvkkIssues: string[];
+  contradictions: string[];
+  recommendations: string[];
+  stats: {
+    wordCount: number;
+    charCount: number;
+    missingCount: number;
+    placeholderCount: number;
+    companyCount: number;
+    kvkkCount: number;
+    contradictionCount: number;
+  };
+}
+
+export interface LegalDocumentsAuditReport {
+  timestamp: string;
+  score: number;
+  status: ComplianceStatus;
+  statusLabel: string;
+  summary: string;
+  stats: {
+    totalDocuments: number;
+    averageScore: number;
+    totalMissing: number;
+    totalPlaceholders: number;
+    totalCompanyNeeded: number;
+    totalKvkkIssues: number;
+    totalContradictions: number;
+  };
+  documents: LegalDocumentItem[];
+  recommendations: string[];
+}
+
 export const SystemHealth: React.FC = () => {
   const [scan, setScan] = useState<SystemHealthScan | null>(null);
   const [logs, setLogs] = useState<SystemHealthLogItem[]>([]);
   const [kvkkReport, setKvkkReport] = useState<KvkkComplianceReport | null>(null);
+  const [legalAuditReport, setLegalAuditReport] = useState<LegalDocumentsAuditReport | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [kvkkLoading, setKvkkLoading] = useState<boolean>(false);
+  const [legalLoading, setLegalLoading] = useState<boolean>(false);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'kvkk' | 'logs'>('overview');
+  const [activeKvkkSubTab, setActiveKvkkSubTab] = useState<'cookies' | 'legal_docs'>('legal_docs');
+  const [expandedDocId, setExpandedDocId] = useState<string | null>(null);
 
   const fetchInitialData = useCallback(async () => {
     setInitialLoading(true);
     setErrorMsg(null);
     try {
-      const [latestRes, logsRes, kvkkRes] = await Promise.all([
+      const [latestRes, logsRes, kvkkRes, legalRes] = await Promise.all([
         fetch('/api/admin/system-health/latest').then(r => r.json()).catch(() => ({})),
         fetch('/api/admin/system-health/logs?limit=30').then(r => r.json()).catch(() => ({})),
-        fetch('/api/admin/system-health/kvkk').then(r => r.json()).catch(() => ({}))
+        fetch('/api/admin/system-health/kvkk').then(r => r.json()).catch(() => ({})),
+        fetch('/api/admin/system-health/legal-audit').then(r => r.json()).catch(() => ({}))
       ]);
 
       if (latestRes?.scan) setScan(latestRes.scan);
       if (logsRes?.logs) setLogs(logsRes.logs);
       if (kvkkRes?.report) setKvkkReport(kvkkRes.report);
+      if (legalRes?.auditReport) setLegalAuditReport(legalRes.auditReport);
     } catch (err: any) {
       setErrorMsg('Sistem verileri yüklenemedi: ' + (err.message || 'Bilinmeyen hata'));
     } finally {
@@ -229,6 +279,24 @@ export const SystemHealth: React.FC = () => {
       setErrorMsg('KVKK tarama hatası: ' + (err.message || 'Bilinmeyen hata'));
     } finally {
       setKvkkLoading(false);
+    }
+  };
+
+  const handleRunLegalAudit = async () => {
+    setLegalLoading(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch('/api/admin/system-health/legal-audit/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.mesaj || 'Yasal metinler denetimi gerçekleştirilemedi.');
+      if (data.auditReport) setLegalAuditReport(data.auditReport);
+    } catch (err: any) {
+      setErrorMsg('Yasal metinler tarama hatası: ' + (err.message || 'Bilinmeyen hata'));
+    } finally {
+      setLegalLoading(false);
     }
   };
 
@@ -308,6 +376,21 @@ export const SystemHealth: React.FC = () => {
     }
   };
 
+  const getDocumentIcon = (id: string) => {
+    switch (id) {
+      case 'uyelik-sozlesmesi': return '📝';
+      case 'kullanim-kosullari': return '📜';
+      case 'gizlilik-politikasi': return '🛡️';
+      case 'kvkk-aydinlatma': return '⚖️';
+      case 'cerez-politikasi': return '🍪';
+      case 'acik-riza': return '✍️';
+      case 'on-bilgilendirme': return '📋';
+      case 'mesafeli-satis': return '🛒';
+      case 'iptal-iade': return '🔄';
+      default: return '📄';
+    }
+  };
+
   const renderServiceMeta = (item?: ServiceItemCheck) => {
     if (!item) return null;
     return (
@@ -374,19 +457,19 @@ export const SystemHealth: React.FC = () => {
           {activeTab === 'kvkk' ? (
             <button
               type="button"
-              onClick={handleRunKvkkScan}
-              disabled={kvkkLoading}
+              onClick={activeKvkkSubTab === 'legal_docs' ? handleRunLegalAudit : handleRunKvkkScan}
+              disabled={activeKvkkSubTab === 'legal_docs' ? legalLoading : kvkkLoading}
               className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 active:scale-95 transition shadow-sm disabled:opacity-50 cursor-pointer"
             >
-              {kvkkLoading ? (
+              {(activeKvkkSubTab === 'legal_docs' ? legalLoading : kvkkLoading) ? (
                 <>
                   <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                   <span>Denetleniyor...</span>
                 </>
               ) : (
                 <>
-                  <span>🍪</span>
-                  <span>KVKK Taraması Çalıştır</span>
+                  <span>{activeKvkkSubTab === 'legal_docs' ? '📜' : '🍪'}</span>
+                  <span>{activeKvkkSubTab === 'legal_docs' ? 'Yasal Metinleri Denetle' : 'KVKK Taraması Çalıştır'}</span>
                 </>
               )}
             </button>
@@ -922,155 +1005,531 @@ export const SystemHealth: React.FC = () => {
         </>
       )}
 
-      {/* TAB 2: KVKK & ÇEREZ UYUMLULUĞU */}
+      {/* TAB 2: KVKK & ÇEREZ & YASAL METİNLER UYUMLULUĞU */}
       {activeTab === 'kvkk' && (
         <div className="space-y-6">
-          {kvkkReport ? (
-            <>
-              {/* Score & Compliance Header Card */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Overall Score */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 flex flex-col items-center justify-center text-center">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">KVKK Uyumluluk Puanı</span>
-                  <div className={`w-32 h-32 rounded-full border-8 flex flex-col items-center justify-center ${getScoreColor(kvkkReport.score)} shadow-inner`}>
-                    <span className="text-4xl font-extrabold tracking-tight">{kvkkReport.score}</span>
-                    <span className="text-xs font-semibold text-slate-500">/ 100</span>
-                  </div>
-                  <div className="mt-4">
-                    {getComplianceBadge(kvkkReport.status)}
-                  </div>
-                  <p className="text-xs text-slate-400 mt-2">
-                    Son Denetim: {new Date(kvkkReport.timestamp).toLocaleString('tr-TR')}
-                  </p>
-                </div>
-
-                {/* Summary & Category Breakdown */}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 lg:col-span-2 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-base font-bold text-slate-900">Mevzuat Uyumluluk Özeti</h3>
-                      <div className="flex items-center gap-1.5 text-xs font-semibold">
-                        <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          {kvkkReport.counts.compliant} Uyumlu
-                        </span>
-                        {kvkkReport.counts.partial > 0 && (
-                          <span className="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
-                            {kvkkReport.counts.partial} Kısmen
-                          </span>
-                        )}
-                        {kvkkReport.counts.nonCompliant > 0 && (
-                          <span className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">
-                            {kvkkReport.counts.nonCompliant} Uyumsuz
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-sm text-slate-600 mb-4">{kvkkReport.summary}</p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Çerez Rıza Yönetimi</span>
-                        <span className="text-sm font-bold text-slate-800">4 / 4 Kriter</span>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Banner, depolama, tercih değiştirme ve consent mode</p>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Çerez Güvenliği</span>
-                        <span className="text-sm font-bold text-slate-800">3 / 3 Kriter</span>
-                        <p className="text-[11px] text-slate-500 mt-0.5">HttpOnly, Secure ve SameSite koruma parametreleri</p>
-                      </div>
-                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Aydınlatma &amp; Şeffaflık</span>
-                        <span className="text-sm font-bold text-slate-800">3 / 3 Kriter</span>
-                        <p className="text-[11px] text-slate-500 mt-0.5">Gizlilik, KVKK m.10/11 ve Çerez Politikası metinleri</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                    <span>Yasal Dayanak: 6698 sayılı KVKK &amp; 2002/58/EC e-Privacy Çerez Direktifi</span>
-                    <span className="font-semibold text-emerald-700">10 / 10 Madde Denetlendi</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 10 Control Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {kvkkReport.items.map((item) => (
-                  <div key={item.id} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-start justify-between gap-3 mb-2.5">
-                        <div>
-                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 mb-1">
-                            {item.category}
-                          </span>
-                          <h4 className="font-bold text-slate-900 text-sm">{item.title}</h4>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs font-semibold text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
-                            {item.score}/10
-                          </span>
-                          {getComplianceBadge(item.status)}
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-slate-600 leading-relaxed mb-3">{item.details}</p>
-
-                      {item.risk && (
-                        <div className="bg-rose-50/80 border border-rose-200 text-rose-800 rounded-xl p-2.5 text-xs mb-2">
-                          <span className="font-bold block mb-0.5">⚠️ Tespit Edilen Risk:</span>
-                          <span>{item.risk}</span>
-                        </div>
-                      )}
-
-                      {item.recommendation && (
-                        <div className="bg-amber-50/80 border border-amber-200 text-amber-800 rounded-xl p-2.5 text-xs">
-                          <span className="font-bold block mb-0.5">💡 Öneri &amp; Çözüm:</span>
-                          <span>{item.recommendation}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Recommendations Box */}
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <span className="text-2xl">💡</span>
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-base">Eksik ve Riskli Alanlar İçin Öneriler</h3>
-                    <p className="text-xs text-slate-500">Sistemin hukuki ve teknik uyumluluğunu en üst seviyeye taşımak için tavsiyeler</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2.5 mt-4">
-                  {kvkkReport.recommendations.map((rec, idx) => (
-                    <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700">
-                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-[11px]">
-                        {idx + 1}
-                      </span>
-                      <p className="leading-relaxed mt-0.5">{rec}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
-              <span className="text-4xl block mb-2">🍪</span>
-              <h3 className="text-base font-bold text-slate-900 mb-1">KVKK ve Çerez Uyumluluk Raporu</h3>
-              <p className="text-xs text-slate-500 max-w-md mx-auto mb-4">
-                Sitenin çerez bannerı, rıza kaydı, Consent Mode kurgusu, çerez güvenlik bayrakları ve yasal metinleri henüz denetlenmedi.
-              </p>
+          {/* Sub-Tab Selector: 9 Temel Yasal Metin vs Çerez & Teknik Uyumluluk */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-bold w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => setActiveKvkkSubTab('legal_docs')}
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg transition ${activeKvkkSubTab === 'legal_docs' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                📜 9 Temel Yasal Metin &amp; Sözleşme Denetimi
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveKvkkSubTab('cookies')}
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg transition ${activeKvkkSubTab === 'cookies' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                🍪 Çerez &amp; Teknik Uyumluluk (10 Kontrol)
+              </button>
+            </div>
+            {activeKvkkSubTab === 'legal_docs' ? (
+              <button
+                type="button"
+                onClick={handleRunLegalAudit}
+                disabled={legalLoading}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition shadow-sm disabled:opacity-50 cursor-pointer"
+              >
+                {legalLoading ? 'Denetleniyor...' : '📜 Yasal Metinleri Yeniden Denetle'}
+              </button>
+            ) : (
               <button
                 type="button"
                 onClick={handleRunKvkkScan}
                 disabled={kvkkLoading}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition shadow-sm disabled:opacity-50 cursor-pointer"
               >
-                {kvkkLoading ? 'Taranıyor...' : 'Taramayı Şimdi Başlat'}
+                {kvkkLoading ? 'Taranıyor...' : '🍪 Çerez Taramasını Yenile'}
               </button>
-            </div>
+            )}
+          </div>
+
+          {/* SUB-VIEW 1: 9 TEMEL YASAL METİN DENETİMİ */}
+          {activeKvkkSubTab === 'legal_docs' && (
+            legalAuditReport ? (
+              <>
+                {/* Overall Legal Score & Stats Banner */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Score Card */}
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Sözleşme &amp; Yasal Metin Uyumluluk</span>
+                    <div className={`w-32 h-32 rounded-full border-8 flex flex-col items-center justify-center ${getScoreColor(legalAuditReport.score)} shadow-inner`}>
+                      <span className="text-4xl font-extrabold tracking-tight">{legalAuditReport.score}</span>
+                      <span className="text-xs font-semibold text-slate-500">/ 100</span>
+                    </div>
+                    <div className="mt-4">
+                      {getComplianceBadge(legalAuditReport.status)}
+                    </div>
+                    <p className="text-xs text-slate-400 mt-2">
+                      Son Denetim: {new Date(legalAuditReport.timestamp).toLocaleString('tr-TR')}
+                    </p>
+                  </div>
+
+                  {/* Legal Summary & Detailed Diagnostic Stats */}
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-base font-bold text-slate-900">Yasal Metinler ve Sözleşmeler Mevzuat Teşhisi</h3>
+                        <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          9 Temel Belge Tam Denetlendi
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-600 mb-4">{legalAuditReport.summary}</p>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Denetlenen Belge</span>
+                          <span className="text-base font-extrabold text-slate-800">{legalAuditReport.stats.totalDocuments} Belge</span>
+                          <p className="text-[10px] text-slate-500 mt-0.5">Üyelik, KVKK, Satış, İade vb.</p>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Eksik Yasal Alan</span>
+                          <span className={`text-base font-extrabold ${legalAuditReport.stats.totalMissing > 0 ? 'text-rose-700' : 'text-emerald-700'}`}>
+                            {legalAuditReport.stats.totalMissing} Alan
+                          </span>
+                          <p className="text-[10px] text-slate-500 mt-0.5">Zorunlu yasal maddeler</p>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Placeholder / Taslak</span>
+                          <span className={`text-base font-extrabold ${legalAuditReport.stats.totalPlaceholders > 0 ? 'text-purple-700' : 'text-emerald-700'}`}>
+                            {legalAuditReport.stats.totalPlaceholders} Adet
+                          </span>
+                          <p className="text-[10px] text-slate-500 mt-0.5">Doldurulmamış [...] alanlar</p>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Şirket Künye Eksiği</span>
+                          <span className={`text-base font-extrabold ${legalAuditReport.stats.totalCompanyNeeded > 0 ? 'text-amber-800' : 'text-emerald-700'}`}>
+                            {legalAuditReport.stats.totalCompanyNeeded} Bilgi
+                          </span>
+                          <p className="text-[10px] text-slate-500 mt-0.5">MERSİS, VKN, Tam Unvan</p>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">KVKK Mevzuat Açığı</span>
+                          <span className={`text-base font-extrabold ${legalAuditReport.stats.totalKvkkIssues > 0 ? 'text-rose-700' : 'text-emerald-700'}`}>
+                            {legalAuditReport.stats.totalKvkkIssues} Madde
+                          </span>
+                          <p className="text-[10px] text-slate-500 mt-0.5">m.10/m.11 başvuru usulü</p>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Çelişkili / Hatalı İfade</span>
+                          <span className={`text-base font-extrabold ${legalAuditReport.stats.totalContradictions > 0 ? 'text-orange-800' : 'text-emerald-700'}`}>
+                            {legalAuditReport.stats.totalContradictions} Risk
+                          </span>
+                          <p className="text-[10px] text-slate-500 mt-0.5">Cayma hakkı ve iade uyumu</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
+                      <span>Dayanak Mevzuat: 6698 s. KVKK, 6502 s. TKHK, Mesafeli Sözleşmeler Yönetmeliği</span>
+                      <span className="font-semibold text-indigo-700">Ortalama Sistem Uyumluluğu: %{legalAuditReport.stats.averageScore}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 9 Legal Documents Detail Cards */}
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-slate-900 text-lg">9 Temel Yasal Metin Ayrıntılı Denetim Raporu</h3>
+                      <p className="text-xs text-slate-500">Her metin için eksik alanlar, placeholder'lar, şirket bilgileri, KVKK uyumu, çelişkiler ve iyileştirme tavsiyeleri</p>
+                    </div>
+                  </div>
+
+                  {legalAuditReport.documents.map((doc) => (
+                    <div key={doc.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 hover:shadow-md transition">
+                      {/* Document Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                        <div className="flex items-start gap-3">
+                          <span className="text-2xl mt-0.5">{getDocumentIcon(doc.id)}</span>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-bold text-slate-900 text-base">{doc.title}</h4>
+                              <a
+                                href={`/yasal.html#${doc.sectionId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] font-mono text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 transition"
+                              >
+                                yasal.html#{doc.sectionId} ↗
+                              </a>
+                            </div>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              {doc.name} • {doc.stats.wordCount} kelime • {doc.stats.charCount} karakter
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 ${getScoreColor(doc.score)} bg-slate-50`}>
+                            <span className="text-xs font-bold">Uygunluk:</span>
+                            <span className="text-sm font-black">{doc.score}/100</span>
+                          </div>
+                          {getComplianceBadge(doc.status)}
+                        </div>
+                      </div>
+
+                      {/* 6 Core Audit Criteria from User Prompt */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
+                        {/* 1. Eksik Alanlar */}
+                        <div className="bg-slate-50/80 rounded-xl p-3.5 border border-slate-100 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">1</span>
+                                Eksik Alanlar
+                              </span>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${doc.missingFields.length > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                {doc.missingFields.length > 0 ? `${doc.missingFields.length} Eksik` : 'Eksiksiz'}
+                              </span>
+                            </div>
+                            {doc.missingFields.length > 0 ? (
+                              <ul className="space-y-1.5 text-xs text-rose-700 mt-2">
+                                {doc.missingFields.map((f, i) => (
+                                  <li key={i} className="flex items-start gap-1.5">
+                                    <span className="text-rose-500 font-bold">•</span>
+                                    <span>{f}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-xs text-emerald-700 font-medium mt-2">✅ Zorunlu yasal maddeler eksiksiz mevcut.</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 2. Placeholder Alanları */}
+                        <div className="bg-slate-50/80 rounded-xl p-3.5 border border-slate-100 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">2</span>
+                                Placeholder Alanları
+                              </span>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${doc.placeholders.length > 0 ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                {doc.placeholders.length > 0 ? `${doc.placeholders.length} Taslak` : 'Temiz'}
+                              </span>
+                            </div>
+                            {doc.placeholders.length > 0 ? (
+                              <ul className="space-y-1.5 text-xs text-purple-700 mt-2">
+                                {doc.placeholders.map((p, i) => (
+                                  <li key={i} className="flex items-start gap-1.5 font-mono">
+                                    <span className="text-purple-500 font-bold">•</span>
+                                    <span>{p}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-xs text-emerald-700 font-medium mt-2">✅ Taslak placeholder veya doldurulmamış alan yok.</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 3. Şirket Bilgisi Gerektiren Bölümler */}
+                        <div className="bg-slate-50/80 rounded-xl p-3.5 border border-slate-100 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">3</span>
+                                Şirket Bilgisi Gereken
+                              </span>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${doc.companyInfoNeeded.length > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}`}>
+                                {doc.companyInfoNeeded.length > 0 ? `${doc.companyInfoNeeded.length} Gerekli` : 'Tanımlı'}
+                              </span>
+                            </div>
+                            {doc.companyInfoNeeded.length > 0 ? (
+                              <ul className="space-y-1.5 text-xs text-amber-800 mt-2">
+                                {doc.companyInfoNeeded.map((c, i) => (
+                                  <li key={i} className="flex items-start gap-1.5">
+                                    <span className="text-amber-600 font-bold">•</span>
+                                    <span>{c}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-xs text-emerald-700 font-medium mt-2">✅ Şirket künye ve unvan bilgileri eksiksiz tanımlı.</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 4. KVKK Uyumluluğu Açısından Eksik Maddeler */}
+                        <div className="bg-slate-50/80 rounded-xl p-3.5 border border-slate-100 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">4</span>
+                                KVKK Mevzuat Eksikleri
+                              </span>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${doc.kvkkIssues.length > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                {doc.kvkkIssues.length > 0 ? `${doc.kvkkIssues.length} Madde` : 'KVKK Uyumlu'}
+                              </span>
+                            </div>
+                            {doc.kvkkIssues.length > 0 ? (
+                              <ul className="space-y-1.5 text-xs text-rose-700 mt-2">
+                                {doc.kvkkIssues.map((k, i) => (
+                                  <li key={i} className="flex items-start gap-1.5">
+                                    <span className="text-rose-500 font-bold">•</span>
+                                    <span>{k}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-xs text-emerald-700 font-medium mt-2">✅ 6698 sayılı KVKK temel gereksinimlerine uygun.</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 5. Hatalı veya Çelişkili İfadeler */}
+                        <div className="bg-slate-50/80 rounded-xl p-3.5 border border-slate-100 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">5</span>
+                                Hatalı / Çelişkili İfadeler
+                              </span>
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${doc.contradictions.length > 0 ? 'bg-orange-100 text-orange-800' : 'bg-emerald-100 text-emerald-700'}`}>
+                                {doc.contradictions.length > 0 ? `${doc.contradictions.length} Risk` : 'Çelişki Yok'}
+                              </span>
+                            </div>
+                            {doc.contradictions.length > 0 ? (
+                              <ul className="space-y-1.5 text-xs text-orange-800 mt-2">
+                                {doc.contradictions.map((ct, i) => (
+                                  <li key={i} className="flex items-start gap-1.5">
+                                    <span className="text-orange-600 font-bold">•</span>
+                                    <span>{ct}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-xs text-emerald-700 font-medium mt-2">✅ Tüketici ve borçlar hukuku çelişkisi bulunmuyor.</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 6. ZarifÇözüm Sistemine Uygunluk Puanı & İyileştirme */}
+                        <div className="bg-slate-50/80 rounded-xl p-3.5 border border-slate-100 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                                <span className="w-4 h-4 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">6</span>
+                                ZarifÇözüm Uygunluğu
+                              </span>
+                              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
+                                {doc.score} / 100
+                              </span>
+                            </div>
+                            {doc.recommendations.length > 0 ? (
+                              <ul className="space-y-1.5 text-xs text-slate-700 mt-2">
+                                {doc.recommendations.map((r, i) => (
+                                  <li key={i} className="flex items-start gap-1.5">
+                                    <span className="text-indigo-600 font-bold">→</span>
+                                    <span>{r}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-xs text-emerald-700 font-medium mt-2">✅ Sistem işleyişi ile tam uyumlu metin.</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Consolidated Recommendations Box */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <span className="text-2xl">📋</span>
+                    <div>
+                      <h3 className="font-bold text-slate-900 text-base">Konsolide Öncelikli Hukuki Eylem Planı</h3>
+                      <p className="text-xs text-slate-500">Yasal metinlerin ve sözleşmelerin mevzuata %100 uyumu için tamamlanması gereken 5 temel adım</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2.5 mt-4">
+                    {legalAuditReport.recommendations.map((rec, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 text-indigo-800 font-bold flex items-center justify-center text-[11px]">
+                          {idx + 1}
+                        </span>
+                        <p className="leading-relaxed mt-0.5">{rec}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
+                <span className="text-4xl block mb-2">📜</span>
+                <h3 className="text-base font-bold text-slate-900 mb-1">9 Temel Yasal Metin ve Sözleşme Denetimi</h3>
+                <p className="text-xs text-slate-500 max-w-md mx-auto mb-4">
+                  Üyelik, Kullanım Şartları, Gizlilik, KVKK, Çerez, Açık Rıza, Ön Bilgilendirme, Mesafeli Satış ve İptal/İade metinleri henüz taranmadı.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleRunLegalAudit}
+                  disabled={legalLoading}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition cursor-pointer"
+                >
+                  {legalLoading ? 'Denetleniyor...' : 'Yasal Metinleri Şimdi Denetle'}
+                </button>
+              </div>
+            )
+          )}
+
+          {/* SUB-VIEW 2: ÇEREZ & TEKNİK UYUMLULUK (10 KONTROL) */}
+          {activeKvkkSubTab === 'cookies' && (
+            kvkkReport ? (
+              <>
+                {/* Score & Compliance Header Card */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Overall Score */}
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">KVKK Uyumluluk Puanı</span>
+                    <div className={`w-32 h-32 rounded-full border-8 flex flex-col items-center justify-center ${getScoreColor(kvkkReport.score)} shadow-inner`}>
+                      <span className="text-4xl font-extrabold tracking-tight">{kvkkReport.score}</span>
+                      <span className="text-xs font-semibold text-slate-500">/ 100</span>
+                    </div>
+                    <div className="mt-4">
+                      {getComplianceBadge(kvkkReport.status)}
+                    </div>
+                    <p className="text-xs text-slate-400 mt-2">
+                      Son Denetim: {new Date(kvkkReport.timestamp).toLocaleString('tr-TR')}
+                    </p>
+                  </div>
+
+                  {/* Summary & Category Breakdown */}
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-base font-bold text-slate-900">Mevzuat Uyumluluk Özeti</h3>
+                        <div className="flex items-center gap-1.5 text-xs font-semibold">
+                          <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            {kvkkReport.counts.compliant} Uyumlu
+                          </span>
+                          {kvkkReport.counts.partial > 0 && (
+                            <span className="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
+                              {kvkkReport.counts.partial} Kısmen
+                            </span>
+                          )}
+                          {kvkkReport.counts.nonCompliant > 0 && (
+                            <span className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">
+                              {kvkkReport.counts.nonCompliant} Uyumsuz
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-sm text-slate-600 mb-4">{kvkkReport.summary}</p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Çerez Rıza Yönetimi</span>
+                          <span className="text-sm font-bold text-slate-800">4 / 4 Kriter</span>
+                          <p className="text-[11px] text-slate-500 mt-0.5">Banner, depolama, tercih değiştirme ve consent mode</p>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Çerez Güvenliği</span>
+                          <span className="text-sm font-bold text-slate-800">3 / 3 Kriter</span>
+                          <p className="text-[11px] text-slate-500 mt-0.5">HttpOnly, Secure ve SameSite koruma parametreleri</p>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Aydınlatma &amp; Şeffaflık</span>
+                          <span className="text-sm font-bold text-slate-800">3 / 3 Kriter</span>
+                          <p className="text-[11px] text-slate-500 mt-0.5">Gizlilik, KVKK m.10/11 ve Çerez Politikası metinleri</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                      <span>Yasal Dayanak: 6698 sayılı KVKK &amp; 2002/58/EC e-Privacy Çerez Direktifi</span>
+                      <span className="font-semibold text-emerald-700">10 / 10 Madde Denetlendi</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 10 Control Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {kvkkReport.items.map((item) => (
+                    <div key={item.id} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-start justify-between gap-3 mb-2.5">
+                          <div>
+                            <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 mb-1">
+                              {item.category}
+                            </span>
+                            <h4 className="font-bold text-slate-900 text-sm">{item.title}</h4>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs font-semibold text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                              {item.score}/10
+                            </span>
+                            {getComplianceBadge(item.status)}
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-slate-600 leading-relaxed mb-3">{item.details}</p>
+
+                        {item.risk && (
+                          <div className="bg-rose-50/80 border border-rose-200 text-rose-800 rounded-xl p-2.5 text-xs mb-2">
+                            <span className="font-bold block mb-0.5">⚠️ Tespit Edilen Risk:</span>
+                            <span>{item.risk}</span>
+                          </div>
+                        )}
+
+                        {item.recommendation && (
+                          <div className="bg-amber-50/80 border border-amber-200 text-amber-800 rounded-xl p-2.5 text-xs">
+                            <span className="font-bold block mb-0.5">💡 Öneri &amp; Çözüm:</span>
+                            <span>{item.recommendation}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Recommendations Box */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <span className="text-2xl">💡</span>
+                    <div>
+                      <h3 className="font-bold text-slate-900 text-base">Eksik ve Riskli Alanlar İçin Öneriler</h3>
+                      <p className="text-xs text-slate-500">Sistemin hukuki ve teknik uyumluluğunu en üst seviyeye taşımak için tavsiyeler</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2.5 mt-4">
+                    {kvkkReport.recommendations.map((rec, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-[11px]">
+                          {idx + 1}
+                        </span>
+                        <p className="leading-relaxed mt-0.5">{rec}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
+                <span className="text-4xl block mb-2">🍪</span>
+                <h3 className="text-base font-bold text-slate-900 mb-1">KVKK ve Çerez Uyumluluk Raporu</h3>
+                <p className="text-xs text-slate-500 max-w-md mx-auto mb-4">
+                  Sitenin çerez bannerı, rıza kaydı, Consent Mode kurgusu, çerez güvenlik bayrakları ve yasal metinleri henüz denetlenmedi.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleRunKvkkScan}
+                  disabled={kvkkLoading}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition cursor-pointer"
+                >
+                  {kvkkLoading ? 'Taranıyor...' : 'Taramayı Şimdi Başlat'}
+                </button>
+              </div>
+            )
           )}
         </div>
       )}

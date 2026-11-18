@@ -148,6 +148,20 @@ test('system-health admin endpoints require superadmin role and return scans', a
     const kvkkScanData = await kvkkScanRes.json();
     assert.ok(kvkkScanData.report);
     assert.equal(kvkkScanData.report.counts.total, 10);
+
+    // Legal Audit endpoints work
+    const legalGetRes = await fetch(`${base}/system-health/legal-audit`);
+    assert.equal(legalGetRes.status, 200);
+    const legalGetData = await legalGetRes.json();
+    assert.ok(legalGetData.auditReport);
+    assert.equal(legalGetData.auditReport.stats.totalDocuments, 9);
+    assert.equal(legalGetData.auditReport.documents.length, 9);
+
+    const legalScanRes = await fetch(`${base}/system-health/legal-audit/scan`, { method: 'POST' });
+    assert.equal(legalScanRes.status, 200);
+    const legalScanData = await legalScanRes.json();
+    assert.ok(legalScanData.auditReport);
+    assert.equal(legalScanData.auditReport.stats.totalDocuments, 9);
   });
 });
 
@@ -318,4 +332,39 @@ test('checkKvkkAndCookieCompliance evaluates all 10 controls and produces score,
   assert.equal(bannerItem.statusLabel, '❌ Uyumsuz');
   assert.ok(bannerItem.risk);
   assert.ok(bannerItem.recommendation);
+});
+
+test('runLegalDocumentsAudit audits all 9 legal documents with 6 criteria', async () => {
+  const { runLegalDocumentsAudit, DOCUMENT_DEFINITIONS } = require('../lib/legal-documents-auditor');
+
+  assert.equal(DOCUMENT_DEFINITIONS.length, 9);
+
+  const report = await runLegalDocumentsAudit();
+  assert.equal(report.stats.totalDocuments, 9);
+  assert.equal(report.documents.length, 9);
+  assert.ok(report.score >= 0 && report.score <= 100);
+  assert.ok(report.recommendations.length > 0);
+
+  // Check each document contains the 6 required criteria
+  for (const doc of report.documents) {
+    assert.ok(doc.id, 'doc.id missing');
+    assert.ok(doc.name, 'doc.name missing');
+    assert.ok(doc.title, 'doc.title missing');
+    assert.ok(typeof doc.score === 'number');
+    assert.ok(Array.isArray(doc.missingFields), 'missingFields should be array');
+    assert.ok(Array.isArray(doc.placeholders), 'placeholders should be array');
+    assert.ok(Array.isArray(doc.companyInfoNeeded), 'companyInfoNeeded should be array');
+    assert.ok(Array.isArray(doc.kvkkIssues), 'kvkkIssues should be array');
+    assert.ok(Array.isArray(doc.contradictions), 'contradictions should be array');
+    assert.ok(Array.isArray(doc.recommendations), 'recommendations should be array');
+  }
+
+  // Verify specific documents
+  const mesafeliSatis = report.documents.find(d => d.id === 'mesafeli-satis');
+  assert.ok(mesafeliSatis);
+  assert.ok(mesafeliSatis.missingFields.length > 0);
+
+  const kvkkDoc = report.documents.find(d => d.id === 'kvkk-aydinlatma');
+  assert.ok(kvkkDoc);
+  assert.ok(kvkkDoc.companyInfoNeeded.length > 0);
 });
