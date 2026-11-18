@@ -27,6 +27,12 @@
         '❌ Hata'
       );
     }
+    if (status === 'not_used') {
+      return e('span', { className: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200' },
+        e('span', { className: 'w-2 h-2 rounded-full bg-slate-400' }),
+        'PostgreSQL kullanılmıyor'
+      );
+    }
     return e('span', { className: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200' },
       e('span', { className: 'w-2 h-2 rounded-full bg-slate-400' }),
       '⚪ Yapılandırılmadı'
@@ -306,7 +312,7 @@
               e('div', { className: 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 text-xs font-semibold' },
                 [
                   { name: 'Backend API', st: scan.checks.api.status },
-                  { name: 'PostgreSQL / Mongo', st: scan.checks.database.status },
+                  { name: scan.checks.database && scan.checks.database.postgres && scan.checks.database.postgres.status === 'not_used' ? 'MongoDB (Aktif)' : 'PostgreSQL / Mongo', st: scan.checks.database.status },
                   { name: 'Cloudflare R2', st: scan.checks.r2.status },
                   { name: 'Cloudinary', st: scan.checks.cloudinary.status },
                   { name: 'SSL / TLS', st: scan.checks.ssl.status },
@@ -365,19 +371,35 @@
                 e('span', { className: 'text-xl' }, '🗄️'),
                 e('div', null,
                   e('h4', { className: 'font-bold text-slate-900 text-sm' }, 'Veritabanı Servisleri'),
-                  e('span', { className: 'text-[11px] text-slate-400' }, 'PostgreSQL & MongoDB')
+                  e('span', { className: 'text-[11px] text-slate-400' }, scan.checks.database && scan.checks.database.postgres && scan.checks.database.postgres.status === 'not_used' ? 'MongoDB Atlas (Aktif Veritabanı)' : 'PostgreSQL & MongoDB')
                 )
               ),
               e(StatusBadge, { status: scan.checks.database.status })
             ),
             e('div', { className: 'space-y-2 mb-3' },
-              e('div', { className: 'bg-slate-50 p-2 rounded-lg text-xs' },
-                e('div', { className: 'flex justify-between items-center font-medium' },
-                  e('span', null, '🐘 PostgreSQL:'),
-                  e(StatusBadge, { status: scan.checks.database.postgres.status })
+              scan.checks.database && scan.checks.database.postgres && scan.checks.database.postgres.status === 'not_used' ?
+                e('div', { className: 'bg-slate-50 border border-slate-200/80 p-2.5 rounded-lg text-xs' },
+                  e('div', { className: 'flex justify-between items-center font-medium' },
+                    e('span', { className: 'text-slate-700 flex items-center gap-1.5' },
+                      e('span', { className: 'text-slate-400' }, '🐘'),
+                      'PostgreSQL:'
+                    ),
+                    e('span', { className: 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-200/80 text-slate-700 border border-slate-300/60' },
+                      e('span', { className: 'w-1.5 h-1.5 rounded-full bg-slate-400' }),
+                      'PostgreSQL kullanılmıyor'
+                    )
+                  ),
+                  e('p', { className: 'text-[11px] text-slate-500 mt-1 leading-relaxed' },
+                    scan.checks.database.postgres.details || 'PostgreSQL kullanılmıyor (Sistem aktif olarak MongoDB Atlas kullanmaktadır).'
+                  )
+                ) :
+                e('div', { className: 'bg-slate-50 p-2 rounded-lg text-xs' },
+                  e('div', { className: 'flex justify-between items-center font-medium' },
+                    e('span', null, '🐘 PostgreSQL:'),
+                    e(StatusBadge, { status: scan.checks.database.postgres.status })
+                  ),
+                  e('p', { className: 'text-[11px] text-slate-500 mt-1' }, scan.checks.database.postgres.details)
                 ),
-                e('p', { className: 'text-[11px] text-slate-500 mt-1' }, scan.checks.database.postgres.details)
-              ),
               e('div', { className: 'bg-slate-50 p-2 rounded-lg text-xs' },
                 e('div', { className: 'flex justify-between items-center font-medium' },
                   e('span', null, '🍃 MongoDB Atlas:'),

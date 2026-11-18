@@ -484,7 +484,21 @@ app.get('/admin-paneli.html', async (req, res, next) => {
   }
   next();
 }, adminSayfasiGonder('admin-paneli.html'));
-app.get('/favicon.svg', (req, res) => res.sendFile(path.join(__dirname, 'favicon.svg')));
+app.get(['/favicon.ico', '/favicon.svg', '/favicon-32x32.png'], (req, res) => {
+  const fileName = req.path.replace(/^\//, '');
+  const publicPath = path.join(__dirname, 'public', fileName);
+  if (fs.existsSync(publicPath)) return res.sendFile(publicPath);
+  const rootPath = path.join(__dirname, fileName);
+  if (fs.existsSync(rootPath)) return res.sendFile(rootPath);
+  res.status(404).end();
+});
+app.get('/animasyon.js', (req, res) => {
+  const assetPath = path.join(__dirname, 'assets', 'animasyon.js');
+  if (fs.existsSync(assetPath)) return res.sendFile(assetPath);
+  const rootPath = path.join(__dirname, 'animasyon.js');
+  if (fs.existsSync(rootPath)) return res.sendFile(rootPath);
+  res.status(404).end();
+});
 
 let koleksiyon, anahtarKoleksiyon, canliDersKoleksiyonu;
 let planliDersKoleksiyonu, quizKoleksiyonu, quizSonucKoleksiyonu, quizAttemptKoleksiyonu, duyuruKoleksiyonu;

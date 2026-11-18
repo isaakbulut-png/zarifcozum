@@ -418,3 +418,59 @@ test('runLegalDocumentsAudit audits all 9 legal documents with 6 criteria', asyn
   assert.ok(kvkkDoc);
   assert.ok(kvkkDoc.companyInfoNeeded.length > 0);
 });
+
+test('checkDatabases marks postgres as not_used when POSTGRES_URL is not set and MongoDB is active', async () => {
+  const originalPg = process.env.POSTGRES_URL;
+  const originalDbUrl = process.env.DATABASE_URL;
+  const originalPgConn = process.env.PG_CONNECTION_STRING;
+
+  try {
+    delete process.env.POSTGRES_URL;
+    delete process.env.DATABASE_URL;
+    delete process.env.PG_CONNECTION_STRING;
+
+    const dbResult = await healthChecker.checkDatabases();
+
+    assert.equal(dbResult.postgres.status, 'not_used');
+    assert.equal(dbResult.postgres.configured, false);
+    assert.equal(dbResult.postgres.inUse, false);
+    assert.equal(dbResult.postgres.lastError, null);
+    assert.ok(dbResult.postgres.details.includes('PostgreSQL kullanılmıyor'));
+
+    // Status should be evaluated based on MongoDB
+    assert.equal(dbResult.status, dbResult.mongo.status);
+
+    // Compute score with healthy mongo and not_used postgres
+    const mockChecks = {
+      api: { status: 'healthy', durationMs: 20 },
+      database: {
+        status: 'healthy',
+        postgres: { status: 'not_used', configured: false, inUse: false },
+        mongo: { status: 'healthy', durationMs: 15 }
+      },
+      r2: { status: 'healthy', durationMs: 50 },
+      cloudinary: { status: 'healthy', durationMs: 50 },
+      ssl: { status: 'healthy', daysLeft: 60 },
+      domain: { status: 'healthy' },
+      mediaCdn: { status: 'healthy' },
+      pinecone: { status: 'healthy', durationMs: 40 },
+      github: { status: 'healthy', durationMs: 60, quota: { remaining: 5000 } },
+      githubActions: { status: 'healthy' },
+      gemini: { status: 'healthy', durationMs: 70 },
+      googleCloud: { status: 'healthy' },
+      performance: { averageMs: 50 }
+    };
+
+    const { computeScoreAndPerformance } = healthChecker;
+    const { score, warnings, errors } = computeScoreAndPerformance(mockChecks);
+
+    assert.equal(score, 100);
+    assert.equal(warnings.length, 0);
+    assert.equal(errors.length, 0);
+    assert.ok(!warnings.some(w => w.toLowerCase().includes('postgresql')));
+  } finally {
+    if (originalPg) process.env.POSTGRES_URL = originalPg;
+    if (originalDbUrl) process.env.DATABASE_URL = originalDbUrl;
+    if (originalPgConn) process.env.PG_CONNECTION_STRING = originalPgConn;
+  }
+});

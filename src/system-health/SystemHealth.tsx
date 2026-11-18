@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-export type HealthStatus = 'healthy' | 'warning' | 'error' | 'unconfigured';
+export type HealthStatus = 'healthy' | 'warning' | 'error' | 'unconfigured' | 'not_used';
 export type ComplianceStatus = 'compliant' | 'partial' | 'non_compliant';
 
 export interface ServiceItemCheck {
@@ -19,6 +19,7 @@ export interface ApiCheck extends ServiceItemCheck {
 
 export interface PostgresCheck extends ServiceItemCheck {
   configured: boolean;
+  inUse?: boolean;
 }
 
 export interface MongoCheck extends ServiceItemCheck {
@@ -323,6 +324,13 @@ export const SystemHealth: React.FC = () => {
             ❌ Hata
           </span>
         );
+      case 'not_used':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+            PostgreSQL kullanılmıyor
+          </span>
+        );
       case 'unconfigured':
       default:
         return (
@@ -567,7 +575,9 @@ export const SystemHealth: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-medium">
                     <span>{scan.checks.database.status === 'healthy' ? '✅' : '⚠️'}</span>
-                    <span className="truncate">PostgreSQL / Mongo</span>
+                    <span className="truncate">
+                      {scan.checks.database.postgres.status === 'not_used' ? 'MongoDB (Aktif)' : 'PostgreSQL / Mongo'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs font-medium">
                     <span>{scan.checks.r2.status === 'healthy' ? '✅' : '⚠️'}</span>
@@ -667,7 +677,9 @@ export const SystemHealth: React.FC = () => {
                   <span className="text-2xl">🗄️</span>
                   <div>
                     <h4 className="font-bold text-slate-900 text-sm">Veritabanı Servisleri</h4>
-                    <span className="text-[11px] text-slate-400">PostgreSQL &amp; MongoDB</span>
+                    <span className="text-[11px] text-slate-400">
+                      {scan.checks.database.postgres.status === 'not_used' ? 'MongoDB Atlas (Aktif Veritabanı)' : 'PostgreSQL & MongoDB'}
+                    </span>
                   </div>
                 </div>
                 {getStatusBadge(scan.checks.database.status)}
@@ -675,18 +687,38 @@ export const SystemHealth: React.FC = () => {
               <div className="space-y-2 mb-3">
                 <div className="bg-slate-50 p-2 rounded-lg text-xs">
                   <div className="flex justify-between font-medium">
-                    <span>🐘 PostgreSQL:</span>
-                    <span>{getStatusBadge(scan.checks.database.postgres.status)}</span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-1">{scan.checks.database.postgres.details}</p>
-                </div>
-                <div className="bg-slate-50 p-2 rounded-lg text-xs">
-                  <div className="flex justify-between font-medium">
                     <span>🍃 MongoDB Atlas:</span>
                     <span>{getStatusBadge(scan.checks.database.mongo.status)}</span>
                   </div>
                   <p className="text-[11px] text-slate-500 mt-1">{scan.checks.database.mongo.details}</p>
                 </div>
+
+                {/* PostgreSQL Bilgilendirme Kartı: Kullanılmıyorsa sarı renk kullanılmaz, uyarı üretmez */}
+                {scan.checks.database.postgres.status === 'not_used' ? (
+                  <div className="bg-slate-50 border border-slate-200/80 p-2.5 rounded-lg text-xs">
+                    <div className="flex justify-between items-center font-medium">
+                      <span className="text-slate-700 flex items-center gap-1.5">
+                        <span className="text-slate-400">🐘</span>
+                        <span>PostgreSQL:</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-200/80 text-slate-700 border border-slate-300/60">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                        PostgreSQL kullanılmıyor
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                      {scan.checks.database.postgres.details || 'PostgreSQL kullanılmıyor (Sistem aktif olarak MongoDB Atlas kullanmaktadır).'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-slate-50 p-2 rounded-lg text-xs">
+                    <div className="flex justify-between font-medium">
+                      <span>🐘 PostgreSQL:</span>
+                      <span>{getStatusBadge(scan.checks.database.postgres.status)}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1">{scan.checks.database.postgres.details}</p>
+                  </div>
+                )}
               </div>
               <div className="flex items-center justify-between text-xs font-semibold text-slate-500 pt-3 border-t border-slate-100">
                 <span>MongoDB Ping:</span>
