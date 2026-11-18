@@ -322,7 +322,8 @@
                   { name: 'GitHub Actions', st: scan.checks.githubActions?.status || 'unconfigured' },
                   { name: 'Google AI Studio', st: scan.checks.gemini?.status || 'unconfigured' },
                   { name: 'Cloudflare Edge', st: scan.checks.cloudflare?.status || 'unconfigured' },
-                  { name: 'Google Cloud', st: scan.checks.googleCloud?.status || 'unconfigured' }
+                  { name: 'Google Cloud', st: scan.checks.googleCloud?.status || 'unconfigured' },
+                  { name: 'İçerik Havuzu', st: scan.checks.contentLibrary?.status || 'healthy' }
                 ].map((item, idx) => e('div', { key: idx, className: 'flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100' },
                   e('span', null, item.st === 'healthy' ? '✅' : (item.st === 'warning' ? '⚠️' : '❌')),
                   e('span', { className: 'truncate text-[11px] text-slate-700' }, item.name)
@@ -696,7 +697,40 @@
               e('span', { className: 'text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded' }, `${scan.checks.googleCloud?.durationMs || 0} ms`)
             ),
             e(ServiceMeta, { item: scan.checks.googleCloud })
-          )
+          ),
+          // 13. Merkezi İçerik Havuzu
+          e('div', { className: 'bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition' },
+            e('div', { className: 'flex items-center justify-between mb-3' },
+              e('div', { className: 'flex items-center gap-2' },
+                e('span', { className: 'text-xl' }, '📚'),
+                e('div', null,
+                  e('h4', { className: 'font-bold text-slate-900 text-sm' }, 'Merkezi İçerik Havuzu'),
+                  e('span', { className: 'text-[11px] text-slate-400' }, 'Soru, Taslak, PDF & R2 Arşivi')
+                )
+              ),
+              e(StatusBadge, { status: scan.checks.contentLibrary?.status || 'healthy' })
+            ),
+            e('p', { className: 'text-xs text-slate-600 mb-3' }, scan.checks.contentLibrary?.details || 'İçerik havuzu ve doküman arşivi aktif.'),
+            e('div', { className: 'bg-slate-50 p-2 rounded-lg text-[11px] text-slate-600 mb-3 space-y-1' },
+              e('div', { className: 'flex justify-between' },
+                e('span', null, 'Kütüphane Dokümanları:'),
+                e('span', { className: 'font-mono text-indigo-700 font-bold' }, `${scan.checks.contentLibrary?.totalContent ?? 0} adet`)
+              ),
+              e('div', { className: 'flex justify-between' },
+                e('span', null, 'AI Soru Taslakları:'),
+                e('span', { className: 'font-mono text-amber-700 font-bold' }, `${scan.checks.contentLibrary?.totalDrafts ?? 0} adet`)
+              ),
+              e('div', { className: 'flex justify-between' },
+                e('span', null, 'Soru Bankası:'),
+                e('span', { className: 'font-mono text-emerald-700 font-bold' }, `${scan.checks.contentLibrary?.totalSorular ?? 0} soru`)
+              )
+            ),
+            e('div', { className: 'flex items-center justify-between text-xs font-semibold text-slate-500 pt-3 border-t border-slate-100' },
+              e('span', null, 'Sorgu Süresi:'),
+              e('span', { className: 'text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded' }, `${scan.checks.contentLibrary?.durationMs || 0} ms`)
+            ),
+            e(ServiceMeta, { item: scan.checks.contentLibrary })
+          ),
         ),
 
         // Performans Dökümü

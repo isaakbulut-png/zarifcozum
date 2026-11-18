@@ -20,6 +20,7 @@ const session = require('express-session');
 const { MongoStore } = require('connect-mongo');
 const { router: authRouter, requireRole, redirectForRole } = require('./routes/auth');
 const { createAIRouter } = require('./routes/ai');
+const { createContentLibraryRouter } = require('./routes/content-library');
 const { createPaymentRouter } = require('./routes/payments');
 const { createAdminRouter } = require('./routes/admin');
 const { createSiteMediaFilesRouter } = require('./routes/site-media-files');
@@ -278,6 +279,36 @@ app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, a
         createdAt: new Date(createdAt.getTime() + 1)
       }
     ]);
+    // Auto-persist educational AI topic summaries or study plans to ContentLibrary
+    try {
+      const msgLower = (request.ogrenciMesaji || '').toLowerCase();
+      let detectedType = null;
+      if (msgLower.includes('calisma plani') || msgLower.includes('çalışma planı') || msgLower.includes('haftalık plan') || msgLower.includes('ders planı')) {
+        detectedType = 'ai_study_plan';
+      } else if (msgLower.includes('konu anlatım') || msgLower.includes('özetle') || msgLower.includes('konu özeti') || (request.konu && yanit.text && yanit.text.length > 250)) {
+        detectedType = 'ai_topic_summary';
+      }
+      if (detectedType && yanit.text && yanit.text.length > 100) {
+        const ContentLibrary = require('./models/ContentLibrary');
+        const autoTitle = (request.konu ? `${request.konu} - ` : '') + (detectedType === 'ai_study_plan' ? 'Çalışma Planı' : 'Konu Özeti');
+        ContentLibrary.create({
+          title: autoTitle,
+          contentType: detectedType,
+          lesson: request.ders || 'Genel',
+          grade: request.sinif || 'Genel',
+          topic: request.konu || 'Genel',
+          body: yanit.text,
+          htmlContent: yanit.html || undefined,
+          metadata: {
+            prompt: request.ogrenciMesaji,
+            generatedBy: 'AI Mentor'
+          },
+          source: 'ai_mentor',
+          status: 'draft',
+          createdBy: req.session.user.id
+        }).catch(err => console.warn('ContentLibrary auto-log warn:', err.message));
+      }
+    } catch (_) {}
     res.json({ success: true, yanit: yanit.text, yanitHtml: yanit.html || undefined });
   } catch (error) {
     if (error.status === 400) {
@@ -577,6 +608,12 @@ app.use('/api/payments', createPaymentRouter({ requireStudent: ogrenciKontrol })
 app.use('/api/ai', createAIRouter({
   getQuizCollection: () => quizKoleksiyonu,
   requireRole,
+  AdminLog
+}));
+app.use('/api/content-library', createContentLibraryRouter({
+  requireStaff: requireRole('teacher', 'admin'),
+  mediaStorage,
+  privateDocumentStorage,
   AdminLog
 }));
 const teacherStudentHomeworkRouters = createTeacherStudentHomeworkRouters({

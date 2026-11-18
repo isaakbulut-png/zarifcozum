@@ -3,6 +3,11 @@ const { rateLimit } = require('express-rate-limit');
 const { ObjectId } = require('mongodb');
 const { prepareQuestion } = require('../lib/quiz-content');
 const safeSvg = require('../assets/safe-svg');
+const Soru = require('../models/Soru');
+const AiQuestionDraft = require('../models/AiQuestionDraft');
+const ContentLibrary = require('../models/ContentLibrary');
+const { checkQuestionSimilarity, indexQuestionInPinecone } = require('../lib/content-similarity');
+const { exportQuestions } = require('../lib/document-exporter');
 
 const { SINIF_KONULARI, TUM_KONULAR } = require('../lib/konu-haritasi');
 
@@ -255,15 +260,82 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       questions: preparedQuestions
     };
 
+    // Semantik Benzerlik ve Mükerrer Kontrolü
+    try {
+      const existing = await Soru.find({ grade }).select('text imageFile _id').limit(100).lean();
+      for (const q of preparedQuestions) {
+        const sim = await checkQuestionSimilarity(q.text, existing);
+        q.similarityScore = sim.similarityScore;
+        q.isDuplicate = sim.isDuplicate;
+        q.similarQuestionId = sim.similarQuestionId;
+      }
+    } catch (simErr) {
+      console.warn('[AI] Benzerlik kontrolü atlandı:', simErr.message);
+    }
+
+    // 1. MongoDB'ye Otomatik Taslak Kaydı (F5 Kaybını Önleme)
+    let draftRecord = null;
+    try {
+      draftRecord = await AiQuestionDraft.create({
+        title: quiz.title,
+        topic,
+        grade,
+        difficulty,
+        count,
+        questions: preparedQuestions.map(q => ({
+          text: q.text,
+          options: q.options,
+          answer: q.answer,
+          explanation: q.explanation,
+          svg: q.svg || '',
+          status: 'draft',
+          similarityScore: q.similarityScore || 0,
+          similarQuestionId: q.similarQuestionId || null
+        })),
+        status: 'draft',
+        source: 'ai',
+        createdBy: req.session.user.id
+      });
+
+      // Merkezi İçerik Havuzuna taslak test kaydı
+      await ContentLibrary.create({
+        title: quiz.title,
+        type: 'ai_test',
+        ders: 'matematik',
+        grade,
+        topic,
+        difficulty,
+        content: {
+          description: quiz.description,
+          questions: preparedQuestions,
+          draftId: draftRecord._id
+        },
+        metadata: {
+          questionCount: preparedQuestions.length,
+          draftId: draftRecord._id
+        },
+        status: 'draft',
+        source: 'ai',
+        createdBy: req.session.user.id
+      });
+    } catch (draftErr) {
+      console.warn('[AI] Otomatik taslak kaydı hatası:', draftErr.message);
+    }
+
+    const draftId = draftRecord ? draftRecord._id.toString() : null;
+
     res.json({
+      draftId,
       quiz: {
+        id: draftId,
+        draftId,
         title: quiz.title,
         description: quiz.description,
         topic: quiz.topic,
         grade: quiz.grade,
         difficulty: quiz.difficulty,
         soruSayisi: quiz.questions.length,
-        questions: quiz.questions
+        questions: preparedQuestions
       }
     });
   });
@@ -316,6 +388,174 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     } catch (error) {
       console.error('Yapay zeka sorusu yayınlanamadı:', error);
       res.status(500).json({ mesaj: 'Soru yayınlanamadı. Lütfen yeniden deneyin.' });
+    }
+  });
+
+  // Taslakları Listele
+  router.get('/questions/drafts', requireRole('teacher'), async (req, res) => {
+    try {
+      const filter = req.session.user.role === 'admin' ? {} : { createdBy: req.session.user.id };
+      const drafts = await AiQuestionDraft.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .lean();
+
+      res.json({
+        drafts: drafts.map(d => ({
+          id: d._id.toString(),
+          title: d.title,
+          topic: d.topic,
+          grade: d.grade,
+          difficulty: d.difficulty,
+          count: d.count,
+          status: d.status,
+          questionCount: d.questions?.length || 0,
+          createdAt: d.createdAt
+        }))
+      });
+    } catch (err) {
+      res.status(500).json({ mesaj: 'Taslaklar listelenemedi.' });
+    }
+  });
+
+  // Belirli Taslağı Getir
+  router.get('/questions/drafts/:id', requireRole('teacher'), async (req, res) => {
+    try {
+      if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz taslak ID.' });
+      const draft = await AiQuestionDraft.findById(req.params.id).lean();
+      if (!draft) return res.status(404).json({ mesaj: 'Taslak bulunamadı.' });
+
+      res.json({
+        draft: {
+          id: draft._id.toString(),
+          title: draft.title,
+          topic: draft.topic,
+          grade: draft.grade,
+          difficulty: draft.difficulty,
+          status: draft.status,
+          questions: draft.questions
+        }
+      });
+    } catch (err) {
+      res.status(500).json({ mesaj: 'Taslak alınamadı.' });
+    }
+  });
+
+  // Taslaktaki Soruları Soru Bankasına Aktar
+  router.post('/questions/drafts/:id/transfer-to-bank', requireRole('teacher'), async (req, res) => {
+    try {
+      if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz taslak ID.' });
+      const draft = await AiQuestionDraft.findById(req.params.id);
+      if (!draft) return res.status(404).json({ mesaj: 'Taslak bulunamadı.' });
+
+      const transferred = [];
+      for (const q of draft.questions) {
+        if (q.status === 'rejected') continue;
+
+        const soru = await Soru.create({
+          format: 'text_svg',
+          text: q.text,
+          options: q.options,
+          explanation: q.explanation || '',
+          svg: q.svg || '',
+          grade: draft.grade,
+          topic: draft.topic,
+          difficulty: draft.difficulty,
+          ders: 'matematik',
+          answer: q.answer,
+          source: 'ai_generated',
+          draftId: draft._id,
+          curriculum_node_id: q.curriculum_node_id || null,
+          createdBy: req.session.user.id
+        });
+
+        // Pinecone Vektör İndeksleme
+        indexQuestionInPinecone(soru._id, q.text, {
+          grade: draft.grade,
+          topic: draft.topic,
+          difficulty: draft.difficulty
+        }).catch(() => {});
+
+        // Merkezi İçerik Havuzuna onaylı tekil soru kaydı
+        await ContentLibrary.create({
+          title: `[${draft.grade}. Sınıf] ${q.text.slice(0, 80)}...`,
+          type: 'ai_question',
+          ders: 'matematik',
+          grade: draft.grade,
+          topic: draft.topic,
+          difficulty: draft.difficulty,
+          content: {
+            text: q.text,
+            options: q.options,
+            answer: q.answer,
+            explanation: q.explanation,
+            svg: q.svg,
+            soruId: soru._id
+          },
+          status: 'approved',
+          source: 'ai',
+          createdBy: req.session.user.id
+        });
+
+        q.status = 'approved';
+        q.approvedQuestionId = soru._id;
+        transferred.push(soru._id.toString());
+      }
+
+      draft.status = 'approved';
+      await draft.save();
+
+      res.json({
+        mesaj: `${transferred.length} soru Soru Bankasına başarıyla aktarıldı ve Pinecone'a indekslendi.`,
+        transferredCount: transferred.length,
+        transferredIds: transferred
+      });
+    } catch (err) {
+      console.error('[AI] Soru bankasına aktarma hatası:', err);
+      res.status(500).json({ mesaj: 'Sorular soru bankasına aktarılamadı.' });
+    }
+  });
+
+  // Taslağı Doğrudan PDF veya DOCX Olarak Dışa Aktar
+  router.post('/questions/drafts/:id/export', requireRole('teacher'), async (req, res) => {
+    try {
+      if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz taslak ID.' });
+      const draft = await AiQuestionDraft.findById(req.params.id).lean();
+      if (!draft) return res.status(404).json({ mesaj: 'Taslak bulunamadı.' });
+
+      const format = String(req.body?.format || 'pdf').toLowerCase();
+      const fileBuffer = exportQuestions(draft.questions, {
+        title: draft.title,
+        grade: draft.grade,
+        topic: draft.topic,
+        difficulty: draft.difficulty,
+        format
+      });
+
+      const contentType = format === 'docx'
+        ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        : 'application/pdf';
+
+      const filename = `soru-kitapcigi-${draft.grade}-sinif-${Date.now()}.${format}`;
+
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(fileBuffer);
+    } catch (err) {
+      console.error('[AI] Taslak export hatası:', err);
+      res.status(500).json({ mesaj: 'Taslak dışa aktarılamadı.' });
+    }
+  });
+
+  // Taslak Sil
+  router.delete('/questions/drafts/:id', requireRole('teacher'), async (req, res) => {
+    try {
+      if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz taslak ID.' });
+      const del = await AiQuestionDraft.findByIdAndDelete(req.params.id);
+      if (!del) return res.status(404).json({ mesaj: 'Taslak bulunamadı.' });
+      res.json({ mesaj: 'Taslak silindi.' });
+    } catch (err) {
+      res.status(500).json({ mesaj: 'Taslak silinemedi.' });
     }
   });
 

@@ -1223,12 +1223,16 @@ body.teacher-menu-open {
           <div class="field"><label for="documentType">Doküman türü</label><select id="documentType"><option>Çalışma kâğıdı</option><option>Konu özeti</option><option>Formül föyü</option><option>Deneme sınavı</option><option>Cevap anahtarı</option><option>Öğretmen kaynağı</option></select></div>
           <div class="field"><label for="documentGrade">Sınıf</label><select id="documentGrade" class="grade-options"></select></div>
           <div class="field"><label for="documentTopic">İlgili konu</label><select id="documentTopic"></select></div>
-          <div class="field full"><label for="documentUrl">PDF adresi</label><input id="documentUrl" type="url" maxlength="500" required placeholder="https://..."></div>
+          <div class="field full">
+            <label for="documentFileInput">PDF Dosyası Yükle (Cloudflare R2 & Güvenli Depolama)</label>
+            <input id="documentFileInput" type="file" accept="application/pdf,.pdf">
+          </div>
+          <div class="field full"><label for="documentUrl">veya Harici PDF Web Adresi (URL)</label><input id="documentUrl" type="url" maxlength="500" placeholder="https://..."></div>
         </div>
-        <button class="btn" type="submit">Doküman bağlantısı ekle</button><p class="status" id="documentStatus" role="status"></p>
+        <button class="btn" type="submit" id="documentSubmitBtn">Dokümanı Kütüphaneye Ekle</button><p class="status" id="documentStatus" role="status"></p>
       </form>
-      <div class="data-list" id="documentList"></div>
-      <p class="storage-note">Bu alan PDF dosyasını sunucuya yüklemez; güvenli bir dosya depolama entegrasyonu eklenene kadar doküman bağlantılarını saklar.</p>
+      <div class="data-list" id="documentList" style="margin-top:16px;"></div>
+      <p class="storage-note">Yüklenen PDF dokümanları merkezi içerik havuzuna ve Cloudflare R2 arşivine kaydedilir.</p>
     </section>
 
     <section class="card module-card" id="teacher-settings" data-panel-view="teacher-settings">
@@ -2171,7 +2175,7 @@ body.teacher-menu-open {
     durumYaz('aiQuestionStatus', 'Sorular hazırlanıyor…');
 
     try {
-      const {quiz} = await api('/api/ai/questions', {
+      const res = await api('/api/ai/questions', {
         method: 'POST',
         body: JSON.stringify({
           topic: $('aiTopic').value,
@@ -2180,6 +2184,9 @@ body.teacher-menu-open {
           count: Number($('aiCount').value)
         })
       });
+      const quiz = res.quiz;
+      quiz.draftId = res.draftId || (quiz && quiz.draftId);
+      if (res.draftId) localStorage.setItem('zarif_last_ai_draft_id', res.draftId);
       aiDraft = quiz;
       $('aiQuestionList').innerHTML = `
         <div class="field">
@@ -2233,6 +2240,49 @@ body.teacher-menu-open {
   });
 
   $('aiQuestionList').addEventListener('click', async event => {
+
+    // Soru Bankasına Aktar
+    const bankBtn = event.target.closest('[data-ai-transfer-bank]');
+    if (bankBtn && aiDraft && aiDraft.draftId) {
+      const cards = [...$('aiQuestionList').querySelectorAll('[data-ai-question]')];
+      const approvedIndices = cards
+        .filter(card => card.querySelector('[data-ai-approved]').checked)
+        .map(card => Number(card.dataset.aiQuestion));
+      if (!approvedIndices.length) {
+        alert('Lütfen soru bankasına aktarılacak en az bir soruyu onaylayın.');
+        return;
+      }
+      bankBtn.disabled = true;
+      bankBtn.textContent = 'Aktarılıyor...';
+      try {
+        const transRes = await api(`/api/ai/questions/drafts/${aiDraft.draftId}/transfer-to-bank`, {
+          method: 'POST',
+          body: JSON.stringify({ questionIndices: approvedIndices })
+        });
+        alert(`Tebrikler! ${transRes.transferredCount || approvedIndices.length} soru kalıcı olarak Soru Bankasına aktarıldı ve Pinecone'a indekslendi.`);
+        bankBtn.textContent = '✅ Aktarıldı';
+      } catch (e) {
+        alert('Soru bankasına aktarma hatası: ' + e.message);
+        bankBtn.disabled = false;
+        bankBtn.textContent = '📚 Soru Bankasına Aktar';
+      }
+      return;
+    }
+
+    // PDF İndir
+    const pdfBtn = event.target.closest('[data-ai-export-pdf]');
+    if (pdfBtn && aiDraft && aiDraft.draftId) {
+      window.open(`/api/ai/questions/drafts/${aiDraft.draftId}/export?format=pdf`, '_blank');
+      return;
+    }
+
+    // DOCX İndir
+    const docxBtn = event.target.closest('[data-ai-export-docx]');
+    if (docxBtn && aiDraft && aiDraft.draftId) {
+      window.open(`/api/ai/questions/drafts/${aiDraft.draftId}/export?format=docx`, '_blank');
+      return;
+    }
+
     const button = event.target.closest('[data-ai-publish]');
     if (!button || !aiDraft || aiPublishing || aiPublished) return;
     const status = $('aiQuestionList').querySelector('.ai-publish-status');
@@ -2800,6 +2850,210 @@ body.teacher-menu-open {
 <script src="/assets/site-footer.js"></script>
 <script src="/assets/breadcrumb.js"></script>
   <script src="/assets/site-media-targets.js"></script>
-  <script src="/assets/site-media.js"></script>
+  <script src="/assets/site-media.js">
+
+  /* --- MERKEZİ İÇERİK HAVUZU & PDF KÜTÜPHANESİ ENTEGRASYONU --- */
+  async function loadTeacherDocuments() {
+    const listEl = $('documentList');
+    if (!listEl) return;
+    try {
+      const res = await api('/api/content-library?type=pdf_document');
+      const docs = res.items || [];
+      if (docs.length === 0) {
+        listEl.innerHTML = '<p class="empty" style="padding:12px;color:#64748b;">Henüz kütüphaneye eklenmiş PDF dokümanı bulunmuyor.</p>';
+        return;
+      }
+      listEl.innerHTML = docs.map(doc => `
+        <div class="card" style="padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+          <div>
+            <strong style="color:#0f172a;display:block;">📄 ${esc(doc.title)}</strong>
+            <span style="font-size:0.75rem;color:#64748b;">
+              ${esc(doc.lesson || 'Genel')} • ${doc.grade ? doc.grade + '. Sınıf • ' : ''}${esc(doc.topic || '')}
+              ${doc.r2Key ? '<span style="color:#7c3aed;font-weight:600;">(R2 Arşivli)</span>' : ''}
+            </span>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <a class="btn light" href="${doc.fileUrl || ('/api/content-library/download/' + encodeURIComponent(doc.storageKey || doc.r2Key || ''))}" target="_blank" download style="font-size:0.78rem;padding:4px 10px;">📥 İndir</a>
+            <button class="btn light" data-delete-doc="${doc._id}" style="font-size:0.78rem;padding:4px 8px;color:#ef4444;" type="button">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    } catch (e) {
+      listEl.innerHTML = '<p class="error" style="padding:8px;">Dokümanlar listelenemedi: ' + esc(e.message) + '</p>';
+    }
+  }
+
+  // PDF Form Submit handler
+  $('documentForm')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const btn = $('documentSubmitBtn') || event.target.querySelector('button[type="submit"]');
+    const fileInput = $('documentFileInput');
+    const title = $('documentTitle').value.trim();
+    const docType = $('documentType').value;
+    const grade = $('documentGrade').value;
+    const topic = $('documentTopic').value;
+    const url = $('documentUrl').value.trim();
+
+    if (!title) {
+      durumYaz('documentStatus', 'Lütfen doküman adını girin.', 'error');
+      return;
+    }
+
+    if (!fileInput.files.length && !url) {
+      durumYaz('documentStatus', 'Lütfen bir PDF dosyası seçin veya bir URL adresi girin.', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    durumYaz('documentStatus', 'Doküman kaydediliyor...');
+
+    try {
+      if (fileInput.files.length > 0) {
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('title', title);
+        formData.append('lesson', 'Matematik');
+        formData.append('grade', grade || 'Genel');
+        formData.append('topic', topic || 'Genel');
+        formData.append('difficulty', 'Orta');
+
+        const uploadRes = await fetch('/api/content-library/upload-pdf', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: formData
+        });
+        const data = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(data.detail || data.error || 'Yükleme başarısız');
+        durumYaz('documentStatus', 'PDF başarıyla yüklendi ve kütüphaneye kaydedildi.', 'ok');
+      } else {
+        await api('/api/content-library', {
+          method: 'POST',
+          body: JSON.stringify({
+            title,
+            contentType: 'pdf_document',
+            lesson: 'Matematik',
+            grade: grade || 'Genel',
+            topic: topic || 'Genel',
+            fileUrl: url,
+            source: 'teacher_upload'
+          })
+        });
+        durumYaz('documentStatus', 'Doküman bağlantısı kütüphaneye eklendi.', 'ok');
+      }
+      $('documentForm').reset();
+      loadTeacherDocuments();
+    } catch (err) {
+      durumYaz('documentStatus', 'Hata: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // Delete Document
+  $('documentList')?.addEventListener('click', async event => {
+    const btn = event.target.closest('[data-delete-doc]');
+    if (!btn) return;
+    const docId = btn.dataset.deleteDoc;
+    if (!confirm('Bu dokümanı kütüphaneden silmek istediğinize emin misiniz?')) return;
+    btn.disabled = true;
+    try {
+      await api('/api/content-library/' + docId, { method: 'DELETE' });
+      loadTeacherDocuments();
+    } catch (e) {
+      alert('Doküman silinemedi: ' + e.message);
+      btn.disabled = false;
+    }
+  });
+
+  // Call on load
+  loadTeacherDocuments();
+
+  // F5 Recovery for AI Questions
+  async function checkAndRestoreLastAiDraft() {
+    const lastDraftId = localStorage.getItem('zarif_last_ai_draft_id');
+    if (!lastDraftId) return;
+    if (aiDraft) return; // already loaded
+    try {
+      const res = await api('/api/ai/questions/drafts/' + lastDraftId);
+      if (res && res.success && res.draft) {
+        const draft = res.draft;
+        aiDraft = {
+          topic: draft.topic,
+          grade: draft.grade,
+          difficulty: draft.difficulty,
+          draftId: draft._id,
+          questions: draft.questions,
+          soruSayisi: draft.questions.length
+        };
+        renderAiQuestionCards(aiDraft, true);
+      }
+    } catch (e) {
+      console.warn('Önceki taslak geri yüklenemedi:', e.message);
+    }
+  }
+
+  // Helper to render AI questions list with F5 recovery & action buttons
+  function renderAiQuestionCards(quiz, isRestored = false) {
+    const container = $('aiQuestionList');
+    if (!container) return;
+
+    container.innerHTML = `
+      <div style="background:#064e3b;color:#34d399;padding:10px 14px;border-radius:8px;font-size:0.85rem;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <span>💾 <strong>Otomatik Taslak Kaydı Aktif:</strong> Sayfa yenilense de sorular silinmez. (Taslak ID: ${quiz.draftId || 'Kayıtlı'})${isRestored ? ' [Geri Yüklendi]' : ''}</span>
+        <span style="font-size:0.75rem;background:#047857;color:#fff;padding:2px 8px;border-radius:4px;">Pinecone & Semantik Analiz Tamamlandı</span>
+      </div>
+      <div class="field">
+        <label for="aiTestTitle">Test başlığı</label>
+        <input id="aiTestTitle" maxlength="150" value="${esc(quiz.topic + ' - Test 1')}" required>
+      </div>
+      <p class="hint">Kontrol ettiğiniz soruları onaylayın; onaylananları soru bankasına aktarabilir, test olarak yayınlayabilir veya PDF/DOCX indirebilirsiniz.</p>
+      ${quiz.questions.map((question, index) => `
+      <article class="question-card" data-ai-question="${index}">
+        <div class="question-top">
+          <strong>Soru ${index + 1}</strong>
+          <label><input type="checkbox" data-ai-approved="${index}" checked> Soruyu onayla</label>
+        </div>
+        <p>${window.zarifMathText ? window.zarifMathText.format(question.text) : esc(question.text)}</p>
+        <div class="ai-question-svg-mount" data-ai-svg="${index}"></div>
+        <div class="question-options">
+          ${['A', 'B', 'C', 'D'].map(letter => `
+            <p><strong>${letter})</strong> ${window.zarifMathText && question.options ? window.zarifMathText.format(question.options[letter] || '') : esc((question.options && question.options[letter]) || '')}</p>
+          `).join('')}
+        </div>
+        <p><strong>Doğru cevap:</strong> ${esc(question.answer)}</p>
+        <p><strong>Açıklama:</strong> ${window.zarifMathText ? window.zarifMathText.format(question.explanation || 'Açıklama bulunmuyor.') : esc(question.explanation || '')}</p>
+        <div class="field"><label for="ai-outcome-${index}">MEB kazanım kodu</label>
+          <input id="ai-outcome-${index}" data-ai-outcome="${index}" value="${esc(question.outcomeCode || '')}" placeholder="MAT.6.1.1">
+        </div>
+      </article>`).join('')}
+      <div class="button-row" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+        <button class="btn" type="button" data-ai-publish>Onaylı soruları test olarak yayınla</button>
+        <button class="btn secondary" type="button" data-ai-transfer-bank style="background:#4338ca;color:#fff;">📚 Soru Bankasına Aktar</button>
+        <button class="btn light" type="button" data-ai-export-pdf>📥 PDF İndir</button>
+        <button class="btn light" type="button" data-ai-export-docx>📄 DOCX İndir</button>
+      </div>
+      <p class="status ai-publish-status" role="status" aria-live="polite" style="margin-top:8px;"></p>`;
+
+    if (typeof window !== 'undefined' && window.zarifSafeSvg) {
+      quiz.questions.forEach((question, index) => {
+        if (question.svg && typeof question.svg === 'string' && question.svg.trim()) {
+          const mount = container.querySelector(`[data-ai-svg="${index}"]`);
+          if (mount) {
+            try {
+              const parsed = window.zarifSafeSvg.parse(question.svg.trim());
+              window.zarifSafeSvg.render(mount, parsed);
+            } catch (err) {
+              console.warn('Soru SVG render hatası:', err);
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // Restore on load if present
+  checkAndRestoreLastAiDraft();
+
+</script>
 </body>
 </html>
