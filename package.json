@@ -39,6 +39,7 @@
     "multer": "^2.5.0",
     "nodemailer": "^10.3.1",
     "openai": "^7.45.1",
+    "pg": "^8.23.1",
     "redis": "^6.3.1",
     "socket.io": "^4.8.4",
     "superpowers": "github:obra/superpowers",

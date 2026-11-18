@@ -10,6 +10,18 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" integrity="sha384-ecIckRi4QlKYya/FQUbBUjS4qp65jF/J87Guw5uzTbO1C1Jfa/6kYmd6dXUF6D7i" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+  <!-- React 18, ReactDOM 18 & Tailwind CSS CDN (Scoped preflight: false) -->
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script>
+    window.tailwind = {
+      corePlugins: {
+        preflight: false
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="/assets/system-health.js"></script>
   <style>
     :root {
       font-family: Inter, "Segoe UI", system-ui, sans-serif;
@@ -654,6 +666,10 @@
 
     <!-- SİSTEM & TASARIM -->
     <div class="nav-title" data-admin-roles="superadmin">Sistem & Ayarlar</div>
+    <button class="nav-btn" type="button" data-view="system-health" data-admin-roles="superadmin">
+      <svg viewBox="0 0 24 24" style="stroke:#10b981"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      <span class="nav-text">Sistem Sağlığı & Güvenlik</span>
+    </button>
     <button class="nav-btn" type="button" data-view="announcements" data-admin-roles="superadmin">
       <svg viewBox="0 0 24 24" style="stroke:#f97316"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="nav-text">Duyurular</span>
@@ -1200,6 +1216,11 @@
       </div>
     </section>
 
+    <!-- SİSTEM SAĞLIĞI VE GÜVENLİK KONTROLÜ (REACT + TYPESCRIPT + TAILWIND) -->
+    <section id="view-system-health" hidden>
+      <div id="system-health-root"></div>
+    </section>
+
     <!-- 16. GÜVENLİK VE LOGLAR -->
     <section id="view-logs" hidden>
       <div class="panel" style="margin-top:0">
@@ -1241,7 +1262,8 @@
         'solved-questions': 'Çözümlü Sorular',
         'questions-manage': 'Soru Bankası & Resim Havuzu',
         'maarif-curriculum': 'Maarif Müfredat Gezgini',
-        'ai-content': 'AI İçerik Stüdyosu'
+        'ai-content': 'AI İçerik Stüdyosu',
+        'system-health': 'Sistem Sağlığı ve Güvenlik'
       };
       const subtitles = {
         overview: 'Platformun anlık sayaçları ve yönetim özeti',
@@ -1260,7 +1282,8 @@
         'solved-questions': 'Video ve çözümlü soru arşivi',
         'questions-manage': 'Soru bankası görselleri ve senkronizasyon',
         'maarif-curriculum': '5–12. sınıf Türkiye Yüzyılı Maarif Modeli ağacı',
-        'ai-content': 'Yapay zekâ destekli soru ve test üretim stüdyosu'
+        'ai-content': 'Yapay zekâ destekli soru ve test üretim stüdyosu',
+        'system-health': 'Render, PostgreSQL, MongoDB, Cloudflare R2, Cloudinary, SSL ve CDN Canlı Teşhisi'
       };
 
       const roleNames = { student: 'Öğrenci', teacher: 'Öğretmen', admin: 'Yönetici' };
@@ -1299,7 +1322,12 @@
         'solved-questions': () => window.solvedQuestionsAdmin?.load?.(),
         'questions-manage': loadQuestionsManage,
         'maarif-curriculum': loadAdminCurriculumTree,
-        'ai-content': () => {}
+        'ai-content': () => {},
+        'system-health': () => {
+          if (typeof window.initSystemHealthApp === 'function') {
+            window.initSystemHealthApp('system-health-root');
+          }
+        }
       };
 
       let page = 1;

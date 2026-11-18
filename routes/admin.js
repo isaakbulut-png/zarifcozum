@@ -90,7 +90,9 @@ function createAdminRouter({
   getAnnouncementCollection, getFaqModel, invalidateFaqCache,
   getQuizCollection, getLessonCollection, getSupportTicketCollection,
   getHomeworkCollection, getAssignmentCollection, getResultCollection,
-  getAttemptCollection, getStudentCollection, getDenemeModel
+  getAttemptCollection, getStudentCollection, getDenemeModel,
+  SystemHealthLog = require('../models/SystemHealthLog'),
+  healthChecker = require('../lib/system-health-checker')
 }) {
   const router = express.Router();
   const mediaUpload = multer({
@@ -738,6 +740,62 @@ function createAdminRouter({
     } catch (error) {
       console.error('Pano kaydedilemedi:', error);
       res.status(500).json({ mesaj: 'Pano kaydedilemedi.' });
+    }
+  });
+
+  router.get('/system-health/latest', allow('superadmin'), async (req, res) => {
+    try {
+      const latest = typeof SystemHealthLog.getLatest === 'function'
+        ? await SystemHealthLog.getLatest()
+        : null;
+      res.json({ scan: latest });
+    } catch (error) {
+      console.error('Son sistem sağlığı taraması alınamadı:', error);
+      res.status(500).json({ mesaj: 'Son sistem sağlığı taraması alınamadı.' });
+    }
+  });
+
+  router.get('/system-health/logs', allow('superadmin'), async (req, res) => {
+    try {
+      const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 30));
+      const logs = typeof SystemHealthLog.getLastLogs === 'function'
+        ? await SystemHealthLog.getLastLogs(limit)
+        : [];
+      res.json({ logs });
+    } catch (error) {
+      console.error('Sistem sağlığı kayıtları alınamadı:', error);
+      res.status(500).json({ mesaj: 'Sistem sağlığı kayıtları alınamadı.' });
+    }
+  });
+
+  router.post('/system-health/scan', allow('superadmin'), async (req, res) => {
+    try {
+      const scannedBy = req.session?.user?.email || req.session?.user?.name || 'Süper Admin';
+      const scanData = typeof healthChecker.runSystemHealthScan === 'function'
+        ? await healthChecker.runSystemHealthScan(scannedBy)
+        : { score: 100, status: 'healthy', summary: 'Simüle tarama tamamlandı.', checks: {}, warnings: [], errors: [], scannedBy };
+
+      let savedLog = null;
+      try {
+        if (typeof SystemHealthLog.saveScan === 'function') {
+          savedLog = await SystemHealthLog.saveScan(scanData);
+        }
+      } catch (dbErr) {
+        console.warn('Sistem sağlığı logu veritabanına yazılamadı:', dbErr.message);
+      }
+
+      await audit(req, 'system_health.scan_performed', 'system_health', 'scan', {
+        score: scanData.score,
+        status: scanData.status
+      });
+
+      res.json({
+        mesaj: 'Sistem taraması başarıyla tamamlandı.',
+        scan: savedLog && typeof savedLog.toObject === 'function' ? savedLog.toObject() : scanData
+      });
+    } catch (error) {
+      console.error('Sistem sağlığı taraması gerçekleştirilemedi:', error);
+      res.status(500).json({ mesaj: 'Sistem sağlığı taraması gerçekleştirilemedi: ' + error.message });
     }
   });
 

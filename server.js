@@ -317,6 +317,16 @@ app.get('/api/homepage-assets', async (req, res) => {
     res.status(500).json({ mesaj: 'Ana sayfa medya ayarları alınamadı.' });
   }
 });
+app.get('/api/health', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json({
+    status: 'ok',
+    uptime: Math.round(process.uptime()),
+    timestamp: Date.now(),
+    nodeVersion: process.version,
+    memoryUsage: Math.round(process.memoryUsage().rss / (1024 * 1024))
+  });
+});
 app.get('/api/announcement-banner', async (req, res) => {
   res.set('Cache-Control', 'no-store');
   try {
