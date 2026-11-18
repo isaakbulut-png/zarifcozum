@@ -274,12 +274,62 @@ test('healthChecker exports all check functions including KVKK compliance', () =
   assert.equal(typeof healthChecker.checkDomains, 'function');
   assert.equal(typeof healthChecker.checkCloudflareMedia, 'function');
   assert.equal(typeof healthChecker.checkPinecone, 'function');
+  assert.equal(typeof healthChecker.getGitHubAuth, 'function');
   assert.equal(typeof healthChecker.checkGitHubApi, 'function');
   assert.equal(typeof healthChecker.checkGitHubActions, 'function');
   assert.equal(typeof healthChecker.checkGemini, 'function');
   assert.equal(typeof healthChecker.checkCloudflareApi, 'function');
   assert.equal(typeof healthChecker.checkGoogleCloud, 'function');
   assert.equal(typeof healthChecker.checkKvkkAndCookieCompliance, 'function');
+});
+
+test('GitHub API and Actions use GITHUB_TOKEN for Authorization and fall back to anonymous access when undefined', async () => {
+  const { getGitHubAuth, checkGitHubApi, checkGitHubActions } = healthChecker;
+
+  // 1. With explicit GITHUB_TOKEN
+  const authWithToken = getGitHubAuth('test_token_123');
+  assert.equal(authWithToken.hasToken, true);
+  assert.equal(authWithToken.authMode, 'token');
+  assert.equal(authWithToken.headers['Authorization'], 'Bearer test_token_123');
+  assert.equal(authWithToken.headers['Accept'], 'application/vnd.github.v3+json');
+  assert.ok(authWithToken.headers['User-Agent']);
+
+  // 2. With Bearer or token prefix already present
+  const authWithBearer = getGitHubAuth('Bearer my_pat_token');
+  assert.equal(authWithBearer.headers['Authorization'], 'Bearer my_pat_token');
+
+  const authWithTokenPrefix = getGitHubAuth('token ghp_classic_token');
+  assert.equal(authWithTokenPrefix.headers['Authorization'], 'token ghp_classic_token');
+
+  // 3. Without token (anonymous fallback)
+  const authAnon = getGitHubAuth('');
+  assert.equal(authAnon.hasToken, false);
+  assert.equal(authAnon.authMode, 'anonymous');
+  assert.equal(authAnon.headers['Authorization'], undefined);
+
+  // 4. Test checkGitHubApi with custom token and anonymous
+  const originalToken = process.env.GITHUB_TOKEN;
+  const originalGhToken = process.env.GH_TOKEN;
+  try {
+    delete process.env.GITHUB_TOKEN;
+    delete process.env.GH_TOKEN;
+
+    const anonRes = await checkGitHubApi();
+    assert.equal(anonRes.authMode, 'anonymous');
+    assert.equal(anonRes.authenticated, false);
+    assert.ok(anonRes.status === 'healthy' || anonRes.status === 'warning');
+
+    process.env.GITHUB_TOKEN = 'mock_valid_token_abc';
+    const authConfig = getGitHubAuth();
+    assert.equal(authConfig.hasToken, true);
+    assert.equal(authConfig.authMode, 'token');
+    assert.equal(authConfig.headers['Authorization'], 'Bearer mock_valid_token_abc');
+  } finally {
+    if (originalToken !== undefined) process.env.GITHUB_TOKEN = originalToken;
+    else delete process.env.GITHUB_TOKEN;
+    if (originalGhToken !== undefined) process.env.GH_TOKEN = originalGhToken;
+    else delete process.env.GH_TOKEN;
+  }
 });
 
 test('checkKvkkAndCookieCompliance evaluates all 10 controls and produces score, status and recommendations', async () => {
