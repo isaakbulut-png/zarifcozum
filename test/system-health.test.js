@@ -135,6 +135,19 @@ test('system-health admin endpoints require superadmin role and return scans', a
     // Dismiss alert endpoint works
     const dismissRes = await fetch(`${base}/system-health/alert/dismiss`, { method: 'POST' });
     assert.equal(dismissRes.status, 200);
+
+    // KVKK endpoints work
+    const kvkkGetRes = await fetch(`${base}/system-health/kvkk`);
+    assert.equal(kvkkGetRes.status, 200);
+    const kvkkGetData = await kvkkGetRes.json();
+    assert.ok(kvkkGetData.report);
+    assert.equal(kvkkGetData.report.counts.total, 10);
+
+    const kvkkScanRes = await fetch(`${base}/system-health/kvkk/scan`, { method: 'POST' });
+    assert.equal(kvkkScanRes.status, 200);
+    const kvkkScanData = await kvkkScanRes.json();
+    assert.ok(kvkkScanData.report);
+    assert.equal(kvkkScanData.report.counts.total, 10);
   });
 });
 
@@ -237,7 +250,7 @@ test('executeScheduledScan handles failures, triggers audit log and sets dashboa
   assert.equal(savedAlert, null);
 });
 
-test('healthChecker exports all 13 check functions', () => {
+test('healthChecker exports all check functions including KVKK compliance', () => {
   assert.equal(typeof healthChecker.runSystemHealthScan, 'function');
   assert.equal(typeof healthChecker.checkApi, 'function');
   assert.equal(typeof healthChecker.checkDatabases, 'function');
@@ -252,4 +265,57 @@ test('healthChecker exports all 13 check functions', () => {
   assert.equal(typeof healthChecker.checkGemini, 'function');
   assert.equal(typeof healthChecker.checkCloudflareApi, 'function');
   assert.equal(typeof healthChecker.checkGoogleCloud, 'function');
+  assert.equal(typeof healthChecker.checkKvkkAndCookieCompliance, 'function');
+});
+
+test('checkKvkkAndCookieCompliance evaluates all 10 controls and produces score, status and recommendations', async () => {
+  const { checkKvkkAndCookieCompliance } = require('../lib/kvkk-compliance-checker');
+
+  // 1. Live codebase inspection
+  const liveReport = await checkKvkkAndCookieCompliance();
+  assert.equal(liveReport.counts.total, 10);
+  assert.ok(liveReport.score >= 90);
+  assert.equal(liveReport.status, 'compliant');
+  assert.equal(liveReport.items.length, 10);
+
+  // Verify all 10 required items are present
+  const expectedIds = [
+    'cookie_banner',
+    'cookie_preferences_stored',
+    'preference_change_allowed',
+    'analytics_consent_gated',
+    'http_only_cookies',
+    'secure_cookies',
+    'same_site_config',
+    'privacy_policy_present',
+    'kvkk_clarification_present',
+    'cookie_policy_present'
+  ];
+  for (const id of expectedIds) {
+    const item = liveReport.items.find(i => i.id === id);
+    assert.ok(item, `Expected item ${id} to exist`);
+    assert.equal(item.status, 'compliant');
+    assert.equal(item.statusLabel, '✅ Uyumlu');
+  }
+
+  // 2. Simulated non-compliant scenarios
+  const degradedReport = await checkKvkkAndCookieCompliance({
+    indexHtml: '<html><body>No banner here</body></html>',
+    yasalHtml: '<html><body>No policies</body></html>',
+    serverJs: 'session({ cookie: { httpOnly: false } })',
+    cookiePrefJs: '',
+    siteFooterJs: ''
+  });
+
+  assert.equal(degradedReport.counts.total, 10);
+  assert.ok(degradedReport.score < 50);
+  assert.equal(degradedReport.status, 'non_compliant');
+  assert.equal(degradedReport.statusLabel, '❌ Uyumsuz');
+  assert.ok(degradedReport.recommendations.length > 0);
+
+  const bannerItem = degradedReport.items.find(i => i.id === 'cookie_banner');
+  assert.equal(bannerItem.status, 'non_compliant');
+  assert.equal(bannerItem.statusLabel, '❌ Uyumsuz');
+  assert.ok(bannerItem.risk);
+  assert.ok(bannerItem.recommendation);
 });

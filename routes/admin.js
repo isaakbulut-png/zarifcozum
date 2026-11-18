@@ -767,6 +767,36 @@ function createAdminRouter({
     }
   });
 
+  router.get('/system-health/kvkk', allow('superadmin', 'editor', 'support'), async (req, res) => {
+    try {
+      const checkerFn = typeof healthChecker.checkKvkkAndCookieCompliance === 'function'
+        ? healthChecker.checkKvkkAndCookieCompliance
+        : require('../lib/kvkk-compliance-checker').checkKvkkAndCookieCompliance;
+      const report = await checkerFn();
+      res.json({ report });
+    } catch (error) {
+      console.error('KVKK ve çerez uyumluluk kontrolü başarısız:', error);
+      res.status(500).json({ mesaj: 'KVKK ve çerez uyumluluk kontrolü başarısız: ' + error.message });
+    }
+  });
+
+  router.post('/system-health/kvkk/scan', allow('superadmin'), async (req, res) => {
+    try {
+      const checkerFn = typeof healthChecker.checkKvkkAndCookieCompliance === 'function'
+        ? healthChecker.checkKvkkAndCookieCompliance
+        : require('../lib/kvkk-compliance-checker').checkKvkkAndCookieCompliance;
+      const report = await checkerFn();
+      await audit(req, 'system_health.kvkk_scan_performed', 'system_health', 'kvkk', {
+        score: report.score,
+        status: report.status
+      });
+      res.json({ mesaj: 'KVKK ve çerez uyumluluk taraması tamamlandı.', report });
+    } catch (error) {
+      console.error('KVKK taraması yürütülemedi:', error);
+      res.status(500).json({ mesaj: 'KVKK taraması yürütülemedi: ' + error.message });
+    }
+  });
+
   router.post('/system-health/alert/dismiss', allow('superadmin'), async (req, res) => {
     try {
       if (typeof SystemConfig.dismissSystemHealthAlert === 'function') {

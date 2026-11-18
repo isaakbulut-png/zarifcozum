@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 export type HealthStatus = 'healthy' | 'warning' | 'error' | 'unconfigured';
+export type ComplianceStatus = 'compliant' | 'partial' | 'non_compliant';
 
 export interface ServiceItemCheck {
   status: HealthStatus;
@@ -130,25 +131,57 @@ export interface SystemHealthLogItem {
   createdAt: string;
 }
 
+export interface KvkkComplianceItem {
+  id: string;
+  title: string;
+  category: string;
+  status: ComplianceStatus;
+  statusLabel: string;
+  score: number;
+  details: string;
+  risk: string | null;
+  recommendation: string | null;
+}
+
+export interface KvkkComplianceReport {
+  timestamp: string;
+  score: number;
+  status: ComplianceStatus;
+  statusLabel: string;
+  summary: string;
+  counts: {
+    total: number;
+    compliant: number;
+    partial: number;
+    nonCompliant: number;
+  };
+  items: KvkkComplianceItem[];
+  recommendations: string[];
+}
+
 export const SystemHealth: React.FC = () => {
   const [scan, setScan] = useState<SystemHealthScan | null>(null);
   const [logs, setLogs] = useState<SystemHealthLogItem[]>([]);
+  const [kvkkReport, setKvkkReport] = useState<KvkkComplianceReport | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [kvkkLoading, setKvkkLoading] = useState<boolean>(false);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'logs'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'kvkk' | 'logs'>('overview');
 
   const fetchInitialData = useCallback(async () => {
     setInitialLoading(true);
     setErrorMsg(null);
     try {
-      const [latestRes, logsRes] = await Promise.all([
-        fetch('/api/admin/system-health/latest').then(r => r.json()),
-        fetch('/api/admin/system-health/logs?limit=30').then(r => r.json())
+      const [latestRes, logsRes, kvkkRes] = await Promise.all([
+        fetch('/api/admin/system-health/latest').then(r => r.json()).catch(() => ({})),
+        fetch('/api/admin/system-health/logs?limit=30').then(r => r.json()).catch(() => ({})),
+        fetch('/api/admin/system-health/kvkk').then(r => r.json()).catch(() => ({}))
       ]);
 
-      if (latestRes.scan) setScan(latestRes.scan);
-      if (logsRes.logs) setLogs(logsRes.logs);
+      if (latestRes?.scan) setScan(latestRes.scan);
+      if (logsRes?.logs) setLogs(logsRes.logs);
+      if (kvkkRes?.report) setKvkkReport(kvkkRes.report);
     } catch (err: any) {
       setErrorMsg('Sistem verileri yüklenemedi: ' + (err.message || 'Bilinmeyen hata'));
     } finally {
@@ -173,11 +206,29 @@ export const SystemHealth: React.FC = () => {
 
       setScan(data.scan);
       const logsRes = await fetch('/api/admin/system-health/logs?limit=30').then(r => r.json());
-      if (logsRes.logs) setLogs(logsRes.logs);
+      if (logsRes?.logs) setLogs(logsRes.logs);
     } catch (err: any) {
       setErrorMsg('Tarama sırasında hata oluştu: ' + (err.message || 'Bilinmeyen hata'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRunKvkkScan = async () => {
+    setKvkkLoading(true);
+    setErrorMsg(null);
+    try {
+      const res = await fetch('/api/admin/system-health/kvkk/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.mesaj || 'KVKK taraması gerçekleştirilemedi.');
+      setKvkkReport(data.report);
+    } catch (err: any) {
+      setErrorMsg('KVKK tarama hatası: ' + (err.message || 'Bilinmeyen hata'));
+    } finally {
+      setKvkkLoading(false);
     }
   };
 
@@ -210,6 +261,33 @@ export const SystemHealth: React.FC = () => {
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
             <span className="w-2 h-2 rounded-full bg-slate-400"></span>
             ⚪ Yapılandırılmadı
+          </span>
+        );
+    }
+  };
+
+  const getComplianceBadge = (status: ComplianceStatus) => {
+    switch (status) {
+      case 'compliant':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            ✅ Uyumlu
+          </span>
+        );
+      case 'partial':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+            ⚠️ Kısmen Uyumlu
+          </span>
+        );
+      case 'non_compliant':
+      default:
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+            <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+            ❌ Uyumsuz
           </span>
         );
     }
@@ -263,7 +341,7 @@ export const SystemHealth: React.FC = () => {
                   ⏰ Otomatik Tarama: Her gün 08:00
                 </span>
               </div>
-              <p className="text-sm text-slate-500">Render, PostgreSQL, MongoDB, Cloudflare R2, Cloudinary, SSL, CDN, Pinecone, GitHub, Gemini &amp; Google Cloud</p>
+              <p className="text-sm text-slate-500">Render, Veritabanları, Cloudflare, SSL, Çerez Politikası &amp; 6698 Sayılı KVKK Canlı Teşhisi</p>
             </div>
           </div>
         </div>
@@ -279,6 +357,13 @@ export const SystemHealth: React.FC = () => {
             </button>
             <button
               type="button"
+              onClick={() => setActiveTab('kvkk')}
+              className={`px-3 py-1.5 rounded-lg transition ${activeTab === 'kvkk' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+            >
+              🍪 KVKK &amp; Çerez Uyumluluğu
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveTab('logs')}
               className={`px-3 py-1.5 rounded-lg transition ${activeTab === 'logs' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
             >
@@ -286,29 +371,50 @@ export const SystemHealth: React.FC = () => {
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={handleStartScan}
-            disabled={loading}
-            className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 active:scale-95 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {loading ? (
-              <>
-                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                </svg>
-                <span>Sistem Taranıyor...</span>
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span>Sistem Taraması Başlat</span>
-              </>
-            )}
-          </button>
+          {activeTab === 'kvkk' ? (
+            <button
+              type="button"
+              onClick={handleRunKvkkScan}
+              disabled={kvkkLoading}
+              className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 active:scale-95 transition shadow-sm disabled:opacity-50 cursor-pointer"
+            >
+              {kvkkLoading ? (
+                <>
+                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  <span>Denetleniyor...</span>
+                </>
+              ) : (
+                <>
+                  <span>🍪</span>
+                  <span>KVKK Taraması Çalıştır</span>
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleStartScan}
+              disabled={loading}
+              className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 active:scale-95 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              {loading ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                  </svg>
+                  <span>Sistem Taranıyor...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Sistem Taraması Başlat</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
@@ -343,6 +449,7 @@ export const SystemHealth: React.FC = () => {
         </div>
       )}
 
+      {/* TAB 1: OVERVIEW */}
       {activeTab === 'overview' && scan && (
         <>
           {/* Score & Summary Card */}
@@ -815,7 +922,160 @@ export const SystemHealth: React.FC = () => {
         </>
       )}
 
-      {/* Logs Tab: Last 30 Scans */}
+      {/* TAB 2: KVKK & ÇEREZ UYUMLULUĞU */}
+      {activeTab === 'kvkk' && (
+        <div className="space-y-6">
+          {kvkkReport ? (
+            <>
+              {/* Score & Compliance Header Card */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Overall Score */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 flex flex-col items-center justify-center text-center">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">KVKK Uyumluluk Puanı</span>
+                  <div className={`w-32 h-32 rounded-full border-8 flex flex-col items-center justify-center ${getScoreColor(kvkkReport.score)} shadow-inner`}>
+                    <span className="text-4xl font-extrabold tracking-tight">{kvkkReport.score}</span>
+                    <span className="text-xs font-semibold text-slate-500">/ 100</span>
+                  </div>
+                  <div className="mt-4">
+                    {getComplianceBadge(kvkkReport.status)}
+                  </div>
+                  <p className="text-xs text-slate-400 mt-2">
+                    Son Denetim: {new Date(kvkkReport.timestamp).toLocaleString('tr-TR')}
+                  </p>
+                </div>
+
+                {/* Summary & Category Breakdown */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 lg:col-span-2 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-base font-bold text-slate-900">Mevzuat Uyumluluk Özeti</h3>
+                      <div className="flex items-center gap-1.5 text-xs font-semibold">
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          {kvkkReport.counts.compliant} Uyumlu
+                        </span>
+                        {kvkkReport.counts.partial > 0 && (
+                          <span className="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
+                            {kvkkReport.counts.partial} Kısmen
+                          </span>
+                        )}
+                        {kvkkReport.counts.nonCompliant > 0 && (
+                          <span className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">
+                            {kvkkReport.counts.nonCompliant} Uyumsuz
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-600 mb-4">{kvkkReport.summary}</p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Çerez Rıza Yönetimi</span>
+                        <span className="text-sm font-bold text-slate-800">4 / 4 Kriter</span>
+                        <p className="text-[11px] text-slate-500 mt-0.5">Banner, depolama, tercih değiştirme ve consent mode</p>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Çerez Güvenliği</span>
+                        <span className="text-sm font-bold text-slate-800">3 / 3 Kriter</span>
+                        <p className="text-[11px] text-slate-500 mt-0.5">HttpOnly, Secure ve SameSite koruma parametreleri</p>
+                      </div>
+                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Aydınlatma &amp; Şeffaflık</span>
+                        <span className="text-sm font-bold text-slate-800">3 / 3 Kriter</span>
+                        <p className="text-[11px] text-slate-500 mt-0.5">Gizlilik, KVKK m.10/11 ve Çerez Politikası metinleri</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                    <span>Yasal Dayanak: 6698 sayılı KVKK &amp; 2002/58/EC e-Privacy Çerez Direktifi</span>
+                    <span className="font-semibold text-emerald-700">10 / 10 Madde Denetlendi</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 10 Control Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {kvkkReport.items.map((item) => (
+                  <div key={item.id} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-start justify-between gap-3 mb-2.5">
+                        <div>
+                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 mb-1">
+                            {item.category}
+                          </span>
+                          <h4 className="font-bold text-slate-900 text-sm">{item.title}</h4>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-semibold text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                            {item.score}/10
+                          </span>
+                          {getComplianceBadge(item.status)}
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-slate-600 leading-relaxed mb-3">{item.details}</p>
+
+                      {item.risk && (
+                        <div className="bg-rose-50/80 border border-rose-200 text-rose-800 rounded-xl p-2.5 text-xs mb-2">
+                          <span className="font-bold block mb-0.5">⚠️ Tespit Edilen Risk:</span>
+                          <span>{item.risk}</span>
+                        </div>
+                      )}
+
+                      {item.recommendation && (
+                        <div className="bg-amber-50/80 border border-amber-200 text-amber-800 rounded-xl p-2.5 text-xs">
+                          <span className="font-bold block mb-0.5">💡 Öneri &amp; Çözüm:</span>
+                          <span>{item.recommendation}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Recommendations Box */}
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <span className="text-2xl">💡</span>
+                  <div>
+                    <h3 className="font-bold text-slate-900 text-base">Eksik ve Riskli Alanlar İçin Öneriler</h3>
+                    <p className="text-xs text-slate-500">Sistemin hukuki ve teknik uyumluluğunu en üst seviyeye taşımak için tavsiyeler</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5 mt-4">
+                  {kvkkReport.recommendations.map((rec, idx) => (
+                    <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-[11px]">
+                        {idx + 1}
+                      </span>
+                      <p className="leading-relaxed mt-0.5">{rec}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
+              <span className="text-4xl block mb-2">🍪</span>
+              <h3 className="text-base font-bold text-slate-900 mb-1">KVKK ve Çerez Uyumluluk Raporu</h3>
+              <p className="text-xs text-slate-500 max-w-md mx-auto mb-4">
+                Sitenin çerez bannerı, rıza kaydı, Consent Mode kurgusu, çerez güvenlik bayrakları ve yasal metinleri henüz denetlenmedi.
+              </p>
+              <button
+                type="button"
+                onClick={handleRunKvkkScan}
+                disabled={kvkkLoading}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition"
+              >
+                {kvkkLoading ? 'Taranıyor...' : 'Taramayı Şimdi Başlat'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 3: LOGS */}
       {activeTab === 'logs' && (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
@@ -883,10 +1143,10 @@ export const SystemHealth: React.FC = () => {
         </div>
       )}
 
-      {initialLoading && !scan && (
+      {initialLoading && !scan && !kvkkReport && (
         <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
           <div className="w-8 h-8 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-sm font-semibold text-slate-700">Sistem sağlığı durumu yükleniyor...</p>
+          <p className="text-sm font-semibold text-slate-700">Sistem sağlığı ve KVKK durumu yükleniyor...</p>
         </div>
       )}
     </div>

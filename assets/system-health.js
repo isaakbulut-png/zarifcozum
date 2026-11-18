@@ -1,5 +1,6 @@
 /**
  * ZarifÇözüm - Sistem Sağlığı ve Güvenlik Kontrolü
+ * KVKK & Çerez Uyumluluğu Modülü
  * React 18 + Tailwind UI Motoru
  */
 (function (global) {
@@ -32,6 +33,25 @@
     );
   }
 
+  function ComplianceBadge({ status }) {
+    if (status === 'compliant') {
+      return e('span', { className: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm' },
+        e('span', { className: 'w-2 h-2 rounded-full bg-emerald-500' }),
+        '✅ Uyumlu'
+      );
+    }
+    if (status === 'partial') {
+      return e('span', { className: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 shadow-sm' },
+        e('span', { className: 'w-2 h-2 rounded-full bg-amber-500' }),
+        '⚠️ Kısmen Uyumlu'
+      );
+    }
+    return e('span', { className: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 shadow-sm' },
+      e('span', { className: 'w-2 h-2 rounded-full bg-rose-500' }),
+      '❌ Uyumsuz'
+    );
+  }
+
   function formatTime(dateStr) {
     if (!dateStr) return '—';
     try {
@@ -57,7 +77,9 @@
   function SystemHealthApp() {
     const [scan, setScan] = useState(null);
     const [logs, setLogs] = useState([]);
+    const [kvkkReport, setKvkkReport] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [kvkkLoading, setKvkkLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState(null);
     const [activeTab, setActiveTab] = useState('overview');
@@ -66,12 +88,14 @@
       setInitialLoading(true);
       setErrorMsg(null);
       try {
-        const [latestRes, logsRes] = await Promise.all([
-          fetch('/api/admin/system-health/latest').then(r => r.json()),
-          fetch('/api/admin/system-health/logs?limit=30').then(r => r.json())
+        const [latestRes, logsRes, kvkkRes] = await Promise.all([
+          fetch('/api/admin/system-health/latest').then(r => r.json()).catch(() => ({})),
+          fetch('/api/admin/system-health/logs?limit=30').then(r => r.json()).catch(() => ({})),
+          fetch('/api/admin/system-health/kvkk').then(r => r.json()).catch(() => ({}))
         ]);
         if (latestRes && latestRes.scan) setScan(latestRes.scan);
         if (logsRes && logsRes.logs) setLogs(logsRes.logs);
+        if (kvkkRes && kvkkRes.report) setKvkkReport(kvkkRes.report);
       } catch (err) {
         setErrorMsg('Sistem verileri alınamadı: ' + (err.message || 'Hata'));
       } finally {
@@ -104,6 +128,24 @@
       }
     };
 
+    const handleRunKvkkScan = async () => {
+      setKvkkLoading(true);
+      setErrorMsg(null);
+      try {
+        const res = await fetch('/api/admin/system-health/kvkk/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.mesaj || 'KVKK taraması tamamlanamadı.');
+        setKvkkReport(data.report);
+      } catch (err) {
+        setErrorMsg('KVKK tarama hatası: ' + (err.message || 'Bilinmeyen hata'));
+      } finally {
+        setKvkkLoading(false);
+      }
+    };
+
     const getScoreBorder = (score) => {
       if (score >= 90) return 'text-emerald-600 border-emerald-500';
       if (score >= 70) return 'text-amber-600 border-amber-500';
@@ -124,7 +166,7 @@
                 '⏰ Otomatik Tarama: Her gün 08:00'
               )
             ),
-            e('p', { className: 'text-xs md:text-sm text-slate-500 mt-0.5' }, 'Render, PostgreSQL, MongoDB, R2, Cloudinary, SSL, CDN, Pinecone, GitHub, Gemini & Google Cloud')
+            e('p', { className: 'text-xs md:text-sm text-slate-500 mt-0.5' }, 'Render, Veritabanları, Cloudflare, SSL, Çerez Politikası & 6698 Sayılı KVKK Canlı Teşhisi')
           )
         ),
         e('div', { className: 'flex flex-wrap items-center gap-3 w-full md:w-auto' },
@@ -136,11 +178,30 @@
             }, '📊 Anlık Durum'),
             e('button', {
               type: 'button',
+              onClick: () => setActiveTab('kvkk'),
+              className: `px-3.5 py-1.5 rounded-lg transition ${activeTab === 'kvkk' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`
+            }, '🍪 KVKK & Çerez Uyumluluğu'),
+            e('button', {
+              type: 'button',
               onClick: () => setActiveTab('logs'),
               className: `px-3.5 py-1.5 rounded-lg transition ${activeTab === 'logs' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`
             }, `📜 Son 30 Tarama (${logs.length})`)
           ),
-          e('button', {
+
+          activeTab === 'kvkk' ? e('button', {
+            type: 'button',
+            onClick: handleRunKvkkScan,
+            disabled: kvkkLoading,
+            className: 'flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 active:scale-95 transition shadow-sm disabled:opacity-50 cursor-pointer'
+          },
+            kvkkLoading ? [
+              e('span', { key: 'spin', className: 'inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' }),
+              e('span', { key: 'txt' }, 'Denetleniyor...')
+            ] : [
+              e('span', { key: 'ico' }, '🍪'),
+              e('span', { key: 'txt' }, 'KVKK Taraması Çalıştır')
+            ]
+          ) : e('button', {
             type: 'button',
             onClick: handleStartScan,
             disabled: loading,
@@ -157,7 +218,7 @@
         )
       ),
 
-      // Kritik Servis Hata Uyarısı (Dashboard Kırmızı Bildirimi)
+      // Kritik Servis Hata Uyarısı
       scan && (scan.status === 'error' || (scan.errors && scan.errors.length > 0)) ? e('div', {
         className: 'bg-rose-50 border-2 border-rose-500 text-rose-900 rounded-2xl p-5 shadow-sm flex items-start gap-4'
       },
@@ -184,7 +245,6 @@
 
       // OVERVIEW TAB
       activeTab === 'overview' && scan ? e('div', { className: 'space-y-6' },
-        // 2. Genel Puan ve Teşhis Özeti
         e('div', { className: 'grid grid-cols-1 lg:grid-cols-3 gap-6' },
           // Puan Kartı
           e('div', { className: 'bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 flex flex-col items-center justify-center text-center' },
@@ -238,7 +298,7 @@
           )
         ),
 
-        // 3. Servis Kartları Izgarası (13 Servis)
+        // Servis Kartları (13 Servis)
         e('div', { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' },
           // 1. API
           e('div', { className: 'bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition' },
@@ -335,7 +395,7 @@
             e(ServiceMeta, { item: scan.checks.cloudinary })
           ),
 
-          // 5. SSL Sertifikası
+          // 5. SSL
           e('div', { className: 'bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition' },
             e('div', { className: 'flex items-center justify-between mb-3' },
               e('div', { className: 'flex items-center gap-2' },
@@ -355,7 +415,7 @@
             e(ServiceMeta, { item: scan.checks.ssl })
           ),
 
-          // 6. Domain & CDN
+          // 6. Domain
           e('div', { className: 'bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition' },
             e('div', { className: 'flex items-center justify-between mb-3' },
               e('div', { className: 'flex items-center gap-2' },
@@ -466,7 +526,7 @@
             e(ServiceMeta, { item: scan.checks.githubActions })
           ),
 
-          // 10. Google AI Studio (Gemini)
+          // 10. Gemini
           e('div', { className: 'bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition' },
             e('div', { className: 'flex items-center justify-between mb-3' },
               e('div', { className: 'flex items-center gap-2' },
@@ -514,7 +574,7 @@
             e(ServiceMeta, { item: scan.checks.cloudflare })
           ),
 
-          // 12. Google Cloud Servisleri
+          // 12. Google Cloud
           e('div', { className: 'bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition' },
             e('div', { className: 'flex items-center justify-between mb-3' },
               e('div', { className: 'flex items-center gap-2' },
@@ -545,7 +605,7 @@
           )
         ),
 
-        // 4. Performans ve Yanıt Süreleri Dökümü
+        // Performans Dökümü
         e('div', { className: 'bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80' },
           e('div', { className: 'flex items-center justify-between mb-4' },
             e('div', null,
@@ -579,6 +639,123 @@
           )
         )
       ) : null,
+
+      // KVKK TAB: KVKK & ÇEREZ UYUMLULUĞU
+      activeTab === 'kvkk' ? (kvkkReport ? e('div', { className: 'space-y-6' },
+        // 1. KVKK Başlık ve Genel Puan Kartı
+        e('div', { className: 'grid grid-cols-1 lg:grid-cols-3 gap-6' },
+          // Puan Kutusu
+          e('div', { className: 'bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 flex flex-col items-center justify-center text-center' },
+            e('span', { className: 'text-xs font-bold uppercase tracking-wider text-slate-400 mb-2' }, 'KVKK Uyumluluk Puanı'),
+            e('div', { className: `w-32 h-32 rounded-full border-8 flex flex-col items-center justify-center ${getScoreBorder(kvkkReport.score)} shadow-inner` },
+              e('span', { className: 'text-4xl font-black tracking-tight' }, kvkkReport.score),
+              e('span', { className: 'text-xs font-bold text-slate-400' }, '/ 100')
+            ),
+            e('div', { className: 'mt-4' }, e(ComplianceBadge, { status: kvkkReport.status })),
+            e('span', { className: 'text-[11px] text-slate-400 mt-2 font-medium' },
+              'Son Denetim: ' + new Date(kvkkReport.timestamp).toLocaleString('tr-TR')
+            )
+          ),
+
+          // Özet ve Kategori Dağılımı
+          e('div', { className: 'bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 lg:col-span-2 flex flex-col justify-between' },
+            e('div', null,
+              e('div', { className: 'flex items-center justify-between mb-2' },
+                e('h3', { className: 'text-base font-bold text-slate-900' }, 'Mevzuat Uyumluluk Özeti'),
+                e('div', { className: 'flex items-center gap-1.5 text-xs font-semibold' },
+                  e('span', { className: 'px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200' }, `${kvkkReport.counts.compliant} Uyumlu`),
+                  kvkkReport.counts.partial > 0 ? e('span', { className: 'px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200' }, `${kvkkReport.counts.partial} Kısmen`) : null,
+                  kvkkReport.counts.nonCompliant > 0 ? e('span', { className: 'px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200' }, `${kvkkReport.counts.nonCompliant} Uyumsuz`) : null
+                )
+              ),
+              e('p', { className: 'text-xs text-slate-600 mb-4' }, kvkkReport.summary),
+              e('div', { className: 'grid grid-cols-1 sm:grid-cols-3 gap-3' },
+                e('div', { className: 'bg-slate-50 p-3 rounded-xl border border-slate-100' },
+                  e('span', { className: 'text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1' }, 'Çerez Rıza Yönetimi'),
+                  e('span', { className: 'text-sm font-bold text-slate-800' }, '4 / 4 Kriter'),
+                  e('p', { className: 'text-[11px] text-slate-500 mt-0.5' }, 'Banner, depolama, tercih değiştirme ve consent mode')
+                ),
+                e('div', { className: 'bg-slate-50 p-3 rounded-xl border border-slate-100' },
+                  e('span', { className: 'text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1' }, 'Çerez Güvenliği'),
+                  e('span', { className: 'text-sm font-bold text-slate-800' }, '3 / 3 Kriter'),
+                  e('p', { className: 'text-[11px] text-slate-500 mt-0.5' }, 'HttpOnly, Secure ve SameSite koruma parametreleri')
+                ),
+                e('div', { className: 'bg-slate-50 p-3 rounded-xl border border-slate-100' },
+                  e('span', { className: 'text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1' }, 'Aydınlatma & Şeffaflık'),
+                  e('span', { className: 'text-sm font-bold text-slate-800' }, '3 / 3 Kriter'),
+                  e('p', { className: 'text-[11px] text-slate-500 mt-0.5' }, 'Gizlilik, KVKK m.10/11 ve Çerez Politikası metinleri')
+                )
+              )
+            ),
+            e('div', { className: 'mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500' },
+              e('span', null, 'Yasal Dayanak: 6698 sayılı KVKK & 2002/58/EC e-Privacy Çerez Direktifi'),
+              e('span', { className: 'font-semibold text-emerald-700' }, '10 / 10 Madde Denetlendi')
+            )
+          )
+        ),
+
+        // 2. 10 Kriter Kartları
+        e('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-6' },
+          kvkkReport.items.map(item => e('div', {
+            key: item.id,
+            className: 'bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition flex flex-col justify-between'
+          },
+            e('div', null,
+              e('div', { className: 'flex items-start justify-between gap-3 mb-2.5' },
+                e('div', null,
+                  e('span', { className: 'inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 mb-1' }, item.category),
+                  e('h4', { className: 'font-bold text-slate-900 text-sm' }, item.title)
+                ),
+                e('div', { className: 'flex items-center gap-2' },
+                  e('span', { className: 'font-mono text-xs font-semibold text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200' }, `${item.score}/10`),
+                  e(ComplianceBadge, { status: item.status })
+                )
+              ),
+              e('p', { className: 'text-xs text-slate-600 leading-relaxed mb-3' }, item.details),
+              item.risk ? e('div', { className: 'bg-rose-50/80 border border-rose-200 text-rose-800 rounded-xl p-2.5 text-xs mb-2' },
+                e('span', { className: 'font-bold block mb-0.5' }, '⚠️ Tespit Edilen Risk:'),
+                e('span', null, item.risk)
+              ) : null,
+              item.recommendation ? e('div', { className: 'bg-amber-50/80 border border-amber-200 text-amber-800 rounded-xl p-2.5 text-xs' },
+                e('span', { className: 'font-bold block mb-0.5' }, '💡 Öneri & Çözüm:'),
+                e('span', null, item.recommendation)
+              ) : null
+            )
+          ))
+        ),
+
+        // 3. Öneriler Paneli
+        e('div', { className: 'bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80' },
+          e('div', { className: 'flex items-center gap-2.5 mb-3' },
+            e('span', { className: 'text-2xl' }, '💡'),
+            e('div', null,
+              e('h3', { className: 'font-bold text-slate-900 text-base' }, 'Eksik ve Riskli Alanlar İçin Öneriler'),
+              e('p', { className: 'text-xs text-slate-500' }, 'Sistemin hukuki ve teknik uyumluluğunu en üst seviyeye taşımak için tavsiyeler')
+            )
+          ),
+          e('div', { className: 'space-y-2.5 mt-4' },
+            (kvkkReport.recommendations || []).map((rec, idx) => e('div', {
+              key: idx,
+              className: 'flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700'
+            },
+              e('span', { className: 'flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-[11px]' }, idx + 1),
+              e('p', { className: 'leading-relaxed mt-0.5' }, rec)
+            ))
+          )
+        )
+      ) : e('div', { className: 'bg-white rounded-2xl p-12 text-center border border-slate-200' },
+        e('span', { className: 'text-4xl block mb-2' }, '🍪'),
+        e('h3', { className: 'text-base font-bold text-slate-900 mb-1' }, 'KVKK ve Çerez Uyumluluk Raporu'),
+        e('p', { className: 'text-xs text-slate-500 max-w-md mx-auto mb-4' },
+          'Sitenin çerez bannerı, rıza kaydı, Consent Mode kurgusu, çerez güvenlik bayrakları ve yasal metinleri henüz denetlenmedi.'
+        ),
+        e('button', {
+          type: 'button',
+          onClick: handleRunKvkkScan,
+          disabled: kvkkLoading,
+          className: 'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition cursor-pointer'
+        }, kvkkLoading ? 'Taranıyor...' : 'Taramayı Şimdi Başlat')
+      )) : null,
 
       // LOGS TAB: Son 30 Tarama
       activeTab === 'logs' ? e('div', { className: 'bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden' },
@@ -631,9 +808,9 @@
         )
       ) : null,
 
-      initialLoading && !scan ? e('div', { className: 'bg-white rounded-2xl p-12 text-center border border-slate-200' },
+      initialLoading && !scan && !kvkkReport ? e('div', { className: 'bg-white rounded-2xl p-12 text-center border border-slate-200' },
         e('div', { className: 'w-8 h-8 border-3 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-3' }),
-        e('p', { className: 'text-sm font-semibold text-slate-700' }, 'Sistem sağlığı durumu yükleniyor...')
+        e('p', { className: 'text-sm font-semibold text-slate-700' }, 'Sistem sağlığı ve KVKK durumu yükleniyor...')
       ) : null
     );
   }
