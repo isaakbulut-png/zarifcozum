@@ -15,7 +15,11 @@
     polygon: ['points'],
     text: ['x', 'y']
   };
-  const common = ['fill', 'stroke', 'stroke-width', 'opacity', 'font-size', 'text-anchor'];
+  const common = [
+    'fill', 'stroke', 'stroke-width', 'opacity', 'font-size', 'text-anchor',
+    'font-weight', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray',
+    'font-family', 'transform', 'dx', 'dy'
+  ];
   const numeric = /^-?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i;
   const color = /^(?:none|transparent|black|white|red|blue|green|gray|grey|orange|purple|yellow|#[0-9a-f]{3,4}|#[0-9a-f]{6}|#[0-9a-f]{8})$/i;
 
@@ -43,6 +47,18 @@
           if (!color.test(value)) invalid();
         } else if (key === 'text-anchor') {
           if (!['start', 'middle', 'end'].includes(value)) invalid();
+        } else if (key === 'font-weight') {
+          if (!/^(?:normal|bold|bolder|lighter|[1-9]00)$/i.test(value)) invalid();
+        } else if (key === 'stroke-linecap') {
+          if (!['butt', 'round', 'square'].includes(value)) invalid();
+        } else if (key === 'stroke-linejoin') {
+          if (!['miter', 'round', 'bevel', 'arcs', 'miter-clip'].includes(value)) invalid();
+        } else if (key === 'stroke-dasharray') {
+          if (!/^[0-9\s,.-]+$/.test(value)) invalid();
+        } else if (key === 'font-family') {
+          if (!/^[a-zA-Z0-9\s,._-]+$/.test(value)) invalid();
+        } else if (key === 'transform') {
+          if (!/^[a-zA-Z0-9\s(),._+-]+$/.test(value)) invalid();
         } else if (!numeric.test(value) || !Number.isFinite(Number(value)) || Math.abs(Number(value)) > 100000) invalid();
         attrs[key] = value;
       }

@@ -2188,49 +2188,7 @@ body.teacher-menu-open {
       quiz.draftId = res.draftId || (quiz && quiz.draftId);
       if (res.draftId) localStorage.setItem('zarif_last_ai_draft_id', res.draftId);
       aiDraft = quiz;
-      $('aiQuestionList').innerHTML = `
-        <div class="field">
-          <label for="aiTestTitle">Test başlığı</label>
-          <input id="aiTestTitle" maxlength="150" value="${esc(quiz.topic + ' - Test 1')}" required>
-        </div>
-        <p class="hint">Kontrol ettiğiniz soruları onaylayın; seçilenler tek bir test olarak yayınlanır.</p>
-        ${quiz.questions.map((question, index) => `
-        <article class="question-card" data-ai-question="${index}">
-          <div class="question-top">
-            <strong>Soru ${index + 1}</strong>
-            <label><input type="checkbox" data-ai-approved="${index}"> Soruyu onayla</label>
-          </div>
-          <p>${window.zarifMathText.format(question.text)}</p>
-          <div class="ai-question-svg-mount" data-ai-svg="${index}"></div>
-          <div class="question-options">
-            ${['A', 'B', 'C', 'D'].map(letter => `
-              <p><strong>${letter})</strong> ${window.zarifMathText.format(question.options[letter])}</p>
-            `).join('')}
-          </div>
-          <p><strong>Doğru cevap:</strong> ${esc(question.answer)}</p>
-          <p><strong>Açıklama:</strong> ${window.zarifMathText.format(question.explanation || 'Açıklama bulunmuyor.')}</p>
-          <div class="field"><label for="ai-outcome-${index}">MEB kazanım kodu (isteğe bağlı)</label>
-            <input id="ai-outcome-${index}" data-ai-outcome="${index}" value="${esc(question.outcomeCode || '')}" placeholder="MAT.6.1.1">
-          </div>
-        </article>`).join('')}
-        <div class="button-row"><button class="btn" type="button" data-ai-publish>Onaylı soruları test olarak yayınla</button></div>
-        <p class="status ai-publish-status" role="status" aria-live="polite"></p>`;
-      if (typeof window !== 'undefined' && window.zarifSafeSvg) {
-        quiz.questions.forEach((question, index) => {
-          if (question.svg && typeof question.svg === 'string' && question.svg.trim()) {
-            const mount = typeof $('aiQuestionList').querySelector === 'function' &&
-              $('aiQuestionList').querySelector(`[data-ai-svg="${index}"]`);
-            if (mount && typeof mount.replaceChildren === 'function') {
-              try {
-                const parsed = window.zarifSafeSvg.parse(question.svg.trim());
-                window.zarifSafeSvg.render(mount, parsed);
-              } catch (err) {
-                console.warn('Soru SVG render hatası:', err);
-              }
-            }
-          }
-        });
-      }
+      renderAiQuestionCards(quiz);
       durumYaz('aiQuestionStatus', `${quiz.soruSayisi} soru hazır. Yayınlamadan önce her soruyu kontrol edin.`, 'ok');
     } catch (error) {
       durumYaz('aiQuestionStatus', 'Sorular üretilemedi: ' + error.message, 'error');
@@ -2351,6 +2309,85 @@ body.teacher-menu-open {
       $('generateAiQuestions').disabled = false;
     }
   });
+
+
+
+  // Helper to render AI questions list with F5 recovery & action buttons
+  function renderAiQuestionCards(quiz, isRestored = false) {
+    const container = $('aiQuestionList');
+    if (!container) return;
+
+    container.innerHTML = `
+      <div style="background:#064e3b;color:#34d399;padding:10px 14px;border-radius:8px;font-size:0.85rem;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <span>💾 <strong>Otomatik Taslak Kaydı Aktif:</strong> Sayfa yenilense de sorular silinmez. (Taslak ID: ${quiz.draftId || 'Kayıtlı'})${isRestored ? ' [Geri Yüklendi]' : ''}</span>
+        <span style="font-size:0.75rem;background:#047857;color:#fff;padding:2px 8px;border-radius:4px;">Pinecone & Semantik Analiz Tamamlandı</span>
+      </div>
+      <div class="field">
+        <label for="aiTestTitle">Test başlığı</label>
+        <input id="aiTestTitle" maxlength="150" value="${esc(quiz.topic + ' - Test 1')}" required>
+      </div>
+      <p class="hint">Kontrol ettiğiniz soruları onaylayın; onaylananları soru bankasına aktarabilir, test olarak yayınlayabilir veya PDF/DOCX indirebilirsiniz.</p>
+      ${quiz.questions.map((question, index) => `
+      <article class="question-card" data-ai-question="${index}">
+        <div class="question-top">
+          <strong>Soru ${index + 1}</strong>
+          <label><input type="checkbox" data-ai-approved="${index}" checked> Soruyu onayla</label>
+        </div>
+        <p>${window.zarifMathText ? window.zarifMathText.format(question.text) : esc(question.text)}</p>
+        <div class="ai-question-svg-mount" data-ai-svg="${index}"></div>
+        <div class="question-options">
+          ${['A', 'B', 'C', 'D'].map(letter => `
+            <p><strong>${letter})</strong> ${window.zarifMathText && question.options ? window.zarifMathText.format(question.options[letter] || '') : esc((question.options && question.options[letter]) || '')}</p>
+          `).join('')}
+        </div>
+        <p><strong>Doğru cevap:</strong> ${esc(question.answer)}</p>
+        <p><strong>Açıklama:</strong> ${window.zarifMathText ? window.zarifMathText.format(question.explanation || 'Açıklama bulunmuyor.') : esc(question.explanation || '')}</p>
+        <div class="field"><label for="ai-outcome-${index}">MEB kazanım kodu</label>
+          <input id="ai-outcome-${index}" data-ai-outcome="${index}" value="${esc(question.outcomeCode || '')}" placeholder="MAT.6.1.1">
+        </div>
+      </article>`).join('')}
+      <div class="button-row" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+        <button class="btn" type="button" data-ai-publish>Onaylı soruları test olarak yayınla</button>
+        <button class="btn secondary" type="button" data-ai-transfer-bank style="background:#4338ca;color:#fff;">📚 Soru Bankasına Aktar</button>
+        <button class="btn light" type="button" data-ai-export-pdf>📥 PDF İndir</button>
+        <button class="btn light" type="button" data-ai-export-docx>📄 DOCX İndir</button>
+      </div>
+      <p class="status ai-publish-status" role="status" aria-live="polite" style="margin-top:8px;"></p>`;
+
+    if (typeof window !== 'undefined') {
+      quiz.questions.forEach((question, index) => {
+        if (question.svg && typeof question.svg === 'string' && question.svg.trim()) {
+          const mount = container.querySelector(`[data-ai-svg="${index}"]`);
+          if (mount) {
+            let rendered = false;
+            if (window.zarifSafeSvg) {
+              try {
+                const parsed = window.zarifSafeSvg.parse(question.svg.trim());
+                window.zarifSafeSvg.render(mount, parsed);
+                rendered = true;
+              } catch (err) {
+                console.warn('Soru SVG render uyarısı, DOMParser deneniyor:', err);
+              }
+            }
+            if (!rendered) {
+              try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(question.svg.trim(), 'image/svg+xml');
+                const svgEl = doc.querySelector('svg');
+                if (svgEl) {
+                  mount.replaceChildren(svgEl);
+                } else {
+                  mount.innerHTML = question.svg.trim();
+                }
+              } catch (e2) {
+                console.error('SVG mount hatası:', e2);
+              }
+            }
+          }
+        }
+      });
+    }
+  }
 
   $('announcementForm').addEventListener('submit', async event => {
     event.preventDefault();
@@ -2989,65 +3026,6 @@ body.teacher-menu-open {
       }
     } catch (e) {
       console.warn('Önceki taslak geri yüklenemedi:', e.message);
-    }
-  }
-
-  // Helper to render AI questions list with F5 recovery & action buttons
-  function renderAiQuestionCards(quiz, isRestored = false) {
-    const container = $('aiQuestionList');
-    if (!container) return;
-
-    container.innerHTML = `
-      <div style="background:#064e3b;color:#34d399;padding:10px 14px;border-radius:8px;font-size:0.85rem;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-        <span>💾 <strong>Otomatik Taslak Kaydı Aktif:</strong> Sayfa yenilense de sorular silinmez. (Taslak ID: ${quiz.draftId || 'Kayıtlı'})${isRestored ? ' [Geri Yüklendi]' : ''}</span>
-        <span style="font-size:0.75rem;background:#047857;color:#fff;padding:2px 8px;border-radius:4px;">Pinecone & Semantik Analiz Tamamlandı</span>
-      </div>
-      <div class="field">
-        <label for="aiTestTitle">Test başlığı</label>
-        <input id="aiTestTitle" maxlength="150" value="${esc(quiz.topic + ' - Test 1')}" required>
-      </div>
-      <p class="hint">Kontrol ettiğiniz soruları onaylayın; onaylananları soru bankasına aktarabilir, test olarak yayınlayabilir veya PDF/DOCX indirebilirsiniz.</p>
-      ${quiz.questions.map((question, index) => `
-      <article class="question-card" data-ai-question="${index}">
-        <div class="question-top">
-          <strong>Soru ${index + 1}</strong>
-          <label><input type="checkbox" data-ai-approved="${index}" checked> Soruyu onayla</label>
-        </div>
-        <p>${window.zarifMathText ? window.zarifMathText.format(question.text) : esc(question.text)}</p>
-        <div class="ai-question-svg-mount" data-ai-svg="${index}"></div>
-        <div class="question-options">
-          ${['A', 'B', 'C', 'D'].map(letter => `
-            <p><strong>${letter})</strong> ${window.zarifMathText && question.options ? window.zarifMathText.format(question.options[letter] || '') : esc((question.options && question.options[letter]) || '')}</p>
-          `).join('')}
-        </div>
-        <p><strong>Doğru cevap:</strong> ${esc(question.answer)}</p>
-        <p><strong>Açıklama:</strong> ${window.zarifMathText ? window.zarifMathText.format(question.explanation || 'Açıklama bulunmuyor.') : esc(question.explanation || '')}</p>
-        <div class="field"><label for="ai-outcome-${index}">MEB kazanım kodu</label>
-          <input id="ai-outcome-${index}" data-ai-outcome="${index}" value="${esc(question.outcomeCode || '')}" placeholder="MAT.6.1.1">
-        </div>
-      </article>`).join('')}
-      <div class="button-row" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
-        <button class="btn" type="button" data-ai-publish>Onaylı soruları test olarak yayınla</button>
-        <button class="btn secondary" type="button" data-ai-transfer-bank style="background:#4338ca;color:#fff;">📚 Soru Bankasına Aktar</button>
-        <button class="btn light" type="button" data-ai-export-pdf>📥 PDF İndir</button>
-        <button class="btn light" type="button" data-ai-export-docx>📄 DOCX İndir</button>
-      </div>
-      <p class="status ai-publish-status" role="status" aria-live="polite" style="margin-top:8px;"></p>`;
-
-    if (typeof window !== 'undefined' && window.zarifSafeSvg) {
-      quiz.questions.forEach((question, index) => {
-        if (question.svg && typeof question.svg === 'string' && question.svg.trim()) {
-          const mount = container.querySelector(`[data-ai-svg="${index}"]`);
-          if (mount) {
-            try {
-              const parsed = window.zarifSafeSvg.parse(question.svg.trim());
-              window.zarifSafeSvg.render(mount, parsed);
-            } catch (err) {
-              console.warn('Soru SVG render hatası:', err);
-            }
-          }
-        }
-      });
     }
   }
 

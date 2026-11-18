@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const draftQuestionItemSchema = new mongoose.Schema({
   text: { type: String, required: true, maxlength: 4000 },

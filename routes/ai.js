@@ -74,13 +74,157 @@ function isValidQuestion(question) {
       (typeof question.svg === 'object' && !Array.isArray(question.svg)));
 }
 
-function prepareAIQuestion(question) {
+function generatePedagogicalSvg(questionText = '', topic = '', grade = 5) {
+  const text = String(questionText || '');
+  const lowerText = text.toLowerCase();
+  const lowerTopic = String(topic || '').toLowerCase();
+
+  const isVisualTopic = lowerTopic.includes('geometri') ||
+    lowerTopic.includes('üçgen') ||
+    lowerTopic.includes('dörtgen') ||
+    lowerTopic.includes('açı') ||
+    lowerTopic.includes('şekil') ||
+    lowerTopic.includes('alan') ||
+    lowerTopic.includes('çevre') ||
+    lowerTopic.includes('doğru') ||
+    lowerTopic.includes('kesir') ||
+    lowerTopic.includes('veri');
+
+  const textMentionsShape = /şekil|grafik|üçgen|çadır|açı|kenar|kare|dikdörtgen|çember|daire|doğru|tablo/i.test(lowerText);
+
+  if (!isVisualTopic && !textMentionsShape) return null;
+
+  // 1. Üçgen / Çadır sorusu
+  if (lowerText.includes('üçgen') || lowerText.includes('çadır') || lowerTopic.includes('üçgen')) {
+    let angleA = '40°';
+    let angleB = '70°';
+    let angleC = '70°';
+
+    const numbers = text.match(/\b([1-9]\d{0,2})°?\b/g);
+    if (numbers && numbers.length >= 2) {
+      angleA = numbers[0].replace('°', '') + '°';
+      angleB = numbers[1].replace('°', '') + '°';
+      const aVal = parseInt(angleA);
+      const bVal = parseInt(angleB);
+      if (aVal + bVal < 180) {
+        angleC = (180 - aVal - bVal) + '°';
+      }
+    }
+
+    const hasTent = lowerText.includes('çadır');
+    const subtitle = hasTent ? 'Çadır Ön Yüzeyi Modeli (ABC Üçgeni)' : 'Geometrik Çizim: ABC Üçgeni';
+
+    return `<svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="280" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <polygon points="250,55 90,225 410,225" fill="#eff6ff" stroke="#2563eb" stroke-width="3" stroke-linejoin="round"/>
+  ${hasTent ? '<line x1="250" y1="55" x2="250" y2="225" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4"/>' : ''}
+  <circle cx="250" cy="55" r="5" fill="#1e293b"/>
+  <circle cx="90" cy="225" r="5" fill="#1e293b"/>
+  <circle cx="410" cy="225" r="5" fill="#1e293b"/>
+  <path d="M 235,75 A 25 25 0 0 0 265,75" fill="none" stroke="#dc2626" stroke-width="2"/>
+  <path d="M 120,225 A 30 30 0 0 0 108,198" fill="none" stroke="#2563eb" stroke-width="2"/>
+  <path d="M 380,225 A 30 30 0 0 1 392,198" fill="none" stroke="#16a34a" stroke-width="2"/>
+  <text x="250" y="40" font-size="16" font-weight="bold" fill="#1e293b" text-anchor="middle">A</text>
+  <text x="70" y="235" font-size="16" font-weight="bold" fill="#1e293b" text-anchor="middle">B</text>
+  <text x="430" y="235" font-size="16" font-weight="bold" fill="#1e293b" text-anchor="middle">C</text>
+  <text x="250" y="95" font-size="13" font-weight="bold" fill="#dc2626" text-anchor="middle">${angleA}</text>
+  <text x="135" y="210" font-size="13" font-weight="bold" fill="#2563eb" text-anchor="middle">${angleB}</text>
+  <text x="365" y="210" font-size="13" font-weight="bold" fill="#16a34a" text-anchor="middle">${angleC}</text>
+  <text x="250" y="260" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">${subtitle}</text>
+</svg>`.trim();
+  }
+
+  // 2. Dörtgen / Dikdörtgen / Kare
+  if (lowerText.includes('dikdörtgen') || lowerText.includes('kare') || lowerText.includes('dörtgen')) {
+    const isSquare = lowerText.includes('kare');
+    const width = isSquare ? 180 : 260;
+    const height = 150;
+    const startX = 250 - (width / 2);
+    const startY = 55;
+
+    return `<svg viewBox="0 0 500 260" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="260" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <rect x="${startX}" y="${startY}" width="${width}" height="${height}" rx="4" fill="#f0fdf4" stroke="#16a34a" stroke-width="3"/>
+  <circle cx="${startX}" cy="${startY}" r="5" fill="#1e293b"/>
+  <circle cx="${startX + width}" cy="${startY}" r="5" fill="#1e293b"/>
+  <circle cx="${startX + width}" cy="${startY + height}" r="5" fill="#1e293b"/>
+  <circle cx="${startX}" cy="${startY + height}" r="5" fill="#1e293b"/>
+  <text x="${startX - 15}" y="${startY - 5}" font-size="15" font-weight="bold" fill="#1e293b">A</text>
+  <text x="${startX + width + 10}" y="${startY - 5}" font-size="15" font-weight="bold" fill="#1e293b">B</text>
+  <text x="${startX + width + 10}" y="${startY + height + 15}" font-size="15" font-weight="bold" fill="#1e293b">C</text>
+  <text x="${startX - 15}" y="${startY + height + 15}" font-size="15" font-weight="bold" fill="#1e293b">D</text>
+  <text x="250" y="240" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">${isSquare ? 'Kare Şekli (ABCD)' : 'Dikdörtgen Şekli (ABCD)'}</text>
+</svg>`.trim();
+  }
+
+  // 3. Sayı Doğrusu
+  if (lowerText.includes('sayı doğrusu') || lowerText.includes('sayı doğrusunda')) {
+    return `<svg viewBox="0 0 500 140" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="140" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <line x1="50" y1="70" x2="450" y2="70" stroke="#1e293b" stroke-width="3"/>
+  <polygon points="45,70 55,64 55,76" fill="#1e293b"/>
+  <polygon points="455,70 445,64 445,76" fill="#1e293b"/>
+  <line x1="100" y1="60" x2="100" y2="80" stroke="#1e293b" stroke-width="2"/>
+  <line x1="180" y1="60" x2="180" y2="80" stroke="#1e293b" stroke-width="2"/>
+  <line x1="260" y1="60" x2="260" y2="80" stroke="#1e293b" stroke-width="2"/>
+  <line x1="340" y1="60" x2="340" y2="80" stroke="#1e293b" stroke-width="2"/>
+  <line x1="420" y1="60" x2="420" y2="80" stroke="#1e293b" stroke-width="2"/>
+  <circle cx="260" cy="70" r="6" fill="#dc2626"/>
+  <text x="100" y="102" font-size="14" fill="#334155" text-anchor="middle">0</text>
+  <text x="180" y="102" font-size="14" fill="#334155" text-anchor="middle">1</text>
+  <text x="260" y="102" font-size="14" font-weight="bold" fill="#dc2626" text-anchor="middle">2 (A)</text>
+  <text x="340" y="102" font-size="14" fill="#334155" text-anchor="middle">3</text>
+  <text x="420" y="102" font-size="14" fill="#334155" text-anchor="middle">4</text>
+  <text x="250" y="32" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">Sayı Doğrusu Modeli</text>
+</svg>`.trim();
+  }
+
+  // 4. Çember / Daire
+  if (lowerText.includes('çember') || lowerText.includes('daire')) {
+    return `<svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="240" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <circle cx="250" cy="115" r="70" fill="#fef3c7" stroke="#d97706" stroke-width="3"/>
+  <circle cx="250" cy="115" r="4" fill="#1e293b"/>
+  <line x1="250" y1="115" x2="320" y2="115" stroke="#dc2626" stroke-width="2"/>
+  <text x="240" y="110" font-size="14" font-weight="bold" fill="#1e293b">O</text>
+  <text x="285" y="105" font-size="13" font-weight="bold" fill="#dc2626">r</text>
+  <text x="250" y="215" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">O Merkezli Çember / Daire Modeli</text>
+</svg>`.trim();
+  }
+
+  // 5. Genel Geometrik Şekiller fallback
+  if (isVisualTopic) {
+    return `<svg viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="220" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <polygon points="120,60 60,160 180,160" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <rect x="220" y="70" width="90" height="90" rx="4" fill="#f0fdf4" stroke="#16a34a" stroke-width="2.5"/>
+  <circle cx="400" cy="115" r="45" fill="#fef3c7" stroke="#d97706" stroke-width="2.5"/>
+  <text x="120" y="185" font-size="13" font-weight="bold" fill="#2563eb" text-anchor="middle">Üçgen</text>
+  <text x="265" y="185" font-size="13" font-weight="bold" fill="#16a34a" text-anchor="middle">Kare</text>
+  <text x="400" y="185" font-size="13" font-weight="bold" fill="#d97706" text-anchor="middle">Çember</text>
+  <text x="250" y="32" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">Geometrik Şekiller Görseli</text>
+</svg>`.trim();
+  }
+
+  return null;
+}
+
+function prepareAIQuestion(question, context = {}) {
   let cleanSvg;
   if (typeof question.svg === 'string' && question.svg.trim()) {
     cleanSvg = question.svg.trim();
   } else if (question.svg && typeof question.svg === 'object') {
     cleanSvg = safeSvg.validate(question.svg);
   }
+
+  // Otomatik görsel desteği: Eğer soru metni şekil/geometri içeriyorsa ve SVG boşsa fallback üret
+  if (!cleanSvg) {
+    const fallbackSvg = generatePedagogicalSvg(question.text, context.topic, context.grade);
+    if (fallbackSvg) {
+      cleanSvg = fallbackSvg;
+    }
+  }
+
   const { svg, ...rest } = question;
   const base = prepareQuestion(cleanSvg && typeof cleanSvg === 'object' ? { ...rest, svg: cleanSvg } : rest);
   return {
@@ -149,11 +293,14 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       'Türkçe eğitim platformu için özgün, pedagojik olarak doğru, yeni nesil matematik soruları hazırla.',
       `Sınıf düzeyi: ${grade}. sınıf (MEB Türkiye Yüzyılı Maarif Modeli). Konu: ${topic}. Zorluk: ${difficulty}. Tam olarak ${count} soru üret.`,
       `Sorular yalnızca ${grade}. sınıf kazanımları ve ön koşulları içinde kalsın; üst sınıf konu veya formüllerini kullanma.`,
-      'GÖRSEL VE ŞEMA KURALI: Basamak ve bölük tabloları, abaküs, sayı doğrusu, modelleme, geometrik şekiller, kesir modelleri, veri tabloları veya şema içeren yeni nesil sorularda "svg" alanına pedagojik, canlı renkli ve net bir SVG kodu ekle. Şema gerektirmeyen sorularda "svg" alanını boş string ("") yap.',
+      'GÖRSEL VE ŞEMA KURALI (ZORUNLU):',
+      '- "Geometrik Şekiller", "Üçgenler", "Dörtgenler", "Açılar", "Alan", "Çevre", "Sayı Doğrusu", "Veri Analizi / Grafikler", "Kesirler", "Doğal Sayılar (Basamak Tablosu / Abaküs)" gibi konularda veya sorunun metninde "Şekildeki...", "Yukarıdaki şemada...", "Verilen şekilde...", "grafikte", "tabloda" gibi ifadeler varsa "svg" ALANININ RENKLİ VE DOLU OLMASI KESİNLİKLE ZORUNLUDUR.',
+      '- Soruda "Şekildeki ABC üçgeni..." yazıp "svg" alanını boş bırakmak KESİNLİKLE YASAKTIR. Soruda bahsedilen şekil, üçgen, açı, çadır, çokgen veya şema mutlaka "svg" alanında görselleştirilmelidir.',
+      '- SVG içinde köşe harfleri (A, B, C), kenar uzunlukları, verilen açı dereceleri (örn: 40°, 70°), tepe noktası net ve okunaklı <text> etiketleriyle yerleştirilmelidir.',
       'SVG KURALLARI (ZORUNLU):',
-      '- Kök etiket: <svg viewBox="0 0 W H" xmlns="http://www.w3.org/2000/svg"> (örn: viewBox="0 0 520 220").',
+      '- Kök etiket: <svg viewBox="0 0 W H" xmlns="http://www.w3.org/2000/svg"> (örn: viewBox="0 0 500 260").',
       '- Yalnızca şu güvenli etiketleri kullan: <svg>, <g>, <rect>, <circle>, <ellipse>, <line>, <polyline>, <polygon>, <path>, <text>. Asla <style>, <defs>, <linearGradient>, <tspan>, <image> veya HTML etiketleri kullanma.',
-      '- Sayısal özniteliklere (width, height, x, y, cx, cy, r, rx, ry, x1, y1, x2, y2, stroke-width, font-size) ASLA "px" veya birim yazma; yalnızca saf sayı yaz (örn: width="520", font-size="14", stroke-width="2").',
+      '- Sayısal özniteliklere (width, height, x, y, cx, cy, r, rx, ry, x1, y1, x2, y2, stroke-width, font-size) ASLA "px" veya birim yazma; yalnızca saf sayı yaz (örn: width="500", font-size="14", stroke-width="2").',
       '- Renkler (fill, stroke): Canlı ve modern renkler kullan (örn: mavi #2563eb, yeşil #16a34a, turuncu #ea580c, sarı #f59e0b, mor #7c3aed, kırmızı #dc2626, nötr zemin #f8fafc, çerçeve #cbd5e1). Sadece hex (#...) veya temel isim (none, black, white, red, blue, green, gray, orange, purple, yellow) kabul edilir.',
       '- <text> etiketi içine metni doğrudan yaz (örn: <text x="100" y="50" fill="#1e293b" font-size="14" text-anchor="middle">Milyonlar Bölüğü</text>).',
       'Her soru dört seçenekli (A, B, C, D) olsun ve yalnızca bir doğru cevap içersin.',
@@ -245,7 +392,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
 
     let preparedQuestions;
     try {
-      preparedQuestions = result.questions.map(prepareAIQuestion);
+      preparedQuestions = result.questions.map(q => prepareAIQuestion(q, { topic, grade }));
     } catch (error) {
       if (!(error instanceof TypeError)) throw error;
       return res.status(502).json({ mesaj: 'Üretilen sorular doğrulanamadı. Lütfen yeniden deneyin.' });
@@ -358,7 +505,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
 
     let preparedQuestions;
     try {
-      preparedQuestions = questions.map(prepareAIQuestion);
+      preparedQuestions = questions.map(q => prepareAIQuestion(q, { topic, grade }));
     } catch (error) {
       if (error instanceof TypeError) return res.status(400).json({ mesaj: error.message });
       throw error;
@@ -523,14 +670,14 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     }
   });
 
-  // Taslağı Doğrudan PDF veya DOCX Olarak Dışa Aktar
-  router.post('/questions/drafts/:id/export', requireRole('teacher'), async (req, res) => {
+  // Taslağı Doğrudan PDF veya DOCX Olarak Dışa Aktar (GET ve POST destekler)
+  router.route('/questions/drafts/:id/export').all(requireRole('teacher'), async (req, res) => {
     try {
       if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz taslak ID.' });
       const draft = await AiQuestionDraft.findById(req.params.id).lean();
       if (!draft) return res.status(404).json({ mesaj: 'Taslak bulunamadı.' });
 
-      const format = String(req.body?.format || 'pdf').toLowerCase();
+      const format = String(req.query?.format || req.body?.format || 'pdf').toLowerCase();
       const fileBuffer = exportQuestions(draft.questions, {
         title: draft.title,
         grade: draft.grade,
