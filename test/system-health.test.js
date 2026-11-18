@@ -1,3 +1,4 @@
+﻿require('dotenv').config();
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const express = require('express');
@@ -472,5 +473,97 @@ test('checkDatabases marks postgres as not_used when POSTGRES_URL is not set and
     if (originalPg) process.env.POSTGRES_URL = originalPg;
     if (originalDbUrl) process.env.DATABASE_URL = originalDbUrl;
     if (originalPgConn) process.env.PG_CONNECTION_STRING = originalPgConn;
+  }
+});
+
+test('inspectCloudinaryConfig correctly identifies all configuration modes and reports missing variables', () => {
+  const { inspectCloudinaryConfig } = healthChecker;
+  assert.equal(typeof inspectCloudinaryConfig, 'function');
+
+  // 1. URL mode
+  const urlRes = inspectCloudinaryConfig({
+    CLOUDINARY_URL: 'cloudinary://312528748138653:77Mx6uFiQMqEzj0Y9gMWTCutDdQ@xznzgjxn'
+  });
+  assert.equal(urlRes.isConfigured, true);
+  assert.equal(urlRes.configMode, 'url');
+  assert.equal(urlRes.hasUrl, true);
+  assert.equal(urlRes.effectiveCloudName, 'xznzgjxn');
+  assert.equal(urlRes.effectiveApiKey, '312528748138653');
+  assert.equal(urlRes.missingVariables.length, 0);
+
+  // 2. Individual triad mode
+  const triadRes = inspectCloudinaryConfig({
+    CLOUDINARY_CLOUD_NAME: 'testcloud',
+    CLOUDINARY_API_KEY: 'testkey123',
+    CLOUDINARY_API_SECRET: 'testsecret456'
+  });
+  assert.equal(triadRes.isConfigured, true);
+  assert.equal(triadRes.configMode, 'individual');
+  assert.equal(triadRes.hasUrl, false);
+  assert.equal(triadRes.effectiveCloudName, 'testcloud');
+  assert.equal(triadRes.effectiveApiKey, 'testkey123');
+  assert.equal(triadRes.missingVariables.length, 0);
+
+  // 3. Partial mode with missing variables
+  const partialRes = inspectCloudinaryConfig({
+    CLOUDINARY_CLOUD_NAME: 'testcloud'
+  });
+  assert.equal(partialRes.isConfigured, false);
+  assert.equal(partialRes.configMode, 'partial');
+  assert.ok(partialRes.missingVariables.includes('CLOUDINARY_API_KEY'));
+  assert.ok(partialRes.missingVariables.includes('CLOUDINARY_API_SECRET'));
+  assert.ok(partialRes.validationError.includes('CLOUDINARY_API_KEY'));
+
+  // 4. None mode
+  const noneRes = inspectCloudinaryConfig({});
+  assert.equal(noneRes.isConfigured, false);
+  assert.equal(noneRes.configMode, 'none');
+  assert.equal(noneRes.missingVariables.length, 3);
+  assert.ok(noneRes.validationError.includes('CLOUDINARY_URL'));
+
+  // 5. Malformed URL
+  const malformedRes = inspectCloudinaryConfig({
+    CLOUDINARY_URL: 'https://cloudinary.com/console'
+  });
+  assert.equal(malformedRes.isConfigured, false);
+  assert.ok(malformedRes.validationError.includes('cloudinary://'));
+});
+
+test('checkCloudinary returns detailed error when unconfigured and runs live test when configured', async () => {
+  const originalUrl = process.env.CLOUDINARY_URL;
+  const originalName = process.env.CLOUDINARY_CLOUD_NAME;
+  const originalKey = process.env.CLOUDINARY_API_KEY;
+  const originalSec = process.env.CLOUDINARY_API_SECRET;
+
+  try {
+    // 1. Test when completely unconfigured
+    delete process.env.CLOUDINARY_URL;
+    delete process.env.CLOUDINARY_CLOUD_NAME;
+    delete process.env.CLOUDINARY_API_KEY;
+    delete process.env.CLOUDINARY_API_SECRET;
+
+    const unconfRes = await healthChecker.checkCloudinary();
+    assert.equal(unconfRes.status, 'error');
+    assert.equal(unconfRes.configMode, 'none');
+    assert.ok(unconfRes.details.includes('CLOUDINARY_URL'));
+    assert.ok(unconfRes.lastError);
+    assert.equal(unconfRes.envStatus.hasUrl, false);
+    assert.equal(unconfRes.envStatus.missingVariables.length, 3);
+
+    // 2. Test when configured with live credentials
+    process.env.CLOUDINARY_URL = originalUrl || 'cloudinary://312528748138653:77Mx6uFiQMqEzj0Y9gMWTCutDdQ@xznzgjxn';
+
+    const healthyRes = await healthChecker.checkCloudinary();
+    assert.equal(healthyRes.status, 'healthy');
+    assert.ok(healthyRes.durationMs > 0);
+    assert.ok(healthyRes.url.startsWith('http'));
+    assert.equal(healthyRes.lastError, null);
+    assert.ok(healthyRes.quota);
+    assert.equal(healthyRes.quota.cloudName, 'xznzgjxn');
+  } finally {
+    if (originalUrl) process.env.CLOUDINARY_URL = originalUrl;
+    if (originalName) process.env.CLOUDINARY_CLOUD_NAME = originalName;
+    if (originalKey) process.env.CLOUDINARY_API_KEY = originalKey;
+    if (originalSec) process.env.CLOUDINARY_API_SECRET = originalSec;
   }
 });

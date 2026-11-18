@@ -442,15 +442,49 @@
                 e('span', { className: 'text-xl' }, '🖼️'),
                 e('div', null,
                   e('h4', { className: 'font-bold text-slate-900 text-sm' }, 'Cloudinary Medya API'),
-                  e('span', { className: 'text-[11px] text-slate-400' }, 'Görsel Yönetim Servisi')
+                  e('span', { className: 'text-[11px] text-slate-400' },
+                    scan.checks.cloudinary.configMode === 'url' ? 'Bağlantı: CLOUDINARY_URL' :
+                    (scan.checks.cloudinary.configMode === 'individual' ? 'Bağlantı: Ayrık Değişkenler' : 'Görsel Yönetim Servisi')
+                  )
                 )
               ),
               e(StatusBadge, { status: scan.checks.cloudinary.status })
             ),
-            e('p', { className: 'text-xs text-slate-600 mb-3' }, scan.checks.cloudinary.details),
+            e('p', { className: 'text-xs text-slate-600 mb-3 leading-relaxed' }, scan.checks.cloudinary.details),
+            // Ortam Değişkenleri Teşhis Kartı
+            scan.checks.cloudinary.envStatus ? e('div', { className: 'bg-slate-50 border border-slate-100 p-2.5 rounded-xl mb-3 space-y-1.5 text-[11px]' },
+              e('div', { className: 'flex items-center justify-between text-slate-500 font-medium' },
+                e('span', null, 'Ortam Değişkenleri:'),
+                e('span', { className: 'font-mono text-slate-700 font-semibold' },
+                  scan.checks.cloudinary.configMode === 'url' ? '⚡ URL Modu' :
+                  (scan.checks.cloudinary.configMode === 'individual' ? '🧩 Ayrık Değişken Modu' : '⚠️ Yapılandırma Eksik')
+                )
+              ),
+              e('div', { className: 'grid grid-cols-2 gap-1 font-mono text-[10px]' },
+                [
+                  { name: 'CLOUDINARY_URL', active: scan.checks.cloudinary.envStatus.hasUrl },
+                  { name: 'CLOUD_NAME', active: scan.checks.cloudinary.envStatus.hasCloudName },
+                  { name: 'API_KEY', active: scan.checks.cloudinary.envStatus.hasApiKey },
+                  { name: 'API_SECRET', active: scan.checks.cloudinary.envStatus.hasApiSecret }
+                ].map((item, idx) => e('div', { key: idx, className: 'flex items-center justify-between p-1 rounded ' + (item.active ? 'bg-emerald-50/80 text-emerald-800' : 'bg-slate-100/80 text-slate-500') },
+                  e('span', null, item.name),
+                  e('span', { className: 'font-bold' }, item.active ? '✓' : '✗')
+                ))
+              ),
+              scan.checks.cloudinary.envStatus.missingVariables && scan.checks.cloudinary.envStatus.missingVariables.length > 0 ?
+                e('div', { className: 'text-rose-700 bg-rose-50 border border-rose-200/60 p-1.5 rounded text-[10px] mt-1' },
+                  'Eksik Değişkenler: ' + scan.checks.cloudinary.envStatus.missingVariables.join(', ')
+                ) : null
+            ) : null,
+            scan.checks.cloudinary.quota && scan.checks.cloudinary.quota.rateLimitRemaining !== undefined ? e('div', { className: 'bg-slate-50 p-2 rounded-lg text-[11px] text-slate-600 mb-3 flex justify-between items-center' },
+              e('span', { className: 'text-slate-400' }, 'API İstek Kotası:'),
+              e('span', { className: 'font-mono font-semibold text-slate-700' },
+                scan.checks.cloudinary.quota.rateLimitRemaining + ' / ' + scan.checks.cloudinary.quota.rateLimitAllowed + ' istek'
+              )
+            ) : null,
             e('div', { className: 'flex items-center justify-between text-xs font-semibold text-slate-500 pt-3 border-t border-slate-100' },
               e('span', null, 'Yükleme & Silme:'),
-              e('span', { className: 'text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded' }, `${scan.checks.cloudinary.durationMs} ms`)
+              e('span', { className: 'text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded' }, scan.checks.cloudinary.durationMs + ' ms')
             ),
             e(ServiceMeta, { item: scan.checks.cloudinary })
           ),

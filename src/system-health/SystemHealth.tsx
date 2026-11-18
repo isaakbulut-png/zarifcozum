@@ -37,8 +37,20 @@ export interface R2Check extends ServiceItemCheck {
   endpoint: string;
 }
 
+export interface CloudinaryEnvStatus {
+  hasUrl: boolean;
+  hasCloudName: boolean;
+  hasApiKey: boolean;
+  hasApiSecret: boolean;
+  cloudName?: string;
+  apiKeyPrefix?: string;
+  missingVariables?: string[];
+}
+
 export interface CloudinaryCheck extends ServiceItemCheck {
   url: string;
+  configMode?: 'url' | 'individual' | 'partial' | 'none';
+  envStatus?: CloudinaryEnvStatus;
 }
 
 export interface SslCheck extends ServiceItemCheck {
@@ -754,12 +766,56 @@ export const SystemHealth: React.FC = () => {
                   <span className="text-2xl">🖼️</span>
                   <div>
                     <h4 className="font-bold text-slate-900 text-sm">Cloudinary Medya API</h4>
-                    <span className="text-[11px] text-slate-400">Görsel Yönetim Servisi</span>
+                    <span className="text-[11px] text-slate-400">
+                      {scan.checks.cloudinary.configMode === 'url' ? 'Bağlantı: CLOUDINARY_URL' :
+                       scan.checks.cloudinary.configMode === 'individual' ? 'Bağlantı: Ayrık Değişkenler' : 'Görsel Yönetim Servisi'}
+                    </span>
                   </div>
                 </div>
                 {getStatusBadge(scan.checks.cloudinary.status)}
               </div>
-              <p className="text-xs text-slate-600 mb-3">{scan.checks.cloudinary.details}</p>
+              <p className="text-xs text-slate-600 mb-3 leading-relaxed">{scan.checks.cloudinary.details}</p>
+
+              {/* Ortam Değişkenleri Teşhis Kartı */}
+              {scan.checks.cloudinary.envStatus && (
+                <div className="bg-slate-50 border border-slate-100 p-2.5 rounded-xl mb-3 space-y-1.5 text-[11px]">
+                  <div className="flex items-center justify-between text-slate-500 font-medium">
+                    <span>Ortam Değişkenleri:</span>
+                    <span className="font-mono text-slate-700 font-semibold">
+                      {scan.checks.cloudinary.configMode === 'url' ? '⚡ URL Modu' :
+                       scan.checks.cloudinary.configMode === 'individual' ? '🧩 Ayrık Değişken Modu' : '⚠️ Yapılandırma Eksik'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1 font-mono text-[10px]">
+                    {[
+                      { name: 'CLOUDINARY_URL', active: scan.checks.cloudinary.envStatus.hasUrl },
+                      { name: 'CLOUD_NAME', active: scan.checks.cloudinary.envStatus.hasCloudName },
+                      { name: 'API_KEY', active: scan.checks.cloudinary.envStatus.hasApiKey },
+                      { name: 'API_SECRET', active: scan.checks.cloudinary.envStatus.hasApiSecret }
+                    ].map((item, idx) => (
+                      <div key={idx} className={`flex items-center justify-between p-1 rounded ${item.active ? 'bg-emerald-50/80 text-emerald-800' : 'bg-slate-100/80 text-slate-500'}`}>
+                        <span>{item.name}</span>
+                        <span className="font-bold">{item.active ? '✓' : '✗'}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {scan.checks.cloudinary.envStatus.missingVariables && scan.checks.cloudinary.envStatus.missingVariables.length > 0 && (
+                    <div className="text-rose-700 bg-rose-50 border border-rose-200/60 p-1.5 rounded text-[10px] mt-1">
+                      Eksik Değişkenler: {scan.checks.cloudinary.envStatus.missingVariables.join(', ')}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {scan.checks.cloudinary.quota && scan.checks.cloudinary.quota.rateLimitRemaining !== undefined && (
+                <div className="bg-slate-50 p-2 rounded-lg text-[11px] text-slate-600 mb-3 flex justify-between items-center">
+                  <span className="text-slate-400">API İstek Kotası:</span>
+                  <span className="font-mono font-semibold text-slate-700">
+                    {scan.checks.cloudinary.quota.rateLimitRemaining} / {scan.checks.cloudinary.quota.rateLimitAllowed} istek
+                  </span>
+                </div>
+              )}
+
               <div className="flex items-center justify-between text-xs font-semibold text-slate-500 pt-3 border-t border-slate-100">
                 <span>Yükleme &amp; Silme:</span>
                 <span className="text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded">{scan.checks.cloudinary.durationMs} ms</span>
