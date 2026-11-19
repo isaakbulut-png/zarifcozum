@@ -16,7 +16,7 @@
     { href: 'konu.html', label: 'Konular', icon: 'book' },
     { href: 'test.html', label: 'Testler', icon: 'test' },
     { href: 'canli.html', label: 'Canlı Ders', icon: 'live' },
-    { href: 'asistan.html', label: 'Asistan', icon: 'bot' },
+    { href: '/ogrenci-paneli.html#ai-mentor-panel', label: 'AI Mentör', icon: 'bot' },
     { href: 'mimari.html', label: 'Mimari & İş Akışı', icon: 'arch' }
   ];
   const current = location.pathname.split('/').pop() || 'index.html';
@@ -25,7 +25,7 @@
   if (side) {
     side.innerHTML = `
       <a class="brand" href="index.html"><img class="brand-logo" src="assets/brand-mark.png" alt="">ZarifÇözüm</a>
-      <a class="side-cta" href="asistan.html" ${current === 'asistan.html' ? 'aria-current="page"' : ''}>🤖 AI Mentör ile Serbest Sohbet</a>
+      <a class="side-cta" href="/ogrenci-paneli.html#ai-mentor-panel">🤖 AI Mentör ile Serbest Sohbet</a>
       <a class="side-cta side-cta-live" href="canli.html?host=1">Canlı Ders Başlat</a>
       <nav class="side-nav" aria-label="Uygulama">
         ${nav.map(n => `<a href="${n.href}" ${n.href === current ? 'aria-current="page"' : ''}>${icons[n.icon]}<span>${n.label}</span></a>`).join('')}

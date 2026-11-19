@@ -343,6 +343,7 @@ app.get('/basari-odakli-sistem.html', (req, res) => {
 });
 // panel.html eski demo panelidir; içeriği gerçek verilerle öğrenci paneline taşındı.
 app.get('/panel.html', (req, res) => res.redirect(301, '/ogrenci-paneli.html'));
+app.get('/asistan.html', (req, res) => res.redirect(302, '/ogrenci-paneli.html#ai-mentor-panel'));
 app.use(authRouter);
 app.use(express.static(path.join(__dirname, 'public'))); // public/deneme-sinavi-optik.html
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
