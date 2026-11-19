@@ -610,13 +610,13 @@
     <!-- KULLANICI & ABONELİK -->
     <div class="nav-title" data-admin-roles="superadmin,support">Kullanıcı & Abonelik</div>
     <button class="nav-btn" type="button" data-view="users" data-admin-roles="superadmin,support">
-        <button class="nav-btn" type="button" data-view="teacher-applications" data-admin-roles="superadmin,support">
-          <svg viewBox="0 0 24 24" style="stroke:#0284c7; fill:none; stroke-width:2;"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Öğretmen Başvuruları</span>
-          <span id="teacherAppBadge" style="display:none; background:#dc2626; color:#fff; font-size:10px; font-weight:700; padding:1px 6px; border-radius:999px; margin-left:auto;">0</span>
-        </button>
       <svg viewBox="0 0 24 24" style="stroke:#38bdf8"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
       <span class="nav-text">Kullanıcılar & Roller</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="teacher-applications" data-admin-roles="superadmin,support">
+      <svg viewBox="0 0 24 24" style="stroke:#0284c7"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="nav-text">Öğretmen Başvuruları</span>
+      <span id="teacherAppBadge" style="display:none; background:#dc2626; color:#fff; font-size:10px; font-weight:700; padding:1px 6px; border-radius:999px; margin-left:auto;">0</span>
     </button>
     <button class="nav-btn" type="button" data-view="payments" data-admin-roles="superadmin">
       <svg viewBox="0 0 24 24" style="stroke:#34d399"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="15" r="1"/></svg>
@@ -666,10 +666,10 @@
     <!-- YAPAY ZEKÂ & ASİSTAN -->
     <div class="nav-title" data-admin-roles="superadmin,editor">Yapay Zekâ & Asistan</div>
     <button class="nav-btn" type="button" data-view="ai-audit" data-admin-roles="superadmin,support">
-          <svg viewBox="0 0 24 24" style="stroke:#8b5cf6; fill:none; stroke-width:2;"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM9 13a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
-          <span>AI Denetim &amp; Kota</span>
-        </button>
-        <button class="nav-btn" type="button" data-view="ai-content" data-admin-roles="superadmin,editor">
+      <svg viewBox="0 0 24 24" style="stroke:#8b5cf6"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM9 13a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
+      <span class="nav-text">AI Denetim & Kota</span>
+    </button>
+    <button class="nav-btn" type="button" data-view="ai-content" data-admin-roles="superadmin,editor">
       <svg viewBox="0 0 24 24" style="stroke:#e879f9"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg>
       <span class="nav-text">AI İçerik Stüdyosu</span>
     </button>
@@ -1145,8 +1145,54 @@
       </div>
     </section>
 
-    <!-- 11. YAPAY ZEKA ZEKÂ İÇERİK STÜDYOSU -->
-    <!-- 10.5. AI DENETİM & KOTA YÖNETİMİ PANELİ -->
+    <!-- ÖĞRETMEN BAŞVURULARI PANELİ -->
+    <section id="view-teacher-applications" hidden>
+      <div class="panel" style="margin-top:0">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
+          <div>
+            <h3 style="margin:0 0 6px 0; display:flex; align-items:center; gap:8px;">
+              <span>👨‍🏫</span> Öğretmen Başvuru &amp; Yetki Yönetimi
+            </h3>
+            <p class="notice" style="margin:0;">Siteye kayıt olan öğretmen adaylarının başvurularını inceleyin; onaylayarak yetki seviyesini (İçerik Üreticisi veya Onaylı Öğretmen) belirleyin.</p>
+          </div>
+          <div>
+            <button type="button" class="btn" id="btnRefreshTeacherApps">
+              🔄 Başvuruları Yenile
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtre Butonları -->
+        <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+          <button type="button" class="btn sm primary" data-app-filter="inceleme_suruyor">⏳ İnceleme Sürüyor (<span id="filterPendingCount">0</span>)</button>
+          <button type="button" class="btn sm" data-app-filter="onaylandi">✅ Onaylananlar</button>
+          <button type="button" class="btn sm" data-app-filter="reddedildi">❌ Reddedilenler</button>
+          <button type="button" class="btn sm" data-app-filter="all">Tüm Başvurular</button>
+        </div>
+
+        <div class="table-wrap">
+          <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+            <thead>
+              <tr style="background:#faf8f5; border-bottom:1px solid #ebd9c8; text-align:left;">
+                <th style="padding:10px 12px;">Öğretmen</th>
+                <th style="padding:10px 12px;">Branş</th>
+                <th style="padding:10px 12px;">Okul / Kurum</th>
+                <th style="padding:10px 12px;">İletişim</th>
+                <th style="padding:10px 12px;">Başvuru Notu</th>
+                <th style="padding:10px 12px;">Tarih</th>
+                <th style="padding:10px 12px;">Durum</th>
+                <th style="padding:10px 12px; text-align:right;">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="teacherAppsTableBody">
+              <tr><td colspan="8" class="empty" style="padding:24px; text-align:center; color:#8c7e72;">Başvurular yükleniyor...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI DENETİM & KOTA YÖNETİMİ PANELİ -->
     <section id="view-ai-audit" hidden>
       <div class="panel" style="margin-top:0">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
@@ -1172,7 +1218,6 @@
             <span>⚡</span> Bölüm A: Yapay Zekâ Ajan Performans &amp; Harcama Dağılımı
           </h4>
           
-          <!-- 4 Temel Özet Kartı -->
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:14px; margin-bottom:18px;">
             <div style="background:#fff; border:1px solid #ebd9c8; border-radius:10px; padding:16px;">
               <div style="font-size:0.8rem; color:#8c7e72; font-weight:600; text-transform:uppercase;">Toplam Sistem Harcaması</div>
@@ -1196,7 +1241,6 @@
             </div>
           </div>
 
-          <!-- Ajan Dağılım Kartları -->
           <div style="background:#faf8f5; border:1px solid #ebd9c8; border-radius:10px; padding:16px;" id="ajanDagilimContainer">
             <div style="font-size:0.88rem; font-weight:700; color:#523520; margin-bottom:12px;">Ajan Bazlı Tüketim &amp; Maliyet Oranları:</div>
             <div id="ajanKartlariListesi" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
@@ -1216,7 +1260,6 @@
             <span style="font-size:0.85rem; color:#8c7e72;" id="kullaniciToplamSayiBadge">Toplam: 0 kullanıcı</span>
           </div>
 
-          <!-- Filtreleme Çubuğu -->
           <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; background:#fff; padding:12px; border:1px solid #ebd9c8; border-radius:8px;">
             <div style="flex:1; min-width:200px;">
               <input type="text" id="aiUserSearchInput" placeholder="Öğrenci adı veya e-posta ara..." style="width:100%; padding:8px 12px; font-size:0.85rem;">
@@ -1247,7 +1290,6 @@
             <button type="button" class="btn primary sm" id="btnAiUserSearch">Filtrele</button>
           </div>
 
-          <!-- Kullanıcı Tablosu -->
           <div class="table-wrap">
             <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
               <thead>
@@ -1259,25 +1301,26 @@
                   <th style="padding:10px 12px;">Toplam Token</th>
                   <th style="padding:10px 12px;">Toplam Maliyet</th>
                   <th style="padding:10px 12px;">AI Durumu</th>
-                  <th style="padding:10px 12px; text-align:right;">Canlı Müdahale Araçları</th>
+                  <th style="padding:10px 12px; text-align:right;">Müdahale &amp; Kotalar</th>
                 </tr>
               </thead>
-              <tbody id="aiAuditTableBody">
-                <tr><td colspan="8" class="empty" style="padding:24px; text-align:center; color:#8c7e72;">Kullanıcılar yükleniyor...</td></tr>
+              <tbody id="aiUsersTableBody">
+                <tr><td colspan="8" class="empty" style="padding:24px; text-align:center; color:#8c7e72;">Kullanıcılar taranıyor...</td></tr>
               </tbody>
             </table>
           </div>
 
           <!-- Sayfalama -->
-          <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:14px;" id="aiAuditPagination">
-            <button type="button" class="btn sm" id="btnAiPrevPage" disabled>← Önceki</button>
-            <span style="font-size:0.85rem; color:#8c7e72;" id="aiAuditPageText">Sayfa 1 / 1</span>
-            <button type="button" class="btn sm" id="btnAiNextPage" disabled>Sonraki →</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; font-size:0.85rem;">
+            <button type="button" class="btn sm" id="btnAiPrevPage">← Önceki Sayfa</button>
+            <span id="aiPageInfo" style="color:#8c7e72;">Sayfa 1</span>
+            <button type="button" class="btn sm" id="btnAiNextPage">Sonraki Sayfa →</button>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- 11. YAPAY ZEKA ZEKÂ İÇERİK STÜDYOSU -->
     <section id="view-ai-content" hidden>
       <div class="panel" style="margin-top:0">
         <h3>Yapay Zekâ Soru & İçerik Asistanı</h3>
@@ -2643,6 +2686,288 @@
                   body: JSON.stringify({ status: 'approved' })
                 });
                 loadContentPool();
+              } catch (e) { alert('Onaylama hatası: ' + e.message); }
+            };
+            tdActions.append(btnApprove);
+          }
+
+          // PDF İndir
+          const btnPdf = document.createElement('a');
+          btnPdf.className = 'btn light';
+          btnPdf.style.fontSize = '0.75rem';
+          btnPdf.style.padding = '4px 8px';
+          btnPdf.style.marginRight = '4px';
+          btnPdf.textContent = '📥 PDF';
+          btnPdf.href = `/api/content-library/export?format=pdf&ids=${itemId}`;
+          btnPdf.target = '_blank';
+          tdActions.append(btnPdf);
+
+          // DOCX İndir
+          const btnDocx = document.createElement('a');
+          btnDocx.className = 'btn light';
+          btnDocx.style.fontSize = '0.75rem';
+          btnDocx.style.padding = '4px 8px';
+          btnDocx.style.marginRight = '4px';
+          btnDocx.textContent = '📄 DOCX';
+          btnDocx.href = `/api/content-library/export?format=docx&ids=${itemId}`;
+          btnDocx.target = '_blank';
+          tdActions.append(btnDocx);
+
+          // R2 Arşivle Butonu
+          if (!item.r2Key) {
+            const btnR2 = document.createElement('button');
+            btnR2.className = 'btn light';
+            btnR2.style.fontSize = '0.75rem';
+            btnR2.style.padding = '4px 8px';
+            btnR2.style.marginRight = '4px';
+            btnR2.textContent = '☁ R2';
+            btnR2.title = "Cloudflare R2'ye kalıcı arşivle";
+            btnR2.onclick = async () => {
+              btnR2.disabled = true;
+              try {
+                const r2res = await api(`/api/content-library/${itemId}/archive-r2`, { method: 'POST' });
+                alert(r2res.mesaj || 'R2 arşivi oluşturuldu.');
+                loadContentPool();
+              } catch (e) { alert('R2 arşiv hatası: ' + e.message); btnR2.disabled = false; }
+            };
+            tdActions.append(btnR2);
+          }
+
+          // Sil
+          const btnDel = document.createElement('button');
+          btnDel.className = 'btn light';
+          btnDel.style.fontSize = '0.75rem';
+          btnDel.style.padding = '4px 8px';
+          btnDel.style.color = '#ef4444';
+          btnDel.textContent = '🗑️';
+          btnDel.onclick = async () => {
+            if (!confirm('Bu içeriği silmek istediğinize emin misiniz?')) return;
+            try {
+              await api(`/api/content-library/${itemId}`, { method: 'DELETE' });
+              loadContentPool();
+            } catch (e) { alert('Silme hatası: ' + e.message); }
+          };
+          tdActions.append(btnDel);
+
+          tr.append(tdActions);
+          tbody.append(tr);
+        });
+      }
+
+      // Event Listeners for Content Pool
+      function setupContentPoolEvents() {
+        $('poolRefreshBtn')?.addEventListener('click', loadContentPool);
+        
+        ['poolFilterLesson', 'poolFilterGrade', 'poolFilterDifficulty', 'poolFilterType', 'poolFilterSource', 'poolFilterStatus'].forEach(id => {
+          $(id)?.addEventListener('change', loadContentPool);
+        });
+
+        $('poolFilterSearch')?.addEventListener('input', () => {
+          clearTimeout(window._poolSearchDebounce);
+          window._poolSearchDebounce = setTimeout(loadContentPool, 300);
+        });
+
+        $('poolSelectAll')?.addEventListener('change', (e) => {
+          document.querySelectorAll('.pool-item-check').forEach(chk => {
+            chk.checked = e.target.checked;
+          });
+        });
+
+        // Toplu PDF İndir
+        $('poolExportPdfBtn')?.addEventListener('click', () => {
+          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
+          const query = selected.length > 0 ? `&ids=${selected.join(',')}` : '';
+          window.open(`/api/content-library/export?format=pdf${query}`, '_blank');
+        });
+
+        // Toplu DOCX İndir
+        $('poolExportDocxBtn')?.addEventListener('click', () => {
+          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
+          const query = selected.length > 0 ? `&ids=${selected.join(',')}` : '';
+          window.open(`/api/content-library/export?format=docx${query}`, '_blank');
+        });
+
+        // Toplu R2 Arşivle
+        $('poolArchiveR2Btn')?.addEventListener('click', async () => {
+          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
+          if (selected.length === 0) {
+            alert('Lütfen R2\'ye arşivlenecek en az bir içerik seçin.');
+            return;
+          }
+          if (!confirm(`Seçili ${selected.length} içerik Cloudflare R2\'ye arşivlenecek. Devam edilsin mi?`)) return;
+          let count = 0;
+          for (const id of selected) {
+            try {
+              await api(`/api/content-library/${id}/archive-r2`, { method: 'POST' });
+              count++;
+            } catch (e) {
+              console.warn('R2 toplu arşiv uyarısı:', id, e.message);
+            }
+          }
+          alert(`${count} içerik başarıyla R2\'ye arşivlendi.`);
+          loadContentPool();
+        });
+      }
+
+      setupContentPoolEvents();
+
+      /* Event Dinleyicileri */
+      document.querySelectorAll('[data-view]').forEach(button =>
+        button.addEventListener('click', () => showView(button.dataset.view)));
+
+      $('userSearchButton')?.addEventListener('click', () => { page = 1; loadUsers(); });
+      $('userSearch')?.addEventListener('keydown', e => { if (e.key === 'Enter') { page = 1; loadUsers(); } });
+      $('userRole')?.addEventListener('change', () => { page = 1; loadUsers(); });
+      $('prevPage')?.addEventListener('click', () => { if (page > 1) { page -= 1; loadUsers(); } });
+      $('nextPage')?.addEventListener('click', () => { if (page < totalPages) { page += 1; loadUsers(); } });
+      $('paymentStatus')?.addEventListener('change', loadPayments);
+
+      $('announcementForm')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const message = $('announcementMsg');
+        message.className = 'msg';
+        message.textContent = '';
+        try {
+          const data = await api('/api/admin/announcements', {
+            method: 'POST',
+            body: JSON.stringify({ message: $('announcementText').value })
+          });
+          $('announcementText').value = '';
+          message.className = 'msg ok';
+          message.textContent = data.mesaj;
+          loadAnnouncements();
+        } catch (error) { message.textContent = error.message; }
+      });
+
+      $('bannerForm')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const message = $('bannerMsg');
+        const button = $('btnPublishBanner');
+        message.className = 'msg';
+        message.textContent = '';
+        button.disabled = true;
+        try {
+          const payload = {
+            active: true,
+            title: $('bannerTitle').value.trim(),
+            message: $('bannerMessage').value.trim(),
+            type: $('bannerType').value,
+            updatedAt: new Date().toISOString()
+          };
+          try {
+            localStorage.setItem('zarif_announcement_banner', JSON.stringify(payload));
+          } catch (_) {}
+          const res = await api('/api/admin/announcement-banner', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          message.className = 'msg ok';
+          message.textContent = res.mesaj || 'Bilgilendirme panosu başarıyla yayınlandı.';
+          loadBanner();
+        } catch (err) {
+          message.className = 'msg';
+          message.textContent = err.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $('btnDisableBanner')?.addEventListener('click', async () => {
+        if (!confirm('Bilgilendirme panosu yayından kaldırılsın mı? Ziyaretçilere artık gösterilmeyecek.')) return;
+        const message = $('bannerMsg');
+        const button = $('btnDisableBanner');
+        message.className = 'msg';
+        message.textContent = '';
+        button.disabled = true;
+        try {
+          const payload = {
+            active: false,
+            title: $('bannerTitle').value.trim(),
+            message: $('bannerMessage').value.trim(),
+            type: $('bannerType').value,
+            updatedAt: new Date().toISOString()
+          };
+          try {
+            localStorage.setItem('zarif_announcement_banner', JSON.stringify(payload));
+          } catch (_) {}
+          const res = await api('/api/admin/announcement-banner', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          message.className = 'msg ok';
+          message.textContent = 'Bilgilendirme panosu yayından kaldırıldı (pasif yapıldı).';
+          loadBanner();
+        } catch (err) {
+          message.className = 'msg';
+          message.textContent = err.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $('faqForm')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const message = $('faqMsg');
+        const button = $('faqSave');
+        message.className = 'msg';
+        message.textContent = '';
+        button.disabled = true;
+        const payload = {
+          question: $('faqQuestion').value,
+          answerHtml: faqEditor?.root.innerHTML || '',
+          grade: $('faqGrade').value,
+          active: $('faqActive').checked
+        };
+        try {
+          const data = await api('/api/admin/faqs', { method: 'POST', body: JSON.stringify(payload) });
+          message.className = 'msg ok';
+          message.textContent = data.mesaj;
+          $('faqQuestion').value = '';
+          if (faqEditor) faqEditor.setContents([]);
+          loadFaqs();
+        } catch (error) {
+          message.textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $('visitorSettingsForm')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const message = $('visitorSettingsMsg');
+        const button = $('saveVisitorSettings');
+        message.className = 'msg';
+        message.textContent = '';
+        button.disabled = true;
+        const ziyaretciHaklari = {
+          questionLimit: Number($('visitorQuestionLimit').value),
+          topicLimit: Number($('visitorTopicLimit').value),
+          trialDurationDays: Number($('visitorTrialDays').value),
+          summaryEnabled: $('visitorSummaryEnabled').checked,
+          practiceEnabled: $('visitorPracticeEnabled').checked,
+          assistantEnabled: $('visitorAssistantEnabled').checked,
+          fullTestEnabled: $('visitorFullTestEnabled').checked,
+          subscriptionRequired: $('subscriptionRequired').checked,
+          registrationEnabled: $('registrationEnabled').checked
+        };
+        try {
+          const data = await api('/api/admin/settings', {
+            method: 'POST',
+            body: JSON.stringify({ ziyaretciHaklari })
+          });
+          message.className = 'msg ok';
+          message.textContent = data.mesaj;
+        } catch (error) {
+          message.textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $('logoutButton')?.addEventListener('click', async () => {
+        await fetch('/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
+        window.location.assign('/yonetim');
+      });
 
       // ==========================================
       // ÖĞRETMEN BAŞVURULARI YÖNETİMİ
@@ -2678,10 +3003,10 @@
             const statusBadges = {
               inceleme_suruyor: '<span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:700; background:#fef3c7; color:#b45309; border:1px solid #fde68a;">⏳ İnceleme Sürüyor</span>',
               onaylandi: '<span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:700; background:#dcfce7; color:#15803d; border:1px solid #bbf7d0;">✅ Onaylandı</span>',
-              reddedildi: '<span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:700; background:#fee2e2; color:#b91c1c; border:1px solid #fecaca;">❌ Reddedildi</span>'
+              reddedildi: '<span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:700; background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;">❌ Reddedildi</span>'
             };
 
-            const dateStr = b.basvuruTarihi ? new Date(b.basvuruTarihi).toLocaleDateString('tr-TR', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+            const dateStr = b.basvuruTarihi ? new Date(b.basvuruTarihi).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
 
             return `
               <tr style="border-bottom:1px solid #f3e1cf;">
@@ -2689,10 +3014,10 @@
                   <strong style="color:#523520; display:block;">${esc(b.name)}</strong>
                   <small style="color:#8c7e72;">${esc(b.email)}</small>
                 </td>
-                <td style="padding:10px 12px; font-family:monospace; color:#334155;">${esc(b.phone)}</td>
-                <td style="padding:10px 12px; font-weight:600; color:#4338ca;">${esc(b.brans)}</td>
-                <td style="padding:10px 12px; color:#475569;">${esc(b.okulKurumAdi)}</td>
-                <td style="padding:10px 12px; max-width:200px; color:#64748b; font-size:12px;" title="${esc(b.basvuruNotu)}">
+                <td style="padding:10px 12px; font-weight:600; color:#523520;">${esc(b.brans || '—')}</td>
+                <td style="padding:10px 12px; color:#523520;">${esc(b.okulKurumAdi || '—')}</td>
+                <td style="padding:10px 12px; color:#523520; font-size:11px;">${esc(b.telefon || '—')}</td>
+                <td style="padding:10px 12px; color:#713f12; font-size:11px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${esc(b.basvuruNotu || '')}">
                   ${esc(b.basvuruNotu ? (b.basvuruNotu.length > 50 ? b.basvuruNotu.slice(0, 50) + '…' : b.basvuruNotu) : '—')}
                 </td>
                 <td style="padding:10px 12px; font-size:11px; color:#8c7e72; white-space:nowrap;">${dateStr}</td>
@@ -2701,7 +3026,6 @@
                   <div style="display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
                     
                     ${b.basvuruDurumu !== 'onaylandi' ? `
-                      <!-- Onayla & Öğretmen Ekle Butonu -->
                       <button type="button" class="btn sm success" title="Öğretmeni onayla ve yetkilendir" onclick="handleApproveTeacherModal('${b.id}', '${esc(b.name)}')">
                         ✨ Onayla &amp; Ekle
                       </button>
@@ -2710,7 +3034,6 @@
                     `}
 
                     ${b.basvuruDurumu !== 'reddedildi' ? `
-                      <!-- Reddet Butonu -->
                       <button type="button" class="btn sm danger" title="Başvuruyu reddet" onclick="handleRejectTeacher('${b.id}', '${esc(b.name)}')">
                         Reddet
                       </button>
@@ -2727,13 +3050,12 @@
         }
       }
 
-      // Onaylama Aksiyonu (Yetki Seviyesi Seçimi ile)
       window.handleApproveTeacherModal = async function(userId, userName) {
         const choice = prompt(
           `"${userName}" adlı öğretmeni onaylayarak sisteme ekleyin.\n\nYetki Seviyesi Seçin:\n1: Onaylı Öğretmen (Günlük 15 Soru / 40 Mesaj - Önerilen)\n2: İçerik Üreticisi (⭐ SINIRSIZ Soru ve Mesaj Yetkisi)\n\nSeçiminizi yazın (1 veya 2):`,
           '1'
         );
-        if (choice === null) return; // İptal edildi
+        if (choice === null) return;
 
         const selectedType = choice.trim() === '2' ? 'icerik_ureticisi' : 'onayli_ogretmen';
         const typeLabel = selectedType === 'icerik_ureticisi' ? 'İçerik Üreticisi (Sınırsız)' : 'Onaylı Öğretmen (15 Soru / 40 Mesaj)';
@@ -2759,7 +3081,6 @@
         }
       };
 
-      // Reddetme Aksiyonu
       window.handleRejectTeacher = async function(userId, userName) {
         if (!confirm(`"${userName}" adlı öğretmenin başvurusunu REDDETMEK istediğinizden emin misiniz?`)) return;
         try {
@@ -2782,19 +3103,6 @@
         }
       };
 
-      // Filtre Butonları Dinleyicisi
-      document.addEventListener('DOMContentLoaded', () => {
-        $('btnRefreshTeacherApps')?.addEventListener('click', () => loadTeacherApplications());
-        document.querySelectorAll('[data-app-filter]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            document.querySelectorAll('[data-app-filter]').forEach(b => b.classList.remove('primary'));
-            btn.classList.add('primary');
-            loadTeacherApplications(btn.dataset.appFilter);
-          });
-        });
-      });
-
-
       // ==========================================
       // AI DENETİM & KOTA YÖNETİMİ SCRIPTLERİ
       // ==========================================
@@ -2815,320 +3123,7 @@
 
           // KPI Değerleri
           $('statAiToplamTL').textContent = (data.genel?.toplamSistemMaliyetTL || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
-          $('statAiToplamUSD').textContent = '
-              } catch (e) { alert('Onaylama hatası: ' + e.message); }
-            };
-            tdActions.append(btnApprove);
-          }
-
-          // PDF İndir
-          const btnPdf = document.createElement('a');
-          btnPdf.className = 'btn light';
-          btnPdf.style.fontSize = '0.75rem';
-          btnPdf.style.padding = '4px 8px';
-          btnPdf.style.marginRight = '4px';
-          btnPdf.textContent = '📥 PDF';
-          btnPdf.href = `/api/content-library/export?format=pdf&ids=${itemId}`;
-          btnPdf.target = '_blank';
-          tdActions.append(btnPdf);
-
-          // DOCX İndir
-          const btnDocx = document.createElement('a');
-          btnDocx.className = 'btn light';
-          btnDocx.style.fontSize = '0.75rem';
-          btnDocx.style.padding = '4px 8px';
-          btnDocx.style.marginRight = '4px';
-          btnDocx.textContent = '📄 DOCX';
-          btnDocx.href = `/api/content-library/export?format=docx&ids=${itemId}`;
-          btnDocx.target = '_blank';
-          tdActions.append(btnDocx);
-
-          // R2 Arşivle Butonu
-          if (!item.r2Key) {
-            const btnR2 = document.createElement('button');
-            btnR2.className = 'btn light';
-            btnR2.style.fontSize = '0.75rem';
-            btnR2.style.padding = '4px 8px';
-            btnR2.style.marginRight = '4px';
-            btnR2.textContent = '☁ R2';
-            btnR2.title = "Cloudflare R2'ye kalıcı arşivle";
-            btnR2.onclick = async () => {
-              btnR2.disabled = true;
-              try {
-                const r2res = await api(`/api/content-library/${itemId}/archive-r2`, { method: 'POST' });
-                alert(r2res.mesaj || 'R2 arşivi oluşturuldu.');
-                loadContentPool();
-              } catch (e) { alert('R2 arşiv hatası: ' + e.message); btnR2.disabled = false; }
-            };
-            tdActions.append(btnR2);
-          }
-
-          // Sil
-          const btnDel = document.createElement('button');
-          btnDel.className = 'btn light';
-          btnDel.style.fontSize = '0.75rem';
-          btnDel.style.padding = '4px 8px';
-          btnDel.style.color = '#ef4444';
-          btnDel.textContent = '🗑️';
-          btnDel.onclick = async () => {
-            if (!confirm('Bu içeriği silmek istediğinize emin misiniz?')) return;
-            try {
-              await api(`/api/content-library/${itemId}`, { method: 'DELETE' });
-              loadContentPool();
-            } catch (e) { alert('Silme hatası: ' + e.message); }
-          };
-          tdActions.append(btnDel);
-
-          tr.append(tdActions);
-          tbody.append(tr);
-        });
-      }
-
-      // Event Listeners for Content Pool
-      function setupContentPoolEvents() {
-        $('poolRefreshBtn')?.addEventListener('click', loadContentPool);
-        
-        ['poolFilterLesson', 'poolFilterGrade', 'poolFilterDifficulty', 'poolFilterType', 'poolFilterSource', 'poolFilterStatus'].forEach(id => {
-          $(id)?.addEventListener('change', loadContentPool);
-        });
-
-        $('poolFilterSearch')?.addEventListener('input', () => {
-          clearTimeout(window._poolSearchDebounce);
-          window._poolSearchDebounce = setTimeout(loadContentPool, 300);
-        });
-
-        $('poolSelectAll')?.addEventListener('change', (e) => {
-          document.querySelectorAll('.pool-item-check').forEach(chk => {
-            chk.checked = e.target.checked;
-          });
-        });
-
-        // Toplu PDF İndir
-        $('poolExportPdfBtn')?.addEventListener('click', () => {
-          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
-          const query = selected.length > 0 ? `&ids=${selected.join(',')}` : '';
-          window.open(`/api/content-library/export?format=pdf${query}`, '_blank');
-        });
-
-        // Toplu DOCX İndir
-        $('poolExportDocxBtn')?.addEventListener('click', () => {
-          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
-          const query = selected.length > 0 ? `&ids=${selected.join(',')}` : '';
-          window.open(`/api/content-library/export?format=docx${query}`, '_blank');
-        });
-
-        // Toplu R2 Arşivle
-        $('poolArchiveR2Btn')?.addEventListener('click', async () => {
-          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
-          if (selected.length === 0) {
-            alert('Lütfen R2\'ye arşivlenecek en az bir içerik seçin.');
-            return;
-          }
-          if (!confirm(`Seçili ${selected.length} içerik Cloudflare R2\'ye arşivlenecek. Devam edilsin mi?`)) return;
-          let count = 0;
-          for (const id of selected) {
-            try {
-              await api(`/api/content-library/${id}/archive-r2`, { method: 'POST' });
-              count++;
-            } catch (e) {
-              console.warn('R2 toplu arşiv uyarısı:', id, e.message);
-            }
-          }
-          alert(`${count} içerik başarıyla R2\'ye arşivlendi.`);
-          loadContentPool();
-        });
-      }
-
-      setupContentPoolEvents();
-
-      /* Event Dinleyicileri */
-      document.querySelectorAll('[data-view]').forEach(button =>
-        button.addEventListener('click', () => showView(button.dataset.view)));
-
-      $('userSearchButton')?.addEventListener('click', () => { page = 1; loadUsers(); });
-      $('userSearch')?.addEventListener('keydown', e => { if (e.key === 'Enter') { page = 1; loadUsers(); } });
-      $('userRole')?.addEventListener('change', () => { page = 1; loadUsers(); });
-      $('prevPage')?.addEventListener('click', () => { if (page > 1) { page -= 1; loadUsers(); } });
-      $('nextPage')?.addEventListener('click', () => { if (page < totalPages) { page += 1; loadUsers(); } });
-      $('paymentStatus')?.addEventListener('change', loadPayments);
-
-      $('announcementForm')?.addEventListener('submit', async event => {
-        event.preventDefault();
-        const message = $('announcementMsg');
-        message.className = 'msg';
-        message.textContent = '';
-        try {
-          const data = await api('/api/admin/announcements', {
-            method: 'POST',
-            body: JSON.stringify({ message: $('announcementText').value })
-          });
-          $('announcementText').value = '';
-          message.className = 'msg ok';
-          message.textContent = data.mesaj;
-          loadAnnouncements();
-        } catch (error) { message.textContent = error.message; }
-      });
-
-      $('bannerForm')?.addEventListener('submit', async event => {
-        event.preventDefault();
-        const message = $('bannerMsg');
-        const button = $('btnPublishBanner');
-        message.className = 'msg';
-        message.textContent = '';
-        button.disabled = true;
-        try {
-          const payload = {
-            active: true,
-            title: $('bannerTitle').value.trim(),
-            message: $('bannerMessage').value.trim(),
-            type: $('bannerType').value,
-            updatedAt: new Date().toISOString()
-          };
-          try {
-            localStorage.setItem('zarif_announcement_banner', JSON.stringify(payload));
-          } catch (_) {}
-          const res = await api('/api/admin/announcement-banner', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-          });
-          message.className = 'msg ok';
-          message.textContent = res.mesaj || 'Bilgilendirme panosu başarıyla yayınlandı.';
-          loadBanner();
-        } catch (err) {
-          message.className = 'msg';
-          message.textContent = err.message;
-        } finally {
-          button.disabled = false;
-        }
-      });
-
-      $('btnDisableBanner')?.addEventListener('click', async () => {
-        if (!confirm('Bilgilendirme panosu yayından kaldırılsın mı? Ziyaretçilere artık gösterilmeyecek.')) return;
-        const message = $('bannerMsg');
-        const button = $('btnDisableBanner');
-        message.className = 'msg';
-        message.textContent = '';
-        button.disabled = true;
-        try {
-          const payload = {
-            active: false,
-            title: $('bannerTitle').value.trim(),
-            message: $('bannerMessage').value.trim(),
-            type: $('bannerType').value,
-            updatedAt: new Date().toISOString()
-          };
-          try {
-            localStorage.setItem('zarif_announcement_banner', JSON.stringify(payload));
-          } catch (_) {}
-          const res = await api('/api/admin/announcement-banner', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-          });
-          message.className = 'msg ok';
-          message.textContent = 'Bilgilendirme panosu yayından kaldırıldı (pasif yapıldı).';
-          loadBanner();
-        } catch (err) {
-          message.className = 'msg';
-          message.textContent = err.message;
-        } finally {
-          button.disabled = false;
-        }
-      });
-
-      $('faqForm')?.addEventListener('submit', async event => {
-        event.preventDefault();
-        const message = $('faqMsg');
-        const button = $('faqSave');
-        message.className = 'msg';
-        message.textContent = '';
-        button.disabled = true;
-        const payload = {
-          question: $('faqQuestion').value,
-          answerHtml: faqEditor?.root.innerHTML || '',
-          grade: $('faqGrade').value,
-          active: $('faqActive').checked
-        };
-        try {
-          const data = await api('/api/admin/faqs', { method: 'POST', body: JSON.stringify(payload) });
-          message.className = 'msg ok';
-          message.textContent = data.mesaj;
-          $('faqQuestion').value = '';
-          if (faqEditor) faqEditor.setContents([]);
-          loadFaqs();
-        } catch (error) {
-          message.textContent = error.message;
-        } finally {
-          button.disabled = false;
-        }
-      });
-
-      $('visitorSettingsForm')?.addEventListener('submit', async event => {
-        event.preventDefault();
-        const message = $('visitorSettingsMsg');
-        const button = $('saveVisitorSettings');
-        message.className = 'msg';
-        message.textContent = '';
-        button.disabled = true;
-        const ziyaretciHaklari = {
-          questionLimit: Number($('visitorQuestionLimit').value),
-          topicLimit: Number($('visitorTopicLimit').value),
-          trialDurationDays: Number($('visitorTrialDays').value),
-          summaryEnabled: $('visitorSummaryEnabled').checked,
-          practiceEnabled: $('visitorPracticeEnabled').checked,
-          assistantEnabled: $('visitorAssistantEnabled').checked,
-          fullTestEnabled: $('visitorFullTestEnabled').checked,
-          subscriptionRequired: $('subscriptionRequired').checked,
-          registrationEnabled: $('registrationEnabled').checked
-        };
-        try {
-          const data = await api('/api/admin/settings', {
-            method: 'POST',
-            body: JSON.stringify({ ziyaretciHaklari })
-          });
-          message.className = 'msg ok';
-          message.textContent = data.mesaj;
-        } catch (error) {
-          message.textContent = error.message;
-        } finally {
-          button.disabled = false;
-        }
-      });
-
-      $('logoutButton')?.addEventListener('click', async () => {
-        await fetch('/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
-        window.location.assign('/yonetim');
-      });
-
-      async function initializePanel() {
-        try {
-          const data = await api('/api/admin/me');
-          activeAdminRole = data.user.adminRole;
-          activeAdminId = data.user.id;
-          
-          $('whoName').textContent = data.user.name || 'Yönetici';
-          $('whoInitial').textContent = (data.user.name || 'Y').charAt(0).toUpperCase();
-          $('whoRole').textContent = adminRoleNames[activeAdminRole] || 'Yönetici';
-
-          document.querySelectorAll('[data-admin-roles]').forEach(element => {
-            const roles = element.dataset.adminRoles.split(',');
-            element.hidden = !roles.includes(activeAdminRole);
-          });
-          
-          const firstView = activeAdminRole === 'editor' ? 'education-quizzes' : 'overview';
-          document.body.classList.remove('rbac-loading');
-          showView(firstView);
-        } catch {
-          window.location.assign('/yonetim');
-        }
-      }
-
-      initializePanel();
-    })();
-  </script>
-  <script src="/assets/breadcrumb.js"></script>
-</body>
-</html>
- + (data.genel?.toplamSistemMaliyetUSD || 0).toFixed(4) + ' USD';
+          $('statAiToplamUSD').textContent = '$' + (data.genel?.toplamSistemMaliyetUSD || 0).toFixed(4) + ' USD';
           $('statAiToplamToken').textContent = (data.genel?.toplamSistemToken || 0).toLocaleString('tr-TR');
           $('statAiToplamKullanim').textContent = (data.genel?.toplamKullanim || 0).toLocaleString('tr-TR') + ' toplam API isteği';
 
@@ -3158,21 +3153,22 @@
             const icon = ajanIcons[ajan.ajanAdi] || '🤖';
             const yuzde = ajan.yuzde || 0;
             return `
-              <div style="background:#fff; border:1px solid #ebd9c8; border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+              <div style="background:#fff; border:1px solid #ebd9c8; border-radius:8px; padding:12px; display:flex; flex-direction:column; justify-content:space-between; gap:8px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <strong style="color:#523520; font-size:0.9rem; display:flex; align-items:center; gap:6px;">
+                  <strong style="color:#523520; font-size:0.88rem; display:flex; align-items:center; gap:6px;">
                     <span>${icon}</span> ${esc(ajan.ajanAdi)}
                   </strong>
-                  <span style="background:#f3e1cf; color:#7a4f2d; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:999px;">
-                    %${yuzde}
-                  </span>
+                  <span style="font-size:0.75rem; font-weight:700; color:#7a4f2d; background:#f3e1cf; padding:2px 6px; border-radius:4px;">%${yuzde}</span>
                 </div>
-                <!-- İlerleme Çubuğu -->
-                <div style="height:6px; background:#f1ebe5; border-radius:999px; overflow:hidden;">
+                <div style="font-size:0.8rem; color:#8c7e72; display:flex; justify-content:space-between;">
+                  <span>İstek: <strong>${ajan.kullanimSayisi}</strong></span>
+                  <span>Token: <strong>${(ajan.toplamToken || 0).toLocaleString('tr-TR')}</strong></span>
+                </div>
+                <div style="height:6px; background:#f1ece8; border-radius:999px; overflow:hidden;">
                   <div style="height:100%; width:${Math.min(100, yuzde)}%; background:#7a4f2d; border-radius:999px;"></div>
                 </div>
                 <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:#8c7e72;">
-                  <span>${ajan.kullanimSayisi.toLocaleString('tr-TR')} istek · ${(ajan.toplamToken || 0).toLocaleString('tr-TR')} token</span>
+                  <span>Maliyet:</span>
                   <strong style="color:#b93838;">${ajan.toplamMaliyetTL.toFixed(2)} ₺</strong>
                 </div>
               </div>
@@ -3180,42 +3176,34 @@
           }).join('');
 
         } catch (err) {
-          console.error('loadAiAuditOverview hatası:', err);
+          console.warn('[AI Audit] Özet yükleme hatası:', err.message);
         }
       }
 
-      async function loadAiAuditUsers(page = 1) {
-        aiAuditCurrentPage = page;
-        const tbody = $('aiAuditTableBody');
+      async function loadAiAuditUsers(targetPage = 1) {
+        aiAuditCurrentPage = targetPage;
+        const tbody = $('aiUsersTableBody');
         if (!tbody) return;
 
         tbody.innerHTML = '<tr><td colspan="8" class="empty" style="padding:24px; text-align:center; color:#8c7e72;">Kullanıcılar taranıyor...</td></tr>';
 
+        const q = $('aiUserSearchInput')?.value.trim() || '';
+        const role = $('aiUserRoleSelect')?.value || 'student';
+        const paket = $('aiUserPackageSelect')?.value || 'all';
+        const sort = $('aiUserSortSelect')?.value || 'maliyet_desc';
+
+        const url = `/api/admin/ai-kullanici-kotalari?sayfa=${targetPage}&limit=15&q=${encodeURIComponent(q)}&rol=${encodeURIComponent(role)}&paket=${encodeURIComponent(paket)}&sirala=${encodeURIComponent(sort)}`;
+
         try {
-          const search = $('aiUserSearchInput')?.value || '';
-          const role = $('aiUserRoleSelect')?.value || 'student';
-          const paketTipi = $('aiUserPackageSelect')?.value || 'all';
-          const sort = $('aiUserSortSelect')?.value || 'maliyet_desc';
-
-          const params = new URLSearchParams({
-            search,
-            role,
-            paketTipi,
-            sort,
-            page: String(aiAuditCurrentPage),
-            limit: '50'
-          });
-
-          const res = await fetch('/api/admin/ai-kullanicilar?' + params.toString(), { credentials: 'same-origin' });
-          if (!res.ok) throw new Error('Kullanıcı listesi alınamadı: ' + res.status);
+          const res = await fetch(url, { credentials: 'same-origin' });
+          if (!res.ok) throw new Error('Kullanıcı kotaları alınamadı: ' + res.status);
           const data = await res.json();
 
-          $('kullaniciToplamSayiBadge').textContent = 'Toplam: ' + (data.toplam || 0) + ' kullanıcı';
+          $('kullaniciToplamSayiBadge').textContent = `Toplam: ${data.toplamKullanici || 0} kullanıcı`;
+          $('aiPageInfo').textContent = `Sayfa ${data.sayfa} / ${data.toplamSayfa || 1}`;
 
-          // Sayfalama
-          $('aiAuditPageText').textContent = `Sayfa ${data.sayfa || 1} / ${data.toplamSayfa || 1}`;
-          $('btnAiPrevPage').disabled = (data.sayfa || 1) <= 1;
-          $('btnAiNextPage').disabled = (data.sayfa || 1) >= (data.toplamSayfa || 1);
+          $('btnAiPrevPage').disabled = data.sayfa <= 1;
+          $('btnAiNextPage').disabled = data.sayfa >= data.toplamSayfa;
 
           if (!data.kullanicilar || data.kullanicilar.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" class="empty" style="padding:24px; text-align:center; color:#8c7e72;">Aramaya uygun kullanıcı bulunamadı.</td></tr>';
@@ -3235,28 +3223,26 @@
               pro: '<span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; background:#fef3c7; color:#b45309; border:1px solid #fde68a;">🚀 Pro</span>'
             };
 
-            // Öğretmen için rol seçici; Öğrenci için paket rozeti
-            const roleOrPackageCell = isTeacher
+            const teacherRoleSelector = isTeacher
               ? `<select style="padding:4px 8px; font-size:11px; font-weight:700; border-radius:6px; border:1px solid #7c3aed; background:#f5f3ff; color:#6d28d9; cursor:pointer;" onchange="handleTeacherTypeChange('${u.id}', this.value, '${esc(u.name)}')">
-                  <option value="standart_ogretmen" ${u.ogretmenTipi === 'standart_ogretmen' ? 'selected' : ''}>Standart (3 Soru / 10 Mesaj)</option>
-                  <option value="onayli_ogretmen" ${u.ogretmenTipi === 'onayli_ogretmen' ? 'selected' : ''}>Onaylı (15 Soru / 40 Mesaj)</option>
-                  <option value="icerik_ureticisi" ${u.ogretmenTipi === 'icerik_ureticisi' ? 'selected' : ''}>⭐ İçerik Üreticisi (⚡ SINIRSIZ)</option>
+                  <option value="icerik_ureticisi" ${u.ogretmenTipi === 'icerik_ureticisi' ? 'selected' : ''}>⭐ İçerik Üreticisi (Sınırsız)</option>
+                  <option value="onayli_ogretmen" ${u.ogretmenTipi === 'onayli_ogretmen' ? 'selected' : ''}>Onaylı Öğretmen (15 Soru / 40 Mesaj)</option>
+                  <option value="standart_ogretmen" ${(!u.ogretmenTipi || u.ogretmenTipi === 'standart_ogretmen') ? 'selected' : ''}>Standart Öğretmen (3 Soru / 10 Mesaj)</option>
                 </select>`
-              : (packageBadges[u.paketTipi] || packageBadges.free);
+              : (packageBadges[u.paketTipi] || u.paketTipi);
 
-            // Kullanım Bilgisi (Öğretmen ise hem soru hem mesaj gösterimi)
-            let usageInfo = '';
+            let usageCol = '';
             if (isTeacher) {
-              const soruLimitiText = u.sinirsiz ? '∞ Sınırsız' : `${u.gunlukSoruKullanim || 0} / ${u.etkinSoruLimiti} soru`;
-              const mesajLimitiText = u.sinirsiz ? '∞ Sınırsız' : `${u.gunlukKullanim} / ${u.etkinLimit} mesaj`;
-              usageInfo = `
+              const soruLimitiText = u.ogretmenTipi === 'icerik_ureticisi' ? 'Sınırsız Soru' : (typeof u.ozelGunlukSoruLimiti === 'number' ? `${u.gunlukSoruUretimSayisi || 0} / ${u.ozelGunlukSoruLimiti} Soru` : `${u.gunlukSoruUretimSayisi || 0} / ${u.ogretmenTipi === 'onayli_ogretmen' ? 15 : 3} Soru`);
+              const mesajLimitiText = u.ogretmenTipi === 'icerik_ureticisi' ? 'Sınırsız Mesaj' : `${u.gunlukKullanim || 0} / ${u.etkinLimit || 10} Mesaj`;
+              usageCol = `
                 <div style="font-size:11px;">
                   <div>📝 <strong>${soruLimitiText}</strong> ${typeof u.ozelGunlukSoruLimiti === 'number' ? '<span style="color:#b45309;">(Özel)</span>' : ''}</div>
                   <div style="color:#64748b;">💬 ${mesajLimitiText}</div>
                 </div>
               `;
             } else {
-              usageInfo = typeof u.ozelGunlukMesajLimiti === 'number'
+              usageCol = u.ozelLimitli
                 ? `<strong style="color:#7a4f2d;">${u.gunlukKullanim} / ${u.etkinLimit}</strong> <small style="color:#b45309; font-weight:600;">(Özel)</small>`
                 : `<span>${u.gunlukKullanim} / ${u.etkinLimit}</span>`;
             }
@@ -3268,16 +3254,20 @@
             return `
               <tr style="border-bottom:1px solid #f3e1cf;">
                 <td style="padding:10px 12px;">
-                  <div style="display:flex; align-items:center; gap:6px;">
-                    <span style="font-size:13px;">${isTeacher ? '👨‍🏫' : '🎓'}</span>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="width:32px; height:32px; border-radius:999px; background:#f3e1cf; color:#7a4f2d; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px;">
+                      ${esc(u.name.charAt(0).toUpperCase())}
+                    </div>
                     <div>
                       <strong style="color:#523520; display:block;">${esc(u.name)}</strong>
                       <small style="color:#8c7e72;">${esc(u.email)} · ${isTeacher ? '<span style="color:#7c3aed; font-weight:600;">Öğretmen</span>' : 'Öğrenci'}</small>
                     </div>
                   </div>
                 </td>
-                <td style="padding:10px 12px;">${roleOrPackageCell}</td>
-                <td style="padding:10px 12px;">${usageInfo}</td>
+                <td style="padding:10px 12px;">
+                  ${teacherRoleSelector}
+                </td>
+                <td style="padding:10px 12px;">${usageCol}</td>
                 <td style="padding:10px 12px;">${bonusBadge}</td>
                 <td style="padding:10px 12px; font-weight:600; color:#523520;">${(u.toplamHarcananToken || 0).toLocaleString('tr-TR')}</td>
                 <td style="padding:10px 12px; font-weight:700; color:#b93838;">${(u.toplamMaliyetTL || 0).toFixed(2)} ₺</td>
@@ -3286,24 +3276,20 @@
                   <div style="display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
                     
                     ${isTeacher ? `
-                      <!-- Öğretmen Özel Soru Limiti Belirle -->
                       <button type="button" class="btn sm" style="background:#f5f3ff; color:#6d28d9; border-color:#ddd6fe;" title="Öğretmene özel günlük yeni soru üretim limiti gir" onclick="handleTeacherQuestionLimitEdit('${u.id}', '${esc(u.name)}', ${u.ozelGunlukSoruLimiti !== null && u.ozelGunlukSoruLimiti !== undefined ? u.ozelGunlukSoruLimiti : 'null'})">
                         🎯 Soru Limiti
                       </button>
                     ` : `
-                      <!-- Öğrenci +20 Bonus Butonu -->
                       <button type="button" class="btn sm" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;" title="Öğrenciye anında 20 ek AI mesaj kredisi hediye et" onclick="handleAiBonus('${u.id}', '${esc(u.name)}')">
                         🎁 +20 Bonus
                       </button>
                     `}
 
-                    <!-- Mesaj Limiti Düzenle -->
-                    <button type="button" class="btn sm" title="Özel günlük mesaj limiti tanımla veya kaldır" onclick="handleAiLimitEdit('${u.id}', '${esc(u.name)}', ${u.ozelGunlukMesajLimiti !== null && u.ozelGunlukMesajLimiti !== undefined ? u.ozelGunlukMesajLimiti : 'null'})">
+                    <button type="button" class="btn sm" style="background:#fff; border-color:#d9d3c3;" title="Kullanıcıya özel kalıcı günlük mesaj limiti belirle" onclick="handleAiLimitEdit('${u.id}', '${esc(u.name)}', ${u.ozelGunlukMesajLimiti !== null ? u.ozelGunlukMesajLimiti : 'null'})">
                       ⚙️ Mesaj Limiti
                     </button>
 
                     ${!isTeacher ? `
-                      <!-- Öğrenci Paket Değiştir Seçimi -->
                       <select style="padding:3px 6px; font-size:11px; border-radius:6px; border:1px solid #d9d3c3;" onchange="handleAiPackageChange('${u.id}', this.value)">
                         <option value="free" ${u.paketTipi === 'free' ? 'selected' : ''}>Free</option>
                         <option value="baslangic" ${u.paketTipi === 'baslangic' ? 'selected' : ''}>Başlangıç</option>
@@ -3311,7 +3297,6 @@
                       </select>
                     ` : ''}
 
-                    <!-- AI Erişim Durdur / Aç Toggle Butonu -->
                     <button type="button" class="btn sm ${isBlocked ? 'success' : 'danger'}" title="${isBlocked ? 'AI Erişim Engelini Kaldır' : 'Kullanıcının AI erişimini derhal kilitle'}" onclick="handleAiAccessToggle('${u.id}', ${!isBlocked}, '${esc(u.name)}')">
                       ${isBlocked ? '🔓 Kilidi Aç' : '🔒 AI Engelle'}
                     </button>
@@ -3327,42 +3312,35 @@
         }
       }
 
-      // Canlı Müdahale Eylemleri
-      
-      window.handleTeacherTypeChange = async function(userId, newType, userName) {
-        const typeLabels = {
-          standart_ogretmen: 'Standart Öğretmen (3 Soru / 10 Mesaj)',
-          onayli_ogretmen: 'Onaylı Öğretmen (15 Soru / 40 Mesaj)',
-          icerik_ureticisi: 'İçerik Üreticisi (⭐ SINIRSIZ Yetki)'
-        };
-        const label = typeLabels[newType] || newType;
-        if (!confirm(`"${userName}" adlı öğretmenin yetki seviyesi "${label}" olarak güncellensin mi?`)) {
-          loadAiAuditUsers(aiAuditCurrentPage);
-          return;
-        }
-        await postAiQuotaUpdate({
-          userId,
-          islem: 'ogretmen_tipi_guncelle',
-          ogretmenTipi: newType
-        });
+      window.handleAiBonus = async function(userId, userName) {
+        if (!confirm(`"${userName}" adlı öğrenciye +20 Bonus AI Mesaj Kredisi tanımlansın mı?`)) return;
+        await postAiQuotaUpdate({ userId, islem: 'bonus_ekle', bonusMiktar: 20 });
       };
 
       window.handleTeacherQuestionLimitEdit = async function(userId, userName, currentLimit) {
         const val = prompt(
-          `"${userName}" adlı öğretmen için Özel Günlük Soru Üretim Limiti belirleyin:\n(Yetki varsayılanına dönmek için boş bırakın veya "null" yazın)\n\nMevcut: ${currentLimit !== null ? currentLimit : 'Yetki Varsayılanı'}`,
+          `"${userName}" için Günlük Özel Soru Üretim Limiti belirleyin:\n(Varsayılan role dönmek için boş bırakın veya "null" yazın)\n\nMevcut Limit: ${currentLimit !== null ? currentLimit : 'Rol Varsayılanı'}`,
           currentLimit !== null ? currentLimit : ''
         );
         if (val === null) return;
         await postAiQuotaUpdate({
           userId,
-          islem: 'soru_limiti_duzenle',
+          islem: 'ogretmen_soru_limiti_duzenle',
           ozelGunlukSoruLimiti: val.trim() === '' || val.trim().toLowerCase() === 'null' ? null : parseInt(val.trim(), 10)
         });
       };
 
-      window.handleAiBonus = async function(userId, userName) {
-        if (!confirm(`"${userName}" adlı öğrenciye +20 Bonus AI Mesaj Kredisi tanımlansın mı?`)) return;
-        await postAiQuotaUpdate({ userId, islem: 'bonus_ekle', bonusMiktar: 20 });
+      window.handleTeacherTypeChange = async function(userId, newType, userName) {
+        const typeLabels = {
+          icerik_ureticisi: 'İçerik Üreticisi (Sınırsız Soru & Mesaj)',
+          onayli_ogretmen: 'Onaylı Öğretmen (15 Soru / 40 Mesaj)',
+          standart_ogretmen: 'Standart Öğretmen (3 Soru / 10 Mesaj)'
+        };
+        if (!confirm(`"${userName}" adlı öğretmenin rolünü "${typeLabels[newType] || newType}" olarak değiştirmek istiyor musunuz?`)) {
+          loadAiAuditUsers(aiAuditCurrentPage);
+          return;
+        }
+        await postAiQuotaUpdate({ userId, islem: 'ogretmen_tipi_degistir', ogretmenTipi: newType });
       };
 
       window.handleAiLimitEdit = async function(userId, userName, currentLimit) {
@@ -3370,7 +3348,7 @@
           `"${userName}" için Özel Günlük Mesaj Limiti belirleyin:\n(Paket varsayılanına dönmek için boş bırakın veya "null" yazın)\n\nMevcut: ${currentLimit !== null ? currentLimit : 'Paket Varsayılanı'}`,
           currentLimit !== null ? currentLimit : ''
         );
-        if (val === null) return; // İptal edildi
+        if (val === null) return;
         await postAiQuotaUpdate({
           userId,
           islem: 'limit_duzenle',
@@ -3399,7 +3377,6 @@
           const data = await res.json();
           if (!res.ok) throw new Error(data.mesaj || 'Güncelleme başarısız (' + res.status + ')');
 
-          // Kullanıcı tablosunu ve özetleri tazele
           await Promise.all([
             loadAiAuditOverview(),
             loadAiAuditUsers(aiAuditCurrentPage)
@@ -3409,8 +3386,17 @@
         }
       }
 
-      // Filtreleme ve Buton Event Dinleyicileri
+      // Event Dinleyicileri
       document.addEventListener('DOMContentLoaded', () => {
+        $('btnRefreshTeacherApps')?.addEventListener('click', () => loadTeacherApplications());
+        document.querySelectorAll('[data-app-filter]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-app-filter]').forEach(b => b.classList.remove('primary'));
+            btn.classList.add('primary');
+            loadTeacherApplications(btn.dataset.appFilter);
+          });
+        });
+
         $('btnAiAuditRefresh')?.addEventListener('click', () => loadAiAudit());
         $('btnAiUserSearch')?.addEventListener('click', () => loadAiAuditUsers(1));
         $('aiUserSearchInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') loadAiAuditUsers(1); });
@@ -3424,289 +3410,6 @@
         $('btnAiNextPage')?.addEventListener('click', () => {
           loadAiAuditUsers(aiAuditCurrentPage + 1);
         });
-      });
-
-              } catch (e) { alert('Onaylama hatası: ' + e.message); }
-            };
-            tdActions.append(btnApprove);
-          }
-
-          // PDF İndir
-          const btnPdf = document.createElement('a');
-          btnPdf.className = 'btn light';
-          btnPdf.style.fontSize = '0.75rem';
-          btnPdf.style.padding = '4px 8px';
-          btnPdf.style.marginRight = '4px';
-          btnPdf.textContent = '📥 PDF';
-          btnPdf.href = `/api/content-library/export?format=pdf&ids=${itemId}`;
-          btnPdf.target = '_blank';
-          tdActions.append(btnPdf);
-
-          // DOCX İndir
-          const btnDocx = document.createElement('a');
-          btnDocx.className = 'btn light';
-          btnDocx.style.fontSize = '0.75rem';
-          btnDocx.style.padding = '4px 8px';
-          btnDocx.style.marginRight = '4px';
-          btnDocx.textContent = '📄 DOCX';
-          btnDocx.href = `/api/content-library/export?format=docx&ids=${itemId}`;
-          btnDocx.target = '_blank';
-          tdActions.append(btnDocx);
-
-          // R2 Arşivle Butonu
-          if (!item.r2Key) {
-            const btnR2 = document.createElement('button');
-            btnR2.className = 'btn light';
-            btnR2.style.fontSize = '0.75rem';
-            btnR2.style.padding = '4px 8px';
-            btnR2.style.marginRight = '4px';
-            btnR2.textContent = '☁ R2';
-            btnR2.title = "Cloudflare R2'ye kalıcı arşivle";
-            btnR2.onclick = async () => {
-              btnR2.disabled = true;
-              try {
-                const r2res = await api(`/api/content-library/${itemId}/archive-r2`, { method: 'POST' });
-                alert(r2res.mesaj || 'R2 arşivi oluşturuldu.');
-                loadContentPool();
-              } catch (e) { alert('R2 arşiv hatası: ' + e.message); btnR2.disabled = false; }
-            };
-            tdActions.append(btnR2);
-          }
-
-          // Sil
-          const btnDel = document.createElement('button');
-          btnDel.className = 'btn light';
-          btnDel.style.fontSize = '0.75rem';
-          btnDel.style.padding = '4px 8px';
-          btnDel.style.color = '#ef4444';
-          btnDel.textContent = '🗑️';
-          btnDel.onclick = async () => {
-            if (!confirm('Bu içeriği silmek istediğinize emin misiniz?')) return;
-            try {
-              await api(`/api/content-library/${itemId}`, { method: 'DELETE' });
-              loadContentPool();
-            } catch (e) { alert('Silme hatası: ' + e.message); }
-          };
-          tdActions.append(btnDel);
-
-          tr.append(tdActions);
-          tbody.append(tr);
-        });
-      }
-
-      // Event Listeners for Content Pool
-      function setupContentPoolEvents() {
-        $('poolRefreshBtn')?.addEventListener('click', loadContentPool);
-        
-        ['poolFilterLesson', 'poolFilterGrade', 'poolFilterDifficulty', 'poolFilterType', 'poolFilterSource', 'poolFilterStatus'].forEach(id => {
-          $(id)?.addEventListener('change', loadContentPool);
-        });
-
-        $('poolFilterSearch')?.addEventListener('input', () => {
-          clearTimeout(window._poolSearchDebounce);
-          window._poolSearchDebounce = setTimeout(loadContentPool, 300);
-        });
-
-        $('poolSelectAll')?.addEventListener('change', (e) => {
-          document.querySelectorAll('.pool-item-check').forEach(chk => {
-            chk.checked = e.target.checked;
-          });
-        });
-
-        // Toplu PDF İndir
-        $('poolExportPdfBtn')?.addEventListener('click', () => {
-          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
-          const query = selected.length > 0 ? `&ids=${selected.join(',')}` : '';
-          window.open(`/api/content-library/export?format=pdf${query}`, '_blank');
-        });
-
-        // Toplu DOCX İndir
-        $('poolExportDocxBtn')?.addEventListener('click', () => {
-          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
-          const query = selected.length > 0 ? `&ids=${selected.join(',')}` : '';
-          window.open(`/api/content-library/export?format=docx${query}`, '_blank');
-        });
-
-        // Toplu R2 Arşivle
-        $('poolArchiveR2Btn')?.addEventListener('click', async () => {
-          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
-          if (selected.length === 0) {
-            alert('Lütfen R2\'ye arşivlenecek en az bir içerik seçin.');
-            return;
-          }
-          if (!confirm(`Seçili ${selected.length} içerik Cloudflare R2\'ye arşivlenecek. Devam edilsin mi?`)) return;
-          let count = 0;
-          for (const id of selected) {
-            try {
-              await api(`/api/content-library/${id}/archive-r2`, { method: 'POST' });
-              count++;
-            } catch (e) {
-              console.warn('R2 toplu arşiv uyarısı:', id, e.message);
-            }
-          }
-          alert(`${count} içerik başarıyla R2\'ye arşivlendi.`);
-          loadContentPool();
-        });
-      }
-
-      setupContentPoolEvents();
-
-      /* Event Dinleyicileri */
-      document.querySelectorAll('[data-view]').forEach(button =>
-        button.addEventListener('click', () => showView(button.dataset.view)));
-
-      $('userSearchButton')?.addEventListener('click', () => { page = 1; loadUsers(); });
-      $('userSearch')?.addEventListener('keydown', e => { if (e.key === 'Enter') { page = 1; loadUsers(); } });
-      $('userRole')?.addEventListener('change', () => { page = 1; loadUsers(); });
-      $('prevPage')?.addEventListener('click', () => { if (page > 1) { page -= 1; loadUsers(); } });
-      $('nextPage')?.addEventListener('click', () => { if (page < totalPages) { page += 1; loadUsers(); } });
-      $('paymentStatus')?.addEventListener('change', loadPayments);
-
-      $('announcementForm')?.addEventListener('submit', async event => {
-        event.preventDefault();
-        const message = $('announcementMsg');
-        message.className = 'msg';
-        message.textContent = '';
-        try {
-          const data = await api('/api/admin/announcements', {
-            method: 'POST',
-            body: JSON.stringify({ message: $('announcementText').value })
-          });
-          $('announcementText').value = '';
-          message.className = 'msg ok';
-          message.textContent = data.mesaj;
-          loadAnnouncements();
-        } catch (error) { message.textContent = error.message; }
-      });
-
-      $('bannerForm')?.addEventListener('submit', async event => {
-        event.preventDefault();
-        const message = $('bannerMsg');
-        const button = $('btnPublishBanner');
-        message.className = 'msg';
-        message.textContent = '';
-        button.disabled = true;
-        try {
-          const payload = {
-            active: true,
-            title: $('bannerTitle').value.trim(),
-            message: $('bannerMessage').value.trim(),
-            type: $('bannerType').value,
-            updatedAt: new Date().toISOString()
-          };
-          try {
-            localStorage.setItem('zarif_announcement_banner', JSON.stringify(payload));
-          } catch (_) {}
-          const res = await api('/api/admin/announcement-banner', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-          });
-          message.className = 'msg ok';
-          message.textContent = res.mesaj || 'Bilgilendirme panosu başarıyla yayınlandı.';
-          loadBanner();
-        } catch (err) {
-          message.className = 'msg';
-          message.textContent = err.message;
-        } finally {
-          button.disabled = false;
-        }
-      });
-
-      $('btnDisableBanner')?.addEventListener('click', async () => {
-        if (!confirm('Bilgilendirme panosu yayından kaldırılsın mı? Ziyaretçilere artık gösterilmeyecek.')) return;
-        const message = $('bannerMsg');
-        const button = $('btnDisableBanner');
-        message.className = 'msg';
-        message.textContent = '';
-        button.disabled = true;
-        try {
-          const payload = {
-            active: false,
-            title: $('bannerTitle').value.trim(),
-            message: $('bannerMessage').value.trim(),
-            type: $('bannerType').value,
-            updatedAt: new Date().toISOString()
-          };
-          try {
-            localStorage.setItem('zarif_announcement_banner', JSON.stringify(payload));
-          } catch (_) {}
-          const res = await api('/api/admin/announcement-banner', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-          });
-          message.className = 'msg ok';
-          message.textContent = 'Bilgilendirme panosu yayından kaldırıldı (pasif yapıldı).';
-          loadBanner();
-        } catch (err) {
-          message.className = 'msg';
-          message.textContent = err.message;
-        } finally {
-          button.disabled = false;
-        }
-      });
-
-      $('faqForm')?.addEventListener('submit', async event => {
-        event.preventDefault();
-        const message = $('faqMsg');
-        const button = $('faqSave');
-        message.className = 'msg';
-        message.textContent = '';
-        button.disabled = true;
-        const payload = {
-          question: $('faqQuestion').value,
-          answerHtml: faqEditor?.root.innerHTML || '',
-          grade: $('faqGrade').value,
-          active: $('faqActive').checked
-        };
-        try {
-          const data = await api('/api/admin/faqs', { method: 'POST', body: JSON.stringify(payload) });
-          message.className = 'msg ok';
-          message.textContent = data.mesaj;
-          $('faqQuestion').value = '';
-          if (faqEditor) faqEditor.setContents([]);
-          loadFaqs();
-        } catch (error) {
-          message.textContent = error.message;
-        } finally {
-          button.disabled = false;
-        }
-      });
-
-      $('visitorSettingsForm')?.addEventListener('submit', async event => {
-        event.preventDefault();
-        const message = $('visitorSettingsMsg');
-        const button = $('saveVisitorSettings');
-        message.className = 'msg';
-        message.textContent = '';
-        button.disabled = true;
-        const ziyaretciHaklari = {
-          questionLimit: Number($('visitorQuestionLimit').value),
-          topicLimit: Number($('visitorTopicLimit').value),
-          trialDurationDays: Number($('visitorTrialDays').value),
-          summaryEnabled: $('visitorSummaryEnabled').checked,
-          practiceEnabled: $('visitorPracticeEnabled').checked,
-          assistantEnabled: $('visitorAssistantEnabled').checked,
-          fullTestEnabled: $('visitorFullTestEnabled').checked,
-          subscriptionRequired: $('subscriptionRequired').checked,
-          registrationEnabled: $('registrationEnabled').checked
-        };
-        try {
-          const data = await api('/api/admin/settings', {
-            method: 'POST',
-            body: JSON.stringify({ ziyaretciHaklari })
-          });
-          message.className = 'msg ok';
-          message.textContent = data.mesaj;
-        } catch (error) {
-          message.textContent = error.message;
-        } finally {
-          button.disabled = false;
-        }
-      });
-
-      $('logoutButton')?.addEventListener('click', async () => {
-        await fetch('/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
-        window.location.assign('/yonetim');
       });
 
       async function initializePanel() {
