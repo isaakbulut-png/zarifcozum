@@ -137,8 +137,39 @@ test('Document Exporter sıfır bağımlılıkla geçerli PDF ve DOCX üretir', 
 test('checkContentLibrary sistem sağlığı fonksiyonu çalışır', async () => {
   const result = await checkContentLibrary();
   assert.ok(result);
-  assert.ok(result.status === 'ok' || result.status === 'warning');
+  assert.ok(result.status === 'healthy' || result.status === 'ok' || result.status === 'warning');
   assert.ok(typeof result.totalContent === 'number');
   assert.ok(typeof result.totalDrafts === 'number');
   assert.ok(typeof result.totalSorular === 'number');
+});
+
+test('exportContentItems nesne seçenekli (options: {A,B,C,D}) soruları sorunsuz işler', async () => {
+  const { exportContentItems } = require('../lib/document-exporter');
+  const items = [
+    {
+      title: 'Geometrik Şekiller AI Testi',
+      type: 'ai_test',
+      grade: 5,
+      topic: 'Geometrik Şekiller',
+      content: {
+        description: 'Test açıklaması',
+        questions: [
+          {
+            text: 'Şekildeki ABC üçgeninde...',
+            options: { A: 'Dar açılı', B: 'Geniş açılı', C: 'Dik açılı', D: 'Eşkenar' },
+            answer: 'A'
+          }
+        ]
+      }
+    }
+  ];
+
+  const pdfBuf = exportContentItems(items, { format: 'pdf' });
+  assert.ok(Buffer.isBuffer(pdfBuf));
+  assert.ok(pdfBuf.toString('binary', 0, 8).startsWith('%PDF-1.4'));
+
+  const docxBuf = exportContentItems(items, { format: 'docx' });
+  assert.ok(Buffer.isBuffer(docxBuf));
+  assert.equal(docxBuf[0], 0x50);
+  assert.equal(docxBuf[1], 0x4B);
 });

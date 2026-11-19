@@ -9,7 +9,7 @@
   const { useState, useEffect, useCallback, createElement: e } = global.React || {};
 
   function StatusBadge({ status }) {
-    if (status === 'healthy') {
+    if (status === 'healthy' || status === 'ok') {
       return e('span', { className: 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm' },
         e('span', { className: 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse' }),
         '✅ Sağlıklı'
@@ -325,7 +325,7 @@
                   { name: 'Google Cloud', st: scan.checks.googleCloud?.status || 'unconfigured' },
                   { name: 'İçerik Havuzu', st: scan.checks.contentLibrary?.status || 'healthy' }
                 ].map((item, idx) => e('div', { key: idx, className: 'flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100' },
-                  e('span', null, item.st === 'healthy' ? '✅' : (item.st === 'warning' ? '⚠️' : '❌')),
+                  e('span', null, (item.st === 'healthy' || item.st === 'ok') ? '✅' : (item.st === 'warning' ? '⚠️' : '❌')),
                   e('span', { className: 'truncate text-[11px] text-slate-700' }, item.name)
                 ))
               )

@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const multer = require('multer');
 const { ObjectId } = require('mongodb');
 const ContentLibrary = require('../models/ContentLibrary');
@@ -44,10 +44,13 @@ function createContentLibraryRouter({ requireStaff, mediaStorage, privateDocumen
       res.json({
         total,
         items: items.map(item => ({
+          _id: item._id.toString(),
           id: item._id.toString(),
           title: item.title,
           type: item.type,
+          contentType: item.type,
           ders: item.ders,
+          lesson: item.ders,
           grade: item.grade,
           topic: item.topic,
           difficulty: item.difficulty,
@@ -57,6 +60,7 @@ function createContentLibraryRouter({ requireStaff, mediaStorage, privateDocumen
           r2Url: item.r2Url,
           metadata: item.metadata,
           content: item.content,
+          body: typeof item.content === 'string' ? item.content : (item.content?.description || (Array.isArray(item.content?.questions) ? `${item.content.questions.length} soru` : '')),
           createdAt: item.createdAt,
           updatedAt: item.updatedAt
         }))
@@ -94,7 +98,51 @@ function createContentLibraryRouter({ requireStaff, mediaStorage, privateDocumen
     }
   });
 
-  // 3. Tekil İçerik Getir
+  // 3. Dışa Aktar (PDF veya DOCX İndir) - GET ve POST destekler (:id rotasından önce tanımlanmalıdır)
+  router.route('/export').all(async (req, res) => {
+    try {
+      const rawIds = req.query?.ids || req.query?.id || req.body?.ids;
+      let ids = [];
+      if (Array.isArray(rawIds)) {
+        ids = rawIds;
+      } else if (typeof rawIds === 'string' && rawIds.trim() && rawIds !== 'undefined' && rawIds !== 'null') {
+        ids = rawIds.split(',').map(s => s.trim()).filter(Boolean);
+      }
+
+      const format = String(req.query?.format || req.body?.format || 'pdf').toLowerCase();
+      const title = req.query?.title || req.body?.title || 'ZarifÇözüm İçerik Havuzu';
+
+      let items = [];
+      const validIds = ids.filter(id => ObjectId.isValid(id));
+      if (validIds.length > 0) {
+        items = await ContentLibrary.find({ _id: { $in: validIds } }).lean();
+      } else {
+        items = await ContentLibrary.find({}).sort({ createdAt: -1 }).limit(20).lean();
+      }
+
+      if (items.length === 0) {
+        return res.status(404).json({ mesaj: 'Dışa aktarılacak içerik bulunamadı.' });
+      }
+
+      const exportFormat = format === 'docx' ? 'docx' : 'pdf';
+      const fileBuffer = exportContentItems(items, { title, format: exportFormat });
+
+      const contentType = exportFormat === 'docx'
+        ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        : 'application/pdf';
+
+      const filename = `zarifcozum-icerik-havuzu-${Date.now()}.${exportFormat}`;
+
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(fileBuffer);
+    } catch (err) {
+      console.error('[ContentLibrary] Export hatası:', err);
+      res.status(500).json({ mesaj: 'İçerikler dışa aktarılamadı: ' + err.message });
+    }
+  });
+
+  // 4. Tekil İçerik Getir
   router.get('/:id', async (req, res) => {
     try {
       if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz içerik ID.' });
@@ -261,39 +309,7 @@ function createContentLibraryRouter({ requireStaff, mediaStorage, privateDocumen
     }
   });
 
-  // 9. Dışa Aktar (PDF veya DOCX Olarak İndir)
-  router.post('/export', async (req, res) => {
-    try {
-      const { ids, format = 'pdf', title = 'ZarifÇözüm İçerik Havuzu' } = req.body;
-      let items = [];
 
-      if (Array.isArray(ids) && ids.length > 0) {
-        items = await ContentLibrary.find({ _id: { $in: ids.filter(ObjectId.isValid) } }).lean();
-      } else {
-        items = await ContentLibrary.find({ status: 'approved' }).sort({ createdAt: -1 }).limit(20).lean();
-      }
-
-      if (items.length === 0) {
-        return res.status(400).json({ mesaj: 'Dışa aktarılacak içerik bulunamadı.' });
-      }
-
-      const exportFormat = String(format).toLowerCase() === 'docx' ? 'docx' : 'pdf';
-      const fileBuffer = exportContentItems(items, { title, format: exportFormat });
-
-      const contentType = exportFormat === 'docx'
-        ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        : 'application/pdf';
-
-      const filename = `zarifcozum-icerik-havuzu-${Date.now()}.${exportFormat}`;
-
-      res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.send(fileBuffer);
-    } catch (err) {
-      console.error('[ContentLibrary] Export hatası:', err);
-      res.status(500).json({ mesaj: 'İçerikler dışa aktarılamadı.' });
-    }
-  });
 
   // 10. Seçili İçerikleri Cloudflare R2'ye Arşivle
   router.post('/:id/archive-r2', async (req, res) => {

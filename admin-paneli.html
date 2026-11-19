@@ -2415,6 +2415,7 @@
         };
 
         items.forEach(item => {
+          const itemId = item._id || item.id;
           const tr = document.createElement('tr');
 
           // Checkbox
@@ -2422,7 +2423,7 @@
           const chk = document.createElement('input');
           chk.type = 'checkbox';
           chk.className = 'pool-item-check';
-          chk.value = item._id;
+          chk.value = itemId;
           tdCheck.append(chk);
           tr.append(tdCheck);
 
@@ -2430,7 +2431,7 @@
           const tdType = document.createElement('td');
           const typeBadge = document.createElement('span');
           typeBadge.className = 'chip info';
-          typeBadge.textContent = typeLabels[item.contentType] || item.contentType;
+          typeBadge.textContent = typeLabels[item.contentType] || typeLabels[item.type] || item.contentType || item.type || 'İçerik';
           tdType.append(typeBadge);
           tr.append(tdType);
 
@@ -2442,14 +2443,14 @@
           const subText = document.createElement('div');
           subText.style.fontSize = '0.75rem';
           subText.style.color = '#64748b';
-          const snippet = item.body ? item.body.slice(0, 100) : (item.summary || '');
+          const snippet = item.body ? item.body.slice(0, 100) : (item.summary || (item.content && typeof item.content === 'string' ? item.content.slice(0, 100) : ''));
           subText.textContent = snippet + (snippet.length >= 100 ? '...' : '');
           tdTitle.append(titleDiv, subText);
           tr.append(tdTitle);
 
           // Ders & Sınıf
           const tdLesson = document.createElement('td');
-          tdLesson.textContent = `${item.lesson || 'Genel'} (${item.grade ? item.grade + '. Sınıf' : 'Tümü'})`;
+          tdLesson.textContent = `${item.lesson || item.ders || 'Genel'} (${item.grade ? item.grade + '. Sınıf' : 'Tümü'})`;
           tr.append(tdLesson);
 
           // Zorluk
@@ -2485,7 +2486,7 @@
             btnApprove.textContent = '✅ Onayla';
             btnApprove.onclick = async () => {
               try {
-                await api(`/api/content-library/${item._id}`, {
+                await api(`/api/content-library/${itemId}`, {
                   method: 'PUT',
                   body: JSON.stringify({ status: 'approved' })
                 });
@@ -2502,7 +2503,7 @@
           btnPdf.style.padding = '4px 8px';
           btnPdf.style.marginRight = '4px';
           btnPdf.textContent = '📥 PDF';
-          btnPdf.href = `/api/content-library/export?format=pdf&ids=${item._id}`;
+          btnPdf.href = `/api/content-library/export?format=pdf&ids=${itemId}`;
           btnPdf.target = '_blank';
           tdActions.append(btnPdf);
 
@@ -2513,7 +2514,7 @@
           btnDocx.style.padding = '4px 8px';
           btnDocx.style.marginRight = '4px';
           btnDocx.textContent = '📄 DOCX';
-          btnDocx.href = `/api/content-library/export?format=docx&ids=${item._id}`;
+          btnDocx.href = `/api/content-library/export?format=docx&ids=${itemId}`;
           btnDocx.target = '_blank';
           tdActions.append(btnDocx);
 
@@ -2529,7 +2530,7 @@
             btnR2.onclick = async () => {
               btnR2.disabled = true;
               try {
-                const r2res = await api(`/api/content-library/${item._id}/archive-r2`, { method: 'POST' });
+                const r2res = await api(`/api/content-library/${itemId}/archive-r2`, { method: 'POST' });
                 alert(r2res.mesaj || 'R2 arşivi oluşturuldu.');
                 loadContentPool();
               } catch (e) { alert('R2 arşiv hatası: ' + e.message); btnR2.disabled = false; }
@@ -2547,7 +2548,7 @@
           btnDel.onclick = async () => {
             if (!confirm('Bu içeriği silmek istediğinize emin misiniz?')) return;
             try {
-              await api(`/api/content-library/${item._id}`, { method: 'DELETE' });
+              await api(`/api/content-library/${itemId}`, { method: 'DELETE' });
               loadContentPool();
             } catch (e) { alert('Silme hatası: ' + e.message); }
           };
