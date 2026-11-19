@@ -13,9 +13,9 @@ for (const dosya of ['.env', 'baglanti_adresi.env']) {
   if (fs.existsSync(envYolu)) dotenv.config({ path: envYolu, quiet: true });
 }
 
-// Model Router (Yönlendirici): İstek türüne göre uygun modeli seçer
-export const DISCOVERY_MODEL = 'gemini-4-argon';
-export const STANDARD_MODEL = process.env.AI_FLASH_MODEL || 'gemini-3.8-flash';
+// Model Router (Yönlendirici): İstek türüne göre uygun modeli seçer (Ekonomik ve hızlı flash modelleri)
+export const DISCOVERY_MODEL = process.env.AI_DISCOVERY_MODEL || 'gemini-2.5-flash';
+export const STANDARD_MODEL = process.env.AI_FLASH_MODEL || 'gemini-2.5-flash';
 
 export function resolveAIModel(gorevTuru) {
   if (gorevTuru === 'discovery_game') {
@@ -27,7 +27,7 @@ export function resolveAIModel(gorevTuru) {
 // Google Gen AI ve Pinecone Başlatma
 const aiClient = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: { timeout: 120000 }, // gemini-4-argon veya akıl yürütme modelleri için 120 sn idealdir
+  httpOptions: { timeout: 60000 },
 });
 
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
@@ -132,9 +132,9 @@ export async function konuAnlatimiZenginlestir(grade, topic) {
       hamIcerik
     ].join('\n\n'),
     config: {
-      systemInstruction: `Sen uzman bir matematik öğretmenisin. Sana verilen ham müfredat özetini temel alarak; ilgili sınıf seviyesine uygun, pedagojik, bol günlük hayat örnekli, cana yakın, detaylı bir konu anlatımı üret. İçeriği Markdown formatında, tam olarak [SAYFA_1], [SAYFA_2], [SAYFA_3], [SAYFA_4] ve [SAYFA_5] etiketleriyle beş ayrı bölüme ayır. Her etiket ayrı bir satırda yer alsın, bölümlerin içeriği dolu ve kendi içinde anlamlı olsun; etiketlerin dışında giriş veya sonuç metni ekleme. ${visualInstruction}`,
+      systemInstruction: `Sen uzman bir matematik öğretmenisin. Sana verilen ham müfredat özetini temel alarak; ilgili sınıf seviyesine uygun, pedagojik, bol günlük hayat örnekli, cana yakın, detaylı bir konu anlatımı üret. İçeriği Markdown formatında, tam olarak [SAYFA_1], [SAYFA_2], [SAYFA_3], [SAYFA_4] ve [SAYFA_5] etiketleriyle beş ayrı bölüme ayır. Her etiket ayrı bir satırda yer alsın, bölümlerin içeriği dolu ve kendi içinde anlamlı olsun; etiketlerin dışında giriş veya sonuç metni ekleme. Cevapları gereksiz uzatma, kısa, net ve pedagojik tut; SVG kodlarını en sade haliyle üret. ${visualInstruction}`,
       temperature: 0.6,
-      maxOutputTokens: 8192
+      maxOutputTokens: 2800
     }
   });
   const anlatim = response.text?.trim();
@@ -220,6 +220,15 @@ function buildConstraintText(metadata = {}, klavuzMatches = [], kitapMatches = [
  * Öğrenci mesajına göre Pinecone'dan ilgili kazanımı, kılavuzu ve ders kitabı örneklerini bulur (RAG).
  */
 async function getMebConstraints(ogrenciMesaji, grade) {
+  const trimmed = String(ogrenciMesaji || '').trim();
+  // 1. Kısa veya selamlama/onay mesajlarında RAG embedding & Pinecone sorgusunu atla (Sıfır Token/Sorgu)
+  const isChitChatOrShort = trimmed.length < 15 ||
+    /^(merhaba|selam|selamlar|günaydın|tünaydın|iyi günler|iyi akşamlar|teşekkür|sağ ol|anladım|tamam|evet|hayır|peki|harika)\b/i.test(trimmed);
+
+  if (isChitChatOrShort) {
+    return "Genel 5-12. sınıf Türkiye Yüzyılı Maarif Modeli matematik müfredat sınırlarına ve pedagojisine sadık kal.";
+  }
+
   try {
     const embeddingResponse = await aiClient.models.embedContent({
       model: 'gemini-embedding-001',
@@ -235,7 +244,6 @@ async function getMebConstraints(ogrenciMesaji, grade) {
     }
 
     // 2. Pinecone Filtreleme Hazırlığı
-    // Eğer sınıf seviyesi (grade) geldiyse, aramayı sadece o sınıfın kazanımlarıyla daraltıyoruz
     const filterQuery = {};
     if (grade) {
       filterQuery.grade = { $eq: Number(grade) };
@@ -255,11 +263,14 @@ async function getMebConstraints(ogrenciMesaji, grade) {
       pineconeIndex.namespace(DERS_KITABI_NAMESPACE).query(queryOptions).catch(() => ({ matches: [] })),
     ]);
 
-    const ilkKazanim = searchResults.matches?.[0]?.metadata || {};
-    const klavuzMatches = klavuzResults?.matches || [];
-    const kitapMatches = kitapResults?.matches || [];
+    // Katı benzerlik eşiği (score >= 0.72): Alakasız veya düşük puanlı metinleri sisteme gömüp token harcama
+    const MIN_SCORE = 0.72;
+    const topKazanim = searchResults.matches?.[0];
+    const ilkKazanim = (topKazanim && (topKazanim.score || 0) >= MIN_SCORE) ? (topKazanim.metadata || {}) : {};
+    const klavuzMatches = (klavuzResults?.matches || []).filter(m => (m.score || 0) >= MIN_SCORE);
+    const kitapMatches = (kitapResults?.matches || []).filter(m => (m.score || 0) >= MIN_SCORE);
 
-    if (searchResults.matches?.length > 0 || klavuzMatches.length > 0 || kitapMatches.length > 0) {
+    if (Object.keys(ilkKazanim).length > 0 || klavuzMatches.length > 0 || kitapMatches.length > 0) {
       return buildConstraintText(ilkKazanim, klavuzMatches, kitapMatches);
     }
     
@@ -275,13 +286,17 @@ async function getMebConstraints(ogrenciMesaji, grade) {
  * @param {string} ogrenciMesaji - Kullanıcının chat mesajı veya soru üretme isteği
  * @param {string} gorevTuru - 'ai_mentor' veya 'soru_uretme'
  * @param {string|number} grade - Öğrencinin sınıf seviyesi (Örn: '5', '6', 9 vb.)
+ * @param {Array} history - Son 2 tura ait temizlenmiş konuşma geçmişi ([{ role: 'user'|'model', text }])
  */
-export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor', grade) {
+export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor', grade, history = [], chosenModel) {
   // 1. Adım: Pinecone'dan 768 boyutlu müfredat sınırını çek
   const mebSiniri = await getMebConstraints(ogrenciMesaji, grade);
 
+  const ALLOWED_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-pro'];
   let systemInstruction = "";
-  let selectedModel = resolveAIModel(gorevTuru);
+  let selectedModel = (chosenModel && ALLOWED_MODELS.includes(chosenModel))
+    ? chosenModel
+    : resolveAIModel(gorevTuru);
 
   // 2. Adım: Göreve göre yapay zekaya rol biçme
   if (gorevTuru === 'discovery_game') {
@@ -289,6 +304,7 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
       Sen Türkiye Yüzyılı Maarif Modeli matematik müfredatına dayalı Keşif Oyunu (Discovery Game) tasarlayan uzman bir eğitim tasarımcısısın.
       Öğrencinin kavramı soru sorarak, hipotez kurarak ve deneyerek adım adım keşfetmesini sağlayan interaktif ve eğlenceli bir senaryo sun.
       Doğrudan cevabı veya formülü verme; yönlendirici adımlarla akıl yürütmesini sağla.
+      Cevapları gereksiz uzatma, kısa, net ve pedagojik tut; SVG kodlarını en sade haliyle üret.
       ${visualInstruction}
       
       [RESMİ MÜFREDAT BAĞLAMI]
@@ -299,6 +315,7 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
       Sen Türkiye Yüzyılı Maarif Modeline tamamen hakim, uzman bir Matematik AI Mentörüsün.
       Öğrenciye matematik sorusunun cevabını asla doğrudan söyleme.
       Yaptığı mantıksal veya işlemsel hatayı tespit et, hatayı kendisinin bulmasını sağlayacak pedagojik ipuçları (Sokratik yöntem) ver.
+      Cevapları gereksiz uzatma, kısa, net ve pedagojik tut; SVG kodlarını en sade haliyle üret.
       ${visualInstruction}
       Sadece sana verilen resmi müfredat kazanım sınırları içinde kal, üst sınıf formülleri ve yöntemleri kesinlikle verme:
       
@@ -313,6 +330,7 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
       1) GÜNLÜK HAYAT BENZETMESİ: Somut, akılda kalıcı bir metafor/örnek (yemek tarifi, spor, oyun, alışveriş vb.).
       2) GÖRSEL CANLANDIRMA: Gerekirse basit ve anlaşılır bir <svg>...</svg> şemasıyla mantığı görselleştir.
       3) KAVRATICI MİKRO SORU: Konunun can alıcı püf noktasını yoklayan, öğrencinin kolayca cevaplayabileceği 1 adet mini pekiştirme sorusu.
+      Cevapları gereksiz uzatma, kısa, net ve pedagojik tut; SVG kodlarını en sade haliyle üret.
       ${visualInstruction}
       Yalnızca resmi müfredat kazanım sınırlarına sadık kal:
       
@@ -327,7 +345,8 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
       - 2. Adım: Matematiksel Strateji / Model Kurma
       - 3. Adım: İşlem Adımları (Gerekirse ${visualInstruction})
       - 4. Adım: Çözümün Sağlaması ve Püf Noktası
-      şeklinde net, anlaşılır ve pedagojik başlıklarla açıkla. Üst sınıf kurallarını kullanma:
+      şeklinde net, anlaşılır ve pedagojik başlıklarla açıkla. Üst sınıf kurallarını kullanma.
+      Cevapları gereksiz uzatma, kısa, net ve pedagojik tut; SVG kodlarını en sade haliyle üret:
       
       [RESMİ MÜFREDAT BAĞLAMI]
       ${mebSiniri}
@@ -337,25 +356,56 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
       Sen Türkiye Yüzyılı Maarif Modeli odaklı şefkatli, motive edici ve stratejik bir "Matematik AI Öğrenci Koçu"sun.
       Öğrencinin motivasyonunu artır, ders çalışma alışkanlıkları, hedef belirleme ve kaygı yönetimi konularında somut, uygulanabilir ve pozitif rehberlik tavsiyeleri ver.
       Klişe öğütler yerine öğrencinin sınıf düzeyine (${grade ? grade + '. sınıf' : 'ilgili sınıf'}) uygun günlük/haftalık mikro hedefler sun.
+      Cevapları gereksiz uzatma, kısa, net ve motive edici tut.
     `;
   } else if (gorevTuru === 'soru_uretme') {
     systemInstruction = `
       Sen Türkiye Yüzyılı Maarif Modeli matematik müfredat standartlarında özgün sorular yazan profesyonel bir yazarsın.
-      Aşağıda belirtilen kazanım sınırlarına %100 uyumlu (Örn: içerikteki sayı sınırlarını veya yöntem kısıtlamalarını aşma), şıkları ve detaylı adımlı çözümü olan tamamen özgün bir matematik sorusu üret:
+      Aşağıda belirtilen kazanım sınırlarına %100 uyumlu (Örn: içerikteki sayı sınırlarını veya yöntem kısıtlamalarını aşma), şıkları ve detaylı adımlı çözümü olan tamamen özgün bir matematik sorusu üret.
+      Cevapları gereksiz uzatma, kısa, net ve pedagojik tut; SVG kodlarını en sade haliyle üret:
       
       [RESMİ MÜFREDAT BAĞLAMI]
       ${mebSiniri}
     `;
   }
 
-  // 3. Adım: Gemini'ı tetikleme
+  // 3. Adım: Kısa Hafıza (Son 2 tur geçmiş + SVG temizliği)
+  let contentsPayload = ogrenciMesaji;
+  if (Array.isArray(history) && history.length > 0) {
+    const multiTurn = [];
+    for (const h of history) {
+      if (h && h.text && (h.role === 'user' || h.role === 'model')) {
+        // SVG kodlarını temizle; maliyeti şişirmeyen özet etiket bırak
+        const cleanText = String(h.text)
+          .replace(/<svg[\s\S]*?<\/svg>/gi, '[Görsel Şema Çizildi]')
+          .trim()
+          .slice(0, 350);
+        if (cleanText) {
+          multiTurn.push({
+            role: h.role,
+            parts: [{ text: cleanText }]
+          });
+        }
+      }
+    }
+    if (multiTurn.length > 0) {
+      multiTurn.push({
+        role: 'user',
+        parts: [{ text: ogrenciMesaji }]
+      });
+      contentsPayload = multiTurn;
+    }
+  }
+
+  // 4. Adım: Gemini'ı tetikleme (maxOutputTokens: 1200 ile maliyet koruması)
   try {
     const response = await aiClient.models.generateContent({
       model: selectedModel,
-      contents: ogrenciMesaji,
+      contents: contentsPayload,
       config: {
         systemInstruction: systemInstruction,
         temperature: 0.2, // Matematiksel netlik ve müfredata sadakat için yaratıcılığı düşük tutuyoruz
+        maxOutputTokens: 1200,
       },
     });
 

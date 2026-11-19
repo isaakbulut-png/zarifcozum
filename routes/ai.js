@@ -309,10 +309,105 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       return res.status(503).json({ mesaj: 'Yapay zeka hizmeti henüz yapılandırılmamış. GEMINI_API_KEY değerini sunucu ortamına ekleyin.' });
     }
 
+    // 1. Veritabanı Soru Havuzu Önbelleği (Question Pool Cache - 0 Token Tasarrufu)
+    const forceFresh = Boolean(req.body?.forceFresh);
+    let cachedPoolQuestions = [];
+
+    if (!forceFresh) {
+      try {
+        const found = await Soru.find({
+          grade,
+          topic,
+          difficulty: difficulty.toLowerCase(),
+          text: { $exists: true, $ne: '' }
+        }).limit(count).lean();
+
+        if (found && found.length > 0) {
+          cachedPoolQuestions = found.map(s => {
+            let opts = {};
+            if (Array.isArray(s.options)) {
+              s.options.forEach(o => { if (o && o.label) opts[o.label] = o.text || ''; });
+            } else if (s.options && typeof s.options === 'object') {
+              opts = s.options;
+            }
+            return {
+              text: s.text,
+              options: opts,
+              answer: s.answer || 'A',
+              explanation: s.explanation || '',
+              svg: typeof s.svg === 'string' ? s.svg : (s.svg ? JSON.stringify(s.svg) : '')
+            };
+          }).filter(isValidQuestion);
+        }
+      } catch (cacheErr) {
+        console.warn('[AI] Soru havuzu önbellek okuma hatası:', cacheErr.message);
+      }
+    }
+
+    // Eğer havuzda istenen soru sayısının tamamı hazır varsa API'ye hiç gitme (0 Token, Anında Yanıt)
+    if (cachedPoolQuestions.length >= count) {
+      const preparedQuestions = cachedPoolQuestions.slice(0, count).map(q => prepareAIQuestion(q, { topic, grade }));
+      const quiz = {
+        title: `${topic} — ${difficulty} seviye (Havuzdan)`,
+        description: `${count} soruluk soru havuzu çalışma testi.`,
+        topic,
+        grade,
+        difficulty,
+        questions: preparedQuestions
+      };
+
+      let draftRecord = null;
+      try {
+        draftRecord = await AiQuestionDraft.create({
+          title: quiz.title,
+          topic,
+          grade,
+          difficulty: String(difficulty || 'orta').toLowerCase(),
+          count,
+          questions: preparedQuestions.map(q => ({
+            text: q.text,
+            options: q.options,
+            answer: q.answer,
+            explanation: q.explanation,
+            svg: q.svg || '',
+            status: 'draft',
+            similarityScore: 0,
+            similarQuestionId: null
+          })),
+          status: 'draft',
+          source: 'pool_cache',
+          createdBy: req.session.user.id
+        });
+      } catch (draftErr) {
+        console.warn('[AI] Havuz taslak kaydı hatası:', draftErr.message);
+      }
+
+      const draftId = draftRecord ? draftRecord._id.toString() : null;
+      return res.json({
+        fromCache: true,
+        draftId,
+        quiz: {
+          id: draftId,
+          draftId,
+          title: quiz.title,
+          description: quiz.description,
+          topic: quiz.topic,
+          grade: quiz.grade,
+          difficulty: quiz.difficulty,
+          soruSayisi: quiz.questions.length,
+          questions: preparedQuestions
+        }
+      });
+    }
+
+    // Eksik kalan soru adedi kadar API'den talep et
+    const neededCount = count - cachedPoolQuestions.length;
+
     const prompt = [
       'Türkçe eğitim platformu için özgün, pedagojik olarak doğru, yeni nesil matematik soruları hazırla.',
-      `Sınıf düzeyi: ${grade}. sınıf (MEB Türkiye Yüzyılı Maarif Modeli). Konu: ${topic}. Zorluk: ${difficulty}. Tam olarak ${count} soru üret.`,
+      `Sınıf düzeyi: ${grade}. sınıf (MEB Türkiye Yüzyılı Maarif Modeli). Konu: ${topic}. Zorluk: ${difficulty}. Tam olarak ${neededCount} soru üret.`,
       `Sorular yalnızca ${grade}. sınıf kazanımları ve ön koşulları içinde kalsın; üst sınıf konu veya formüllerini kullanma.`,
+      'Cevapları, soru ve açıklama metinlerini gereksiz uzatma, kısa, net ve pedagojik tut; SVG kodlarını en sade haliyle üret.',
       'MATEMATİK VE GEOMETRİ FORMÜL KURALLARI (ZORUNLU):',
       '- Soru metnindeki (text), tüm seçeneklerdeki (options: A, B, C, D) ve açıklamadaki (explanation) TÜM matematiksel ve geometrik ifadeleri, değişkenleri ($x$, $y$), geometrik şekil ve açı sembollerini ($ABC$, $[AB] \\perp [AC]$, $\\widehat{BAC}$), üslü/köklü sayıları ($3^{x-1}$, $x^2$, $\\sqrt{16}$), alt indisli terimleri ($y_K$, $x_A$) ve uzunlukları ($|AB| = 4$) KESİNLİKLE tek dolar ($ ... $) işareti içine alarak yaz.',
       '- JSON formatında geçerli olması için LaTeX komutlarındaki ters eğik çizgileri (\\) MUTLAKA çift ters eğik çizgi ile kaçır (escape et): "\\\\perp", "\\\\parallel", "\\\\widehat", "\\\\frac", "\\\\sqrt", "\\\\circ", "\\\\times", "\\\\cdot". Kesinlikle tek ters eğik çizgi veya geçersiz JSON kaçış karakteri kullanma.',
@@ -336,13 +431,15 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       'Yalnızca istenen JSON şemasına uyan JSON döndür; Markdown veya fazladan metin ekleme.'
     ].join('\n');
 
-    // Çoklu model desteği ve otomatik geçiş (önce ultra hızlı lite, sonra diğerleri)
+    // Güvenli Ajan/Model Doğrulaması (İzin verilen modeller: flash-lite, flash, pro)
+    const ALLOWED_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-pro'];
+    const requestedModel = typeof req.body?.selectedModel === 'string' ? req.body.selectedModel.trim() : '';
+    const activeModel = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'gemini-2.5-flash';
+
+    // Model zinciri: Öğretmenin seçtiği model öncelikli; gerekirse güvenli flash modellerine fallback
     const candidateModels = [
-      process.env.GEMINI_MODEL,
-      'gemini-3.1-flash-lite',
-      'gemini-3.5-flash',
-      'gemini-flash-latest',
-      'gemini-3.8-flash'
+      activeModel,
+      ...(activeModel !== 'gemini-2.5-flash' ? ['gemini-2.5-flash'] : ['gemini-2.5-flash-lite', 'gemini-3.1-flash-lite'])
     ].filter(Boolean);
 
     let response = null;
@@ -434,7 +531,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       return res.status(502).json({ mesaj: 'Yapay zeka geçerli soru verisi döndürmedi. Lütfen yeniden deneyin.' });
     }
 
-    if (!Array.isArray(result.questions) || result.questions.length !== count ||
+    if (!Array.isArray(result.questions) || result.questions.length !== neededCount ||
         !result.questions.every(isValidQuestion)) {
       console.error('Gemini yanıtı beklenen soru biçimini karşılamadı.');
       return res.status(502).json({ mesaj: 'Üretilen sorular doğrulanamadı. Lütfen yeniden deneyin.' });
@@ -442,15 +539,16 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
 
     let preparedQuestions;
     try {
-      preparedQuestions = result.questions.map(q => prepareAIQuestion(q, { topic, grade }));
+      const allRawQuestions = [...cachedPoolQuestions, ...result.questions];
+      preparedQuestions = allRawQuestions.map(q => prepareAIQuestion(q, { topic, grade }));
     } catch (error) {
       if (!(error instanceof TypeError)) throw error;
       return res.status(502).json({ mesaj: 'Üretilen sorular doğrulanamadı. Lütfen yeniden deneyin.' });
     }
 
     const quiz = {
-      title: `${topic} — ${difficulty} seviye (Yapay zeka)`,
-      description: `${count} soruluk yapay zeka destekli çalışma testi.`,
+      title: `${topic} — ${difficulty} seviye ${cachedPoolQuestions.length > 0 ? '(Havuz + Yapay Zeka)' : '(Yapay zeka)'}`,
+      description: `${count} soruluk çalışma testi.`,
       topic,
       grade,
       difficulty,

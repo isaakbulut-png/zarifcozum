@@ -268,7 +268,22 @@ app.get('/api/mufredat-ozet', mufredatKonulariLimiter, requireKonuLogin, async (
 
 app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, async (req, res) => {
   try {
-    const request = normalizeAiChatRequest(req.body);
+    const request = normalizeAiChatRequest(req.body, req.session?.user?.role);
+
+    // Maliyetsiz Kısa Hafıza: Son 2 mesaj çiftini (4 mesaj) veritabanından alıp modele aktar
+    if (!request.history || request.history.length === 0) {
+      const pastMessages = await ChatMessage.find({ userId: req.session.user.id, roomName: 'assistant' })
+        .sort({ createdAt: -1 })
+        .limit(4)
+        .lean();
+      if (pastMessages && pastMessages.length > 0) {
+        request.history = pastMessages.reverse().map(m => ({
+          role: m.sender === 'user' ? 'user' : 'model',
+          text: m.message
+        }));
+      }
+    }
+
     const yanit = await generateAssistantReply(request);
     const createdAt = new Date();
     await ChatMessage.create([
