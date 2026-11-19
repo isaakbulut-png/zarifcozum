@@ -53,6 +53,7 @@ const Deneme = require('./models/Deneme');
 const { createWebhookRouter } = require('./routes/webhooks');
 const { attachRealtimeChat } = require('./lib/realtime-chat');
 const { normalizeAiChatRequest, createAiChatReply } = require('./lib/ai-chat');
+const { aiQuotaMiddleware, getQuotaStatus } = require('./middleware/aiQuota');
 const { createFaqService } = require('./lib/faq-service');
 const { redisOptions } = require('./lib/redis-options');
 const { studentQuestion } = require('./lib/quiz-content');
