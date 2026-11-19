@@ -101,6 +101,10 @@ button,select{font:inherit}
 .nav a.gz-cta small{font-size:.72rem;color:rgba(255,255,255,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nav a.gz-cta .gz-cta-arrow{font-size:1rem;font-weight:700;color:rgba(255,255,255,0.8);transition:transform .2s ease}
 .nav a.gz-cta:hover .gz-cta-arrow{transform:translateX(3px);color:#fff}
+.nav a.gz-cta[aria-current="page"]{
+  outline:2px solid #fff;outline-offset:2px;transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(124,58,237,0.65);border-color:#fff;
+}
 
 /* Navigasyon Listesi ve Kategoriler */
 .nav{display:flex;flex-direction:column;gap:3px;list-style:none;margin:0;padding:0}
@@ -339,7 +343,7 @@ button,select{font:inherit}
     <nav aria-label="Ana menü">
       <ul class="nav">
         <li>
-          <a class="gz-cta" href="asistan.html" title="AI Mentör ile Serbest Sohbet">
+          <a class="gz-cta" href="#ai-mentor-panel" title="AI Mentör ile Serbest Sohbet">
             <div class="gz-cta-sparkle">
               <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM9 13a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
             </div>
@@ -476,6 +480,78 @@ button,select{font:inherit}
           <h3>Öğretmen yorumu</h3>
           <div id="gzLatestComment"></div>
         </article>
+      </div>
+    </section>
+
+    <!-- AI Mentör Özel Çalışma Alanı -->
+    <section class="panel-view" id="ai-mentor-panel" data-panel-view="ai-mentor-panel" hidden>
+      <div class="section-head">
+        <div>
+          <span class="chip hot" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:8px">
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM9 13a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
+            7/24 Canlı Sokratik Mentör
+          </span>
+          <h2>AI Mentör ile Birebir Sohbet &amp; Soru Çözümü</h2>
+          <p class="hint" style="font-size:.92rem;color:var(--muted)">MEB Türkiye Yüzyılı Maarif Modeli ve tüm ders kitapları entegrasyonuyla 4 farklı modda yapay zekâ desteği al.</p>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden;border:1px solid var(--line);box-shadow:0 4px 20px rgba(0,0,0,0.06);background:#fff">
+        <!-- Rol Seçici Çubuk -->
+        <div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;background:var(--bg);border-bottom:1px solid var(--line);align-items:center" id="studentAiRolesBar">
+          <button type="button" class="student-ai-pill active" data-role="ai_mentor" style="padding:7px 16px;border-radius:999px;border:1px solid #7a4f2d;background:#7a4f2d;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s">🧠 Sokratik Mentör (Bana Buldur)</button>
+          <button type="button" class="student-ai-pill" data-role="ogretmen_ikizi" style="padding:7px 16px;border-radius:999px;border:1px solid #d9d3c3;background:#fff;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s">👨‍🏫 Öğretmen İkizi (Farklı Anlat)</button>
+          <button type="button" class="student-ai-pill" data-role="soru_cozum" style="padding:7px 16px;border-radius:999px;border:1px solid #d9d3c3;background:#fff;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s">📝 Adım Adım Soru Çözümü</button>
+          <button type="button" class="student-ai-pill" data-role="ai_koc" style="padding:7px 16px;border-radius:999px;border:1px solid #d9d3c3;background:#fff;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s">🎯 AI Koç (Çalışma &amp; Motivasyon)</button>
+        </div>
+
+        <!-- Sınıf Düzeyi ve Mod Açıklaması -->
+        <div style="display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px">
+            <label for="studentAiGradeSelect" style="font-weight:600;color:var(--text)">Sınıf Seviyesi:</label>
+            <select id="studentAiGradeSelect" style="padding:5px 12px;border-radius:8px;border:1px solid var(--line);font-size:13px;background:#fff;color:var(--text)">
+              <option value="">Genel (5-12. Sınıf)</option>
+              <option value="5">5. Sınıf</option>
+              <option value="6">6. Sınıf</option>
+              <option value="7">7. Sınıf</option>
+              <option value="8">8. Sınıf</option>
+              <option value="9">9. Sınıf</option>
+              <option value="10">10. Sınıf</option>
+              <option value="11">11. Sınıf</option>
+              <option value="12">12. Sınıf</option>
+            </select>
+          </div>
+          <span style="color:var(--muted);font-size:12px;margin-left:auto" id="studentAiRoleDesc">Cevabı doğrudan vermez; ipuçları, rehber sorular ve şekillerle senin bulmanı sağlar.</span>
+          <button type="button" id="studentAiClearBtn" style="font-size:12px;padding:4px 10px;cursor:pointer;color:var(--muted);border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:500">🧹 Sohbeti Temizle</button>
+        </div>
+
+        <!-- Sohbet Akışı Mesaj Alanı -->
+        <div id="studentAiChatBody" style="height:440px;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;background:var(--card)" aria-live="polite">
+          <!-- Başlangıç Mentör Mesajı -->
+          <div style="align-self:flex-start;max-width:85%;padding:14px 18px;background:#fff;border:1px solid var(--line);border-radius:16px;border-bottom-left-radius:4px;font-size:14px;line-height:1.6;box-shadow:0 2px 6px rgba(0,0,0,.03);color:var(--text)">
+            <div style="font-weight:700;color:#7a4f2d;font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+              <span>🤖</span><span>AI Mentör (Sokratik Rehber)</span>
+            </div>
+            <div>Merhaba! Ben senin yapay zekâ matematik mentörünüm. Anlamadığın bir konuyu, çözemediğin bir soruyu ya da takıldığın bir matematiksel kavramı bana yazabilirsin. Cevabı doğrudan ezberletmek yerine, adım adım senin keşfetmeni sağlayacağım. Nereden başlayalım?</div>
+          </div>
+        </div>
+
+        <!-- Hızlı Örnek Sorular (Tek tıkla başlangıç) -->
+        <div style="display:flex;gap:8px;padding:10px 16px;background:#fff;border-top:1px dashed var(--line);overflow-x:auto" id="studentAiPromptsBar">
+          <span style="font-size:12px;font-weight:600;color:var(--muted);align-self:center;white-space:nowrap">Örnek Konular:</span>
+          <button type="button" class="student-quick-prompt" style="padding:5px 12px;border-radius:99px;border:1px solid #d9d3c3;background:var(--card);font-size:12px;cursor:pointer;white-space:nowrap;color:var(--text)">📐 Pisagor teoremini bir örnekle anlatır mısın?</button>
+          <button type="button" class="student-quick-prompt" style="padding:5px 12px;border-radius:99px;border:1px solid #d9d3c3;background:var(--card);font-size:12px;cursor:pointer;white-space:nowrap;color:var(--text)">🔢 Kareköklü sayılarda toplama nasıl yapılır?</button>
+          <button type="button" class="student-quick-prompt" style="padding:5px 12px;border-radius:99px;border:1px solid #d9d3c3;background:var(--card);font-size:12px;cursor:pointer;white-space:nowrap;color:var(--text)">🎯 Bu hafta için günlük 45 dk matematik çalışma planı yap</button>
+        </div>
+
+        <!-- Mesaj Gönderme Formu -->
+        <form id="studentAiForm" style="display:flex;gap:10px;padding:14px 16px;background:#fff;border-top:1px solid var(--line);align-items:center">
+          <input type="text" id="studentAiInput" placeholder="Matematik sorunu, konuyu veya takıldığın adımı yaz…" autocomplete="off" style="flex:1;padding:12px 16px;border:1px solid var(--line);border-radius:10px;font-size:14px;background:var(--card);color:var(--text)" required maxlength="1000">
+          <button type="submit" id="studentAiSubmit" style="padding:12px 24px;background:var(--orange);color:#fff;border:none;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .18s ease">
+            <span>Gönder</span>
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </form>
       </div>
     </section>
 
@@ -789,6 +865,9 @@ button,select{font:inherit}
     async function loadStudentHomework() {
       try {
         const {students, homeworks} = await api('/api/student/homeworks');
+        if (students.length && $('studentAiGradeSelect') && !$('studentAiGradeSelect').value) {
+          $('studentAiGradeSelect').value = String(students[0].grade);
+        }
         $('linkedStudentProfiles').innerHTML = students.length
           ? students.map(profile => `<span class="chip">${esc(profile.firstName)} · ${profile.grade}. sınıf / ${esc(profile.section)}</span>`).join('')
           : '<p class="feed-status">Henüz öğretmen öğrenci profilinize bağlı değil.</p>';
@@ -1416,6 +1495,143 @@ button,select{font:inherit}
         button.disabled = false;
       }
     });
+
+    // ---- Öğrenci AI Mentör Çalışma Alanı ----
+    let studentActiveRole = 'ai_mentor';
+    const studentRoleDescs = {
+      ai_mentor: 'Cevabı doğrudan vermez; ipuçları, rehber sorular ve şekillerle senin bulmanı sağlar.',
+      ogretmen_ikizi: 'Konuyu günlük hayattan somut benzetmeler ve farklı anlatım yollarıyla basitleştirir.',
+      soru_cozum: 'Sorunun çözümünü adım adım, kuralları ve gerekçeleriyle açıklar.',
+      ai_koc: 'Sana özel haftalık çalışma planı, motivasyon ve sınav taktikleri sunar.'
+    };
+
+    const studentRoleLabels = {
+      ai_mentor: '🧠 Sokratik Mentör',
+      ogretmen_ikizi: '👨‍🏫 Öğretmen İkizi',
+      soru_cozum: '📝 Soru Çözümü',
+      ai_koc: '🎯 AI Koç'
+    };
+
+    const studentRolePills = document.querySelectorAll('.student-ai-pill');
+    studentRolePills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        studentRolePills.forEach(p => {
+          p.style.background = '#fff';
+          p.style.color = 'var(--text)';
+          p.style.borderColor = '#d9d3c3';
+          p.style.fontWeight = '500';
+        });
+        pill.style.background = '#7a4f2d';
+        pill.style.color = '#fff';
+        pill.style.borderColor = '#7a4f2d';
+        pill.style.fontWeight = '600';
+        studentActiveRole = pill.dataset.role || 'ai_mentor';
+        if ($('studentAiRoleDesc')) $('studentAiRoleDesc').textContent = studentRoleDescs[studentActiveRole] || '';
+        $('studentAiInput')?.focus();
+      });
+    });
+
+    // Hızlı örnek sorular
+    document.querySelectorAll('.student-quick-prompt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const inp = $('studentAiInput');
+        if (inp) {
+          inp.value = btn.textContent.replace(/^[^\wüğışöçİĞÜŞÖÇ"]+/, '').replace(/^"/, '').replace(/"$/, '').trim();
+          inp.focus();
+        }
+      });
+    });
+
+    // Sohbeti temizle
+    $('studentAiClearBtn')?.addEventListener('click', () => {
+      const chatBody = $('studentAiChatBody');
+      if (chatBody) {
+        chatBody.innerHTML = `
+          <div style="align-self:flex-start;max-width:85%;padding:14px 18px;background:#fff;border:1px solid var(--line);border-radius:16px;border-bottom-left-radius:4px;font-size:14px;line-height:1.6;box-shadow:0 2px 6px rgba(0,0,0,.03);color:var(--text)">
+            <div style="font-weight:700;color:#7a4f2d;font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+              <span>🤖</span><span>AI Mentör (Sokratik Rehber)</span>
+            </div>
+            <div>Sohbet geçmişi temizlendi. Yeni bir soru veya konuyla devam edebilirsin.</div>
+          </div>
+        `;
+      }
+    });
+
+    const studentAiForm = $('studentAiForm');
+    if (studentAiForm) {
+      studentAiForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const input = $('studentAiInput');
+        const submitBtn = $('studentAiSubmit');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const chatBody = $('studentAiChatBody');
+        
+        // Öğrenci Balonu
+        const userBubble = document.createElement('div');
+        userBubble.style.cssText = 'align-self:flex-end;max-width:80%;padding:12px 16px;background:#7a4f2d;color:#fff;border-radius:16px;border-bottom-right-radius:4px;font-size:14px;line-height:1.5;box-shadow:0 2px 8px rgba(122,79,45,.25);word-break:break-word';
+        userBubble.textContent = text;
+        chatBody.appendChild(userBubble);
+
+        // Yükleniyor Balonu
+        const loadingBubble = document.createElement('div');
+        loadingBubble.style.cssText = 'align-self:flex-start;max-width:85%;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:16px;border-bottom-left-radius:4px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px';
+        loadingBubble.innerHTML = `<span>⏳</span><span>AI Mentör yanıtını hazırlıyor…</span>`;
+        chatBody.appendChild(loadingBubble);
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        input.value = '';
+        input.disabled = true;
+        submitBtn.disabled = true;
+
+        try {
+          const gradeVal = $('studentAiGradeSelect')?.value;
+          const res = await api('/api/chat', {
+            method: 'POST',
+            body: JSON.stringify({
+              ogrenciMesaji: text,
+              gorevTuru: studentActiveRole,
+              grade: gradeVal ? Number(gradeVal) : undefined
+            })
+          });
+
+          loadingBubble.remove();
+          const aiBubble = document.createElement('div');
+          aiBubble.style.cssText = 'align-self:flex-start;max-width:85%;padding:14px 18px;background:#fff;border:1px solid var(--line);border-radius:16px;border-bottom-left-radius:4px;font-size:14px;line-height:1.6;box-shadow:0 2px 8px rgba(0,0,0,.04);color:var(--text);word-break:break-word';
+          
+          const header = document.createElement('div');
+          header.style.cssText = 'font-weight:700;color:#7a4f2d;font-size:13px;margin-bottom:8px;display:flex;align-items:center;gap:6px';
+          header.innerHTML = `<span>🤖</span><span>${studentRoleLabels[studentActiveRole] || 'AI Mentör'}</span>`;
+          aiBubble.appendChild(header);
+
+          const content = document.createElement('div');
+          content.style.whiteSpace = 'pre-wrap';
+          const yanitMetni = res.yanit || res.text || '';
+          
+          if (window.zarifAiVisual) {
+            window.zarifAiVisual.append(content, yanitMetni);
+          } else {
+            content.textContent = yanitMetni;
+          }
+          
+          if (window.ZarifMathText) {
+            window.ZarifMathText.render(content);
+          }
+
+          aiBubble.appendChild(content);
+          chatBody.appendChild(aiBubble);
+        } catch (err) {
+          loadingBubble.style.color = '#dc2626';
+          loadingBubble.innerHTML = `<span>⚠️</span><span>Hata: ${esc(err.message || 'AI Mentör yanıt veremedi. Lütfen tekrar deneyin.')}</span>`;
+        } finally {
+          input.disabled = false;
+          submitBtn.disabled = false;
+          input.focus();
+          chatBody.scrollTop = chatBody.scrollHeight;
+        }
+      });
+    }
 
     loadContent();
     loadImageExams().catch(error => {
