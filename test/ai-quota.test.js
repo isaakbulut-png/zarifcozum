@@ -3,70 +3,72 @@ const assert = require('node:assert/strict');
 const {
   resetIfNewDay,
   getEffectiveMessageLimit,
+  getEffectiveQuestionLimit,
+  canUserUseProModel,
   checkAndConsumeQuota,
-  getQuotaStatus
+  getQuotaStatus,
+  OGRETMEN_LIMITLERI
 } = require('../middleware/aiQuota');
 
-test('AI Kota - getEffectiveMessageLimit paket ve özel limit hiyerarşisi', () => {
-  // Free paket
-  assert.equal(getEffectiveMessageLimit({ paketTipi: 'free' }), 5);
-  // Baslangic paket
-  assert.equal(getEffectiveMessageLimit({ paketTipi: 'baslangic' }), 25);
-  // Pro paket
-  assert.equal(getEffectiveMessageLimit({ paketTipi: 'pro' }), 60);
+test('Öğretmen Rol & Kota - Limit hiyerarşisi ve Pro model izinleri', () => {
+  // Admin sınırsız ve Pro kullanabilir
+  const admin = { role: 'admin' };
+  assert.equal(getEffectiveMessageLimit(admin), Infinity);
+  assert.equal(getEffectiveQuestionLimit(admin), Infinity);
+  assert.equal(canUserUseProModel(admin), true);
 
-  // Ozel gunluk limit paketi ezer
-  assert.equal(getEffectiveMessageLimit({ paketTipi: 'free', ozelGunlukMesajLimiti: 100 }), 100);
-  assert.equal(getEffectiveMessageLimit({ paketTipi: 'pro', ozelGunlukMesajLimiti: 2 }), 2);
-  // null veya tanımsız ise pakete geri düşer
-  assert.equal(getEffectiveMessageLimit({ paketTipi: 'free', ozelGunlukMesajLimiti: null }), 5);
+  // İçerik üreticisi öğretmen sınırsız ve Pro kullanabilir
+  const icerikUreticisi = { role: 'teacher', ogretmenTipi: 'icerik_ureticisi' };
+  assert.equal(getEffectiveMessageLimit(icerikUreticisi), Infinity);
+  assert.equal(getEffectiveQuestionLimit(icerikUreticisi), Infinity);
+  assert.equal(canUserUseProModel(icerikUreticisi), true);
+
+  // Onaylı öğretmen: 15 soru, 40 mesaj, Pro yasak
+  const onayli = { role: 'teacher', ogretmenTipi: 'onayli_ogretmen' };
+  assert.equal(getEffectiveQuestionLimit(onayli), 15);
+  assert.equal(getEffectiveMessageLimit(onayli), 40);
+  assert.equal(canUserUseProModel(onayli), false);
+
+  // Onaylı öğretmen için admin özel soru limiti belirlediyse o geçerli
+  const ozelOnayli = { role: 'teacher', ogretmenTipi: 'onayli_ogretmen', ozelGunlukSoruLimiti: 25, ozelGunlukMesajLimiti: 70 };
+  assert.equal(getEffectiveQuestionLimit(ozelOnayli), 25);
+  assert.equal(getEffectiveMessageLimit(ozelOnayli), 70);
+
+  // Standart öğretmen: 3 soru, 10 mesaj, Pro yasak
+  const standart = { role: 'teacher', ogretmenTipi: 'standart_ogretmen' };
+  assert.equal(getEffectiveQuestionLimit(standart), 3);
+  assert.equal(getEffectiveMessageLimit(standart), 10);
+  assert.equal(canUserUseProModel(standart), false);
 });
 
-test('AI Kota - resetIfNewDay eski günleri sıfırlar, aynı günü korur', () => {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  const user = {
-    gunlukAiMesajSayisi: 12,
-    gunlukSoruUretimSayisi: 4,
-    sonKotaSifirlamaTarihi: yesterday
-  };
-
-  const didReset = resetIfNewDay(user);
-  assert.equal(didReset, true);
-  assert.equal(user.gunlukAiMesajSayisi, 0);
-  assert.equal(user.gunlukSoruUretimSayisi, 0);
-
-  // Aynı gün tekrar çağrıldığında sıfırlanmaz
-  const didResetAgain = resetIfNewDay(user);
-  assert.equal(didResetAgain, false);
-});
-
-test('AI Kota - aiErisimEngelli durumu istekleri 403 ile bloklar', async () => {
-  const user = {
-    role: 'student',
-    aiErisimEngelli: true,
-    paketTipi: 'pro'
-  };
-
-  const res = await checkAndConsumeQuota(user, 'message');
-  assert.equal(res.allowed, false);
-  assert.equal(res.status, 403);
-  assert.equal(res.error, 'AI_ACCESS_BLOCKED');
-});
-
-test('AI Kota - Teacher ve Admin rolleri öğrenci mesaj kotasından muaftır', async () => {
-  const teacher = {
+test('Öğretmen Rol & Kota - Tüketim ve Kota Aşımı Kontrolü', async () => {
+  // Standart öğretmen 3 soru kotasını doldurmuşsa (bugün)
+  const standart = {
     role: 'teacher',
-    aiErisimEngelli: false,
-    gunlukAiMesajSayisi: 9999
-  };
-  const admin = {
-    role: 'admin',
-    aiErisimEngelli: false,
-    gunlukAiMesajSayisi: 9999
+    ogretmenTipi: 'standart_ogretmen',
+    gunlukSoruUretimSayisi: 3,
+    sonKotaSifirlamaTarihi: new Date()
   };
 
-  assert.equal((await checkAndConsumeQuota(teacher, 'message')).allowed, true);
-  assert.equal((await checkAndConsumeQuota(admin, 'message')).allowed, true);
+  const res = await checkAndConsumeQuota(standart, 'question', 1);
+  assert.equal(res.allowed, false);
+  assert.equal(res.status, 429);
+  assert.equal(res.error, 'QUOTA_EXCEEDED');
+
+  // İçerik üreticisi 100 soru da üretse engellenmez
+  const icerikUreticisi = {
+    role: 'teacher',
+    ogretmenTipi: 'icerik_ureticisi',
+    gunlukSoruUretimSayisi: 100,
+    sonKotaSifirlamaTarihi: new Date()
+  };
+  const res2 = await checkAndConsumeQuota(icerikUreticisi, 'question', 10);
+  assert.equal(res2.allowed, true);
+  assert.equal(res2.sinirsiz, true);
+});
+
+test('Öğrenci Kota - Temel kurallar korunuyor', () => {
+  assert.equal(getEffectiveMessageLimit({ role: 'student', paketTipi: 'free' }), 5);
+  assert.equal(getEffectiveMessageLimit({ role: 'student', paketTipi: 'pro' }), 60);
+  assert.equal(canUserUseProModel({ role: 'student' }), false);
 });

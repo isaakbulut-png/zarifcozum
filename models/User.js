@@ -89,6 +89,17 @@ const userSchema = new mongoose.Schema({
     default: null
   },
   // Yapay Zekâ Kota ve Denetim Alanları
+  // Öğretmen Rol & Yetki Seviyesi
+  ogretmenTipi: {
+    type: String,
+    enum: ['icerik_ureticisi', 'onayli_ogretmen', 'standart_ogretmen'],
+    default: 'standart_ogretmen',
+    index: true
+  },
+  ozelGunlukSoruLimiti: {
+    type: Number,
+    default: null
+  },
   paketTipi: {
     type: String,
     enum: ['free', 'baslangic', 'pro'],

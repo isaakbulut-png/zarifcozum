@@ -1312,7 +1312,7 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
 
       const [users, totalCount] = await Promise.all([
         User.find(filter)
-          .select('name email role paketTipi gunlukAiMesajSayisi ozelGunlukMesajLimiti ekstraBonusKredi toplamHarcananToken toplamMaliyetTL aiErisimEngelli sonKotaSifirlamaTarihi')
+          .select('name email role ogretmenTipi paketTipi gunlukAiMesajSayisi gunlukSoruUretimSayisi ozelGunlukMesajLimiti ozelGunlukSoruLimiti ekstraBonusKredi toplamHarcananToken toplamMaliyetTL aiErisimEngelli sonKotaSifirlamaTarihi')
           .sort(sortQuery)
           .skip(skip)
           .limit(limitNum)
@@ -1321,23 +1321,31 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
       ]);
 
       const formatted = users.map(u => {
+        const { getEffectiveMessageLimit, getEffectiveQuestionLimit, canUserUseProModel } = require('../middleware/aiQuota');
         const pTipi = u.paketTipi || 'free';
-        const tabanLimit = (PAKET_LIMITLERI[pTipi] || PAKET_LIMITLERI.free).maxMessages;
-        const ozelLimit = typeof u.ozelGunlukMesajLimiti === 'number' ? u.ozelGunlukMesajLimiti : null;
-        const etkinLimit = ozelLimit !== null ? ozelLimit : tabanLimit;
+        const oTip = u.ogretmenTipi || 'standart_ogretmen';
+        const etkinLimit = getEffectiveMessageLimit(u);
+        const etkinSoruLimiti = getEffectiveQuestionLimit(u);
         const gunlukKullanim = u.gunlukAiMesajSayisi || 0;
-        const kalanHak = Math.max(0, etkinLimit - gunlukKullanim);
+        const gunlukSoruKullanim = u.gunlukSoruUretimSayisi || 0;
+        const isSinirsiz = u.role === 'admin' || (u.role === 'teacher' && oTip === 'icerik_ureticisi');
 
         return {
           id: u._id.toString(),
           name: u.name || 'İsimsiz Kullanıcı',
           email: u.email,
           role: u.role,
+          ogretmenTipi: u.role === 'teacher' ? oTip : undefined,
+          ozelGunlukSoruLimiti: u.ozelGunlukSoruLimiti,
+          gunlukSoruKullanim,
+          etkinSoruLimiti,
+          proModelIzni: canUserUseProModel(u),
+          sinirsiz: isSinirsiz,
           paketTipi: pTipi,
           gunlukKullanim,
-          ozelGunlukMesajLimiti: ozelLimit,
+          ozelGunlukMesajLimiti: u.ozelGunlukMesajLimiti,
           etkinLimit,
-          kalanHak,
+          kalanHak: isSinirsiz ? 'Sınırsız' : Math.max(0, etkinLimit - gunlukKullanim),
           ekstraBonusKredi: u.ekstraBonusKredi || 0,
           toplamHarcananToken: u.toplamHarcananToken || 0,
           toplamMaliyetTL: Number((u.toplamMaliyetTL || 0).toFixed(2)),
@@ -1365,8 +1373,10 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
         userId,
         islem,
         ozelGunlukMesajLimiti,
+        ozelGunlukSoruLimiti,
         bonusMiktar,
         paketTipi,
+        ogretmenTipi,
         aiErisimEngelli
       } = req.body;
 
@@ -1392,6 +1402,24 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
           }
           user.ozelGunlukMesajLimiti = parsed;
           degisiklikDetayi.ozelGunlukMesajLimiti = parsed;
+        }
+      } else if (islem === 'ogretmen_tipi_guncelle') {
+        if (!['icerik_ureticisi', 'onayli_ogretmen', 'standart_ogretmen'].includes(ogretmenTipi)) {
+          return res.status(400).json({ mesaj: 'Geçersiz öğretmen tipi. (icerik_ureticisi, onayli_ogretmen, standart_ogretmen)' });
+        }
+        user.ogretmenTipi = ogretmenTipi;
+        degisiklikDetayi.yeniOgretmenTipi = ogretmenTipi;
+      } else if (islem === 'soru_limiti_duzenle') {
+        if (ozelGunlukSoruLimiti === null || ozelGunlukSoruLimiti === '' || ozelGunlukSoruLimiti === 'null') {
+          user.ozelGunlukSoruLimiti = null;
+          degisiklikDetayi.ozelGunlukSoruLimiti = 'Varsayılan yetki limitine dönüldü';
+        } else {
+          const parsed = parseInt(ozelGunlukSoruLimiti, 10);
+          if (isNaN(parsed) || parsed < 0) {
+            return res.status(400).json({ mesaj: 'Geçersiz soru limiti değeri.' });
+          }
+          user.ozelGunlukSoruLimiti = parsed;
+          degisiklikDetayi.ozelGunlukSoruLimiti = parsed;
         }
       } else if (islem === 'bonus_ekle') {
         const miktar = parseInt(bonusMiktar, 10) || 20;

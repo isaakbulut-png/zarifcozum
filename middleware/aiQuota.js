@@ -1,10 +1,17 @@
 const User = require('../models/User');
 
-// Paket Varsayılan Limitleri
+// Öğrenci Paket Varsayılan Limitleri
 const PAKET_LIMITLERI = {
   free: { maxMessages: 5, maxQuestions: 0 },
   baslangic: { maxMessages: 25, maxQuestions: 3 },
   pro: { maxMessages: 60, maxQuestions: 10 }
+};
+
+// Öğretmen Rol & Yetki Varsayılan Limitleri
+const OGRETMEN_LIMITLERI = {
+  icerik_ureticisi: { maxQuestions: Infinity, maxMessages: Infinity, allowPro: true },
+  onayli_ogretmen: { maxQuestions: 15, maxMessages: 40, allowPro: false },
+  standart_ogretmen: { maxQuestions: 3, maxMessages: 10, allowPro: false }
 };
 
 /**
@@ -30,9 +37,28 @@ function resetIfNewDay(user) {
 
 /**
  * Kullanıcının etkin günlük mesaj limitini hesaplar.
- * Eğer ozelGunlukMesajLimiti tanımlıysa paketi ezer.
  */
 function getEffectiveMessageLimit(user) {
+  if (!user) return 5;
+
+  // Admin her zaman sınırsız
+  if (user.role === 'admin') return Infinity;
+
+  // Öğretmen Rolleri
+  if (user.role === 'teacher') {
+    const oTip = user.ogretmenTipi || 'standart_ogretmen';
+    if (oTip === 'icerik_ureticisi') return Infinity;
+
+    // Admin özel limit belirlemişse paketi ezer
+    if (typeof user.ozelGunlukMesajLimiti === 'number' && user.ozelGunlukMesajLimiti >= 0) {
+      return user.ozelGunlukMesajLimiti;
+    }
+
+    const tLimits = OGRETMEN_LIMITLERI[oTip] || OGRETMEN_LIMITLERI.standart_ogretmen;
+    return tLimits.maxMessages;
+  }
+
+  // Öğrenci Rolü
   if (typeof user.ozelGunlukMesajLimiti === 'number' && user.ozelGunlukMesajLimiti >= 0) {
     return user.ozelGunlukMesajLimiti;
   }
@@ -41,49 +67,71 @@ function getEffectiveMessageLimit(user) {
 }
 
 /**
- * Kullanıcının etkin soru üretim limitini hesaplar.
+ * Kullanıcının etkin yeni soru üretim limitini hesaplar.
  */
 function getEffectiveQuestionLimit(user) {
+  if (!user) return 0;
+
+  // Admin her zaman sınırsız
+  if (user.role === 'admin') return Infinity;
+
+  // Öğretmen Rolleri
+  if (user.role === 'teacher') {
+    const oTip = user.ogretmenTipi || 'standart_ogretmen';
+    if (oTip === 'icerik_ureticisi') return Infinity;
+
+    // Admin özel limit belirlemişse ozelGunlukSoruLimiti önceliklidir
+    if (typeof user.ozelGunlukSoruLimiti === 'number' && user.ozelGunlukSoruLimiti >= 0) {
+      return user.ozelGunlukSoruLimiti;
+    }
+
+    const tLimits = OGRETMEN_LIMITLERI[oTip] || OGRETMEN_LIMITLERI.standart_ogretmen;
+    return tLimits.maxQuestions;
+  }
+
+  // Öğrenci Rolü
   const paket = PAKET_LIMITLERI[user.paketTipi] || PAKET_LIMITLERI.free;
   return paket.maxQuestions;
+}
+
+/**
+ * Kullanıcının gemini-2.5-pro modelini seçme yetkisi var mı?
+ */
+function canUserUseProModel(user) {
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+  if (user.role === 'teacher' && user.ogretmenTipi === 'icerik_ureticisi') return true;
+  return false;
 }
 
 /**
  * Kullanıcının yapay zeka kotasını denetler ve kullanır.
  * @param {Object} userDoc - Veritabanındaki User dökümanı
  * @param {'message' | 'question'} islemTuru - Yapılan işlem
+ * @param {number} miktar - Tüketilecek hak (varsayılan: 1)
  * @returns {Promise<{ allowed: boolean, reason?: string, error?: string, status?: number }>}
  */
-async function checkAndConsumeQuota(userDoc, islemTuru = 'message') {
+async function checkAndConsumeQuota(userDoc, islemTuru = 'message', miktar = 1) {
   if (!userDoc) {
-    return { allowed: true }; // Girişsiz kullanıcı veya oturum dışı (genel kurallar işler)
-  }
-
-  // Öğretmen ve Admin rolleri öğrenci kotalarından muaftır
-  if (['teacher', 'admin'].includes(userDoc.role)) {
-    // Ancak AI erişimi özellikle kilitlenmişse engellenir
-    if (userDoc.aiErisimEngelli) {
-      return {
-        allowed: false,
-        status: 403,
-        error: 'AI_ACCESS_BLOCKED',
-        message: 'Yapay zekâ erişiminiz yönetici tarafından geçici olarak durdurulmuştur.'
-      };
-    }
     return { allowed: true };
   }
 
-  // 1. AI Erişim Engeli Kontrolü
-  if (userDoc.aiErisimEngelli) {
+  // 1. AI Erişim Engeli Kontrolü (Admin hariç)
+  if (userDoc.role !== 'admin' && userDoc.aiErisimEngelli) {
     return {
       allowed: false,
       status: 403,
       error: 'AI_ACCESS_BLOCKED',
-      message: 'Yapay zekâ erişiminiz yönetici tarafından geçici olarak askıya alınmıştır. Destek ile iletişime geçebilirsiniz.'
+      message: 'Yapay zekâ erişiminiz yönetici tarafından geçici olarak durdurulmuştur. Lütfen destek ile iletişime geçin.'
     };
   }
 
-  // 2. Yeni Gün Kontrolü ve Sayaç Sıfırlama
+  // 2. Admin ve İçerik Üreticisi tamamen SINIRSIZ
+  if (userDoc.role === 'admin' || (userDoc.role === 'teacher' && userDoc.ogretmenTipi === 'icerik_ureticisi')) {
+    return { allowed: true, sinirsiz: true };
+  }
+
+  // 3. Yeni Gün Kontrolü ve Sayaç Sıfırlama
   const needsReset = resetIfNewDay(userDoc);
   if (needsReset) {
     await User.updateOne(
@@ -98,41 +146,43 @@ async function checkAndConsumeQuota(userDoc, islemTuru = 'message') {
     ).catch(() => {});
   }
 
-  // 3. Limit Kontrolü
+  const consumeCount = Math.max(1, parseInt(miktar, 10) || 1);
+
+  // 4. Limit Kontrolleri
   if (islemTuru === 'message') {
     const effectiveLimit = getEffectiveMessageLimit(userDoc);
     const used = userDoc.gunlukAiMesajSayisi || 0;
 
-    if (used < effectiveLimit) {
-      // Normal limit dahilinde
-      await User.updateOne({ _id: userDoc._id }, { $inc: { gunlukAiMesajSayisi: 1 } }).catch(() => {});
-      userDoc.gunlukAiMesajSayisi = used + 1;
-      return { allowed: true, kalan: effectiveLimit - (used + 1) };
+    if (used + consumeCount <= effectiveLimit) {
+      await User.updateOne({ _id: userDoc._id }, { $inc: { gunlukAiMesajSayisi: consumeCount } }).catch(() => {});
+      userDoc.gunlukAiMesajSayisi = used + consumeCount;
+      return { allowed: true, kalan: effectiveLimit - (used + consumeCount) };
     }
 
     // Normal limit dolmuş, bonus kredi kontrol et
     const bonus = userDoc.ekstraBonusKredi || 0;
-    if (bonus > 0) {
+    if (bonus >= consumeCount) {
       await User.updateOne(
         { _id: userDoc._id },
         {
           $inc: {
-            gunlukAiMesajSayisi: 1,
-            ekstraBonusKredi: -1
+            gunlukAiMesajSayisi: consumeCount,
+            ekstraBonusKredi: -consumeCount
           }
         }
       ).catch(() => {});
-      userDoc.gunlukAiMesajSayisi = used + 1;
-      userDoc.ekstraBonusKredi = bonus - 1;
-      return { allowed: true, bonusKullanildi: true, kalanBonus: bonus - 1 };
+      userDoc.gunlukAiMesajSayisi = used + consumeCount;
+      userDoc.ekstraBonusKredi = bonus - consumeCount;
+      return { allowed: true, bonusKullanildi: true, kalanBonus: bonus - consumeCount };
     }
 
-    // Hem kota hem bonus bitti
     return {
       allowed: false,
       status: 429,
       error: 'QUOTA_EXCEEDED',
-      message: 'Günlük AI mesaj hakkınız doldu. Paketinizi yükselterek veya yöneticinizden ek hak talep ederek devam edebilirsiniz.',
+      message: userDoc.role === 'teacher'
+        ? `Günlük AI mesaj hakkınız (${effectiveLimit} mesaj) doldu. Yetkinizi yükseltmek için okul yöneticinize başvurabilirsiniz.`
+        : 'Günlük AI mesaj hakkınız doldu. Paketinizi yükselterek devam edebilirsiniz.',
       limit: effectiveLimit,
       kullanilan: used
     };
@@ -140,17 +190,19 @@ async function checkAndConsumeQuota(userDoc, islemTuru = 'message') {
     const questionLimit = getEffectiveQuestionLimit(userDoc);
     const used = userDoc.gunlukSoruUretimSayisi || 0;
 
-    if (used < questionLimit) {
-      await User.updateOne({ _id: userDoc._id }, { $inc: { gunlukSoruUretimSayisi: 1 } }).catch(() => {});
-      userDoc.gunlukSoruUretimSayisi = used + 1;
-      return { allowed: true, kalan: questionLimit - (used + 1) };
+    if (used + consumeCount <= questionLimit) {
+      await User.updateOne({ _id: userDoc._id }, { $inc: { gunlukSoruUretimSayisi: consumeCount } }).catch(() => {});
+      userDoc.gunlukSoruUretimSayisi = used + consumeCount;
+      return { allowed: true, kalan: questionLimit - (used + consumeCount) };
     }
 
     return {
       allowed: false,
       status: 429,
       error: 'QUOTA_EXCEEDED',
-      message: 'Günlük yeni soru üretim limitiniz doldu. Hazır soru havuzundan çözmeye devam edebilir veya paketinizi yükseltebilirsiniz.',
+      message: userDoc.role === 'teacher'
+        ? `Günlük yeni soru üretim kotanız (${questionLimit} soru) doldu. Hazır soru havuzundan sınırsız soru seçebilir veya kota artırımı için yöneticiyle iletişime geçebilirsiniz.`
+        : 'Günlük yeni soru üretim limitiniz doldu. Hazır soru havuzundan soru çözmeye devam edebilirsiniz.',
       limit: questionLimit,
       kullanilan: used
     };
@@ -165,6 +217,7 @@ async function checkAndConsumeQuota(userDoc, islemTuru = 'message') {
 function getQuotaStatus(user) {
   if (!user) {
     return {
+      rol: 'misafir',
       paketTipi: 'free',
       etkinLimit: 5,
       kullanilan: 0,
@@ -175,16 +228,28 @@ function getQuotaStatus(user) {
   }
 
   resetIfNewDay(user);
-  const etkinLimit = getEffectiveMessageLimit(user);
-  const kullanilan = user.gunlukAiMesajSayisi || 0;
-  const kalan = Math.max(0, etkinLimit - kullanilan);
+  const etkinMesajLimiti = getEffectiveMessageLimit(user);
+  const etkinSoruLimiti = getEffectiveQuestionLimit(user);
+  const isSinirsiz = user.role === 'admin' || (user.role === 'teacher' && user.ogretmenTipi === 'icerik_ureticisi');
 
   return {
+    rol: user.role,
+    ogretmenTipi: user.role === 'teacher' ? (user.ogretmenTipi || 'standart_ogretmen') : undefined,
     paketTipi: user.paketTipi || 'free',
-    ozelLimitMi: typeof user.ozelGunlukMesajLimiti === 'number',
-    etkinLimit,
-    kullanilan,
-    kalan,
+    sinirsiz: isSinirsiz,
+    proModelIzni: canUserUseProModel(user),
+    mesaj: {
+      etkinLimit: etkinMesajLimiti,
+      kullanilan: user.gunlukAiMesajSayisi || 0,
+      kalan: isSinirsiz ? Infinity : Math.max(0, etkinMesajLimiti - (user.gunlukAiMesajSayisi || 0)),
+      ozelLimitMi: typeof user.ozelGunlukMesajLimiti === 'number'
+    },
+    soru: {
+      etkinLimit: etkinSoruLimiti,
+      kullanilan: user.gunlukSoruUretimSayisi || 0,
+      kalan: isSinirsiz ? Infinity : Math.max(0, etkinSoruLimiti - (user.gunlukSoruUretimSayisi || 0)),
+      ozelLimitMi: typeof user.ozelGunlukSoruLimiti === 'number'
+    },
     ekstraBonusKredi: user.ekstraBonusKredi || 0,
     toplamHarcananToken: user.toplamHarcananToken || 0,
     toplamMaliyetTL: user.toplamMaliyetTL || 0,
@@ -201,11 +266,10 @@ function aiQuotaMiddleware(islemTuru = 'message') {
       const user = req.session?.user;
       if (!user) return next();
 
-      // Veritabanından güncel kullanıcıyı çek (bellekteki oturum eski olabilir)
       const freshUser = await User.findById(user._id || user.id);
       if (!freshUser) return next();
 
-      const result = await checkAndConsumeQuota(freshUser, islemTuru);
+      const result = await checkAndConsumeQuota(freshUser, islemTuru, 1);
       if (!result.allowed) {
         return res.status(result.status || 429).json({
           error: result.error || 'QUOTA_EXCEEDED',
@@ -216,10 +280,10 @@ function aiQuotaMiddleware(islemTuru = 'message') {
         });
       }
 
-      // Oturumu güncelle
       req.session.user.gunlukAiMesajSayisi = freshUser.gunlukAiMesajSayisi;
+      req.session.user.gunlukSoruUretimSayisi = freshUser.gunlukSoruUretimSayisi;
       req.session.user.ekstraBonusKredi = freshUser.ekstraBonusKredi;
-      req.session.user.paketTipi = freshUser.paketTipi;
+      req.session.user.ogretmenTipi = freshUser.ogretmenTipi;
       req.session.user.aiErisimEngelli = freshUser.aiErisimEngelli;
 
       next();
@@ -232,9 +296,11 @@ function aiQuotaMiddleware(islemTuru = 'message') {
 
 module.exports = {
   PAKET_LIMITLERI,
+  OGRETMEN_LIMITLERI,
   resetIfNewDay,
   getEffectiveMessageLimit,
   getEffectiveQuestionLimit,
+  canUserUseProModel,
   checkAndConsumeQuota,
   getQuotaStatus,
   aiQuotaMiddleware

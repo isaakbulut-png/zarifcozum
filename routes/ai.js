@@ -5,6 +5,7 @@ const { prepareQuestion } = require('../lib/quiz-content');
 const safeSvg = require('../assets/safe-svg');
 const { normalizeBareMath } = require('../assets/math-text');
 const Soru = require('../models/Soru');
+const { canUserUseProModel, checkAndConsumeQuota } = require('../middleware/aiQuota');
 const AiQuestionDraft = require('../models/AiQuestionDraft');
 const ContentLibrary = require('../models/ContentLibrary');
 const { checkQuestionSimilarity, indexQuestionInPinecone } = require('../lib/content-similarity');
@@ -419,6 +420,24 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     // Eksik kalan soru adedi kadar API'den talep et
     const neededCount = count - cachedPoolQuestions.length;
 
+    // Hazır havuzdan karşılanamayan her yeni soru için öğretmen/öğrenci kotasını kontrol et
+    if (neededCount > 0 && req.session.user) {
+      try {
+        const freshUser = await User.findById(req.session.user.id || req.session.user._id);
+        const quotaCheck = await checkAndConsumeQuota(freshUser, 'question', neededCount);
+        if (!quotaCheck.allowed) {
+          return res.status(quotaCheck.status || 429).json({
+            error: quotaCheck.error || 'QUOTA_EXCEEDED',
+            mesaj: quotaCheck.message,
+            limit: quotaCheck.limit,
+            kullanilan: quotaCheck.kullanilan
+          });
+        }
+      } catch (quotaErr) {
+        console.warn('[AI] Kota kontrol hatası:', quotaErr.message);
+      }
+    }
+
     const prompt = [
       'Türkçe eğitim platformu için özgün, pedagojik olarak doğru, yeni nesil matematik soruları hazırla.',
       `Sınıf düzeyi: ${grade}. sınıf (MEB Türkiye Yüzyılı Maarif Modeli). Konu: ${topic}. Zorluk: ${difficulty}. Tam olarak ${neededCount} soru üret.`,
@@ -450,7 +469,12 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     // Güvenli Ajan/Model Doğrulaması (İzin verilen modeller: flash-lite, flash, pro)
     const ALLOWED_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-pro'];
     const requestedModel = typeof req.body?.selectedModel === 'string' ? req.body.selectedModel.trim() : '';
-    const activeModel = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'gemini-2.5-flash';
+    let activeModel = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'gemini-2.5-flash';
+
+    // Model İzni Denetimi: gemini-2.5-pro sadece Admin ve İçerik Üreticisi öğretmenlere açıktır
+    if (activeModel === 'gemini-2.5-pro' && !canUserUseProModel(req.session.user)) {
+      activeModel = 'gemini-2.5-flash'; // Yetkisiz öğretmen otomatik flash modeline düşürülür
+    }
 
     // Model zinciri: Öğretmenin seçtiği model öncelikli; gerekirse güvenli flash modellerine fallback
     const candidateModels = [
@@ -626,6 +650,37 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         source: 'ai',
         createdBy: req.session.user.id
       });
+
+      // 3. Kitle Kaynaklı Havuz Büyütme: Üretilen soruları tek tek onaylı soru olarak havuza ekle
+      for (const q of preparedQuestions) {
+        try {
+          await ContentLibrary.create({
+            title: `${topic} Sorusu (${grade}. Sınıf)`,
+            type: 'soru',
+            ders: 'matematik',
+            grade,
+            topic,
+            difficulty: String(difficulty || 'orta').toLowerCase(),
+            content: {
+              text: q.text,
+              options: q.options,
+              answer: q.answer,
+              explanation: q.explanation,
+              svg: q.svg || ''
+            },
+            metadata: {
+              kazanim: topic,
+              source: 'ai_crowdsourced',
+              teacherRole: req.session.user?.ogretmenTipi || 'standart_ogretmen'
+            },
+            status: 'approved', // Sonraki testlerde havuz önbelleği olarak doğrudan kullanılsın
+            source: 'ai_crowdsourced',
+            createdBy: req.session.user.id
+          });
+        } catch (crowdErr) {
+          // Mükerrer veya sessiz geçiş
+        }
+      }
 
       // Merkezi İçerik Havuzuna taslak test kaydı
       await ContentLibrary.create({

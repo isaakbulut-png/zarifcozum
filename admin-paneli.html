@@ -3065,6 +3065,7 @@
 
           tbody.innerHTML = data.kullanicilar.map(u => {
             const isBlocked = u.aiErisimEngelli;
+            const isTeacher = u.role === 'teacher';
             const statusBadge = isBlocked
               ? '<span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:700; background:#fee2e2; color:#b91c1c;">🚫 Kilitli</span>'
               : '<span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:700; background:#dcfce7; color:#15803d;">✅ Aktif</span>';
@@ -3075,9 +3076,31 @@
               pro: '<span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; background:#fef3c7; color:#b45309; border:1px solid #fde68a;">🚀 Pro</span>'
             };
 
-            const usageInfo = typeof u.ozelGunlukMesajLimiti === 'number'
-              ? `<strong style="color:#7a4f2d;">${u.gunlukKullanim} / ${u.etkinLimit}</strong> <small style="color:#b45309; font-weight:600;">(Özel Limit)</small>`
-              : `<span>${u.gunlukKullanim} / ${u.etkinLimit}</span>`;
+            // Öğretmen için rol seçici; Öğrenci için paket rozeti
+            const roleOrPackageCell = isTeacher
+              ? `<select style="padding:4px 8px; font-size:11px; font-weight:700; border-radius:6px; border:1px solid #7c3aed; background:#f5f3ff; color:#6d28d9; cursor:pointer;" onchange="handleTeacherTypeChange('${u.id}', this.value, '${esc(u.name)}')">
+                  <option value="standart_ogretmen" ${u.ogretmenTipi === 'standart_ogretmen' ? 'selected' : ''}>Standart (3 Soru / 10 Mesaj)</option>
+                  <option value="onayli_ogretmen" ${u.ogretmenTipi === 'onayli_ogretmen' ? 'selected' : ''}>Onaylı (15 Soru / 40 Mesaj)</option>
+                  <option value="icerik_ureticisi" ${u.ogretmenTipi === 'icerik_ureticisi' ? 'selected' : ''}>⭐ İçerik Üreticisi (⚡ SINIRSIZ)</option>
+                </select>`
+              : (packageBadges[u.paketTipi] || packageBadges.free);
+
+            // Kullanım Bilgisi (Öğretmen ise hem soru hem mesaj gösterimi)
+            let usageInfo = '';
+            if (isTeacher) {
+              const soruLimitiText = u.sinirsiz ? '∞ Sınırsız' : `${u.gunlukSoruKullanim || 0} / ${u.etkinSoruLimiti} soru`;
+              const mesajLimitiText = u.sinirsiz ? '∞ Sınırsız' : `${u.gunlukKullanim} / ${u.etkinLimit} mesaj`;
+              usageInfo = `
+                <div style="font-size:11px;">
+                  <div>📝 <strong>${soruLimitiText}</strong> ${typeof u.ozelGunlukSoruLimiti === 'number' ? '<span style="color:#b45309;">(Özel)</span>' : ''}</div>
+                  <div style="color:#64748b;">💬 ${mesajLimitiText}</div>
+                </div>
+              `;
+            } else {
+              usageInfo = typeof u.ozelGunlukMesajLimiti === 'number'
+                ? `<strong style="color:#7a4f2d;">${u.gunlukKullanim} / ${u.etkinLimit}</strong> <small style="color:#b45309; font-weight:600;">(Özel)</small>`
+                : `<span>${u.gunlukKullanim} / ${u.etkinLimit}</span>`;
+            }
 
             const bonusBadge = u.ekstraBonusKredi > 0
               ? `<span style="padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;">+${u.ekstraBonusKredi} Bonus</span>`
@@ -3086,10 +3109,15 @@
             return `
               <tr style="border-bottom:1px solid #f3e1cf;">
                 <td style="padding:10px 12px;">
-                  <strong style="color:#523520; display:block;">${esc(u.name)}</strong>
-                  <small style="color:#8c7e72;">${esc(u.email)}</small>
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:13px;">${isTeacher ? '👨‍🏫' : '🎓'}</span>
+                    <div>
+                      <strong style="color:#523520; display:block;">${esc(u.name)}</strong>
+                      <small style="color:#8c7e72;">${esc(u.email)} · ${isTeacher ? '<span style="color:#7c3aed; font-weight:600;">Öğretmen</span>' : 'Öğrenci'}</small>
+                    </div>
+                  </div>
                 </td>
-                <td style="padding:10px 12px;">${packageBadges[u.paketTipi] || packageBadges.free}</td>
+                <td style="padding:10px 12px;">${roleOrPackageCell}</td>
                 <td style="padding:10px 12px;">${usageInfo}</td>
                 <td style="padding:10px 12px;">${bonusBadge}</td>
                 <td style="padding:10px 12px; font-weight:600; color:#523520;">${(u.toplamHarcananToken || 0).toLocaleString('tr-TR')}</td>
@@ -3098,25 +3126,34 @@
                 <td style="padding:10px 12px; text-align:right;">
                   <div style="display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
                     
-                    <!-- +20 Bonus Butonu -->
-                    <button type="button" class="btn sm" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;" title="Öğrenciye anında 20 ek AI mesaj kredisi hediye et" onclick="handleAiBonus('${u.id}', '${esc(u.name)}')">
-                      🎁 +20 Bonus
+                    ${isTeacher ? `
+                      <!-- Öğretmen Özel Soru Limiti Belirle -->
+                      <button type="button" class="btn sm" style="background:#f5f3ff; color:#6d28d9; border-color:#ddd6fe;" title="Öğretmene özel günlük yeni soru üretim limiti gir" onclick="handleTeacherQuestionLimitEdit('${u.id}', '${esc(u.name)}', ${u.ozelGunlukSoruLimiti !== null && u.ozelGunlukSoruLimiti !== undefined ? u.ozelGunlukSoruLimiti : 'null'})">
+                        🎯 Soru Limiti
+                      </button>
+                    ` : `
+                      <!-- Öğrenci +20 Bonus Butonu -->
+                      <button type="button" class="btn sm" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;" title="Öğrenciye anında 20 ek AI mesaj kredisi hediye et" onclick="handleAiBonus('${u.id}', '${esc(u.name)}')">
+                        🎁 +20 Bonus
+                      </button>
+                    `}
+
+                    <!-- Mesaj Limiti Düzenle -->
+                    <button type="button" class="btn sm" title="Özel günlük mesaj limiti tanımla veya kaldır" onclick="handleAiLimitEdit('${u.id}', '${esc(u.name)}', ${u.ozelGunlukMesajLimiti !== null && u.ozelGunlukMesajLimiti !== undefined ? u.ozelGunlukMesajLimiti : 'null'})">
+                      ⚙️ Mesaj Limiti
                     </button>
 
-                    <!-- Limit Düzenle Butonu -->
-                    <button type="button" class="btn sm" title="Öğrenciye özel günlük limit tanımla veya kaldır" onclick="handleAiLimitEdit('${u.id}', '${esc(u.name)}', ${u.ozelGunlukMesajLimiti !== null ? u.ozelGunlukMesajLimiti : 'null'})">
-                      ⚙️ Limit
-                    </button>
-
-                    <!-- Paket Değiştir Seçimi -->
-                    <select style="padding:3px 6px; font-size:11px; border-radius:6px; border:1px solid #d9d3c3;" onchange="handleAiPackageChange('${u.id}', this.value)">
-                      <option value="free" ${u.paketTipi === 'free' ? 'selected' : ''}>Free</option>
-                      <option value="baslangic" ${u.paketTipi === 'baslangic' ? 'selected' : ''}>Başlangıç</option>
-                      <option value="pro" ${u.paketTipi === 'pro' ? 'selected' : ''}>Pro</option>
-                    </select>
+                    ${!isTeacher ? `
+                      <!-- Öğrenci Paket Değiştir Seçimi -->
+                      <select style="padding:3px 6px; font-size:11px; border-radius:6px; border:1px solid #d9d3c3;" onchange="handleAiPackageChange('${u.id}', this.value)">
+                        <option value="free" ${u.paketTipi === 'free' ? 'selected' : ''}>Free</option>
+                        <option value="baslangic" ${u.paketTipi === 'baslangic' ? 'selected' : ''}>Başlangıç</option>
+                        <option value="pro" ${u.paketTipi === 'pro' ? 'selected' : ''}>Pro</option>
+                      </select>
+                    ` : ''}
 
                     <!-- AI Erişim Durdur / Aç Toggle Butonu -->
-                    <button type="button" class="btn sm ${isBlocked ? 'success' : 'danger'}" title="${isBlocked ? 'AI Erişim Engelini Kaldır' : 'Öğrencinin AI erişimini derhal kilitle'}" onclick="handleAiAccessToggle('${u.id}', ${!isBlocked}, '${esc(u.name)}')">
+                    <button type="button" class="btn sm ${isBlocked ? 'success' : 'danger'}" title="${isBlocked ? 'AI Erişim Engelini Kaldır' : 'Kullanıcının AI erişimini derhal kilitle'}" onclick="handleAiAccessToggle('${u.id}', ${!isBlocked}, '${esc(u.name)}')">
                       ${isBlocked ? '🔓 Kilidi Aç' : '🔒 AI Engelle'}
                     </button>
 
@@ -3132,6 +3169,38 @@
       }
 
       // Canlı Müdahale Eylemleri
+      
+      window.handleTeacherTypeChange = async function(userId, newType, userName) {
+        const typeLabels = {
+          standart_ogretmen: 'Standart Öğretmen (3 Soru / 10 Mesaj)',
+          onayli_ogretmen: 'Onaylı Öğretmen (15 Soru / 40 Mesaj)',
+          icerik_ureticisi: 'İçerik Üreticisi (⭐ SINIRSIZ Yetki)'
+        };
+        const label = typeLabels[newType] || newType;
+        if (!confirm(`"${userName}" adlı öğretmenin yetki seviyesi "${label}" olarak güncellensin mi?`)) {
+          loadAiAuditUsers(aiAuditCurrentPage);
+          return;
+        }
+        await postAiQuotaUpdate({
+          userId,
+          islem: 'ogretmen_tipi_guncelle',
+          ogretmenTipi: newType
+        });
+      };
+
+      window.handleTeacherQuestionLimitEdit = async function(userId, userName, currentLimit) {
+        const val = prompt(
+          `"${userName}" adlı öğretmen için Özel Günlük Soru Üretim Limiti belirleyin:\n(Yetki varsayılanına dönmek için boş bırakın veya "null" yazın)\n\nMevcut: ${currentLimit !== null ? currentLimit : 'Yetki Varsayılanı'}`,
+          currentLimit !== null ? currentLimit : ''
+        );
+        if (val === null) return;
+        await postAiQuotaUpdate({
+          userId,
+          islem: 'soru_limiti_duzenle',
+          ozelGunlukSoruLimiti: val.trim() === '' || val.trim().toLowerCase() === 'null' ? null : parseInt(val.trim(), 10)
+        });
+      };
+
       window.handleAiBonus = async function(userId, userName) {
         if (!confirm(`"${userName}" adlı öğrenciye +20 Bonus AI Mesaj Kredisi tanımlansın mı?`)) return;
         await postAiQuotaUpdate({ userId, islem: 'bonus_ekle', bonusMiktar: 20 });
