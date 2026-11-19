@@ -126,6 +126,18 @@ async function checkAndConsumeQuota(userDoc, islemTuru = 'message', miktar = 1) 
     };
   }
 
+  // 1.5. Öğretmen Başvuru Onay Kontrolü: Onaylanmamış öğretmen AI özelliklerini kullanamaz
+  if (userDoc.role === 'teacher' && userDoc.basvuruDurumu !== 'onaylandi') {
+    return {
+      allowed: false,
+      status: 403,
+      error: 'APPLICATION_PENDING',
+      message: userDoc.basvuruDurumu === 'reddedildi'
+        ? 'Öğretmen başvurunuz onaylanmamıştır. Destek ekibiyle iletişime geçebilirsiniz.'
+        : 'Öğretmen başvurunuz incelenmektedir. Onaylandığında tüm özellikler aktif olacaktır.'
+    };
+  }
+
   // 2. Admin ve İçerik Üreticisi tamamen SINIRSIZ
   if (userDoc.role === 'admin' || (userDoc.role === 'teacher' && userDoc.ogretmenTipi === 'icerik_ureticisi')) {
     return { allowed: true, sinirsiz: true };
@@ -235,6 +247,7 @@ function getQuotaStatus(user) {
   return {
     rol: user.role,
     ogretmenTipi: user.role === 'teacher' ? (user.ogretmenTipi || 'standart_ogretmen') : undefined,
+    basvuruDurumu: user.basvuruDurumu || (user.role === 'teacher' ? 'inceleme_suruyor' : 'onaylandi'),
     paketTipi: user.paketTipi || 'free',
     sinirsiz: isSinirsiz,
     proModelIzni: canUserUseProModel(user),

@@ -1485,6 +1485,111 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
     }
   });
 
+  
+  // ==========================================
+  // ÖĞRETMEN BAŞVURULARI VE ONAY AKIŞI
+  // ==========================================
+
+  // 1. Öğretmen Başvuruları Listesi
+  router.get('/ogretmen-basvurulari', allow('superadmin', 'support'), async (req, res) => {
+    try {
+      const { durum = 'inceleme_suruyor' } = req.query;
+
+      const filter = { role: 'teacher' };
+      if (durum && durum !== 'all') {
+        filter.basvuruDurumu = durum;
+      }
+
+      const [basvurular, bekleyenSayisi] = await Promise.all([
+        User.find(filter)
+          .select('name email phone telefon brans okulKurumAdi basvuruNotu basvuruDurumu ogretmenTipi basvuruTarihi onayTarihi createdAt')
+          .sort({ basvuruTarihi: -1, createdAt: -1 })
+          .limit(200)
+          .lean(),
+        User.countDocuments({ role: 'teacher', basvuruDurumu: 'inceleme_suruyor' })
+      ]);
+
+      const formatted = basvurular.map(b => ({
+        id: b._id.toString(),
+        name: b.name || 'İsimsiz',
+        email: b.email,
+        phone: b.phone || b.telefon || '—',
+        brans: b.brans || 'Belirtilmedi',
+        okulKurumAdi: b.okulKurumAdi || 'Belirtilmedi',
+        basvuruNotu: b.basvuruNotu || '',
+        basvuruDurumu: b.basvuruDurumu || 'inceleme_suruyor',
+        ogretmenTipi: b.ogretmenTipi || 'standart_ogretmen',
+        basvuruTarihi: b.basvuruTarihi || b.createdAt,
+        onayTarihi: b.onayTarihi || null
+      }));
+
+      res.json({
+        basvurular: formatted,
+        bekleyenSayisi,
+        toplam: formatted.length
+      });
+    } catch (error) {
+      console.error('Öğretmen başvuruları alınamadı:', error);
+      res.status(500).json({ mesaj: 'Öğretmen başvuruları alınamadı: ' + error.message });
+    }
+  });
+
+  // 2. Öğretmen Başvuru Onayla / Reddet
+  router.post('/ogretmen-basvuru-durum-guncelle', allow('superadmin', 'support'), async (req, res) => {
+    try {
+      const { userId, yeniDurum, ogretmenTipi } = req.body;
+
+      if (!userId || !['onaylandi', 'reddedildi', 'inceleme_suruyor'].includes(yeniDurum)) {
+        return res.status(400).json({ mesaj: 'userId ve geçerli yeniDurum zorunludur.' });
+      }
+
+      const user = await User.findById(userId);
+      if (!user || user.role !== 'teacher') {
+        return res.status(404).json({ mesaj: 'Öğretmen kullanıcısı bulunamadı.' });
+      }
+
+      user.basvuruDurumu = yeniDurum;
+
+      if (yeniDurum === 'onaylandi') {
+        user.ogretmenTipi = ['icerik_ureticisi', 'onayli_ogretmen', 'standart_ogretmen'].includes(ogretmenTipi)
+          ? ogretmenTipi
+          : 'onayli_ogretmen';
+        user.onayTarihi = new Date();
+        user.onaylayanAdminId = req.session.user._id ? req.session.user._id.toString() : 'admin';
+      }
+
+      await user.save();
+
+      // Admin log kaydı
+      try {
+        await AdminLog.create({
+          actorId: req.session.user._id,
+          actorName: req.session.user.name || 'Admin',
+          action: yeniDurum === 'onaylandi' ? 'approve_teacher' : 'reject_teacher',
+          entityType: 'user',
+          entityId: user._id.toString(),
+          details: { yeniDurum, ogretmenTipi: user.ogretmenTipi }
+        });
+      } catch (logErr) {}
+
+      res.json({
+        basarili: true,
+        mesaj: yeniDurum === 'onaylandi'
+          ? `"${user.name}" adlı öğretmen onaylandı ve ${user.ogretmenTipi} yetkisiyle aktif edildi.`
+          : `"${user.name}" adlı öğretmenin başvurusu reddedildi.`,
+        kullanici: {
+          id: user._id.toString(),
+          name: user.name,
+          basvuruDurumu: user.basvuruDurumu,
+          ogretmenTipi: user.ogretmenTipi
+        }
+      });
+    } catch (error) {
+      console.error('Öğretmen başvuru durum güncelleme hatası:', error);
+      res.status(500).json({ mesaj: 'Başvuru güncellenemedi: ' + error.message });
+    }
+  });
+
   return router;
 }
 

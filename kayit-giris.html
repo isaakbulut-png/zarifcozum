@@ -590,9 +590,24 @@
             </select>
           </div>
 
-          <div id="teacherCodeField" class="field-wrap" hidden>
-            <label for="teacherCode">Öğretmen davet kodu</label>
-            <input id="teacherCode" name="teacherCode" type="password" autocomplete="off" disabled>
+          <!-- Öğretmen Başvuru Alanları -->
+          <div id="teacherApplicationFields" hidden>
+            <div class="field-wrap" style="margin-bottom:12px;">
+              <label for="brans">Branşınız</label>
+              <input id="brans" name="brans" type="text" placeholder="Örn. Matematik, Geometri, Fen Bilimleri" disabled>
+            </div>
+            <div class="field-wrap" style="margin-bottom:12px;">
+              <label for="okulKurumAdi">Görev Yaptığınız Okul veya Kurum</label>
+              <input id="okulKurumAdi" name="okulKurumAdi" type="text" placeholder="Örn. Atatürk Anadolu Lisesi / Etüt Merkezi" disabled>
+            </div>
+            <div class="field-wrap" style="margin-bottom:12px;">
+              <label for="basvuruNotu">Başvuru Notu (İsteğe bağlı)</label>
+              <input id="basvuruNotu" name="basvuruNotu" type="text" placeholder="Deneyiminiz veya uzmanlık alanınız..." disabled>
+            </div>
+            <div class="field-wrap">
+              <label for="teacherCode">Varsa Davet / Hızlı Aktivasyon Kodu (İsteğe bağlı)</label>
+              <input id="teacherCode" name="teacherCode" type="password" placeholder="Kodunuz varsa doğrudan onaylanır" autocomplete="off" disabled>
+            </div>
           </div>
 
           <div id="parentCodeField" class="field-wrap" hidden>
@@ -734,9 +749,14 @@
         $('forgotRow').hidden = registering;
         $('passwordConfirmation').required = registering;
         $('password').autocomplete = registering ? 'new-password' : 'current-password';
-        $('teacherCodeField').hidden = !registering || parentMode || $('role').value !== 'teacher';
-        $('teacherCode').disabled = $('teacherCodeField').hidden;
-        $('teacherCode').required = !$('teacherCodeField').hidden;
+        const isTeacherReg = registering && !parentMode && $('role').value === 'teacher';
+        if ($('teacherApplicationFields')) {
+          $('teacherApplicationFields').hidden = !isTeacherReg;
+          $('brans').disabled = !isTeacherReg;
+          $('okulKurumAdi').disabled = !isTeacherReg;
+          $('basvuruNotu').disabled = !isTeacherReg;
+          $('teacherCode').disabled = !isTeacherReg;
+        }
         
         $('authTitle').textContent = parentRegistration
           ? 'Veli Kaydı'
@@ -748,6 +768,8 @@
 
         $('submitButton').textContent = parentRegistration
           ? 'Veli hesabı oluştur'
+          : (registering && $('role').value === 'teacher')
+          ? 'Öğretmen Başvurusu Gönder'
           : registering
           ? 'Hesap oluştur'
           : 'Giriş yap';
@@ -843,7 +865,10 @@
             credential: response.credential,
             intent: mode === 'register' ? 'register' : 'login',
             role: $('role').value,
-            teacherCode: $('teacherCode').value
+            teacherCode: $('teacherCode')?.value || '',
+            brans: $('brans')?.value || '',
+            okulKurumAdi: $('okulKurumAdi')?.value || '',
+            basvuruNotu: $('basvuruNotu')?.value || ''
           });
           window.location.assign(result.redirectTo);
         } catch (error) {

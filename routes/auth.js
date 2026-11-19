@@ -177,7 +177,19 @@ router.post('/register', registerLimiter, async (req, res) => {
   }
 
   try {
-    const user = await User.createWithPassword({ name, email, phone: normalizedPhone, role }, password);
+    const user = await User.createWithPassword({
+      name,
+      email,
+      phone: normalizedPhone,
+      telefon: normalizedPhone,
+      role,
+      basvuruDurumu,
+      ogretmenTipi,
+      brans,
+      okulKurumAdi,
+      basvuruNotu,
+      basvuruTarihi: new Date()
+    }, password);
     await regenerateSession(req);
     req.session.user = { ...publicUser(user) };
     await saveSession(req);

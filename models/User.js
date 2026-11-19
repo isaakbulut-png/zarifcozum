@@ -90,6 +90,53 @@ const userSchema = new mongoose.Schema({
   },
   // Yapay Zekâ Kota ve Denetim Alanları
   // Öğretmen Rol & Yetki Seviyesi
+  // Öğretmen Başvuru ve Onay Akışı Alanları
+  basvuruDurumu: {
+    type: String,
+    enum: ['inceleme_suruyor', 'onaylandi', 'reddedildi'],
+    default: function() {
+      // Öğrenciler ve adminler doğrudan onaylıdır, öğretmenler incelemeyle başlar
+      return this.role === 'teacher' ? 'inceleme_suruyor' : 'onaylandi';
+    },
+    index: true
+  },
+  brans: {
+    type: String,
+    trim: true,
+    maxlength: 100,
+    default: null
+  },
+  okulKurumAdi: {
+    type: String,
+    trim: true,
+    maxlength: 200,
+    default: null
+  },
+  telefon: {
+    type: String,
+    trim: true,
+    maxlength: 25,
+    default: null
+  },
+  basvuruNotu: {
+    type: String,
+    trim: true,
+    maxlength: 1000,
+    default: null
+  },
+  basvuruTarihi: {
+    type: Date,
+    default: Date.now,
+    index: true
+  },
+  onaylayanAdminId: {
+    type: String,
+    default: null
+  },
+  onayTarihi: {
+    type: Date,
+    default: null
+  },
   ogretmenTipi: {
     type: String,
     enum: ['icerik_ureticisi', 'onayli_ogretmen', 'standart_ogretmen'],
