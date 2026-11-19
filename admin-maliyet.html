@@ -213,7 +213,7 @@
       <span>AI Maliyet &amp; Token Takip Sistemi</span>
     </h1>
     <div class="header-links">
-      <span id="rateBadge" class="badge" style="background:#334155;color:#f8fafc;padding:6px 12px;font-size:12px">Kur: 1 USD = 35.00 TL</span>
+      <span id="rateBadge" class="badge" style="background:#1e293b;color:#f8fafc;padding:6px 14px;font-size:12px;display:inline-flex;align-items:center;gap:6px;border:1px solid #334155;">🟢 Kur: 1 USD = 50.46 TL</span>
       <button id="refreshBtn" class="btn btn-light" onclick="loadData()">🔄 Yenile</button>
       <a href="/admin-paneli.html" class="btn btn-primary">← Yönetim Paneli</a>
     </div>
@@ -331,9 +331,15 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
 
-        // 1. Dolar Kuru
+        // 1. Dolar Kuru (Piyasa Canlı Döviz)
         if (data.dolarKuru) {
-          document.getElementById('rateBadge').textContent = `Kur: 1 USD = ${data.dolarKuru.toFixed(2)} TL`;
+          const liveIcon = data.isLive ? '🟢 ' : '⚪ ';
+          const sourceText = data.kurKaynagi ? ` (${data.kurKaynagi})` : '';
+          const badgeEl = document.getElementById('rateBadge');
+          badgeEl.textContent = `${liveIcon}Kur: 1 USD = ${data.dolarKuru.toFixed(2)} TL${sourceText}`;
+          if (data.kurGuncellemeTarihi) {
+            badgeEl.title = `Son Kur Güncellemesi: ${new Date(data.kurGuncellemeTarihi).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`;
+          }
         }
 
         // 2. Özet Kartları
