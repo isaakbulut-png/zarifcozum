@@ -3,6 +3,7 @@ const { rateLimit } = require('express-rate-limit');
 const { ObjectId } = require('mongodb');
 const { prepareQuestion } = require('../lib/quiz-content');
 const safeSvg = require('../assets/safe-svg');
+const { normalizeBareMath } = require('../assets/math-text');
 const Soru = require('../models/Soru');
 const AiQuestionDraft = require('../models/AiQuestionDraft');
 const ContentLibrary = require('../models/ContentLibrary');
@@ -210,6 +211,16 @@ function generatePedagogicalSvg(questionText = '', topic = '', grade = 5) {
 }
 
 function prepareAIQuestion(question, context = {}) {
+  // Matematik ve LaTeX ifadelerini normalize et
+  const normalizedText = normalizeBareMath(question.text || '');
+  const normalizedExplanation = normalizeBareMath(question.explanation || '');
+  const normalizedOptions = {};
+  if (question.options) {
+    for (const letter of secenekler) {
+      normalizedOptions[letter] = normalizeBareMath(question.options[letter] || '');
+    }
+  }
+
   let cleanSvg;
   if (typeof question.svg === 'string' && question.svg.trim()) {
     cleanSvg = question.svg.trim();
@@ -219,17 +230,17 @@ function prepareAIQuestion(question, context = {}) {
 
   // Otomatik görsel desteği: Eğer soru metni şekil/geometri içeriyorsa ve SVG boşsa fallback üret
   if (!cleanSvg) {
-    const fallbackSvg = generatePedagogicalSvg(question.text, context.topic, context.grade);
+    const fallbackSvg = generatePedagogicalSvg(normalizedText, context.topic, context.grade);
     if (fallbackSvg) {
       cleanSvg = fallbackSvg;
     }
   }
 
   const { svg, ...rest } = question;
-  const base = prepareQuestion(cleanSvg && typeof cleanSvg === 'object' ? { ...rest, svg: cleanSvg } : rest);
+  const base = prepareQuestion(cleanSvg && typeof cleanSvg === 'object' ? { ...rest, text: normalizedText, options: normalizedOptions, svg: cleanSvg } : { ...rest, text: normalizedText, options: normalizedOptions });
   return {
     ...base,
-    explanation: typeof question.explanation === 'string' ? question.explanation.trim() : '',
+    explanation: normalizedExplanation.trim(),
     ...(cleanSvg ? { svg: cleanSvg } : {})
   };
 }
@@ -237,7 +248,10 @@ function prepareAIQuestion(question, context = {}) {
 function soruSemasi() {
   const secenekSemasi = {
     type: 'OBJECT',
-    properties: Object.fromEntries(secenekler.map(letter => [letter, { type: 'STRING' }])),
+    properties: Object.fromEntries(secenekler.map(letter => [letter, {
+      type: 'STRING',
+      description: `${letter} seçeneği metni. Tüm matematiksel ifadeler tek dolar $ ... $ içinde ve geçerli kaçırılmış LaTeX ile yazılmalıdır (örn: "$3^{x-1}$", "$[AB] \\\\perp [AC]$").`
+    }])),
     required: secenekler
   };
   return {
@@ -248,14 +262,20 @@ function soruSemasi() {
         items: {
           type: 'OBJECT',
           properties: {
-            text: { type: 'STRING' },
+            text: {
+              type: 'STRING',
+              description: 'Soru metni. Tüm matematiksel ifadeler, değişkenler ($x$, $y$), üslü/köklü sayılar ($3^{x-1}$, $\\sqrt{x}$), geometrik semboller ($ABC$, $[AB] \\perp [AC]$, $\\widehat{BAC}$) ve uzunluklar ($|AB| = 4$) mutlaka tek dolar $ ... $ içine alınmalı ve ters eğik çizgiler çift kaçırılmalıdır (\\\\perp).'
+            },
             svg: {
               type: 'STRING',
-              description: 'Görsel, şema veya tablo gerektiren sorularda geçerli ve renkli <svg viewBox="0 0 W H" xmlns="http://www.w3.org/2000/svg">...</svg> kodu; görsel gerekmiyorsa boş metin.'
+              description: 'Görsel, şema veya tablo gerektiren sorularda geçerli ve renkli <svg viewBox="0 0 W H" xmlns="http://www.w3.org/2000/svg">...</svg> kodu; görsel gerekmiyorsa boş metin. SVG içinde asla $ veya ham LaTeX kullanılmaz.'
             },
             options: secenekSemasi,
             answer: { type: 'STRING', enum: secenekler },
-            explanation: { type: 'STRING' }
+            explanation: {
+              type: 'STRING',
+              description: 'Çözüm adımları. Tüm matematiksel ifadeler $ ... $ içine alınmalı ve ters eğik çizgiler çift kaçırılmalıdır.'
+            }
           },
           required: ['text', 'options', 'answer', 'explanation']
         }
@@ -293,14 +313,21 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       'Türkçe eğitim platformu için özgün, pedagojik olarak doğru, yeni nesil matematik soruları hazırla.',
       `Sınıf düzeyi: ${grade}. sınıf (MEB Türkiye Yüzyılı Maarif Modeli). Konu: ${topic}. Zorluk: ${difficulty}. Tam olarak ${count} soru üret.`,
       `Sorular yalnızca ${grade}. sınıf kazanımları ve ön koşulları içinde kalsın; üst sınıf konu veya formüllerini kullanma.`,
+      'MATEMATİK VE GEOMETRİ FORMÜL KURALLARI (ZORUNLU):',
+      '- Soru metnindeki (text), tüm seçeneklerdeki (options: A, B, C, D) ve açıklamadaki (explanation) TÜM matematiksel ve geometrik ifadeleri, değişkenleri ($x$, $y$), geometrik şekil ve açı sembollerini ($ABC$, $[AB] \\perp [AC]$, $\\widehat{BAC}$), üslü/köklü sayıları ($3^{x-1}$, $x^2$, $\\sqrt{16}$), alt indisli terimleri ($y_K$, $x_A$) ve uzunlukları ($|AB| = 4$) KESİNLİKLE tek dolar ($ ... $) işareti içine alarak yaz.',
+      '- JSON formatında geçerli olması için LaTeX komutlarındaki ters eğik çizgileri (\\) MUTLAKA çift ters eğik çizgi ile kaçır (escape et): "\\\\perp", "\\\\parallel", "\\\\widehat", "\\\\frac", "\\\\sqrt", "\\\\circ", "\\\\times", "\\\\cdot". Kesinlikle tek ters eğik çizgi veya geçersiz JSON kaçış karakteri kullanma.',
+      '- Kesinlikle dolar işareti olmadan çıplak LaTeX kodu ("3^{x-1}", "x_A", "\\perp") üretme.',
       'GÖRSEL VE ŞEMA KURALI (ZORUNLU):',
       '- "Geometrik Şekiller", "Üçgenler", "Dörtgenler", "Açılar", "Alan", "Çevre", "Sayı Doğrusu", "Veri Analizi / Grafikler", "Kesirler", "Doğal Sayılar (Basamak Tablosu / Abaküs)" gibi konularda veya sorunun metninde "Şekildeki...", "Yukarıdaki şemada...", "Verilen şekilde...", "grafikte", "tabloda" gibi ifadeler varsa "svg" ALANININ RENKLİ VE DOLU OLMASI KESİNLİKLE ZORUNLUDUR.',
       '- Soruda "Şekildeki ABC üçgeni..." yazıp "svg" alanını boş bırakmak KESİNLİKLE YASAKTIR. Soruda bahsedilen şekil, üçgen, açı, çadır, çokgen veya şema mutlaka "svg" alanında görselleştirilmelidir.',
       '- SVG içinde köşe harfleri (A, B, C), kenar uzunlukları, verilen açı dereceleri (örn: 40°, 70°), tepe noktası net ve okunaklı <text> etiketleriyle yerleştirilmelidir.',
       'SVG KURALLARI (ZORUNLU):',
       '- Kök etiket: <svg viewBox="0 0 W H" xmlns="http://www.w3.org/2000/svg"> (örn: viewBox="0 0 500 260").',
-      '- Yalnızca şu güvenli etiketleri kullan: <svg>, <g>, <rect>, <circle>, <ellipse>, <line>, <polyline>, <polygon>, <path>, <text>. Asla <style>, <defs>, <linearGradient>, <tspan>, <image> veya HTML etiketleri kullanma.',
-      '- Sayısal özniteliklere (width, height, x, y, cx, cy, r, rx, ry, x1, y1, x2, y2, stroke-width, font-size) ASLA "px" veya birim yazma; yalnızca saf sayı yaz (örn: width="500", font-size="14", stroke-width="2").',
+      '- Yalnızca şu güvenli etiketleri kullan: <svg>, <g>, <rect>, <circle>, <ellipse>, <line>, <polyline>, <polygon>, <path>, <text>, <tspan>. Asla <style>, <defs>, <linearGradient>, <image> veya HTML etiketleri kullanma.',
+      '- SVG <text> veya <tspan> etiketleri içinde KaTeX ve ham LaTeX sözdizimi ($, \\, {, }, ^) KESİNLİKLE KULLANILMAZ.',
+      '- Üslü ifadeler için: <text x="100" y="50">x<tspan dy="-6" font-size="10">2</tspan><tspan dy="6"> </tspan></text> yapısını veya doğrudan Unicode karakterlerini (², ³, ˣ) kullan.',
+      '- Alt indisler için: <text x="100" y="50">y<tspan dy="4" font-size="10">K</tspan><tspan dy="-4"> </tspan></text> yapısını veya doğrudan Unicode karakterlerini (₁, ₂, ₖ) kullan.',
+      '- Sayısal özniteliklere (width, height, x, y, cx, cy, r, rx, ry, x1, y1, x2, y2, stroke-width, font-size, dx, dy) ASLA "px" veya birim yazma; yalnızca saf sayı yaz (örn: width="500", font-size="14", stroke-width="2").',
       '- Renkler (fill, stroke): Canlı ve modern renkler kullan (örn: mavi #2563eb, yeşil #16a34a, turuncu #ea580c, sarı #f59e0b, mor #7c3aed, kırmızı #dc2626, nötr zemin #f8fafc, çerçeve #cbd5e1). Sadece hex (#...) veya temel isim (none, black, white, red, blue, green, gray, orange, purple, yellow) kabul edilir.',
       '- <text> etiketi içine metni doğrudan yaz (örn: <text x="100" y="50" fill="#1e293b" font-size="14" text-anchor="middle">Milyonlar Bölüğü</text>).',
       'Her soru dört seçenekli (A, B, C, D) olsun ve yalnızca bir doğru cevap içersin.',

@@ -13,7 +13,8 @@
     line: ['x1', 'y1', 'x2', 'y2'],
     polyline: ['points'],
     polygon: ['points'],
-    text: ['x', 'y']
+    text: ['x', 'y'],
+    tspan: ['x', 'y', 'dx', 'dy']
   };
   const common = [
     'fill', 'stroke', 'stroke-width', 'opacity', 'font-size', 'text-anchor',
@@ -24,6 +25,46 @@
   const color = /^(?:none|transparent|black|white|red|blue|green|gray|grey|orange|purple|yellow|#[0-9a-f]{3,4}|#[0-9a-f]{6}|#[0-9a-f]{8})$/i;
 
   function invalid() { throw new TypeError('SVG yalnızca güvenli temel şekiller ve geçerli değerler içermelidir.'); }
+
+  // SVG <text> ve <tspan> içindeki ham LaTeX kodlarını temizleyen ve Unicode eşdeğerlerine dönüştüren filtre
+  function sanitizeSvgText(str) {
+    if (!str || typeof str !== 'string') return '';
+    let s = str;
+    // $ işaretlerini temizle
+    s = s.replace(/\$([^$]+)\$/g, '$1');
+    s = s.replace(/\$/g, '');
+
+    // LaTeX sembolleri -> Unicode
+    s = s.replace(/\\perp\b/g, '⊥');
+    s = s.replace(/\\parallel\b/g, '∥');
+    s = s.replace(/\\angle\b/g, '∠');
+    s = s.replace(/\\widehat\{([^}]+)\}/g, '$1̂');
+    s = s.replace(/\\circ\b|\\degree\b|\^\\circ\b/g, '°');
+    s = s.replace(/\^\{\\circ\}/g, '°');
+    s = s.replace(/\\cdot\b/g, '·');
+    s = s.replace(/\\times\b/g, '×');
+    s = s.replace(/\\pm\b/g, '±');
+    s = s.replace(/\\alpha\b/g, 'α');
+    s = s.replace(/\\beta\b/g, 'β');
+    s = s.replace(/\\theta\b/g, 'θ');
+    s = s.replace(/\\pi\b/g, 'π');
+
+    // Üslü ifadeler: örn: x^2 -> x², 3^{x-1} -> 3ˣ⁻¹
+    const sup = { '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '+': '⁺', '-': '⁻', 'x': 'ˣ', 'y': 'ʸ', 'n': 'ⁿ', 'k': 'ᵏ' };
+    s = s.replace(/\^\{([^}]+)\}/g, (_, exp) => exp.split('').map(c => sup[c] || c).join(''));
+    s = s.replace(/\^([0-9a-zA-Z+-])/g, (_, c) => sup[c] || `^${c}`);
+
+    // Alt indisler: örn: y_K -> yₖ, x_1 -> x₁
+    const sub = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉', 'x': 'ₓ', 'y': 'ᵧ', 'k': 'ₖ', 'K': 'ₖ', 'A': 'ₐ', 'B': 'ᵦ', 'n': 'ₙ' };
+    s = s.replace(/_\{([^}]+)\}/g, (_, exp) => exp.split('').map(c => sub[c] || c).join(''));
+    s = s.replace(/_([0-9a-zA-Z])/g, (_, c) => sub[c] || `_${c}`);
+
+    // Artakalan ters eğik çizgileri temizle
+    s = s.replace(/\\([a-zA-Z]+)/g, '$1');
+
+    return s;
+  }
+
   function validate(input) {
     if (!input || JSON.stringify(input).length > 10000) invalid();
     let count = 0;
@@ -62,15 +103,18 @@
         } else if (!numeric.test(value) || !Number.isFinite(Number(value)) || Math.abs(Number(value)) > 100000) invalid();
         attrs[key] = value;
       }
-      if (node.text !== undefined && (node.tag !== 'text' || typeof node.text !== 'string' || node.text.length > 500)) invalid();
-      if (node.tag === 'text' && node.children.length) invalid();
-      if (!['svg', 'g'].includes(node.tag) && node.tag !== 'text' && node.children.length) invalid();
+      if (node.text !== undefined && (!['text', 'tspan'].includes(node.tag) || typeof node.text !== 'string' || node.text.length > 500)) invalid();
+      if (node.tag === 'tspan' && node.children.length) invalid();
+      if (!['svg', 'g', 'text'].includes(node.tag) && node.children.length) invalid();
+      if (node.tag === 'text' && node.children.some(child => child.tag !== 'tspan')) invalid();
+
       const result = {tag: node.tag, attrs, children: node.children.map(child => check(child, depth + 1))};
-      if (node.text !== undefined) result.text = node.text;
+      if (node.text !== undefined) result.text = sanitizeSvgText(node.text);
       return result;
     }
     return check(input, 0);
   }
+
   function parse(code) {
     if (typeof code !== 'string' || code.length > 10000 || /<!|<\?/.test(code)) invalid();
     const doc = new DOMParser().parseFromString(code, 'image/svg+xml');
@@ -90,23 +134,25 @@
         else if (child.nodeType === 3) text += child.nodeValue;
         else invalid();
       }
-      if (element.localName !== 'text' && text.trim()) invalid();
+      if (!['text', 'tspan'].includes(element.localName) && text.trim()) invalid();
       const result = {tag: element.localName, attrs, children};
-      if (element.localName === 'text') result.text = text;
+      if (['text', 'tspan'].includes(element.localName)) result.text = sanitizeSvgText(text);
       return result;
     }
     return validate(convert(doc.documentElement));
   }
+
   function render(target, input) {
     const data = validate(input);
     function create(node) {
       const element = document.createElementNS(namespace, node.tag);
       for (const [key, value] of Object.entries(node.attrs)) element.setAttribute(key, value);
-      if (node.text !== undefined) element.textContent = node.text;
+      if (node.text !== undefined) element.textContent = sanitizeSvgText(node.text);
       node.children.forEach(child => element.append(create(child)));
       return element;
     }
     target.replaceChildren(create(data));
   }
-  return {validate, parse, render};
+
+  return {validate, parse, render, sanitizeSvgText};
 });
