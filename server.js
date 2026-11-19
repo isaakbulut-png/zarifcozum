@@ -268,7 +268,7 @@ app.get('/api/mufredat-ozet', mufredatKonulariLimiter, requireKonuLogin, async (
 
 app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, async (req, res) => {
   try {
-    const request = normalizeAiChatRequest(req.body, req.session?.user?.role);
+    const request = normalizeAiChatRequest(req.body, req.session?.user?.role, req.session?.user);
 
     // Maliyetsiz Kısa Hafıza: Son 2 mesaj çiftini (4 mesaj) veritabanından alıp modele aktar
     if (!request.history || request.history.length === 0) {
@@ -514,7 +514,7 @@ app.get(['/yonetim', '/admin-giris.html'], async (req, res, next) => {
   }
   next();
 }, adminSayfasiGonder('admin-giris.html'));
-app.get('/admin-paneli.html', async (req, res, next) => {
+app.get(['/admin-paneli.html', '/admin-maliyet.html'], async (req, res, next) => {
   if (!req.session.user?.id) return res.redirect('/yonetim');
   if (!['admin', 'teacher'].includes(req.session.user.role) && !req.session.user.adminRole) {
     return res.redirect('/yonetim');
@@ -528,8 +528,9 @@ app.get('/admin-paneli.html', async (req, res, next) => {
     console.error('Yönetim paneli rolü doğrulanamadı:', error);
     return res.status(500).send('Yönetim paneli yetkisi doğrulanamadı.');
   }
-  next();
-}, adminSayfasiGonder('admin-paneli.html'));
+  const targetPage = req.path.includes('admin-maliyet') ? 'admin-maliyet.html' : 'admin-paneli.html';
+  adminSayfasiGonder(targetPage)(req, res);
+});
 app.get(['/favicon.ico', '/favicon.svg', '/favicon-32x32.png'], (req, res) => {
   const fileName = req.path.replace(/^\//, '');
   const publicPath = path.join(__dirname, 'public', fileName);

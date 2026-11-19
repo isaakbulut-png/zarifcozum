@@ -383,6 +383,22 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       }
 
       const draftId = draftRecord ? draftRecord._id.toString() : null;
+
+      // AI Maliyet & Tasarruf Logu (Cache Hit)
+      try {
+        const { recordAiUsage } = require('../lib/ai-usage-tracker');
+        recordAiUsage({
+          kullaniciId: req.session.user?.id,
+          kullaniciAdi: req.session.user?.name,
+          kullaniciRol: req.session.user?.role || 'teacher',
+          modul: 'Soru Sihirbazı',
+          modelAdi: 'Havuz Önbelleği',
+          cacheHit: true,
+          durum: 'cache_hit',
+          detay: { soruSayisi: count, topic, grade, difficulty }
+        });
+      } catch (logErr) {}
+
       return res.json({
         fromCache: true,
         draftId,
@@ -526,6 +542,25 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         .replace(/\s*```$/, '')
         .trim();
       result = JSON.parse(sanitizedText);
+
+      // AI Token & Maliyet Loglama
+      try {
+        const promptTokens = payload.usageMetadata?.promptTokenCount || 0;
+        const candidatesTokens = payload.usageMetadata?.candidatesTokenCount || 0;
+        const { recordAiUsage } = require('../lib/ai-usage-tracker');
+        recordAiUsage({
+          kullaniciId: req.session.user?.id,
+          kullaniciAdi: req.session.user?.name,
+          kullaniciRol: req.session.user?.role || 'teacher',
+          modul: 'Soru Sihirbazı',
+          modelAdi: activeModel,
+          promptTokens,
+          candidatesTokens,
+          cacheHit: false,
+          durum: 'success',
+          detay: { soruSayisi: neededCount, topic, grade, difficulty }
+        });
+      } catch (logErr) {}
     } catch (error) {
       console.error('Gemini Hatası:', error);
       return res.status(502).json({ mesaj: 'Yapay zeka geçerli soru verisi döndürmedi. Lütfen yeniden deneyin.' });

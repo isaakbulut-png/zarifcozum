@@ -104,6 +104,20 @@ export async function konuOzetiGetir(grade, topic) {
   const ozet = response.text?.replace(/\s+/g, ' ').trim();
   if (!ozet) throw new Error('Yapay zekâ konu özeti üretemedi.');
   ozetOnbellegi.set(anahtar, ozet);
+
+  try {
+    const { recordAiUsage } = await import('./lib/ai-usage-tracker.js');
+    recordAiUsage({
+      modul: 'Konu Özeti',
+      modelAdi: resolveAIModel('konu_ozeti'),
+      promptTokens: response.usageMetadata?.promptTokenCount || 0,
+      candidatesTokens: response.usageMetadata?.candidatesTokenCount || 0,
+      cacheHit: false,
+      durum: 'success',
+      detay: { grade, topic }
+    });
+  } catch {}
+
   return ozet;
 }
 
@@ -150,6 +164,20 @@ export async function konuAnlatimiZenginlestir(grade, topic) {
     etiketler.slice(0, sayfaSayisi).every((etiket, i) => Number(etiket[1]) === i + 1) &&
     bolumler.slice(0, sayfaSayisi).every(Boolean);
   if (!sayfalarGecerli) throw new Error('Yapay zekâ konu anlatımını en az dört dolu, sıralı sayfaya bölemedi. Lütfen yeniden deneyin.');
+
+  try {
+    const { recordAiUsage } = await import('./lib/ai-usage-tracker.js');
+    recordAiUsage({
+      modul: 'Konu Anlatımı Zenginleştir',
+      modelAdi: resolveAIModel('ders_notu'),
+      promptTokens: response.usageMetadata?.promptTokenCount || 0,
+      candidatesTokens: response.usageMetadata?.candidatesTokenCount || 0,
+      cacheHit: false,
+      durum: 'success',
+      detay: { grade, topic }
+    });
+  } catch {}
+
   return anlatim;
 }
 
@@ -288,7 +316,7 @@ async function getMebConstraints(ogrenciMesaji, grade) {
  * @param {string|number} grade - Öğrencinin sınıf seviyesi (Örn: '5', '6', 9 vb.)
  * @param {Array} history - Son 2 tura ait temizlenmiş konuşma geçmişi ([{ role: 'user'|'model', text }])
  */
-export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor', grade, history = [], chosenModel) {
+export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor', grade, history = [], chosenModel, userContext = {}) {
   // 1. Adım: Pinecone'dan 768 boyutlu müfredat sınırını çek
   const mebSiniri = await getMebConstraints(ogrenciMesaji, grade);
 
@@ -408,6 +436,29 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
         maxOutputTokens: 1200,
       },
     });
+
+    try {
+      const modulLabels = {
+        ai_mentor: 'Sokratik Mentör',
+        ogretmen_ikizi: 'Öğretmen İkizi',
+        soru_cozum: 'Adım Adım Çözüm',
+        ai_koc: 'AI Koç',
+        discovery_game: 'Keşif Oyunu'
+      };
+      const { recordAiUsage } = await import('./lib/ai-usage-tracker.js');
+      recordAiUsage({
+        kullaniciId: userContext?.userId || null,
+        kullaniciAdi: userContext?.userName || 'Kullanıcı',
+        kullaniciRol: userContext?.userRole || 'öğrenci',
+        modul: modulLabels[gorevTuru] || 'AI Mentör',
+        modelAdi: selectedModel,
+        promptTokens: response.usageMetadata?.promptTokenCount || 0,
+        candidatesTokens: response.usageMetadata?.candidatesTokenCount || 0,
+        cacheHit: false,
+        durum: 'success',
+        detay: { grade }
+      });
+    } catch (logErr) {}
 
     return response.text;
   } catch (error) {

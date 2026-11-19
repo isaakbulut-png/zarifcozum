@@ -121,6 +121,17 @@ function createAdminRouter({
     details
   });
 
+  router.get('/ai-maliyet-ozeti', allow('superadmin', 'editor', 'support'), async (req, res) => {
+    try {
+      const { getAiUsageSummary } = require('../lib/ai-usage-tracker');
+      const summary = await getAiUsageSummary();
+      res.json(summary);
+    } catch (error) {
+      console.error('AI maliyet özeti alınamadı:', error);
+      res.status(500).json({ mesaj: 'AI maliyet özeti alınamadı.' });
+    }
+  });
+
   router.get('/homepage-assets', allow('superadmin'), async (req, res) => {
     try {
       res.json({ homepageAssets: await SystemConfig.getHomepageAssets() });
