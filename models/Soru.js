@@ -19,10 +19,10 @@ const soruSchema = new mongoose.Schema({
   text: { type: String, maxlength: 4000, default: '' },
   options: { type: mongoose.Schema.Types.Mixed, default: [] },
   explanation: { type: String, maxlength: 4000, default: '' },
-  svg: { type: String, default: '' },
-  grade: { type: Number, min: 5, max: 12, index: true },
+  svg: { type: mongoose.Schema.Types.Mixed, default: '' },
+  grade: { type: Number, min: 1, max: 12, index: true },
   topic: { type: String, maxlength: 250, trim: true, index: true },
-  difficulty: { type: String, enum: ['kolay', 'orta', 'zor', null], default: null, index: true },
+  difficulty: { type: String, lowercase: true, trim: true, enum: ['kolay', 'orta', 'zor', null], default: null, index: true },
   ders: { type: String, default: 'matematik', trim: true, lowercase: true, maxlength: 60, index: true },
   siraNo: { type: Number, default: null },
   // Cloudinary'e yüklenen resimlerde dolu; klasörden taranan kayıtlarda hiç yazılmaz (sparse indeks).
@@ -40,8 +40,11 @@ const soruSchema = new mongoose.Schema({
   createdBy: { type: String, default: 'system', maxlength: 60 }
 }, { timestamps: true, collection: 'sorular' });
 
-// Otomatik seçenek eşleme: { A: '...', B: '...' } nesnesi verilirse [{ label: 'A', text: '...' }] dizisine dönüştürür.
+// Otomatik seçenek ve zorluk eşleme
 soruSchema.pre('validate', function() {
+  if (this.difficulty && typeof this.difficulty === 'string') {
+    this.difficulty = this.difficulty.trim().toLowerCase();
+  }
   if (this.options && typeof this.options === 'object' && !Array.isArray(this.options)) {
     this.options = Object.entries(this.options).map(([label, text]) => ({ label, text: String(text) }));
   }

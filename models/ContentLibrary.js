@@ -19,7 +19,7 @@ const contentLibrarySchema = new mongoose.Schema({
   ders: { type: String, default: 'matematik', trim: true, lowercase: true, maxlength: 60, index: true },
   grade: { type: Number, min: 1, max: 12, default: 8, index: true },
   topic: { type: String, maxlength: 250, trim: true, default: 'Genel', index: true },
-  difficulty: { type: String, enum: ['kolay', 'orta', 'zor', null], default: null, index: true },
+  difficulty: { type: String, lowercase: true, trim: true, enum: ['kolay', 'orta', 'zor', null], default: null, index: true },
   content: { type: mongoose.Schema.Types.Mixed, required: true },
   metadata: {
     type: mongoose.Schema.Types.Mixed,
@@ -61,6 +61,9 @@ contentLibrarySchema.virtual('body')
 
 // Pre-validate hook to map aliases before mongoose validation
 contentLibrarySchema.pre('validate', function() {
+  if (this.difficulty && typeof this.difficulty === 'string') {
+    this.difficulty = this.difficulty.trim().toLowerCase();
+  }
   if (!this.type && this.get('contentType')) this.type = this.get('contentType');
   if (!this.ders && this.get('lesson')) this.ders = this.get('lesson');
   if (!this.content && this.get('body')) this.content = this.get('body');

@@ -173,3 +173,46 @@ test('exportContentItems nesne seçenekli (options: {A,B,C,D}) soruları sorunsu
   assert.equal(docxBuf[0], 0x50);
   assert.equal(docxBuf[1], 0x4B);
 });
+
+test('Soru ve ContentLibrary büyük harfli Zor/Orta/Kolay zorlukları ve SVG nesnelerini kabul eder', async () => {
+  const soru = new Soru({
+    format: 'text_svg',
+    text: 'Alanı 80 cm² olan kare...',
+    options: { A: '20', B: '24', C: '26', D: '28' },
+    explanation: 'Kenar √80 = 4√5',
+    svg: '<svg viewBox="0 0 500 280"><rect width="500" height="280"/></svg>',
+    grade: 8,
+    topic: 'Kareköklü İfadeler',
+    difficulty: 'Zor',
+    ders: 'matematik',
+    answer: 'C',
+    source: 'ai_generated',
+    createdBy: 'teacher1'
+  });
+
+  await soru.validate();
+  assert.equal(soru.difficulty, 'zor');
+  assert.equal(soru.grade, 8);
+  assert.equal(soru.options.length, 4);
+  assert.equal(soru.options[0].label, 'A');
+
+  const content = new ContentLibrary({
+    title: '[8. Sınıf] Alanı 80 cm² olan kare...',
+    type: 'ai_question',
+    ders: 'matematik',
+    grade: 8,
+    topic: 'Kareköklü İfadeler',
+    difficulty: 'Zor',
+    content: {
+      text: soru.text,
+      options: soru.options,
+      answer: soru.answer
+    },
+    status: 'approved',
+    source: 'ai',
+    createdBy: 'teacher1'
+  });
+
+  await content.validate();
+  assert.equal(content.difficulty, 'zor');
+});

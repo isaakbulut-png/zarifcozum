@@ -336,54 +336,77 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       'Yalnızca istenen JSON şemasına uyan JSON döndür; Markdown veya fazladan metin ekleme.'
     ].join('\n');
 
-    let response;
-    try {
-      response = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey
-          },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseMimeType: 'application/json',
-              responseSchema: soruSemasi(),
-              maxOutputTokens: 8192
-            }
-          }),
-          signal: AbortSignal.timeout(60000)
+    // Çoklu model desteği ve otomatik geçiş (önce ultra hızlı lite, sonra diğerleri)
+    const candidateModels = [
+      process.env.GEMINI_MODEL,
+      'gemini-3.1-flash-lite',
+      'gemini-3.5-flash',
+      'gemini-flash-latest',
+      'gemini-3.8-flash'
+    ].filter(Boolean);
+
+    let response = null;
+    let lastError = null;
+    let lastStatus = null;
+
+    for (const model of candidateModels) {
+      try {
+        const fetchRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': apiKey
+            },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                responseMimeType: 'application/json',
+                responseSchema: soruSemasi(),
+                maxOutputTokens: 4096
+              }
+            }),
+            signal: AbortSignal.timeout(18000)
+          }
+        );
+
+        if (fetchRes.ok) {
+          response = fetchRes;
+          break;
+        } else {
+          lastStatus = fetchRes.status;
+          const errorBody = await fetchRes.text();
+          console.warn(`[AI] Model ${model} HTTP ${fetchRes.status}:`, errorBody.slice(0, 160));
+          if (fetchRes.status === 401 || fetchRes.status === 403) {
+            lastStatus = fetchRes.status;
+            break; // Yetkilendirme hatası modelden bağımsızdır
+          }
         }
-      );
-    } catch (error) {
-      console.error('Gemini Hatası:', error);
-      if (error.name === 'TimeoutError' || error.name === 'AbortError') {
-        return res.status(504).json({ mesaj: 'Soru üretimi zaman aşımına uğradı. Lütfen yeniden deneyin.' });
+      } catch (err) {
+        lastError = err;
+        console.warn(`[AI] Model ${model} çağrısında hata/zaman aşımı:`, err.message);
       }
-      return res.status(502).json({ mesaj: 'Yapay zeka hizmetine bağlanılamadı.' });
     }
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      console.error(`Gemini Hatası: HTTP ${response.status}`, errorBody);
+    if (!response || !response.ok) {
+      if (lastError && (lastError.name === 'TimeoutError' || lastError.name === 'AbortError')) {
+        return res.status(504).json({ mesaj: 'Soru üretimi zaman aşımına uğradı. Lütfen yeniden deneyin.' });
+      }
       let mesaj = 'Yapay zeka soruları şu anda üretemedi. Lütfen daha sonra tekrar deneyin.';
-      if (response.status === 429) {
+      if (lastStatus === 429) {
         mesaj = 'Yapay zeka hizmeti şu anda yoğun. Biraz sonra tekrar deneyin.';
-      } else if ([401, 403].includes(response.status)) {
+      } else if ([401, 403].includes(lastStatus)) {
         mesaj = 'Yapay zeka API anahtarı geçersiz veya yetkisiz. Sunucudaki GEMINI_API_KEY ayarını kontrol edin.';
-      } else if (response.status === 404) {
+      } else if (lastStatus === 404) {
         mesaj = 'Yapay zeka modeli bulunamadı. Sunucudaki model yapılandırmasını kontrol edin.';
-      } else if (response.status === 400) {
+      } else if (lastStatus === 400) {
         mesaj = 'Yapay zeka isteği reddedildi. Sunucu günlüklerindeki Gemini hatasını kontrol edin.';
-      } else if (response.status >= 500) {
+      } else if (lastStatus >= 500) {
         mesaj = 'Yapay zeka sağlayıcısı şu anda yanıt veremiyor. Biraz sonra tekrar deneyin.';
       }
-      const status = response.status === 429 ? 503 : 502;
-      return res.status(status).json({
-        mesaj
-      });
+      const status = lastStatus === 429 ? 503 : (lastStatus === 401 || lastStatus === 403 ? 401 : 502);
+      return res.status(status).json({ mesaj });
     }
 
     let result;
@@ -622,64 +645,92 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       const draft = await AiQuestionDraft.findById(req.params.id);
       if (!draft) return res.status(404).json({ mesaj: 'Taslak bulunamadı.' });
 
+      // İstemciden seçili soru indeksleri geldiyse filtrele
+      const selectedIndices = Array.isArray(req.body?.questionIndices) && req.body.questionIndices.length > 0
+        ? new Set(req.body.questionIndices.map(Number))
+        : null;
+
+      const rawDiff = String(draft.difficulty || 'orta').trim().toLowerCase();
+      const normalizedDifficulty = ['kolay', 'orta', 'zor'].includes(rawDiff) ? rawDiff : 'orta';
+      const userId = req.session?.user?.id || req.session?.user?._id || 'teacher';
+
       const transferred = [];
-      for (const q of draft.questions) {
+      const errors = [];
+
+      for (let idx = 0; idx < draft.questions.length; idx++) {
+        if (selectedIndices && !selectedIndices.has(idx)) continue;
+        const q = draft.questions[idx];
         if (q.status === 'rejected') continue;
 
-        const formattedOptions = Array.isArray(q.options)
-          ? q.options
-          : (q.options && typeof q.options === 'object'
-            ? Object.entries(q.options).map(([label, text]) => ({ label, text: String(text) }))
-            : []);
+        try {
+          const formattedOptions = Array.isArray(q.options)
+            ? q.options
+            : (q.options && typeof q.options === 'object'
+              ? Object.entries(q.options).map(([label, text]) => ({ label: String(label).toUpperCase(), text: String(text || '') }))
+              : []);
 
-        const soru = await Soru.create({
-          format: 'text_svg',
-          text: q.text,
-          options: formattedOptions,
-          explanation: q.explanation || '',
-          svg: q.svg || '',
-          grade: draft.grade,
-          topic: draft.topic,
-          difficulty: draft.difficulty,
-          ders: 'matematik',
-          answer: q.answer,
-          source: 'ai_generated',
-          draftId: draft._id,
-          curriculum_node_id: q.curriculum_node_id || null,
-          createdBy: req.session.user.id
-        });
+          const svgContent = typeof q.svg === 'string'
+            ? q.svg
+            : (q.svg && typeof q.svg === 'object' ? (safeSvg.validate(q.svg) || JSON.stringify(q.svg)) : '');
 
-        // Pinecone Vektör İndeksleme
-        indexQuestionInPinecone(soru._id, q.text, {
-          grade: draft.grade,
-          topic: draft.topic,
-          difficulty: draft.difficulty
-        }).catch(() => {});
-
-        // Merkezi İçerik Havuzuna onaylı tekil soru kaydı
-        await ContentLibrary.create({
-          title: `[${draft.grade}. Sınıf] ${q.text.slice(0, 80)}...`,
-          type: 'ai_question',
-          ders: 'matematik',
-          grade: draft.grade,
-          topic: draft.topic,
-          difficulty: draft.difficulty,
-          content: {
+          const soru = await Soru.create({
+            format: 'text_svg',
             text: q.text,
-            options: q.options,
-            answer: q.answer,
-            explanation: q.explanation,
-            svg: q.svg,
-            soruId: soru._id
-          },
-          status: 'approved',
-          source: 'ai',
-          createdBy: req.session.user.id
-        });
+            options: formattedOptions,
+            explanation: q.explanation || '',
+            svg: svgContent,
+            grade: Number(draft.grade) || 8,
+            topic: draft.topic || 'Genel',
+            difficulty: normalizedDifficulty,
+            ders: 'matematik',
+            answer: q.answer || 'A',
+            source: 'ai_generated',
+            draftId: draft._id,
+            curriculum_node_id: q.curriculum_node_id || null,
+            createdBy: userId
+          });
 
-        q.status = 'approved';
-        q.approvedQuestionId = soru._id;
-        transferred.push(soru._id.toString());
+          // Pinecone Vektör İndeksleme (arka planda)
+          indexQuestionInPinecone(soru._id, q.text, {
+            grade: draft.grade,
+            topic: draft.topic,
+            difficulty: normalizedDifficulty
+          }).catch(err => console.warn('[AI] Pinecone indeksleme atlandı:', err.message));
+
+          // Merkezi İçerik Havuzuna onaylı tekil soru kaydı
+          await ContentLibrary.create({
+            title: `[${draft.grade}. Sınıf] ${q.text.slice(0, 80)}...`,
+            type: 'ai_question',
+            ders: 'matematik',
+            grade: Number(draft.grade) || 8,
+            topic: draft.topic || 'Genel',
+            difficulty: normalizedDifficulty,
+            content: {
+              text: q.text,
+              options: q.options,
+              answer: q.answer,
+              explanation: q.explanation,
+              svg: svgContent,
+              soruId: soru._id
+            },
+            status: 'approved',
+            source: 'ai',
+            createdBy: userId
+          });
+
+          q.status = 'approved';
+          q.approvedQuestionId = soru._id;
+          transferred.push(soru._id.toString());
+        } catch (itemErr) {
+          console.error(`[AI] Soru #${idx} aktarma hatası:`, itemErr);
+          errors.push(`Soru #${idx + 1}: ${itemErr.message}`);
+        }
+      }
+
+      if (transferred.length === 0 && errors.length > 0) {
+        return res.status(500).json({
+          mesaj: 'Sorular soru bankasına aktarılamadı: ' + errors[0]
+        });
       }
 
       draft.status = 'approved';
@@ -693,7 +744,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       });
     } catch (err) {
       console.error('[AI] Soru bankasına aktarma hatası:', err);
-      res.status(500).json({ mesaj: 'Sorular soru bankasına aktarılamadı.' });
+      res.status(500).json({ mesaj: 'Sorular soru bankasına aktarılamadı: ' + (err.message || 'Bilinmeyen hata') });
     }
   });
 
