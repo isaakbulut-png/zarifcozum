@@ -123,7 +123,8 @@ function createAdminRouter({
 
   router.get('/ai-maliyet-ozeti', allow('superadmin', 'editor', 'support'), async (req, res) => {
     try {
-      const { getAiUsageSummary } = require('../lib/ai-usage-tracker');
+      const { getAiUsageSummary, getAiAuditSummary } = require('../lib/ai-usage-tracker');
+const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQuota');
       const summary = await getAiUsageSummary();
       res.json(summary);
     } catch (error) {
@@ -1237,6 +1238,222 @@ function createAdminRouter({
     } catch (error) {
       console.error('Yönetim kayıtları alınamadı:', error);
       res.status(500).json({ mesaj: 'Yönetim kayıtları alınamadı.' });
+    }
+  });
+
+  
+  // ==========================================
+  // AI DENETİM & KOTA YÖNETİMİ ENDPOINT'LERİ
+  // ==========================================
+
+  // 1. Ajan Performans ve Genel AI Denetim Özeti
+  router.get('/ai-denetim-ozet', allow('superadmin', 'support'), async (req, res) => {
+    try {
+      const [auditData, toplamOgrenci, aiEngelliSayisi, ozelLimitliSayisi, bonusluSayisi] = await Promise.all([
+        getAiAuditSummary(),
+        User.countDocuments({ role: 'student' }),
+        User.countDocuments({ aiErisimEngelli: true }),
+        User.countDocuments({ ozelGunlukMesajLimiti: { $ne: null } }),
+        User.countDocuments({ ekstraBonusKredi: { $gt: 0 } })
+      ]);
+
+      res.json({
+        genel: auditData.genel,
+        ajanlar: auditData.ajanlar,
+        kullaniciIstatistikleri: {
+          toplamOgrenci,
+          aiEngelliSayisi,
+          ozelLimitliSayisi,
+          bonusluSayisi
+        }
+      });
+    } catch (error) {
+      console.error('AI denetim özeti alınamadı:', error);
+      res.status(500).json({ mesaj: 'AI denetim özeti alınamadı: ' + error.message });
+    }
+  });
+
+  // 2. Kullanıcı Bazlı AI Denetim Listesi
+  router.get('/ai-kullanicilar', allow('superadmin', 'support'), async (req, res) => {
+    try {
+      const {
+        search = '',
+        role = 'student',
+        paketTipi = 'all',
+        sort = 'maliyet_desc',
+        limit = 50,
+        page = 1
+      } = req.query;
+
+      const filter = {};
+      if (role && role !== 'all') {
+        filter.role = role;
+      }
+      if (paketTipi && paketTipi !== 'all') {
+        filter.paketTipi = paketTipi;
+      }
+      if (search && String(search).trim()) {
+        const q = String(search).trim();
+        filter.$or = [
+          { name: { $regex: q, $options: 'i' } },
+          { email: { $regex: q, $options: 'i' } }
+        ];
+      }
+
+      // Sıralama
+      let sortQuery = { toplamMaliyetTL: -1, toplamHarcananToken: -1 };
+      if (sort === 'token_desc') sortQuery = { toplamHarcananToken: -1 };
+      else if (sort === 'mesaj_desc') sortQuery = { gunlukAiMesajSayisi: -1 };
+      else if (sort === 'name_asc') sortQuery = { name: 1 };
+
+      const limitNum = Math.min(Math.max(1, parseInt(limit, 10) || 50), 200);
+      const pageNum = Math.max(1, parseInt(page, 10) || 1);
+      const skip = (pageNum - 1) * limitNum;
+
+      const [users, totalCount] = await Promise.all([
+        User.find(filter)
+          .select('name email role paketTipi gunlukAiMesajSayisi ozelGunlukMesajLimiti ekstraBonusKredi toplamHarcananToken toplamMaliyetTL aiErisimEngelli sonKotaSifirlamaTarihi')
+          .sort(sortQuery)
+          .skip(skip)
+          .limit(limitNum)
+          .lean(),
+        User.countDocuments(filter)
+      ]);
+
+      const formatted = users.map(u => {
+        const pTipi = u.paketTipi || 'free';
+        const tabanLimit = (PAKET_LIMITLERI[pTipi] || PAKET_LIMITLERI.free).maxMessages;
+        const ozelLimit = typeof u.ozelGunlukMesajLimiti === 'number' ? u.ozelGunlukMesajLimiti : null;
+        const etkinLimit = ozelLimit !== null ? ozelLimit : tabanLimit;
+        const gunlukKullanim = u.gunlukAiMesajSayisi || 0;
+        const kalanHak = Math.max(0, etkinLimit - gunlukKullanim);
+
+        return {
+          id: u._id.toString(),
+          name: u.name || 'İsimsiz Kullanıcı',
+          email: u.email,
+          role: u.role,
+          paketTipi: pTipi,
+          gunlukKullanim,
+          ozelGunlukMesajLimiti: ozelLimit,
+          etkinLimit,
+          kalanHak,
+          ekstraBonusKredi: u.ekstraBonusKredi || 0,
+          toplamHarcananToken: u.toplamHarcananToken || 0,
+          toplamMaliyetTL: Number((u.toplamMaliyetTL || 0).toFixed(2)),
+          aiErisimEngelli: Boolean(u.aiErisimEngelli),
+          sonKotaSifirlamaTarihi: u.sonKotaSifirlamaTarihi
+        };
+      });
+
+      res.json({
+        kullanicilar: formatted,
+        toplam: totalCount,
+        sayfa: pageNum,
+        toplamSayfa: Math.ceil(totalCount / limitNum)
+      });
+    } catch (error) {
+      console.error('AI kullanıcı listesi alınamadı:', error);
+      res.status(500).json({ mesaj: 'Kullanıcı listesi alınamadı: ' + error.message });
+    }
+  });
+
+  // 3. Canlı Müdahale: Kullanıcı Kota, Bonus, Paket ve Erişim Güncelleme
+  router.post('/kullanici-kota-guncelle', allow('superadmin', 'support'), async (req, res) => {
+    try {
+      const {
+        userId,
+        islem,
+        ozelGunlukMesajLimiti,
+        bonusMiktar,
+        paketTipi,
+        aiErisimEngelli
+      } = req.body;
+
+      if (!userId) {
+        return res.status(400).json({ mesaj: 'userId parametresi zorunludur.' });
+      }
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ mesaj: 'Kullanıcı bulunamadı.' });
+      }
+
+      let degisiklikDetayi = {};
+
+      if (islem === 'limit_duzenle') {
+        if (ozelGunlukMesajLimiti === null || ozelGunlukMesajLimiti === '' || ozelGunlukMesajLimiti === 'null') {
+          user.ozelGunlukMesajLimiti = null;
+          degisiklikDetayi.ozelGunlukMesajLimiti = 'Varsayılan paket limitine dönüldü';
+        } else {
+          const parsed = parseInt(ozelGunlukMesajLimiti, 10);
+          if (isNaN(parsed) || parsed < 0) {
+            return res.status(400).json({ mesaj: 'Geçersiz limit değeri.' });
+          }
+          user.ozelGunlukMesajLimiti = parsed;
+          degisiklikDetayi.ozelGunlukMesajLimiti = parsed;
+        }
+      } else if (islem === 'bonus_ekle') {
+        const miktar = parseInt(bonusMiktar, 10) || 20;
+        user.ekstraBonusKredi = (user.ekstraBonusKredi || 0) + miktar;
+        degisiklikDetayi.eklenenBonus = miktar;
+        degisiklikDetayi.toplamBonus = user.ekstraBonusKredi;
+      } else if (islem === 'paket_degistir') {
+        if (!['free', 'baslangic', 'pro'].includes(paketTipi)) {
+          return res.status(400).json({ mesaj: 'Geçersiz paket tipi. (free, baslangic, pro)' });
+        }
+        user.paketTipi = paketTipi;
+        degisiklikDetayi.yeniPaket = paketTipi;
+      } else if (islem === 'erisim_toggle') {
+        user.aiErisimEngelli = typeof aiErisimEngelli === 'boolean' ? aiErisimEngelli : !user.aiErisimEngelli;
+        degisiklikDetayi.aiErisimEngelli = user.aiErisimEngelli;
+      } else if (islem === 'kota_sifirla') {
+        user.gunlukAiMesajSayisi = 0;
+        user.gunlukSoruUretimSayisi = 0;
+        user.sonKotaSifirlamaTarihi = new Date();
+        degisiklikDetayi.mesaj = 'Bugünkü kullanım sayaçları sıfırlandı';
+      } else {
+        return res.status(400).json({ mesaj: 'Geçersiz işlem türü.' });
+      }
+
+      await user.save();
+
+      // Admin log kaydı
+      try {
+        await AdminLog.create({
+          actorId: req.session.user._id,
+          actorName: req.session.user.name || 'Admin',
+          action: 'ai_quota_update',
+          entityType: 'user',
+          entityId: user._id.toString(),
+          details: { islem, ...degisiklikDetayi }
+        });
+      } catch (logErr) {
+        console.warn('AdminLog kaydı yapılamadı:', logErr.message);
+      }
+
+      const pTipi = user.paketTipi || 'free';
+      const tabanLimit = (PAKET_LIMITLERI[pTipi] || PAKET_LIMITLERI.free).maxMessages;
+      const etkinLimit = typeof user.ozelGunlukMesajLimiti === 'number' ? user.ozelGunlukMesajLimiti : tabanLimit;
+
+      res.json({
+        basarili: true,
+        mesaj: 'Kullanıcı AI kota ayarları başarıyla güncellendi.',
+        kullanici: {
+          id: user._id.toString(),
+          name: user.name,
+          paketTipi: pTipi,
+          ozelGunlukMesajLimiti: user.ozelGunlukMesajLimiti,
+          etkinLimit,
+          gunlukKullanim: user.gunlukAiMesajSayisi,
+          kalanHak: Math.max(0, etkinLimit - user.gunlukAiMesajSayisi),
+          ekstraBonusKredi: user.ekstraBonusKredi,
+          aiErisimEngelli: user.aiErisimEngelli
+        }
+      });
+    } catch (error) {
+      console.error('Kullanıcı kota güncelleme hatası:', error);
+      res.status(500).json({ mesaj: 'Kullanıcı kotası güncellenemedi: ' + error.message });
     }
   });
 

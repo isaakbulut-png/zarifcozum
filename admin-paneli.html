@@ -660,7 +660,11 @@
 
     <!-- YAPAY ZEKÂ & ASİSTAN -->
     <div class="nav-title" data-admin-roles="superadmin,editor">Yapay Zekâ & Asistan</div>
-    <button class="nav-btn" type="button" data-view="ai-content" data-admin-roles="superadmin,editor">
+    <button class="nav-btn" type="button" data-view="ai-audit" data-admin-roles="superadmin,support">
+          <svg viewBox="0 0 24 24" style="stroke:#8b5cf6; fill:none; stroke-width:2;"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM9 13a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
+          <span>AI Denetim &amp; Kota</span>
+        </button>
+        <button class="nav-btn" type="button" data-view="ai-content" data-admin-roles="superadmin,editor">
       <svg viewBox="0 0 24 24" style="stroke:#e879f9"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg>
       <span class="nav-text">AI İçerik Stüdyosu</span>
     </button>
@@ -1137,6 +1141,138 @@
     </section>
 
     <!-- 11. YAPAY ZEKA ZEKÂ İÇERİK STÜDYOSU -->
+    <!-- 10.5. AI DENETİM & KOTA YÖNETİMİ PANELİ -->
+    <section id="view-ai-audit" hidden>
+      <div class="panel" style="margin-top:0">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
+          <div>
+            <h3 style="margin:0 0 6px 0; display:flex; align-items:center; gap:8px;">
+              <span>🤖</span> AI Denetim &amp; Kullanıcı Kota Yönetim Paneli
+            </h3>
+            <p class="notice" style="margin:0;">Tüm öğrenci ve öğretmenlerin yapay zekâ tüketimini, model/ajan dağılımını canlı takip edin; kullanıcı bazlı kotalara anında müdahale edin.</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <a href="/admin-maliyet.html" target="_blank" class="btn" style="background:#4f46e5; color:#fff; border-color:#4338ca;">
+              📊 Detaylı Finansal Maliyet Dashboard ↗
+            </a>
+            <button type="button" class="btn" id="btnAiAuditRefresh">
+              🔄 Canlı Verileri Yenile
+            </button>
+          </div>
+        </div>
+
+        <!-- BÖLÜM A: AJAN PERFORMANS ÖZETİ VE KPI KARTLARI -->
+        <div style="margin-bottom:28px;">
+          <h4 style="margin:0 0 14px 0; font-size:1.05rem; color:#523520; display:flex; align-items:center; gap:6px;">
+            <span>⚡</span> Bölüm A: Yapay Zekâ Ajan Performans &amp; Harcama Dağılımı
+          </h4>
+          
+          <!-- 4 Temel Özet Kartı -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:14px; margin-bottom:18px;">
+            <div style="background:#fff; border:1px solid #ebd9c8; border-radius:10px; padding:16px;">
+              <div style="font-size:0.8rem; color:#8c7e72; font-weight:600; text-transform:uppercase;">Toplam Sistem Harcaması</div>
+              <div style="font-size:1.6rem; font-weight:700; color:#b93838; margin-top:4px;" id="statAiToplamTL">0.00 ₺</div>
+              <div style="font-size:0.8rem; color:#a89d91;" id="statAiToplamUSD">$0.0000 USD</div>
+            </div>
+            <div style="background:#fff; border:1px solid #ebd9c8; border-radius:10px; padding:16px;">
+              <div style="font-size:0.8rem; color:#8c7e72; font-weight:600; text-transform:uppercase;">Toplam Tüketilen Token</div>
+              <div style="font-size:1.6rem; font-weight:700; color:#523520; margin-top:4px;" id="statAiToplamToken">0</div>
+              <div style="font-size:0.8rem; color:#a89d91;" id="statAiToplamKullanim">0 toplam istek</div>
+            </div>
+            <div style="background:#fff; border:1px solid #ebd9c8; border-radius:10px; padding:16px;">
+              <div style="font-size:0.8rem; color:#8c7e72; font-weight:600; text-transform:uppercase;">AI Erişimi Kilitli</div>
+              <div style="font-size:1.6rem; font-weight:700; color:#dc2626; margin-top:4px;" id="statAiEngelliSayisi">0</div>
+              <div style="font-size:0.8rem; color:#a89d91;">Kötüye kullanım engeli</div>
+            </div>
+            <div style="background:#fff; border:1px solid #ebd9c8; border-radius:10px; padding:16px;">
+              <div style="font-size:0.8rem; color:#8c7e72; font-weight:600; text-transform:uppercase;">Özel Limitli / Bonuslu</div>
+              <div style="font-size:1.6rem; font-weight:700; color:#15803d; margin-top:4px;" id="statAiOzelSayisi">0</div>
+              <div style="font-size:0.8rem; color:#a89d91;">Admin ayrıcalıklı öğrenci</div>
+            </div>
+          </div>
+
+          <!-- Ajan Dağılım Kartları -->
+          <div style="background:#faf8f5; border:1px solid #ebd9c8; border-radius:10px; padding:16px;" id="ajanDagilimContainer">
+            <div style="font-size:0.88rem; font-weight:700; color:#523520; margin-bottom:12px;">Ajan Bazlı Tüketim &amp; Maliyet Oranları:</div>
+            <div id="ajanKartlariListesi" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
+              <div style="color:#8c7e72; font-size:0.85rem;">Ajan performans verileri yükleniyor...</div>
+            </div>
+          </div>
+        </div>
+
+        <hr style="border:none; border-top:1px solid #ebd9c8; margin:24px 0;">
+
+        <!-- BÖLÜM B: KULLANICI BAZLI DENETİM TABLOSU & BÖLÜM C: CANLI MÜDAHALE -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+            <h4 style="margin:0; font-size:1.05rem; color:#523520; display:flex; align-items:center; gap:6px;">
+              <span>👥</span> Bölüm B &amp; C: Kullanıcı Bazlı Denetim &amp; Canlı Müdahale Araçları
+            </h4>
+            <span style="font-size:0.85rem; color:#8c7e72;" id="kullaniciToplamSayiBadge">Toplam: 0 kullanıcı</span>
+          </div>
+
+          <!-- Filtreleme Çubuğu -->
+          <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; background:#fff; padding:12px; border:1px solid #ebd9c8; border-radius:8px;">
+            <div style="flex:1; min-width:200px;">
+              <input type="text" id="aiUserSearchInput" placeholder="Öğrenci adı veya e-posta ara..." style="width:100%; padding:8px 12px; font-size:0.85rem;">
+            </div>
+            <div>
+              <select id="aiUserRoleSelect" style="padding:8px 12px; font-size:0.85rem;">
+                <option value="student">Sadece Öğrenciler</option>
+                <option value="teacher">Sadece Öğretmenler</option>
+                <option value="all">Tüm Roller</option>
+              </select>
+            </div>
+            <div>
+              <select id="aiUserPackageSelect" style="padding:8px 12px; font-size:0.85rem;">
+                <option value="all">Tüm Paketler</option>
+                <option value="free">Free Paket</option>
+                <option value="baslangic">Başlangıç Paketi</option>
+                <option value="pro">Pro Paket</option>
+              </select>
+            </div>
+            <div>
+              <select id="aiUserSortSelect" style="padding:8px 12px; font-size:0.85rem;">
+                <option value="maliyet_desc">En Çok Harcayan (TL)</option>
+                <option value="token_desc">En Çok Token Tüketen</option>
+                <option value="mesaj_desc">Bugünkü Mesaj Sayısı</option>
+                <option value="name_asc">İsim (A-Z)</option>
+              </select>
+            </div>
+            <button type="button" class="btn primary sm" id="btnAiUserSearch">Filtrele</button>
+          </div>
+
+          <!-- Kullanıcı Tablosu -->
+          <div class="table-wrap">
+            <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+              <thead>
+                <tr style="background:#faf8f5; border-bottom:1px solid #ebd9c8; text-align:left;">
+                  <th style="padding:10px 12px;">Öğrenci / Kullanıcı</th>
+                  <th style="padding:10px 12px;">Paket</th>
+                  <th style="padding:10px 12px;">Bugünkü Kullanım / Limit</th>
+                  <th style="padding:10px 12px;">Bonus Kredi</th>
+                  <th style="padding:10px 12px;">Toplam Token</th>
+                  <th style="padding:10px 12px;">Toplam Maliyet</th>
+                  <th style="padding:10px 12px;">AI Durumu</th>
+                  <th style="padding:10px 12px; text-align:right;">Canlı Müdahale Araçları</th>
+                </tr>
+              </thead>
+              <tbody id="aiAuditTableBody">
+                <tr><td colspan="8" class="empty" style="padding:24px; text-align:center; color:#8c7e72;">Kullanıcılar yükleniyor...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Sayfalama -->
+          <div style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:14px;" id="aiAuditPagination">
+            <button type="button" class="btn sm" id="btnAiPrevPage" disabled>← Önceki</button>
+            <span style="font-size:0.85rem; color:#8c7e72;" id="aiAuditPageText">Sayfa 1 / 1</span>
+            <button type="button" class="btn sm" id="btnAiNextPage" disabled>Sonraki →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section id="view-ai-content" hidden>
       <div class="panel" style="margin-top:0">
         <h3>Yapay Zekâ Soru & İçerik Asistanı</h3>
@@ -1414,6 +1550,7 @@
         'solved-questions': 'Çözümlü Sorular',
         'questions-manage': 'Soru Bankası & Resim Havuzu',
         'maarif-curriculum': 'Maarif Müfredat Gezgini',
+        'ai-audit': 'AI Denetim & Kota Yönetimi',
         'ai-content': 'AI İçerik Stüdyosu',
         'content-pool': '📚 Merkezi İçerik Havuzu',
         'system-health': 'Sistem Sağlığı ve Güvenlik'
@@ -1435,6 +1572,7 @@
         'solved-questions': 'Video ve çözümlü soru arşivi',
         'questions-manage': 'Soru bankası görselleri ve senkronizasyon',
         'maarif-curriculum': '5–12. sınıf Türkiye Yüzyılı Maarif Modeli ağacı',
+        'ai-audit': 'Yapay zekâ tüketim analizi, ajan performansı ve kullanıcı bazlı canlı kota kontrolleri',
         'ai-content': 'Yapay zekâ destekli soru ve test üretim stüdyosu',
         'content-pool': 'AI soru taslakları, onaylı sorular, PDF dokümanları, konu anlatımları ve Cloudflare R2 arşivi',
         'system-health': 'Render, PostgreSQL, MongoDB, Cloudflare R2, Cloudinary, SSL ve CDN Canlı Teşhisi'
@@ -1476,6 +1614,7 @@
         'solved-questions': () => window.solvedQuestionsAdmin?.load?.(),
         'questions-manage': loadQuestionsManage,
         'maarif-curriculum': loadAdminCurriculumTree,
+        'ai-audit': loadAiAudit,
         'ai-content': () => {},
         'content-pool': loadContentPool,
         'system-health': () => {
@@ -2496,6 +2635,569 @@
                   body: JSON.stringify({ status: 'approved' })
                 });
                 loadContentPool();
+
+      // ==========================================
+      // AI DENETİM & KOTA YÖNETİMİ SCRIPTLERİ
+      // ==========================================
+      let aiAuditCurrentPage = 1;
+
+      async function loadAiAudit() {
+        await Promise.all([
+          loadAiAuditOverview(),
+          loadAiAuditUsers()
+        ]);
+      }
+
+      async function loadAiAuditOverview() {
+        try {
+          const res = await fetch('/api/admin/ai-denetim-ozet', { credentials: 'same-origin' });
+          if (!res.ok) throw new Error('AI denetim özeti alınamadı: ' + res.status);
+          const data = await res.json();
+
+          // KPI Değerleri
+          $('statAiToplamTL').textContent = (data.genel?.toplamSistemMaliyetTL || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+          $('statAiToplamUSD').textContent = '
+              } catch (e) { alert('Onaylama hatası: ' + e.message); }
+            };
+            tdActions.append(btnApprove);
+          }
+
+          // PDF İndir
+          const btnPdf = document.createElement('a');
+          btnPdf.className = 'btn light';
+          btnPdf.style.fontSize = '0.75rem';
+          btnPdf.style.padding = '4px 8px';
+          btnPdf.style.marginRight = '4px';
+          btnPdf.textContent = '📥 PDF';
+          btnPdf.href = `/api/content-library/export?format=pdf&ids=${itemId}`;
+          btnPdf.target = '_blank';
+          tdActions.append(btnPdf);
+
+          // DOCX İndir
+          const btnDocx = document.createElement('a');
+          btnDocx.className = 'btn light';
+          btnDocx.style.fontSize = '0.75rem';
+          btnDocx.style.padding = '4px 8px';
+          btnDocx.style.marginRight = '4px';
+          btnDocx.textContent = '📄 DOCX';
+          btnDocx.href = `/api/content-library/export?format=docx&ids=${itemId}`;
+          btnDocx.target = '_blank';
+          tdActions.append(btnDocx);
+
+          // R2 Arşivle Butonu
+          if (!item.r2Key) {
+            const btnR2 = document.createElement('button');
+            btnR2.className = 'btn light';
+            btnR2.style.fontSize = '0.75rem';
+            btnR2.style.padding = '4px 8px';
+            btnR2.style.marginRight = '4px';
+            btnR2.textContent = '☁ R2';
+            btnR2.title = "Cloudflare R2'ye kalıcı arşivle";
+            btnR2.onclick = async () => {
+              btnR2.disabled = true;
+              try {
+                const r2res = await api(`/api/content-library/${itemId}/archive-r2`, { method: 'POST' });
+                alert(r2res.mesaj || 'R2 arşivi oluşturuldu.');
+                loadContentPool();
+              } catch (e) { alert('R2 arşiv hatası: ' + e.message); btnR2.disabled = false; }
+            };
+            tdActions.append(btnR2);
+          }
+
+          // Sil
+          const btnDel = document.createElement('button');
+          btnDel.className = 'btn light';
+          btnDel.style.fontSize = '0.75rem';
+          btnDel.style.padding = '4px 8px';
+          btnDel.style.color = '#ef4444';
+          btnDel.textContent = '🗑️';
+          btnDel.onclick = async () => {
+            if (!confirm('Bu içeriği silmek istediğinize emin misiniz?')) return;
+            try {
+              await api(`/api/content-library/${itemId}`, { method: 'DELETE' });
+              loadContentPool();
+            } catch (e) { alert('Silme hatası: ' + e.message); }
+          };
+          tdActions.append(btnDel);
+
+          tr.append(tdActions);
+          tbody.append(tr);
+        });
+      }
+
+      // Event Listeners for Content Pool
+      function setupContentPoolEvents() {
+        $('poolRefreshBtn')?.addEventListener('click', loadContentPool);
+        
+        ['poolFilterLesson', 'poolFilterGrade', 'poolFilterDifficulty', 'poolFilterType', 'poolFilterSource', 'poolFilterStatus'].forEach(id => {
+          $(id)?.addEventListener('change', loadContentPool);
+        });
+
+        $('poolFilterSearch')?.addEventListener('input', () => {
+          clearTimeout(window._poolSearchDebounce);
+          window._poolSearchDebounce = setTimeout(loadContentPool, 300);
+        });
+
+        $('poolSelectAll')?.addEventListener('change', (e) => {
+          document.querySelectorAll('.pool-item-check').forEach(chk => {
+            chk.checked = e.target.checked;
+          });
+        });
+
+        // Toplu PDF İndir
+        $('poolExportPdfBtn')?.addEventListener('click', () => {
+          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
+          const query = selected.length > 0 ? `&ids=${selected.join(',')}` : '';
+          window.open(`/api/content-library/export?format=pdf${query}`, '_blank');
+        });
+
+        // Toplu DOCX İndir
+        $('poolExportDocxBtn')?.addEventListener('click', () => {
+          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
+          const query = selected.length > 0 ? `&ids=${selected.join(',')}` : '';
+          window.open(`/api/content-library/export?format=docx${query}`, '_blank');
+        });
+
+        // Toplu R2 Arşivle
+        $('poolArchiveR2Btn')?.addEventListener('click', async () => {
+          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
+          if (selected.length === 0) {
+            alert('Lütfen R2\'ye arşivlenecek en az bir içerik seçin.');
+            return;
+          }
+          if (!confirm(`Seçili ${selected.length} içerik Cloudflare R2\'ye arşivlenecek. Devam edilsin mi?`)) return;
+          let count = 0;
+          for (const id of selected) {
+            try {
+              await api(`/api/content-library/${id}/archive-r2`, { method: 'POST' });
+              count++;
+            } catch (e) {
+              console.warn('R2 toplu arşiv uyarısı:', id, e.message);
+            }
+          }
+          alert(`${count} içerik başarıyla R2\'ye arşivlendi.`);
+          loadContentPool();
+        });
+      }
+
+      setupContentPoolEvents();
+
+      /* Event Dinleyicileri */
+      document.querySelectorAll('[data-view]').forEach(button =>
+        button.addEventListener('click', () => showView(button.dataset.view)));
+
+      $('userSearchButton')?.addEventListener('click', () => { page = 1; loadUsers(); });
+      $('userSearch')?.addEventListener('keydown', e => { if (e.key === 'Enter') { page = 1; loadUsers(); } });
+      $('userRole')?.addEventListener('change', () => { page = 1; loadUsers(); });
+      $('prevPage')?.addEventListener('click', () => { if (page > 1) { page -= 1; loadUsers(); } });
+      $('nextPage')?.addEventListener('click', () => { if (page < totalPages) { page += 1; loadUsers(); } });
+      $('paymentStatus')?.addEventListener('change', loadPayments);
+
+      $('announcementForm')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const message = $('announcementMsg');
+        message.className = 'msg';
+        message.textContent = '';
+        try {
+          const data = await api('/api/admin/announcements', {
+            method: 'POST',
+            body: JSON.stringify({ message: $('announcementText').value })
+          });
+          $('announcementText').value = '';
+          message.className = 'msg ok';
+          message.textContent = data.mesaj;
+          loadAnnouncements();
+        } catch (error) { message.textContent = error.message; }
+      });
+
+      $('bannerForm')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const message = $('bannerMsg');
+        const button = $('btnPublishBanner');
+        message.className = 'msg';
+        message.textContent = '';
+        button.disabled = true;
+        try {
+          const payload = {
+            active: true,
+            title: $('bannerTitle').value.trim(),
+            message: $('bannerMessage').value.trim(),
+            type: $('bannerType').value,
+            updatedAt: new Date().toISOString()
+          };
+          try {
+            localStorage.setItem('zarif_announcement_banner', JSON.stringify(payload));
+          } catch (_) {}
+          const res = await api('/api/admin/announcement-banner', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          message.className = 'msg ok';
+          message.textContent = res.mesaj || 'Bilgilendirme panosu başarıyla yayınlandı.';
+          loadBanner();
+        } catch (err) {
+          message.className = 'msg';
+          message.textContent = err.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $('btnDisableBanner')?.addEventListener('click', async () => {
+        if (!confirm('Bilgilendirme panosu yayından kaldırılsın mı? Ziyaretçilere artık gösterilmeyecek.')) return;
+        const message = $('bannerMsg');
+        const button = $('btnDisableBanner');
+        message.className = 'msg';
+        message.textContent = '';
+        button.disabled = true;
+        try {
+          const payload = {
+            active: false,
+            title: $('bannerTitle').value.trim(),
+            message: $('bannerMessage').value.trim(),
+            type: $('bannerType').value,
+            updatedAt: new Date().toISOString()
+          };
+          try {
+            localStorage.setItem('zarif_announcement_banner', JSON.stringify(payload));
+          } catch (_) {}
+          const res = await api('/api/admin/announcement-banner', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          message.className = 'msg ok';
+          message.textContent = 'Bilgilendirme panosu yayından kaldırıldı (pasif yapıldı).';
+          loadBanner();
+        } catch (err) {
+          message.className = 'msg';
+          message.textContent = err.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $('faqForm')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const message = $('faqMsg');
+        const button = $('faqSave');
+        message.className = 'msg';
+        message.textContent = '';
+        button.disabled = true;
+        const payload = {
+          question: $('faqQuestion').value,
+          answerHtml: faqEditor?.root.innerHTML || '',
+          grade: $('faqGrade').value,
+          active: $('faqActive').checked
+        };
+        try {
+          const data = await api('/api/admin/faqs', { method: 'POST', body: JSON.stringify(payload) });
+          message.className = 'msg ok';
+          message.textContent = data.mesaj;
+          $('faqQuestion').value = '';
+          if (faqEditor) faqEditor.setContents([]);
+          loadFaqs();
+        } catch (error) {
+          message.textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $('visitorSettingsForm')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const message = $('visitorSettingsMsg');
+        const button = $('saveVisitorSettings');
+        message.className = 'msg';
+        message.textContent = '';
+        button.disabled = true;
+        const ziyaretciHaklari = {
+          questionLimit: Number($('visitorQuestionLimit').value),
+          topicLimit: Number($('visitorTopicLimit').value),
+          trialDurationDays: Number($('visitorTrialDays').value),
+          summaryEnabled: $('visitorSummaryEnabled').checked,
+          practiceEnabled: $('visitorPracticeEnabled').checked,
+          assistantEnabled: $('visitorAssistantEnabled').checked,
+          fullTestEnabled: $('visitorFullTestEnabled').checked,
+          subscriptionRequired: $('subscriptionRequired').checked,
+          registrationEnabled: $('registrationEnabled').checked
+        };
+        try {
+          const data = await api('/api/admin/settings', {
+            method: 'POST',
+            body: JSON.stringify({ ziyaretciHaklari })
+          });
+          message.className = 'msg ok';
+          message.textContent = data.mesaj;
+        } catch (error) {
+          message.textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      $('logoutButton')?.addEventListener('click', async () => {
+        await fetch('/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
+        window.location.assign('/yonetim');
+      });
+
+      async function initializePanel() {
+        try {
+          const data = await api('/api/admin/me');
+          activeAdminRole = data.user.adminRole;
+          activeAdminId = data.user.id;
+          
+          $('whoName').textContent = data.user.name || 'Yönetici';
+          $('whoInitial').textContent = (data.user.name || 'Y').charAt(0).toUpperCase();
+          $('whoRole').textContent = adminRoleNames[activeAdminRole] || 'Yönetici';
+
+          document.querySelectorAll('[data-admin-roles]').forEach(element => {
+            const roles = element.dataset.adminRoles.split(',');
+            element.hidden = !roles.includes(activeAdminRole);
+          });
+          
+          const firstView = activeAdminRole === 'editor' ? 'education-quizzes' : 'overview';
+          document.body.classList.remove('rbac-loading');
+          showView(firstView);
+        } catch {
+          window.location.assign('/yonetim');
+        }
+      }
+
+      initializePanel();
+    })();
+  </script>
+  <script src="/assets/breadcrumb.js"></script>
+</body>
+</html>
+ + (data.genel?.toplamSistemMaliyetUSD || 0).toFixed(4) + ' USD';
+          $('statAiToplamToken').textContent = (data.genel?.toplamSistemToken || 0).toLocaleString('tr-TR');
+          $('statAiToplamKullanim').textContent = (data.genel?.toplamKullanim || 0).toLocaleString('tr-TR') + ' toplam API isteği';
+
+          $('statAiEngelliSayisi').textContent = data.kullaniciIstatistikleri?.aiEngelliSayisi || 0;
+          $('statAiOzelSayisi').textContent = (data.kullaniciIstatistikleri?.ozelLimitliSayisi || 0) + ' / ' + (data.kullaniciIstatistikleri?.bonusluSayisi || 0) + ' bonus';
+
+          // Ajan Dağılım Kartları
+          const container = $('ajanKartlariListesi');
+          if (!container) return;
+
+          if (!data.ajanlar || data.ajanlar.length === 0) {
+            container.innerHTML = '<div style="color:#8c7e72; font-size:0.85rem;">Henüz kayıtlı ajan kullanım verisi bulunmuyor.</div>';
+            return;
+          }
+
+          const ajanIcons = {
+            'Sokratik Mentör': '🧠',
+            'Öğretmen İkizi': '👨‍🏫',
+            'Adım Adım Çözüm': '📝',
+            'Adım Adım Soru Çözümü': '📝',
+            'AI Koç': '🎯',
+            'Soru Sihirbazı': '🧙‍♂️',
+            'Konu Anlatımı Zenginleştirme': '📚'
+          };
+
+          container.innerHTML = data.ajanlar.map(ajan => {
+            const icon = ajanIcons[ajan.ajanAdi] || '🤖';
+            const yuzde = ajan.yuzde || 0;
+            return `
+              <div style="background:#fff; border:1px solid #ebd9c8; border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong style="color:#523520; font-size:0.9rem; display:flex; align-items:center; gap:6px;">
+                    <span>${icon}</span> ${esc(ajan.ajanAdi)}
+                  </strong>
+                  <span style="background:#f3e1cf; color:#7a4f2d; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:999px;">
+                    %${yuzde}
+                  </span>
+                </div>
+                <!-- İlerleme Çubuğu -->
+                <div style="height:6px; background:#f1ebe5; border-radius:999px; overflow:hidden;">
+                  <div style="height:100%; width:${Math.min(100, yuzde)}%; background:#7a4f2d; border-radius:999px;"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:#8c7e72;">
+                  <span>${ajan.kullanimSayisi.toLocaleString('tr-TR')} istek · ${(ajan.toplamToken || 0).toLocaleString('tr-TR')} token</span>
+                  <strong style="color:#b93838;">${ajan.toplamMaliyetTL.toFixed(2)} ₺</strong>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+        } catch (err) {
+          console.error('loadAiAuditOverview hatası:', err);
+        }
+      }
+
+      async function loadAiAuditUsers(page = 1) {
+        aiAuditCurrentPage = page;
+        const tbody = $('aiAuditTableBody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '<tr><td colspan="8" class="empty" style="padding:24px; text-align:center; color:#8c7e72;">Kullanıcılar taranıyor...</td></tr>';
+
+        try {
+          const search = $('aiUserSearchInput')?.value || '';
+          const role = $('aiUserRoleSelect')?.value || 'student';
+          const paketTipi = $('aiUserPackageSelect')?.value || 'all';
+          const sort = $('aiUserSortSelect')?.value || 'maliyet_desc';
+
+          const params = new URLSearchParams({
+            search,
+            role,
+            paketTipi,
+            sort,
+            page: String(aiAuditCurrentPage),
+            limit: '50'
+          });
+
+          const res = await fetch('/api/admin/ai-kullanicilar?' + params.toString(), { credentials: 'same-origin' });
+          if (!res.ok) throw new Error('Kullanıcı listesi alınamadı: ' + res.status);
+          const data = await res.json();
+
+          $('kullaniciToplamSayiBadge').textContent = 'Toplam: ' + (data.toplam || 0) + ' kullanıcı';
+
+          // Sayfalama
+          $('aiAuditPageText').textContent = `Sayfa ${data.sayfa || 1} / ${data.toplamSayfa || 1}`;
+          $('btnAiPrevPage').disabled = (data.sayfa || 1) <= 1;
+          $('btnAiNextPage').disabled = (data.sayfa || 1) >= (data.toplamSayfa || 1);
+
+          if (!data.kullanicilar || data.kullanicilar.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="empty" style="padding:24px; text-align:center; color:#8c7e72;">Aramaya uygun kullanıcı bulunamadı.</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = data.kullanicilar.map(u => {
+            const isBlocked = u.aiErisimEngelli;
+            const statusBadge = isBlocked
+              ? '<span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:700; background:#fee2e2; color:#b91c1c;">🚫 Kilitli</span>'
+              : '<span style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:700; background:#dcfce7; color:#15803d;">✅ Aktif</span>';
+
+            const packageBadges = {
+              free: '<span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">Free</span>',
+              baslangic: '<span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;">Başlangıç</span>',
+              pro: '<span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; background:#fef3c7; color:#b45309; border:1px solid #fde68a;">🚀 Pro</span>'
+            };
+
+            const usageInfo = typeof u.ozelGunlukMesajLimiti === 'number'
+              ? `<strong style="color:#7a4f2d;">${u.gunlukKullanim} / ${u.etkinLimit}</strong> <small style="color:#b45309; font-weight:600;">(Özel Limit)</small>`
+              : `<span>${u.gunlukKullanim} / ${u.etkinLimit}</span>`;
+
+            const bonusBadge = u.ekstraBonusKredi > 0
+              ? `<span style="padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;">+${u.ekstraBonusKredi} Bonus</span>`
+              : '<span style="color:#cbd5e1;">—</span>';
+
+            return `
+              <tr style="border-bottom:1px solid #f3e1cf;">
+                <td style="padding:10px 12px;">
+                  <strong style="color:#523520; display:block;">${esc(u.name)}</strong>
+                  <small style="color:#8c7e72;">${esc(u.email)}</small>
+                </td>
+                <td style="padding:10px 12px;">${packageBadges[u.paketTipi] || packageBadges.free}</td>
+                <td style="padding:10px 12px;">${usageInfo}</td>
+                <td style="padding:10px 12px;">${bonusBadge}</td>
+                <td style="padding:10px 12px; font-weight:600; color:#523520;">${(u.toplamHarcananToken || 0).toLocaleString('tr-TR')}</td>
+                <td style="padding:10px 12px; font-weight:700; color:#b93838;">${(u.toplamMaliyetTL || 0).toFixed(2)} ₺</td>
+                <td style="padding:10px 12px;">${statusBadge}</td>
+                <td style="padding:10px 12px; text-align:right;">
+                  <div style="display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+                    
+                    <!-- +20 Bonus Butonu -->
+                    <button type="button" class="btn sm" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;" title="Öğrenciye anında 20 ek AI mesaj kredisi hediye et" onclick="handleAiBonus('${u.id}', '${esc(u.name)}')">
+                      🎁 +20 Bonus
+                    </button>
+
+                    <!-- Limit Düzenle Butonu -->
+                    <button type="button" class="btn sm" title="Öğrenciye özel günlük limit tanımla veya kaldır" onclick="handleAiLimitEdit('${u.id}', '${esc(u.name)}', ${u.ozelGunlukMesajLimiti !== null ? u.ozelGunlukMesajLimiti : 'null'})">
+                      ⚙️ Limit
+                    </button>
+
+                    <!-- Paket Değiştir Seçimi -->
+                    <select style="padding:3px 6px; font-size:11px; border-radius:6px; border:1px solid #d9d3c3;" onchange="handleAiPackageChange('${u.id}', this.value)">
+                      <option value="free" ${u.paketTipi === 'free' ? 'selected' : ''}>Free</option>
+                      <option value="baslangic" ${u.paketTipi === 'baslangic' ? 'selected' : ''}>Başlangıç</option>
+                      <option value="pro" ${u.paketTipi === 'pro' ? 'selected' : ''}>Pro</option>
+                    </select>
+
+                    <!-- AI Erişim Durdur / Aç Toggle Butonu -->
+                    <button type="button" class="btn sm ${isBlocked ? 'success' : 'danger'}" title="${isBlocked ? 'AI Erişim Engelini Kaldır' : 'Öğrencinin AI erişimini derhal kilitle'}" onclick="handleAiAccessToggle('${u.id}', ${!isBlocked}, '${esc(u.name)}')">
+                      ${isBlocked ? '🔓 Kilidi Aç' : '🔒 AI Engelle'}
+                    </button>
+
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
+
+        } catch (err) {
+          tbody.innerHTML = `<tr><td colspan="8" class="empty" style="padding:24px; text-align:center; color:#dc2626;">Kullanıcılar yüklenemedi: ${esc(err.message)}</td></tr>`;
+        }
+      }
+
+      // Canlı Müdahale Eylemleri
+      window.handleAiBonus = async function(userId, userName) {
+        if (!confirm(`"${userName}" adlı öğrenciye +20 Bonus AI Mesaj Kredisi tanımlansın mı?`)) return;
+        await postAiQuotaUpdate({ userId, islem: 'bonus_ekle', bonusMiktar: 20 });
+      };
+
+      window.handleAiLimitEdit = async function(userId, userName, currentLimit) {
+        const val = prompt(
+          `"${userName}" için Özel Günlük Mesaj Limiti belirleyin:\n(Paket varsayılanına dönmek için boş bırakın veya "null" yazın)\n\nMevcut: ${currentLimit !== null ? currentLimit : 'Paket Varsayılanı'}`,
+          currentLimit !== null ? currentLimit : ''
+        );
+        if (val === null) return; // İptal edildi
+        await postAiQuotaUpdate({
+          userId,
+          islem: 'limit_duzenle',
+          ozelGunlukMesajLimiti: val.trim() === '' || val.trim().toLowerCase() === 'null' ? null : parseInt(val.trim(), 10)
+        });
+      };
+
+      window.handleAiPackageChange = async function(userId, newPackage) {
+        await postAiQuotaUpdate({ userId, islem: 'paket_degistir', paketTipi: newPackage });
+      };
+
+      window.handleAiAccessToggle = async function(userId, targetBlocked, userName) {
+        const actionText = targetBlocked ? 'AI erişimini KİLİTLEMEK' : 'AI erişim engelini KALDIRMAK';
+        if (!confirm(`"${userName}" adlı kullanıcının ${actionText} istediğinizden emin misiniz?`)) return;
+        await postAiQuotaUpdate({ userId, islem: 'erisim_toggle', aiErisimEngelli: targetBlocked });
+      };
+
+      async function postAiQuotaUpdate(payload) {
+        try {
+          const res = await fetch('/api/admin/kullanici-kota-guncelle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mesaj || 'Güncelleme başarısız (' + res.status + ')');
+
+          // Kullanıcı tablosunu ve özetleri tazele
+          await Promise.all([
+            loadAiAuditOverview(),
+            loadAiAuditUsers(aiAuditCurrentPage)
+          ]);
+        } catch (err) {
+          alert('Hata: ' + err.message);
+        }
+      }
+
+      // Filtreleme ve Buton Event Dinleyicileri
+      document.addEventListener('DOMContentLoaded', () => {
+        $('btnAiAuditRefresh')?.addEventListener('click', () => loadAiAudit());
+        $('btnAiUserSearch')?.addEventListener('click', () => loadAiAuditUsers(1));
+        $('aiUserSearchInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') loadAiAuditUsers(1); });
+        $('aiUserRoleSelect')?.addEventListener('change', () => loadAiAuditUsers(1));
+        $('aiUserPackageSelect')?.addEventListener('change', () => loadAiAuditUsers(1));
+        $('aiUserSortSelect')?.addEventListener('change', () => loadAiAuditUsers(1));
+
+        $('btnAiPrevPage')?.addEventListener('click', () => {
+          if (aiAuditCurrentPage > 1) loadAiAuditUsers(aiAuditCurrentPage - 1);
+        });
+        $('btnAiNextPage')?.addEventListener('click', () => {
+          loadAiAuditUsers(aiAuditCurrentPage + 1);
+        });
+      });
+
               } catch (e) { alert('Onaylama hatası: ' + e.message); }
             };
             tdActions.append(btnApprove);

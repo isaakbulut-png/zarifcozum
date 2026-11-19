@@ -88,6 +88,46 @@ const userSchema = new mongoose.Schema({
     maxlength: 300,
     default: null
   },
+  // Yapay Zekâ Kota ve Denetim Alanları
+  paketTipi: {
+    type: String,
+    enum: ['free', 'baslangic', 'pro'],
+    default: 'free',
+    index: true
+  },
+  gunlukAiMesajSayisi: {
+    type: Number,
+    default: 0
+  },
+  gunlukSoruUretimSayisi: {
+    type: Number,
+    default: 0
+  },
+  sonKotaSifirlamaTarihi: {
+    type: Date,
+    default: Date.now
+  },
+  ozelGunlukMesajLimiti: {
+    type: Number,
+    default: null
+  },
+  ekstraBonusKredi: {
+    type: Number,
+    default: 0
+  },
+  toplamHarcananToken: {
+    type: Number,
+    default: 0
+  },
+  toplamMaliyetTL: {
+    type: Number,
+    default: 0
+  },
+  aiErisimEngelli: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
   subscriptionStatus: {
     type: String,
     enum: ['free', 'active', 'expired'],

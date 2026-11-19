@@ -266,7 +266,19 @@ app.get('/api/mufredat-ozet', mufredatKonulariLimiter, requireKonuLogin, async (
   }
 });
 
-app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, async (req, res) => {
+
+// Öğrenci Anlık AI Kota Durumu
+app.get('/api/student/ai-quota', requireRole('student', 'teacher', 'admin'), async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user._id || req.session.user.id);
+    const status = getQuotaStatus(user);
+    res.json(status);
+  } catch (error) {
+    res.status(500).json({ mesaj: 'Kota bilgisi alınamadı.' });
+  }
+});
+
+app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, aiQuotaMiddleware('message'), async (req, res) => {
   try {
     const request = normalizeAiChatRequest(req.body, req.session?.user?.role, req.session?.user);
 
