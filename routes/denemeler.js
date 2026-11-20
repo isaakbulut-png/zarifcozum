@@ -13,7 +13,7 @@ async function denemeSorulari(deneme) {
   return deneme.soruIds.map(id => byId.get(id.toString())).filter(Boolean);
 }
 
-function createDenemelerRouters({ requireStaff, requireStudent, getResultCollection, pointsService }) {
+function createDenemelerRouters({ requireStaff, requireStudent, getResultCollection, pointsService, getProgressCollection }) {
   const staff = express.Router();
   staff.use(requireStaff);
 
@@ -218,6 +218,19 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
       const blankCount = answers.filter(answer => answer === null).length;
       const wrongCount = totalCount - correctCount - blankCount;
       const score = Math.round(correctCount * 100 / totalCount);
+
+      const timeSpentSeconds = Array.isArray(req.body?.timeSpentSeconds) ? req.body.timeSpentSeconds : [];
+      const answerDetails = sorular.map((soru, i) => ({
+        no: i + 1,
+        questionIndex: i,
+        secilen: answers[i],
+        dogru: soru.answer,
+        correct: answers[i] !== null && answers[i] === soru.answer,
+        timeSpentSeconds: typeof timeSpentSeconds[i] === 'number' ? timeSpentSeconds[i] : null,
+        outcomeCode: soru.outcomeCode || soru.kazanimKodu || null,
+        topic: soru.topic || soru.konu || null
+      }));
+
       // Upsert tek bir deneme için ikinci teslimi atomik olarak engeller.
       const {yazim, kazanilanPuan} = await pointsService.transaction(async session => {
         const yazim = await getResultCollection().updateOne(
@@ -225,7 +238,8 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
           {
             $setOnInsert: {
               quizTitle: deneme.title, studentName: req.session.user.name,
-              answers, correctCount, wrongCount, blankCount, totalCount, score, createdAt: new Date()
+              answers, correctCount, wrongCount, blankCount, totalCount, score,
+              answerDetails, createdAt: new Date()
             }
           },
           { upsert: true, session }
@@ -238,6 +252,27 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
         return {yazim, kazanilanPuan};
       });
       if (!yazim.upsertedCount) return res.status(409).json({ mesaj: 'Bu denemeyi zaten tamamladınız.' });
+
+      // Atomik kazanım ilerleme güncellemesi ve önbellek temizleme
+      try {
+        const { recordKazanimOutcome, invalidateStudentGelisimCache } = require('./ogrenci-gelisim');
+        invalidateStudentGelisimCache(req.session.user.id);
+        const progressCol = typeof getProgressCollection === 'function' ? getProgressCollection() : null;
+        if (progressCol) {
+          for (const item of answerDetails) {
+            if (item.topic) {
+              await recordKazanimOutcome(progressCol, {
+                studentUserId: req.session.user.id,
+                grade: deneme.grade || (req.session?.user?.grade ? Number(req.session.user.grade) : 8),
+                topic: item.topic,
+                isCorrect: item.correct
+              });
+            }
+          }
+        }
+      } catch (kErr) {
+        console.warn('Deneme kazanım ilerleme / cache güncelleme uyarısı:', kErr.message);
+      }
 
       // AI Soru Psikoloğu & Teşhis Analizi (Arka planda çalıştırılıp veritabanına eklenir)
       let aiAnaliz = null;

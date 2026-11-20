@@ -61,6 +61,8 @@ const systemConfigSchema = new mongoose.Schema({
     warnings: { type: [String], default: [] },
     updatedAt: { type: Date, default: Date.now }
   },
+  gemini_initial_credit: { type: Number, default: 0.00 },
+  gemini_credit_updated_at: { type: Date, default: null },
   pagePath: {type: String, default: null},
   targetKey: {type: String, default: null},
   assetType: {type: String, enum: ['image', 'animation', null], default: null},
@@ -201,6 +203,34 @@ systemConfigSchema.statics.dismissSystemHealthAlert = async function () {
     errors: [],
     warnings: []
   });
+};
+
+systemConfigSchema.statics.getGeminiCreditSettings = async function () {
+  const config = await this.findById('gemini-credit').lean();
+  return {
+    gemini_initial_credit: typeof config?.gemini_initial_credit === 'number' ? config.gemini_initial_credit : 0.00,
+    gemini_credit_updated_at: config?.gemini_credit_updated_at || null
+  };
+};
+
+systemConfigSchema.statics.saveGeminiCredit = async function (initialCredit) {
+  const amount = Number(parseFloat(initialCredit).toFixed(2));
+  const now = new Date();
+  const config = await this.findOneAndUpdate(
+    { _id: 'gemini-credit' },
+    {
+      $set: {
+        gemini_initial_credit: isNaN(amount) ? 0.00 : amount,
+        gemini_credit_updated_at: now
+      },
+      $setOnInsert: { _id: 'gemini-credit' }
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  ).lean();
+  return {
+    gemini_initial_credit: config.gemini_initial_credit,
+    gemini_credit_updated_at: config.gemini_credit_updated_at
+  };
 };
 
 module.exports = mongoose.models.SystemConfig || mongoose.model('SystemConfig', systemConfigSchema);

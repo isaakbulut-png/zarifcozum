@@ -294,6 +294,21 @@ app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, a
   try {
     const request = normalizeAiChatRequest(req.body, req.session?.user?.role, req.session?.user);
 
+    // AI Mentör ile Zayıf Konu Köprüsü: Öğrencinin en zayıf 3 konusunu ve genel test başarısını bağlama ekle (0 ekstra token israfı)
+    if (req.session?.user?.role === 'student' && req.session?.user?.id) {
+      try {
+        const { getStudentWeakContext } = require('./routes/ogrenci-gelisim');
+        const weakContext = await getStudentWeakContext(req.session.user.id, () => kazanimIlerleme);
+        if (weakContext && weakContext.zayifKonular?.length > 0) {
+          request.userContext = request.userContext || {};
+          request.userContext.zayifKonular = weakContext.zayifKonular;
+          request.userContext.basariOrtalamasi = weakContext.testOrtalama;
+        }
+      } catch (wErr) {
+        console.warn('Zayıf konu bağlamı eklenirken uyarı:', wErr.message);
+      }
+    }
+
     // Maliyetsiz Kısa Hafıza: Son 2 mesaj çiftini (4 mesaj) veritabanından alıp modele aktar
     if (!request.history || request.history.length === 0) {
       const pastMessages = await ChatMessage.find({ userId: req.session.user.id, roomName: 'assistant' })
@@ -625,6 +640,7 @@ const denemeRouters = createDenemelerRouters({
   requireStaff: requireRole('teacher', 'admin'),
   requireStudent: ogrenciKontrol,
   getResultCollection: () => quizSonucKoleksiyonu,
+  getProgressCollection: () => kazanimIlerleme,
   pointsService
 });
 app.use('/api/denemeler', denemeRouters.staff);
@@ -886,6 +902,7 @@ const liveQuizHandlers = createLiveQuizHandlers({
   getResultCollection: () => quizSonucKoleksiyonu,
   getHomeworkCollection: () => homeworks,
   getHomeworkAssignmentCollection: () => homeworkAssignments,
+  getProgressCollection: () => kazanimIlerleme,
   pointsService
 });
 app.post('/api/ogrenci/quiz/:id/attempt', ogrenciKontrol, liveQuizHandlers.start);

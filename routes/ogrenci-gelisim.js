@@ -61,7 +61,10 @@ function mapResult(row) {
     yanlis: Math.max(total - dogru - bos, 0),
     bos,
     total,
-    createdAt: row.createdAt
+    createdAt: row.createdAt,
+    answers,
+    review: Array.isArray(row.review) ? row.review : [],
+    answerDetails: Array.isArray(row.answerDetails) ? row.answerDetails : []
   };
 }
 
@@ -73,6 +76,136 @@ function validKazanim(body) {
   if (!Number.isInteger(grade) || grade < 1 || grade > 12 || !unit || !topic ||
       ![...KAZANIM_DURUMLARI, 'yok'].includes(status)) return null;
   return { grade, unit, topic, status };
+}
+
+// -------------------------------------------------------------
+// 5.000 Anlık Kullanıcı İçin Yüksek Performanslı Bellek-İçi TTL Cache
+// -------------------------------------------------------------
+const gelisimCache = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 dakika TTL
+
+function getGelisimCache(key) {
+  const item = gelisimCache.get(key);
+  if (!item) return null;
+  if (Date.now() > item.expiresAt) {
+    gelisimCache.delete(key);
+    return null;
+  }
+  return item.data;
+}
+
+function setGelisimCache(key, data, ttlMs = CACHE_TTL_MS) {
+  gelisimCache.set(key, { data, expiresAt: Date.now() + ttlMs });
+}
+
+function invalidateStudentGelisimCache(studentUserId) {
+  if (!studentUserId) return;
+  const idStr = String(studentUserId);
+  for (const key of gelisimCache.keys()) {
+    if (key.startsWith(`${idStr}:`) || key.includes(`:${idStr}:`) || key.includes(`:${idStr}`)) {
+      gelisimCache.delete(key);
+    }
+  }
+}
+
+// 10 dakikada bir süresi geçmiş önbellek anahtarlarını süpür (bellek sızıntısı önleme)
+if (typeof setInterval === 'function') {
+  const cleaner = setInterval(() => {
+    const now = Date.now();
+    for (const [key, item] of gelisimCache.entries()) {
+      if (now > item.expiresAt) gelisimCache.delete(key);
+    }
+  }, 10 * 60 * 1000);
+  if (cleaner?.unref) cleaner.unref();
+}
+
+/**
+ * Öğrenci bir test sorusu çözdüğünde kazanım sayacını atomik ($inc) günceller ve
+ * doğruluk yüzdesini (accuracyRate) hesaplar.
+ */
+async function recordKazanimOutcome(progressCollection, { studentUserId, grade, unit, topic, isCorrect }) {
+  if (!progressCollection || !studentUserId || !topic) return null;
+  const filter = {
+    studentUserId: String(studentUserId),
+    topic: String(topic).trim()
+  };
+  if (grade) filter.grade = Number(grade);
+
+  const existing = await progressCollection.findOne(filter);
+  const correctIncrement = isCorrect ? 1 : 0;
+  const prevCorrect = (existing && typeof existing.correctCount === 'number') ? existing.correctCount : 0;
+  const prevAttempted = (existing && typeof existing.totalAttempted === 'number') ? existing.totalAttempted : 0;
+
+  const newCorrect = prevCorrect + correctIncrement;
+  const newAttempted = prevAttempted + 1;
+  const accuracyRate = Math.round((newCorrect * 100) / newAttempted);
+
+  // Doğruluk oranına göre otomatik kazanım durumu güncelleme
+  let status = existing?.status || 'devam';
+  if (status !== 'tamamlandi' && accuracyRate >= 75 && newAttempted >= 5) {
+    status = 'tamamlandi';
+  } else if (accuracyRate < 50 && newAttempted >= 3) {
+    status = 'eksik';
+  }
+
+  const updateDoc = {
+    $inc: {
+      correctCount: correctIncrement,
+      totalAttempted: 1
+    },
+    $set: {
+      accuracyRate,
+      status,
+      updatedAt: new Date()
+    },
+    $setOnInsert: {
+      unit: unit || 'Genel',
+      grade: grade || 8,
+      updatedBy: 'system'
+    }
+  };
+
+  await progressCollection.updateOne(filter, updateDoc, { upsert: true });
+  invalidateStudentGelisimCache(studentUserId);
+  return { correctCount: newCorrect, totalAttempted: newAttempted, accuracyRate, status };
+}
+
+/**
+ * AI Mentör Sohbeti için öğrencinin zayıf konularını (en zayıf 3) ve genel ortalamasını
+ * 0 ekstra token israfıyla ve önbellekten hızlıca getirir.
+ */
+async function getStudentWeakContext(userId, getProgressCol) {
+  if (!userId) return null;
+  const cacheKey = `${userId}:weak_context`;
+  const cached = getGelisimCache(cacheKey);
+  if (cached) return cached;
+
+  const cachedReport = getGelisimCache(`${userId}:rapor`);
+  let zayifKonular = [];
+  let testOrtalama = null;
+
+  if (cachedReport) {
+    zayifKonular = (cachedReport.zayif || []).slice(0, 3).map(z => z.konu);
+    testOrtalama = cachedReport.testBasarisi?.ortalama ?? null;
+  } else if (typeof getProgressCol === 'function') {
+    try {
+      const col = getProgressCol();
+      if (col) {
+        const rows = await col.find({
+          studentUserId: String(userId),
+          $or: [{ status: 'eksik' }, { accuracyRate: { $lt: 50, $gt: 0 } }]
+        }).limit(3).toArray();
+        zayifKonular = rows.map(r => r.topic);
+      }
+    } catch {}
+  }
+
+  const result = {
+    zayifKonular: zayifKonular.filter(Boolean),
+    testOrtalama
+  };
+  setGelisimCache(cacheKey, result, 2 * 60 * 1000);
+  return result;
 }
 
 function createGelisimRouters({
@@ -103,13 +236,14 @@ function createGelisimRouters({
   async function buildSummary(userId, now = new Date()) {
     const today = dayKey(now);
     const monday = weekStart(today);
-    const [logs, goal, results, progress, assignments] = await Promise.all([
+    const [logs, goal, results, progress, assignments, comments] = await Promise.all([
       getStudyLogCollection().find({ studentUserId: userId, day: { $gte: addDays(today, -366) } })
         .sort({ day: -1, createdAt: -1 }).limit(2000).toArray(),
       getGoalCollection().findOne({ studentUserId: userId }),
       getResultCollection().find({ studentId: userId }).sort({ createdAt: -1 }).limit(200).toArray(),
       getProgressCollection().find({ studentUserId: userId }).limit(2000).toArray(),
-      getAssignmentCollection().find({ studentUserId: userId }).limit(1000).toArray()
+      getAssignmentCollection().find({ studentUserId: userId }).limit(1000).toArray(),
+      typeof getCommentCollection === 'function' ? getCommentCollection().find({ studentUserId: userId }).sort({ createdAt: -1 }).limit(1).toArray() : Promise.resolve([])
     ]);
 
     const minutesByDay = new Map();
@@ -145,7 +279,14 @@ function createGelisimRouters({
       },
       kayitlar: logs.slice(0, 15).map(log => ({
         id: String(log._id), gun: log.day, dakika: log.minutes, konu: log.topic || '', not: log.note || ''
-      }))
+      })),
+      sonYorum: comments && comments[0] ? {
+        id: String(comments[0]._id),
+        ogretmen: comments[0].teacherName || 'Öğretmen',
+        metin: comments[0].text,
+        createdAt: comments[0].createdAt,
+        tur: comments[0].type
+      } : null
     };
   }
 
@@ -155,6 +296,9 @@ function createGelisimRouters({
     const rows = await getProgressCollection().find(filter).limit(2000).toArray();
     return rows.map(row => ({
       grade: row.grade, unit: row.unit, topic: row.topic, status: row.status,
+      correctCount: typeof row.correctCount === 'number' ? row.correctCount : 0,
+      totalAttempted: typeof row.totalAttempted === 'number' ? row.totalAttempted : 0,
+      accuracyRate: typeof row.accuracyRate === 'number' ? row.accuracyRate : null,
       updatedBy: row.updatedBy, updatedAt: row.updatedAt
     }));
   }
@@ -292,12 +436,14 @@ function createGelisimRouters({
     const key = { studentUserId: userId, grade: kazanim.grade, unit: kazanim.unit, topic: kazanim.topic };
     if (kazanim.status === 'yok') {
       await getProgressCollection().deleteOne(key);
+      invalidateStudentGelisimCache(userId);
       return;
     }
     const existing = await getProgressCollection().findOne(key);
     const fields = { status: kazanim.status, updatedBy, updatedAt: new Date() };
     if (existing) await getProgressCollection().updateOne({ _id: existing._id }, { $set: fields });
     else await getProgressCollection().insertOne({ ...key, ...fields });
+    invalidateStudentGelisimCache(userId);
   }
 
   async function saveGoal(userId, minutes) {
@@ -305,6 +451,7 @@ function createGelisimRouters({
     const fields = { weeklyMinutes: minutes, updatedAt: new Date() };
     if (existing) await getGoalCollection().updateOne({ _id: existing._id }, { $set: fields });
     else await getGoalCollection().insertOne({ studentUserId: userId, ...fields });
+    invalidateStudentGelisimCache(userId);
   }
 
   function validGoal(value) {
@@ -314,8 +461,16 @@ function createGelisimRouters({
 
   // ---------- Öğrenci ----------
   student.get('/ozet', asyncRoute(async (req, res) => {
-    const grade = await linkedGrade(req.session.user.id);
-    res.json({ ...(await buildSummary(req.session.user.id)), sinif: grade });
+    const userId = req.session.user.id;
+    const cacheKey = `${userId}:ozet`;
+    const cached = getGelisimCache(cacheKey);
+    if (cached) return res.json(cached);
+
+    const grade = await linkedGrade(userId);
+    const summary = await buildSummary(userId);
+    const response = { ...summary, sinif: grade };
+    setGelisimCache(cacheKey, response);
+    res.json(response);
   }));
 
   student.get('/kazanimlar', asyncRoute(async (req, res) => {
@@ -327,12 +482,33 @@ function createGelisimRouters({
     const kazanim = validKazanim(req.body);
     if (!kazanim) return res.status(400).json({ mesaj: 'Sınıf, ünite, konu ve geçerli bir durum gereklidir.' });
     await saveProgress(req.session.user.id, kazanim, 'student');
+    invalidateStudentGelisimCache(req.session.user.id);
     res.json({ mesaj: 'Kazanım durumu kaydedildi.' });
   }));
 
-  student.get('/testler', asyncRoute(async (req, res) => res.json(await buildTests(req.session.user.id))));
+  student.get('/testler', asyncRoute(async (req, res) => {
+    const userId = req.session.user.id;
+    const cacheKey = `${userId}:testler`;
+    const cached = getGelisimCache(cacheKey);
+    if (cached) return res.json(cached);
+
+    const tests = await buildTests(userId);
+    setGelisimCache(cacheKey, tests);
+    res.json(tests);
+  }));
+
   student.get('/takvim', asyncRoute(async (req, res) => res.json({ olaylar: await buildCalendar(req.session.user.id) })));
-  student.get('/rapor', asyncRoute(async (req, res) => res.json(await buildReport(req.session.user.id))));
+
+  student.get('/rapor', asyncRoute(async (req, res) => {
+    const userId = req.session.user.id;
+    const cacheKey = `${userId}:rapor`;
+    const cached = getGelisimCache(cacheKey);
+    if (cached) return res.json(cached);
+
+    const report = await buildReport(userId);
+    setGelisimCache(cacheKey, report);
+    res.json(report);
+  }));
 
   student.post('/calisma', asyncRoute(async (req, res) => {
     const minutes = Number(req.body?.minutes);
@@ -346,6 +522,7 @@ function createGelisimRouters({
       studentUserId: req.session.user.id, day, minutes,
       topic: metin(req.body?.topic, 200), note: metin(req.body?.note, 500), createdAt: new Date()
     });
+    invalidateStudentGelisimCache(req.session.user.id);
     res.status(201).json({ mesaj: 'Çalışma süresi kaydedildi.' });
   }));
 
@@ -354,6 +531,7 @@ function createGelisimRouters({
     if (!id) return res.status(400).json({ mesaj: 'Kayıt numarası geçersiz.' });
     const result = await getStudyLogCollection().deleteOne({ _id: id, studentUserId: req.session.user.id });
     if (!result.deletedCount) return res.status(404).json({ mesaj: 'Kayıt bulunamadı.' });
+    invalidateStudentGelisimCache(req.session.user.id);
     res.json({ mesaj: 'Kayıt silindi.' });
   }));
 
@@ -361,6 +539,7 @@ function createGelisimRouters({
     const minutes = validGoal(req.body?.weeklyMinutes);
     if (!minutes) return res.status(400).json({ mesaj: 'Haftalık hedef 30–4200 dakika arasında olmalıdır.' });
     await saveGoal(req.session.user.id, minutes);
+    invalidateStudentGelisimCache(req.session.user.id);
     res.json({ mesaj: 'Haftalık hedef kaydedildi.', weeklyMinutes: minutes });
   }));
 
@@ -536,6 +715,7 @@ function createGelisimRouters({
       };
     }
     await getCommentCollection().insertOne(record);
+    invalidateStudentGelisimCache(profile.linkedUserId);
     res.status(201).json({ mesaj: type === 'rapor' ? 'Rapor kaydedildi.' : 'Yorum kaydedildi.' });
   }));
 
@@ -553,12 +733,27 @@ function createGelisimRouters({
   teacher.delete('/yorumlar/:commentId', asyncRoute(async (req, res) => {
     const id = objectId(req.params.commentId);
     if (!id) return res.status(400).json({ mesaj: 'Kayıt numarası geçersiz.' });
+    const existing = await getCommentCollection().findOne({ _id: id, teacherId: req.session.user.id });
     const result = await getCommentCollection().deleteOne({ _id: id, teacherId: req.session.user.id });
     if (!result.deletedCount) return res.status(404).json({ mesaj: 'Kayıt bulunamadı.' });
+    if (existing?.studentUserId) invalidateStudentGelisimCache(existing.studentUserId);
     res.json({ mesaj: 'Kayıt silindi.' });
   }));
 
   return { teacher, student };
 }
 
-module.exports = { createGelisimRouters, calculateStreak, weekStart, addDays, dayKey, mapResult };
+module.exports = {
+  createGelisimRouters,
+  calculateStreak,
+  weekStart,
+  addDays,
+  dayKey,
+  mapResult,
+  gelisimCache,
+  getGelisimCache,
+  setGelisimCache,
+  invalidateStudentGelisimCache,
+  recordKazanimOutcome,
+  getStudentWeakContext
+};

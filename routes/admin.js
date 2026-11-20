@@ -1285,13 +1285,31 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
   // 1. Ajan Performans ve Genel AI Denetim Özeti
   router.get('/ai-denetim-ozet', allow('superadmin', 'support'), async (req, res) => {
     try {
-      const [auditData, toplamOgrenci, aiEngelliSayisi, ozelLimitliSayisi, bonusluSayisi] = await Promise.all([
+      const AiUsageLog = require('../models/AiUsageLog');
+      const [auditData, toplamOgrenci, aiEngelliSayisi, ozelLimitliSayisi, bonusluSayisi, krediAyari] = await Promise.all([
         getAiAuditSummary(),
         User.countDocuments({ role: 'student' }),
         User.countDocuments({ aiErisimEngelli: true }),
         User.countDocuments({ ozelGunlukMesajLimiti: { $ne: null } }),
-        User.countDocuments({ ekstraBonusKredi: { $gt: 0 } })
+        User.countDocuments({ ekstraBonusKredi: { $gt: 0 } }),
+        typeof SystemConfig.getGeminiCreditSettings === 'function'
+          ? SystemConfig.getGeminiCreditSettings()
+          : { initialCredit: 0.00, updatedAt: null }
       ]);
+
+      let spentSinceUpdateTL = 0;
+      let spentSinceUpdateUSD = 0;
+      if (krediAyari.updatedAt) {
+        const sinceSpend = await AiUsageLog.aggregate([
+          { $match: { tarih: { $gte: krediAyari.updatedAt }, cacheHit: false } },
+          { $group: { _id: null, totalTL: { $sum: '$toplamMaliyetTL' }, totalUSD: { $sum: '$toplamMaliyetUSD' } } }
+        ]);
+        if (sinceSpend.length > 0) {
+          spentSinceUpdateTL = sinceSpend[0].totalTL || 0;
+          spentSinceUpdateUSD = sinceSpend[0].totalUSD || 0;
+        }
+      }
+      const remainingCredit = Math.max(0, Number((krediAyari.initialCredit - spentSinceUpdateTL).toFixed(2)));
 
       res.json({
         genel: auditData.genel,
@@ -1301,11 +1319,50 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
           aiEngelliSayisi,
           ozelLimitliSayisi,
           bonusluSayisi
+        },
+        kredi: {
+          initialCredit: krediAyari.initialCredit,
+          remainingCredit,
+          spentSinceUpdateTL: Number(spentSinceUpdateTL.toFixed(2)),
+          spentSinceUpdateUSD: Number(spentSinceUpdateUSD.toFixed(4)),
+          updatedAt: krediAyari.updatedAt,
+          isExhausted: remainingCredit <= 0,
+          isLow: remainingCredit > 0 && remainingCredit < 10
         }
       });
     } catch (error) {
       console.error('AI denetim özeti alınamadı:', error);
       res.status(500).json({ mesaj: 'AI denetim özeti alınamadı: ' + error.message });
+    }
+  });
+
+  // 1B. Gemini API Tanımlı Kredi Güncelleme (Sadece Süper Admin)
+  router.post('/ai-kredi-guncelle', allow('superadmin'), async (req, res) => {
+    try {
+      const { initialCredit, credit } = req.body || {};
+      const amount = initialCredit !== undefined ? initialCredit : credit;
+      const numAmount = parseFloat(amount);
+      if (isNaN(numAmount) || numAmount < 0) {
+        return res.status(400).json({ mesaj: 'Geçersiz kredi tutarı. Sıfır veya pozitif bir sayı giriniz.' });
+      }
+
+      if (typeof SystemConfig.saveGeminiCredit !== 'function') {
+        return res.status(500).json({ mesaj: 'Sistem ayar servisi bulunamadı.' });
+      }
+
+      const updated = await SystemConfig.saveGeminiCredit(numAmount);
+      await audit(req, 'gemini_credit.updated', 'system_config', 'gemini-credit', {
+        initialCredit: updated.initialCredit,
+        updatedAt: updated.updatedAt
+      });
+
+      res.json({
+        mesaj: `Gemini API başlangıç kredisi ${updated.initialCredit.toFixed(2)} ₺ olarak güncellendi.`,
+        kredi: updated
+      });
+    } catch (error) {
+      console.error('Gemini kredi güncelleme hatası:', error);
+      res.status(500).json({ mesaj: 'Kredi güncellenemedi: ' + error.message });
     }
   });
 

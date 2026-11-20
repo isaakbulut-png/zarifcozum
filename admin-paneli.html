@@ -1228,6 +1228,10 @@
               <span>🤖</span> AI Denetim &amp; Kullanıcı Kota Yönetim Paneli
             </h3>
             <p class="notice" style="margin:0;">Tüm öğrenci ve öğretmenlerin yapay zekâ tüketimini, model/ajan dağılımını canlı takip edin; kullanıcı bazlı kotalara anında müdahale edin.</p>
+            <div id="aiCreditExhaustedBanner" style="display:none; background:#fee2e2; border:1px solid #f87171; border-left:5px solid #dc2626; color:#991b1b; padding:10px 14px; border-radius:8px; margin-top:10px; font-weight:600; font-size:0.88rem; align-items:center; gap:8px;">
+              <span style="font-size:1.2rem;">🚨</span>
+              <span><strong>Kritik Uyarı:</strong> Gemini API krediniz tükenmiştir (0.00 ₺ veya eksi bakiye). Asistanlar duraklatılabilir. Lütfen Google Cloud bakiyenizi kontrol edip güncelleyin.</span>
+            </div>
           </div>
           <div style="display:flex; gap:10px;">
             <a href="/admin-maliyet.html" target="_blank" class="btn" style="background:#4f46e5; color:#fff; border-color:#4338ca;">
@@ -1245,11 +1249,27 @@
             <span>⚡</span> Bölüm A: Yapay Zekâ Ajan Performans &amp; Harcama Dağılımı
           </h4>
           
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:14px; margin-bottom:18px;">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; margin-bottom:18px;">
             <div style="background:#fff; border:1px solid #ebd9c8; border-radius:10px; padding:16px;">
               <div style="font-size:0.8rem; color:#8c7e72; font-weight:600; text-transform:uppercase;">Toplam Sistem Harcaması</div>
               <div style="font-size:1.6rem; font-weight:700; color:#b93838; margin-top:4px;" id="statAiToplamTL">0.00 ₺</div>
               <div style="font-size:0.8rem; color:#a89d91;" id="statAiToplamUSD">$0.0000 USD</div>
+            </div>
+            <div style="background:#fff; border:1px solid #ebd9c8; border-radius:10px; padding:16px; position:relative;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:0.8rem; color:#8c7e72; font-weight:600; text-transform:uppercase;">Kalan API Kredisi</div>
+                <button type="button" id="btnOpenCreditModal" title="Krediyi Güncelle" style="background:#f3e1cf; border:1px solid #d9c3b0; cursor:pointer; font-size:0.75rem; padding:3px 7px; border-radius:5px; color:#523520; font-weight:600; display:inline-flex; align-items:center; gap:4px;">
+                  <span>✏️</span> Bakiye Güncelle
+                </button>
+              </div>
+              <div style="display:flex; align-items:baseline; gap:6px; margin-top:4px;">
+                <span id="statAiKalanKrediIcon" style="display:none; font-size:1.2rem;">⚠️</span>
+                <div style="font-size:1.6rem; font-weight:700; color:#15803d;" id="statAiKalanKredi">0.00 ₺</div>
+              </div>
+              <div style="font-size:0.78rem; color:#a89d91; display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+                <span>Tanımlı: <strong id="statAiBaslangicKredi">0.00 ₺</strong></span>
+                <small id="statAiKrediTarih" title="Bakiye güncelleme tarihi">—</small>
+              </div>
             </div>
             <div style="background:#fff; border:1px solid #ebd9c8; border-radius:10px; padding:16px;">
               <div style="font-size:0.8rem; color:#8c7e72; font-weight:600; text-transform:uppercase;">Toplam Tüketilen Token</div>
@@ -1355,6 +1375,32 @@
             <button type="button" class="btn sm" id="btnAiNextPage">Sonraki Sayfa →</button>
           </div>
         </div>
+
+        <!-- GEMINI API KREDİ GÜNCELLEME MODALI -->
+        <dialog id="geminiCreditModal" style="border:1px solid #ebd9c8; border-radius:12px; padding:24px; max-width:440px; width:90%; box-shadow:0 12px 36px rgba(0,0,0,0.2); background:#fff; margin:auto;">
+          <form id="geminiCreditForm" method="dialog">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <h3 style="margin:0; font-size:1.15rem; color:#523520; display:flex; align-items:center; gap:8px;">
+                <span>💳</span> Gemini API Bakiyesi Güncelle
+              </h3>
+              <button type="button" id="btnCloseCreditModal" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:#8c7e72;">✕</button>
+            </div>
+            <p style="font-size:0.86rem; color:#6b5e51; margin:0 0 16px 0; line-height:1.4;">
+              Google Cloud Console'da tanımlı olan veya kalan güncel Gemini API kredinizi (TRY cinsinden) giriniz. Sistem bu tutardan sonraki harcamaları otomatik düşerek anlık kalan krediyi hesaplar.
+            </p>
+            <div style="margin-bottom:16px;">
+              <label style="display:block; font-size:0.82rem; font-weight:600; color:#523520; margin-bottom:6px;" for="inputGeminiCredit">
+                Tanımlı Kredi Tutarı (₺):
+              </label>
+              <input type="number" step="0.01" min="0" id="inputGeminiCredit" required placeholder="Örn: 29.05" style="width:100%; padding:10px 12px; border:1px solid #d9d3c3; border-radius:8px; font-size:1rem; box-sizing:border-box;">
+            </div>
+            <div id="geminiCreditModalMsg" style="display:none; font-size:0.82rem; margin-bottom:12px; padding:8px 12px; border-radius:6px;"></div>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+              <button type="button" id="btnCancelCreditModal" class="btn" style="background:#f3f4f6; color:#374151; border:1px solid #d1d5db;">İptal</button>
+              <button type="submit" id="btnSaveCreditModal" class="btn" style="background:#523520; color:#fff; border-color:#523520;">💾 Bakiyeyi Kaydet</button>
+            </div>
+          </form>
+        </dialog>
       </div>
     </section>
 
@@ -3399,6 +3445,35 @@
           $('statAiEngelliSayisi').textContent = data.kullaniciIstatistikleri?.aiEngelliSayisi || 0;
           $('statAiOzelSayisi').textContent = (data.kullaniciIstatistikleri?.ozelLimitliSayisi || 0) + ' / ' + (data.kullaniciIstatistikleri?.bonusluSayisi || 0) + ' bonus';
 
+          // Kalan API Kredisi ve Uyarı Kontrolü
+          if (data.kredi) {
+            const rem = Number(data.kredi.remainingCredit || 0);
+            const init = Number(data.kredi.initialCredit || 0);
+            const remEl = $('statAiKalanKredi');
+            const initEl = $('statAiBaslangicKredi');
+            const dateEl = $('statAiKrediTarih');
+            const iconEl = $('statAiKalanKrediIcon');
+            const bannerEl = $('aiCreditExhaustedBanner');
+
+            if (remEl) remEl.textContent = rem.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+            if (initEl) initEl.textContent = init.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+            if (dateEl) dateEl.textContent = data.kredi.updatedAt ? fmtDate(data.kredi.updatedAt) : 'Tanımsız';
+
+            if (rem <= 0) {
+              if (remEl) remEl.style.color = '#dc2626';
+              if (iconEl) { iconEl.style.display = 'inline'; iconEl.textContent = '🚨'; }
+              if (bannerEl) bannerEl.style.display = 'flex';
+            } else if (rem < 10) {
+              if (remEl) remEl.style.color = '#dc2626';
+              if (iconEl) { iconEl.style.display = 'inline'; iconEl.textContent = '⚠️'; }
+              if (bannerEl) bannerEl.style.display = 'none';
+            } else {
+              if (remEl) remEl.style.color = '#15803d';
+              if (iconEl) iconEl.style.display = 'none';
+              if (bannerEl) bannerEl.style.display = 'none';
+            }
+          }
+
           // Ajan Dağılım Kartları
           const container = $('ajanKartlariListesi');
           if (!container) return;
@@ -3858,6 +3933,80 @@
         $('btnAiNextPage')?.addEventListener('click', () => {
           loadAiAuditUsers(aiAuditCurrentPage + 1);
         });
+
+        // Gemini API Kredi Modalı İşlemleri
+        const creditModal = $('geminiCreditModal');
+        const openCreditBtn = $('btnOpenCreditModal');
+        const closeCreditBtn = $('btnCloseCreditModal');
+        const cancelCreditBtn = $('btnCancelCreditModal');
+        const creditForm = $('geminiCreditForm');
+        const creditInput = $('inputGeminiCredit');
+        const creditMsg = $('geminiCreditModalMsg');
+
+        if (openCreditBtn && creditModal) {
+          openCreditBtn.addEventListener('click', () => {
+            if (creditMsg) creditMsg.style.display = 'none';
+            if (creditModal.showModal) {
+              creditModal.showModal();
+            } else {
+              creditModal.style.display = 'block';
+            }
+          });
+        }
+
+        const handleCloseCreditModal = () => {
+          if (creditModal?.close) {
+            creditModal.close();
+          } else if (creditModal) {
+            creditModal.style.display = 'none';
+          }
+        };
+
+        if (closeCreditBtn) closeCreditBtn.addEventListener('click', handleCloseCreditModal);
+        if (cancelCreditBtn) cancelCreditBtn.addEventListener('click', handleCloseCreditModal);
+
+        if (creditForm) {
+          creditForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const val = parseFloat(creditInput?.value);
+            if (isNaN(val) || val < 0) {
+              if (creditMsg) {
+                creditMsg.style.display = 'block';
+                creditMsg.style.background = '#fee2e2';
+                creditMsg.style.color = '#991b1b';
+                creditMsg.textContent = 'Lütfen geçerli bir bakiye tutarı giriniz.';
+              }
+              return;
+            }
+
+            const saveBtn = $('btnSaveCreditModal');
+            if (saveBtn) {
+              saveBtn.disabled = true;
+              saveBtn.textContent = 'Kaydediliyor...';
+            }
+
+            try {
+              await api('/api/admin/ai-kredi-guncelle', {
+                method: 'POST',
+                body: JSON.stringify({ initialCredit: val })
+              });
+              handleCloseCreditModal();
+              await loadAiAuditOverview();
+            } catch (err) {
+              if (creditMsg) {
+                creditMsg.style.display = 'block';
+                creditMsg.style.background = '#fee2e2';
+                creditMsg.style.color = '#991b1b';
+                creditMsg.textContent = err.message || 'Kredi kaydedilemedi.';
+              }
+            } finally {
+              if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 Bakiyeyi Kaydet';
+              }
+            }
+          });
+        }
       });
 
       async function initializePanel() {

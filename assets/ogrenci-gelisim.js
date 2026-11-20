@@ -91,7 +91,10 @@
           ${unit.topics.map((topic, topicIndex) => {
             const row = byKey.get(`${unit.title}||${topic}`);
             const status = row?.status || 'yok';
-            return `<div class="gz-topic status-${status}"><span>${esc(topic)}${row?.updatedBy === 'teacher' ? ' <small>· öğretmen işaretledi</small>' : ''}</span>
+            const accBadge = row && row.totalAttempted > 0
+              ? `<span class="gz-chip" style="font-size:.72rem;margin-left:6px" title="${row.correctCount}/${row.totalAttempted} doğru">🎯 %${row.accuracyRate ?? Math.round(row.correctCount * 100 / row.totalAttempted)} (${row.correctCount}/${row.totalAttempted})</span>`
+              : '';
+            return `<div class="gz-topic status-${status}"><span>${esc(topic)}${row?.updatedBy === 'teacher' ? ' <small>· öğretmen işaretledi</small>' : ''}${accBadge}</span>
               ${editable ? `<select data-gz-kazanim data-grade="${esc(grade)}" data-u="${unitIndex}" data-t="${topicIndex}" aria-label="${esc(topic)} durumu">
                 ${Object.entries(STATUS_LABEL).map(([value, label]) => `<option value="${value}"${value === status ? ' selected' : ''}>${label}</option>`).join('')}</select>`
                 : `<em>${STATUS_LABEL[status]}</em>`}</div>`;
@@ -110,9 +113,10 @@
       <h4 class="gz-sub">Son sonuçlar</h4>
       ${bars(recent.map(item => ({value: item.score || 0, top: item.score === null ? '' : `%${item.score}`, label: fmtShort(item.createdAt), tone: item.type === 'deneme' ? 'alt' : '', title: item.title})), 100)}
       <p class="gz-legend"><i></i> Kazanım testi <i class="alt"></i> Deneme sınavı</p>
-      <div class="gz-table-wrap"><table class="gz-table"><thead><tr><th>Tür</th><th>Test</th><th>Puan</th><th>D / Y / B</th><th>Tarih</th></tr></thead>
+      <div class="gz-table-wrap"><table class="gz-table"><thead><tr><th>Tür</th><th>Test</th><th>Puan</th><th>D / Y / B</th><th>Tarih</th><th>İşlem</th></tr></thead>
       <tbody>${testler.map(item => `<tr><td>${item.type === 'deneme' ? 'Deneme' : 'Kazanım'}</td><td>${esc(item.title)}</td><td>${item.score === null ? '—' : `%${item.score}`}</td>
-        <td>${item.dogru} / ${item.yanlis} / ${item.bos}</td><td>${esc(new Date(item.createdAt).toLocaleDateString('tr-TR'))}</td></tr>`).join('')}</tbody></table></div>`;
+        <td>${item.dogru} / ${item.yanlis} / ${item.bos}</td><td>${esc(new Date(item.createdAt).toLocaleDateString('tr-TR'))}</td>
+        <td><button type="button" class="gz-btn-mini gz-karne-btn" data-gz-test-karne="${esc(item.id)}" title="Soru soru detaylı sınav karnesini incele">📊 Detay / Karne</button></td></tr>`).join('')}</tbody></table></div>`;
   }
 
   function calendarHtml(events) {
@@ -147,19 +151,114 @@
   }
 
   function reportHtml(report, teacher) {
-    const lists = (title, items, tone) => `<div class="gz-card ${tone}"><h4>${title}</h4>${items.length
-      ? `<ul class="gz-list">${items.map(item => `<li><div><strong>${esc(item.konu)}</strong><small>${esc(item.kaynak)}</small></div></li>`).join('')}</ul>` : empty('Henüz yeterli veri yok.')}</div>`;
+    const lists = (title, items, tone, isWeak = false) => `<div class="gz-card ${tone}"><h4>${title}</h4>${items.length
+      ? `<ul class="gz-list">${items.map(item => `<li><div style="flex:1"><strong>${esc(item.konu)}</strong><small>${esc(item.kaynak)}</small></div>
+         ${isWeak && !teacher ? `<button type="button" class="gz-btn-mini gz-ai-topic-btn" data-gz-ai-topic="${esc(item.konu)}" title="Bu konuyu AI Mentör ile birebir çalış">🤖 AI Mentör ile Çalış</button>` : ''}
+         </li>`).join('')}</ul>` : empty('Henüz yeterli veri yok.')}</div>`;
     return `<h4 class="gz-sub">Haftalık gelişim (son 6 hafta)</h4>
       ${bars(report.haftalar.map(week => ({value: week.dakika, top: week.dakika ? fmtMin(week.dakika) : '', label: fmtShort(week.baslangic),
         title: `${week.testSayisi} test · ${week.testOrtalama === null ? 'test yok' : `ortalama %${week.testOrtalama}`} · ${week.teslimEdilenOdev} ödev teslimi`})), 0)}
       <div class="gz-table-wrap"><table class="gz-table"><thead><tr><th>Hafta</th><th>Çalışma</th><th>Test</th><th>Test ort.</th><th>Teslim edilen ödev</th></tr></thead><tbody>
       ${report.haftalar.map(week => `<tr><td>${esc(fmtShort(week.baslangic))}</td><td>${esc(fmtMin(week.dakika))}</td><td>${week.testSayisi}</td>
         <td>${week.testOrtalama === null ? '—' : `%${week.testOrtalama}`}</td><td>${week.teslimEdilenOdev}</td></tr>`).join('')}</tbody></table></div>
-      <div class="gz-two">${lists('Güçlü konular', report.guclu, 'good')}${lists('Geliştirilecek konular', report.zayif, 'weak')}</div>
+      <div class="gz-two">${lists('Güçlü konular', report.guclu, 'good', false)}${lists('Geliştirilecek konular', report.zayif, 'weak', true)}</div>
       <h4 class="gz-sub">Konu / ders bazlı ödev başarısı</h4>
       ${report.konuBasarisi.length ? `<ul class="gz-list">${report.konuBasarisi.map(item => `<li><div><strong>${esc(item.konu)}</strong><small>${item.sayi} değerlendirilmiş ödev</small></div>
         <b>%${item.ortalama}</b></li>`).join('')}</ul>` : empty('Değerlendirilmiş ödev bulunmuyor.')}
       ${commentsHtml(report, teacher)}`;
+  }
+
+  function showKarneModal(test) {
+    let modal = document.getElementById('gzKarneModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'gzKarneModal';
+      modal.className = 'gz-modal';
+      document.body.appendChild(modal);
+    }
+
+    const details = Array.isArray(test.answerDetails) && test.answerDetails.length
+      ? test.answerDetails
+      : (Array.isArray(test.answers) ? test.answers.map((ans, i) => {
+          const rev = test.review?.[i];
+          const isCorrect = rev ? (ans !== null && ans === rev.answer) : null;
+          return {
+            no: i + 1,
+            questionIndex: i,
+            answer: ans,
+            correctAnswer: rev?.answer || '—',
+            correct: isCorrect,
+            timeSpentSeconds: null,
+            topic: null
+          };
+        }) : []);
+
+    const scoreClass = (test.score || 0) >= 70 ? 'score-good' : ((test.score || 0) >= 50 ? 'score-mid' : 'score-low');
+
+    modal.innerHTML = `
+      <div class="gz-modal-backdrop" data-gz-close-modal="true"></div>
+      <div class="gz-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="gzKarneTitle">
+        <header class="gz-modal-header">
+          <div>
+            <span class="gz-chip ${test.type === 'deneme' ? 'kind-sinav' : 'kind-odev'}">${test.type === 'deneme' ? 'Deneme Sınavı' : 'Kazanım Testi'}</span>
+            <h3 id="gzKarneTitle" style="margin:6px 0 2px;font-size:1.25rem">${esc(test.title)}</h3>
+            <small style="color:var(--muted, #666)">${esc(new Date(test.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }))}</small>
+          </div>
+          <button type="button" class="gz-modal-close" data-gz-close-modal="true" aria-label="Kapat">&times;</button>
+        </header>
+
+        <div class="gz-karne-summary-row">
+          <div class="gz-karne-score ${scoreClass}">
+            <strong>${test.score === null ? '—' : `%${test.score}`}</strong>
+            <small>Başarı Oranı</small>
+          </div>
+          <div class="gz-karne-metrics">
+            <span class="gz-chip ok">✅ ${test.dogru} Doğru</span>
+            <span class="gz-chip bad">❌ ${test.yanlis} Yanlış</span>
+            <span class="gz-chip">⚪ ${test.bos} Boş</span>
+            <span class="gz-chip">📝 Toplam ${test.total} Soru</span>
+          </div>
+        </div>
+
+        <h4 style="font-size:15px;margin:18px 0 10px;font-weight:700">Soru Soru Çözüm Analizi</h4>
+        <div class="gz-table-wrap" style="max-height:360px;overflow-y:auto">
+          <table class="gz-table gz-karne-table">
+            <thead>
+              <tr>
+                <th style="width:60px">Soru</th>
+                <th>Verilen Cevap</th>
+                <th>Doğru Cevap</th>
+                <th>Durum</th>
+                <th>Süre</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${details.length ? details.map(d => {
+                const isBlank = d.answer === null || d.answer === undefined || d.answer === '';
+                const isCorrect = d.correct === true;
+                const statusBadge = isBlank
+                  ? '<span class="gz-chip">⚪ Boş</span>'
+                  : (isCorrect ? '<span class="gz-chip ok">✅ Doğru</span>' : '<span class="gz-chip bad">❌ Yanlış</span>');
+                const timeText = typeof d.timeSpentSeconds === 'number' ? `${d.timeSpentSeconds} sn` : '—';
+                return `<tr>
+                  <td><strong>${d.no || d.questionIndex + 1}</strong></td>
+                  <td><b>${isBlank ? '—' : esc(d.answer || d.secilen)}</b></td>
+                  <td><b>${esc(d.correctAnswer || d.dogru || '—')}</b></td>
+                  <td>${statusBadge}</td>
+                  <td><small>${timeText}</small></td>
+                </tr>`;
+              }).join('') : `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">Soru detay analizi bulunamadı.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="text-align:right;margin-top:18px">
+          <button type="button" class="gz-btn" data-gz-close-modal="true">Kapat</button>
+        </div>
+      </div>
+    `;
+
+    modal.classList.add('is-open');
   }
 
   function mountStudent() {
@@ -184,8 +283,19 @@
       $('gzUpcoming').innerHTML = upcomingHtml(state.takvim);
       $('gzHomework').innerHTML = homeworkChips(state.ozet.odev);
       $('gzLogs').innerHTML = logListHtml(state.ozet.kayitlar, true);
-      const latest = state.rapor?.yorumlar[0];
-      $('gzLatestComment').innerHTML = latest ? `<article class="gz-comment"><header><strong>${esc(latest.ogretmen)}</strong><small>${esc(new Date(latest.createdAt).toLocaleDateString('tr-TR'))}</small></header><p>${esc(latest.metin)}</p></article>` : empty('Öğretmen yorumu bekleniyor.');
+      const latest = state.ozet?.sonYorum || state.rapor?.yorumlar?.find(item => item.tur === 'yorum') || state.rapor?.yorumlar?.[0];
+      $('gzLatestComment').innerHTML = latest ? `
+        <article class="gz-teacher-note-card">
+          <div class="gz-teacher-note-head">
+            <span class="gz-teacher-avatar">👨‍🏫</span>
+            <div style="flex:1">
+              <strong>${esc(latest.ogretmen)}</strong>
+              <small>${esc(new Date(latest.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }))}</small>
+            </div>
+            <span class="gz-chip ok">Öğretmeninin Notu</span>
+          </div>
+          <p class="gz-teacher-note-body">“${esc(latest.metin)}”</p>
+        </article>` : `<p class="gz-empty">Henüz öğretmen değerlendirmesi bulunmuyor. Öğretmenin ödev ve testlerini inceledikçe buraya özel tavsiyeler ekleyecektir.</p>`;
       if (goalInput && document.activeElement !== goalInput) goalInput.value = state.ozet.haftalikHedef || '';
       $('gzKazanim').innerHTML = kazanimHtml(state.grade, state.kazanimlar, true);
       if (state.testler) $('gzTestler').innerHTML = testsHtml(state.testler);
@@ -264,8 +374,52 @@
     document.addEventListener('click', async event => {
       const log = event.target.closest?.('[data-gz-delete-log]');
       const reminder = event.target.closest?.('[data-gz-delete-event]');
+      const karneBtn = event.target.closest?.('[data-gz-test-karne]');
+      const aiTopicBtn = event.target.closest?.('[data-gz-ai-topic]');
+      const closeModal = event.target.closest?.('[data-gz-close-modal]');
+
       if (log) await run('gzStudyStatus', () => api(`/api/student/gelisim/calisma/${encodeURIComponent(log.dataset.gzDeleteLog)}`, {method: 'DELETE'}));
       if (reminder) await run('gzReminderStatus', () => api(`/api/student/gelisim/hatirlatici/${encodeURIComponent(reminder.dataset.gzDeleteEvent)}`, {method: 'DELETE'}));
+
+      if (karneBtn && state.testler) {
+        const testId = karneBtn.dataset.gzTestKarne;
+        const test = state.testler.testler.find(t => t.id === testId);
+        if (test) showKarneModal(test);
+      }
+
+      if (closeModal) {
+        const modal = document.getElementById('gzKarneModal');
+        if (modal) modal.classList.remove('is-open');
+      }
+
+      if (aiTopicBtn) {
+        const topic = aiTopicBtn.dataset.gzAiTopic;
+        if (typeof window.showPanel === 'function') {
+          window.showPanel('ai-mentor-panel', true);
+        } else {
+          location.hash = '#ai-mentor-panel';
+        }
+        const socraticPill = document.querySelector('.student-ai-pill[data-role="ai_mentor"]');
+        if (socraticPill) socraticPill.click();
+
+        const input = document.getElementById('studentAiInput') || document.getElementById('studentAiChatInput');
+        if (input) {
+          input.value = `Hocam, gelişim analizimde "${topic}" konusunun zayıf olduğunu gördüm. Bu konunun mantığını ve püf noktalarını bana Sokratik yöntemle adım adım kavratabilir misiniz?`;
+          input.focus();
+          const sendBtn = document.getElementById('studentAiSubmit') || document.getElementById('studentAiSendBtn');
+          if (sendBtn) {
+            sendBtn.classList.add('gz-pulse-glow');
+            setTimeout(() => sendBtn.classList.remove('gz-pulse-glow'), 2500);
+          }
+        }
+      }
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        const modal = document.getElementById('gzKarneModal');
+        if (modal && modal.classList.contains('is-open')) modal.classList.remove('is-open');
+      }
     });
 
     document.querySelector('[name="day"]')?.setAttribute('max', localDay(new Date()));
@@ -352,9 +506,22 @@
       const eventButton = event.target.closest('[data-gz-delete-event]');
       const commentButton = event.target.closest('[data-gz-delete-comment]');
       const guardianButton = event.target.closest('[data-gz-guardian]');
+      const karneButton = event.target.closest('[data-gz-test-karne]');
+      const closeModal = event.target.closest('[data-gz-close-modal]');
+
       if (eventButton) act(() => api(`/api/ogretmen/gelisim/olaylar/${encodeURIComponent(eventButton.dataset.gzDeleteEvent)}`, {method: 'DELETE'}), 'Takvim kaydı silindi.');
       if (commentButton) act(() => api(`/api/ogretmen/gelisim/yorumlar/${encodeURIComponent(commentButton.dataset.gzDeleteComment)}`, {method: 'DELETE'}), 'Kayıt silindi.');
       if (guardianButton) act(() => api(`/api/ogretmen/gelisim/yorumlar/${encodeURIComponent(guardianButton.dataset.gzGuardian)}/veli`, {method: 'PATCH'}), 'Rapor veliye iletildi olarak işaretlendi.');
+
+      if (karneButton && data?.testler) {
+        const test = data.testler.find(t => t.id === karneButton.dataset.gzTestKarne);
+        if (test) showKarneModal(test);
+      }
+
+      if (closeModal) {
+        const modal = document.getElementById('gzKarneModal');
+        if (modal) modal.classList.remove('is-open');
+      }
     });
 
     host.innerHTML = '<div class="gz"><p class="gz-empty">Gelişim verileri yükleniyor…</p></div>';

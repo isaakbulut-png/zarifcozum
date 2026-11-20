@@ -320,6 +320,18 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
   // 1. Adım: Pinecone'dan 768 boyutlu müfredat sınırını çek
   const mebSiniri = await getMebConstraints(ogrenciMesaji, grade);
 
+  // 1.1 Adım: Öğrencinin Zayıf Konu Bağlamı (0 ekstra token israfı, varsa 2-3 satır pedagojik yönlendirme)
+  let weakContextInstruction = "";
+  if (userContext?.zayifKonular && userContext.zayifKonular.length > 0) {
+    const weakList = userContext.zayifKonular.slice(0, 3).join(', ');
+    const basariStr = userContext.basariOrtalamasi ? `%${userContext.basariOrtalamasi}` : 'belirleniyor';
+    weakContextInstruction = `
+      [ÖĞRENCİ PERFORMANS VE ZAYIF KAZANIM BİLGİSİ]
+      Öğrencinin güncel gelişim analizine göre en çok zorlandığı zayıf konular: ${weakList} (Genel Başarı Ortalaması: ${basariStr}).
+      Öğrenci bu konulardan bahsettiğinde veya genel destek istediğinde, bu eksiklerini kapatacak şekilde Sokratik sorularla ve sabırla yönlendir.
+    `;
+  }
+
   const ALLOWED_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-pro'];
   let systemInstruction = "";
   let selectedModel = (chosenModel && ALLOWED_MODELS.includes(chosenModel))
@@ -416,6 +428,10 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
       [RESMİ MÜFREDAT BAĞLAMI]
       ${mebSiniri}
     `;
+  }
+
+  if (weakContextInstruction) {
+    systemInstruction += `\n${weakContextInstruction}`;
   }
 
   // 3. Adım: Kısa Hafıza (Son 2 tur geçmiş + SVG temizliği)

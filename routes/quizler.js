@@ -49,7 +49,7 @@ function createStudentQuizSubmissionHandler() {
   });
 }
 
-function createLiveQuizHandlers({getQuizCollection, getAttemptCollection, getResultCollection, pointsService, getHomeworkCollection, getHomeworkAssignmentCollection}) {
+function createLiveQuizHandlers({getQuizCollection, getAttemptCollection, getResultCollection, pointsService, getHomeworkCollection, getHomeworkAssignmentCollection, getProgressCollection}) {
   const key = (studentId, quizId) => `${studentId}:${quizId}`;
   const runId = attempt => attempt.runId || attempt._id;
   const runFilter = attempt => attempt.runId ? {runId: attempt.runId} : {runId: {$exists: false}};
@@ -133,11 +133,19 @@ function createLiveQuizHandlers({getQuizCollection, getAttemptCollection, getRes
           return res.status(409).json({mesaj: 'Bu soru artık kontrol edilemez.'});
         }
         const correct = answer === question.answer;
+        const timeSpent = typeof req.body?.timeSpentSeconds === 'number' ? req.body.timeSpentSeconds : null;
         const updated = await getAttemptCollection().updateOne({
           _id: attempt._id, studentId: req.session.user.id, status: 'open',
           ...runFilter(attempt),
           [`state.${index}.checks`]: state.checks, [`state.${index}.correct`]: state.correct
-        }, {$set: {[`state.${index}`]: {checks: state.checks + 1, answer, correct}}});
+        }, {$set: {
+          [`state.${index}`]: {
+            checks: state.checks + 1,
+            answer,
+            correct,
+            timeSpentSeconds: timeSpent ?? state.timeSpentSeconds ?? null
+          }
+        }});
         if (!updated.modifiedCount) return res.status(409).json({mesaj: 'Test durumu değişti; yeniden deneyin.'});
         return res.json({index, checks: state.checks + 1, answer, correct, remainingChecks: correct ? 0 : 1 - state.checks});
       } catch (error) { return fail(res, error); }
@@ -179,17 +187,60 @@ function createLiveQuizHandlers({getQuizCollection, getAttemptCollection, getRes
             answer, explanation: explanation || '',
             ipucuVar: Boolean(outcomeCode && answers[index] !== answer)
           }));
+
+          // Soru bazlı süre ve detaylı karne analizi
+          const timeSpentSeconds = Array.isArray(req.body?.timeSpentSeconds) ? req.body.timeSpentSeconds : [];
+          const answerDetails = attempt.questions.map((question, index) => {
+            const st = attempt.state[index];
+            const timeSpent = typeof timeSpentSeconds[index] === 'number'
+              ? timeSpentSeconds[index]
+              : (typeof st?.timeSpentSeconds === 'number' ? st.timeSpentSeconds : null);
+            return {
+              no: index + 1,
+              questionIndex: index,
+              answer: st?.answer || null,
+              correctAnswer: question.answer,
+              correct: st?.correct === true,
+              timeSpentSeconds: timeSpent,
+              topic: question.topic || question.konu || attempt.quizTitle || null,
+              outcomeCode: question.outcomeCode || question.kazanimKodu || null
+            };
+          });
+
           const result = {
             _id: resultId, liveAttemptId: runId(attempt), quizId: attempt.quizId, quizTitle: attempt.quizTitle,
             studentId: attempt.studentId, studentName: attempt.studentName, answers, correctCount,
-            totalCount, score, kazanilanPuan, review, createdAt: new Date(),
+            totalCount, score, kazanilanPuan, review, answerDetails, createdAt: new Date(),
             performance: attempt.questions.map((question, index) => ({
               curriculum_node_id: question.curriculum_node_id instanceof ObjectId ? question.curriculum_node_id : null,
               question_fingerprint: questionFingerprint(question),
-              correct: attempt.state[index].correct === true
+              correct: attempt.state[index].correct === true,
+              timeSpentSeconds: answerDetails[index]?.timeSpentSeconds || null
             }))
           };
           await getResultCollection().insertOne(result, {session});
+
+          // Atomik kazanım ilerleme güncellemesi ve önbellek geçersiz kılma
+          try {
+            const { recordKazanimOutcome, invalidateStudentGelisimCache } = require('./ogrenci-gelisim');
+            invalidateStudentGelisimCache(attempt.studentId);
+            const progressCol = typeof getProgressCollection === 'function' ? getProgressCollection() : null;
+            if (progressCol) {
+              for (const detail of answerDetails) {
+                if (detail.topic) {
+                  await recordKazanimOutcome(progressCol, {
+                    studentUserId: attempt.studentId,
+                    grade: attempt.grade || 8,
+                    topic: detail.topic,
+                    isCorrect: detail.correct
+                  });
+                }
+              }
+            }
+          } catch (kErr) {
+            console.warn('Kazanım ilerleme / cache temizleme uyarısı:', kErr.message);
+          }
+
           return {result};
         });
         if (outcome.status) return res.status(outcome.status).json({mesaj: outcome.mesaj});

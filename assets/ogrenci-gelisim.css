@@ -65,3 +65,45 @@
 .gz-comment header{display:flex;justify-content:space-between;gap:8px}
 .gz-comment p{margin:6px 0;white-space:pre-wrap;overflow-wrap:anywhere}
 .gz-side-label{margin:18px 12px 4px;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#b7aba0;font-weight:700;list-style:none}
+
+/* Mini Aksiyon Butonları & AI Mentör Köprüsü */
+.gz-btn-mini{background:var(--gz-card);border:1px solid var(--gz-line);border-radius:6px;padding:5px 10px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit;color:var(--gz-ink);transition:all .15s ease}
+.gz-btn-mini:hover{background:var(--gz-soft);border-color:var(--gz-accent);color:var(--gz-accent)}
+.gz-ai-topic-btn{background:#f3e1cf;color:#6b4a2f;border:1px solid #d9d3c3;white-space:nowrap}
+.gz-ai-topic-btn:hover{background:#7a4f2d;color:#fff;border-color:#7a4f2d}
+.gz-karne-btn{background:#eef2ff;color:#394f8c;border:1px solid #c7d2fe;white-space:nowrap}
+.gz-karne-btn:hover{background:#394f8c;color:#fff;border-color:#394f8c}
+
+/* Öğretmeninin Notu Kartı */
+.gz-teacher-note-card{background:#fffaf5;border:1px solid #ecd58a;border-left:4px solid #7a4f2d;border-radius:12px;padding:14px 16px;margin:8px 0}
+.gz-teacher-note-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.gz-teacher-avatar{font-size:1.6rem;line-height:1}
+.gz-teacher-note-head strong{display:block;font-size:.92rem;color:#4a2e1a}
+.gz-teacher-note-head small{color:var(--gz-muted);font-size:.75rem}
+.gz-teacher-note-body{margin:0;font-style:italic;color:#3a2618;font-size:.9rem;line-height:1.45}
+
+/* Detay / Sınav Karnesi Modalı */
+.gz-modal{display:none;position:fixed;inset:0;z-index:99999;align-items:center;justify-content:center;padding:16px}
+.gz-modal.is-open{display:flex}
+.gz-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px)}
+.gz-modal-dialog{position:relative;z-index:10;background:#fff;border-radius:16px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,0.22);border:1px solid var(--gz-line)}
+.gz-modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:1px solid var(--gz-line);padding-bottom:12px;margin-bottom:16px}
+.gz-modal-close{background:none;border:none;font-size:1.8rem;line-height:1;cursor:pointer;color:var(--gz-muted);padding:0 4px}
+.gz-modal-close:hover{color:#000}
+.gz-karne-summary-row{display:flex;flex-wrap:wrap;align-items:center;gap:16px;background:var(--gz-card);border:1px solid var(--gz-line);border-radius:12px;padding:14px;margin-bottom:14px}
+.gz-karne-score{display:grid;place-items:center;padding:10px 18px;border-radius:10px;min-width:110px}
+.gz-karne-score strong{font-size:1.8rem;line-height:1.1}
+.gz-karne-score.score-good{background:#f3e1cf;color:#6b4a2f}
+.gz-karne-score.score-mid{background:#fff4d6;color:#80620c}
+.gz-karne-score.score-low{background:#fde9e8;color:#a3201a}
+.gz-karne-metrics{display:flex;flex-wrap:wrap;gap:8px;flex:1}
+.gz-karne-table th{background:var(--gz-card);font-weight:700}
+.gz-karne-table td{vertical-align:middle}
+
+/* AI Butonu Nabız Animasyonu */
+@keyframes gzPulse {
+  0%{transform:scale(1);box-shadow:0 0 0 0 rgba(122,79,45,0.7)}
+  50%{transform:scale(1.05);box-shadow:0 0 0 10px rgba(122,79,45,0)}
+  100%{transform:scale(1);box-shadow:0 0 0 0 rgba(122,79,45,0)}
+}
+.gz-pulse-glow{animation:gzPulse 1s ease 2}
