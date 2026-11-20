@@ -1,5 +1,5 @@
 (function () {
-  const tokenPattern = /<svg\b[\s\S]*?<\/svg\s*>|\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\)|\$[^$\n]+?\$/gi;
+  const tokenPattern = /<figure\b[\s\S]*?<\/figure\s*>|<table\b[\s\S]*?<\/table\s*>|<svg\b[\s\S]*?<\/svg\s*>|\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\)|\$[^$\n]+?\$/gi;
 
   function append(target, text) {
     const source = String(text);
@@ -7,7 +7,12 @@
     for (const match of source.matchAll(tokenPattern)) {
       target.append(document.createTextNode(source.slice(last, match.index)));
       const token = match[0];
-      if (/^<svg\b/i.test(token)) {
+      if (/^<figure\b/i.test(token) || /^<table\b/i.test(token)) {
+        const container = document.createElement('div');
+        container.className = /^<figure\b/i.test(token) ? 'ai-rendered-figure' : 'ai-rendered-table overflow-x-auto';
+        container.innerHTML = token;
+        target.append(container);
+      } else if (/^<svg\b/i.test(token)) {
         const figure = document.createElement('span');
         figure.className = 'ai-svg';
         try {

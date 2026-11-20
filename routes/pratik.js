@@ -334,7 +334,19 @@ function createPratikRouter({
 
     let anlatim;
     try {
-      anlatim = await icerikGetir('konu-slides-v4', sinif, konu, 0, () => konuUret({ sinif, konu }));
+      // 1. Önce Maarif Modeli yayınlanmış zengin içerik havuzunu (CurriculumContent) kontrol et
+      const CurriculumContent = require('../models/CurriculumContent');
+      const published = await CurriculumContent.findOne({
+        grade: sinif,
+        sub_topic: konu,
+        status: 'published'
+      }).lean();
+
+      if (published && published.detailed_content) {
+        anlatim = published.detailed_content;
+      } else {
+        anlatim = await icerikGetir('konu-slides-v4', sinif, konu, 0, () => konuUret({ sinif, konu }));
+      }
     } catch (error) {
       return res.status(error.status || 502).json({ mesaj: error.message || 'Konu anlatımı hazırlanamadı.' });
     }

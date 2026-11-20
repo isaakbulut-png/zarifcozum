@@ -8,6 +8,7 @@ const Soru = require('../models/Soru');
 const { canUserUseProModel, checkAndConsumeQuota } = require('../middleware/aiQuota');
 const AiQuestionDraft = require('../models/AiQuestionDraft');
 const ContentLibrary = require('../models/ContentLibrary');
+const CurriculumContent = require('../models/CurriculumContent');
 const { checkQuestionSimilarity, indexQuestionInPinecone } = require('../lib/content-similarity');
 const { exportQuestions } = require('../lib/document-exporter');
 
@@ -1161,6 +1162,144 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     } catch (error) {
       console.error('Yapay zeka testi silinemedi veya işlem kaydı oluşturulamadı:', error);
       res.status(500).json({ mesaj: 'Test silinemedi veya işlem kaydı oluşturulamadı.' });
+    }
+  });
+
+  // ==========================================
+  // MAARİF MODELİ KONU ANLATIM ÜRETİCİSİ ENDPOINTS
+  // ==========================================
+
+  // 1. Yapay Zeka ile Maarif Konu Anlatımı Üret
+  router.post('/curriculum-content/generate', requireRole('teacher', 'admin'), async (req, res) => {
+    try {
+      const grade = Number(req.body?.grade);
+      const ders = typeof req.body?.ders === 'string' ? req.body.ders.trim() : 'Matematik';
+      const unit_topic = typeof req.body?.unit_topic === 'string' ? req.body.unit_topic.trim() : '';
+      const sub_topic = typeof req.body?.sub_topic === 'string' ? req.body.sub_topic.trim() : '';
+      const teacherNotes = typeof req.body?.teacherNotes === 'string' ? req.body.teacherNotes.trim() : '';
+      const activeModel = req.body?.model || 'gemini-2.5-flash';
+
+      if (!grade || grade < 5 || grade > 12 || !unit_topic || !sub_topic) {
+        return res.status(400).json({ mesaj: 'Sınıf (5-12), tema ve alt konu seçimi zorunludur.' });
+      }
+
+      const { generateMaarifCurriculumContent } = await import('../aiService.mjs');
+      const generated = await generateMaarifCurriculumContent({
+        grade,
+        unitTopic: unit_topic,
+        subTopic: sub_topic,
+        ders,
+        teacherNotes,
+        activeModel
+      });
+
+      // AI Token Kullanımını Kaydet
+      try {
+        const { recordAiUsage } = require('../lib/ai-usage-tracker');
+        recordAiUsage({
+          kullaniciId: req.session.user?.id,
+          kullaniciAdi: req.session.user?.name,
+          kullaniciRol: req.session.user?.role || 'teacher',
+          modul: 'Konu Anlatım Üreticisi',
+          modelAdi: generated.model || activeModel,
+          promptTokens: generated.usage?.promptTokens || 0,
+          candidatesTokens: generated.usage?.candidatesTokens || 0,
+          cacheHit: false,
+          durum: 'success',
+          detay: { grade, ders, unit_topic, sub_topic }
+        });
+      } catch (logErr) {}
+
+      res.json({
+        success: true,
+        data: {
+          grade,
+          subject: ders,
+          unit_topic,
+          sub_topic,
+          outcome_code: generated.outcome_code,
+          official_boundary: generated.official_boundary,
+          title: generated.title,
+          short_summary: generated.short_summary,
+          detailed_content: generated.detailed_content,
+          illustrations: generated.illustrations || [],
+          teacherNotes
+        }
+      });
+    } catch (err) {
+      console.error('[AI] Konu anlatımı üretme hatası:', err);
+      res.status(500).json({ mesaj: err.message || 'Konu anlatımı üretilemedi.' });
+    }
+  });
+
+  // 2. Konu Anlatımını Kaydet & Yayınla (Öğrenci Paneline Aktar)
+  router.post('/curriculum-content/publish', requireRole('teacher', 'admin'), async (req, res) => {
+    try {
+      const grade = Number(req.body?.grade);
+      const subject = typeof req.body?.subject === 'string' ? req.body.subject.trim() : (req.body?.ders || 'Matematik');
+      const unit_topic = typeof req.body?.unit_topic === 'string' ? req.body.unit_topic.trim() : '';
+      const sub_topic = typeof req.body?.sub_topic === 'string' ? req.body.sub_topic.trim() : '';
+      const outcome_code = typeof req.body?.outcome_code === 'string' ? req.body.outcome_code.trim() : '';
+      const short_summary = typeof req.body?.short_summary === 'string' ? req.body.short_summary.trim() : '';
+      const detailed_content = typeof req.body?.detailed_content === 'string' ? req.body.detailed_content : '';
+      const illustrations = Array.isArray(req.body?.illustrations) ? req.body.illustrations : [];
+      const teacherNotes = typeof req.body?.teacherNotes === 'string' ? req.body.teacherNotes.trim() : '';
+      const status = req.body?.status === 'draft' ? 'draft' : 'published';
+
+      if (!grade || !unit_topic || !sub_topic || !detailed_content) {
+        return res.status(400).json({ mesaj: 'Sınıf, ünite, alt konu ve içerik zorunludur.' });
+      }
+
+      const filter = { grade, subject, unit_topic, sub_topic };
+      const updateData = {
+        outcome_code,
+        short_summary,
+        detailed_content,
+        illustrations,
+        teacherNotes,
+        status,
+        createdBy: req.session.user?.id || 'teacher'
+      };
+
+      const saved = await CurriculumContent.findOneAndUpdate(
+        filter,
+        updateData,
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+
+      res.json({
+        success: true,
+        mesaj: status === 'published' ? 'Konu anlatımı öğrenci paneline yayınlandı.' : 'Taslak olarak kaydedildi.',
+        data: saved
+      });
+    } catch (err) {
+      console.error('[AI] Konu anlatımı yayınlama hatası:', err);
+      res.status(500).json({ mesaj: 'Konu anlatımı kaydedilemedi.' });
+    }
+  });
+
+  // 3. Konu Anlatımını Getir (Öğretmen, Öğrenci ve Admin için)
+  router.get('/curriculum-content', requireRole('teacher', 'student', 'admin'), async (req, res) => {
+    try {
+      const grade = req.query?.grade ? Number(req.query.grade) : null;
+      const unit_topic = typeof req.query?.unit_topic === 'string' ? req.query.unit_topic.trim() : '';
+      const sub_topic = typeof req.query?.sub_topic === 'string' ? req.query.sub_topic.trim() : (req.query?.topic ? req.query.topic.trim() : '');
+      const status = req.query?.status || 'published';
+
+      const filter = { status };
+      if (grade) filter.grade = grade;
+      if (unit_topic) filter.unit_topic = unit_topic;
+      if (sub_topic) filter.sub_topic = sub_topic;
+
+      const found = await CurriculumContent.findOne(filter).lean();
+      if (!found) {
+        return res.json({ found: false, mesaj: 'İçerik bulunamadı.' });
+      }
+
+      res.json({ found: true, content: found });
+    } catch (err) {
+      console.error('[AI] Konu anlatımı okuma hatası:', err);
+      res.status(500).json({ mesaj: 'İçerik sorgulanamadı.' });
     }
   });
 

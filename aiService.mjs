@@ -248,6 +248,7 @@ function buildConstraintText(metadata = {}, klavuzMatches = [], kitapMatches = [
 
 /**
  * Pinecone katı metadata filtreleme ile seçilen sınıf, ders, tema ve alt konuya ait verileri çeker (RAG).
+ * "ders_kitabi" namespace'i altındaki MEB Maarif kitap sayfalarını sorgular.
  */
 export async function getStrictMebContext({ grade, unitTopic, subTopic, ders = 'Matematik', queryText = '' }) {
   const meta = findSubTopicMeta ? findSubTopicMeta(grade, unitTopic, subTopic) : null;
@@ -256,12 +257,16 @@ export async function getStrictMebContext({ grade, unitTopic, subTopic, ders = '
 
   let pineconeRagContext = '';
   try {
+    const dersKitabiNs = pineconeIndex.namespace('ders_kitabi');
     const filterQuery = {};
-    if (grade) filterQuery.grade = { $eq: Number(grade) };
-    if (unitTopic) filterQuery.unit_topic = { $eq: unitTopic };
-    if (subTopic) filterQuery.sub_topic = { $eq: subTopic };
+    if (grade) {
+      filterQuery.$or = [
+        { not: { $eq: Number(grade) } },
+        { grade: { $eq: Number(grade) } }
+      ];
+    }
 
-    const searchText = queryText || `${grade}. sınıf ${unitTopic || ''} ${subTopic || ''}`.trim();
+    const searchText = queryText || `${grade}. sınıf ${ders} ${unitTopic || ''} ${subTopic || ''}`.trim();
     const embeddingResponse = await aiClient.models.embedContent({
       model: 'gemini-embedding-001',
       contents: searchText,
@@ -270,28 +275,46 @@ export async function getStrictMebContext({ grade, unitTopic, subTopic, ders = '
 
     const queryVector = embeddingResponse.embedding?.values || embeddingResponse.embeddings?.[0]?.values;
     if (queryVector) {
-      const searchResults = await pineconeIndex.query({
+      const searchResults = await dersKitabiNs.query({
         vector: queryVector,
-        topK: 4,
+        topK: 8,
         includeMetadata: true,
         filter: filterQuery
       });
 
-      const matches = (searchResults.matches || []).filter(m => (m.score || 0) >= 0.55);
-      if (matches.length > 0) {
-        pineconeRagContext = matches.map(m => {
-          const mMeta = m.metadata || {};
-          if (mMeta.type === 'theory') {
-            return `[MEB DERS KİTABI TEORİK ÇERÇEVE]\nAlt Başlık: ${mMeta.sub_topic || subTopic}\nResmi Sınır: ${mMeta.official_boundary || ''}\nİçerik: ${mMeta.text_content || ''}`;
-          } else if (mMeta.type === 'solved_example') {
-            return `[MEB DERS KİTABI ÇÖZÜMLÜ ÖRNEK MODELİ]\nÖrnek Soru: ${mMeta.question || ''}\nAdım Adım Çözüm / Modelleme: ${mMeta.solution || mMeta.text_content || ''}`;
+      const relevantMatches = (searchResults.matches || []).filter(m => (m.score || 0) >= 0.45);
+      if (relevantMatches.length > 0) {
+        // Alt konu ve tema anahtar kelimeleriyle skorlama
+        const subWords = `${unitTopic || ''} ${subTopic || ''}`
+          .toLowerCase()
+          .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+          .split(/\s+/)
+          .filter(w => w.length > 2);
+
+        const scoredMatches = relevantMatches.map(m => {
+          const text = (m.metadata?.text || m.metadata?.metin || '').toLowerCase();
+          const theme = (m.metadata?.theme || m.metadata?.tema || '').toLowerCase();
+          let bonus = 0;
+          for (const w of subWords) {
+            if (theme.includes(w)) bonus += 0.20;
+            if (text.includes(w)) bonus += 0.08;
           }
-          return mMeta.text_content || '';
+          return { ...m, finalScore: (m.score || 0) + bonus };
+        }).sort((a, b) => b.finalScore - a.finalScore);
+
+        const topMatches = scoredMatches.slice(0, 4);
+        pineconeRagContext = topMatches.map(m => {
+          const mMeta = m.metadata || {};
+          const sayfa = mMeta.page || mMeta.sayfa || '';
+          const kitap = mMeta.book || mMeta.kitap || '';
+          const tema = mMeta.theme || mMeta.tema || '';
+          const rawText = mMeta.text || mMeta.metin || '';
+          return `[MEB DERS KİTABI SAYFA ${sayfa} - ${kitap} / ${tema}]\n${rawText.slice(0, 2000)}`;
         }).join('\n\n---\n\n');
       }
     }
   } catch (error) {
-    console.warn('[RAG] Pinecone katı metadata filtreleme uyarısı:', error.message);
+    console.warn('[RAG] Pinecone ders_kitabi katı filtreleme uyarısı:', error.message);
   }
 
   const parts = [

@@ -29,6 +29,7 @@ const SiteMediaTargets = require('./assets/site-media-targets');
 const { createSorularRouter } = require('./routes/sorular');
 const { createCozumluSorularRouters } = require('./routes/cozumlu-sorular');
 const { createDenemelerRouters } = require('./routes/denemeler');
+const { createExamsRouter } = require('./routes/exams');
 const { requireKonuLogin } = require('./lib/konu-erisimi');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
@@ -51,6 +52,7 @@ const { PLANS, featureDecision } = require('./lib/subscription-plans');
 const AdminLog = require('./models/AdminLog');
 const CozumluSoru = require('./models/CozumluSoru');
 const Deneme = require('./models/Deneme');
+const Exam = require('./models/Exam');
 const { createWebhookRouter } = require('./routes/webhooks');
 const { attachRealtimeChat } = require('./lib/realtime-chat');
 const { normalizeAiChatRequest, createAiChatReply } = require('./lib/ai-chat');
@@ -646,6 +648,12 @@ const denemeRouters = createDenemelerRouters({
 app.use('/api/denemeler', denemeRouters.staff);
 app.use('/api/ogrenci/denemeler', denemeRouters.student);
 app.use('/api/acik-deneme', denemeRouters.acik);
+const examRouters = createExamsRouter({
+  requireStaff: requireRole('teacher', 'admin'),
+  requireStudent: ogrenciKontrol
+});
+app.use('/api/exams', examRouters.staff);
+app.use('/api/ogrenci/exams', examRouters.student);
 app.use('/api/admin', createAdminRouter({
   User,
   Payment,

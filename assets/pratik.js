@@ -168,7 +168,11 @@
       listeTuru = '';
     };
 
-    String(metin).replace(/<svg\b[\s\S]*?<\/svg\s*>/gi, svg => svg.replace(/\r?\n/g, ' ')).split(/\r?\n/).forEach(satir => {
+    String(metin)
+      .replace(/<svg\b[\s\S]*?<\/svg\s*>/gi, svg => svg.replace(/\r?\n/g, ' '))
+      .replace(/<figure\b[\s\S]*?<\/figure\s*>/gi, fig => fig.replace(/\r?\n/g, ' '))
+      .replace(/<table\b[\s\S]*?<\/table\s*>/gi, tbl => tbl.replace(/\r?\n/g, ' '))
+      .split(/\r?\n/).forEach(satir => {
       const temiz = satir.trim();
       if (!temiz) {
         paragrafiEkle();
