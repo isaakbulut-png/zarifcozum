@@ -477,6 +477,10 @@ sitePages.forEach(page => {
           return res.status(500).send('Veli paneli hesabı doğrulanamadı.');
         }
       }
+    } else if (role === 'student') {
+      if (['student', 'admin'].includes(req.session.user.role) || req.session.user.adminRole) {
+        canOpen = true;
+      }
     } else if (role === 'teacher') {
       if (!['teacher', 'admin'].includes(req.session.user.role) && !req.session.user.adminRole) {
         canOpen = false;

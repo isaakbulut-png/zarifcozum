@@ -1967,26 +1967,38 @@
             if (activeAdminRole === 'superadmin' && user.role === 'student') {
               const packageSelect = document.createElement('select');
               packageSelect.setAttribute('aria-label', `${user.name} paket işlemi`);
-              for (const [value, label] of [['', 'Paket...'], ['temel', 'Temel ver'], ['standart', 'Standart ver'],
-                ['vip', 'VIP ver'], ['revoke', 'Aboneliği kaldır']]) {
+              for (const [value, label] of [['', 'Paket Seç...'], ['temel', 'Temel ver (1 Yıl)'], ['standart', 'Standart ver (1 Yıl)'],
+                ['vip', 'VIP ver (1 Yıl)'], ['revoke', 'Aboneliği kaldır']]) {
                 packageSelect.append(Object.assign(document.createElement('option'), { value, textContent: label }));
               }
               packageSelect.addEventListener('change', async () => {
                 if (!packageSelect.value) return;
+                const chosen = packageSelect.value;
+                packageSelect.disabled = true;
                 try {
-                  if (packageSelect.value === 'revoke') {
-                    await api(`/api/admin/users/${encodeURIComponent(user.id)}/subscription`, {
+                  let res;
+                  if (chosen === 'revoke') {
+                    if (!confirm(`"${user.name}" adlı öğrencinin aktif aboneliği iptal edilecek ve Free pakete düşürülecektir. Onaylıyor musunuz?`)) {
+                      packageSelect.disabled = false;
+                      packageSelect.value = '';
+                      return;
+                    }
+                    res = await api(`/api/admin/users/${encodeURIComponent(user.id)}/subscription`, {
                       method: 'PUT',
-                      body: JSON.stringify({ action: 'revoke' })
+                      body: JSON.stringify({ action: 'revoke', plan: null })
                     });
                   } else {
-                    await api(`/api/admin/users/${encodeURIComponent(user.id)}/subscription`, {
+                    res = await api(`/api/admin/users/${encodeURIComponent(user.id)}/subscription`, {
                       method: 'PUT',
-                      body: JSON.stringify({ action: 'grant', plan: packageSelect.value, durationMonths: 1 })
+                      body: JSON.stringify({ action: 'grant', plan: chosen, days: 365, durationMonths: 12 })
                     });
                   }
+                  $('usersMsg').className = 'msg ok';
+                  $('usersMsg').textContent = res.mesaj || 'Abonelik paketi güncellendi.';
                   loadUsers();
                 } catch (error) {
+                  packageSelect.disabled = false;
+                  $('usersMsg').className = 'msg';
                   $('usersMsg').textContent = error.message;
                   loadUsers();
                 }

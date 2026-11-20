@@ -407,15 +407,38 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
   });
 
   router.put('/users/:id/subscription', allow('superadmin'), async (req, res) => {
-    const plan = req.body?.plan;
-    const days = req.body?.days;
-    const revoke = plan === null;
-    if (!ObjectId.isValid(req.params.id) || (!revoke && !Object.hasOwn(PLANS, plan)) ||
-        (!revoke && (!Number.isInteger(days) || days < 1 || days > 3650))) {
-      return res.status(400).json({ mesaj: 'Geçerli paket ve 1–3650 arası gün sayısı gönderin.' });
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ mesaj: 'Geçersiz kullanıcı kimliği.' });
     }
+    const body = req.body || {};
+    const action = body.action;
+    const rawPlan = body.plan;
+    const revoke = action === 'revoke' || rawPlan === null || rawPlan === 'revoke' || rawPlan === 'free';
+
+    let plan = rawPlan;
+    if (revoke) {
+      plan = null;
+    }
+
+    // Gün hesabı: Gönderilmişse days, yoksa durationMonths * 30, hiçbiri yoksa varsayılan 365 gün (1 yıl)
+    let days = body.days;
+    if (!days && body.durationMonths) {
+      const dm = parseInt(body.durationMonths, 10);
+      days = dm >= 12 ? 365 : dm * 30;
+    }
+    if (!days && !revoke) {
+      days = 365;
+    }
+
+    if (!revoke && (!plan || !Object.hasOwn(PLANS, plan))) {
+      return res.status(400).json({ mesaj: 'Geçerli bir paket seçin (temel, standart, vip).' });
+    }
+    if (!revoke && (!Number.isInteger(days) || days < 1 || days > 3650)) {
+      return res.status(400).json({ mesaj: 'Geçerli 1–3650 arası gün sayısı gönderin.' });
+    }
+
     try {
-      const target = await User.findById(req.params.id).select('role name');
+      const target = await User.findById(req.params.id);
       if (!target || target.role !== 'student') {
         return res.status(404).json({ mesaj: 'Yalnızca öğrenci hesaplarına paket tanımlanabilir.' });
       }
@@ -424,16 +447,26 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
         target.subscriptionPlan = null;
         target.subscriptionType = null;
         target.expiresAt = null;
+        target.paketTipi = 'free';
       } else {
         target.subscriptionStatus = 'active';
         target.subscriptionPlan = plan;
-        target.subscriptionType = 'monthly';
+        target.subscriptionType = days >= 360 ? 'annual' : 'monthly';
         target.expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+        target.paketTipi = plan;
       }
       await target.save();
       await audit(req, revoke ? 'user.subscription.revoked' : 'user.subscription.granted', 'user',
         target._id.toString(), revoke ? {} : { plan, days });
-      res.json({ mesaj: revoke ? 'Abonelik kaldırıldı.' : 'Paket tanımlandı.' });
+
+      const planTitle = plan === 'vip' ? 'VIP' : plan === 'standart' ? 'Standart' : plan === 'temel' ? 'Temel' : '';
+      res.json({
+        mesaj: revoke ? `${target.name} adlı öğrencinin aboneliği kaldırıldı.` : `${target.name} adlı öğrenciye ${planTitle} Paket (${days} gün) başarıyla tanımlandı.`,
+        plan: target.subscriptionPlan,
+        paketTipi: target.paketTipi,
+        subscriptionStatus: target.subscriptionStatus,
+        expiresAt: target.expiresAt
+      });
     } catch (error) {
       console.error('Kullanıcı aboneliği güncellenemedi:', error);
       res.status(500).json({ mesaj: 'Kullanıcı aboneliği güncellenemedi.' });

@@ -617,7 +617,7 @@ function createRequireRole(UserModel, ParentModel = Parent) {
       const currentRole = isParent ? 'parent' : user.role;
       const adminRole = adminRoleOf(user);
       const effectiveRoles = isParent ? ['parent']
-        : adminRole === 'superadmin' ? ['admin', 'teacher']
+        : adminRole === 'superadmin' ? ['admin', 'teacher', 'student']
         : adminRole === 'editor' ? ['teacher']
         : adminRole === 'support' ? []
         : [currentRole];
