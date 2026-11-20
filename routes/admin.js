@@ -121,10 +121,11 @@ function createAdminRouter({
     details
   });
 
+  const { getAiUsageSummary, getAiAuditSummary } = require('../lib/ai-usage-tracker');
+  const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQuota');
+
   router.get('/ai-maliyet-ozeti', allow('superadmin', 'editor', 'support'), async (req, res) => {
     try {
-      const { getAiUsageSummary, getAiAuditSummary } = require('../lib/ai-usage-tracker');
-const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQuota');
       const summary = await getAiUsageSummary();
       res.json(summary);
     } catch (error) {
@@ -1290,7 +1291,7 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
     try {
       const AiUsageLog = require('../models/AiUsageLog');
       const SysConfig = SystemConfig || require('../models/SystemConfig');
-      const [auditData, toplamOgrenci, aiEngelliSayisi, ozelLimitliSayisi, bonusluSayisi, krediAyari] = await Promise.all([
+      const [auditData, toplamOgrenci, aiEngelliSayisi, ozelLimitliSayisi, bonusluSayisi, rawKrediAyari] = await Promise.all([
         getAiAuditSummary(),
         User.countDocuments({ role: 'student' }),
         User.countDocuments({ aiErisimEngelli: true }),
@@ -1301,11 +1302,19 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
           : { initialCredit: 0.00, updatedAt: null }
       ]);
 
+      const krediAyari = rawKrediAyari || { initialCredit: 0.00, updatedAt: null };
+      const initialCredit = typeof krediAyari.initialCredit === 'number'
+        ? krediAyari.initialCredit
+        : typeof krediAyari.gemini_initial_credit === 'number'
+          ? krediAyari.gemini_initial_credit
+          : 0.00;
+      const creditDate = krediAyari.updatedAt || krediAyari.gemini_credit_updated_at || null;
+
       let spentSinceUpdateTL = 0;
       let spentSinceUpdateUSD = 0;
-      if (krediAyari.updatedAt) {
+      if (creditDate) {
         const sinceSpend = await AiUsageLog.aggregate([
-          { $match: { tarih: { $gte: krediAyari.updatedAt }, cacheHit: false } },
+          { $match: { tarih: { $gte: new Date(creditDate) }, cacheHit: false } },
           { $group: { _id: null, totalTL: { $sum: '$toplamMaliyetTL' }, totalUSD: { $sum: '$toplamMaliyetUSD' } } }
         ]);
         if (sinceSpend.length > 0) {
@@ -1313,7 +1322,7 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
           spentSinceUpdateUSD = sinceSpend[0].totalUSD || 0;
         }
       }
-      const remainingCredit = Math.max(0, Number((krediAyari.initialCredit - spentSinceUpdateTL).toFixed(2)));
+      const remainingCredit = Math.max(0, Number((initialCredit - spentSinceUpdateTL).toFixed(2)));
 
       res.json({
         genel: auditData.genel,
@@ -1325,11 +1334,11 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
           bonusluSayisi
         },
         kredi: {
-          initialCredit: krediAyari.initialCredit,
+          initialCredit,
           remainingCredit,
           spentSinceUpdateTL: Number(spentSinceUpdateTL.toFixed(2)),
           spentSinceUpdateUSD: Number(spentSinceUpdateUSD.toFixed(4)),
-          updatedAt: krediAyari.updatedAt,
+          updatedAt: creditDate,
           isExhausted: remainingCredit <= 0,
           isLow: remainingCredit > 0 && remainingCredit < 10
         }

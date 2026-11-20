@@ -3998,6 +3998,20 @@
                 if ($('statAiBaslangicKredi')) {
                   $('statAiBaslangicKredi').textContent = init.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
                 }
+                if ($('statAiKalanKredi')) {
+                  $('statAiKalanKredi').textContent = init.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+                  $('statAiKalanKredi').style.color = init <= 0 ? '#dc2626' : (init < 10 ? '#dc2626' : '#15803d');
+                }
+                if ($('statAiKrediTarih')) {
+                  $('statAiKrediTarih').textContent = fmtDate(saveRes.kredi.updatedAt || new Date());
+                }
+                if ($('statAiKalanKrediIcon')) {
+                  $('statAiKalanKrediIcon').style.display = init < 10 ? 'inline' : 'none';
+                  $('statAiKalanKrediIcon').textContent = init <= 0 ? '🚨' : '⚠️';
+                }
+                if ($('aiCreditExhaustedBanner')) {
+                  $('aiCreditExhaustedBanner').style.display = init <= 0 ? 'flex' : 'none';
+                }
               }
               handleCloseCreditModal();
               await loadAiAuditOverview();
