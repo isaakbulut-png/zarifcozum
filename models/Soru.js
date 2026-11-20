@@ -8,7 +8,7 @@ const optionSchema = new mongoose.Schema({
 const soruSchema = new mongoose.Schema({
   format: {
     type: String,
-    enum: ['image', 'text_svg', 'hybrid'],
+    enum: ['image', 'text_svg', 'hybrid', 'open_ended'],
     default: 'image',
     index: true
   },
@@ -19,6 +19,10 @@ const soruSchema = new mongoose.Schema({
   text: { type: String, maxlength: 4000, default: '' },
   options: { type: mongoose.Schema.Types.Mixed, default: [] },
   explanation: { type: String, maxlength: 4000, default: '' },
+  solution: { type: String, maxlength: 4000, default: '' },
+  rubric: { type: mongoose.Schema.Types.Mixed, default: [] },
+  outcomeCode: { type: String, maxlength: 60, default: '' },
+  questionType: { type: String, enum: ['open_ended', 'multiple_choice'], default: 'open_ended', index: true },
   svg: { type: mongoose.Schema.Types.Mixed, default: '' },
   grade: { type: Number, min: 1, max: 12, index: true },
   topic: { type: String, maxlength: 250, trim: true, index: true },

@@ -2,9 +2,13 @@ const mongoose = require('mongoose');
 
 const draftQuestionItemSchema = new mongoose.Schema({
   text: { type: String, required: true, maxlength: 4000 },
-  options: { type: mongoose.Schema.Types.Mixed, required: true },
+  options: { type: mongoose.Schema.Types.Mixed, default: {} },
   answer: { type: String, default: null },
   explanation: { type: String, maxlength: 4000, default: '' },
+  solution: { type: String, maxlength: 4000, default: '' },
+  rubric: { type: mongoose.Schema.Types.Mixed, default: [] },
+  outcomeCode: { type: String, maxlength: 60, default: '' },
+  questionType: { type: String, default: 'open_ended' },
   svg: { type: String, default: '' },
   curriculum_node_id: { type: mongoose.Schema.Types.ObjectId, default: null },
   status: { type: String, enum: ['draft', 'approved', 'rejected'], default: 'draft' },

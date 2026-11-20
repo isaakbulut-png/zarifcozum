@@ -12,6 +12,7 @@ const { checkQuestionSimilarity, indexQuestionInPinecone } = require('../lib/con
 const { exportQuestions } = require('../lib/document-exporter');
 
 const { SINIF_KONULARI, TUM_KONULAR } = require('../lib/konu-haritasi');
+const { getCurriculumTree, findSubTopicMeta, SINIF_KONULARI_V2 } = require('../lib/meb-curriculum');
 
 // Eski taslak/kayıtlar bozulmasın diye önceki serbest konu adları da geçerli sayılır.
 const eskiKonular = [
@@ -46,7 +47,7 @@ const eskiKonular = [
   'Çember ve Daire',
   'Analitik Geometri'
 ];
-const konular = new Set([...eskiKonular, ...TUM_KONULAR]);
+const konular = new Set([...eskiKonular, ...TUM_KONULAR, ...Object.values(SINIF_KONULARI_V2).flat()]);
 const zorluklar = new Set(['Kolay', 'Orta', 'Zor']);
 const secenekler = ['A', 'B', 'C', 'D'];
 const soruUretmeSiniri = rateLimit({
@@ -58,22 +59,27 @@ const soruUretmeSiniri = rateLimit({
 });
 
 function isValidQuestion(question) {
-  return question &&
-    typeof question.text === 'string' &&
-    question.text.trim().length > 0 &&
-    question.text.length <= 1500 &&
-    question.options &&
-    secenekler.every(letter =>
+  if (!question || typeof question.text !== 'string' || !question.text.trim()) return false;
+  if (question.text.length > 3500) return false;
+
+  // Açık Uçlu Maarif Modeli sorusu kontrolü: solution/explanation ve rubric
+  const hasSolution = (typeof question.solution === 'string' && question.solution.trim().length > 0) ||
+                      (typeof question.explanation === 'string' && question.explanation.trim().length > 0);
+  const hasRubric = Array.isArray(question.rubric) && question.rubric.length > 0;
+  if (hasSolution && (hasRubric || !question.options)) {
+    return true;
+  }
+
+  // Çoktan seçmeli soru kontrolü
+  if (question.options && typeof question.options === 'object') {
+    return secenekler.every(letter =>
       typeof question.options[letter] === 'string' &&
       question.options[letter].trim().length > 0 &&
-      question.options[letter].length <= 300
-    ) &&
-    secenekler.includes(question.answer) &&
-    (!question.explanation ||
-      (typeof question.explanation === 'string' && question.explanation.length <= 1000)) &&
-    (question.svg === undefined || question.svg === null ||
-      (typeof question.svg === 'string' && question.svg.length <= 10000) ||
-      (typeof question.svg === 'object' && !Array.isArray(question.svg)));
+      question.options[letter].length <= 500
+    ) && secenekler.includes(question.answer);
+  }
+
+  return Boolean(hasSolution);
 }
 
 function generatePedagogicalSvg(questionText = '', topic = '', grade = 5) {
@@ -214,11 +220,16 @@ function generatePedagogicalSvg(questionText = '', topic = '', grade = 5) {
 function prepareAIQuestion(question, context = {}) {
   // Matematik ve LaTeX ifadelerini normalize et
   const normalizedText = normalizeBareMath(question.text || '');
-  const normalizedExplanation = normalizeBareMath(question.explanation || '');
-  const normalizedOptions = {};
-  if (question.options) {
+  const rawSolution = question.solution || question.explanation || '';
+  const normalizedSolution = normalizeBareMath(rawSolution);
+  
+  let normalizedOptions = null;
+  if (question.options && typeof question.options === 'object') {
+    normalizedOptions = {};
     for (const letter of secenekler) {
-      normalizedOptions[letter] = normalizeBareMath(question.options[letter] || '');
+      if (question.options[letter]) {
+        normalizedOptions[letter] = normalizeBareMath(question.options[letter] || '');
+      }
     }
   }
 
@@ -229,20 +240,89 @@ function prepareAIQuestion(question, context = {}) {
     cleanSvg = safeSvg.validate(question.svg);
   }
 
-  // Otomatik görsel desteği: Eğer soru metni şekil/geometri içeriyorsa ve SVG boşsa fallback üret
+  // Otomatik görsel desteği
   if (!cleanSvg) {
-    const fallbackSvg = generatePedagogicalSvg(normalizedText, context.topic, context.grade);
+    const fallbackSvg = generatePedagogicalSvg(normalizedText, context.subTopic || context.unitTopic || context.topic, context.grade);
     if (fallbackSvg) {
       cleanSvg = fallbackSvg;
     }
   }
 
-  const { svg, ...rest } = question;
-  const base = prepareQuestion(cleanSvg && typeof cleanSvg === 'object' ? { ...rest, text: normalizedText, options: normalizedOptions, svg: cleanSvg } : { ...rest, text: normalizedText, options: normalizedOptions });
+  // Analitik Değerlendirme Rubriği normalizasyonu
+  let normalizedRubric = [];
+  if (Array.isArray(question.rubric)) {
+    normalizedRubric = question.rubric.map(r => ({
+      criterion: normalizeBareMath(r.criterion || r.kriter || ''),
+      points: Number(r.points || r.puan || 0)
+    })).filter(r => r.criterion && r.points > 0);
+  }
+
+  const isMultipleChoice = normalizedOptions && secenekler.every(l => Boolean(normalizedOptions[l]));
+  const questionType = isMultipleChoice ? 'multiple_choice' : 'open_ended';
+
   return {
-    ...base,
-    explanation: normalizedExplanation.trim(),
+    text: normalizedText,
+    solution: normalizedSolution,
+    explanation: normalizedSolution,
+    rubric: normalizedRubric,
+    outcomeCode: question.outcomeCode || context.outcomeCode || '',
+    unitTopic: context.unitTopic || '',
+    subTopic: context.subTopic || context.topic || '',
+    questionType,
+    ...(normalizedOptions ? { options: normalizedOptions, answer: question.answer || 'A' } : { options: {} }),
     ...(cleanSvg ? { svg: cleanSvg } : {})
+  };
+}
+
+function openEndedSoruSemasi() {
+  return {
+    type: 'OBJECT',
+    properties: {
+      questions: {
+        type: 'ARRAY',
+        items: {
+          type: 'OBJECT',
+          properties: {
+            text: {
+              type: 'STRING',
+              description: 'Türkiye Yüzyılı Maarif Modeli standartlarında, günlük yaşam senaryolu, ezbere dayalı olmayan, kavramsal muhakeme ve akıl yürütme ölçen açık uçlu soru metni. Tüm matematiksel ifadeler tek dolar $...$ içinde ve kaçırılmış LaTeX (\\\\frac, \\\\sqrt) ile yazılmalıdır.'
+            },
+            svg: {
+              type: 'STRING',
+              description: 'Görsel, şema veya tablo gerektiren sorularda geçerli ve sade <svg viewBox="0 0 W H" xmlns="http://www.w3.org/2000/svg">...</svg> kodu; görsel gerekmiyorsa boş metin.'
+            },
+            solution: {
+              type: 'STRING',
+              description: 'Öğrencinin sergilemesi beklenen adım adım çözüm süreci, modelleme ve mantıksal gerekçelendirme. Tüm matematiksel ifadeler $...$ içine alınmalıdır.'
+            },
+            rubric: {
+              type: 'ARRAY',
+              description: 'Sorunun 100 puan üzerinden analitik değerlendirme rubriği ve puan dağılımı (2-4 kriter).',
+              items: {
+                type: 'OBJECT',
+                properties: {
+                  criterion: {
+                    type: 'STRING',
+                    description: 'Değerlendirilen çözüm adımı veya kavramsal beceri (örn: "Problem durumunu matematiksel olarak modelleme ve değişkenleri belirleme").'
+                  },
+                  points: {
+                    type: 'INTEGER',
+                    description: 'Bu kriterin puan karşılığı (örn: 25, 50).'
+                  }
+                },
+                required: ['criterion', 'points']
+              }
+            },
+            outcomeCode: {
+              type: 'STRING',
+              description: 'İlgili MEB kazanım kodu (örn: MAT.5.1.1).'
+            }
+          },
+          required: ['text', 'solution', 'rubric']
+        }
+      }
+    },
+    required: ['questions']
   };
 }
 
@@ -289,18 +369,33 @@ function soruSemasi() {
 function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
   const router = express.Router();
 
-  router.get('/konular', requireRole('teacher'), (req, res) => {
-    res.json({ konular: SINIF_KONULARI });
+  router.get('/konular', requireRole('teacher', 'student', 'admin'), (req, res) => {
+    res.json({
+      tree: getCurriculumTree(),
+      konular: SINIF_KONULARI_V2
+    });
   });
 
   router.post('/questions', requireRole('teacher'), soruUretmeSiniri, async (req, res) => {
-    const topic = typeof req.body?.topic === 'string' ? req.body.topic.trim() : '';
-    const difficulty = typeof req.body?.difficulty === 'string' ? req.body.difficulty : '';
-    const count = Number(req.body?.count);
     const grade = Number(req.body?.grade);
+    const ders = typeof req.body?.ders === 'string' ? req.body.ders.trim() : 'Matematik';
+    const unit_topic = typeof req.body?.unit_topic === 'string' ? req.body.unit_topic.trim() : (req.body?.tema || '');
+    const sub_topic = typeof req.body?.sub_topic === 'string' ? req.body.sub_topic.trim() : (req.body?.alt_konu || req.body?.topic || '');
+    const difficulty = typeof req.body?.difficulty === 'string' ? req.body.difficulty : 'Orta';
+    const count = Number(req.body?.count) || 5;
+    const questionType = req.body?.questionType === 'multiple_choice' ? 'multiple_choice' : 'open_ended';
 
-    if (!SINIF_KONULARI[grade]?.includes(topic) || !zorluklar.has(difficulty) ||
-        ![1, 5, 10, 15, 20].includes(count)) {
+    // Müfredat ve alt konu çözümlemesi
+    const subMeta = findSubTopicMeta(grade, unit_topic, sub_topic);
+    const resolvedUnit = subMeta?.unit_topic || unit_topic || 'Genel Konu';
+    const resolvedSub = subMeta?.name || sub_topic || 'Genel';
+    const outcomeCode = subMeta?.outcome_code || '';
+    const officialBoundary = subMeta?.official_boundary || '';
+
+    const validGrade = Number.isInteger(grade) && grade >= 5 && grade <= 12;
+    const validCount = [1, 3, 5, 10, 15, 20].includes(count);
+
+    if (!validGrade || !zorluklar.has(difficulty) || !validCount || !resolvedSub) {
       return res.status(400).json({ mesaj: 'Sınıf, konu, zorluk veya soru sayısı seçimi geçersiz.' });
     }
 
@@ -318,7 +413,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       try {
         const found = await Soru.find({
           grade,
-          topic,
+          topic: resolvedSub,
           difficulty: difficulty.toLowerCase(),
           text: { $exists: true, $ne: '' }
         }).limit(count).lean();
@@ -334,8 +429,12 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
             return {
               text: s.text,
               options: opts,
-              answer: s.answer || 'A',
-              explanation: s.explanation || '',
+              answer: s.answer || null,
+              solution: s.solution || s.explanation || '',
+              explanation: s.explanation || s.solution || '',
+              rubric: s.rubric || [],
+              outcomeCode: s.outcomeCode || outcomeCode,
+              questionType: s.questionType || (Object.keys(opts).length >= 4 ? 'multiple_choice' : 'open_ended'),
               svg: typeof s.svg === 'string' ? s.svg : (s.svg ? JSON.stringify(s.svg) : '')
             };
           }).filter(isValidQuestion);
@@ -347,11 +446,19 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
 
     // Eğer havuzda istenen soru sayısının tamamı hazır varsa API'ye hiç gitme (0 Token, Anında Yanıt)
     if (cachedPoolQuestions.length >= count) {
-      const preparedQuestions = cachedPoolQuestions.slice(0, count).map(q => prepareAIQuestion(q, { topic, grade }));
+      const preparedQuestions = cachedPoolQuestions.slice(0, count).map(q => prepareAIQuestion(q, {
+        topic: resolvedSub,
+        subTopic: resolvedSub,
+        unitTopic: resolvedUnit,
+        grade,
+        outcomeCode
+      }));
       const quiz = {
-        title: `${topic} — ${difficulty} seviye (Havuzdan)`,
+        title: `${resolvedUnit} / ${resolvedSub} — ${difficulty} seviye (Havuzdan)`,
         description: `${count} soruluk soru havuzu çalışma testi.`,
-        topic,
+        topic: resolvedSub,
+        unit_topic: resolvedUnit,
+        sub_topic: resolvedSub,
         grade,
         difficulty,
         questions: preparedQuestions
@@ -361,15 +468,19 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       try {
         draftRecord = await AiQuestionDraft.create({
           title: quiz.title,
-          topic,
+          topic: resolvedSub,
           grade,
           difficulty: String(difficulty || 'orta').toLowerCase(),
           count,
           questions: preparedQuestions.map(q => ({
             text: q.text,
-            options: q.options,
-            answer: q.answer,
-            explanation: q.explanation,
+            options: q.options || {},
+            answer: q.answer || null,
+            explanation: q.explanation || '',
+            solution: q.solution || '',
+            rubric: q.rubric || [],
+            outcomeCode: q.outcomeCode || outcomeCode,
+            questionType: q.questionType || 'open_ended',
             svg: q.svg || '',
             status: 'draft',
             similarityScore: 0,
@@ -396,7 +507,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
           modelAdi: 'Havuz Önbelleği',
           cacheHit: true,
           durum: 'cache_hit',
-          detay: { soruSayisi: count, topic, grade, difficulty }
+          detay: { soruSayisi: count, topic: resolvedSub, grade, difficulty }
         });
       } catch (logErr) {}
 
@@ -409,6 +520,8 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
           title: quiz.title,
           description: quiz.description,
           topic: quiz.topic,
+          unit_topic: quiz.unit_topic,
+          sub_topic: quiz.sub_topic,
           grade: quiz.grade,
           difficulty: quiz.difficulty,
           soruSayisi: quiz.questions.length,
@@ -420,7 +533,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     // Eksik kalan soru adedi kadar API'den talep et
     const neededCount = count - cachedPoolQuestions.length;
 
-    // Hazır havuzdan karşılanamayan her yeni soru için öğretmen/öğrenci kotasını kontrol et
+    // Hazır havuzdan karşılanamayan her yeni soru için öğretmen kotasını kontrol et
     if (neededCount > 0 && req.session.user) {
       try {
         const freshUser = await User.findById(req.session.user.id || req.session.user._id);
@@ -438,32 +551,53 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       }
     }
 
+    // 2. PINECONE KATI METADATA FİLTRELİ RAG SORGUSU
+    let ragContext = '';
+    try {
+      const { getStrictMebContext } = await import('../aiService.mjs');
+      ragContext = await getStrictMebContext({
+        grade,
+        unitTopic: resolvedUnit,
+        subTopic: resolvedSub,
+        ders
+      });
+    } catch (ragErr) {
+      console.warn('[AI Questions] Strict RAG context uyarısı:', ragErr.message);
+      ragContext = `[TÜRKİYE YÜZYILI MAARİF MODELİ RESMÎ MÜFREDAT KAZANIM VE SINIRLARI]\nSınıf: ${grade}. Sınıf\nDers: ${ders}\nTema / Ünite: ${resolvedUnit}\nAlt Konu: ${resolvedSub}\nKazanım: ${outcomeCode}\nResmi Sınırlar: ${officialBoundary}`;
+    }
+
+    // 3. TÜRKİYE YÜZYILI MAARİF MODELİ SİSTEM PROMPTU (AÇIK UÇLU & RUBRİKLİ)
     const prompt = [
-      'Türkçe eğitim platformu için özgün, pedagojik olarak doğru, yeni nesil matematik soruları hazırla.',
-      `Sınıf düzeyi: ${grade}. sınıf (MEB Türkiye Yüzyılı Maarif Modeli). Konu: ${topic}. Zorluk: ${difficulty}. Tam olarak ${neededCount} soru üret.`,
-      `Sorular yalnızca ${grade}. sınıf kazanımları ve ön koşulları içinde kalsın; üst sınıf konu veya formüllerini kullanma.`,
-      'Cevapları, soru ve açıklama metinlerini gereksiz uzatma, kısa, net ve pedagojik tut; SVG kodlarını en sade haliyle üret.',
+      'Sen Türkiye Yüzyılı Maarif Modeli standartlarında uzman bir Matematik Eğitim Uzmanı ve Açık Uçlu Soru Yazarısın.',
+      `Sınıf Düzeyi: ${grade}. Sınıf (MEB Türkiye Yüzyılı Maarif Modeli)`,
+      `Ders: ${ders}`,
+      `Tema / Ünite: ${resolvedUnit}`,
+      `Alt Konu: ${resolvedSub}`,
+      outcomeCode ? `Kazanım Kodu: ${outcomeCode}` : '',
+      `Zorluk: ${difficulty}`,
+      `Üretilecek Soru Sayısı: Tam olarak ${neededCount} soru üret.`,
+      '',
+      'PINECONE DOĞRULANMIŞ RESMÎ KAZANIM SINIRLARI (ZORUNLU - BU SINIRLARIN DIŞINA ÇIKMA):',
+      ragContext,
+      '',
+      'MAARİF MODELİ PEDAGOJİK VE SORU STANDARTLARI (KESİNLİKLE UYULMALIDIR):',
+      '1. EZBERE DEĞİL, SÜRECE ODAKLI: Sorular salt formül uygulatan kuru işlem soruları olamaz. Öğrencinin kavramsal anlama, matematiksel modelleme, akıl yürütme ve muhakeme becerilerini ölçmelidir.',
+      '2. GÜNLÜK YAŞAM SENARYOLU: Soru metni öğrencinin bağ kurabileceği gerçekçi bir yaşam durumunu (mühendislik, zanaat, doğa, bilim, ekonomi, spor, mimari vb.) hikâyeleştirmelidir.',
+      questionType === 'open_ended'
+        ? '3. AÇIK UÇLU FORMAT: Sorular çoktan seçmeli DEĞİLDİR. Öğrencinin çözüm sürecini, adımlarını ve mantığını yazarak sergilemesini gerektiren AÇIK UÇLU sorulardır.'
+        : '3. ÇOKTAN SEÇMELİ FORMAT: Sorular dört seçenekli (A, B, C, D) ve tek bir doğru cevabı olan sorulardır.',
+      '4. ANALİTİK DEĞERLENDİRME RUBRİĞİ (rubric): Her soru için toplam 100 puan üzerinden 2-4 adımlı analitik puanlama kriterleri (criterion ve points) hazırla (Örn: Verilenleri modelleme 25P, Bağıntı kurma ve işlem 50P, Sonucu bağlamda yorumlama 25P).',
+      '5. ADIM ADIM ÇÖZÜM SÜRECİ (solution): Beklenen modelleme, işlem basamakları ve muhakeme açıkça yazılmalıdır.',
+      '',
       'MATEMATİK VE GEOMETRİ FORMÜL KURALLARI (ZORUNLU):',
-      '- Soru metnindeki (text), tüm seçeneklerdeki (options: A, B, C, D) ve açıklamadaki (explanation) TÜM matematiksel ve geometrik ifadeleri, değişkenleri ($x$, $y$), geometrik şekil ve açı sembollerini ($ABC$, $[AB] \\perp [AC]$, $\\widehat{BAC}$), üslü/köklü sayıları ($3^{x-1}$, $x^2$, $\\sqrt{16}$), alt indisli terimleri ($y_K$, $x_A$) ve uzunlukları ($|AB| = 4$) KESİNLİKLE tek dolar ($ ... $) işareti içine alarak yaz.',
-      '- JSON formatında geçerli olması için LaTeX komutlarındaki ters eğik çizgileri (\\) MUTLAKA çift ters eğik çizgi ile kaçır (escape et): "\\\\perp", "\\\\parallel", "\\\\widehat", "\\\\frac", "\\\\sqrt", "\\\\circ", "\\\\times", "\\\\cdot". Kesinlikle tek ters eğik çizgi veya geçersiz JSON kaçış karakteri kullanma.',
-      '- Kesinlikle dolar işareti olmadan çıplak LaTeX kodu ("3^{x-1}", "x_A", "\\perp") üretme.',
-      'GÖRSEL VE ŞEMA KURALI (ZORUNLU):',
-      '- "Geometrik Şekiller", "Üçgenler", "Dörtgenler", "Açılar", "Alan", "Çevre", "Sayı Doğrusu", "Veri Analizi / Grafikler", "Kesirler", "Doğal Sayılar (Basamak Tablosu / Abaküs)" gibi konularda veya sorunun metninde "Şekildeki...", "Yukarıdaki şemada...", "Verilen şekilde...", "grafikte", "tabloda" gibi ifadeler varsa "svg" ALANININ RENKLİ VE DOLU OLMASI KESİNLİKLE ZORUNLUDUR.',
-      '- Soruda "Şekildeki ABC üçgeni..." yazıp "svg" alanını boş bırakmak KESİNLİKLE YASAKTIR. Soruda bahsedilen şekil, üçgen, açı, çadır, çokgen veya şema mutlaka "svg" alanında görselleştirilmelidir.',
-      '- SVG içinde köşe harfleri (A, B, C), kenar uzunlukları, verilen açı dereceleri (örn: 40°, 70°), tepe noktası net ve okunaklı <text> etiketleriyle yerleştirilmelidir.',
-      'SVG KURALLARI (ZORUNLU):',
-      '- Kök etiket: <svg viewBox="0 0 W H" xmlns="http://www.w3.org/2000/svg"> (örn: viewBox="0 0 500 260").',
-      '- Yalnızca şu güvenli etiketleri kullan: <svg>, <g>, <rect>, <circle>, <ellipse>, <line>, <polyline>, <polygon>, <path>, <text>, <tspan>. Asla <style>, <defs>, <linearGradient>, <image> veya HTML etiketleri kullanma.',
-      '- SVG <text> veya <tspan> etiketleri içinde KaTeX ve ham LaTeX sözdizimi ($, \\, {, }, ^) KESİNLİKLE KULLANILMAZ.',
-      '- Üslü ifadeler için: <text x="100" y="50">x<tspan dy="-6" font-size="10">2</tspan><tspan dy="6"> </tspan></text> yapısını veya doğrudan Unicode karakterlerini (², ³, ˣ) kullan.',
-      '- Alt indisler için: <text x="100" y="50">y<tspan dy="4" font-size="10">K</tspan><tspan dy="-4"> </tspan></text> yapısını veya doğrudan Unicode karakterlerini (₁, ₂, ₖ) kullan.',
-      '- Sayısal özniteliklere (width, height, x, y, cx, cy, r, rx, ry, x1, y1, x2, y2, stroke-width, font-size, dx, dy) ASLA "px" veya birim yazma; yalnızca saf sayı yaz (örn: width="500", font-size="14", stroke-width="2").',
-      '- Renkler (fill, stroke): Canlı ve modern renkler kullan (örn: mavi #2563eb, yeşil #16a34a, turuncu #ea580c, sarı #f59e0b, mor #7c3aed, kırmızı #dc2626, nötr zemin #f8fafc, çerçeve #cbd5e1). Sadece hex (#...) veya temel isim (none, black, white, red, blue, green, gray, orange, purple, yellow) kabul edilir.',
-      '- <text> etiketi içine metni doğrudan yaz (örn: <text x="100" y="50" fill="#1e293b" font-size="14" text-anchor="middle">Milyonlar Bölüğü</text>).',
-      'Her soru dört seçenekli (A, B, C, D) olsun ve yalnızca bir doğru cevap içersin.',
-      'Sayıları, işlemleri, şemadaki değerleri ve doğru seçeneği birbiriyle %100 tutarlı olacak şekilde dikkatle doğrula.',
-      'Açıklama alanında çözümün kısa ve anlaşılır adımlarını ver.',
-      'Yalnızca istenen JSON şemasına uyan JSON döndür; Markdown veya fazladan metin ekleme.'
+      '- Soru metnindeki (text) ve çözümdeki (solution) TÜM matematiksel/geometrik ifadeleri, formülleri, değişkenleri ($x$, $y$), geometrik sembolleri ve sayıları tek dolar ($...$) içine alarak yaz.',
+      '- JSON içinde geçerli olması için LaTeX komutlarındaki ters eğik çizgileri MUTLAKA çift ters eğik çizgi ile kaçır: "\\\\perp", "\\\\frac", "\\\\sqrt", "\\\\times", "\\\\cdot".',
+      '',
+      'GÖRSEL VE ŞEMA KURALI (SVG):',
+      '- Geometri, şekil, grafik veya modelleme içeren sorularda "svg" alanına geçerli, sade ve renkli bir <svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">...</svg> şeması ekle. Görsel gerekmeyen sorularda boş bırak.',
+      '- SVG içinde asla $ veya KaTeX kullanma; metinleri düz Unicode ile yaz.',
+      '',
+      'Yalnızca istenen JSON şemasına uyan JSON döndür; Markdown bloğu veya fazladan açıklama metni ekleme.'
     ].join('\n');
 
     // Güvenli Ajan/Model Doğrulaması (İzin verilen modeller: flash-lite, flash, pro)
@@ -499,230 +633,252 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: {
-                responseMimeType: 'application/json',
-                responseSchema: soruSemasi(),
-                maxOutputTokens: 4096
-              }
-            }),
-            signal: AbortSignal.timeout(18000)
-          }
-        );
-
-        if (fetchRes.ok) {
-          response = fetchRes;
-          break;
-        } else {
-          lastStatus = fetchRes.status;
-          const errorBody = await fetchRes.text();
-          console.warn(`[AI] Model ${model} HTTP ${fetchRes.status}:`, errorBody.slice(0, 160));
-          if (fetchRes.status === 401 || fetchRes.status === 403) {
-            lastStatus = fetchRes.status;
-            break; // Yetkilendirme hatası modelden bağımsızdır
-          }
+              responseMimeType: 'application/json',
+              responseSchema: questionType === 'open_ended' ? openEndedSoruSemasi() : soruSemasi(),
+              maxOutputTokens: 4096
+            }
+          }),
+          signal: AbortSignal.timeout(22000)
         }
-      } catch (err) {
-        lastError = err;
-        console.warn(`[AI] Model ${model} çağrısında hata/zaman aşımı:`, err.message);
-      }
-    }
+      );
 
-    if (!response || !response.ok) {
-      if (lastError && (lastError.name === 'TimeoutError' || lastError.name === 'AbortError')) {
-        return res.status(504).json({ mesaj: 'Soru üretimi zaman aşımına uğradı. Lütfen yeniden deneyin.' });
+      if (fetchRes.ok) {
+        response = fetchRes;
+        break;
+      } else {
+        lastStatus = fetchRes.status;
+        const errorBody = await fetchRes.text();
+        console.warn(`[AI] Model ${model} HTTP ${fetchRes.status}:`, errorBody.slice(0, 160));
+        if (fetchRes.status === 401 || fetchRes.status === 403) {
+          lastStatus = fetchRes.status;
+          break; // Yetkilendirme hatası modelden bağımsızdır
+        }
       }
-      let mesaj = 'Yapay zeka soruları şu anda üretemedi. Lütfen daha sonra tekrar deneyin.';
-      if (lastStatus === 429) {
-        mesaj = 'Yapay zeka hizmeti şu anda yoğun. Biraz sonra tekrar deneyin.';
-      } else if ([401, 403].includes(lastStatus)) {
-        mesaj = 'Yapay zeka API anahtarı geçersiz veya yetkisiz. Sunucudaki GEMINI_API_KEY ayarını kontrol edin.';
-      } else if (lastStatus === 404) {
-        mesaj = 'Yapay zeka modeli bulunamadı. Sunucudaki model yapılandırmasını kontrol edin.';
-      } else if (lastStatus === 400) {
-        mesaj = 'Yapay zeka isteği reddedildi. Sunucu günlüklerindeki Gemini hatasını kontrol edin.';
-      } else if (lastStatus >= 500) {
-        mesaj = 'Yapay zeka sağlayıcısı şu anda yanıt veremiyor. Biraz sonra tekrar deneyin.';
-      }
-      const status = lastStatus === 429 ? 503 : (lastStatus === 401 || lastStatus === 403 ? 401 : 502);
-      return res.status(status).json({ mesaj });
+    } catch (err) {
+      lastError = err;
+      console.warn(`[AI] Model ${model} çağrısında hata/zaman aşımı:`, err.message);
     }
+  }
 
-    let result;
+  if (!response || !response.ok) {
+    if (lastError && (lastError.name === 'TimeoutError' || lastError.name === 'AbortError')) {
+      return res.status(504).json({ mesaj: 'Soru üretimi zaman aşımına uğradı. Lütfen yeniden deneyin.' });
+    }
+    let mesaj = 'Yapay zeka soruları şu anda üretemedi. Lütfen daha sonra tekrar deneyin.';
+    if (lastStatus === 429) {
+      mesaj = 'Yapay zeka hizmeti şu anda yoğun. Biraz sonra tekrar deneyin.';
+    } else if ([401, 403].includes(lastStatus)) {
+      mesaj = 'Yapay zeka API anahtarı geçersiz veya yetkisiz. Sunucudaki GEMINI_API_KEY ayarını kontrol edin.';
+    } else if (lastStatus === 404) {
+      mesaj = 'Yapay zeka modeli bulunamadı. Sunucudaki model yapılandırmasını kontrol edin.';
+    } else if (lastStatus === 400) {
+      mesaj = 'Yapay zeka isteği reddedildi. Sunucu günlüklerindeki Gemini hatasını kontrol edin.';
+    } else if (lastStatus >= 500) {
+      mesaj = 'Yapay zeka sağlayıcısı şu anda yanıt veremiyor. Biraz sonra tekrar deneyin.';
+    }
+    const status = lastStatus === 429 ? 503 : (lastStatus === 401 || lastStatus === 403 ? 401 : 502);
+    return res.status(status).json({ mesaj });
+  }
+
+  let result;
+  try {
+    const responseText = await response.text();
+    let payload;
     try {
-      const responseText = await response.text();
-      let payload;
-      try {
-        payload = JSON.parse(responseText);
-      } catch (error) {
-        console.error('Gemini Hatası: API yanıtı JSON olarak okunamadı.', error);
-        return res.status(502).json({ mesaj: 'Yapay zeka geçerli soru verisi döndürmedi. Lütfen yeniden deneyin.' });
-      }
-      const text = payload.candidates?.[0]?.content?.parts
-        ?.map(part => part.text || '')
-        .join('');
-      if (!text) throw new Error('Model yanıtında soru verisi bulunamadı.');
-      const sanitizedText = text
-        .trim()
-        .replace(/^```(?:json)?\s*/i, '')
-        .replace(/\s*```$/, '')
-        .trim();
-      result = JSON.parse(sanitizedText);
-
-      // AI Token & Maliyet Loglama
-      try {
-        const promptTokens = payload.usageMetadata?.promptTokenCount || 0;
-        const candidatesTokens = payload.usageMetadata?.candidatesTokenCount || 0;
-        const { recordAiUsage } = require('../lib/ai-usage-tracker');
-        recordAiUsage({
-          kullaniciId: req.session.user?.id,
-          kullaniciAdi: req.session.user?.name,
-          kullaniciRol: req.session.user?.role || 'teacher',
-          modul: 'Soru Sihirbazı',
-          modelAdi: activeModel,
-          promptTokens,
-          candidatesTokens,
-          cacheHit: false,
-          durum: 'success',
-          detay: { soruSayisi: neededCount, topic, grade, difficulty }
-        });
-      } catch (logErr) {}
+      payload = JSON.parse(responseText);
     } catch (error) {
-      console.error('Gemini Hatası:', error);
+      console.error('Gemini Hatası: API yanıtı JSON olarak okunamadı.', error);
       return res.status(502).json({ mesaj: 'Yapay zeka geçerli soru verisi döndürmedi. Lütfen yeniden deneyin.' });
     }
+    const text = payload.candidates?.[0]?.content?.parts
+      ?.map(part => part.text || '')
+      .join('');
+    if (!text) throw new Error('Model yanıtında soru verisi bulunamadı.');
+    const sanitizedText = text
+      .trim()
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/, '')
+      .trim();
+    result = JSON.parse(sanitizedText);
 
-    if (!Array.isArray(result.questions) || result.questions.length !== neededCount ||
-        !result.questions.every(isValidQuestion)) {
-      console.error('Gemini yanıtı beklenen soru biçimini karşılamadı.');
-      return res.status(502).json({ mesaj: 'Üretilen sorular doğrulanamadı. Lütfen yeniden deneyin.' });
-    }
-
-    let preparedQuestions;
+    // AI Token & Maliyet Loglama
     try {
-      const allRawQuestions = [...cachedPoolQuestions, ...result.questions];
-      preparedQuestions = allRawQuestions.map(q => prepareAIQuestion(q, { topic, grade }));
-    } catch (error) {
-      if (!(error instanceof TypeError)) throw error;
-      return res.status(502).json({ mesaj: 'Üretilen sorular doğrulanamadı. Lütfen yeniden deneyin.' });
-    }
+      const promptTokens = payload.usageMetadata?.promptTokenCount || 0;
+      const candidatesTokens = payload.usageMetadata?.candidatesTokenCount || 0;
+      const { recordAiUsage } = require('../lib/ai-usage-tracker');
+      recordAiUsage({
+        kullaniciId: req.session.user?.id,
+        kullaniciAdi: req.session.user?.name,
+        kullaniciRol: req.session.user?.role || 'teacher',
+        modul: 'Soru Sihirbazı',
+        modelAdi: activeModel,
+        promptTokens,
+        candidatesTokens,
+        cacheHit: false,
+        durum: 'success',
+        detay: { soruSayisi: neededCount, topic: resolvedSub, unit_topic: resolvedUnit, grade, difficulty, questionType }
+      });
+    } catch (logErr) {}
+  } catch (error) {
+    console.error('Gemini Hatası:', error);
+    return res.status(502).json({ mesaj: 'Yapay zeka geçerli soru verisi döndürmedi. Lütfen yeniden deneyin.' });
+  }
 
-    const quiz = {
-      title: `${topic} — ${difficulty} seviye ${cachedPoolQuestions.length > 0 ? '(Havuz + Yapay Zeka)' : '(Yapay zeka)'}`,
-      description: `${count} soruluk çalışma testi.`,
-      topic,
+  if (!Array.isArray(result.questions) || result.questions.length !== neededCount ||
+      !result.questions.every(isValidQuestion)) {
+    console.error('Gemini yanıtı beklenen soru biçimini karşılamadı.');
+    return res.status(502).json({ mesaj: 'Üretilen sorular doğrulanamadı. Lütfen yeniden deneyin.' });
+  }
+
+  let preparedQuestions;
+  try {
+    const allRawQuestions = [...cachedPoolQuestions, ...result.questions];
+    preparedQuestions = allRawQuestions.map(q => prepareAIQuestion(q, {
+      topic: resolvedSub,
+      subTopic: resolvedSub,
+      unitTopic: resolvedUnit,
       grade,
-      difficulty,
-      questions: preparedQuestions
-    };
+      outcomeCode
+    }));
+  } catch (error) {
+    if (!(error instanceof TypeError)) throw error;
+    return res.status(502).json({ mesaj: 'Üretilen sorular doğrulanamadı. Lütfen yeniden deneyin.' });
+  }
 
-    // Semantik Benzerlik ve Mükerrer Kontrolü
-    try {
-      const existing = await Soru.find({ grade }).select('text imageFile _id').limit(100).lean();
-      for (const q of preparedQuestions) {
-        const sim = await checkQuestionSimilarity(q.text, existing);
-        q.similarityScore = sim.similarityScore;
-        q.isDuplicate = sim.isDuplicate;
-        q.similarQuestionId = sim.similarQuestionId;
-      }
-    } catch (simErr) {
-      console.warn('[AI] Benzerlik kontrolü atlandı:', simErr.message);
+  const quiz = {
+    title: `${resolvedUnit} / ${resolvedSub} — ${difficulty} seviye ${questionType === 'open_ended' ? '(Maarif Modeli Açık Uçlu)' : ''} ${cachedPoolQuestions.length > 0 ? '(Havuz + Yapay Zeka)' : '(Yapay zeka)'}`.trim(),
+    description: `${count} soruluk ${questionType === 'open_ended' ? 'açık uçlu Maarif Modeli' : ''} çalışma testi.`,
+    topic: resolvedSub,
+    unit_topic: resolvedUnit,
+    sub_topic: resolvedSub,
+    grade,
+    difficulty,
+    questionType,
+    questions: preparedQuestions
+  };
+
+  // Semantik Benzerlik ve Mükerrer Kontrolü
+  try {
+    const existing = await Soru.find({ grade }).select('text imageFile _id').limit(100).lean();
+    for (const q of preparedQuestions) {
+      const sim = await checkQuestionSimilarity(q.text, existing);
+      q.similarityScore = sim.similarityScore;
+      q.isDuplicate = sim.isDuplicate;
+      q.similarQuestionId = sim.similarQuestionId;
     }
+  } catch (simErr) {
+    console.warn('[AI] Benzerlik kontrolü atlandı:', simErr.message);
+  }
 
-    // 1. MongoDB'ye Otomatik Taslak Kaydı (F5 Kaybını Önleme)
-    let draftRecord = null;
-    try {
-      draftRecord = await AiQuestionDraft.create({
-        title: quiz.title,
-        topic,
-        grade,
-        difficulty: String(difficulty || 'orta').toLowerCase(),
-        count,
-        questions: preparedQuestions.map(q => ({
-          text: q.text,
-          options: q.options,
-          answer: q.answer,
-          explanation: q.explanation,
-          svg: q.svg || '',
-          status: 'draft',
-          similarityScore: q.similarityScore || 0,
-          similarQuestionId: q.similarQuestionId || null
-        })),
+  // 1. MongoDB'ye Otomatik Taslak Kaydı (F5 Kaybını Önleme)
+  let draftRecord = null;
+  try {
+    draftRecord = await AiQuestionDraft.create({
+      title: quiz.title,
+      topic: resolvedSub,
+      grade,
+      difficulty: String(difficulty || 'orta').toLowerCase(),
+      count,
+      questions: preparedQuestions.map(q => ({
+        text: q.text,
+        options: q.options || {},
+        answer: q.answer || null,
+        explanation: q.explanation || '',
+        solution: q.solution || '',
+        rubric: q.rubric || [],
+        outcomeCode: q.outcomeCode || outcomeCode,
+        questionType: q.questionType || questionType,
+        svg: q.svg || '',
         status: 'draft',
-        source: 'ai',
-        createdBy: req.session.user.id
-      });
-
-      // 3. Kitle Kaynaklı Havuz Büyütme: Üretilen soruları tek tek onaylı soru olarak havuza ekle
-      for (const q of preparedQuestions) {
-        try {
-          await ContentLibrary.create({
-            title: `${topic} Sorusu (${grade}. Sınıf)`,
-            type: 'soru',
-            ders: 'matematik',
-            grade,
-            topic,
-            difficulty: String(difficulty || 'orta').toLowerCase(),
-            content: {
-              text: q.text,
-              options: q.options,
-              answer: q.answer,
-              explanation: q.explanation,
-              svg: q.svg || ''
-            },
-            metadata: {
-              kazanim: topic,
-              source: 'ai_crowdsourced',
-              teacherRole: req.session.user?.ogretmenTipi || 'standart_ogretmen'
-            },
-            status: 'approved', // Sonraki testlerde havuz önbelleği olarak doğrudan kullanılsın
-            source: 'ai_crowdsourced',
-            createdBy: req.session.user.id
-          });
-        } catch (crowdErr) {
-          // Mükerrer veya sessiz geçiş
-        }
-      }
-
-      // Merkezi İçerik Havuzuna taslak test kaydı
-      await ContentLibrary.create({
-        title: quiz.title,
-        type: 'ai_test',
-        ders: 'matematik',
-        grade,
-        topic,
-        difficulty: String(difficulty || 'orta').toLowerCase(),
-        content: {
-          description: quiz.description,
-          questions: preparedQuestions,
-          draftId: draftRecord._id
-        },
-        metadata: {
-          questionCount: preparedQuestions.length,
-          draftId: draftRecord._id
-        },
-        status: 'draft',
-        source: 'ai',
-        createdBy: req.session.user.id
-      });
-    } catch (draftErr) {
-      console.warn('[AI] Otomatik taslak kaydı hatası:', draftErr.message);
-    }
-
-    const draftId = draftRecord ? draftRecord._id.toString() : null;
-
-    res.json({
-      draftId,
-      quiz: {
-        id: draftId,
-        draftId,
-        title: quiz.title,
-        description: quiz.description,
-        topic: quiz.topic,
-        grade: quiz.grade,
-        difficulty: quiz.difficulty,
-        soruSayisi: quiz.questions.length,
-        questions: preparedQuestions
-      }
+        similarityScore: q.similarityScore || 0,
+        similarQuestionId: q.similarQuestionId || null
+      })),
+      status: 'draft',
+      source: 'ai',
+      createdBy: req.session.user.id
     });
+
+    // 3. Kitle Kaynaklı Havuz Büyütme: Üretilen soruları tek tek onaylı soru olarak havuza ekle
+    for (const q of preparedQuestions) {
+      try {
+        await ContentLibrary.create({
+          title: `${resolvedSub} Sorusu (${grade}. Sınıf)`,
+          type: 'soru',
+          ders: 'matematik',
+          grade,
+          topic: resolvedSub,
+          difficulty: String(difficulty || 'orta').toLowerCase(),
+          content: {
+            text: q.text,
+            options: q.options || {},
+            answer: q.answer || null,
+            explanation: q.explanation || '',
+            solution: q.solution || '',
+            rubric: q.rubric || [],
+            svg: q.svg || ''
+          },
+          metadata: {
+            kazanim: resolvedSub,
+            outcomeCode: q.outcomeCode || outcomeCode,
+            unitTopic: resolvedUnit,
+            source: 'ai_crowdsourced',
+            teacherRole: req.session.user?.ogretmenTipi || 'standart_ogretmen'
+          },
+          status: 'approved',
+          source: 'ai_crowdsourced',
+          createdBy: req.session.user.id
+        });
+      } catch (crowdErr) {
+        // Mükerrer veya sessiz geçiş
+      }
+    }
+
+    // Merkezi İçerik Havuzuna taslak test kaydı
+    await ContentLibrary.create({
+      title: quiz.title,
+      type: 'ai_test',
+      ders: 'matematik',
+      grade,
+      topic: resolvedSub,
+      difficulty: String(difficulty || 'orta').toLowerCase(),
+      content: {
+        description: quiz.description,
+        questions: preparedQuestions,
+        draftId: draftRecord._id
+      },
+      metadata: {
+        questionCount: preparedQuestions.length,
+        unitTopic: resolvedUnit,
+        subTopic: resolvedSub,
+        draftId: draftRecord._id
+      },
+      status: 'draft',
+      source: 'ai',
+      createdBy: req.session.user.id
+    });
+  } catch (draftErr) {
+    console.warn('[AI] Otomatik taslak kaydı hatası:', draftErr.message);
+  }
+
+  const draftId = draftRecord ? draftRecord._id.toString() : null;
+
+  res.json({
+    draftId,
+    quiz: {
+      id: draftId,
+      draftId,
+      title: quiz.title,
+      description: quiz.description,
+      topic: quiz.topic,
+      unit_topic: quiz.unit_topic,
+      sub_topic: quiz.sub_topic,
+      grade: quiz.grade,
+      difficulty: quiz.difficulty,
+      questionType: quiz.questionType,
+      soruSayisi: quiz.questions.length,
+      questions: preparedQuestions
+    }
+  });
   });
 
   router.post('/questions/publish', requireRole('teacher'), async (req, res) => {

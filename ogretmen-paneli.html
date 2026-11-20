@@ -1382,9 +1382,9 @@ body.teacher-menu-open {
     <section class="card" id="ai-question-wizard" data-panel-view="ai-question-wizard">
       <div class="section-title"><div><h2>Yapay Zeka Soru Sihirbazı</h2><p class="hint">Soruları gözden geçirin; her soruyu ayrı ayrı onaylayıp öğrencilerle paylaşabilirsiniz.</p></div></div>
       <form id="aiQuestionForm">
-        <div class="form-grid">
+        <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
           <div class="field">
-            <label for="aiGrade">Sınıf</label>
+            <label for="aiGrade">1. Sınıf</label>
             <select id="aiGrade" required>
               <option value="">Sınıf seçin</option>
               <option value="5">5. Sınıf</option>
@@ -1398,9 +1398,29 @@ body.teacher-menu-open {
             </select>
           </div>
           <div class="field">
-            <label for="aiTopic">Konu</label>
-            <select id="aiTopic" required disabled>
+            <label for="aiDers">2. Ders</label>
+            <select id="aiDers" required>
+              <option value="Matematik" selected>Matematik (MEB Maarif)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="aiTema">3. Tema / Ünite</label>
+            <select id="aiTema" required disabled>
               <option value="">Önce sınıf seçin</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="aiAltKonu">4. Alt Konu (Müfredat Hedefi)</label>
+            <select id="aiAltKonu" required disabled>
+              <option value="">Önce tema seçin</option>
+            </select>
+            <input type="hidden" id="aiTopic" value="">
+          </div>
+          <div class="field">
+            <label for="aiQuestionType">Soru Formatı</label>
+            <select id="aiQuestionType" required>
+              <option value="open_ended" selected>✍️ Açık Uçlu (Maarif Modeli &amp; Rubrikli)</option>
+              <option value="multiple_choice">🔘 Çoktan Seçmeli (4 Seçenekli)</option>
             </select>
           </div>
           <div class="field">
@@ -1423,10 +1443,9 @@ body.teacher-menu-open {
             <label for="aiCount">Soru sayısı</label>
             <select id="aiCount" required>
               <option value="1">1 soru</option>
-              <option value="5">5 soru</option>
-              <option value="10" selected>10 soru</option>
-              <option value="15">15 soru</option>
-              <option value="20">20 soru</option>
+              <option value="3">3 soru</option>
+              <option value="5" selected>5 soru</option>
+              <option value="10">10 soru</option>
             </select>
           </div>
         </div>
@@ -2265,18 +2284,65 @@ body.teacher-menu-open {
     }
   });
 
-  // Sınıf → konu bağımlı menüsü; konu haritası sunucudan (müfredat JSON'larından) gelir
+  // Sınıf → Ders → Tema/Ünite → Alt Konu zincirleme (cascading) menü
+  let aiCurriculumTree = {};
+
   async function aiKonulariYukle() {
     try {
-      const {konular} = await api('/api/ai/konular');
+      const res = await api('/api/ai/konular');
+      aiCurriculumTree = res.tree || {};
+
       $('aiGrade').addEventListener('change', () => {
-        const liste = konular[$('aiGrade').value] || [];
-        $('aiTopic').replaceChildren(new Option(liste.length ? 'Konu seçin' : 'Önce sınıf seçin', ''),
-          ...liste.map(konu => new Option(konu, konu)));
-        $('aiTopic').disabled = !liste.length;
+        const grade = $('aiGrade').value;
+        const gradeData = aiCurriculumTree[grade];
+        const temaSelect = $('aiTema');
+        const altKonuSelect = $('aiAltKonu');
+
+        if (!grade || !gradeData || !gradeData.temalar) {
+          temaSelect.replaceChildren(new Option('Önce sınıf seçin', ''));
+          temaSelect.disabled = true;
+          altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
+          altKonuSelect.disabled = true;
+          $('aiTopic').value = '';
+          return;
+        }
+
+        const temalar = Object.keys(gradeData.temalar);
+        temaSelect.replaceChildren(
+          new Option('Tema / Ünite seçin…', ''),
+          ...temalar.map(t => new Option(t, t))
+        );
+        temaSelect.disabled = !temalar.length;
+        altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
+        altKonuSelect.disabled = true;
+        $('aiTopic').value = '';
+      });
+
+      $('aiTema').addEventListener('change', () => {
+        const grade = $('aiGrade').value;
+        const tema = $('aiTema').value;
+        const altKonuSelect = $('aiAltKonu');
+
+        if (!grade || !tema || !aiCurriculumTree[grade]?.temalar?.[tema]) {
+          altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
+          altKonuSelect.disabled = true;
+          $('aiTopic').value = '';
+          return;
+        }
+
+        const altKonular = aiCurriculumTree[grade].temalar[tema].alt_konular || [];
+        altKonuSelect.replaceChildren(
+          new Option('Alt konu seçin (Müfredat Hedefi)…', ''),
+          ...altKonular.map(sub => new Option(sub.name + (sub.outcome_code ? ` [${sub.outcome_code}]` : ''), sub.name))
+        );
+        altKonuSelect.disabled = !altKonular.length;
+      });
+
+      $('aiAltKonu').addEventListener('change', () => {
+        $('aiTopic').value = $('aiAltKonu').value;
       });
     } catch (error) {
-      durumYaz('aiQuestionStatus', 'Konu listesi yüklenemedi: ' + error.message, 'error');
+      durumYaz('aiQuestionStatus', 'Müfredat ağacı yüklenemedi: ' + error.message, 'error');
     }
   }
   aiKonulariYukle();
@@ -2285,18 +2351,33 @@ body.teacher-menu-open {
     event.preventDefault();
     const button = $('generateAiQuestions');
     if (button.disabled || aiPublishing) return;
+
+    const grade = $('aiGrade').value;
+    const ders = $('aiDers')?.value || 'Matematik';
+    const unit_topic = $('aiTema').value;
+    const sub_topic = $('aiAltKonu').value;
+
+    if (!grade || !unit_topic || !sub_topic) {
+      durumYaz('aiQuestionStatus', 'Lütfen sınıf, tema ve alt konuyu eksiksiz seçin.', 'error');
+      return;
+    }
+
     button.disabled = true;
     aiDraft = null;
     aiPublished = false;
     $('aiQuestionList').replaceChildren();
-    durumYaz('aiQuestionStatus', 'Sorular hazırlanıyor…');
+    durumYaz('aiQuestionStatus', 'Maarif Modeli standartlarında Pinecone doğrulamalı sorular hazırlanıyor…');
 
     try {
       const res = await api('/api/ai/questions', {
         method: 'POST',
         body: JSON.stringify({
-          topic: $('aiTopic').value,
-          grade: Number($('aiGrade').value),
+          grade: Number(grade),
+          ders,
+          unit_topic,
+          sub_topic,
+          topic: sub_topic,
+          questionType: $('aiQuestionType')?.value || 'open_ended',
           difficulty: $('aiDifficulty').value,
           count: Number($('aiCount').value),
           selectedModel: $('aiModelSelect')?.value || 'gemini-2.5-flash'
@@ -2366,7 +2447,7 @@ body.teacher-menu-open {
     const cards = [...$('aiQuestionList').querySelectorAll('[data-ai-question]')];
     const questions = cards.filter(card => card.querySelector('[data-ai-approved]').checked).map(card => {
       const question = aiDraft.questions[Number(card.dataset.aiQuestion)];
-      const outcomeCode = card.querySelector('[data-ai-outcome]').value.trim();
+      const outcomeCode = card.querySelector('[data-ai-outcome]')?.value?.trim() || question.outcomeCode || '';
       let svg = question.svg;
       if (typeof svg === 'string' && svg.trim() && typeof window !== 'undefined' && window.zarifSafeSvg) {
         try {
@@ -2428,42 +2509,85 @@ body.teacher-menu-open {
     }
   });
 
-
-
   // Helper to render AI questions list with F5 recovery & action buttons
   function renderAiQuestionCards(quiz, isRestored = false) {
     const container = $('aiQuestionList');
     if (!container) return;
 
+    const unitTitle = quiz.unit_topic ? `${quiz.unit_topic} › ` : '';
+    const subTitle = quiz.sub_topic || quiz.topic || '';
+
     container.innerHTML = `
       <div style="background:#064e3b;color:#34d399;padding:10px 14px;border-radius:8px;font-size:0.85rem;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
         <span>💾 <strong>Otomatik Taslak Kaydı Aktif:</strong> Sayfa yenilense de sorular silinmez. (Taslak ID: ${quiz.draftId || 'Kayıtlı'})${isRestored ? ' [Geri Yüklendi]' : ''}</span>
-        <span style="font-size:0.75rem;background:#047857;color:#fff;padding:2px 8px;border-radius:4px;">Pinecone & Semantik Analiz Tamamlandı</span>
+        <span style="font-size:0.75rem;background:#047857;color:#fff;padding:2px 8px;border-radius:4px;">Pinecone Katı Filtreli &amp; Maarif Modeli Senkronize</span>
       </div>
       <div class="field">
         <label for="aiTestTitle">Test başlığı</label>
-        <input id="aiTestTitle" maxlength="150" value="${esc(quiz.topic + ' - Test 1')}" required>
+        <input id="aiTestTitle" maxlength="150" value="${esc((unitTitle + subTitle).trim() || 'Matematik Testi')}" required>
       </div>
       <p class="hint">Kontrol ettiğiniz soruları onaylayın; onaylananları soru bankasına aktarabilir, test olarak yayınlayabilir veya PDF/DOCX indirebilirsiniz.</p>
-      ${quiz.questions.map((question, index) => `
-      <article class="question-card" data-ai-question="${index}">
-        <div class="question-top">
-          <strong>Soru ${index + 1}</strong>
-          <label><input type="checkbox" data-ai-approved="${index}" checked> Soruyu onayla</label>
-        </div>
-        <p>${window.zarifMathText ? window.zarifMathText.format(question.text) : esc(question.text)}</p>
-        <div class="ai-question-svg-mount" data-ai-svg="${index}"></div>
-        <div class="question-options">
-          ${['A', 'B', 'C', 'D'].map(letter => `
-            <p><strong>${letter})</strong> ${window.zarifMathText && question.options ? window.zarifMathText.format(question.options[letter] || '') : esc((question.options && question.options[letter]) || '')}</p>
-          `).join('')}
-        </div>
-        <p><strong>Doğru cevap:</strong> ${esc(question.answer)}</p>
-        <p><strong>Açıklama:</strong> ${window.zarifMathText ? window.zarifMathText.format(question.explanation || 'Açıklama bulunmuyor.') : esc(question.explanation || '')}</p>
-        <div class="field"><label for="ai-outcome-${index}">MEB kazanım kodu</label>
-          <input id="ai-outcome-${index}" data-ai-outcome="${index}" value="${esc(question.outcomeCode || '')}" placeholder="MAT.6.1.1">
-        </div>
-      </article>`).join('')}
+      ${quiz.questions.map((question, index) => {
+        const isOpenEnded = question.questionType === 'open_ended' || (!question.options || Object.keys(question.options).length === 0);
+        return `
+        <article class="question-card" data-ai-question="${index}">
+          <div class="question-top">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <strong>Soru ${index + 1}</strong>
+              ${isOpenEnded
+                ? '<span style="font-size:11px;background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:4px;font-weight:600;">✍️ Açık Uçlu (Maarif Modeli)</span>'
+                : '<span style="font-size:11px;background:#f3e8ff;color:#7e22ce;padding:2px 8px;border-radius:4px;font-weight:600;">🔘 Çoktan Seçmeli</span>'}
+            </div>
+            <label><input type="checkbox" data-ai-approved="${index}" checked> Soruyu onayla</label>
+          </div>
+          <p style="font-size:15px;line-height:1.6;margin:10px 0;">${window.zarifMathText ? window.zarifMathText.format(question.text) : esc(question.text)}</p>
+          <div class="ai-question-svg-mount" data-ai-svg="${index}"></div>
+
+          ${!isOpenEnded && question.options ? `
+          <div class="question-options">
+            ${['A', 'B', 'C', 'D'].map(letter => `
+              <p><strong>${letter})</strong> ${window.zarifMathText && question.options[letter] ? window.zarifMathText.format(question.options[letter]) : esc(question.options[letter] || '')}</p>
+            `).join('')}
+          </div>
+          <p style="margin:8px 0;"><strong>Doğru cevap:</strong> <span class="badge" style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:4px;font-weight:700;">${esc(question.answer)}</span></p>
+          ` : ''}
+
+          <!-- Adım Adım Beklenen Çözüm Süreci -->
+          <div style="background:#fefce8;border:1px solid #fef08a;border-left:4px solid #ca8a04;padding:10px 14px;border-radius:6px;margin:12px 0;font-size:0.92rem;">
+            <strong style="color:#854d0e;display:block;margin-bottom:4px;">📝 Beklenen Çözüm ve Modelleme Adımları:</strong>
+            <div>${window.zarifMathText ? window.zarifMathText.format(question.solution || question.explanation || 'Çözüm adımları belirtilmemiş.') : esc(question.solution || question.explanation || '')}</div>
+          </div>
+
+          <!-- Analitik Değerlendirme Rubriği -->
+          ${question.rubric && question.rubric.length ? `
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #16a34a;padding:10px 14px;border-radius:6px;margin:12px 0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <strong style="color:#166534;font-size:0.9rem;">📊 Değerlendirme Rubriği (Puanlama Anahtarı)</strong>
+              <span style="font-size:11px;font-weight:700;color:#166534;background:#dcfce7;padding:2px 8px;border-radius:999px;">100 Puan Üzerinden</span>
+            </div>
+            <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+              <thead>
+                <tr style="border-bottom:1px solid #bbf7d0;text-align:left;color:#166534;">
+                  <th style="padding:4px 6px;">Kriter / Bilişsel Süreç</th>
+                  <th style="padding:4px 6px;width:70px;text-align:right;">Puan</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${question.rubric.map(r => `
+                  <tr style="border-bottom:1px dashed #dcfce7;">
+                    <td style="padding:5px 6px;">${window.zarifMathText ? window.zarifMathText.format(r.criterion) : esc(r.criterion)}</td>
+                    <td style="padding:5px 6px;text-align:right;font-weight:700;color:#15803d;">+${esc(r.points)} P</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>` : ''}
+
+          <div class="field" style="margin-top:10px;"><label for="ai-outcome-${index}">MEB kazanım kodu</label>
+            <input id="ai-outcome-${index}" data-ai-outcome="${index}" value="${esc(question.outcomeCode || '')}" placeholder="Örn: MAT.5.1.1">
+          </div>
+        </article>`;
+      }).join('')}
       <div class="button-row" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
         <button class="btn" type="button" data-ai-publish>Onaylı soruları test olarak yayınla</button>
         <button class="btn secondary" type="button" data-ai-transfer-bank style="background:#4338ca;color:#fff;">📚 Soru Bankasına Aktar</button>

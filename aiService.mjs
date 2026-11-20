@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import { Pinecone } from '@pinecone-database/pinecone';
 import outcome from './lib/meb-outcome.js';
+import mebCurriculum from './lib/meb-curriculum.js';
+const { findSubTopicMeta } = mebCurriculum;
 
 // .env öncelikli, eksikler baglanti_adresi.env'den tamamlanır
 const kokDizin = path.dirname(fileURLToPath(import.meta.url));
@@ -245,9 +247,74 @@ function buildConstraintText(metadata = {}, klavuzMatches = [], kitapMatches = [
 }
 
 /**
+ * Pinecone katı metadata filtreleme ile seçilen sınıf, ders, tema ve alt konuya ait verileri çeker (RAG).
+ */
+export async function getStrictMebContext({ grade, unitTopic, subTopic, ders = 'Matematik', queryText = '' }) {
+  const meta = findSubTopicMeta ? findSubTopicMeta(grade, unitTopic, subTopic) : null;
+  const outcomeCode = meta?.outcome_code || '';
+  const officialBoundary = meta?.official_boundary || '';
+
+  let pineconeRagContext = '';
+  try {
+    const filterQuery = {};
+    if (grade) filterQuery.grade = { $eq: Number(grade) };
+    if (unitTopic) filterQuery.unit_topic = { $eq: unitTopic };
+    if (subTopic) filterQuery.sub_topic = { $eq: subTopic };
+
+    const searchText = queryText || `${grade}. sınıf ${unitTopic || ''} ${subTopic || ''}`.trim();
+    const embeddingResponse = await aiClient.models.embedContent({
+      model: 'gemini-embedding-001',
+      contents: searchText,
+      config: { taskType: 'RETRIEVAL_QUERY', outputDimensionality: 768 }
+    });
+
+    const queryVector = embeddingResponse.embedding?.values || embeddingResponse.embeddings?.[0]?.values;
+    if (queryVector) {
+      const searchResults = await pineconeIndex.query({
+        vector: queryVector,
+        topK: 4,
+        includeMetadata: true,
+        filter: filterQuery
+      });
+
+      const matches = (searchResults.matches || []).filter(m => (m.score || 0) >= 0.55);
+      if (matches.length > 0) {
+        pineconeRagContext = matches.map(m => {
+          const mMeta = m.metadata || {};
+          if (mMeta.type === 'theory') {
+            return `[MEB DERS KİTABI TEORİK ÇERÇEVE]\nAlt Başlık: ${mMeta.sub_topic || subTopic}\nResmi Sınır: ${mMeta.official_boundary || ''}\nİçerik: ${mMeta.text_content || ''}`;
+          } else if (mMeta.type === 'solved_example') {
+            return `[MEB DERS KİTABI ÇÖZÜMLÜ ÖRNEK MODELİ]\nÖrnek Soru: ${mMeta.question || ''}\nAdım Adım Çözüm / Modelleme: ${mMeta.solution || mMeta.text_content || ''}`;
+          }
+          return mMeta.text_content || '';
+        }).join('\n\n---\n\n');
+      }
+    }
+  } catch (error) {
+    console.warn('[RAG] Pinecone katı metadata filtreleme uyarısı:', error.message);
+  }
+
+  const parts = [
+    `[TÜRKİYE YÜZYILI MAARİF MODELİ RESMÎ MÜFREDAT KAZANIM SINIRLARI]`,
+    `Sınıf: ${grade}. Sınıf`,
+    `Ders: ${ders}`,
+    unitTopic ? `Tema / Ünite: ${unitTopic}` : '',
+    subTopic ? `Alt Konu: ${subTopic}` : '',
+    outcomeCode ? `Kazanım Kodu: ${outcomeCode}` : '',
+    officialBoundary ? `Resmi Kazanım Sınırları ve Kısıtlamaları:\n${officialBoundary}` : ''
+  ];
+
+  if (pineconeRagContext) {
+    parts.push(`\n[PINECONE KAT'Î FİLTRELİ DERS KİTABI VERİLERİ (RAG)]\n${pineconeRagContext}`);
+  }
+
+  return parts.filter(Boolean).join('\n');
+}
+
+/**
  * Öğrenci mesajına göre Pinecone'dan ilgili kazanımı, kılavuzu ve ders kitabı örneklerini bulur (RAG).
  */
-async function getMebConstraints(ogrenciMesaji, grade) {
+async function getMebConstraints(ogrenciMesaji, grade, topicContext = {}) {
   const trimmed = String(ogrenciMesaji || '').trim();
   // 1. Kısa veya selamlama/onay mesajlarında RAG embedding & Pinecone sorgusunu atla (Sıfır Token/Sorgu)
   const isChitChatOrShort = trimmed.length < 15 ||
@@ -255,6 +322,17 @@ async function getMebConstraints(ogrenciMesaji, grade) {
 
   if (isChitChatOrShort) {
     return "Genel 5-12. sınıf Türkiye Yüzyılı Maarif Modeli matematik müfredat sınırlarına ve pedagojisine sadık kal.";
+  }
+
+  // Eğer kullanıcı belirli bir alt konu ve ünite seçtiyse, katı metadata filtreli RAG çağır
+  if (topicContext && (topicContext.sub_topic || topicContext.unit_topic)) {
+    return getStrictMebContext({
+      grade,
+      unitTopic: topicContext.unit_topic,
+      subTopic: topicContext.sub_topic,
+      ders: topicContext.ders || 'Matematik',
+      queryText: ogrenciMesaji
+    });
   }
 
   try {
@@ -316,9 +394,9 @@ async function getMebConstraints(ogrenciMesaji, grade) {
  * @param {string|number} grade - Öğrencinin sınıf seviyesi (Örn: '5', '6', 9 vb.)
  * @param {Array} history - Son 2 tura ait temizlenmiş konuşma geçmişi ([{ role: 'user'|'model', text }])
  */
-export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor', grade, history = [], chosenModel, userContext = {}) {
+export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor', grade, history = [], chosenModel, userContext = {}, topicContext = {}) {
   // 1. Adım: Pinecone'dan 768 boyutlu müfredat sınırını çek
-  const mebSiniri = await getMebConstraints(ogrenciMesaji, grade);
+  const mebSiniri = await getMebConstraints(ogrenciMesaji, grade, topicContext);
 
   // 1.1 Adım: Öğrencinin Zayıf Konu Bağlamı (0 ekstra token israfı, varsa 2-3 satır pedagojik yönlendirme)
   let weakContextInstruction = "";
@@ -421,8 +499,10 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
     `;
   } else if (gorevTuru === 'soru_uretme') {
     systemInstruction = `
-      Sen Türkiye Yüzyılı Maarif Modeli matematik müfredat standartlarında özgün sorular yazan profesyonel bir yazarsın.
-      Aşağıda belirtilen kazanım sınırlarına %100 uyumlu (Örn: içerikteki sayı sınırlarını veya yöntem kısıtlamalarını aşma), şıkları ve detaylı adımlı çözümü olan tamamen özgün bir matematik sorusu üret.
+      Sen Türkiye Yüzyılı Maarif Modeli standartlarında uzman bir matematik eğitimcisi ve açık uçlu soru yazarısın.
+      Aşağıda belirtilen kazanım ve alt konu sınırlarına %100 sadık kalarak, kesinlikle bu sınırları aşmadan özgün sorular üret.
+      Sorular ezbere dayalı salt işlem sormamalı; günlük yaşam senaryolu, kavramsal derinlik ve muhakeme ölçen, öğrencinin çözüm sürecini ve matematiksel modelleme adımlarını yazmasını gerektiren AÇIK UÇLU formatta olmalıdır.
+      Her soru için mutlaka analitik bir değerlendirme rubriği (kriterler ve puan dağılımı) oluştur.
       Cevapları gereksiz uzatma, kısa, net ve pedagojik tut; SVG kodlarını en sade haliyle üret:
       
       [RESMİ MÜFREDAT BAĞLAMI]

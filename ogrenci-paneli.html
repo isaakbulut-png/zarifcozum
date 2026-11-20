@@ -516,12 +516,12 @@ button,select{font:inherit}
           <button type="button" class="student-ai-pill" data-role="ai_koc" style="padding:7px 16px;border-radius:999px;border:1px solid #d9d3c3;background:#fff;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s">🎯 AI Koç (Çalışma &amp; Motivasyon)</button>
         </div>
 
-        <!-- Sınıf Düzeyi ve Mod Açıklaması -->
-        <div style="display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap">
+        <!-- Sınıf Düzeyi ve Müfredat Zincirleme Menüsü -->
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap">
           <div style="display:flex;align-items:center;gap:6px">
-            <label for="studentAiGradeSelect" style="font-weight:600;color:var(--text)">Sınıf Seviyesi:</label>
-            <select id="studentAiGradeSelect" style="padding:5px 12px;border-radius:8px;border:1px solid var(--line);font-size:13px;background:#fff;color:var(--text)">
-              <option value="">Genel (5-12. Sınıf)</option>
+            <label for="studentAiGradeSelect" style="font-weight:600;color:var(--text)">Sınıf:</label>
+            <select id="studentAiGradeSelect" style="padding:5px 10px;border-radius:8px;border:1px solid var(--line);font-size:12px;background:#fff;color:var(--text)">
+              <option value="">Genel (5-12)</option>
               <option value="5">5. Sınıf</option>
               <option value="6">6. Sınıf</option>
               <option value="7">7. Sınıf</option>
@@ -530,6 +530,18 @@ button,select{font:inherit}
               <option value="10">10. Sınıf</option>
               <option value="11">11. Sınıf</option>
               <option value="12">12. Sınıf</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <label for="studentAiTemaSelect" style="font-weight:600;color:var(--text)">Tema / Ünite:</label>
+            <select id="studentAiTemaSelect" disabled style="padding:5px 10px;border-radius:8px;border:1px solid var(--line);font-size:12px;background:#fff;color:var(--text);max-width:180px;">
+              <option value="">Tüm Temalar</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <label for="studentAiAltKonuSelect" style="font-weight:600;color:var(--text)">Alt Konu:</label>
+            <select id="studentAiAltKonuSelect" disabled style="padding:5px 10px;border-radius:8px;border:1px solid var(--line);font-size:12px;background:#fff;color:var(--text);max-width:200px;">
+              <option value="">Tüm Konular</option>
             </select>
           </div>
           <span style="color:var(--muted);font-size:12px;margin-left:auto" id="studentAiRoleDesc">Cevabı doğrudan vermez; ipuçları, rehber sorular ve şekillerle senin bulmanı sağlar.</span>
@@ -1822,6 +1834,64 @@ button,select{font:inherit}
       });
     });
 
+    // Sınıf → Tema → Alt Konu zincirleme müfredat senkronizasyonu
+    let studentCurriculumTree = {};
+    async function loadStudentCurriculumTree() {
+      try {
+        const res = await api('/api/ai/konular');
+        studentCurriculumTree = res.tree || {};
+
+        const gradeSelect = $('studentAiGradeSelect');
+        const temaSelect = $('studentAiTemaSelect');
+        const altKonuSelect = $('studentAiAltKonuSelect');
+
+        function updateTemaDropdown() {
+          const grade = gradeSelect?.value;
+          if (!grade || !studentCurriculumTree[grade]?.temalar) {
+            temaSelect.replaceChildren(new Option('Tüm Temalar', ''));
+            temaSelect.disabled = true;
+            altKonuSelect.replaceChildren(new Option('Tüm Konular', ''));
+            altKonuSelect.disabled = true;
+            return;
+          }
+          const temalar = Object.keys(studentCurriculumTree[grade].temalar);
+          temaSelect.replaceChildren(
+            new Option('Tema seçin…', ''),
+            ...temalar.map(t => new Option(t, t))
+          );
+          temaSelect.disabled = !temalar.length;
+          altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
+          altKonuSelect.disabled = true;
+        }
+
+        function updateAltKonuDropdown() {
+          const grade = gradeSelect?.value;
+          const tema = temaSelect?.value;
+          if (!grade || !tema || !studentCurriculumTree[grade]?.temalar?.[tema]) {
+            altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
+            altKonuSelect.disabled = true;
+            return;
+          }
+          const altKonular = studentCurriculumTree[grade].temalar[tema].alt_konular || [];
+          altKonuSelect.replaceChildren(
+            new Option('Alt konu seçin…', ''),
+            ...altKonular.map(sub => new Option(sub.name + (sub.outcome_code ? ` [${sub.outcome_code}]` : ''), sub.name))
+          );
+          altKonuSelect.disabled = !altKonular.length;
+        }
+
+        gradeSelect?.addEventListener('change', updateTemaDropdown);
+        temaSelect?.addEventListener('change', updateAltKonuDropdown);
+
+        if (gradeSelect?.value) {
+          updateTemaDropdown();
+        }
+      } catch (e) {
+        console.warn('Öğrenci müfredat ağacı yüklenemedi:', e.message);
+      }
+    }
+    loadStudentCurriculumTree();
+
     // Sohbeti temizle
     $('studentAiClearBtn')?.addEventListener('click', () => {
       const chatBody = $('studentAiChatBody');
@@ -1867,12 +1937,17 @@ button,select{font:inherit}
 
         try {
           const gradeVal = $('studentAiGradeSelect')?.value;
+          const temaVal = $('studentAiTemaSelect')?.value;
+          const altKonuVal = $('studentAiAltKonuSelect')?.value;
           const res = await api('/api/chat', {
             method: 'POST',
             body: JSON.stringify({
               ogrenciMesaji: text,
               gorevTuru: studentActiveRole,
-              grade: gradeVal ? Number(gradeVal) : undefined
+              grade: gradeVal ? Number(gradeVal) : undefined,
+              unit_topic: temaVal || undefined,
+              sub_topic: altKonuVal || undefined,
+              ders: 'Matematik'
             })
           });
 
