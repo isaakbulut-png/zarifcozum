@@ -16,6 +16,7 @@ function resimTuru(buffer) {
 }
 
 function createSorularRouter({ requireStaff, yukleyici = cloudinaryYukleyici, AdminLog }) {
+  const SafeAdminLog = AdminLog || require('../models/AdminLog');
   const router = express.Router();
   router.use(requireStaff);
 
@@ -116,20 +117,48 @@ function createSorularRouter({ requireStaff, yukleyici = cloudinaryYukleyici, Ad
   router.delete('/:id', async (req, res) => {
     try {
       if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz soru numarası.' });
-      const soru = await Soru.findByIdAndDelete(req.params.id).lean();
+      const query = Soru.findByIdAndDelete(req.params.id);
+      const soru = await (typeof query?.lean === 'function' ? query.lean() : query);
       if (!soru) return res.status(404).json({ mesaj: 'Soru bulunamadı.' });
-      await AdminLog.create({
-        actorId: req.session.user.id,
-        actorName: req.session.user.name || 'Yönetici',
-        action: 'question.deleted',
-        entityType: 'question',
-        entityId: soru._id.toString(),
-        details: { ders: soru.ders, imageFile: soru.imageFile }
-      });
+      if (SafeAdminLog?.create && require('mongoose').connection?.readyState === 1) {
+        await SafeAdminLog.create({
+          actorId: req.session.user?.id,
+          actorName: req.session.user?.name || 'Yönetici',
+          action: 'question.deleted',
+          entityType: 'question',
+          entityId: soru._id.toString(),
+          details: { ders: soru.ders, imageFile: soru.imageFile }
+        }).catch(() => {});
+      }
       res.json({ mesaj: 'Soru silindi.' });
     } catch (error) {
       console.error('Soru silinemedi veya işlem kaydı oluşturulamadı:', error);
       res.status(500).json({ mesaj: 'Soru silinemedi veya işlem kaydı oluşturulamadı.' });
+    }
+  });
+
+  router.post('/toplu-sil', async (req, res) => {
+    try {
+      const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+      const validIds = ids.filter(id => ObjectId.isValid(id));
+      if (!validIds.length) {
+        return res.status(400).json({ mesaj: 'Silinecek geçerli soru seçilmedi.' });
+      }
+      const silinenler = await Soru.find({ _id: { $in: validIds } }).lean();
+      await Soru.deleteMany({ _id: { $in: validIds } });
+      if (SafeAdminLog?.create && require('mongoose').connection?.readyState === 1) {
+        await SafeAdminLog.create({
+          actorId: req.session.user?.id,
+          actorName: req.session.user?.name || 'Öğretmen',
+          action: 'questions.bulk_deleted',
+          entityType: 'question',
+          details: { count: silinenler.length, ids: validIds }
+        }).catch(() => {});
+      }
+      res.json({ mesaj: `${silinenler.length} soru silindi.`, silinenSayisi: silinenler.length });
+    } catch (error) {
+      console.error('Toplu soru silinemedi:', error);
+      res.status(500).json({ mesaj: 'Sorular silinemedi.' });
     }
   });
 

@@ -7,9 +7,13 @@ const User = require('../models/User');
 const { createRequireRole } = require('./auth');
 const { PLANS } = require('../lib/subscription-plans');
 
-const SANDBOX_PLANS = Object.freeze(Object.fromEntries(Object.entries(PLANS).map(([key, plan]) => [
+const ACTIVE_PLANS = Object.freeze(Object.fromEntries(Object.entries(PLANS).map(([key, plan]) => [
   key,
-  Object.freeze({ label: `${plan.label} aylık demo üyeliği`, amountMinor: plan.amountMinor })
+  Object.freeze({
+    label: plan.label || `${key} Yıllık Aboneliği`,
+    amountMinor: plan.amountMinor,
+    period: plan.period || 'yearly'
+  })
 ])));
 
 const checkoutLimiter = rateLimit({
@@ -74,8 +78,8 @@ function createPaymentRouter({
 
   router.post('/paytr/checkout', ogrenciKontrol, checkoutLimiter, async (req, res) => {
     const planKey = typeof req.body?.plan === 'string' ? req.body.plan : '';
-    const plan = Object.hasOwn(SANDBOX_PLANS, planKey) ? SANDBOX_PLANS[planKey] : null;
-    if (!plan) return res.status(400).json({ mesaj: 'Geçersiz demo paketi.' });
+    const plan = Object.hasOwn(ACTIVE_PLANS, planKey) ? ACTIVE_PLANS[planKey] : null;
+    if (!plan) return res.status(400).json({ mesaj: 'Geçersiz abonelik paketi.' });
 
     const merchantId = String(process.env.PAYTR_MERCHANT_ID || '').trim();
     const merchantKey = String(process.env.PAYTR_MERCHANT_KEY || '');
@@ -139,7 +143,7 @@ function createPaymentRouter({
         userId: user._id,
         expectedAmountMinor: plan.amountMinor,
         currency: 'TRY',
-        subscriptionType: 'monthly',
+        subscriptionType: plan.period || 'yearly',
         plan: planKey,
         status: 'pending'
       });
@@ -181,4 +185,4 @@ function createPaymentRouter({
   return router;
 }
 
-module.exports = { createPaymentRouter, paytrToken, SANDBOX_PLANS };
+module.exports = { createPaymentRouter, paytrToken, ACTIVE_PLANS, SANDBOX_PLANS: ACTIVE_PLANS };

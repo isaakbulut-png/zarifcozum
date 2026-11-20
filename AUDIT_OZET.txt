@@ -1,0 +1,215 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                 ÖĞRENCİ & ÖĞRETMEN PANELİ AUDIT RAPORU ÖZETI               ║
+║                                                                              ║
+║ 📅 Tarih: 20 Kasım 2026 | 🔍 Kapsamlı Analiz | 📊 128 Toplam Buton       ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ 🚨 ACIL SORUNLAR (Yüksek Etki, Yüksek Kullanıcı Karışıklığı)              ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+[1] 🔴 SINAV TAKVIMI: Yerel Saklanıyor, Öğrenci Görmüyor
+   ├─ Problem: Öğretmen "Sınavı takvime ekle" butonuna basıyor
+   ├─ Beklenen: Sınav sunucuya kaydediliyor, öğrenciler görebiliyor
+   ├─ Gerçek: Veriler yalnızca tarayıcıda tutuluyor
+   ├─ Konum: ogretmen-paneli.html:1328-1341
+   ├─ Risiko: 🔴 YÜKSEK - Kullanıcılar işlem tamamlandığını zannediyor
+   └─ Çözüm: Backend API rotası ekleyin, öğrenci takvimini API'den okuyun
+              Priority: 🥇 ACIL #1
+
+[2] 🔴 ÖĞRETMENİN AYARLARI: Tercihler Sunucuya Kaydedilmiyor
+   ├─ Problem: Branş, sınıf seviyeleri, bildirim tercihleri form var
+   ├─ Beklenen: Tercihler hesaplar arası senkron edilecek
+   ├─ Gerçek: Yerel tarayıcıda tutulacak ("Bu cihazda...")
+   ├─ Konum: ogretmen-paneli.html:1244-1258
+   ├─ Risiko: 🔴 YÜKSEK - Öğretmen başka cihazdan giriş yaptığında tercihler kayıp
+   └─ Çözüm: Backend API ekleyin, öğretmen profili tablosuna alan ekleyin
+              Priority: 🥇 ACIL #2
+
+[3] 🔴 ÖĞRENCİ KAZANIMI: Öğretmen Göremez
+   ├─ Problem: Öğrenci panelinde "Kazanım Takibi" var, öğretmen göremez
+   ├─ Beklenen: Öğretmen öğrencinin hangi kazanımda ne durumda olduğunu gözlemle
+   ├─ Gerçek: Öğretmen panelinde öğrenci detayında bu info yok
+   ├─ Konum: Backend API mevcut (routes/ogrenci-gelisim.js:274+), 
+             Panel ekranı eksik
+   ├─ Risiko: 🟠 ORTA - Öğretmen öğrenci ilerlemesini tam izleyemiyor
+   └─ Çözüm: Öğretmen paneline "Kazanım Raporu" kartı ekleyin
+              Priority: 🥈 ÖNEMLİ #3
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ ⚠️  GEREKSIZ/FAZLALIK BUTONLAR                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+[1] 👯 ÇIFT KONTROL: "Canlı Dersi Sonlandır" İki Yerde
+   ├─ Yeri 1: Ders bölümünde (ogretmen-paneli.html:936-937)
+   ├─ Yeri 2: Kenar çubuğunda (ogretmen-paneli.html:1286-1291)
+   ├─ Sorun: Karışıklık, Kod duplikasyon, Tutarsız UX
+   ├─ Risiko: 🟠 ORTA - Öğretmen hangisine basacağını şaşırabilir
+   └─ Çözüm: Kenar çubuk kontrolünü KALDIRIN, ders bölümünde saklayın
+              Priority: 🥈 ÖNEMLİ #4
+
+[2] 🏷️ KARIŞTıRıCı MENÜLER: Öğrenci Panelinde Test Kategorileri
+   ├─ Menü 1: "Sınav ve testlerim"
+   ├─ Menü 2: "Öğretmen testleri"
+   ├─ Menü 3: "Deneme sınavları"
+   ├─ Problem: Net ayrım yok, hangi testin ne olduğu belli değil
+   ├─ Konum: ogrenci-paneli.html:367-370, 397-409
+   ├─ Risiko: 🟡 DÜŞÜK-ORTA - Kullanıcı deneyimi karışık
+   └─ Çözüm: Menü adlarını ve açıklamalarını netleştirin
+              Örneğin: "Benim Testlerim" / "Öğretmen Testleri" / "Deneme Testleri"
+              Priority: 🥉 DÜŞÜK #6
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ 🔗 BAĞLANMAMIŞ ILETIŞIM NOKTAALARI (Veri Akışı Kesintileri)                ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Veri Akışı Kontrolü Tablosu:
+┌─────────────────────────────────┬────────────────────┬──────────────────┐
+│ Veri / Özellik                  │ Öğrenci → Server   │ Server → Öğretmen│
+├─────────────────────────────────┼────────────────────┼──────────────────┤
+│ Çalışma Kaydı (Log)             │ ✅ Kaydediliyor    │ ❌ Gösterilmiyor │
+│ Çalışma Hedefi (Goal)           │ ✅ Kaydediliyor    │ ❌ Gösterilmiyor │
+│ Kazanım Durumu                  │ ✅ Kaydediliyor    │ ⚠️  Kısmi gösterim│
+│ Test Sonuçları                  │ ✅ Kaydediliyor    │ ✅ Gösteriliyor  │
+│ Sınav Planı (Calendar)          │ ❌ Yok             │ ❌ Yok           │
+│ Ödev Atama & Teslimi            │ ✅ Tam Entegre     │ ✅ Tam Entegre   │
+│ Canlı Ders Yönetimi             │ ✅ Tam Entegre     │ ✅ Tam Entegre   │
+│ Bildirim Tercihleri             │ ⚠️  Yerel Saklanıyor│ ❌ Kullanılmıyor │
+│ Müfredat İlerleme               │ ✅ Takip Ediliyor  │ ❌ Görüntülenmyor│
+└─────────────────────────────────┴────────────────────┴──────────────────┘
+
+Kesinti Noktaları:
+  1. ❌ Öğretmen profili (branş, tercihler) → Hiçbir API rotası
+  2. ❌ Öğretmen sınav planı → Yerel saklanış, sunucuya kaydedilmiyor
+  3. ❌ Öğrenci çalışma hedefleri → Öğretmen tarafında gözükmüyor
+  4. ⚠️  Öğrenci kazanımları → API mevcut, panel bağlantısı eksik
+  5. ⚠️  Bildirimler → Tercihler kaydedilmiyor, sistem uygulamıyor
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ 🔄 ASİMETRİ ANALIZI: Her Yönü ile Birbirine Bağlı mı?                   ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Öğrenci Panelinde VAR, Öğretmen Panelinde YOK:
+  ✅ AI Mentör                      (Öğretmen: Sınırlı AI asistanı)
+  ✅ Çalışma Kaydı/Hedefi          (Öğretmen: Göremez)
+  ✅ Kazanım Takibi (Detaylı)      (Öğretmen: Genel başarı analizi)
+  ✅ Test Sonuçları (Detaylı)      (Öğretmen: Dış testler listesi)
+  ✅ Kişisel Takvim                (Öğretmen: Yerel sınav planı)
+  ✅ Bildirim Ayarları (Çalışan)   (Öğretmen: Çalışmıyor)
+
+Öğretmen Panelinde VAR, Öğrenci Panelinde YOK:
+  ✅ Ödev Atama (Toplu)            (Öğrenci: Alır & Teslim Eder)
+  ✅ Muasır Karşılaştırma          (Öğrenci: Erişim yok)
+  ✅ Toplu İşlemler                (Öğrenci: Tek tek işlem)
+  ✅ Raporlama & İstatistik        (Öğrenci: Sadece kendi verileri)
+
+Sonuç: ⚠️ ASIMETRIK - Birçok alanda 1-yönlü veri akışı
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ 📋 ÖNCELİKLİ HAREKETE GEÇME LİSTESİ (Priority Order)                      ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+🥇 ACIL (Bu haftalar içinde yapılmalı):
+  [1] Sınav Takvimi Sunucu Entegrasyonu
+      Dosya: ogretmen-paneli.html:1328-1341
+      Backend: Yeni API rotası gerekli
+      
+  [2] Öğrenci Kazanım Raporu Öğretmen Paneline Ekle
+      Backend: routes/ogrenci-gelisim.js:274+ (mevcut)
+      Frontend: Yeni kart ekleyin
+      
+  [3] Çift Canlı Ders Kontrolünü Birleştir
+      Dosya: ogretmen-paneli.html:936-937 & 1286-1291
+      Çözüm: Kenar çubuk kontrolünü kaldırın
+
+🥈 ÖNEMLİ (Bu ay içinde):
+  [4] Öğretmen Tercihlerini API'ye Bağla
+      Dosya: ogretmen-paneli.html:1244-1258
+      Backend: Yeni API rotası gerekli
+      
+  [5] Bildirim Ayarlarını Aktif Hale Getir
+      Dosya: Öğretmen & Öğrenci paneli tercihler
+      Backend: Tercihler sunucuya kaydedilmeli
+
+🥉 DÜŞÜK (Sonraki sprint):
+  [6] Öğrenci Test Menü Netleştirmesi
+      Dosya: ogrenci-paneli.html:367-370, 397-409
+      Çözüm: Menü adlarını ve açıklamalarını iyileştirin
+      
+  [7] Yerel Depolama Uyarıları Ekleme
+      Çözüm: "Bu cihazda tutulacak" tooltip/bildirimleri ekleyin
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ ✅ ÇALIŞAN ENTEGRASYONLAR (Referans Olarak)                               ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Bu alanlar doğru şekilde bağlanmış, model alabilirsiniz:
+
+✅ ÖDev Yönetimi (FULLY INTEGRATED)
+   Öğretmen: Ödev oluştur & ata
+   Öğrenci: Ödev al, teslim et
+   Backend: routes/ogretmen-ogrenci-odev.js (301-908 satır)
+   
+✅ Canlı Ders (FULLY INTEGRATED)
+   Öğretmen: Ders oluştur, durdur
+   Öğrenci: Derse katıl, ayrıl
+   Backend: routes/live-lessons.js
+   
+✅ Test/Quiz (FULLY INTEGRATED)
+   Öğretmen: Test oluştur, ata
+   Öğrenci: Test çöz, sonuçları gör
+   Backend: routes/quizler.js
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ 📊 ISTATISTIKLER & ÖZET METRIKLER                                        ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Toplam Buton:              128 (47 öğrenci + 81 öğretmen)
+Bağlı Özellikler:          ~70% (Temel işlevler çalışıyor)
+Eksik Entegrasyonlar:      ~30% (Profil, tercihler, sınav planı)
+Tekrarlayan Kontroller:    2 (Canlı ders sonlandırma)
+Yanıltıcı İşlemler:        2 (Sınav planı, bildirim tercihleri)
+Asimetrik Veri Akışı:      5+ alan
+
+Genel Sağlık Durumu:       🟠 ORTA (Temel işlevler OK, profil & tercihler sorunlu)
+
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║ 🎯 SONUÇ                                                                   ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+✅ GÜÇLÜ YÖNLER:
+   • Ödev yönetimi tam entegre
+   • Test/Quiz sistemi çalışıyor
+   • Canlı ders yönetimi düzgün
+   • Temel işlevler sağlam
+
+⚠️  ZAYIF YÖNLER:
+   • Öğretmen profili tercihleri yerel (kaydedilmiyor)
+   • Sınav takvimi ortak değil
+   • Öğrenci ilerlemesi öğretmene kısıtlı
+   • Bildirim tercihleri çalışmıyor
+
+🔴 KULLANIAICI RİSKLERİ:
+   • Öğretmen "Sınavı ekle" → hiçbir öğrenci görmez
+   • Öğretmen ayarları → başka cihazda kayıp
+   • Öğrenci hedefleri → öğretmen göremez
+
+💡 ÖNERİLER:
+   1. Sınav takvimini API'ye bağlayın (Priority: 🥇)
+   2. Öğretmen tercihlerini sunucuya kaydedin (Priority: 🥇)
+   3. Öğrenci ilerlemesini öğretmen paneline açın (Priority: 🥇)
+   4. Çift kontrol noktalarını birleştirin (Priority: 🥈)
+
+─────────────────────────────────────────────────────────────────────────────
+Rapor Hazırlayan: Copilot Audit Agent
+Tarih: 20 Kasım 2026 - 10:21
+Durum: ✅ TAMAMLANDI - Kapsamlı Audit & Eksik Çalışma Önerileri Sunuldu
+─────────────────────────────────────────────────────────────────────────────

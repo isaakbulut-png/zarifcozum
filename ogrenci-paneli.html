@@ -397,6 +397,12 @@ button,select{font:inherit}
         <li><a href="#denemeler">
           <svg viewBox="0 0 24 24" style="stroke:#eab308"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
           <span class="nav-text">Deneme Sınavları</span></a></li>
+        <li><a href="#yaziliya-hazirlik">
+          <svg viewBox="0 0 24 24" style="stroke:#ec4899"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span class="nav-text">Yazılıya Hazırlık</span></a></li>
+        <li><a href="#liderlik-tablosu">
+          <svg viewBox="0 0 24 24" style="stroke:#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span class="nav-text">Liderlik &amp; Sertifika</span></a></li>
         <li><a href="#planli-dersler">
           <svg viewBox="0 0 24 24" style="stroke:#06b6d4"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
           <span class="nav-text">Planlı Canlı Dersler</span></a></li>
@@ -664,6 +670,30 @@ button,select{font:inherit}
     </section>
 
     <section class="panel-view" id="denemeler" data-panel-view="denemeler">
+    
+    <!-- CANLI TÜRKİYE GENELİ DENEME GERİ SAYIM KARTI -->
+    <div id="tgCountdownCard" class="card" style="display:none; margin-bottom:20px; background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color:#fff; border:1px solid #334155; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+        <div>
+          <span class="chip hot" style="background:#ea580c; color:#fff; font-size:11px; font-weight:700;">🇹🇷 TÜRKİYE GENELİ DİJİTAL OPTİK DENEME</span>
+          <h2 id="tgExamTitle" style="color:#fff; margin:8px 0 4px; font-size:1.3rem;">2026 Türkiye Geneli Deneme</h2>
+          <p id="tgExamDesc" style="color:#94a3b8; font-size:0.88rem; margin:0;">Tüm Türkiye ile aynı anda sıralama ve net karnesi.</p>
+        </div>
+        <div style="text-align:right;">
+          <div id="tgStatusLabel" style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#f59e0b; font-weight:700;">SINAVA KALAN SÜRE</div>
+          <div id="tgTimerNumbers" style="font-family:monospace; font-size:1.7rem; font-weight:700; color:#38bdf8; margin-top:2px;">
+            00g 00s 00d 00s
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1);">
+        <div style="font-size:0.84rem; color:#cbd5e1;" id="tgExamMeta">
+          👥 <strong id="tgParticipantCount">0</strong> Katılımcı · ⏱️ <strong id="tgDuration">80</strong> Dakika
+        </div>
+        <a href="deneme-sinavi-optik.html" id="tgActionBtn" class="btn-join" style="margin:0; background:#0284c7; color:#fff;">Optik Sınav Salonuna Git →</a>
+      </div>
+    </div>
+
     <div class="section-head"><h2>Resimli deneme sınavları</h2></div>
     <section class="teacher-feed" id="imageExamFeed" aria-live="polite"><p class="feed-status">Denemeler yükleniyor…</p></section>
     <section class="card" id="imageExamRunner" hidden>
@@ -681,6 +711,133 @@ button,select{font:inherit}
     </div>
 
     <p class="feed-status">Öğretmeninin planladığı sınav tarihleri <a href="#ders-takvimim" style="text-decoration:underline">Ders Takvimim</a> bölümünde görünür. Çözdüğün denemeler <a href="#testlerim" style="text-decoration:underline">Sınav ve Testlerim</a> bölümünde listelenir.</p>
+    </section>
+
+    <!-- YAZILIYA HAZIRLIK (MEB SENARYO AÇIK UÇLU PROVALAR) -->
+    <section class="panel-view" id="yaziliya-hazirlik" data-panel-view="yaziliya-hazirlik" hidden>
+      <div class="section-head" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h2>📝 MEB Senaryo Uyumlu Yazılıya Hazırlık Provaları</h2>
+          <p class="hint">Yeni Maarif Modeli ve MEB ortak açık uçlu yazılı sınav senaryolarına tam uyumlu provalar.</p>
+        </div>
+        <div id="yaziliQuotaBadge" style="padding:6px 14px; border-radius:999px; font-size:12px; font-weight:700; background:#fdf2f8; color:#be185d; border:1px solid #fbcfe8;">
+          📊 Prova Hakkı Yükleniyor...
+        </div>
+      </div>
+
+      <!-- Dönem ve Sınıf Filtresi -->
+      <div class="card" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:12px; margin-bottom:16px;">
+        <label style="font-size:13px; font-weight:600;">Dönem Seçimi:
+          <select id="yaziliDonemFilter" style="padding:6px 12px; border-radius:8px; border:1px solid var(--line); font-size:13px; background:#fff;">
+            <option value="">Tüm Sınav Dönemleri</option>
+            <option value="1_donem_1_yazili">1. Dönem 1. Yazılı</option>
+            <option value="1_donem_2_yazili">1. Dönem 2. Yazılı</option>
+            <option value="2_donem_1_yazili">2. Dönem 1. Yazılı</option>
+            <option value="2_donem_2_yazili">2. Dönem 2. Yazılı</option>
+          </select>
+        </label>
+        <button type="button" class="btn-join" id="btnRefreshYazili" style="margin-top:0; padding:6px 14px; font-size:13px;">🔄 Yenile</button>
+      </div>
+
+      <!-- Provalar Listesi Feed -->
+      <section class="teacher-feed" id="yaziliFeed" aria-live="polite">
+        <p class="feed-status">Yazılı provaları yükleniyor…</p>
+      </section>
+
+      <!-- Aktif Prova İnceleme & Çözüm Ekranı -->
+      <section class="card" id="yaziliRunner" hidden style="margin-top:20px; border:2px solid #7a4f2d;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); padding-bottom:12px; margin-bottom:16px;">
+          <div>
+            <h2 id="yaziliActiveTitle" style="margin:0; font-size:1.2rem;"></h2>
+            <small id="yaziliActiveMeta" style="color:var(--muted);"></small>
+          </div>
+          <button type="button" class="logout-button" id="btnCloseYazili" style="width:auto; margin:0; padding:6px 14px;">✕ Kapat</button>
+        </div>
+        <div id="yaziliSorularContainer" style="display:flex; flex-direction:column; gap:16px;"></div>
+      </section>
+    </section>
+
+    <!-- OYUNLAŞTIRMA: HAFTALIK LİDERLİK TABLOSU & SERTİFİKA -->
+    <section class="panel-view" id="liderlik-tablosu" data-panel-view="liderlik-tablosu" hidden>
+      <div class="section-head">
+        <h2>🏆 Haftalık Liderlik Ligi, Rozetler &amp; Başarı Sertifikası</h2>
+        <p class="hint">Çalışma serini koru, haftalık ligde zirveye tırman ve VIP başarı sertifikanı al.</p>
+      </div>
+
+      <!-- Seri & Rozet Özeti -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:20px;">
+        <div class="card" style="padding:16px; border-left:4px solid #f97316;">
+          <div style="font-size:0.8rem; color:var(--muted); font-weight:600;">GÜNLÜK ÇALIŞMA SERİSİ</div>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+            <span style="font-size:1.8rem;">🔥</span>
+            <span style="font-size:1.6rem; font-weight:700; color:#ea580c;" id="gamifyStreakCount">0 Gün</span>
+          </div>
+          <small style="color:var(--muted);">Her gün soru çözerek serini devam ettir!</small>
+        </div>
+
+        <div class="card" style="padding:16px; border-left:4px solid #3b82f6;">
+          <div style="font-size:0.8rem; color:var(--muted); font-weight:600;">SERİ KORUMA KALKANI</div>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+            <span style="font-size:1.8rem;" id="gamifyShieldIcon">🛡️</span>
+            <span style="font-size:1.3rem; font-weight:700;" id="gamifyShieldStatus">Yükleniyor...</span>
+          </div>
+          <small id="gamifyShieldDesc" style="color:var(--muted);">Standart ve VIP paketlerde 1 gün çalışma kaçırsan bile serin sıfırlanmaz.</small>
+        </div>
+
+        <div class="card" style="padding:16px; border-left:4px solid #8b5cf6;">
+          <div style="font-size:0.8rem; color:var(--muted); font-weight:600;">KAZANILAN ROZETLER</div>
+          <div style="display:flex; align-items:center; gap:6px; margin-top:8px; flex-wrap:wrap;" id="gamifyBadgesList">
+            <span class="chip">Yükleniyor...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Liderlik Tablosu ve Sertifika 2'li Grid -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px;">
+        <!-- Sol: Haftalık Liderlik Tablosu -->
+        <div class="card" style="position:relative; overflow:hidden;">
+          <h3 style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <span>🎖️ Haftalık Liderlik Sıralaması</span>
+            <span class="chip hot" style="font-size:11px;">Canlı Lig</span>
+          </h3>
+
+          <div id="leaderboardLockOverlay" hidden style="position:absolute; inset:0; background:rgba(255,255,255,0.92); backdrop-filter:blur(3px); z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
+            <span style="font-size:2.5rem; margin-bottom:8px;">🔒</span>
+            <strong style="color:var(--navy-900); font-size:1.05rem;">Haftalık Lig Sıralaması Kilitli</strong>
+            <p style="font-size:0.88rem; color:var(--muted); margin:8px 0 16px; max-width:280px;">Haftalık liderlik yarışına katılmak, puan toplamak ve seri kalkanını aktifleştirmek için <strong>Standart</strong> veya <strong>VIP</strong> pakete geçin.</p>
+            <a href="Paketler.html" class="btn-join" style="margin:0;">Paketleri İncele →</a>
+          </div>
+
+          <div id="leaderboardList" style="display:flex; flex-direction:column; gap:8px;">
+            <p class="feed-status">Liderlik tablosu yükleniyor…</p>
+          </div>
+        </div>
+
+        <!-- Sağ: Aylık Başarı Sertifikası -->
+        <div class="card" style="position:relative; overflow:hidden; border:2px solid #e0c3fc; background:linear-gradient(180deg, #faf5ff 0%, #fff 100%);">
+          <h3 style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; color:#6b21a8;">
+            <span>📜 Aylık Başarı Sertifikası</span>
+            <span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; background:#f3e8ff; color:#7e22ce; border:1px solid #d8b4fe;">👑 VIP Paket</span>
+          </h3>
+
+          <div id="certificateLockOverlay" hidden style="position:absolute; inset:0; background:rgba(255,255,255,0.92); backdrop-filter:blur(3px); z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
+            <span style="font-size:2.5rem; margin-bottom:8px;">👑</span>
+            <strong style="color:#581c87; font-size:1.05rem;">Aylık Başarı Sertifikası VIP Özelliğidir</strong>
+            <p style="font-size:0.88rem; color:var(--muted); margin:8px 0 16px; max-width:280px;">Her ay düzenli çalışan ve gelişim gösteren VIP öğrencilerimize özel hazırlanan imzalı başarı sertifikasını indirmek için VIP Pakete geçin.</p>
+            <a href="Paketler.html" class="btn-join" style="margin:0; background:#7e22ce;">👑 VIP Pakete Yükselt →</a>
+          </div>
+
+          <div style="padding:14px; border:1px dashed #c084fc; border-radius:12px; background:#fff; text-align:center;">
+            <div style="font-family:Georgia, serif; font-size:1.1rem; font-weight:700; color:#581c87; margin-bottom:4px;">ZARİFÇÖZÜM MATEMATİK AKADEMİSİ</div>
+            <div style="font-size:0.85rem; color:#7e22ce; font-weight:600; margin-bottom:12px;">ÜSTÜN BAŞARI &amp; DÜZENLİ ÇALIŞMA BELGESİ</div>
+            <p style="font-size:0.85rem; color:var(--text); line-height:1.5;">Bu belge, platformumuzda gösterdiği istikrarlı matematik çalışması, tamamladığı kazanımlar ve deneme sınavı başarıları vesilesiyle sayın öğrencimiz adına tanzim edilmiştir.</p>
+            <div style="margin:16px 0; font-weight:700; font-size:1.1rem; color:#1e1b4b;" id="certStudentName">Öğrenci Adı</div>
+            <button type="button" class="btn-join" id="btnDownloadCert" style="background:#7e22ce; margin:8px auto 0; display:inline-flex; align-items:center; gap:6px;">
+              <span>📥</span><span>Sertifikayı İndir / Yazdır</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 </div>
@@ -1327,11 +1484,19 @@ button,select{font:inherit}
           badge.style.color = '#dc2626';
           badge.style.borderColor = '#fca5a5';
           badge.innerHTML = '🚫 AI Erişimi Askıya Alındı';
+        } else if (q.sinirsiz) {
+          badge.style.background = '#dcfce7';
+          badge.style.color = '#15803d';
+          badge.style.borderColor = '#86efac';
+          badge.innerHTML = '⚡ Yapay Zekâ: <strong>SINIRSIZ (Yönetici)</strong>';
         } else {
           badge.style.background = '#f3e1cf';
           badge.style.color = '#7a4f2d';
           badge.style.borderColor = '#d9d3c3';
-          badge.innerHTML = `⚡ Bugünkü Kalan AI Hakkın: <strong>${q.kalan} / ${q.etkinLimit}</strong>${bonusText}`;
+          const sokratikGunluk = q.sokratik ? `${q.sokratik.gunlukKalan}/${q.sokratik.gunlukLimit}` : `${q.mesaj?.kalan || 0}/${q.mesaj?.etkinLimit || 0}`;
+          const sokratikAylik = q.sokratik?.aylikKalan !== undefined ? ` (Aylık: ${q.sokratik.aylikKalan})` : '';
+          const ikizAylik = q.ogretmenIkizi ? ` · 👨‍🏫 İkiz: ${q.ogretmenIkizi.aylikKalan}` : '';
+          badge.innerHTML = `⚡ <strong>Sokratik:</strong> ${sokratikGunluk}${sokratikAylik}${ikizAylik}${bonusText}`;
         }
       } catch (e) {
         // Sessiz hata
@@ -1666,7 +1831,349 @@ button,select{font:inherit}
       });
     }
 
+    // ==========================================
+    // 1. MEB SENARYO YAZILIYA HAZIRLIK MODÜLÜ
+    // ==========================================
+    async function loadYaziliProvalari() {
+      const feed = $('yaziliFeed');
+      const badge = $('yaziliQuotaBadge');
+      if (!feed) return;
+
+      const donem = $('yaziliDonemFilter')?.value || '';
+      try {
+        const url = `/api/yazili${donem ? `?donem=${encodeURIComponent(donem)}` : ''}`;
+        const res = await api(url);
+        
+        if (badge) {
+          if (res.donemlikLimit === 'sinirsiz') {
+            badge.style.background = '#dcfce7';
+            badge.style.color = '#15803d';
+            badge.style.borderColor = '#86efac';
+            badge.textContent = `⭐ Sınırsız Yazılı Provası (${(res.mevcutPaket || '').toUpperCase()})`;
+          } else if (res.donemlikLimit === 2) {
+            badge.style.background = '#fef3c7';
+            badge.style.color = '#b45309';
+            badge.style.borderColor = '#fde68a';
+            badge.textContent = `📝 Dönemlik Kalan Prova Hakkı: ${Math.max(0, 2 - (res.kullanilanHak || 0))} / 2 (Temel Paket)`;
+          } else {
+            badge.style.background = '#fee2e2';
+            badge.style.color = '#dc2626';
+            badge.style.borderColor = '#fca5a5';
+            badge.textContent = `🔒 Yazılı Provaları Kilitli (Free Paket - Yükseltin)`;
+          }
+        }
+
+        if (!res.provalar || res.provalar.length === 0) {
+          feed.innerHTML = '<p class="feed-status">Bu dönem için yayınlanmış yazılı provası bulunmuyor.</p>';
+          return;
+        }
+
+        const donemAdlari = {
+          '1_donem_1_yazili': '1. Dönem 1. Yazılı',
+          '1_donem_2_yazili': '1. Dönem 2. Yazılı',
+          '2_donem_1_yazili': '2. Dönem 1. Yazılı',
+          '2_donem_2_yazili': '2. Dönem 2. Yazılı'
+        };
+
+        feed.innerHTML = res.provalar.map(p => `
+          <article class="feed-card" style="border-left:4px solid #ec4899;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+              <div>
+                <span class="chip" style="background:#fce7f3; color:#be185d; font-weight:700;">${p.grade}. Sınıf · ${donemAdlari[p.donem] || p.donem}</span>
+                <span class="chip" style="background:#f3f4f6; color:#4b5563; font-weight:600;">Senaryo ${p.senaryoNo}</span>
+                <h3 style="margin-top:6px;">${esc(p.title)}</h3>
+                <p style="font-size:0.86rem; color:var(--muted);">${esc(p.aciklama || '')}</p>
+                <small>📝 ${p.soruSayisi} Açık Uçlu Soru · 💯 Toplam ${p.toplamPuan} Puan</small>
+              </div>
+              <div style="text-align:right;">
+                ${p.pdfUrl ? `<a href="${esc(p.pdfUrl)}" target="_blank" class="text-link" style="font-size:0.82rem; margin-bottom:8px; display:inline-block;">📄 PDF İndir</a><br>` : ''}
+                <button type="button" class="btn-join" data-yazili-open-id="${esc(p.id)}" style="margin-top:4px;">
+                  Provayı Aç &amp; Çöz →
+                </button>
+              </div>
+            </div>
+          </article>
+        `).join('');
+
+      } catch (err) {
+        if (feed) feed.innerHTML = `<p class="feed-status error">Provalar yüklenemedi: ${esc(err.message)}</p>`;
+      }
+    }
+
+    $('btnRefreshYazili')?.addEventListener('click', () => loadYaziliProvalari());
+    $('yaziliDonemFilter')?.addEventListener('change', () => loadYaziliProvalari());
+
+    $('yaziliFeed')?.addEventListener('click', async event => {
+      const btn = event.target.closest('[data-yazili-open-id]');
+      if (!btn) return;
+      const id = btn.dataset.yaziliOpenId;
+      btn.disabled = true;
+      try {
+        const res = await api(`/api/yazili/${id}`);
+        const prova = res.prova;
+        $('yaziliActiveTitle').textContent = prova.title;
+        $('yaziliActiveMeta').textContent = `${prova.grade}. Sınıf · Senaryo ${prova.senaryoNo} · ${prova.sorular.length} Soru · ${prova.toplamPuan} Puan`;
+
+        $('yaziliSorularContainer').innerHTML = prova.sorular.map((s, idx) => `
+          <div style="padding:16px; border:1px solid var(--line); border-radius:12px; background:#fff;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <strong style="color:#7a4f2d; font-size:1.05rem;">Soru ${s.soruNo || idx + 1}</strong>
+              <span class="chip" style="background:#fef3c7; color:#b45309; font-weight:700;">${s.puan || 10} Puan</span>
+            </div>
+            ${s.kazanimKodu ? `<div style="font-size:0.75rem; color:#6b7280; margin-bottom:6px;">🎯 Kazanım: ${esc(s.kazanimKodu)}</div>` : ''}
+            <div style="font-size:0.95rem; line-height:1.6; margin-bottom:12px;">${esc(s.metin)}</div>
+            ${s.resimUrl ? `<div style="margin:10px 0;"><img src="${esc(s.resimUrl)}" alt="Soru Görseli" style="max-width:100%; max-height:280px; border-radius:8px; border:1px solid var(--line);"></div>` : ''}
+
+            <div style="margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);">
+              <button type="button" class="btn-join" style="padding:4px 10px; font-size:12px; background:#f3f4f6; color:#374151;" onclick="const el = document.getElementById('cozum-${idx}'); el.hidden = !el.hidden; this.textContent = el.hidden ? '👁️ Çözümü Göster' : '🙈 Çözümü Gizle';">
+                👁️ Çözümü Göster
+              </button>
+              <div id="cozum-${idx}" hidden style="margin-top:10px; padding:12px; background:#faf5ff; border:1px solid #e9d5ff; border-radius:8px; font-size:0.9rem; color:#581c87;">
+                <strong>💡 MEB Senaryo Çözüm Adımları:</strong>
+                <p style="margin:6px 0 0; white-space:pre-wrap;">${esc(s.cozumMetni || 'Detaylı çözüm açıklaması bulunmuyor.')}</p>
+                ${s.cozumVideoUrl ? `<div style="margin-top:8px;"><a href="${esc(s.cozumVideoUrl)}" target="_blank" class="text-link" style="color:#7e22ce; font-weight:600;">▶️ Çözüm Videosunu İzle</a></div>` : ''}
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        $('yaziliRunner').hidden = false;
+        $('yaziliRunner').scrollIntoView({ behavior: 'smooth' });
+        loadYaziliProvalari();
+      } catch (err) {
+        alert('Hata: ' + (err.message || 'Provaya erişilemedi.'));
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    $('btnCloseYazili')?.addEventListener('click', () => {
+      $('yaziliRunner').hidden = true;
+    });
+
+    // ==========================================
+    // 2. OYUNLAŞTIRMA & HAFTALIK LİDERLİK TABLOSU
+    // ==========================================
+    let studentUserPlan = 'free';
+    let currentStudentName = 'Öğrenci';
+
+    async function loadGamificationAndLeaderboard() {
+      try {
+        const qRes = await fetch('/api/student/ai-quota', { credentials: 'same-origin' });
+        if (qRes.ok) {
+          const quotaData = await qRes.json();
+          studentUserPlan = quotaData.paketTipi || 'free';
+          currentStudentName = quotaData.name || 'Öğrenci';
+
+          if ($('gamifyStreakCount')) {
+            $('gamifyStreakCount').textContent = `${quotaData.seriGunSayisi || 0} Gün`;
+          }
+          if ($('gamifyShieldStatus')) {
+            const hasShield = quotaData.seriKorumaKalkani || (studentUserPlan === 'standart' || studentUserPlan === 'vip');
+            $('gamifyShieldStatus').textContent = hasShield ? 'Aktif (Korumalı)' : 'Pasif';
+            $('gamifyShieldStatus').style.color = hasShield ? '#15803d' : '#94a3b8';
+            $('gamifyShieldIcon').textContent = hasShield ? '🛡️' : '⚪';
+          }
+
+          const badgesEl = $('gamifyBadgesList');
+          if (badgesEl) {
+            const rozetler = quotaData.kazanilanRozetler || [];
+            if (rozetler.length > 0) {
+              badgesEl.innerHTML = rozetler.map(r => `
+                <span class="chip" style="background:#f5f3ff; color:#6d28d9; border:1px solid #ddd6fe; font-weight:600;">
+                  ${esc(r.icon || '🏅')} ${esc(r.ad)}
+                </span>
+              `).join('');
+            } else {
+              badgesEl.innerHTML = '<small style="color:var(--muted);">Henüz rozet kazanılmadı. Soru çözerek ilk rozetini aç!</small>';
+            }
+          }
+
+          const isLeaderboardAllowed = studentUserPlan === 'standart' || studentUserPlan === 'vip' || quotaData.rol === 'admin';
+          if ($('leaderboardLockOverlay')) {
+            $('leaderboardLockOverlay').hidden = isLeaderboardAllowed;
+          }
+
+          const isCertAllowed = studentUserPlan === 'vip' || quotaData.rol === 'admin';
+          if ($('certificateLockOverlay')) {
+            $('certificateLockOverlay').hidden = isCertAllowed;
+          }
+          if ($('certStudentName')) {
+            $('certStudentName').textContent = currentStudentName;
+          }
+
+          adaptAiCoachForPlan(studentUserPlan);
+        }
+
+        const lbRes = await fetch('/api/leaderboard', { credentials: 'same-origin' });
+        if (lbRes.ok) {
+          const lbData = await lbRes.json();
+          const list = lbData.leaderboard || [];
+          const container = $('leaderboardList');
+          if (container) {
+            if (list.length === 0) {
+              container.innerHTML = '<p class="feed-status">Bu hafta henüz puan toplayan öğrenci yok.</p>';
+            } else {
+              container.innerHTML = list.map((item, idx) => {
+                const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `${item.sira}.`));
+                return `
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-radius:8px; background:${idx < 3 ? '#fffbeb' : '#f8fafc'}; border:1px solid ${idx < 3 ? '#fde68a' : '#e2e8f0'};">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="font-weight:700; width:26px; text-align:center;">${medal}</span>
+                      <strong style="color:var(--text); font-size:0.9rem;">${esc(item.name)}</strong>
+                      <span class="chip" style="font-size:10px; padding:2px 6px;">${esc(item.mevcutLig || 'Bronz')}</span>
+                    </div>
+                    <strong style="color:#d97706; font-size:0.9rem;">${(item.haftalikPuan || 0).toLocaleString('tr-TR')} Puan</strong>
+                  </div>
+                `;
+              }).join('');
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Oyunlaştırma yüklenemedi:', err);
+      }
+    }
+
+    $('btnDownloadCert')?.addEventListener('click', () => {
+      const certWindow = window.open('', '_blank');
+      if (!certWindow) {
+        alert('Lütfen açılır pencerelere izin verin.');
+        return;
+      }
+      const bugun = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+      certWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="tr">
+        <head>
+          <meta charset="utf-8">
+          <title>ZarifÇözüm Üstün Başarı Sertifikası</title>
+          <style>
+            body { margin:0; padding:40px; font-family: 'Georgia', serif; background:#f4f4f5; display:flex; justify-content:center; }
+            .cert-card { width:800px; height:560px; padding:40px; background:#fff; border:14px double #7a4f2d; box-shadow:0 10px 30px rgba(0,0,0,0.15); text-align:center; position:relative; box-sizing:border-box; }
+            .gold-seal { font-size:3rem; margin-bottom:10px; }
+            h1 { font-size:26px; color:#523520; letter-spacing:2px; margin:0 0 10px; }
+            h2 { font-size:18px; color:#c2410c; letter-spacing:1px; margin:0 0 24px; text-transform:uppercase; }
+            .name { font-size:30px; font-weight:bold; color:#1e1b4b; border-bottom:2px solid #ea580c; display:inline-block; padding:0 30px 6px; margin:16px 0; }
+            p { font-size:15px; color:#475569; line-height:1.7; max-width:620px; margin:16px auto; }
+            .footer { display:flex; justify-content:space-between; align-items:flex-end; margin-top:50px; padding:0 40px; }
+            .sign { border-top:1px solid #64748b; padding-top:6px; font-size:13px; color:#334155; }
+            @media print { body { padding:0; background:#fff; } .cert-card { box-shadow:none; } }
+          </style>
+        </head>
+        <body>
+          <div class="cert-card">
+            <div class="gold-seal">🏆</div>
+            <h1>ZARİFÇÖZÜM MATEMATİK AKADEMİSİ</h1>
+            <h2>AYLIK ÜSTÜN BAŞARI &amp; İSTİKRAR BELGESİ</h2>
+            <p>Bu başarı sertifikası, platformumuz bünyesinde gösterdiği üstün çalışma azmi, tamamladığı Maarif Modeli kazanımları ve deneme başarıları vesilesiyle sayın öğrencimiz</p>
+            <div class="name">${esc(currentStudentName)}</div>
+            <p>adına başarılarının devamı temennisiyle düzenlenmiştir.</p>
+            <div class="footer">
+              <div class="sign">Tarih: ${bugun}</div>
+              <div style="font-size:2rem;">👑 VIP</div>
+              <div class="sign">ZarifÇözüm Eğitim Kurulu</div>
+            </div>
+          </div>
+          <script>window.onload = () => window.print();<\/script>
+        </body>
+        </html>
+      `);
+      certWindow.document.close();
+    });
+
+    // ==========================================
+    // 3. TÜRKİYE GENELİ DENEME GERİ SAYIM MOTORU
+    // ==========================================
+    let tgCountdownTimer = null;
+
+    async function loadTgCountdown() {
+      try {
+        const res = await fetch('/api/ogrenci/denemeler/turkiye-geneli-aktif', { credentials: 'same-origin' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const aktif = data.aktifDeneme;
+        const card = $('tgCountdownCard');
+        if (!card) return;
+
+        if (!aktif) {
+          card.style.display = 'none';
+          return;
+        }
+
+        card.style.display = 'block';
+        $('tgExamTitle').textContent = aktif.title;
+        $('tgExamDesc').textContent = aktif.description || `${aktif.grade}. Sınıf Türkiye Geneli Maarif Modeli Matematik Denemesi`;
+        $('tgParticipantCount').textContent = aktif.totalParticipants || 0;
+        $('tgDuration').textContent = aktif.durationMinutes || 80;
+
+        const targetTime = aktif.targetTimestamp;
+        const isUpcoming = aktif.status === 'upcoming';
+        $('tgStatusLabel').textContent = isUpcoming ? 'SINAV BAŞLAMASINA KALAN SÜRE' : (aktif.status === 'active' ? 'SINAV DEVAM EDİYOR - BİTİŞE KALAN' : 'SINAV TAMAMLANDI');
+
+        if (tgCountdownTimer) clearInterval(tgCountdownTimer);
+
+        function tick() {
+          const now = Date.now();
+          const diff = targetTime - now;
+
+          if (diff <= 0) {
+            $('tgTimerNumbers').textContent = '00g 00s 00d 00s';
+            if (aktif.status === 'upcoming') {
+              $('tgStatusLabel').textContent = 'SINAV BAŞLADI!';
+              $('tgActionBtn').style.background = '#15803d';
+              $('tgActionBtn').textContent = 'Hemen Sınava Başla →';
+            }
+            return;
+          }
+
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+          const minutes = Math.floor((diff / 1000 / 60) % 60);
+          const seconds = Math.floor((diff / 1000) % 60);
+
+          $('tgTimerNumbers').textContent = 
+            `${String(days).padStart(2, '0')}g ${String(hours).padStart(2, '0')}s ${String(minutes).padStart(2, '0')}d ${String(seconds).padStart(2, '0')}s`;
+        }
+
+        tick();
+        tgCountdownTimer = setInterval(tick, 1000);
+
+      } catch (err) {
+        console.warn('TG Deneme sayacı alınamadı:', err);
+      }
+    }
+
+    // ==========================================
+    // 4. AI KOÇ MODÜLÜNÜ PAKETE GÖRE ÖZELLEŞTİR
+    // ==========================================
+    function adaptAiCoachForPlan(plan) {
+      const kocPill = document.querySelector('[data-role="ai_koc"]');
+      if (!kocPill) return;
+
+      if (plan === 'vip') {
+        kocPill.innerHTML = '👑 VIP Sınav Strateji Koçu';
+        studentRoleLabels.ai_koc = '👑 VIP Sınav Strateji Koçu';
+        studentRoleDescs.ai_koc = 'Haftalık net hedef simülasyonu, LGS/YKS sınav taktikleri ve ileri düzey başarı projeksiyonu sunar.';
+      } else if (plan === 'standart') {
+        kocPill.innerHTML = '🎯 AI Koç (Günlük Dinamik Reçete)';
+        studentRoleLabels.ai_koc = '🎯 AI Koç (Günlük Reçete)';
+        studentRoleDescs.ai_koc = 'Günlük dinamik çalışma reçetesi çıkarır, eksik kazanımlarını teşhis ederek nokta atışı pratik önerir.';
+      } else {
+        kocPill.innerHTML = '🎯 AI Koç (Haftalık Plan)';
+        studentRoleLabels.ai_koc = '🎯 AI Koç (Haftalık Plan)';
+        studentRoleDescs.ai_koc = 'Haftalık otomatik çalışma planı, motivasyon ve düzenli matematik çalışma rehberliği sunar.';
+      }
+
+      if (studentActiveRole === 'ai_koc' && $('studentAiRoleDesc')) {
+        $('studentAiRoleDesc').textContent = studentRoleDescs.ai_koc;
+      }
+    }
+
     loadContent();
+    loadYaziliProvalari();
+    loadGamificationAndLeaderboard();
+    loadTgCountdown();
     loadImageExams().catch(error => {
       console.error('Denemeler alınamadı:', error);
       $('imageExamFeed').textContent = `Denemeler yüklenemedi: ${error.message}`;

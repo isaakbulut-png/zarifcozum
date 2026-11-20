@@ -887,6 +887,33 @@
         </div>
         <p class="msg" id="examsMsg" role="alert"></p>
       </div>
+
+      <!-- MEB SENARYO AÇIK UÇLU YAZILI PROVALARI YÖNETİMİ -->
+      <div class="panel" style="margin-top:24px; border:1px solid #fbcfe8;">
+        <div class="toolbar" style="justify-content:space-between">
+          <h3 style="color:#9d174d;">📝 MEB Açık Uçlu Yazılı Provaları (5-12. Sınıf)</h3>
+          <button type="button" class="btn primary sm" id="btnAdminNewYazili" style="background:#be185d; border-color:#9d174d;">
+            ➕ Yeni Yazılı Provası Ekle
+          </button>
+        </div>
+        <div class="notice">Yeni Maarif Modeli ortak yazılı sınav senaryoları (1. ve 2. Dönem). Temel pakete dönemlik 2, Standart ve VIP'ye sınırsız erişim tanımlıdır.</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Prova Başlığı</th>
+                <th>Sınıf &amp; Dönem</th>
+                <th>Senaryo No</th>
+                <th>Soru / Puan</th>
+                <th>PDF</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="adminYaziliBody"></tbody>
+          </table>
+        </div>
+        <p class="msg" id="adminYaziliMsg" role="alert"></p>
+      </div>
     </section>
 
     <!-- 7. KONU ANLATIMLARI -->
@@ -1275,8 +1302,11 @@
               <select id="aiUserPackageSelect" style="padding:8px 12px; font-size:0.85rem;">
                 <option value="all">Tüm Paketler</option>
                 <option value="free">Free Paket</option>
-                <option value="baslangic">Başlangıç Paketi</option>
-                <option value="pro">Pro Paket</option>
+                <option value="temel">Temel Paket (₺4.990)</option>
+                <option value="standart">Standart Paket (₺8.490)</option>
+                <option value="vip">👑 VIP Paket (₺14.990)</option>
+                <option value="baslangic">Başlangıç (Eski)</option>
+                <option value="pro">Pro (Eski)</option>
               </select>
             </div>
             <div>
@@ -1288,6 +1318,14 @@
               </select>
             </div>
             <button type="button" class="btn primary sm" id="btnAiUserSearch">Filtrele</button>
+            <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" class="btn sm" style="background:#7a4f2d; color:#fff; border:none; display:inline-flex; align-items:center; gap:6px; font-weight:600;" onclick="openBulkBonusModal()">
+                🏆 Başarılı Öğrencilere Toplu Bonus Dağıt
+              </button>
+              <button type="button" class="btn sm" style="background:#0369a1; color:#fff; border:none; display:inline-flex; align-items:center; gap:6px; font-weight:600;" onclick="openTgDenemeModal()">
+                📝 Türkiye Geneli Deneme &amp; Sıralama
+              </button>
+            </div>
           </div>
 
           <div class="table-wrap">
@@ -2242,7 +2280,109 @@
             return row;
           }));
         } catch (error) { $('examsMsg').textContent = error.message; }
+        loadAdminYaziliProvalari();
       }
+
+      async function loadAdminYaziliProvalari() {
+        const tbody = $('adminYaziliBody');
+        const msg = $('adminYaziliMsg');
+        if (!tbody) return;
+        if (msg) msg.textContent = '';
+        try {
+          const res = await fetch('/api/yazili/admin/list', { credentials: 'same-origin' });
+          if (!res.ok) throw new Error('Yazılı provaları alınamadı: ' + res.status);
+          const data = await res.json();
+          const provalar = data.provalar || [];
+          if (!provalar.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty" style="text-align:center; padding:16px;">Henüz eklenmiş yazılı provası bulunmuyor.</td></tr>';
+            return;
+          }
+
+          const donemMap = {
+            '1_donem_1_yazili': '1.D. 1.Yazılı',
+            '1_donem_2_yazili': '1.D. 2.Yazılı',
+            '2_donem_1_yazili': '2.D. 1.Yazılı',
+            '2_donem_2_yazili': '2.D. 2.Yazılı'
+          };
+
+          tbody.innerHTML = provalar.map(p => `
+            <tr>
+              <td><strong>${esc(p.title)}</strong></td>
+              <td><span class="chip">${p.grade}. Sınıf</span> <span class="chip">${donemMap[p.donem] || p.donem}</span></td>
+              <td>Senaryo ${p.senaryoNo || 1}</td>
+              <td>${p.soruSayisi || (p.sorular?.length || 0)} Soru / ${p.toplamPuan || 100} Puan</td>
+              <td>${p.pdfUrl ? `<a href="${esc(p.pdfUrl)}" target="_blank">PDF</a>` : '—'}</td>
+              <td>
+                <button type="button" class="btn danger sm" onclick="handleDeleteYazili('${p.id}', '${esc(p.title)}')">
+                  🗑️ Sil
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        } catch (err) {
+          if (msg) msg.textContent = err.message;
+        }
+      }
+
+      window.handleDeleteYazili = async function(id, title) {
+        if (!confirm(`"${title}" adlı yazılı provasını silmek istediğinize emin misiniz?`)) return;
+        try {
+          const res = await fetch(`/api/yazili/${id}`, {
+            method: 'DELETE',
+            credentials: 'same-origin'
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mesaj || 'Silme başarısız');
+          alert('✅ Yazılı provası silindi.');
+          loadAdminYaziliProvalari();
+        } catch (err) {
+          alert('Hata: ' + err.message);
+        }
+      };
+
+      $('btnAdminNewYazili')?.addEventListener('click', async () => {
+        const title = prompt('Yazılı Provası Başlığı (Örn: 8. Sınıf Matematik 1. Dönem 1. Yazılı Senaryo 1):');
+        if (!title) return;
+        const grade = parseInt(prompt('Sınıf Düzeyi (5-12):', '8'), 10) || 8;
+        const donemSecim = prompt('Dönem Seçiniz:\n1: 1. Dönem 1. Yazılı\n2: 1. Dönem 2. Yazılı\n3: 2. Dönem 1. Yazılı\n4: 2. Dönem 2. Yazılı', '1');
+        const donemler = { '1': '1_donem_1_yazili', '2': '1_donem_2_yazili', '3': '2_donem_1_yazili', '4': '2_donem_2_yazili' };
+        const donem = donemler[donemSecim?.trim()] || '1_donem_1_yazili';
+        const senaryoNo = parseInt(prompt('Senaryo Numarası:', '1'), 10) || 1;
+        const soruSayisi = parseInt(prompt('Açık Uçlu Soru Sayısı (Varsayılan MEB şablonu üretilir):', '5'), 10) || 5;
+
+        const sorular = [];
+        for (let i = 1; i <= soruSayisi; i++) {
+          sorular.push({
+            soruNo: i,
+            metin: `${grade}. Sınıf ${title} - Soru ${i}: MEB senaryo formatında açık uçlu matematik problem metni. Adımları açıklayarak çözünüz.`,
+            puan: Math.round(100 / soruSayisi),
+            kazanimKodu: `M.${grade}.1.${i}`,
+            cozumMetni: `Adım 1: Verilenler ve istenenler belirlenir.\nAdım 2: İşlem bağıntısı kurulur.\nAdım 3: Sonuç doğrulanır.`
+          });
+        }
+
+        try {
+          const res = await fetch('/api/yazili', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+              title,
+              grade,
+              donem,
+              senaryoNo,
+              sorular,
+              toplamPuan: 100
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mesaj || 'Prova oluşturulamadı');
+          alert('✅ Yazılı provası başarıyla oluşturuldu!');
+          loadAdminYaziliProvalari();
+        } catch (err) {
+          alert('Hata: ' + err.message);
+        }
+      });
 
       async function loadTickets() {
         $('ticketsMsg').textContent = '';
@@ -3219,6 +3359,9 @@
 
             const packageBadges = {
               free: '<span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">Free</span>',
+              temel: '<span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;">Temel</span>',
+              standart: '<span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; background:#fef3c7; color:#b45309; border:1px solid #fde68a;">Standart</span>',
+              vip: '<span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; background:#fae8ff; color:#86198f; border:1px solid #f0abfc;">👑 VIP</span>',
               baslangic: '<span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;">Başlangıç</span>',
               pro: '<span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; background:#fef3c7; color:#b45309; border:1px solid #fde68a;">🚀 Pro</span>'
             };
@@ -3234,10 +3377,12 @@
             let usageCol = '';
             if (isTeacher) {
               const soruLimitiText = u.ogretmenTipi === 'icerik_ureticisi' ? 'Sınırsız Soru' : (typeof u.ozelGunlukSoruLimiti === 'number' ? `${u.gunlukSoruUretimSayisi || 0} / ${u.ozelGunlukSoruLimiti} Soru` : `${u.gunlukSoruUretimSayisi || 0} / ${u.ogretmenTipi === 'onayli_ogretmen' ? 15 : 3} Soru`);
+              const aylikLimitText = typeof u.ozelAylikSoruLimiti === 'number' ? `${u.ozelAylikSoruLimiti} (Özel Kotası)` : '200 / Ay';
               const mesajLimitiText = u.ogretmenTipi === 'icerik_ureticisi' ? 'Sınırsız Mesaj' : `${u.gunlukKullanim || 0} / ${u.etkinLimit || 10} Mesaj`;
               usageCol = `
                 <div style="font-size:11px;">
                   <div>📝 <strong>${soruLimitiText}</strong> ${typeof u.ozelGunlukSoruLimiti === 'number' ? '<span style="color:#b45309;">(Özel)</span>' : ''}</div>
+                  <div style="color:#2563eb;">📅 Aylık: <strong>${aylikLimitText}</strong></div>
                   <div style="color:#64748b;">💬 ${mesajLimitiText}</div>
                 </div>
               `;
@@ -3247,9 +3392,11 @@
                 : `<span>${u.gunlukKullanim} / ${u.etkinLimit}</span>`;
             }
 
-            const bonusBadge = u.ekstraBonusKredi > 0
-              ? `<span style="padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;">+${u.ekstraBonusKredi} Bonus</span>`
-              : '<span style="color:#cbd5e1;">—</span>';
+            let bonusBadges = [];
+            if (u.ekstraBonusKredi > 0) bonusBadges.push(`<span style="padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;">+${u.ekstraBonusKredi} Mesaj</span>`);
+            if (u.ekstraSokratikKredi > 0) bonusBadges.push(`<span style="padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd;">+${u.ekstraSokratikKredi} Sokratik</span>`);
+            if (u.ekstraOgretmenIkiziKredi > 0) bonusBadges.push(`<span style="padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700; background:#fae8ff; color:#86198f; border:1px solid #f0abfc;">+${u.ekstraOgretmenIkiziKredi} İkiz</span>`);
+            const bonusBadge = bonusBadges.length > 0 ? bonusBadges.join('<br>') : '<span style="color:#cbd5e1;">—</span>';
 
             return `
               <tr style="border-bottom:1px solid #f3e1cf;">
@@ -3276,24 +3423,34 @@
                   <div style="display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
                     
                     ${isTeacher ? `
+                      <button type="button" class="btn sm" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;" title="Öğretmenin aylık soru üretim kotasını düzenle (Varsayılan: 200)" onclick="handleTeacherMonthlyQuestionLimitEdit('${u.id}', '${esc(u.name)}', ${u.ozelAylikSoruLimiti !== null && u.ozelAylikSoruLimiti !== undefined ? u.ozelAylikSoruLimiti : 'null'})">
+                        📅 Aylık Soru (${u.ozelAylikSoruLimiti !== null && u.ozelAylikSoruLimiti !== undefined ? u.ozelAylikSoruLimiti : 200})
+                      </button>
                       <button type="button" class="btn sm" style="background:#f5f3ff; color:#6d28d9; border-color:#ddd6fe;" title="Öğretmene özel günlük yeni soru üretim limiti gir" onclick="handleTeacherQuestionLimitEdit('${u.id}', '${esc(u.name)}', ${u.ozelGunlukSoruLimiti !== null && u.ozelGunlukSoruLimiti !== undefined ? u.ozelGunlukSoruLimiti : 'null'})">
-                        🎯 Soru Limiti
+                        🎯 Günlük Soru
                       </button>
                     ` : `
+                      <button type="button" class="btn sm" style="background:#f0f9ff; color:#0369a1; border-color:#bae6fd;" title="Öğrencinin kayıtlı sınıf düzeyini düzenle" onclick="handleStudentGradeEdit('${u.id}', '${esc(u.name)}', ${u.kayitliSinif || 8})">
+                        📚 ${u.kayitliSinif || 8}. Sınıf
+                      </button>
+                      <button type="button" class="btn sm" style="background:#fdf4ff; color:#86198f; border-color:#f0abfc;" title="Sokratik Mentör veya Öğretmen İkizi için özel hak ekle" onclick="handleAgentBonus('${u.id}', '${esc(u.name)}')">
+                        🎁 İkiz/Sokratik
+                      </button>
                       <button type="button" class="btn sm" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;" title="Öğrenciye anında 20 ek AI mesaj kredisi hediye et" onclick="handleAiBonus('${u.id}', '${esc(u.name)}')">
                         🎁 +20 Bonus
                       </button>
                     `}
 
                     <button type="button" class="btn sm" style="background:#fff; border-color:#d9d3c3;" title="Kullanıcıya özel kalıcı günlük mesaj limiti belirle" onclick="handleAiLimitEdit('${u.id}', '${esc(u.name)}', ${u.ozelGunlukMesajLimiti !== null ? u.ozelGunlukMesajLimiti : 'null'})">
-                      ⚙️ Mesaj Limiti
+                      ⚙️ Limit
                     </button>
 
                     ${!isTeacher ? `
                       <select style="padding:3px 6px; font-size:11px; border-radius:6px; border:1px solid #d9d3c3;" onchange="handleAiPackageChange('${u.id}', this.value)">
                         <option value="free" ${u.paketTipi === 'free' ? 'selected' : ''}>Free</option>
-                        <option value="baslangic" ${u.paketTipi === 'baslangic' ? 'selected' : ''}>Başlangıç</option>
-                        <option value="pro" ${u.paketTipi === 'pro' ? 'selected' : ''}>Pro</option>
+                        <option value="temel" ${u.paketTipi === 'temel' ? 'selected' : ''}>Temel (₺4.990)</option>
+                        <option value="standart" ${u.paketTipi === 'standart' ? 'selected' : ''}>Standart (₺8.490)</option>
+                        <option value="vip" ${u.paketTipi === 'vip' ? 'selected' : ''}>👑 VIP (₺14.990)</option>
                       </select>
                     ` : ''}
 
@@ -3315,6 +3472,168 @@
       window.handleAiBonus = async function(userId, userName) {
         if (!confirm(`"${userName}" adlı öğrenciye +20 Bonus AI Mesaj Kredisi tanımlansın mı?`)) return;
         await postAiQuotaUpdate({ userId, islem: 'bonus_ekle', bonusMiktar: 20 });
+      };
+
+      window.handleStudentGradeEdit = async function(userId, userName, currentGrade) {
+        const val = prompt(
+          `"${userName}" için Kayıtlı Sınıf Düzeyini belirleyin (5 - 12):\n(Müfredat konu ve test erişimi bu sınıfa göre kısıtlanır)`,
+          currentGrade || '8'
+        );
+        if (val === null) return;
+        const grade = parseInt(val.trim(), 10);
+        if (isNaN(grade) || grade < 5 || grade > 12) {
+          alert('Lütfen 5 ile 12 arasında geçerli bir sınıf düzeyi girin.');
+          return;
+        }
+        await postAiQuotaUpdate({ userId, islem: 'sinif_guncelle', kayitliSinif: grade });
+      };
+
+      window.handleAgentBonus = async function(userId, userName) {
+        const secim = prompt(
+          `"${userName}" için Özel Ajan Kredisi Tanımla:\n\n` +
+          "1 - Öğretmen İkizi (Farklı Anlatım) Kredisi Ekle\n" +
+          "2 - Sokratik AI Mentör (Bana Buldur) Kredisi Ekle\n\n" +
+          "Lütfen 1 veya 2 yazın:"
+        );
+        if (!secim) return;
+
+        let ajan = '';
+        if (secim.trim() === '1') ajan = 'ogretmen_ikizi';
+        else if (secim.trim() === '2') ajan = 'sokratik';
+        else {
+          alert('Geçersiz seçim!');
+          return;
+        }
+
+        const miktarStr = prompt(`Eklenecek ${ajan === 'ogretmen_ikizi' ? 'Öğretmen İkizi' : 'Sokratik Mentör'} hak miktarı:`, "10");
+        if (!miktarStr) return;
+        const bonusMiktar = parseInt(miktarStr.trim(), 10);
+        if (isNaN(bonusMiktar) || bonusMiktar <= 0) {
+          alert('Pozitif bir sayı giriniz.');
+          return;
+        }
+
+        await postAiQuotaUpdate({ userId, islem: 'ajan_bonusu_ekle', ajan, bonusMiktar });
+      };
+
+      window.handleTeacherMonthlyQuestionLimitEdit = async function(userId, userName, currentLimit) {
+        const val = prompt(
+          `"${userName}" için Aylık Soru Üretim Kotasını belirleyin:\n(Varsayılan 200 soruya dönmek için boş bırakın veya "null" yazın)\n\nMevcut: ${currentLimit !== null ? currentLimit : '200 (Standart)'}`,
+          currentLimit !== null ? currentLimit : ''
+        );
+        if (val === null) return;
+        await postAiQuotaUpdate({
+          userId,
+          islem: 'aylik_soru_limiti_duzenle',
+          ozelAylikSoruLimiti: val.trim() === '' || val.trim().toLowerCase() === 'null' ? null : parseInt(val.trim(), 10)
+        });
+      };
+
+      window.openBulkBonusModal = async function() {
+        const secim = prompt(
+          "🏆 BAŞARILI ÖĞRENCİLERE TOPLU BONUS DAĞIT\n\n" +
+          "Kriter Seçiniz:\n" +
+          "1 - Haftalık Ligde İlk 3'e Girenlere (+50 Kredi)\n" +
+          "2 - 7 Gün Kesintisiz Seri Yapanlara (+20 Kredi)\n" +
+          "3 - Son Denemede %10'luk Dilime Girenlere (+30 Kredi)\n" +
+          "4 - Tüm Aktif Öğrencilere Genel Teşvik Bonusu (+20 Kredi)\n\n" +
+          "Lütfen 1, 2, 3 veya 4 yazıp Tamam'a basın:"
+        );
+        if (!secim) return;
+
+        let kriter = '';
+        let varsayilanBonus = 20;
+        if (secim.trim() === '1') { kriter = 'haftalik_lig_ilk_3'; varsayilanBonus = 50; }
+        else if (secim.trim() === '2') { kriter = 'seri_7_gun'; varsayilanBonus = 20; }
+        else if (secim.trim() === '3') { kriter = 'deneme_yuzdelik_10'; varsayilanBonus = 30; }
+        else if (secim.trim() === '4') { kriter = 'tum_ogrenciler'; varsayilanBonus = 20; }
+        else {
+          alert('Geçersiz seçim!');
+          return;
+        }
+
+        const miktarStr = prompt(`Verilecek bonus kredi miktarı:`, varsayilanBonus.toString());
+        if (!miktarStr) return;
+        const bonusMiktar = parseInt(miktarStr.trim(), 10);
+        if (isNaN(bonusMiktar) || bonusMiktar <= 0) {
+          alert('Geçerli bir pozitif sayı giriniz.');
+          return;
+        }
+
+        try {
+          const res = await fetch('/api/admin/toplu-bonus-dagit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ kriter, bonusMiktar })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mesaj || 'Toplu bonus dağıtımı başarısız oldu.');
+          alert(`✅ Tebrikler! ${data.etkilenenOgrenciSayisi} öğrenciye başarıyla +${bonusMiktar} bonus kredi dağıtıldı.`);
+          loadAiAuditUsers(aiAuditCurrentPage);
+        } catch (err) {
+          alert('Hata: ' + err.message);
+        }
+      };
+
+      window.openTgDenemeModal = async function() {
+        try {
+          const res = await fetch('/api/admin/turkiye-geneli-denemeler', { credentials: 'same-origin' });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mesaj || 'Denemeler alınamadı.');
+
+          const sinavlar = data.sinavlar || [];
+          let listeMetni = sinavlar.map((s, idx) => 
+            `${idx + 1}. [${s.sinif}. Sınıf] ${s.baslik} - Durum: ${s.durum} (${s.katilimciSayisi || 0} Katılımcı)`
+          ).join('\n');
+
+          const secim = prompt(
+            "📝 TÜRKİYE GENELİ DENEME YÖNETİMİ & SIRALAMA MOTORU\n\n" +
+            (sinavlar.length ? listeMetni + "\n\n" : "Henüz TG Deneme bulunmuyor.\n\n") +
+            "Yapmak istediğiniz işlem:\n" +
+            "Y - Yeni Türkiye Geneli Deneme Oluştur\n" +
+            "S - Sınav Sıralamalarını ve Net Karnelerini Hesapla/Açıkla (Sıra No yazın, örn: 1)\n" +
+            "İptal için boş bırakın:"
+          );
+
+          if (!secim) return;
+
+          if (secim.trim().toUpperCase() === 'Y') {
+            const baslik = prompt("Deneme Sınavı Başlığı (Örn: 2026 1. Türkiye Geneli LGS Matematik):");
+            if (!baslik) return;
+            const sinif = parseInt(prompt("Sınıf Düzeyi (5-12):", "8"), 10) || 8;
+            const soruSayisi = parseInt(prompt("Soru Sayısı:", "20"), 10) || 20;
+            const sureDakika = parseInt(prompt("Sınav Süresi (Dakika):", "40"), 10) || 40;
+
+            const createRes = await fetch('/api/admin/turkiye-geneli-deneme', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ baslik, sinif, soruSayisi, sureDakika })
+            });
+            const cData = await createRes.json();
+            if (!createRes.ok) throw new Error(cData.mesaj || 'Sınav oluşturulamadı.');
+            alert(`✅ Türkiye Geneli Deneme oluşturuldu!\nID: ${cData.deneme?._id || ''}`);
+          } else {
+            const idx = parseInt(secim.trim(), 10) - 1;
+            if (isNaN(idx) || idx < 0 || idx >= sinavlar.length) {
+              alert("Geçersiz sınav sıra numarası!");
+              return;
+            }
+            const secilenSinav = sinavlar[idx];
+            if (!confirm(`"${secilenSinav.baslik}" sınavı için Türkiye ve İl geneli sıralamalar, yüzdelik dilimler hesaplansın ve sonuçlar ilan edilsin mi?`)) return;
+
+            const rankRes = await fetch(`/api/admin/turkiye-geneli-sirala/${secilenSinav._id}`, {
+              method: 'POST',
+              credentials: 'same-origin'
+            });
+            const rData = await rankRes.json();
+            if (!rankRes.ok) throw new Error(rData.mesaj || 'Sıralama hesaplanamadı.');
+            alert(`✅ ${rData.mesaj}\nHesaplanan Katılımcı: ${rData.katilimciSayisi}`);
+          }
+        } catch (err) {
+          alert('Hata: ' + err.message);
+        }
       };
 
       window.handleTeacherQuestionLimitEdit = async function(userId, userName, currentLimit) {

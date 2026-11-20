@@ -147,3 +147,49 @@ test('resim olmayan dosya, büyük dosya ve yapılandırma eksikliği reddedilir
     assert.equal((await fetch(`${base}/yukle`, { method: 'POST', body: resimFormu(PNG) })).status, 403);
   }, sahteYukleyici());
 });
+
+test('soru tekil ve toplu silme API testleri', async () => {
+  const origFindByIdAndDelete = Soru.findByIdAndDelete;
+  const origFind = Soru.find;
+  const origDeleteMany = Soru.deleteMany;
+
+  Soru.findByIdAndDelete = id => ({ lean: async () => ({ _id: id, ders: 'matematik' }) });
+  Soru.find = () => ({ lean: async () => [{ _id: '507f1f77bcf86cd799439011' }, { _id: '507f1f77bcf86cd799439012' }] });
+  Soru.deleteMany = async () => ({ deletedCount: 2 });
+
+  try {
+    await withServer({ id: 't1', role: 'teacher' }, async base => {
+      // 1. Tekil silme
+      const delRes = await fetch(`${base}/507f1f77bcf86cd799439011`, { method: 'DELETE' });
+      assert.equal(delRes.status, 200);
+      const delData = await delRes.json();
+      assert.equal(delData.mesaj, 'Soru silindi.');
+
+      // 2. Geçersiz ID ile silme
+      const badRes = await fetch(`${base}/gecersiz-id`, { method: 'DELETE' });
+      assert.equal(badRes.status, 400);
+
+      // 3. Toplu silme
+      const bulkRes = await fetch(`${base}/toplu-sil`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'] })
+      });
+      assert.equal(bulkRes.status, 200);
+      const bulkData = await bulkRes.json();
+      assert.equal(bulkData.silinenSayisi, 2);
+
+      // 4. Boş toplu silme
+      const emptyBulk = await fetch(`${base}/toplu-sil`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [] })
+      });
+      assert.equal(emptyBulk.status, 400);
+    });
+  } finally {
+    Soru.findByIdAndDelete = origFindByIdAndDelete;
+    Soru.find = origFind;
+    Soru.deleteMany = origDeleteMany;
+  }
+});

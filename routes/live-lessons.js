@@ -196,11 +196,56 @@ function createLiveLessonsRouter({
   }));
 
   router.get('/api/canli/katilim', requireStudent, asyncRoute(async (req, res) => {
+    const { resolveUserPlan } = require('../middleware/aiQuota');
+    const userPlan = resolveUserPlan(req.session.user);
+    // Yalnızca açıkça 'temel' pakette olan bireysel öğrenciler için canlı ders kapatılır
+    if (req.session.user?.paketTipi === 'temel' || (req.session.user?.subscriptionPlan === 'temel' && req.session.user?.subscriptionStatus === 'active')) {
+      return res.status(403).json({
+        kod: 'CANLI_DERS_KAPALI',
+        mesaj: 'Canlı ders yayınları Temel pakette kapalıdır. Standart pakette ayda 2 canlı tekrar dersi, VIP pakette ise haftalık tüm canlı derslere sınırsız katılabilirsiniz.'
+      });
+    }
+
     const lesson = await activeMeeting();
     if (!lesson || !await studentCanAccess(getStudentCollection(), req.session.user.id, lesson)) {
       return res.status(404).json({ mesaj: 'Şu anda katılabileceğiniz aktif bir canlı ders yok.' });
     }
     res.json(meetingSummary(lesson));
+  }));
+
+  router.get('/api/canli/arsiv', requireStudent, asyncRoute(async (req, res) => {
+    const { resolveUserPlan } = require('../middleware/aiQuota');
+    const LiveLessonArchive = require('../models/LiveLessonArchive');
+    const userPlan = resolveUserPlan(req.session.user);
+    if (userPlan === 'free' || userPlan === 'temel') {
+      return res.status(403).json({
+        kod: 'VIDEO_ARSIV_KAPALI',
+        mesaj: 'Canlı ders video kayıt arşivi Standart pakette son 30 gün, VIP pakette ise tüm yıl sınırsız olarak sunulmaktadır.'
+      });
+    }
+
+    const query = { published: true };
+    if (userPlan === 'standart') {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      query.recordedAt = { $gte: thirtyDaysAgo };
+    }
+
+    const archives = await LiveLessonArchive.find(query).sort({ recordedAt: -1 }).limit(50).lean();
+    res.json({
+      arsiv: archives.map(a => ({
+        id: a._id.toString(),
+        title: a.title,
+        topic: a.topic,
+        grade: a.grade,
+        videoUrl: a.videoUrl,
+        thumbnailUrl: a.thumbnailUrl,
+        durationMinutes: a.durationMinutes,
+        teacherName: a.teacherName,
+        recordedAt: a.recordedAt
+      })),
+      plan: userPlan,
+      arsivKapsami: userPlan === 'vip' ? 'tüm_yıl' : 'son_30_gün'
+    });
   }));
 
   router.post('/api/ogretmen/canli/sonlandir', requireTeacher, asyncRoute(async (req, res) => {

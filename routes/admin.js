@@ -1274,16 +1274,14 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
   });
 
   // 2. Kullanıcı Bazlı AI Denetim Listesi
-  router.get('/ai-kullanicilar', allow('superadmin', 'support'), async (req, res) => {
+  const getAiUsersListHandler = async (req, res) => {
     try {
-      const {
-        search = '',
-        role = 'student',
-        paketTipi = 'all',
-        sort = 'maliyet_desc',
-        limit = 50,
-        page = 1
-      } = req.query;
+      const search = req.query.search || req.query.q || '';
+      const role = req.query.role || req.query.rol || 'student';
+      const paketTipi = req.query.paketTipi || req.query.paket || 'all';
+      const sort = req.query.sort || req.query.sirala || 'maliyet_desc';
+      const limit = req.query.limit || 50;
+      const page = req.query.page || req.query.sayfa || 1;
 
       const filter = {};
       if (role && role !== 'all') {
@@ -1312,7 +1310,7 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
 
       const [users, totalCount] = await Promise.all([
         User.find(filter)
-          .select('name email role ogretmenTipi paketTipi gunlukAiMesajSayisi gunlukSoruUretimSayisi ozelGunlukMesajLimiti ozelGunlukSoruLimiti ekstraBonusKredi toplamHarcananToken toplamMaliyetTL aiErisimEngelli sonKotaSifirlamaTarihi')
+          .select('name email role ogretmenTipi paketTipi kayitliSinif seciliTelafiSinif gunlukAiMesajSayisi gunlukSoruUretimSayisi ozelGunlukMesajLimiti ozelGunlukSoruLimiti ozelAylikSoruLimiti ekstraBonusKredi ekstraSokratikKredi ekstraOgretmenIkiziKredi toplamHarcananToken toplamMaliyetTL aiErisimEngelli sonKotaSifirlamaTarihi')
           .sort(sortQuery)
           .skip(skip)
           .limit(limitNum)
@@ -1336,7 +1334,10 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
           email: u.email,
           role: u.role,
           ogretmenTipi: u.role === 'teacher' ? oTip : undefined,
+          kayitliSinif: u.kayitliSinif || 8,
+          seciliTelafiSinif: u.seciliTelafiSinif || null,
           ozelGunlukSoruLimiti: u.ozelGunlukSoruLimiti,
+          ozelAylikSoruLimiti: u.ozelAylikSoruLimiti,
           gunlukSoruKullanim,
           etkinSoruLimiti,
           proModelIzni: canUserUseProModel(u),
@@ -1347,6 +1348,8 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
           etkinLimit,
           kalanHak: isSinirsiz ? 'Sınırsız' : Math.max(0, etkinLimit - gunlukKullanim),
           ekstraBonusKredi: u.ekstraBonusKredi || 0,
+          ekstraSokratikKredi: u.ekstraSokratikKredi || 0,
+          ekstraOgretmenIkiziKredi: u.ekstraOgretmenIkiziKredi || 0,
           toplamHarcananToken: u.toplamHarcananToken || 0,
           toplamMaliyetTL: Number((u.toplamMaliyetTL || 0).toFixed(2)),
           aiErisimEngelli: Boolean(u.aiErisimEngelli),
@@ -1357,14 +1360,19 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
       res.json({
         kullanicilar: formatted,
         toplam: totalCount,
+        toplamKullanici: totalCount,
         sayfa: pageNum,
+        page: pageNum,
         toplamSayfa: Math.ceil(totalCount / limitNum)
       });
     } catch (error) {
       console.error('AI kullanıcı listesi alınamadı:', error);
       res.status(500).json({ mesaj: 'Kullanıcı listesi alınamadı: ' + error.message });
     }
-  });
+  };
+
+  router.get('/ai-kullanicilar', allow('superadmin', 'support'), getAiUsersListHandler);
+  router.get('/ai-kullanici-kotalari', allow('superadmin', 'support'), getAiUsersListHandler);
 
   // 3. Canlı Müdahale: Kullanıcı Kota, Bonus, Paket ve Erişim Güncelleme
   router.post('/kullanici-kota-guncelle', allow('superadmin', 'support'), async (req, res) => {
@@ -1374,10 +1382,14 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
         islem,
         ozelGunlukMesajLimiti,
         ozelGunlukSoruLimiti,
+        ozelAylikSoruLimiti,
         bonusMiktar,
         paketTipi,
         ogretmenTipi,
-        aiErisimEngelli
+        aiErisimEngelli,
+        kayitliSinif,
+        seciliTelafiSinif,
+        ajan
       } = req.body;
 
       if (!userId) {
@@ -1421,22 +1433,67 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
           user.ozelGunlukSoruLimiti = parsed;
           degisiklikDetayi.ozelGunlukSoruLimiti = parsed;
         }
+      } else if (islem === 'aylik_soru_limiti_duzenle') {
+        if (ozelAylikSoruLimiti === null || ozelAylikSoruLimiti === '' || ozelAylikSoruLimiti === 'null') {
+          user.ozelAylikSoruLimiti = null;
+          degisiklikDetayi.ozelAylikSoruLimiti = 'Varsayılan aylık kotaya (200) dönüldü';
+        } else {
+          const parsed = parseInt(ozelAylikSoruLimiti, 10);
+          if (isNaN(parsed) || parsed < 0) {
+            return res.status(400).json({ mesaj: 'Geçersiz aylık soru limiti.' });
+          }
+          user.ozelAylikSoruLimiti = parsed;
+          degisiklikDetayi.ozelAylikSoruLimiti = parsed;
+        }
+      } else if (islem === 'sinif_guncelle') {
+        const sinifNum = parseInt(kayitliSinif, 10);
+        if (isNaN(sinifNum) || sinifNum < 5 || sinifNum > 12) {
+          return res.status(400).json({ mesaj: 'Kayıtlı sınıf 5 ile 12 arasında olmalıdır.' });
+        }
+        user.kayitliSinif = sinifNum;
+        if (seciliTelafiSinif !== undefined) {
+          const telafiNum = parseInt(seciliTelafiSinif, 10);
+          user.seciliTelafiSinif = (!isNaN(telafiNum) && telafiNum >= 5 && telafiNum <= 12) ? telafiNum : null;
+        }
+        degisiklikDetayi.kayitliSinif = user.kayitliSinif;
+        degisiklikDetayi.seciliTelafiSinif = user.seciliTelafiSinif;
       } else if (islem === 'bonus_ekle') {
         const miktar = parseInt(bonusMiktar, 10) || 20;
         user.ekstraBonusKredi = (user.ekstraBonusKredi || 0) + miktar;
         degisiklikDetayi.eklenenBonus = miktar;
         degisiklikDetayi.toplamBonus = user.ekstraBonusKredi;
+      } else if (islem === 'ajan_bonusu_ekle') {
+        const miktar = parseInt(bonusMiktar, 10) || 10;
+        if (ajan === 'ogretmen_ikizi') {
+          user.ekstraOgretmenIkiziKredi = (user.ekstraOgretmenIkiziKredi || 0) + miktar;
+          degisiklikDetayi.eklenenOgretmenIkiziBonus = miktar;
+        } else {
+          user.ekstraSokratikKredi = (user.ekstraSokratikKredi || 0) + miktar;
+          degisiklikDetayi.eklenenSokratikBonus = miktar;
+        }
       } else if (islem === 'paket_degistir') {
-        if (!['free', 'baslangic', 'pro'].includes(paketTipi)) {
-          return res.status(400).json({ mesaj: 'Geçersiz paket tipi. (free, baslangic, pro)' });
+        const validPlans = ['free', 'temel', 'standart', 'vip', 'baslangic', 'pro'];
+        if (!validPlans.includes(paketTipi)) {
+          return res.status(400).json({ mesaj: 'Geçersiz paket tipi. (free, temel, standart, vip)' });
         }
         user.paketTipi = paketTipi;
+        if (['temel', 'standart', 'vip'].includes(paketTipi)) {
+          user.subscriptionPlan = paketTipi;
+          user.subscriptionStatus = 'active';
+          if (!user.expiresAt || new Date(user.expiresAt) <= new Date()) {
+            user.expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+          }
+        } else if (paketTipi === 'free') {
+          user.subscriptionPlan = null;
+          user.subscriptionStatus = 'free';
+        }
         degisiklikDetayi.yeniPaket = paketTipi;
       } else if (islem === 'erisim_toggle') {
         user.aiErisimEngelli = typeof aiErisimEngelli === 'boolean' ? aiErisimEngelli : !user.aiErisimEngelli;
         degisiklikDetayi.aiErisimEngelli = user.aiErisimEngelli;
       } else if (islem === 'kota_sifirla') {
         user.gunlukAiMesajSayisi = 0;
+        user.gunlukSokratikSayisi = 0;
         user.gunlukSoruUretimSayisi = 0;
         user.sonKotaSifirlamaTarihi = new Date();
         degisiklikDetayi.mesaj = 'Bugünkü kullanım sayaçları sıfırlandı';
@@ -1482,6 +1539,168 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
     } catch (error) {
       console.error('Kullanıcı kota güncelleme hatası:', error);
       res.status(500).json({ mesaj: 'Kullanıcı kotası güncellenemedi: ' + error.message });
+    }
+  });
+
+  // 4. Başarılı Öğrencilere Toplu Bonus Dağıtımı (Ödül Motoru)
+  router.post('/toplu-bonus-dagit', allow('superadmin', 'support'), async (req, res) => {
+    try {
+      const { kriter, miktar = 20, aciklama } = req.body;
+      const bonusMiktar = parseInt(miktar, 10);
+      if (isNaN(bonusMiktar) || bonusMiktar <= 0 || bonusMiktar > 500) {
+        return res.status(400).json({ mesaj: 'Dağıtılacak bonus miktarı 1 ile 500 arasında olmalıdır.' });
+      }
+
+      let hedefSorgu = {};
+      let kriterAciklamasi = '';
+
+      if (kriter === 'haftalik_lig_ilk_3') {
+        const top3 = await User.find({ role: 'student', haftalikPuan: { $gt: 0 } })
+          .sort({ haftalikPuan: -1 })
+          .limit(3)
+          .select('_id')
+          .lean();
+        if (!top3.length) {
+          return res.status(404).json({ mesaj: 'Haftalık ligde puanı olan öğrenci bulunamadı.' });
+        }
+        hedefSorgu = { _id: { $in: top3.map(u => u._id) } };
+        kriterAciklamasi = 'Haftalık ligde ilk 3 dereceye giren öğrenciler';
+      } else if (kriter === 'seri_7_gun') {
+        hedefSorgu = { role: 'student', seriGunSayisi: { $gte: 7 } };
+        kriterAciklamasi = '7 gün ve üzeri çalışma serisi (streak) yakalayan öğrenciler';
+      } else if (kriter === 'deneme_yuzdelik_10') {
+        hedefSorgu = { role: 'student', zarifPuan: { $gte: 100 } };
+        kriterAciklamasi = 'Yüksek deneme ve platform puanına sahip öğrenciler';
+      } else if (kriter === 'tum_ogrenciler') {
+        hedefSorgu = { role: 'student', restricted: { $ne: true } };
+        kriterAciklamasi = 'Tüm aktif kayıtlı öğrenciler';
+      } else {
+        return res.status(400).json({ mesaj: 'Geçersiz ödül kriteri. (haftalik_lig_ilk_3, seri_7_gun, deneme_yuzdelik_10, tum_ogrenciler)' });
+      }
+
+      const updateResult = await User.updateMany(hedefSorgu, {
+        $inc: { ekstraBonusKredi: bonusMiktar }
+      });
+
+      try {
+        await AdminLog.create({
+          actorId: req.session.user._id,
+          actorName: req.session.user.name || 'Admin',
+          action: 'bulk_bonus_awarded',
+          entityType: 'students',
+          details: {
+            kriter,
+            kriterAciklamasi,
+            miktar: bonusMiktar,
+            etkilenenSayisi: updateResult.modifiedCount,
+            aciklama
+          }
+        });
+      } catch {}
+
+      res.json({
+        basarili: true,
+        mesaj: `${kriterAciklamasi} kapsamındaki ${updateResult.modifiedCount} öğrenciye kişi başı +${bonusMiktar} bonus kredi başarıyla tanımlandı.`,
+        etkilenenOgrenciSayisi: updateResult.modifiedCount,
+        kisiBasiBonus: bonusMiktar,
+        toplamDagitilanBonus: updateResult.modifiedCount * bonusMiktar
+      });
+    } catch (err) {
+      console.error('Toplu bonus dağıtımı hatası:', err);
+      res.status(500).json({ mesaj: 'Toplu bonus dağıtılamadı: ' + err.message });
+    }
+  });
+
+  // 5. Türkiye Geneli Deneme Listeleme
+  router.get('/turkiye-geneli-denemeler', allow('superadmin', 'editor'), async (req, res) => {
+    try {
+      const TurkiyeGeneliDeneme = require('../models/TurkiyeGeneliDeneme');
+      const denemeler = await TurkiyeGeneliDeneme.find().sort({ startDate: -1 }).lean();
+      res.json({ denemeler });
+    } catch (err) {
+      res.status(500).json({ mesaj: 'Türkiye Geneli Denemeler listelenemedi: ' + err.message });
+    }
+  });
+
+  // 6. Yeni Türkiye Geneli Deneme Oluşturma
+  router.post('/turkiye-geneli-deneme', allow('superadmin', 'editor'), async (req, res) => {
+    try {
+      const TurkiyeGeneliDeneme = require('../models/TurkiyeGeneliDeneme');
+      const { title, grade, startDate, endDate, durationMinutes = 80, soruIds = [], description = '' } = req.body;
+      if (!title || !grade || !startDate || !endDate) {
+        return res.status(400).json({ mesaj: 'Deneme adı, sınıf (5-12), başlangıç ve bitiş tarihi zorunludur.' });
+      }
+      const deneme = await TurkiyeGeneliDeneme.create({
+        title: title.trim(),
+        grade: Number(grade),
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        durationMinutes: Number(durationMinutes) || 80,
+        soruIds,
+        description: description.trim(),
+        published: true,
+        createdBy: req.session.user._id
+      });
+      res.status(201).json({ basarili: true, mesaj: 'Türkiye Geneli Deneme başarıyla oluşturuldu ve yayınlandı.', deneme });
+    } catch (err) {
+      res.status(500).json({ mesaj: 'Deneme oluşturulamadı: ' + err.message });
+    }
+  });
+
+  // 7. Türkiye Geneli Sıralama ve Net Karnelerini Hesaplatma / Açıklama
+  router.post('/turkiye-geneli-sirala/:id', allow('superadmin', 'editor'), async (req, res) => {
+    try {
+      const TurkiyeGeneliDeneme = require('../models/TurkiyeGeneliDeneme');
+      const { rankParticipants, calculateNet } = require('../lib/turkiye-geneli-ranking');
+      const mongoose = require('mongoose');
+      const deneme = await TurkiyeGeneliDeneme.findById(req.params.id);
+      if (!deneme) return res.status(404).json({ mesaj: 'Türkiye Geneli Deneme bulunamadı.' });
+
+      const db = mongoose.connection.db;
+      const sonuclar = db ? await db.collection('turkiye_geneli_sonuclar').find({ denemeId: deneme._id }).toArray() : [];
+      if (!sonuclar || !sonuclar.length) {
+        return res.status(400).json({ mesaj: 'Bu denemeye henüz katılım sağlayan öğrenci bulunmuyor.' });
+      }
+
+      const formatted = sonuclar.map(s => ({
+        ...s,
+        studentId: s.studentId ? s.studentId.toString() : '',
+        netCount: s.netCount !== undefined ? s.netCount : calculateNet(s.correctCount, s.wrongCount),
+        score: s.score || 0,
+        city: s.city || 'Belirtilmedi'
+      }));
+
+      const ranked = rankParticipants(formatted);
+
+      for (const item of ranked) {
+        await db.collection('turkiye_geneli_sonuclar').updateOne(
+          { _id: item._id },
+          {
+            $set: {
+              turkiyeSirasi: item.turkiyeSirasi,
+              ilSirasi: item.ilSirasi,
+              yuzdelikDilim: item.yuzdelikDilim,
+              toplamKatilimci: item.toplamKatilimci
+            }
+          }
+        );
+      }
+
+      const totalNet = ranked.reduce((acc, curr) => acc + curr.netCount, 0);
+      const avgNet = parseFloat((totalNet / ranked.length).toFixed(2));
+      deneme.resultsAnnounced = true;
+      deneme.totalParticipants = ranked.length;
+      deneme.averageNet = avgNet;
+      await deneme.save();
+
+      res.json({
+        basarili: true,
+        mesaj: `${ranked.length} öğrencinin Türkiye ve il sıralamaları ile yüzdelik dilimleri başarıyla hesaplandı ve yayınlandı.`,
+        toplamKatilimci: ranked.length,
+        ortalamaNet: avgNet
+      });
+    } catch (err) {
+      res.status(500).json({ mesaj: 'Sıralama hesaplanamadı: ' + err.message });
     }
   });
 

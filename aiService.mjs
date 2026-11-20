@@ -380,11 +380,32 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
       ${mebSiniri}
     `;
   } else if (gorevTuru === 'ai_koc') {
+    const userPlan = userContext?.userPlan || 'temel';
+    let planOzelligi = '';
+    if (userPlan === 'vip') {
+      planOzelligi = `
+      [VIP MODU: GELİŞMİŞ SINAV STRATEJİ KOÇU & NET HEDEF SİMÜLASYONU]
+      - Öğrenciye haftalık net hedef projeksiyonu ve simülasyonu sun (örn: "Şu an 12 nettesin, hedef 18 net için şu 2 kritik kazanımı kapatmalısın").
+      - LGS / YKS ve okul denemelerine yönelik profesyonel zaman yönetimi, soru eleme ve sınav anı stratejisi taktikleri ver.
+      - Çok adımlı stratejik çalışma döngüsü çiz.`;
+    } else if (userPlan === 'standart') {
+      planOzelligi = `
+      [STANDART MODU: GÜNLÜK DİNAMİK REÇETE & KAZANIM TEŞHİSİ]
+      - Öğrencinin bugünkü çalışma reçetesini 1-2 kritik MEB kazanımına odaklayarak reçetelendir.
+      - Hangi konuda eksik kalındığını teşhis et ve eksik kapatma adımlarını reçete formatında listele.`;
+    } else {
+      planOzelligi = `
+      [TEMEL MODU: HAFTALIK OTOMATİK ÇALIŞMA PLANI]
+      - Öğrencinin sınıf seviyesine uygun, 7 günlük dengeli ve sürdürülebilir bir haftalık matematik çalışma planı çıkar.
+      - Temel motivasyon ve çalışma alışkanlığı rehberliği sun.`;
+    }
+
     systemInstruction = `
-      Sen Türkiye Yüzyılı Maarif Modeli odaklı şefkatli, motive edici ve stratejik bir "Matematik AI Öğrenci Koçu"sun.
-      Öğrencinin motivasyonunu artır, ders çalışma alışkanlıkları, hedef belirleme ve kaygı yönetimi konularında somut, uygulanabilir ve pozitif rehberlik tavsiyeleri ver.
-      Klişe öğütler yerine öğrencinin sınıf düzeyine (${grade ? grade + '. sınıf' : 'ilgili sınıf'}) uygun günlük/haftalık mikro hedefler sun.
-      Cevapları gereksiz uzatma, kısa, net ve motive edici tut.
+      Sen Türkiye Yüzyılı Maarif Modeli odaklı, pedagojik ve stratejik bir "Matematik AI Öğrenci Koçu"sun.
+      ${planOzelligi}
+      Öğrencinin motivasyonunu artır, hedef belirleme ve odaklanma konularında somut, uygulanabilir ve pozitif rehberlik yap.
+      Klişe öğütler yerine öğrencinin sınıf düzeyine (${grade ? grade + '. sınıf' : 'ilgili sınıf'}) uygun somut mikro hedefler sun.
+      Cevapları gereksiz uzatma; başlıklar, maddeler ve net adımlarla motive edici tut.
     `;
   } else if (gorevTuru === 'soru_uretme') {
     systemInstruction = `

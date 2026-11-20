@@ -93,15 +93,15 @@ test('PayTR sandbox checkout signs the server-priced order and returns hosted if
       assert.equal(result.iframeUrl, 'https://www.paytr.com/odeme/guvenli/sandboxToken123');
       assert.match(result.orderReference, /^ZC[a-f0-9]{32}$/);
       assert.equal(receivedPayload.merchant_oid, result.orderReference);
-      assert.equal(receivedPayload.payment_amount, '24900');
+      assert.equal(receivedPayload.payment_amount, '499000');
       assert.equal(receivedPayload.currency, 'TL');
       assert.equal(receivedPayload.test_mode, '1');
       assert.equal(
         receivedPayload.paytr_token,
         paytrToken(receivedPayload, process.env.PAYTR_MERCHANT_KEY, process.env.PAYTR_MERCHANT_SALT)
       );
-      assert.equal(createdPayment.expectedAmountMinor, 24900);
-      assert.equal(createdPayment.subscriptionType, 'monthly');
+      assert.equal(createdPayment.expectedAmountMinor, 499000);
+      assert.equal(createdPayment.subscriptionType, 'yearly');
       assert.equal(createdPayment.status, 'pending');
       assert.equal(createdPayment.userId, user._id);
       assert.equal('cardNumber' in createdPayment, false);

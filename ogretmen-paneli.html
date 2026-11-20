@@ -1353,6 +1353,17 @@ body.teacher-menu-open {
         </div>
         <p class="status" id="imageUploadStatus" role="status"></p>
       </form>
+      <div id="imageQuestionToolbar" style="display:none; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:20px; padding:10px 14px; background:#fbf8f3; border:1px solid #ebd9c8; border-radius:8px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <strong style="color:var(--text); font-size:0.92rem;">Yüklenen Sorular (<span id="questionCountBadge">0</span>)</strong>
+          <button type="button" class="btn light sm" id="btnToggleSelectAllQuestions" style="padding:4px 10px; font-size:12px;">Tümünü Seç</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button type="button" class="btn light sm" id="btnDeleteSelectedQuestions" style="padding:5px 12px; font-size:12px; color:#dc2626; border-color:#fca5a5; display:inline-flex; align-items:center; gap:4px; font-weight:600;">
+            🗑️ Seçili Soruları Sil
+          </button>
+        </div>
+      </div>
       <div class="image-grid" id="imageQuestionList"></div>
 
       <div class="exam-create">
@@ -1994,9 +2005,14 @@ body.teacher-menu-open {
 
   async function resimliSorulariYukle() {
     const {sorular} = await api('/api/sorular');
+    if ($('questionCountBadge')) $('questionCountBadge').textContent = sorular.length;
+    if ($('imageQuestionToolbar')) $('imageQuestionToolbar').style.display = sorular.length ? 'flex' : 'none';
     $('imageQuestionList').innerHTML = sorular.length
-      ? sorular.map(soru => `<figure class="image-card">
-          <img src="${esc(soru.imageUrl)}" alt="${esc(soru.ders)} sorusu" loading="lazy">
+      ? sorular.map(soru => `<figure class="image-card" id="soru-card-${esc(soru.id)}">
+          <div style="position:relative">
+            <img src="${esc(soru.imageUrl)}" alt="${esc(soru.ders)} sorusu" loading="lazy">
+            <button type="button" data-soru-delete="${esc(soru.id)}" title="Bu soruyu sil" style="position:absolute;top:6px;right:6px;background:rgba(255,255,255,0.92);border:1px solid #fca5a5;color:#dc2626;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:3px;box-shadow:0 2px 6px rgba(0,0,0,0.15);transition:all .15s">🗑️ Sil</button>
+          </div>
           <div>
             <label><input type="checkbox" data-deneme-soru="${esc(soru.id)}"${seciliSorular.has(soru.id) ? ' checked' : ''}>
             <strong>${esc(soru.ders)}${soru.siraNo ? ' · ' + soru.siraNo : ''}</strong></label>
@@ -2038,6 +2054,57 @@ body.teacher-menu-open {
       durumYaz('examStatus', 'Cevap kaydedildi.', 'ok');
     } catch (error) {
       durumYaz('examStatus', 'Cevap kaydedilemedi: ' + error.message, 'error');
+    }
+  });
+
+  $('imageQuestionList').addEventListener('click', async event => {
+    const silBtn = event.target.closest('[data-soru-delete]');
+    if (!silBtn) return;
+    const soruId = silBtn.dataset.soruDelete;
+    if (!confirm('Bu soruyu silmek istediğinize emin misiniz?')) return;
+    silBtn.disabled = true;
+    silBtn.textContent = 'Siliniyor…';
+    try {
+      await api(`/api/sorular/${encodeURIComponent(soruId)}`, { method: 'DELETE' });
+      seciliSorular.delete(soruId);
+      durumYaz('imageUploadStatus', 'Soru başarıyla silindi.', 'ok');
+      await resimliSorulariYukle();
+    } catch (error) {
+      durumYaz('imageUploadStatus', 'Soru silinemedi: ' + error.message, 'error');
+      silBtn.disabled = false;
+      silBtn.textContent = '🗑️ Sil';
+    }
+  });
+
+  $('btnToggleSelectAllQuestions')?.addEventListener('click', () => {
+    const boxes = $('imageQuestionList').querySelectorAll('[data-deneme-soru]');
+    const allChecked = Array.from(boxes).length > 0 && Array.from(boxes).every(b => b.checked);
+    boxes.forEach(b => {
+      b.checked = !allChecked;
+      if (!allChecked) seciliSorular.add(b.dataset.denemeSoru);
+      else seciliSorular.delete(b.dataset.denemeSoru);
+    });
+    $('btnToggleSelectAllQuestions').textContent = allChecked ? 'Tümünü Seç' : 'Seçimi Kaldır';
+  });
+
+  $('btnDeleteSelectedQuestions')?.addEventListener('click', async () => {
+    if (seciliSorular.size === 0) {
+      alert('Lütfen silmek istediğiniz soruları kutucukları işaretleyerek seçin.');
+      return;
+    }
+    if (!confirm(`Seçili ${seciliSorular.size} soruyu silmek istediğinize emin misiniz?`)) return;
+
+    durumYaz('imageUploadStatus', 'Seçili sorular siliniyor…');
+    try {
+      await api('/api/sorular/toplu-sil', {
+        method: 'POST',
+        body: JSON.stringify({ ids: [...seciliSorular] })
+      });
+      seciliSorular.clear();
+      durumYaz('imageUploadStatus', 'Seçili sorular başarıyla silindi.', 'ok');
+      await resimliSorulariYukle();
+    } catch (error) {
+      durumYaz('imageUploadStatus', 'Toplu silme başarısız: ' + error.message, 'error');
     }
   });
 

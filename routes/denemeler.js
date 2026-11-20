@@ -128,6 +128,59 @@ function createDenemelerRouters({ requireStaff, requireStudent, getResultCollect
   });
 
   // Doğru cevaplar bu yanıta asla eklenmez.
+  // Aktif veya Yaklaşan Türkiye Geneli Deneme Geri Sayım Bilgisi
+  student.get('/turkiye-geneli-aktif', async (req, res) => {
+    try {
+      const TurkiyeGeneliDeneme = require('../models/TurkiyeGeneliDeneme');
+      const now = new Date();
+      const user = req.session.user || {};
+      const userGrade = Number(user.kayitliSinif) || 8;
+
+      let deneme = await TurkiyeGeneliDeneme.findOne({
+        published: true,
+        grade: userGrade,
+        endDate: { $gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) }
+      }).sort({ startDate: 1 }).lean();
+
+      // Sınıfa özel yoksa genel en yakın sınavı bul
+      if (!deneme) {
+        deneme = await TurkiyeGeneliDeneme.findOne({
+          published: true,
+          endDate: { $gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) }
+        }).sort({ startDate: 1 }).lean();
+      }
+
+      if (!deneme) {
+        return res.json({ aktifDeneme: null });
+      }
+
+      const isUpcoming = now < new Date(deneme.startDate);
+      const isActive = now >= new Date(deneme.startDate) && now <= new Date(deneme.endDate);
+      const isEnded = now > new Date(deneme.endDate);
+
+      res.json({
+        aktifDeneme: {
+          id: deneme._id.toString(),
+          title: deneme.title,
+          grade: deneme.grade,
+          description: deneme.description,
+          durationMinutes: deneme.durationMinutes,
+          startDate: deneme.startDate,
+          endDate: deneme.endDate,
+          soruSayisi: Array.isArray(deneme.soruIds) ? deneme.soruIds.length : 0,
+          totalParticipants: deneme.totalParticipants || 0,
+          resultsAnnounced: Boolean(deneme.resultsAnnounced),
+          averageNet: deneme.averageNet || 0,
+          status: isUpcoming ? 'upcoming' : (isActive ? 'active' : 'ended'),
+          targetTimestamp: isUpcoming ? new Date(deneme.startDate).getTime() : new Date(deneme.endDate).getTime()
+        }
+      });
+    } catch (err) {
+      console.error('Türkiye Geneli aktif deneme hatası:', err);
+      res.status(500).json({ mesaj: 'Aktif deneme bilgisi alınamadı.' });
+    }
+  });
+
   student.get('/:id', async (req, res) => {
     try {
       if (!OBJECT_ID.test(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz deneme numarası.' });

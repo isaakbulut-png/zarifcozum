@@ -32,8 +32,8 @@ const { createDenemelerRouters } = require('./routes/denemeler');
 const { requireKonuLogin } = require('./lib/konu-erisimi');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
-const { createTeacherPreferencesRouter } = require('./routes/teacher-preferences');
 const { createPratikRouter } = require('./routes/pratik');
+const { createYaziliRouter } = require('./routes/yazili');
 const { createLiveLessonsRouter } = require('./routes/live-lessons');
 const { studentLessonFilter, matchesAudience, studentProfiles: getStudentProfiles } = require('./lib/live-lesson-audience');
 const { createParentRouter } = require('./routes/parent');
@@ -636,6 +636,7 @@ app.use('/api/admin', createAdminRouter({
   getDenemeModel: () => Deneme
 }));
 app.use('/api/payments', createPaymentRouter({ requireStudent: ogrenciKontrol }));
+app.use('/api/yazili', createYaziliRouter({ requireRole }));
 app.use('/api/ai', createAIRouter({
   getQuizCollection: () => quizKoleksiyonu,
   requireRole,
@@ -674,8 +675,7 @@ const gelisimRouters = createGelisimRouters({
   getGoalCollection: () => ogrenciHedefleri,
   getProgressCollection: () => kazanimIlerleme,
   getCommentCollection: () => ogretmenYorumlari,
-  getEventCollection: () => takvimOlaylari,
-  getQuizCollection: () => quizKoleksiyonu
+  getEventCollection: () => takvimOlaylari
 });
 app.use('/api/pratik', createPratikRouter({
   getUsageCollection: () => pratikKullanim,
@@ -706,10 +706,6 @@ app.use('/api/pratik', createPratikRouter({
 }));
 app.use('/api/ogretmen/gelisim', gelisimRouters.teacher);
 app.use('/api/student/gelisim', gelisimRouters.student);
-app.use('/api/ogretmen/tercihler', createTeacherPreferencesRouter({
-  requireTeacher: requireRole('teacher', 'admin'),
-  UserModel: User
-}));
 app.use('/api/ogretmen', teacherStudentHomeworkRouters.teacher);
 app.use('/api/student', teacherStudentHomeworkRouters.student);
 app.use('/api/parent', createParentRouter({

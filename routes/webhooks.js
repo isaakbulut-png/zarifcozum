@@ -101,12 +101,24 @@ async function updatePayment({ gateway, orderReference, paymentId, amountMinor, 
       const base = user.expiresAt && user.expiresAt > now ? user.expiresAt : now;
       user.subscriptionStatus = 'active';
       user.subscriptionType = payment.subscriptionType;
-      if (payment.plan) user.subscriptionPlan = payment.plan;
+      if (payment.plan) {
+        user.subscriptionPlan = payment.plan;
+        user.paketTipi = payment.plan; // Kota middleware ile tam senkronizasyon
+      }
       user.expiresAt = addSubscriptionPeriod(base, payment.subscriptionType);
       user.paymentGateway = gateway;
       if (payment.providerCustomerId) {
         user.paymentGatewayCustomerId = payment.providerCustomerId;
       }
+      // Yeni abonelik aktivasyonunda kotaları sıfırla
+      user.gunlukAiMesajSayisi = 0;
+      user.gunlukSokratikSayisi = 0;
+      user.aylikSokratikSayisi = 0;
+      user.aylikOgretmenIkiziSayisi = 0;
+      user.gunlukSoruUretimSayisi = 0;
+      user.aylikSoruUretimSayisi = 0;
+      user.sonKotaSifirlamaTarihi = now;
+      user.sonAylikSifirlamaTarihi = now;
       payment.status = 'paid';
       payment.providerPaymentId = paymentId || payment.providerPaymentId;
       payment.paidAt = now;

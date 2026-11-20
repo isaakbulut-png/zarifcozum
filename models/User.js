@@ -106,15 +106,6 @@ const userSchema = new mongoose.Schema({
     maxlength: 100,
     default: null
   },
-  teacherPanelPreferences: {
-    type: new mongoose.Schema({
-      displayName: { type: String, trim: true, maxlength: 100, default: '' },
-      branch: { type: String, trim: true, maxlength: 80, default: '' },
-      grades: { type: [Number], default: [] },
-      notifications: { type: Boolean, default: true }
-    }, { _id: false }),
-    default: undefined
-  },
   okulKurumAdi: {
     type: String,
     trim: true,
@@ -158,11 +149,36 @@ const userSchema = new mongoose.Schema({
   },
   paketTipi: {
     type: String,
-    enum: ['free', 'baslangic', 'pro'],
+    enum: ['free', 'temel', 'standart', 'vip', 'baslangic', 'pro'],
     default: 'free',
     index: true
   },
+  // Sınıf Düzeyi ve Telafi Alanları
+  kayitliSinif: {
+    type: Number,
+    enum: [5, 6, 7, 8, 9, 10, 11, 12, null],
+    default: null,
+    index: true
+  },
+  seciliTelafiSinif: {
+    type: Number,
+    enum: [5, 6, 7, 8, 9, 10, 11, 12, null],
+    default: null
+  },
+  // Çok Boyutlu Günlük ve Aylık AI Sayaçları
   gunlukAiMesajSayisi: {
+    type: Number,
+    default: 0
+  },
+  gunlukSokratikSayisi: {
+    type: Number,
+    default: 0
+  },
+  aylikSokratikSayisi: {
+    type: Number,
+    default: 0
+  },
+  aylikOgretmenIkiziSayisi: {
     type: Number,
     default: 0
   },
@@ -170,15 +186,72 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  aylikSoruUretimSayisi: {
+    type: Number,
+    default: 0
+  },
   sonKotaSifirlamaTarihi: {
     type: Date,
     default: Date.now
   },
+  sonAylikSifirlamaTarihi: {
+    type: Date,
+    default: Date.now
+  },
+  // Oyunlaştırma (Gamification)
+  seriGunSayisi: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  sonCalismaTarihi: {
+    type: Date,
+    default: null
+  },
+  seriKorumaKalkani: {
+    type: Boolean,
+    default: false
+  },
+  kazanilanRozetler: [{
+    id: String,
+    ad: String,
+    kategori: String,
+    icon: String,
+    kazanildiAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  erisenYaziliProvalar: [{
+    yaziliId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'YaziliProva'
+    },
+    donem: {
+      type: String
+    },
+    erisimTarihi: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   ozelGunlukMesajLimiti: {
     type: Number,
     default: null
   },
+  ozelAylikSoruLimiti: {
+    type: Number,
+    default: null
+  },
   ekstraBonusKredi: {
+    type: Number,
+    default: 0
+  },
+  ekstraSokratikKredi: {
+    type: Number,
+    default: 0
+  },
+  ekstraOgretmenIkiziKredi: {
     type: Number,
     default: 0
   },
@@ -230,6 +303,25 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 userSchema.index({ role: 1, haftalikPuan: -1, _id: 1 }, { name: 'student_weekly_leaderboard' });
+
+userSchema.methods.isSubscriptionActive = function (now = new Date()) {
+  if (this.role === 'admin') return true;
+  if (this.subscriptionStatus !== 'active') return false;
+  if (this.expiresAt && new Date(this.expiresAt) <= now) return false;
+  return true;
+};
+
+userSchema.methods.getEffectivePlan = function (now = new Date()) {
+  if (this.role === 'admin') return 'vip';
+  if (this.isSubscriptionActive(now) && this.subscriptionPlan) {
+    return this.subscriptionPlan;
+  }
+  // Fallback to paketTipi mapping
+  if (this.paketTipi === 'vip' || this.paketTipi === 'pro') return 'vip';
+  if (this.paketTipi === 'standart') return 'standart';
+  if (this.paketTipi === 'temel' || this.paketTipi === 'baslangic') return 'temel';
+  return 'free';
+};
 
 userSchema.statics.createWithPassword = async function (userData, password) {
   const passwordHash = await this.hashPassword(password);
