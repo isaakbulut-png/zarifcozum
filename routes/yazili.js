@@ -26,7 +26,11 @@ function createYaziliRouter({ requireRole } = {}) {
   // 1. Öğrenci: Sınıfına ve Paketine Uygun Yazılı Provalarını Listele
   router.get('/', requireAuth, async (req, res) => {
     try {
-      const user = req.session.user;
+      let user = req.session.user;
+      if (user.role === 'admin' && req.query.previewUserId) {
+        const previewTarget = await User.findById(req.query.previewUserId);
+        if (previewTarget) user = previewTarget;
+      }
       const { grade, donem } = req.query;
       const plan = resolveUserPlan(user);
 
@@ -82,7 +86,8 @@ function createYaziliRouter({ requireRole } = {}) {
         createdAt: p.createdAt
       }));
 
-      const donemlikLimit = (user.role === 'admin' || user.role === 'teacher')
+      const isRealAdmin = req.session.user?.role === 'admin' && !req.query.previewUserId;
+      const donemlikLimit = (isRealAdmin || req.session.user?.role === 'teacher')
         ? 'sinirsiz'
         : (plan === 'vip' || plan === 'standart')
           ? 'sinirsiz'
@@ -90,7 +95,7 @@ function createYaziliRouter({ requireRole } = {}) {
 
       res.json({
         success: true,
-        mevcutPaket: plan,
+        mevcutPaket: isRealAdmin ? 'admin' : (req.session.user?.role === 'teacher' ? 'ogretmen' : plan),
         donemlikLimit,
         kullanilanHak: kullanilanProvaIds.length,
         provalar: listesi

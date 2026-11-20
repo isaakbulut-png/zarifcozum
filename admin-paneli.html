@@ -1750,6 +1750,48 @@
         return td;
       }
 
+      function zarifConfirmDialog({ title, message, confirmText = 'Onayla', cancelText = 'Vazgeç', isDanger = false }) {
+        return new Promise(resolve => {
+          let dialog = document.getElementById('zarifConfirmDialog');
+          if (!dialog) {
+            dialog = document.createElement('dialog');
+            dialog.id = 'zarifConfirmDialog';
+            dialog.style.border = 'none';
+            dialog.style.borderRadius = '16px';
+            dialog.style.padding = '24px';
+            dialog.style.maxWidth = '420px';
+            dialog.style.width = '90%';
+            dialog.style.boxShadow = '0 20px 40px rgba(0,0,0,0.25)';
+            dialog.style.background = '#fff';
+            dialog.style.fontFamily = 'inherit';
+            dialog.style.color = '#231810';
+            document.body.appendChild(dialog);
+          }
+          dialog.innerHTML = `
+            <div style="text-align:center; margin-bottom:16px;">
+              <div style="font-size:36px; margin-bottom:8px;">${isDanger ? '⚠️' : '✨'}</div>
+              <h3 style="margin:0 0 8px 0; color:#231810; font-size:1.15rem; font-weight:700;">${title}</h3>
+              <p style="margin:0; font-size:0.92rem; color:#64748b; line-height:1.5;">${message}</p>
+            </div>
+            <div style="display:flex; justify-content:center; gap:12px; margin-top:20px;">
+              <button type="button" id="zarifConfirmCancel" class="btn" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:8px; padding:8px 18px; font-weight:600; cursor:pointer;">
+                ${cancelText}
+              </button>
+              <button type="button" id="zarifConfirmOk" class="btn" style="background:${isDanger ? '#dc2626' : '#7a4f2d'}; color:#fff; border:none; border-radius:8px; padding:8px 20px; font-weight:600; cursor:pointer;">
+                ${confirmText}
+              </button>
+            </div>
+          `;
+          const cleanUp = (result) => {
+            dialog.close();
+            resolve(result);
+          };
+          dialog.querySelector('#zarifConfirmCancel').onclick = () => cleanUp(false);
+          dialog.querySelector('#zarifConfirmOk').onclick = () => cleanUp(true);
+          dialog.showModal();
+        });
+      }
+
       function emptyRow(body, columns, text) {
         body.replaceChildren();
         const tr = document.createElement('tr');
@@ -1952,10 +1994,25 @@
             } else {
               adminRoleCell.textContent = adminRoleNames[user.adminRole] || '—';
             }
-            cell(tr, subNames[user.subscriptionStatus] || '—', user.subscriptionStatus === 'active' ? 'ok' : '');
-            cell(tr, user.subscriptionStatus === 'active'
-              ? (packageNames[user.subscriptionPlan] || 'Temel (eski)')
-              : '—');
+            const currentPlan = user.subscriptionPlan || user.paketTipi || 'free';
+            const isActive = (user.subscriptionStatus === 'active' || ['temel', 'standart', 'vip'].includes(currentPlan)) && currentPlan !== 'free';
+
+            // Abonelik Durumu Sütunu:
+            const subCell = cell(tr, '');
+            subCell.innerHTML = isActive
+              ? '<span class="chip" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:700;">Aktif</span>'
+              : '<span class="chip" style="background:#f1f5f9; color:#64748b; border:1px solid #e2e8f0;">Ücretsiz</span>';
+
+            // Paket Sütunu:
+            const planCell = cell(tr, '');
+            const planChips = {
+              vip: '<span class="chip" style="background:#fae8ff; color:#86198f; border:1px solid #f0abfc; font-weight:700;">👑 VIP Paket</span>',
+              standart: '<span class="chip" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-weight:700;">🎯 Standart</span>',
+              temel: '<span class="chip" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a; font-weight:700;">📚 Temel</span>',
+              free: '<span style="color:#94a3b8;">—</span>'
+            };
+            planCell.innerHTML = isActive ? (planChips[currentPlan] || currentPlan) : '<span style="color:#94a3b8;">—</span>';
+
             cell(tr, user.expiresAt ? fmtDate(user.expiresAt) : '—');
             cell(tr, fmtDate(user.createdAt));
             const actionCell = cell(tr, '');
@@ -1967,22 +2024,64 @@
             if (activeAdminRole === 'superadmin' && user.role === 'student') {
               const packageSelect = document.createElement('select');
               packageSelect.setAttribute('aria-label', `${user.name} paket işlemi`);
-              for (const [value, label] of [['', 'Paket Seç...'], ['temel', 'Temel ver (1 Yıl)'], ['standart', 'Standart ver (1 Yıl)'],
-                ['vip', 'VIP ver (1 Yıl)'], ['revoke', 'Aboneliği kaldır']]) {
-                packageSelect.append(Object.assign(document.createElement('option'), { value, textContent: label }));
+              packageSelect.style.padding = '4px 8px';
+              packageSelect.style.fontSize = '12px';
+              packageSelect.style.borderRadius = '6px';
+              packageSelect.style.border = '1px solid #d9d3c3';
+              packageSelect.style.background = '#fff';
+
+              const packageOptions = [
+                ['free', '⚪ Ücretsiz (Free)'],
+                ['temel', '📚 Temel Paket (1 Yıl)'],
+                ['standart', '🎯 Standart Paket (1 Yıl)'],
+                ['vip', '👑 VIP Paket (1 Yıl)']
+              ];
+
+              for (const [val, lbl] of packageOptions) {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = lbl;
+                if (val === (isActive ? currentPlan : 'free')) {
+                  opt.selected = true;
+                }
+                packageSelect.append(opt);
               }
+
+              packageSelect.dataset.prevValue = isActive ? currentPlan : 'free';
+
               packageSelect.addEventListener('change', async () => {
-                if (!packageSelect.value) return;
-                const chosen = packageSelect.value;
+                const newPlan = packageSelect.value;
+                const prevPlan = packageSelect.dataset.prevValue;
+                if (newPlan === prevPlan) return;
+
+                const planTitles = {
+                  vip: '👑 VIP Paket (1 Yıl)',
+                  standart: '🎯 Standart Paket (1 Yıl)',
+                  temel: '📚 Temel Paket (1 Yıl)',
+                  free: 'Ücretsiz (Free)'
+                };
+
+                const isCancel = newPlan === 'free';
+                const msg = isCancel
+                  ? `"${user.name}" adlı öğrencinin aktif aboneliği iptal edilecek ve Ücretsiz (Free) pakete düşürülecektir. Onaylıyor musunuz?`
+                  : `"${user.name}" adlı öğrenciye ${planTitles[newPlan]} tanımlanacaktır. Onaylıyor musunuz?`;
+
+                const confirmed = await zarifConfirmDialog({
+                  title: isCancel ? 'Abonelik İptali Onayı' : 'Paket Tanımlama Onayı',
+                  message: msg,
+                  confirmText: isCancel ? 'Aboneliği İptal Et' : 'Paketi Tanımla',
+                  isDanger: isCancel
+                });
+
+                if (!confirmed) {
+                  packageSelect.value = prevPlan;
+                  return;
+                }
+
                 packageSelect.disabled = true;
                 try {
                   let res;
-                  if (chosen === 'revoke') {
-                    if (!confirm(`"${user.name}" adlı öğrencinin aktif aboneliği iptal edilecek ve Free pakete düşürülecektir. Onaylıyor musunuz?`)) {
-                      packageSelect.disabled = false;
-                      packageSelect.value = '';
-                      return;
-                    }
+                  if (isCancel) {
                     res = await api(`/api/admin/users/${encodeURIComponent(user.id)}/subscription`, {
                       method: 'PUT',
                       body: JSON.stringify({ action: 'revoke', plan: null })
@@ -1990,20 +2089,38 @@
                   } else {
                     res = await api(`/api/admin/users/${encodeURIComponent(user.id)}/subscription`, {
                       method: 'PUT',
-                      body: JSON.stringify({ action: 'grant', plan: chosen, days: 365, durationMonths: 12 })
+                      body: JSON.stringify({ action: 'grant', plan: newPlan, days: 365, durationMonths: 12 })
                     });
                   }
+                  packageSelect.dataset.prevValue = newPlan;
                   $('usersMsg').className = 'msg ok';
-                  $('usersMsg').textContent = res.mesaj || 'Abonelik paketi güncellendi.';
+                  $('usersMsg').textContent = res.mesaj || 'Abonelik paketi başarıyla güncellendi.';
                   loadUsers();
                 } catch (error) {
+                  packageSelect.value = prevPlan;
                   packageSelect.disabled = false;
                   $('usersMsg').className = 'msg';
                   $('usersMsg').textContent = error.message;
-                  loadUsers();
                 }
               });
               actionsWrap.append(packageSelect);
+
+              // 👁️ Öğrenci Gözüyle İncele (Önizleme) Butonu
+              const previewLink = document.createElement('a');
+              previewLink.href = `/ogrenci-paneli.html?previewUserId=${encodeURIComponent(user.id)}`;
+              previewLink.target = '_blank';
+              previewLink.className = 'btn sm';
+              previewLink.style.background = '#f0fdf4';
+              previewLink.style.color = '#15803d';
+              previewLink.style.borderColor = '#bbf7d0';
+              previewLink.style.textDecoration = 'none';
+              previewLink.style.display = 'inline-flex';
+              previewLink.style.alignItems = 'center';
+              previewLink.style.gap = '4px';
+              previewLink.style.fontWeight = '600';
+              previewLink.title = `"${user.name}" adlı öğrencinin panelini önizle`;
+              previewLink.innerHTML = '👁️ İncele';
+              actionsWrap.append(previewLink);
 
               const clearBtn = document.createElement('button');
               clearBtn.className = 'btn sm';

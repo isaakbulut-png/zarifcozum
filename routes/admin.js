@@ -342,7 +342,7 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
       const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
       const [users, total] = await Promise.all([
         User.find(filter)
-          .select('name email role adminRole restricted restrictionReason subscriptionStatus subscriptionType subscriptionPlan expiresAt createdAt')
+          .select('name email role adminRole restricted restrictionReason subscriptionStatus subscriptionType subscriptionPlan paketTipi expiresAt createdAt')
           .sort({ createdAt: -1 })
           .skip((page - 1) * PAGE_SIZE)
           .limit(PAGE_SIZE)
@@ -353,22 +353,25 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
         page,
         pageSize: PAGE_SIZE,
         total,
-        users: users.map(user => ({
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          adminRole: adminRoleOf(user),
-          restricted: Boolean(user.restricted),
-          restrictionReason: user.restrictionReason || null,
-          ...(req.adminRole === 'superadmin' && {
-            subscriptionStatus: user.subscriptionStatus,
-            subscriptionType: user.subscriptionType,
-            subscriptionPlan: user.subscriptionPlan || null,
-            expiresAt: user.expiresAt
-          }),
-          createdAt: user.createdAt
-        }))
+        users: users.map(user => {
+          const effectivePlan = user.subscriptionPlan || user.paketTipi || null;
+          const isPlanActive = Boolean(user.subscriptionStatus === 'active' || (effectivePlan && ['temel', 'standart', 'vip'].includes(effectivePlan)));
+          return {
+            id: user._id.toString(),
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            adminRole: adminRoleOf(user),
+            restricted: Boolean(user.restricted),
+            restrictionReason: user.restrictionReason || null,
+            subscriptionStatus: isPlanActive ? 'active' : (user.subscriptionStatus || 'free'),
+            subscriptionType: user.subscriptionType || 'annual',
+            subscriptionPlan: effectivePlan,
+            paketTipi: user.paketTipi || effectivePlan || 'free',
+            expiresAt: user.expiresAt || null,
+            createdAt: user.createdAt
+          };
+        })
       });
     } catch (error) {
       console.error('Kullanıcılar alınamadı:', error);

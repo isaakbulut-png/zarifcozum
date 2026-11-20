@@ -876,11 +876,18 @@ button,select{font:inherit}
     let quizBusy = false;
     let pendingHomework = null;
 
+    const previewUserId = new URLSearchParams(window.location.search).get('previewUserId');
+    function withPreviewParam(url) {
+      if (!previewUserId) return url;
+      const sep = url.includes('?') ? '&' : '?';
+      return `${url}${sep}previewUserId=${encodeURIComponent(previewUserId)}`;
+    }
+
     async function api(url, options = {}) {
       if (window.location.protocol === 'file:') {
         throw new Error('Paneli dosyaya çift tıklayarak değil, proje klasöründe npm start çalıştırdıktan sonra http://localhost:3000/ogrenci-paneli.html adresinden açın.');
       }
-      const response = await fetch(url, {
+      const response = await fetch(withPreviewParam(url), {
         ...options,
         credentials: 'same-origin',
         headers: {
@@ -1096,11 +1103,26 @@ button,select{font:inherit}
         }
         $('studentName').textContent = user.name;
         $('studentEmail').textContent = user.email;
+
+        if (previewUserId && !document.getElementById('adminPreviewBanner')) {
+          const banner = document.createElement('div');
+          banner.id = 'adminPreviewBanner';
+          banner.style.cssText = 'position:sticky; top:0; z-index:99999; background:linear-gradient(90deg, #7a4f2d, #573318); color:#fff; padding:10px 16px; font-size:13px; font-weight:600; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.25); display:flex; justify-content:center; align-items:center; gap:16px;';
+          const pName = user.name || 'Öğrenci';
+          const pPlan = (user.subscriptionPlan || user.paketTipi || 'Free').toUpperCase();
+          banner.innerHTML = `
+            <span>👁️ <strong>YÖNETİCİ ÖNİZLEME MODU:</strong> "${esc(pName)}" (${esc(pPlan)}) olarak inceleniyor. Gerçek paket kotaları ve yetkileri simüle edilmektedir.</span>
+            <a href="/admin-paneli.html" style="background:#fff; color:#7a4f2d; border-radius:6px; padding:4px 12px; text-decoration:none; font-weight:700; font-size:12px;">← Yönetim Paneline Dön</a>
+          `;
+          document.body.prepend(banner);
+        }
+
         const planBadge = $('studentPlanBadge');
         if (planBadge) {
-          if (user.hasActivePlan) {
+          const currentPlanKey = user.subscriptionPlan || user.paketTipi;
+          if (user.hasActivePlan && currentPlanKey && currentPlanKey !== 'free') {
             const planLabels = { temel: 'Temel Paket', standart: 'Standart Paket', vip: 'VIP Paket' };
-            planBadge.textContent = planLabels[user.subscriptionPlan] || 'Aktif Paket';
+            planBadge.textContent = planLabels[currentPlanKey] || 'Aktif Paket';
             planBadge.className = 'user-plan-badge active';
             planBadge.style.display = 'inline-block';
           } else {
@@ -1561,7 +1583,7 @@ button,select{font:inherit}
       const badge = $('studentAiQuotaBadge');
       if (!badge) return;
       try {
-        const res = await fetch('/api/student/ai-quota', { credentials: 'same-origin' });
+        const res = await fetch(withPreviewParam('/api/student/ai-quota'), { credentials: 'same-origin' });
         if (!res.ok) {
           if (res.status === 401) {
             badge.innerHTML = '⚡ Yapay Zekâ: Giriş Yapınız';
@@ -1910,7 +1932,8 @@ button,select{font:inherit}
             badge.style.background = '#dcfce7';
             badge.style.color = '#15803d';
             badge.style.borderColor = '#86efac';
-            badge.textContent = `⭐ Sınırsız Yazılı Provası (${(res.mevcutPaket || '').toUpperCase()})`;
+            const paketName = res.mevcutPaket === 'admin' ? 'Yönetici' : res.mevcutPaket === 'ogretmen' ? 'Öğretmen' : (res.mevcutPaket || '').toUpperCase();
+            badge.textContent = `⭐ Sınırsız Yazılı Provası (${paketName})`;
           } else if (res.donemlikLimit === 2) {
             badge.style.background = '#fef3c7';
             badge.style.color = '#b45309';
@@ -2020,7 +2043,7 @@ button,select{font:inherit}
 
     async function loadGamificationAndLeaderboard() {
       try {
-        const qRes = await fetch('/api/student/ai-quota', { credentials: 'same-origin' });
+        const qRes = await fetch(withPreviewParam('/api/student/ai-quota'), { credentials: 'same-origin' });
         if (qRes.ok) {
           const quotaData = await qRes.json();
           renderStudentAiQuotaBadge(quotaData);

@@ -272,8 +272,18 @@ app.get('/api/mufredat-ozet', mufredatKonulariLimiter, requireKonuLogin, async (
 // Öğrenci Anlık AI Kota Durumu
 app.get('/api/student/ai-quota', requireRole('student', 'teacher', 'admin'), async (req, res) => {
   try {
-    const user = await User.findById(req.session.user._id || req.session.user.id);
+    let targetId = req.session.user._id || req.session.user.id;
+    const isStaff = req.session.user.role === 'admin' || req.session.user.role === 'teacher';
+    if (isStaff && req.query.previewUserId) {
+      targetId = req.query.previewUserId;
+    }
+    const user = await User.findById(targetId);
     const status = getQuotaStatus(user);
+    if (isStaff && req.query.previewUserId && user) {
+      status.sinirsiz = false; // Önizlemede öğrencinin gerçek kotasını göster
+      status.isPreview = true;
+      status.name = user.name;
+    }
     res.json(status);
   } catch (error) {
     res.status(500).json({ mesaj: 'Kota bilgisi alınamadı.' });
@@ -796,7 +806,11 @@ async function aktifCanliDersiAl() {
 
 app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async (req, res) => {
   try {
-    const profiles = await getStudentProfiles(studentProfiles, req.session.user.id);
+    let effectiveStudentId = req.session.user.id;
+    if ((req.session.user.role === 'admin' || req.session.user.adminRole) && req.query.previewUserId) {
+      effectiveStudentId = req.query.previewUserId;
+    }
+    const profiles = await getStudentProfiles(studentProfiles, effectiveStudentId);
     const [dersler, quizler, duyurular, sonuclar, aktifDers, parentConnectionCode] = await Promise.all([
       planliDersKoleksiyonu.find(studentLessonFilter(profiles))
         .sort({ startsAt: 1 }).limit(50).toArray(),
@@ -812,7 +826,7 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
           { expiresAt: { $gte: new Date() } }
         ]
       }).sort({ createdAt: -1 }).limit(20).toArray(),
-      quizSonucKoleksiyonu.find({ studentId: req.session.user.id })
+      quizSonucKoleksiyonu.find({ studentId: effectiveStudentId })
         .sort({ createdAt: -1 }).limit(100).toArray(),
       aktifCanliDersiAl(),
       User.ensureParentConnectionCode(req.session.user.id)

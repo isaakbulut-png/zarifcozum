@@ -569,17 +569,35 @@ router.get('/me', async (req, res) => {
       });
       return;
     }
-    const hasActivePlan = !isParent && Boolean(user.subscriptionStatus === 'active' && (!user.expiresAt || new Date(user.expiresAt) > new Date()));
+    const isStaff = user && (user.role === 'admin' || Boolean(adminRoleOf(user)));
+    let effectiveUser = user;
+    let isPreview = false;
+    if (isStaff && req.query.previewUserId) {
+      const previewTarget = await User.findById(req.query.previewUserId)
+        .select('name email role adminRole subscriptionStatus subscriptionPlan paketTipi expiresAt');
+      if (previewTarget) {
+        effectiveUser = previewTarget;
+        isPreview = true;
+      }
+    }
+
+    const currentEffectivePlan = effectiveUser.subscriptionPlan || effectiveUser.paketTipi || null;
+    const hasActivePlan = !isParent && Boolean(
+      (effectiveUser.subscriptionStatus === 'active' || (currentEffectivePlan && ['temel', 'standart', 'vip'].includes(currentEffectivePlan))) &&
+      (!effectiveUser.expiresAt || new Date(effectiveUser.expiresAt) > new Date())
+    );
     res.json({
       user: {
-        id: user._id.toString(),
-        name: isParent ? `${user.name} ${user.surname}`.trim() : user.name,
-        email: user.email,
-        role: isParent ? 'parent' : user.role,
-        adminRole: isParent ? null : adminRoleOf(user),
-        subscriptionStatus: user.subscriptionStatus || null,
-        subscriptionPlan: user.subscriptionPlan || null,
-        hasActivePlan
+        id: effectiveUser._id.toString(),
+        name: isParent ? `${effectiveUser.name} ${effectiveUser.surname}`.trim() : effectiveUser.name,
+        email: effectiveUser.email,
+        role: isParent ? 'parent' : effectiveUser.role,
+        adminRole: isParent ? null : adminRoleOf(effectiveUser),
+        subscriptionStatus: effectiveUser.subscriptionStatus || (hasActivePlan ? 'active' : 'free'),
+        subscriptionPlan: currentEffectivePlan,
+        paketTipi: effectiveUser.paketTipi || currentEffectivePlan || 'free',
+        hasActivePlan,
+        isPreview
       }
     });
   } catch (error) {
