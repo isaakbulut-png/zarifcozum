@@ -3432,7 +3432,10 @@
 
       async function loadAiAuditOverview() {
         try {
-          const res = await fetch('/api/admin/ai-denetim-ozet', { credentials: 'same-origin' });
+          const res = await fetch('/api/admin/ai-denetim-ozet?_t=' + Date.now(), {
+            credentials: 'same-origin',
+            cache: 'no-store'
+          });
           if (!res.ok) throw new Error('AI denetim özeti alınamadı: ' + res.status);
           const data = await res.json();
 
@@ -3986,10 +3989,16 @@
             }
 
             try {
-              await api('/api/admin/ai-kredi-guncelle', {
+              const saveRes = await api('/api/admin/ai-kredi-guncelle', {
                 method: 'POST',
                 body: JSON.stringify({ initialCredit: val })
               });
+              if (saveRes?.kredi?.initialCredit !== undefined) {
+                const init = Number(saveRes.kredi.initialCredit || 0);
+                if ($('statAiBaslangicKredi')) {
+                  $('statAiBaslangicKredi').textContent = init.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+                }
+              }
               handleCloseCreditModal();
               await loadAiAuditOverview();
             } catch (err) {

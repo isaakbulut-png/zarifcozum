@@ -206,7 +206,13 @@ systemConfigSchema.statics.dismissSystemHealthAlert = async function () {
 };
 
 systemConfigSchema.statics.getGeminiCreditSettings = async function () {
-  const config = await this.findById('gemini-credit').lean();
+  let config = await this.findById('visitor-access').lean();
+  if (typeof config?.gemini_initial_credit !== 'number') {
+    config = await this.findById('gemini-credit').lean();
+  }
+  if (typeof config?.gemini_initial_credit !== 'number') {
+    config = await this.findOne({ gemini_initial_credit: { $exists: true, $gt: 0 } }).lean();
+  }
   const initialCredit = typeof config?.gemini_initial_credit === 'number' ? config.gemini_initial_credit : 0.00;
   const updatedAt = config?.gemini_credit_updated_at || null;
   return {
@@ -220,24 +226,39 @@ systemConfigSchema.statics.getGeminiCreditSettings = async function () {
 systemConfigSchema.statics.saveGeminiCredit = async function (initialCredit) {
   const amount = Number(parseFloat(initialCredit).toFixed(2));
   const now = new Date();
-  const config = await this.findOneAndUpdate(
-    { _id: 'gemini-credit' },
+  const validAmount = isNaN(amount) ? 0.00 : amount;
+
+  // Ana sistem konfigürasyon belgesi (visitor-access) üzerinde güncelle
+  await this.findOneAndUpdate(
+    { _id: 'visitor-access' },
     {
       $set: {
-        gemini_initial_credit: isNaN(amount) ? 0.00 : amount,
+        gemini_initial_credit: validAmount,
         gemini_credit_updated_at: now
-      },
-      $setOnInsert: { _id: 'gemini-credit' }
+      }
     },
     { upsert: true, new: true, setDefaultsOnInsert: true }
-  ).lean();
-  const savedAmount = typeof config?.gemini_initial_credit === 'number' ? config.gemini_initial_credit : amount;
-  const savedDate = config?.gemini_credit_updated_at || now;
+  );
+
+  // İkincil uyumluluk kaydı olarak gemini-credit belgesini de güncelle
+  try {
+    await this.updateOne(
+      { _id: 'gemini-credit' },
+      {
+        $set: {
+          gemini_initial_credit: validAmount,
+          gemini_credit_updated_at: now
+        }
+      },
+      { upsert: true }
+    );
+  } catch (_) {}
+
   return {
-    initialCredit: savedAmount,
-    updatedAt: savedDate,
-    gemini_initial_credit: savedAmount,
-    gemini_credit_updated_at: savedDate
+    initialCredit: validAmount,
+    updatedAt: now,
+    gemini_initial_credit: validAmount,
+    gemini_credit_updated_at: now
   };
 };
 

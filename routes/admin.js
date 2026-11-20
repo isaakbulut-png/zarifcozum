@@ -1284,16 +1284,20 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
 
   // 1. Ajan Performans ve Genel AI Denetim Özeti
   router.get('/ai-denetim-ozet', allow('superadmin', 'support'), async (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
     try {
       const AiUsageLog = require('../models/AiUsageLog');
+      const SysConfig = SystemConfig || require('../models/SystemConfig');
       const [auditData, toplamOgrenci, aiEngelliSayisi, ozelLimitliSayisi, bonusluSayisi, krediAyari] = await Promise.all([
         getAiAuditSummary(),
         User.countDocuments({ role: 'student' }),
         User.countDocuments({ aiErisimEngelli: true }),
         User.countDocuments({ ozelGunlukMesajLimiti: { $ne: null } }),
         User.countDocuments({ ekstraBonusKredi: { $gt: 0 } }),
-        typeof SystemConfig.getGeminiCreditSettings === 'function'
-          ? SystemConfig.getGeminiCreditSettings()
+        typeof SysConfig.getGeminiCreditSettings === 'function'
+          ? SysConfig.getGeminiCreditSettings()
           : { initialCredit: 0.00, updatedAt: null }
       ]);
 
@@ -1346,11 +1350,12 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
         return res.status(400).json({ mesaj: 'Geçersiz kredi tutarı. Sıfır veya pozitif bir sayı giriniz.' });
       }
 
-      if (typeof SystemConfig.saveGeminiCredit !== 'function') {
+      const SysConfig = SystemConfig || require('../models/SystemConfig');
+      if (typeof SysConfig.saveGeminiCredit !== 'function') {
         return res.status(500).json({ mesaj: 'Sistem ayar servisi bulunamadı.' });
       }
 
-      const updated = await SystemConfig.saveGeminiCredit(numAmount);
+      const updated = await SysConfig.saveGeminiCredit(numAmount);
       const savedAmount = typeof updated?.initialCredit === 'number'
         ? updated.initialCredit
         : typeof updated?.gemini_initial_credit === 'number'
