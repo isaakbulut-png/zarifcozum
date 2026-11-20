@@ -394,6 +394,40 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
   fallthrough: true
 }));
 if (mediaStorage.get) app.use('/uploads', createSiteMediaFilesRouter(mediaStorage));
+
+// Cloudflare R2 AI İllüstrasyon Akışı (Render restartlarında veri kaybını önler, kalıcı R2 deposundan okur)
+app.get('/uploads/ai-illustrations/:filename', async (req, res) => {
+  const filename = req.params.filename;
+  if (!/^[a-z0-9_.-]+\.(png|jpe?g|webp)$/i.test(filename)) {
+    return res.status(400).send('Geçersiz görsel adı.');
+  }
+
+  try {
+    const { getFromR2 } = require('./lib/image-generator');
+    const object = await getFromR2(`ai-illustrations/${filename}`);
+    if (!object || !object.Body) {
+      return res.status(404).send('Görsel bulunamadı.');
+    }
+
+    res.set({
+      'Content-Type': object.ContentType || 'image/png',
+      'X-Content-Type-Options': 'nosniff',
+      'Cache-Control': 'public, max-age=31536000, immutable'
+    });
+    if (Number.isSafeInteger(object.ContentLength)) {
+      res.set('Content-Length', String(object.ContentLength));
+    }
+
+    const { pipeline } = require('node:stream/promises');
+    await pipeline(object.Body, res);
+  } catch (err) {
+    if (err.name === 'NoSuchKey' || err.$metadata?.httpStatusCode === 404) {
+      return res.status(404).send('Görsel bulunamadı.');
+    }
+    console.error('[R2 AI Illustrations] Görsel getirme hatası:', err.message);
+    res.status(503).send('Görsel deposuna ulaşılamadı.');
+  }
+});
 app.use('/logo', express.static(path.join(__dirname, 'logo')));
 app.use('/pages', express.static(path.join(__dirname, 'pages'), { extensions: ['html'] }));
 app.get('/api/homepage-assets', async (req, res) => {
