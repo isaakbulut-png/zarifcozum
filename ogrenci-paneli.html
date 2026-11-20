@@ -926,6 +926,9 @@ button,select{font:inherit}
         history.pushState(null, '', `#${selectedView.dataset.panelView}`);
       }
       $('menu-toggle').checked = false;
+      if (selectedView.dataset.panelView === 'ai-mentor') {
+        updateStudentAiQuotaBadge();
+      }
     }
 
     showPanel(location.hash.slice(1));
@@ -996,12 +999,22 @@ button,select{font:inherit}
           </article>`).join('')
         : emptyMessage('Henüz öğretmen testi yayınlanmadı.');
       $('taskFeed').innerHTML = emptyMessage('Ödevler yükleniyor…');
-      $('announcementFeed').innerHTML = content.duyurular.length
-        ? content.duyurular.map(item => `<article class="feed-card">
-            <p>${esc(item.message)}</p>
-            <small>${new Date(item.createdAt).toLocaleString('tr-TR')}</small>
-          </article>`).join('')
-        : emptyMessage('Henüz duyuru yok.');
+      let dismissedIds = [];
+      try {
+        dismissedIds = JSON.parse(localStorage.getItem('zarif_dismissed_duyurular') || '[]');
+      } catch {}
+
+      const gorunenDuyurular = (content.duyurular || []).filter(item => !dismissedIds.includes(item.id));
+
+      $('announcementFeed').innerHTML = gorunenDuyurular.length
+        ? gorunenDuyurular.map(item => '<article class="feed-card" id="student-duyuru-' + esc(item.id) + '" style="position:relative; padding-right:48px;">' +
+            '<button type="button" class="btn-dismiss-duyuru" data-dismiss-duyuru-id="' + esc(item.id) + '" title="Okudum, bu duyuruyu gizle" style="position:absolute; top:12px; right:12px; background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer; padding:4px 8px; border-radius:6px; transition:all .15s;" onmouseover="this.style.background=\'#fee2e2\';this.style.color=\'#b91c1c\';" onmouseout="this.style.background=\'none\';this.style.color=\'var(--muted)\';">' +
+              '✕' +
+            '</button>' +
+            '<p style="font-size:0.95rem; line-height:1.6; margin-bottom:6px;">' + esc(item.message) + '</p>' +
+            '<small style="color:var(--muted);">' + new Date(item.createdAt).toLocaleString('tr-TR') + '</small>' +
+          '</article>').join('')
+        : emptyMessage('Henüz okunmamış duyuru yok.');
       $('studentResults').innerHTML = content.sonuclar.length
         ? content.sonuclar.map(result => `<article class="feed-card">
             <h3>${esc(result.quizTitle)}</h3>
@@ -1468,42 +1481,7 @@ button,select{font:inherit}
         window.scrollTo({top: 0, behavior: 'smooth'});
         await submitQuizHomework();
         try {
-          await loadContent();
-
-    // Öğrenci Anlık AI Kota Rozeti
-    async function updateStudentAiQuotaBadge() {
-      const badge = $('studentAiQuotaBadge');
-      if (!badge) return;
-      try {
-        const res = await fetch('/api/student/ai-quota', { credentials: 'same-origin' });
-        if (!res.ok) return;
-        const q = await res.json();
-        const bonusText = q.ekstraBonusKredi > 0 ? ` (+${q.ekstraBonusKredi} Bonus)` : '';
-        if (q.aiErisimEngelli) {
-          badge.style.background = '#fee2e2';
-          badge.style.color = '#dc2626';
-          badge.style.borderColor = '#fca5a5';
-          badge.innerHTML = '🚫 AI Erişimi Askıya Alındı';
-        } else if (q.sinirsiz) {
-          badge.style.background = '#dcfce7';
-          badge.style.color = '#15803d';
-          badge.style.borderColor = '#86efac';
-          badge.innerHTML = '⚡ Yapay Zekâ: <strong>SINIRSIZ (Yönetici)</strong>';
-        } else {
-          badge.style.background = '#f3e1cf';
-          badge.style.color = '#7a4f2d';
-          badge.style.borderColor = '#d9d3c3';
-          const sokratikGunluk = q.sokratik ? `${q.sokratik.gunlukKalan}/${q.sokratik.gunlukLimit}` : `${q.mesaj?.kalan || 0}/${q.mesaj?.etkinLimit || 0}`;
-          const sokratikAylik = q.sokratik?.aylikKalan !== undefined ? ` (Aylık: ${q.sokratik.aylikKalan})` : '';
-          const ikizAylik = q.ogretmenIkizi ? ` · 👨‍🏫 İkiz: ${q.ogretmenIkizi.aylikKalan}` : '';
-          badge.innerHTML = `⚡ <strong>Sokratik:</strong> ${sokratikGunluk}${sokratikAylik}${ikizAylik}${bonusText}`;
-        }
-      } catch (e) {
-        // Sessiz hata
-      }
-    }
-    updateStudentAiQuotaBadge();
-
+          await loadQuizResults();
         } catch (error) {
           $('quizResultStatus').textContent += ` Sonuç listesi yenilenemedi: ${error.message}`;
         }
@@ -1515,6 +1493,89 @@ button,select{font:inherit}
         if (activeQuiz) updateQuizView();
       }
     });
+
+    // Duyuru Gizleme (Öğrenci Kapat Butonu)
+    $('announcementFeed')?.addEventListener('click', event => {
+      const btn = event.target.closest('[data-dismiss-duyuru-id]');
+      if (!btn) return;
+      const id = btn.dataset.dismissDuyuruId;
+      try {
+        const dismissed = JSON.parse(localStorage.getItem('zarif_dismissed_duyurular') || '[]');
+        if (!dismissed.includes(id)) {
+          dismissed.push(id);
+          localStorage.setItem('zarif_dismissed_duyurular', JSON.stringify(dismissed));
+        }
+      } catch {}
+      const card = document.getElementById('student-duyuru-' + id);
+      if (card) {
+        card.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+          card.remove();
+          if ($('announcementFeed').querySelectorAll('.feed-card').length === 0) {
+            $('announcementFeed').innerHTML = emptyMessage('Henüz okunmamış duyuru yok.');
+          }
+        }, 250);
+      }
+    });
+
+    // Öğrenci Anlık AI Kota Rozeti
+    function renderStudentAiQuotaBadge(q) {
+      const badge = $('studentAiQuotaBadge');
+      if (!badge) return;
+      if (!q) {
+        badge.style.background = '#f3e1cf';
+        badge.style.color = '#7a4f2d';
+        badge.style.borderColor = '#d9d3c3';
+        badge.innerHTML = '⚡ <strong>Sokratik AI Mentör</strong> Aktif';
+        return;
+      }
+      const bonusText = q.ekstraBonusKredi > 0 ? ` (+${q.ekstraBonusKredi} Bonus)` : '';
+      if (q.aiErisimEngelli) {
+        badge.style.background = '#fee2e2';
+        badge.style.color = '#dc2626';
+        badge.style.borderColor = '#fca5a5';
+        badge.innerHTML = '🚫 AI Erişimi Askıya Alındı';
+      } else if (q.sinirsiz) {
+        badge.style.background = '#dcfce7';
+        badge.style.color = '#15803d';
+        badge.style.borderColor = '#86efac';
+        badge.innerHTML = '⚡ Yapay Zekâ: <strong>SINIRSIZ (Yönetici)</strong>';
+      } else {
+        badge.style.background = '#f3e1cf';
+        badge.style.color = '#7a4f2d';
+        badge.style.borderColor = '#d9d3c3';
+        const sokratikGunluk = q.sokratik ? `${q.sokratik.gunlukKalan}/${q.sokratik.gunlukLimit}` : `${q.mesaj?.kalan || 0}/${q.mesaj?.etkinLimit || 0}`;
+        const sokratikAylik = q.sokratik?.aylikKalan !== undefined ? ` (Aylık: ${q.sokratik.aylikKalan})` : '';
+        const ikizAylik = q.ogretmenIkizi ? ` · 👨‍🏫 İkiz: ${q.ogretmenIkizi.aylikKalan}` : '';
+        badge.innerHTML = `⚡ <strong>Sokratik:</strong> ${sokratikGunluk}${sokratikAylik}${ikizAylik}${bonusText}`;
+      }
+    }
+
+    async function updateStudentAiQuotaBadge(preloadedQuota = null) {
+      if (preloadedQuota) {
+        renderStudentAiQuotaBadge(preloadedQuota);
+        return;
+      }
+      const badge = $('studentAiQuotaBadge');
+      if (!badge) return;
+      try {
+        const res = await fetch('/api/student/ai-quota', { credentials: 'same-origin' });
+        if (!res.ok) {
+          if (res.status === 401) {
+            badge.innerHTML = '⚡ Yapay Zekâ: Giriş Yapınız';
+          } else {
+            badge.innerHTML = '⚡ <strong>Sokratik AI Mentör</strong> Aktif';
+          }
+          return;
+        }
+        const q = await res.json();
+        renderStudentAiQuotaBadge(q);
+      } catch (e) {
+        badge.innerHTML = '⚡ <strong>Sokratik AI Mentör</strong> Aktif';
+      }
+    }
     $('quizReview').addEventListener('click', async event => {
       const button = event.target.closest('[data-mentor-result]');
       if (!button) return;
@@ -1962,6 +2023,7 @@ button,select{font:inherit}
         const qRes = await fetch('/api/student/ai-quota', { credentials: 'same-origin' });
         if (qRes.ok) {
           const quotaData = await qRes.json();
+          renderStudentAiQuotaBadge(quotaData);
           studentUserPlan = quotaData.paketTipi || 'free';
           currentStudentName = quotaData.name || 'Öğrenci';
 
@@ -2171,6 +2233,7 @@ button,select{font:inherit}
     }
 
     loadContent();
+    updateStudentAiQuotaBadge();
     loadYaziliProvalari();
     loadGamificationAndLeaderboard();
     loadTgCountdown();

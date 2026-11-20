@@ -1450,6 +1450,18 @@ body.teacher-menu-open {
       <div class="section-title"><div><h2>Öğrencilere duyuru</h2><p class="hint">Duyurular tüm öğrencilerin panelinde yayınlanır.</p></div></div>
       <form id="announcementForm">
         <div class="field"><label for="announcementText">Duyuru metni</label><textarea id="announcementText" maxlength="1000" required placeholder="Öğrencilerinizle paylaşmak istediğiniz mesaj..."></textarea></div>
+        <div style="display:flex; align-items:center; gap:16px; margin:12px 0 16px; flex-wrap:wrap;">
+          <label for="announcementDuration" style="font-size:0.85rem; font-weight:600; color:var(--muted); display:flex; align-items:center; gap:8px;">
+            <span>⏱️ Yayında Kalma Süresi:</span>
+            <select id="announcementDuration" style="padding:6px 12px; border-radius:8px; border:1px solid #d9d3c3; background:#fff; font-size:0.85rem; cursor:pointer;">
+              <option value="7">1 Hafta (Kısa Hatırlatma)</option>
+              <option value="14" selected>2 Hafta (Varsayılan - İdeal)</option>
+              <option value="30">1 Ay (Yazılı / Sınav Dönemi)</option>
+              <option value="0">Süresiz (Kalıcı Genel Kural)</option>
+            </select>
+          </label>
+          <small style="color:var(--muted); font-size:0.8rem;">Süresi dolan duyurular öğrenci akışından otomatik olarak kaldırılır.</small>
+        </div>
         <div class="button-row"><button class="btn" type="submit">Duyuru Yayınla</button><span class="muted" id="announcementStatus" role="status"></span></div>
       </form>
       <div class="data-list" id="announcementList"></div>
@@ -1691,9 +1703,33 @@ body.teacher-menu-open {
         </article>`).join('')
       : '<p class="empty">Henüz yayınlanmış test yok.</p>';
     $('announcementList').innerHTML = yonetim.duyurular.length
-      ? yonetim.duyurular.map(item => `<article class="data-item">
-          <div><strong>${esc(item.message)}</strong><p>${tarihSaat(item.createdAt)}</p></div>
-        </article>`).join('')
+      ? yonetim.duyurular.map(item => {
+          const now = Date.now();
+          const expTime = item.expiresAt ? new Date(item.expiresAt).getTime() : null;
+          const isExpired = expTime && expTime < now;
+          let statusBadge = '';
+          if (!expTime) {
+            statusBadge = '<span class="status-chip" style="background:#f1f5f9; color:#475569; font-size:11px; padding:2px 8px; border-radius:4px;">♾️ Süresiz</span>';
+          } else if (isExpired) {
+            statusBadge = '<span class="status-chip" style="background:#fee2e2; color:#b91c1c; font-size:11px; padding:2px 8px; border-radius:4px;">⌛ Süresi Doldu (Öğrencide Gizlendi)</span>';
+          } else {
+            const kalanGun = Math.ceil((expTime - now) / (1000 * 60 * 60 * 24));
+            statusBadge = '<span class="status-chip" style="background:#dcfce7; color:#15803d; font-size:11px; padding:2px 8px; border-radius:4px;">✅ Yayında (' + kalanGun + ' gün kaldı)</span>';
+          }
+
+          return '<article class="data-item" style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">' +
+            '<div style="flex:1;">' +
+              '<div style="margin-bottom:6px;">' + statusBadge + '</div>' +
+              '<strong style="display:block; font-size:0.95rem; line-height:1.5;">' + esc(item.message) + '</strong>' +
+              '<p style="margin-top:4px; font-size:0.8rem; color:var(--muted);">' + tarihSaat(item.createdAt) + '</p>' +
+            '</div>' +
+            '<div>' +
+              '<button class="btn light danger" type="button" data-delete-announcement-id="' + esc(item.id) + '" style="color:#b91c1c; border-color:#fca5a5; padding:6px 12px; font-size:0.8rem;">' +
+                '🗑️ Sil' +
+              '</button>' +
+            '</div>' +
+          '</article>';
+        }).join('')
       : '<p class="empty">Henüz duyuru yayınlanmadı.</p>';
     $('managementResults').innerHTML = yonetim.sonuclar.length
       ? yonetim.sonuclar.map(result => `<tr>
@@ -2471,6 +2507,23 @@ body.teacher-menu-open {
     }
   }
 
+    $('announcementList')?.addEventListener('click', async event => {
+    const btn = event.target.closest('[data-delete-announcement-id]');
+    if (!btn) return;
+    const id = btn.dataset.deleteAnnouncementId;
+    if (!confirm('Bu duyuruyu silmek istediğinizden emin misiniz?\nTüm öğrencilerin panelinden derhal kaldırılacaktır.')) return;
+    btn.disabled = true;
+    try {
+      await api('/api/ogretmen/duyurular/' + encodeURIComponent(id), { method: 'DELETE' });
+      yonetim = await api('/api/ogretmen/yonetim');
+      yonetimCiz();
+      $('announcementStatus').textContent = 'Duyuru başarıyla silindi.';
+    } catch (err) {
+      alert('Duyuru silinemedi: ' + err.message);
+      btn.disabled = false;
+    }
+  });
+
   $('announcementForm').addEventListener('submit', async event => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -2480,7 +2533,10 @@ body.teacher-menu-open {
     try {
       await api('/api/ogretmen/duyurular', {
         method: 'POST',
-        body: JSON.stringify({message: $('announcementText').value})
+        body: JSON.stringify({
+        message: $('announcementText').value,
+        durationDays: parseInt($('announcementDuration')?.value || '14', 10)
+      })
       });
       form.reset();
       yonetim = await api('/api/ogretmen/yonetim');

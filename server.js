@@ -801,7 +801,13 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
         $or: [{ source: { $ne: 'ai' } }, { source: 'ai', published: true }]
       })
         .sort({ createdAt: -1 }).limit(50).toArray(),
-      duyuruKoleksiyonu.find({}).sort({ createdAt: -1 }).limit(20).toArray(),
+      duyuruKoleksiyonu.find({
+        $or: [
+          { expiresAt: { $exists: false } },
+          { expiresAt: null },
+          { expiresAt: { $gte: new Date() } }
+        ]
+      }).sort({ createdAt: -1 }).limit(20).toArray(),
       quizSonucKoleksiyonu.find({ studentId: req.session.user.id })
         .sort({ createdAt: -1 }).limit(100).toArray(),
       aktifCanliDersiAl(),
@@ -838,8 +844,13 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
         tamamlandi: tamamlananQuizler.has(_id.toString()),
         questions: questions.map(studentQuestion)
       })),
-      duyurular: duyurular.map(({ _id, message, createdAt }) => ({
-        id: _id.toString(), message, createdAt
+      duyurular: duyurular.map(({ _id, message, createdAt, expiresAt, durationDays, createdBy }) => ({
+        id: _id.toString(),
+        message,
+        createdAt,
+        expiresAt: expiresAt || null,
+        durationDays: durationDays || null,
+        isOwner: createdBy === req.session.user.id || req.session.user.role === 'admin'
       })),
       sonuclar: sonuclar.map(({ _id, quizId, quizTitle, score, correctCount, totalCount, createdAt }) => ({
         id: _id.toString(), quizId: quizId.toString(), quizTitle, score, correctCount, totalCount, createdAt
@@ -910,8 +921,13 @@ app.get('/api/ogretmen/yonetim', ogretmenKontrol, async (req, res) => {
         id: _id.toString(), title, description, soruSayisi: questions.length, createdAt,
         aiYayin: source === 'ai' && published === true
       })),
-      duyurular: duyurular.map(({ _id, message, createdAt }) => ({
-        id: _id.toString(), message, createdAt
+      duyurular: duyurular.map(({ _id, message, createdAt, expiresAt, durationDays, createdBy }) => ({
+        id: _id.toString(),
+        message,
+        createdAt,
+        expiresAt: expiresAt || null,
+        durationDays: durationDays || null,
+        isOwner: createdBy === req.session.user.id || req.session.user.role === 'admin'
       })),
       sonuclar: [
         ...quizSonuclari.map(({ _id, studentName, quizTitle, score, createdAt }) => ({
@@ -960,8 +976,15 @@ app.post('/api/ogretmen/duyurular', ogretmenKontrol, async (req, res) => {
     if (!message || message.length > 1000) {
       return res.status(400).json({ mesaj: 'Duyuru 1–1000 karakter arasında olmalıdır.' });
     }
+    const durationDays = req.body?.durationDays !== undefined ? parseInt(req.body.durationDays, 10) : 14;
+    let expiresAt = null;
+    if (durationDays > 0) {
+      expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
+    }
     const announcement = {
       message,
+      durationDays: durationDays > 0 ? durationDays : null,
+      expiresAt,
       createdBy: req.session.user.id,
       createdAt: new Date()
     };
@@ -973,6 +996,27 @@ app.post('/api/ogretmen/duyurular', ogretmenKontrol, async (req, res) => {
   } catch (err) {
     console.error('❌ Duyuru kaydedilemedi:', err);
     res.status(500).json({ mesaj: 'Duyuru yayınlanamadı.' });
+  }
+});
+
+app.delete('/api/ogretmen/duyurular/:id', ogretmenKontrol, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ mesaj: 'Geçersiz duyuru numarası.' });
+    }
+    const query = { _id: new ObjectId(id) };
+    if (req.session.user.role !== 'admin') {
+      query.createdBy = req.session.user.id;
+    }
+    const result = await duyuruKoleksiyonu.deleteOne(query);
+    if (!result.deletedCount) {
+      return res.status(404).json({ mesaj: 'Duyuru bulunamadı veya silme yetkiniz yok.' });
+    }
+    res.json({ success: true, mesaj: 'Duyuru yayından kaldırıldı ve silindi.' });
+  } catch (err) {
+    console.error('❌ Duyuru silinemedi:', err);
+    res.status(500).json({ mesaj: 'Duyuru silinemedi: ' + err.message });
   }
 });
 
