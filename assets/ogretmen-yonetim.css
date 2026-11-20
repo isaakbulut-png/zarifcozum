@@ -180,9 +180,30 @@ body { background: var(--teacher-background); color: var(--teacher-ink); }
   .detail-heading, .invitation-panel { flex-wrap: wrap; }
   .review-form { align-items: stretch; }
 }
+
+/* Tabs */
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid var(--teacher-border); }
+.tab-btn { padding: 12px 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--teacher-muted); font: 600 .9rem var(--body); cursor: pointer; transition: all .2s ease; }
+.tab-btn:hover { color: var(--teacher-ink); }
+.tab-btn.active { color: var(--teacher-green-dark); border-bottom-color: var(--teacher-green-dark); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Exam Pool Builder */
+#examPoolTabs { display: flex; gap: 8px; margin-bottom: 20px; }
+#examAutoResult { margin-top: 20px; }
+#examManualQuestionList { margin: 14px 0; }
+.question-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--teacher-border); cursor: pointer; }
+.question-row input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+.question-row:hover { background: #fbfaf9; }
+.question-row.selected { background: #f0ede8; }
+.question-info { flex: 1; min-width: 0; }
+.question-info strong { display: block; font-size: .85rem; word-break: break-word; }
+.question-info small { color: var(--teacher-muted); font-size: .75rem; }
+
 @media print {
   body { background: #fff; }
-  .bar, .teacher-sidebar, .teacher-kpis, #overview, #curriculum, #students, #assignments, #quiz-builder, #image-questions, #ai-question-wizard, #lessons, #library, #announcements, #teacher-settings, #answer-key, #anahtarKutu, #anahtarUyari, #stats, #analizKart, #csv, #printAnalytics { display: none !important; }
+  .bar, .teacher-sidebar, .teacher-kpis, #overview, #curriculum, #students, #assignments, #quiz-builder, #image-questions, #ai-question-wizard, #lessons, #library, #announcements, #teacher-settings, #answer-key, #anahtarKutu, #anahtarUyari, #stats, #analizKart, #csv, #printAnalytics, #exam-pool-builder { display: none !important; }
   .teacher-layout.authenticated { display: block; }
   .teacher-content { max-width: none; padding: 0; }
   .card, .analytics-panels > article { box-shadow: none; border: 1px solid #bbb; }

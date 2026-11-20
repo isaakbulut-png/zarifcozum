@@ -723,6 +723,14 @@ button,select{font:inherit}
     </div>
 
     <p class="feed-status">Öğretmeninin planladığı sınav tarihleri <a href="#ders-takvimim" style="text-decoration:underline">Ders Takvimim</a> bölümünde görünür. Çözdüğün denemeler <a href="#testlerim" style="text-decoration:underline">Sınav ve Testlerim</a> bölümünde listelenir.</p>
+
+    <!-- ÖĞRETMEN TARAFINDAN OLUŞTURULAN TESTLER VE DENEMELER -->
+    <div class="section-head" style="margin-top:28px;">
+      <h2>📚 Öğretmen Testleri ve Deneme Sınavları</h2>
+    </div>
+    <section class="teacher-feed" id="examPoolFeed" aria-live="polite">
+      <p class="feed-status">Sınavlar yükleniyor…</p>
+    </section>
     </section>
 
     <!-- YAZILIYA HAZIRLIK (MEB SENARYO AÇIK UÇLU PROVALAR) -->
@@ -2345,6 +2353,7 @@ button,select{font:inherit}
 </script>
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/ogrenci-gelisim.js"></script>
+<script src="/assets/exam-pool-list.js"></script>
 <script src="/assets/pratik.js"></script>
 <script>
   [["konu", "konu"], ["test", "test"], ["kazanim", "kazanim"]].forEach(([id, mod]) => {
