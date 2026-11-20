@@ -207,9 +207,13 @@ systemConfigSchema.statics.dismissSystemHealthAlert = async function () {
 
 systemConfigSchema.statics.getGeminiCreditSettings = async function () {
   const config = await this.findById('gemini-credit').lean();
+  const initialCredit = typeof config?.gemini_initial_credit === 'number' ? config.gemini_initial_credit : 0.00;
+  const updatedAt = config?.gemini_credit_updated_at || null;
   return {
-    gemini_initial_credit: typeof config?.gemini_initial_credit === 'number' ? config.gemini_initial_credit : 0.00,
-    gemini_credit_updated_at: config?.gemini_credit_updated_at || null
+    initialCredit,
+    updatedAt,
+    gemini_initial_credit: initialCredit,
+    gemini_credit_updated_at: updatedAt
   };
 };
 
@@ -227,9 +231,13 @@ systemConfigSchema.statics.saveGeminiCredit = async function (initialCredit) {
     },
     { upsert: true, new: true, setDefaultsOnInsert: true }
   ).lean();
+  const savedAmount = typeof config?.gemini_initial_credit === 'number' ? config.gemini_initial_credit : amount;
+  const savedDate = config?.gemini_credit_updated_at || now;
   return {
-    gemini_initial_credit: config.gemini_initial_credit,
-    gemini_credit_updated_at: config.gemini_credit_updated_at
+    initialCredit: savedAmount,
+    updatedAt: savedDate,
+    gemini_initial_credit: savedAmount,
+    gemini_credit_updated_at: savedDate
   };
 };
 

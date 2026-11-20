@@ -1351,14 +1351,24 @@ const { PAKET_LIMITLERI, getEffectiveMessageLimit } = require('../middleware/aiQ
       }
 
       const updated = await SystemConfig.saveGeminiCredit(numAmount);
+      const savedAmount = typeof updated?.initialCredit === 'number'
+        ? updated.initialCredit
+        : typeof updated?.gemini_initial_credit === 'number'
+          ? updated.gemini_initial_credit
+          : numAmount;
+      const savedDate = updated?.updatedAt || updated?.gemini_credit_updated_at || new Date();
+
       await audit(req, 'gemini_credit.updated', 'system_config', 'gemini-credit', {
-        initialCredit: updated.initialCredit,
-        updatedAt: updated.updatedAt
+        initialCredit: savedAmount,
+        updatedAt: savedDate
       });
 
       res.json({
-        mesaj: `Gemini API başlangıç kredisi ${updated.initialCredit.toFixed(2)} ₺ olarak güncellendi.`,
-        kredi: updated
+        mesaj: `Gemini API başlangıç kredisi ${savedAmount.toFixed(2)} ₺ olarak güncellendi.`,
+        kredi: {
+          initialCredit: savedAmount,
+          updatedAt: savedDate
+        }
       });
     } catch (error) {
       console.error('Gemini kredi güncelleme hatası:', error);
