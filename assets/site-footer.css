@@ -1,3 +1,12 @@
+/* Panel sayfalarında footer kesinlikle gösterilmez */
+body:has(.teacher-layout) .site-footer,
+body:has(.app-shell) .site-footer,
+body:has(.admin-panel) .site-footer,
+body:has(#studentAvatar) .site-footer,
+body[data-page*="paneli"] .site-footer {
+  display: none !important;
+}
+
 .site-footer.site-footer-rich {
   padding-block: 3rem 1.25rem;
   border-top: 0;

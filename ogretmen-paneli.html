@@ -476,7 +476,6 @@ main .site-breadcrumb a:focus-visible {
 .teacher-nav-links a[href="#analytics"] > svg { stroke: #4ade80; }
 .teacher-nav-links a[href="#image-questions"] > svg { stroke: #c084fc; }
 .teacher-nav-links a[href="#ai-question-wizard"] > svg { stroke: #f97316; }
-.teacher-nav-links a[href="#ai-curriculum-wizard"] > svg { stroke: #0284c7; }
 .teacher-nav-links a[href="#lessons"] > svg { stroke: #f87171; }
 .teacher-nav-links a[href="#library"] > svg { stroke: #2dd4bf; }
 .teacher-nav-links a[href="#announcements"] > svg { stroke: #e879f9; }
@@ -968,7 +967,6 @@ body.teacher-menu-open {
         <a href="#analytics"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20V4M4 20h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>Başarı analizi</a>
         <a href="#image-questions"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h.01M21 15l-5-5L5 21"/></svg>Soru bankası</a>
         <a href="#ai-question-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6z"/></svg>Yapay Zeka İle Soru Üret</a>
-        <a href="#ai-curriculum-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg>Maarif Konu Anlatımı Üret</a>
       </div>
     </details>
     <details class="teacher-nav-group" open>
@@ -1304,113 +1302,6 @@ body.teacher-menu-open {
       </div>
     </section>
 
-    <section class="card" id="exam-pool-builder" data-panel-view="exam-pool-builder">
-      <div class="section-title"><div><h2>📝 Havuzdan Test / Deneme Oluştur</h2><p class="hint">Onaylı soru havuzundan otomatik veya manuel seçim yaparak test/deneme sınavları oluşturun.</p></div></div>
-      
-      <!-- Sekme Navigasyonu -->
-      <div class="tabs" id="examPoolTabs" role="tablist">
-        <button class="tab-btn active" id="examAutoTab" role="tab" aria-selected="true" aria-controls="examAutoPanel">⚡ Otomatik Çekme</button>
-        <button class="tab-btn" id="examManualTab" role="tab" aria-selected="false" aria-controls="examManualPanel">✋ Manuel Seçim</button>
-      </div>
-
-      <!-- TAB 1: Otomatik Çekme -->
-      <div class="tab-panel active" id="examAutoPanel" role="tabpanel" aria-labelledby="examAutoTab">
-        <form id="examAutoForm">
-          <div class="form-grid">
-            <div class="field"><label for="examAutoGrade">Sınıf</label>
-              <select id="examAutoGrade" required>
-                <option value="">Sınıf seçin</option>
-              </select>
-            </div>
-            <div class="field"><label for="examAutoType">Sınav Türü</label>
-              <select id="examAutoType" required>
-                <option value="konu_testi">Konu Testi</option>
-                <option value="deneme_sinavi">Deneme Sınavı</option>
-              </select>
-            </div>
-            <div class="field"><label for="examAutoTopic">Tema/Ünite</label>
-              <input id="examAutoTopic" type="text" placeholder="Örn. 1. Tema, Temel Üniteler" maxlength="250">
-            </div>
-            <div class="field"><label for="examAutoSubtopic">Alt Konu (İsteğe Bağlı)</label>
-              <input id="examAutoSubtopic" type="text" placeholder="Örn. Üslü Sayılar" maxlength="250">
-            </div>
-            <div class="field"><label for="examAutoCount">Soru Sayısı</label>
-              <input id="examAutoCount" type="number" min="1" max="100" value="20" required>
-            </div>
-            <div class="field"><label for="examAutoDuration">Süre (Dakika)</label>
-              <input id="examAutoDuration" type="number" min="1" max="480" value="60" required>
-            </div>
-            <div class="field full"><label for="examAutoTitle">Sınav Adı</label>
-              <input id="examAutoTitle" type="text" placeholder="Örn. 6. Sınıf 1. Tema Tarama Testi" maxlength="200" required>
-            </div>
-          </div>
-          <div class="button-row">
-            <button class="btn" type="submit">Çek ve Oluştur</button>
-            <span class="status" id="examAutoStatus" role="status" aria-live="polite"></span>
-          </div>
-        </form>
-        <div id="examAutoResult" hidden style="margin-top:20px; padding:14px; background:#f9f8f7; border:1px solid #e3dcd6; border-radius:10px;">
-          <h4>Ön İzleme</h4>
-          <p id="examAutoResultInfo" style="margin-bottom:10px; font-size:0.92rem;"></p>
-          <div class="keygrid" id="examAutoResultPreview"></div>
-          <div class="button-row" style="margin-top:14px;">
-            <button class="btn" type="button" id="examAutoPublish">Yayınla</button>
-            <button class="btn light" type="button" id="examAutoCancel">İptal</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 2: Manuel Seçim -->
-      <div class="tab-panel" id="examManualPanel" role="tabpanel" aria-labelledby="examManualTab" hidden>
-        <div class="tools" style="margin-bottom:16px;">
-          <select id="examManualGrade">
-            <option value="">Sınıf (Filtre)</option>
-          </select>
-          <select id="examManualTopic">
-            <option value="">Tema (Filtre)</option>
-          </select>
-          <input id="examManualSearch" type="text" placeholder="Soru ara..." maxlength="100">
-          <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
-            <span id="examManualSelected">0 seçildi</span>
-            <button class="btn light" type="button" id="examManualSelectAll">Tümünü Seç</button>
-            <button class="btn light" type="button" id="examManualClearAll">Temizle</button>
-          </div>
-        </div>
-        <div class="scroll" id="examManualQuestionList" style="max-height:400px;"></div>
-        <form id="examManualForm" style="margin-top:16px;">
-          <div class="form-grid">
-            <div class="field full"><label for="examManualTitle">Sınav Adı</label>
-              <input id="examManualTitle" type="text" placeholder="Örn. Özel Seçme Testi" maxlength="200" required>
-            </div>
-            <div class="field"><label for="examManualGradeForm">Sınıf</label>
-              <select id="examManualGradeForm" required>
-                <option value="">Seçin</option>
-              </select>
-            </div>
-            <div class="field"><label for="examManualTypeForm">Sınav Türü</label>
-              <select id="examManualTypeForm" required>
-                <option value="konu_testi">Konu Testi</option>
-                <option value="deneme_sinavi">Deneme Sınavı</option>
-              </select>
-            </div>
-            <div class="field"><label for="examManualDurationForm">Süre (Dakika)</label>
-              <input id="examManualDurationForm" type="number" min="1" max="480" value="60" required>
-            </div>
-          </div>
-          <div class="button-row">
-            <button class="btn" type="submit">Oluştur</button>
-            <span class="status" id="examManualStatus" role="status" aria-live="polite"></span>
-          </div>
-        </form>
-      </div>
-
-      <!-- Oluşturulan Sınavlar Listesi -->
-      <div style="margin-top:28px; padding-top:20px; border-top:1px solid #d9d3c3;">
-        <h3>Oluşturulan Sınavlar</h3>
-        <div id="examList" class="data-list" aria-live="polite"></div>
-      </div>
-    </section>
-
     <section class="card" id="quiz-builder" data-panel-view="quiz-builder">
       <div class="section-title"><div><h2>Dinamik test oluşturucu</h2><p class="hint">Testler yayınlandığında öğrencilerin panelinde görünür.</p></div></div>
       <form id="quizForm">
@@ -1566,81 +1457,6 @@ body.teacher-menu-open {
       <div class="question-list" id="aiQuestionList" aria-live="polite"></div>
     </section>
 
-    <section class="card" id="ai-curriculum-wizard" data-panel-view="ai-curriculum-wizard">
-      <div class="section-title">
-        <div>
-          <h2>Maarif Modeli Konu Anlatım Üreticisi</h2>
-          <p class="hint">Türkiye Yüzyılı Maarif Modeli müfredatına tam uyumlu, telifsiz, 5 sayfalık derin anlatımlı ve çift katmanlı görsel (SVG + Imagen) destekli zengin konu içerikleri üretin ve öğrencilerinize yayınlayın.</p>
-        </div>
-      </div>
-      <form id="aiCurriculumForm">
-        <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
-          <div class="field">
-            <label for="currGrade">1. Sınıf</label>
-            <select id="currGrade" required>
-              <option value="">Sınıf seçin</option>
-              <option value="5">5. Sınıf</option>
-              <option value="6">6. Sınıf</option>
-              <option value="7">7. Sınıf</option>
-              <option value="8">8. Sınıf</option>
-              <option value="9">9. Sınıf</option>
-              <option value="10">10. Sınıf</option>
-              <option value="11">11. Sınıf</option>
-              <option value="12">12. Sınıf</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="currDers">2. Ders</label>
-            <select id="currDers" required>
-              <option value="Matematik" selected>Matematik (MEB Maarif)</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="currTema">3. Tema / Ünite</label>
-            <select id="currTema" required disabled>
-              <option value="">Önce sınıf seçin</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="currAltKonu">4. Alt Konu (Müfredat Hedefi)</label>
-            <select id="currAltKonu" required disabled>
-              <option value="">Önce tema seçin</option>
-            </select>
-          </div>
-          <div class="field" style="grid-column: 1 / -1;">
-            <label for="currTeacherNotes">5. Öğretmen Özel Odak Notu / Ek Talimat (İsteğe bağlı)</label>
-            <input type="text" id="currTeacherNotes" placeholder="Örn: Kesir modelleri ve pasta dilimi benzetmelerine ağırlık ver, günlük hayat senaryosu ekle" maxlength="500" style="width:100%;padding:10px 12px;border:1px solid #dcd2c4;border-radius:8px;">
-          </div>
-        </div>
-        <div class="button-row" style="margin-top:14px;display:flex;gap:10px;align-items:center;">
-          <button class="btn" id="generateCurriculumBtn" type="submit">🧠 Maarif Modeli Konu Anlatımı Üret</button>
-          <span id="currStatus" class="status" role="status" aria-live="polite"></span>
-        </div>
-      </form>
-
-      <!-- Üretilen İçerik Önizleme & Yayınlama Alanı -->
-      <div id="currPreviewWrapper" style="display:none;margin-top:24px;border-top:2px dashed #e2e8f0;padding-top:20px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
-          <div>
-            <h3 id="currPreviewTitle" style="margin:0;font-size:20px;color:#1e293b;"></h3>
-            <p id="currPreviewMeta" style="margin:4px 0 0 0;font-size:13px;color:#64748b;"></p>
-          </div>
-          <div style="display:flex;gap:10px;">
-            <button class="btn" id="publishCurriculumBtn" type="button" style="background:#059669;color:#fff;">🚀 Öğrenci Paneline Yayınla</button>
-          </div>
-        </div>
-
-        <div id="currSummaryBox" style="background:#f8fafc;border-left:4px solid #3b82f6;padding:12px 16px;border-radius:6px;margin-bottom:18px;">
-          <strong style="color:#1e40af;font-size:14px;">📌 Hızlı Bakış / Kısa Özet:</strong>
-          <p id="currSummaryText" style="margin:6px 0 0 0;font-size:14px;color:#334155;line-height:1.5;"></p>
-        </div>
-
-        <!-- 5 Sayfalık Sekmeli / Sayfalı Görünüm -->
-        <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;" id="currPageTabs"></div>
-        <div id="currPageContent" class="zp-anlatim" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;min-height:300px;box-shadow:0 1px 3px rgba(0,0,0,0.05);overflow-x:auto;"></div>
-      </div>
-    </section>
-
     <section class="card" id="student-results" data-panel-view="student-results">
       <div class="section-title"><div><h2>Öğrenci test sonuçları</h2><p class="hint">Test, öğrenci ve puan bilgileri.</p></div></div>
       <div class="table-wrap"><table class="management-table">
@@ -1762,7 +1578,6 @@ body.teacher-menu-open {
 <script src="assets/curriculum-tree-view.js"></script>
 <script src="assets/ogretmen-gezinme.js"></script>
 <script src="assets/ogretmen-yonetim.js"></script>
-<script src="assets/exam-pool-builder.js"></script>
 <script src="assets/ogrenci-gelisim.js"></script>
 <script src="assets/ogretmen-canli.js"></script>
 <script>
@@ -2526,50 +2341,6 @@ body.teacher-menu-open {
       $('aiAltKonu').addEventListener('change', () => {
         $('aiTopic').value = $('aiAltKonu').value;
       });
-
-      // Maarif Konu Anlatım Üreticisi Cascading Dropdowns
-      $('currGrade').addEventListener('change', () => {
-        const grade = $('currGrade').value;
-        const gradeData = aiCurriculumTree[grade];
-        const temaSelect = $('currTema');
-        const altKonuSelect = $('currAltKonu');
-
-        if (!grade || !gradeData || !gradeData.temalar) {
-          temaSelect.replaceChildren(new Option('Önce sınıf seçin', ''));
-          temaSelect.disabled = true;
-          altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
-          altKonuSelect.disabled = true;
-          return;
-        }
-
-        const temalar = Object.keys(gradeData.temalar);
-        temaSelect.replaceChildren(
-          new Option('Tema / Ünite seçin…', ''),
-          ...temalar.map(t => new Option(t, t))
-        );
-        temaSelect.disabled = !temalar.length;
-        altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
-        altKonuSelect.disabled = true;
-      });
-
-      $('currTema').addEventListener('change', () => {
-        const grade = $('currGrade').value;
-        const tema = $('currTema').value;
-        const altKonuSelect = $('currAltKonu');
-
-        if (!grade || !tema || !aiCurriculumTree[grade]?.temalar?.[tema]) {
-          altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
-          altKonuSelect.disabled = true;
-          return;
-        }
-
-        const altKonular = aiCurriculumTree[grade].temalar[tema].alt_konular || [];
-        altKonuSelect.replaceChildren(
-          new Option('Alt konu seçin (Müfredat Hedefi)…', ''),
-          ...altKonular.map(sub => new Option(sub.name + (sub.outcome_code ? ` [${sub.outcome_code}]` : ''), sub.name))
-        );
-        altKonuSelect.disabled = !altKonular.length;
-      });
     } catch (error) {
       durumYaz('aiQuestionStatus', 'Müfredat ağacı yüklenemedi: ' + error.message, 'error');
     }
@@ -2857,124 +2628,6 @@ body.teacher-menu-open {
           }
         }
       });
-    }
-  }
-
-  // ==========================================
-  // MAARİF MODELİ KONU ANLATIM ÜRETİCİSİ LOGIC
-  // ==========================================
-  let currentGeneratedCurriculum = null;
-
-  $('aiCurriculumForm')?.addEventListener('submit', async event => {
-    event.preventDefault();
-    const btn = $('generateCurriculumBtn');
-    const grade = $('currGrade').value;
-    const ders = $('currDers')?.value || 'Matematik';
-    const unit_topic = $('currTema').value;
-    const sub_topic = $('currAltKonu').value;
-    const teacherNotes = $('currTeacherNotes')?.value || '';
-
-    if (!grade || !unit_topic || !sub_topic) {
-      durumYaz('currStatus', 'Lütfen sınıf, tema ve alt konuyu seçin.', 'error');
-      return;
-    }
-
-    btn.disabled = true;
-    durumYaz('currStatus', 'Türkiye Yüzyılı Maarif Modeli konu anlatımı ve pedagojik görselleri üretiliyor (bu işlem 15-30 sn sürebilir)…');
-    $('currPreviewWrapper').style.display = 'none';
-
-    try {
-      const res = await api('/api/ai/curriculum-content/generate', {
-        method: 'POST',
-        body: JSON.stringify({ grade: Number(grade), ders, unit_topic, sub_topic, teacherNotes })
-      });
-
-      currentGeneratedCurriculum = res.data;
-      renderCurriculumPreview(res.data);
-      durumYaz('currStatus', '✅ Konu anlatımı ve pedagojik görseller başarıyla üretildi.', 'ok');
-    } catch (err) {
-      durumYaz('currStatus', 'Hata: ' + err.message, 'error');
-    } finally {
-      btn.disabled = false;
-    }
-  });
-
-  $('publishCurriculumBtn')?.addEventListener('click', async () => {
-    if (!currentGeneratedCurriculum) return;
-    const pBtn = $('publishCurriculumBtn');
-    pBtn.disabled = true;
-    durumYaz('currStatus', 'Öğrenci paneline yayınlanıyor…');
-
-    try {
-      const res = await api('/api/ai/curriculum-content/publish', {
-        method: 'POST',
-        body: JSON.stringify({
-          ...currentGeneratedCurriculum,
-          status: 'published'
-        })
-      });
-
-      durumYaz('currStatus', '🎉 ' + (res.mesaj || 'Konu anlatımı başarıyla yayınlandı!'), 'ok');
-      pBtn.textContent = '✅ Yayınlandı';
-    } catch (err) {
-      durumYaz('currStatus', 'Yayınlama hatası: ' + err.message, 'error');
-      pBtn.disabled = false;
-    }
-  });
-
-  function renderCurriculumPreview(item) {
-    $('currPreviewTitle').textContent = item.title || `${item.sub_topic} - Maarif Modeli Konu Anlatımı`;
-    $('currPreviewMeta').textContent = `${item.grade}. Sınıf · ${item.unit_topic} · Kazanım: ${item.outcome_code || 'Belirtilmemiş'}`;
-    $('currSummaryText').textContent = item.short_summary || '';
-
-    const content = item.detailed_content || '';
-    const pages = [];
-    const parts = content.split(/\[SAYFA_(\d+)\]/gi);
-    if (parts.length >= 3) {
-      for (let i = 1; i < parts.length; i += 2) {
-        pages.push({ no: parts[i], text: (parts[i+1] || '').trim() });
-      }
-    } else {
-      pages.push({ no: '1', text: content });
-    }
-
-    const tabsContainer = $('currPageTabs');
-    tabsContainer.replaceChildren();
-
-    const pageTitles = [
-      '1. Sayfa: Gerçek Hayat Keşfi',
-      '2. Sayfa: Kavram İnşası & Şemalar',
-      '3. Sayfa: Çözümlü Örnekler',
-      '4. Sayfa: Kavram Yanılgıları',
-      '5. Sayfa: Kendini Dene'
-    ];
-
-    pages.forEach((p, idx) => {
-      const tabBtn = document.createElement('button');
-      tabBtn.type = 'button';
-      tabBtn.className = 'btn ' + (idx === 0 ? '' : 'zp-ikincil');
-      tabBtn.style.padding = '6px 12px';
-      tabBtn.style.fontSize = '12px';
-      tabBtn.textContent = pageTitles[idx] || `${p.no}. Sayfa`;
-      tabBtn.addEventListener('click', () => {
-        Array.from(tabsContainer.children).forEach(c => c.className = 'btn zp-ikincil');
-        tabBtn.className = 'btn';
-        displayCurriculumPage(p.text);
-      });
-      tabsContainer.appendChild(tabBtn);
-    });
-
-    displayCurriculumPage(pages[0]?.text || '');
-    $('currPreviewWrapper').style.display = 'block';
-  }
-
-  function displayCurriculumPage(rawText) {
-    const container = $('currPageContent');
-    container.replaceChildren();
-    if (window.zarifAiVisual) {
-      window.zarifAiVisual.append(container, rawText);
-    } else {
-      container.innerHTML = rawText;
     }
   }
 
@@ -3494,7 +3147,6 @@ body.teacher-menu-open {
   });
 })();
 </script>
-<script src="/assets/site-footer.js"></script>
 <script src="/assets/breadcrumb.js"></script>
   <script src="/assets/site-media-targets.js"></script>
   <script src="/assets/site-media.js">

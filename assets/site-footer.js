@@ -1,4 +1,16 @@
 (() => {
+  // Yönetim ve kullanıcı panellerinde footer kesinlikle gösterilmez
+  const pathname = (window.location.pathname || '').toLowerCase();
+  if (
+    pathname.includes('admin-paneli') ||
+    pathname.includes('ogretmen-paneli') ||
+    pathname.includes('ogrenci-paneli') ||
+    pathname.includes('yonetim') ||
+    document.querySelector('.admin-panel, .teacher-layout, .app-shell, #studentAvatar')
+  ) {
+    return;
+  }
+
   const footer = document.querySelector('footer.site-footer') || document.createElement('footer');
   footer.className = 'site-footer site-footer-rich';
   footer.innerHTML = `
