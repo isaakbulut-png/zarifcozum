@@ -8,6 +8,8 @@
   const curriculum = window.MATEMATIK_MUFREDATI || {};
   const createId = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const today = () => new Date().toISOString().slice(0, 10);
+  let hasSavedProfile = false;
+  let serverExams = [];
   const defaultState = () => ({
     students: [],
     assignments: [],
@@ -24,6 +26,7 @@
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
       if (!saved || typeof saved !== 'object') return defaultState();
+      hasSavedProfile = Boolean(saved.profile && typeof saved.profile === 'object');
       const initial = defaultState();
       if ((Array.isArray(saved.students) && saved.students.length) ||
           (Array.isArray(saved.assignments) && saved.assignments.length)) {
@@ -433,7 +436,8 @@
     });
     const activeClasses = new Set(state.students.filter(student => student.active !== false).map(student => `${student.grade}-${student.section || ''}`));
     const published = state.content.filter(item => item.status === 'published').length;
-    const upcomingExams = state.exams.filter(exam => exam.date >= today()).length;
+    const allExams = [...state.exams, ...serverExams];
+    const upcomingExams = allExams.filter(exam => exam.date >= today()).length;
     $('kpiStudents').textContent = String(state.students.length);
     $('kpiClasses').textContent = String(activeClasses.size);
     $('kpiLessons').textContent = String(state.content.length);
@@ -502,7 +506,7 @@
     );
 
     const lessons = (management.dersler || []).filter(lesson => withinCurrentWeek(lesson.startsAt));
-    const weekExams = state.exams.filter(exam => withinCurrentWeek(`${exam.date}T12:00:00`));
+    const weekExams = allExams.filter(exam => withinCurrentWeek(`${exam.date}T12:00:00`));
     const schedule = [
       ...lessons.map(lesson => ({title: lesson.title, when: lesson.startsAt, link: lesson.link, kind: 'Canlı ders'})),
       ...weekExams.map(exam => ({title: exam.title, when: `${exam.date}T12:00:00`, kind: 'Sınav'}))
@@ -519,7 +523,7 @@
     </div>`).join('') : dashboardEmptyState('Henüz öğrenci etkinliği bulunmuyor.', 'Öğrenci ekle', '#students');
   }
 
-  function initializeProfile() {
+  function applyProfile() {
     $('teacherDisplayName').value = state.profile.name;
     $('teacherBranch').value = state.profile.branch || 'Matematik';
     $('teacherNotifications').checked = state.profile.notifications !== false;
@@ -527,12 +531,66 @@
     [...select.options].forEach(option => { option.selected = state.profile.grades.includes(Number(option.value)); });
   }
 
+  async function initializeProfile() {
+    const form = $('teacherProfileForm');
+    const controls = [...form.querySelectorAll('input, select, button')];
+    controls.forEach(control => { control.disabled = true; });
+    try {
+      const {preferences} = await teacherApi('/api/ogretmen/tercihler');
+      let saved = Boolean(preferences);
+      if (preferences) {
+        state.profile = {
+          name: preferences.displayName, branch: preferences.branch,
+          grades: preferences.grades, notifications: preferences.notifications
+        };
+      } else if (hasSavedProfile) {
+        const migrated = await teacherApi('/api/ogretmen/tercihler', {
+          method: 'PUT',
+          body: JSON.stringify({
+            displayName: state.profile.name, branch: state.profile.branch || 'Matematik',
+            grades: state.profile.grades, notifications: state.profile.notifications !== false
+          })
+        });
+        saved = true;
+        state.profile = {
+          name: migrated.preferences.displayName, branch: migrated.preferences.branch,
+          grades: migrated.preferences.grades, notifications: migrated.preferences.notifications
+        };
+      }
+      applyProfile();
+      setStatus(
+        'profileStatus',
+        saved ? 'Profil tercihleri hesabınızla eşitlendi.' : 'Henüz kaydedilmiş tercih yok; kaydettiğinizde hesabınıza yazılır.',
+        saved ? 'ok' : ''
+      );
+    } catch (error) {
+      applyProfile();
+      setStatus('profileStatus', `Profil tercihleri yüklenemedi: ${error.message}`, 'error');
+    } finally {
+      controls.forEach(control => { control.disabled = false; });
+    }
+  }
+
+  async function loadServerExams() {
+    const result = await teacherApi('/api/ogretmen/gelisim/sinavlar');
+    serverExams = result.sinavlar || [];
+    renderExams();
+    renderDashboard();
+  }
+
   function renderExams() {
     const list = $('scheduledExamList');
     if (!list) return;
-    list.innerHTML = state.exams.length ? [...state.exams].sort((a, b) => a.date.localeCompare(b.date)).map(exam => `<article class="data-item">
-      <div><strong>${escapeHtml(exam.title)}</strong><p>${gradeLabel(exam.grade)} · ${escapeHtml(exam.date)}${exam.quizId ? ` · ${escapeHtml(management.quizler.find(quiz => quiz.id === exam.quizId)?.title || 'Bağlı test')}` : ''}</p></div>
-      <button class="del" type="button" data-exam-delete="${escapeHtml(exam.id)}" aria-label="Sınavı kaldır">×</button>
+    const exams = [
+      ...state.exams.map(exam => ({...exam, localOnly: true})),
+      ...serverExams.map(exam => ({...exam, localOnly: false}))
+    ].sort((a, b) => a.date.localeCompare(b.date));
+    list.innerHTML = exams.length ? exams.map(exam => `<article class="data-item">
+      <div><strong>${escapeHtml(exam.title)}</strong><p>${gradeLabel(exam.grade)} · ${escapeHtml(exam.date)}${exam.quizId ? ` · ${escapeHtml(management.quizler.find(quiz => quiz.id === exam.quizId)?.title || 'Bağlı test')}` : ''}</p>
+        <small>${exam.localOnly ? 'Yalnızca bu cihazda; öğrencilere görünmez' : 'Bağlı öğrencilerin takviminde görünür'}</small></div>
+      ${exam.localOnly
+        ? `<button class="del" type="button" data-exam-delete="${escapeHtml(exam.id)}" aria-label="Yerel sınavı kaldır">×</button>`
+        : `<button class="del" type="button" data-shared-exam-delete="${escapeHtml(exam.id)}" aria-label="Paylaşılan sınavı kaldır">×</button>`}
     </article>`).join('') : '<p class="dashboard-empty">Henüz planlanmış sınav yok.</p>';
   }
 
@@ -842,6 +900,9 @@
     renderDocuments();
     renderAnalytics();
     renderExams();
+    loadServerExams().catch(error => {
+      setStatus('examScheduleStatus', `Paylaşılan sınavlar yüklenemedi: ${error.message}`, 'error');
+    });
 
     $('curriculumGrade').addEventListener('change', renderCurriculum);
     $('curriculumUnit').addEventListener('change', renderCurriculum);
@@ -944,35 +1005,89 @@
       persist('documentStatus', 'Doküman kaldırıldı.');
     });
 
-    $('teacherProfileForm').addEventListener('submit', event => {
+    $('teacherProfileForm').addEventListener('submit', async event => {
       event.preventDefault();
-      state.profile = {
-        name: $('teacherDisplayName').value.trim(), branch: $('teacherBranch').value.trim(),
+      const preferences = {
+        displayName: $('teacherDisplayName').value.trim(), branch: $('teacherBranch').value.trim(),
         grades: [...$('teacherGrades').selectedOptions].map(option => Number(option.value)),
         notifications: $('teacherNotifications').checked
       };
-      persist('profileStatus', 'Panel tercihleri bu tarayıcıya kaydedildi.');
+      const submit = event.currentTarget.querySelector('[type="submit"]');
+      submit.disabled = true;
+      try {
+        const result = await teacherApi('/api/ogretmen/tercihler', {
+          method: 'PUT', body: JSON.stringify(preferences)
+        });
+        state.profile = {
+          name: result.preferences.displayName, branch: result.preferences.branch,
+          grades: result.preferences.grades, notifications: result.preferences.notifications
+        };
+        hasSavedProfile = true;
+        setStatus('profileStatus', result.mesaj, 'ok');
+      } catch (error) {
+        setStatus('profileStatus', `Tercihler kaydedilemedi: ${error.message}`, 'error');
+      } finally {
+        submit.disabled = false;
+      }
     });
 
     $('printAnalytics').addEventListener('click', () => window.print());
-    $('examScheduleForm')?.addEventListener('submit', event => {
+    $('examScheduleForm')?.addEventListener('submit', async event => {
       event.preventDefault();
-      state.exams.push({
-        id: createId(), title: $('examTitleSchedule').value.trim(),
-        grade: Number($('examGrade').value), date: $('examDate').value,
-        quizId: $('examQuiz').value
-      });
-      if (persist('examScheduleStatus', 'Sınav takvime eklendi.')) {
-        event.currentTarget.reset();
-        renderExams();
+      const form = event.currentTarget;
+      const submit = form.querySelector('[type="submit"]');
+      submit.disabled = true;
+      setStatus('examScheduleStatus', 'Sınav öğrencilerin takvimine kaydediliyor…');
+      try {
+        const result = await teacherApi('/api/ogretmen/gelisim/sinavlar', {
+          method: 'POST',
+          body: JSON.stringify({
+            title: $('examTitleSchedule').value.trim(),
+            grade: Number($('examGrade').value),
+            date: $('examDate').value,
+            quizId: $('examQuiz').value || null
+          })
+        });
+        setStatus('examScheduleStatus', result.mesaj, 'ok');
+        form.reset();
+        try {
+          await loadServerExams();
+        } catch (error) {
+          setStatus('examScheduleStatus', `Sınav kaydedildi ancak liste yenilenemedi: ${error.message}`, 'error');
+        }
+      } catch (error) {
+        setStatus('examScheduleStatus', `Sınav kaydedilemedi: ${error.message}`, 'error');
+      } finally {
+        submit.disabled = false;
       }
     });
-    $('scheduledExamList')?.addEventListener('click', event => {
-      const button = event.target.closest('[data-exam-delete]');
-      if (!button) return;
-      state.exams = state.exams.filter(exam => exam.id !== button.dataset.examDelete);
-      persist('examScheduleStatus', 'Sınav takvimden kaldırıldı.');
-      renderExams();
+    $('scheduledExamList')?.addEventListener('click', async event => {
+      const shared = event.target.closest('[data-shared-exam-delete]');
+      if (shared) {
+        shared.disabled = true;
+        try {
+          const result = await teacherApi(`/api/ogretmen/gelisim/sinavlar/${encodeURIComponent(shared.dataset.sharedExamDelete)}`, {
+            method: 'DELETE'
+          });
+          setStatus('examScheduleStatus', result.mesaj, 'ok');
+        } catch (error) {
+          setStatus('examScheduleStatus', `Sınav kaldırılamadı: ${error.message}`, 'error');
+          shared.disabled = false;
+          return;
+        }
+        try {
+          await loadServerExams();
+        } catch (error) {
+          setStatus('examScheduleStatus', `Sınav kaldırıldı ancak liste yenilenemedi: ${error.message}`, 'error');
+        }
+        return;
+      }
+      const local = event.target.closest('[data-exam-delete]');
+      if (!local) return;
+      state.exams = state.exams.filter(exam => exam.id !== local.dataset.examDelete);
+      if (persist('examScheduleStatus', 'Bu cihazdaki sınav planı kaldırıldı.')) {
+        renderExams();
+      }
     });
 
     const navigationLinks = [...document.querySelectorAll('.teacher-sidebar nav a[href^="#"]')];

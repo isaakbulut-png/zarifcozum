@@ -106,6 +106,15 @@ const userSchema = new mongoose.Schema({
     maxlength: 100,
     default: null
   },
+  teacherPanelPreferences: {
+    type: new mongoose.Schema({
+      displayName: { type: String, trim: true, maxlength: 100, default: '' },
+      branch: { type: String, trim: true, maxlength: 80, default: '' },
+      grades: { type: [Number], default: [] },
+      notifications: { type: Boolean, default: true }
+    }, { _id: false }),
+    default: undefined
+  },
   okulKurumAdi: {
     type: String,
     trim: true,

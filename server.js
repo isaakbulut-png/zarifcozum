@@ -32,6 +32,7 @@ const { createDenemelerRouters } = require('./routes/denemeler');
 const { requireKonuLogin } = require('./lib/konu-erisimi');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
+const { createTeacherPreferencesRouter } = require('./routes/teacher-preferences');
 const { createPratikRouter } = require('./routes/pratik');
 const { createLiveLessonsRouter } = require('./routes/live-lessons');
 const { studentLessonFilter, matchesAudience, studentProfiles: getStudentProfiles } = require('./lib/live-lesson-audience');
@@ -673,7 +674,8 @@ const gelisimRouters = createGelisimRouters({
   getGoalCollection: () => ogrenciHedefleri,
   getProgressCollection: () => kazanimIlerleme,
   getCommentCollection: () => ogretmenYorumlari,
-  getEventCollection: () => takvimOlaylari
+  getEventCollection: () => takvimOlaylari,
+  getQuizCollection: () => quizKoleksiyonu
 });
 app.use('/api/pratik', createPratikRouter({
   getUsageCollection: () => pratikKullanim,
@@ -704,6 +706,10 @@ app.use('/api/pratik', createPratikRouter({
 }));
 app.use('/api/ogretmen/gelisim', gelisimRouters.teacher);
 app.use('/api/student/gelisim', gelisimRouters.student);
+app.use('/api/ogretmen/tercihler', createTeacherPreferencesRouter({
+  requireTeacher: requireRole('teacher', 'admin'),
+  UserModel: User
+}));
 app.use('/api/ogretmen', teacherStudentHomeworkRouters.teacher);
 app.use('/api/student', teacherStudentHomeworkRouters.student);
 app.use('/api/parent', createParentRouter({

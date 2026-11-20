@@ -1252,7 +1252,7 @@ body.teacher-menu-open {
         </div>
         <button class="btn" type="submit">Tercihleri kaydet</button><p class="status" id="profileStatus" role="status"></p>
       </form>
-      <p class="storage-note">Profil tercihleri yalnızca bu tarayıcıda saklanır. Şifre ve hesap güvenliği mevcut giriş sistemi üzerinden yönetilir.</p>
+      <p class="storage-note">Profil tercihleri öğretmen hesabınıza kaydedilir. Bildirim seçeneği tercihinizi saklar; şu anda bildirim gönderimi başlatmaz.</p>
     </section>
 
     <section class="card" id="lessons" data-panel-view="lessons">
@@ -1324,7 +1324,7 @@ body.teacher-menu-open {
       <div class="data-list" id="quizList"></div>
       <div class="exam-create" id="exam-calendar">
         <h3>Sınav takvimi</h3>
-        <p class="hint">Yayınladığınız testleri sınıfa ve tarihe göre planlayın.</p>
+        <p class="hint">Sınav planı seçilen sınıftaki hesabı bağlı aktif öğrencilerin takviminde görünür.</p>
         <form id="examScheduleForm">
           <div class="form-grid">
             <div class="field"><label for="examTitleSchedule">Sınav adı</label><input id="examTitleSchedule" maxlength="160" required placeholder="Örn. 6. sınıf kesirler sınavı"></div>
@@ -1332,10 +1332,10 @@ body.teacher-menu-open {
             <div class="field"><label for="examDate">Sınav tarihi</label><input id="examDate" type="date" required></div>
             <div class="field"><label for="examQuiz">Bağlı test (isteğe bağlı)</label><select id="examQuiz"><option value="">Henüz test seçilmedi</option></select></div>
           </div>
-          <div class="button-row"><button class="btn light" type="submit">Sınavı takvime ekle</button><span class="status" id="examScheduleStatus" role="status"></span></div>
+          <div class="button-row"><button class="btn light" type="submit">Öğrenci takvimlerine ekle</button><span class="status" id="examScheduleStatus" role="status"></span></div>
         </form>
         <div class="data-list" id="scheduledExamList"></div>
-        <p class="storage-note">Sınav planı bu cihazdaki takvimde saklanır; mevcut platformun sınav yayın API’siyle bağlantısı kurulmamıştır.</p>
+        <p class="storage-note">Yeni planlar bağlı öğrencilerin takvimleriyle eşitlenir. Bu cihazda önceden kaydedilmiş planlar yerel kalır ve öğrencilere aktarılmaz.</p>
       </div>
     </section>
 

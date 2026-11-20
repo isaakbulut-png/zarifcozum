@@ -87,7 +87,8 @@ function createGelisimRouters({
   getGoalCollection,
   getProgressCollection,
   getCommentCollection,
-  getEventCollection
+  getEventCollection,
+  getQuizCollection
 }) {
   const teacher = express.Router();
   const student = express.Router();
@@ -178,11 +179,21 @@ function createGelisimRouters({
   async function buildCalendar(userId, now = new Date()) {
     const from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const to = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
-    const [lessons, assignments, events] = await Promise.all([
+    const [lessons, assignments, events, linkedProfiles] = await Promise.all([
       getPlannedLessonCollection().find({ startsAt: { $gte: from, $lte: to } }).sort({ startsAt: 1 }).limit(100).toArray(),
       getAssignmentCollection().find({ studentUserId: userId, dueAt: { $gte: from, $lte: to } }).limit(200).toArray(),
-      getEventCollection().find({ studentUserId: userId, startsAt: { $gte: from, $lte: to } }).sort({ startsAt: 1 }).limit(200).toArray()
+      getEventCollection().find({ studentUserId: userId, startsAt: { $gte: from, $lte: to } }).sort({ startsAt: 1 }).limit(200).toArray(),
+      getStudentCollection().find({ linkedUserId: userId, active: true }).toArray()
     ]);
+    const classFilters = [...new Map(linkedProfiles
+      .filter(profile => profile.teacherId && profile.grade)
+      .map(profile => [`${profile.teacherId}:${profile.grade}`, {
+        teacherId: profile.teacherId, grade: profile.grade, kind: 'sinav', audience: 'class',
+        createdBy: 'teacher', startsAt: { $gte: from, $lte: to }
+      }])).values()];
+    const classExams = classFilters.length
+      ? await getEventCollection().find({ $or: classFilters }).sort({ startsAt: 1 }).limit(200).toArray()
+      : [];
     const homeworkIds = [...new Set(assignments.map(item => String(item.homeworkId)))].map(objectId).filter(Boolean);
     const homeworks = homeworkIds.length
       ? await getHomeworkCollection().find({ _id: { $in: homeworkIds } }).toArray()
@@ -202,6 +213,11 @@ function createGelisimRouters({
         id: String(event._id), kind: event.kind, title: event.title, startsAt: event.startsAt,
         note: event.note || '', createdBy: event.createdBy, teacherId: event.teacherId || null,
         deletable: true
+      })),
+      ...classExams.map(event => ({
+        id: String(event._id), kind: event.kind, title: event.title, startsAt: event.startsAt,
+        note: event.note || '', teacherId: event.teacherId, quizId: event.quizId || null,
+        deletable: false
       }))
     ];
     return items.sort((a, b) => new Date(a.startsAt) - new Date(b.startsAt));
@@ -372,6 +388,65 @@ function createGelisimRouters({
   }));
 
   // ---------- Öğretmen ----------
+  teacher.get('/sinavlar', asyncRoute(async (req, res) => {
+    const rows = await getEventCollection().find({
+      teacherId: req.session.user.id, kind: 'sinav', audience: 'class', createdBy: 'teacher'
+    }).sort({ startsAt: 1 }).limit(200).toArray();
+    res.json({
+      sinavlar: rows.map(event => ({
+        id: String(event._id), title: event.title, grade: event.grade,
+        date: dayKey(event.startsAt), startsAt: event.startsAt, quizId: event.quizId || null
+      }))
+    });
+  }));
+
+  teacher.post('/sinavlar', asyncRoute(async (req, res) => {
+    const title = metin(req.body?.title, 160);
+    const grade = Number(req.body?.grade);
+    const date = metin(req.body?.date, 10);
+    const startsAt = /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(`${date}T12:00:00+03:00`) : new Date(NaN);
+    if (!title || !Number.isInteger(grade) || grade < 1 || grade > 12 ||
+        !Number.isFinite(startsAt.getTime()) || startsAt.toISOString().slice(0, 10) !== date || date < dayKey(new Date())) {
+      return res.status(400).json({ mesaj: 'Sınav adı, 1–12 arası sınıf ve bugün veya sonrası için geçerli tarih gereklidir.' });
+    }
+
+    const profiles = await getStudentCollection().find({
+      teacherId: req.session.user.id, grade, active: true, linkedUserId: { $exists: true, $nin: [null, ''] }
+    }).limit(1000).toArray();
+    if (!profiles.length) {
+      return res.status(409).json({ mesaj: 'Bu sınıfta hesabı öğretmene bağlı aktif öğrenci bulunamadı.' });
+    }
+
+    let quizId = null;
+    if (req.body?.quizId) {
+      const id = objectId(req.body.quizId);
+      if (!id) return res.status(400).json({ mesaj: 'Bağlı test numarası geçersiz.' });
+      const quiz = await getQuizCollection().findOne({ _id: id, createdBy: req.session.user.id });
+      if (!quiz) return res.status(404).json({ mesaj: 'Bağlı test bulunamadı.' });
+      quizId = String(quiz._id);
+    }
+
+    const event = {
+      teacherId: req.session.user.id, kind: 'sinav', audience: 'class',
+      grade, title, startsAt, quizId, createdBy: 'teacher', createdAt: new Date()
+    };
+    const result = await getEventCollection().insertOne(event);
+    res.status(201).json({
+      mesaj: 'Sınav öğrencilerin takvimine eklendi.',
+      sinav: { id: String(result.insertedId), title, grade, date, quizId }
+    });
+  }));
+
+  teacher.delete('/sinavlar/:id', asyncRoute(async (req, res) => {
+    const id = objectId(req.params.id);
+    if (!id) return res.status(400).json({ mesaj: 'Sınav numarası geçersiz.' });
+    const result = await getEventCollection().deleteOne({
+      _id: id, teacherId: req.session.user.id, kind: 'sinav', audience: 'class', createdBy: 'teacher'
+    });
+    if (!result.deletedCount) return res.status(404).json({ mesaj: 'Sınav bulunamadı.' });
+    res.json({ mesaj: 'Sınav takvimden kaldırıldı.' });
+  }));
+
   async function ownedLinkedProfile(req, res) {
     const id = objectId(req.params.id);
     if (!id) {
