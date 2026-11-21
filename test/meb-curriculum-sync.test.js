@@ -199,6 +199,15 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Daire, Daire Dilimi, Eşkenar Dörtgen ve Yamuğun Alanına İlişkin Problemler'
   ], '7. sınıf 9. Tema MEB içindekiler görseliyle birebir aynı 5 alt konuyu içermelidir');
 
+  // 9. Sınıf 1. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (4 alt konu)
+  const grade9Tema1Subs = getSubTopics(9, '1. Tema: Sayılar').map(s => s.name);
+  assert.deepEqual(grade9Tema1Subs, [
+    'Gerçek Sayıların Üslü ve Köklü Gösterimleri ile Yapılan İşlemler',
+    'Gerçek Sayı Aralıklarının Gösterimi ve Aralıklarla İlgili İşlemlerde Küme Sembollerinin Kullanımı',
+    'Sayı Kümeleri ve İşlem Özellikleri',
+    'Gerçek Sayıların İşlem Özelliklerini Cebirsel Olarak İfade Etme'
+  ], '9. sınıf 1. Tema MEB içindekiler görseliyle birebir aynı 4 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

@@ -315,7 +315,7 @@ window.MATEMATIK_MUFREDATI = {
       "unit_topic": "Sayılar",
       "topics": [
         "Gerçek Sayıların Üslü ve Köklü Gösterimleri ile Yapılan İşlemler",
-        "Gerçek Sayı Aralıklarının Gösterimi ve Aralıklarla İlgili İşlemler",
+        "Gerçek Sayı Aralıklarının Gösterimi ve Aralıklarla İlgili İşlemlerde Küme Sembollerinin Kullanımı",
         "Sayı Kümeleri ve İşlem Özellikleri",
         "Gerçek Sayıların İşlem Özelliklerini Cebirsel Olarak İfade Etme"
       ]
