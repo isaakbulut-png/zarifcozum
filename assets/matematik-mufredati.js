@@ -368,8 +368,8 @@ window.MATEMATIK_MUFREDATI = {
       "title": "7. Tema: Veriden Olasılığa",
       "unit_topic": "Veriden Olasılığa",
       "topics": [
-        "Olayların Olasılığını Gözleme Dayalı Tahmin Etme",
-        "Olayların Olasılığına İlişkin Tümevarımsal Akıl Yürütme"
+        "Deneysel Olasılık",
+        "Teorik Olasılık"
       ]
     }
   ],

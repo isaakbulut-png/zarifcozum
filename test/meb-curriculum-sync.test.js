@@ -239,6 +239,13 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Başkaları Tarafından Oluşturulan Tek Nicel Değişkenli Veri Dağılımlarını İnceleme'
   ], '9. sınıf 6. Tema MEB içindekiler görseliyle birebir aynı 2 alt konuyu içermelidir');
 
+  // 9. Sınıf 7. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (2 alt konu)
+  const grade9Tema7Subs = getSubTopics(9, '7. Tema: Veriden Olasılığa').map(s => s.name);
+  assert.deepEqual(grade9Tema7Subs, [
+    'Deneysel Olasılık',
+    'Teorik Olasılık'
+  ], '9. sınıf 7. Tema MEB içindekiler görseliyle birebir aynı 2 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

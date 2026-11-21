@@ -916,14 +916,14 @@
       "7. Tema: Veriden Olasılığa": {
         "alt_konular": [
           {
-            "name": "Olayların Olasılığını Gözleme Dayalı Tahmin Etme",
+            "name": "Deneysel Olasılık",
             "outcome_code": "MAT.9.7.1",
-            "official_boundary": "Deneysel olasılık ve göreli frekans."
+            "official_boundary": "Olayların gerçekleşme olasılığını deney, simülasyon ve gözleme dayalı olarak tahmin etme."
           },
           {
-            "name": "Olayların Olasılığına İlişkin Tümevarımsal Akıl Yürütme",
+            "name": "Teorik Olasılık",
             "outcome_code": "MAT.9.7.2",
-            "official_boundary": "Teorik olasılık ve eş olası olaylar."
+            "official_boundary": "Olayların teorik olasılığına ilişkin tümevarımsal akıl yürütme ve eş olası durumlar."
           }
         ]
       }
