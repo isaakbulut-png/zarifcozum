@@ -1,9 +1,9 @@
 const express = require('express');
 const { createCurriculumService } = require('../lib/curriculumService');
-const { buildCurriculumTreeFromMongo } = require('../lib/curriculumMongoTree');
+const { buildCurriculumTreeFromMongo, buildCurriculumTreeFromJson } = require('../lib/curriculumMongoTree');
 const { ObjectId } = require('mongodb');
 
-const TREE_CACHE_TTL_MS = 60 * 1000;
+const TREE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 dakika önbellek
 
 function createCurriculumRouter({ requireStaff, service = createCurriculumService(), getDb }) {
   const router = express.Router();
@@ -15,85 +15,93 @@ function createCurriculumRouter({ requireStaff, service = createCurriculumServic
   async function getRootTree() {
     if (cachedTree && Date.now() < cachedTreeExpiresAt) return cachedTree;
     if (!treeRequest) {
-      treeRequest = Promise.resolve()
-        .then(() => service.getTree())
-        .then(response => {
-          if (response && response.status >= 200 && response.status < 300) {
-            cachedTree = response;
-            cachedTreeExpiresAt = Date.now() + TREE_CACHE_TTL_MS;
-          }
-          return response;
-        })
-        .catch(async error => {
-          if (typeof getDb === 'function') {
+      treeRequest = (async () => {
+        // 1. Birincil ve en güvenilir kaynak: Yerel MongoDB veritabanı (soru sayıları dahil, sıfır gecikme, 429 hatası oluşturmaz)
+        if (typeof getDb === 'function') {
+          try {
             const db = getDb();
             if (db) {
               const data = await buildCurriculumTreeFromMongo(db, null);
-              const fallbackResponse = { status: 200, data };
-              cachedTree = fallbackResponse;
-              cachedTreeExpiresAt = Date.now() + TREE_CACHE_TTL_MS;
-              return fallbackResponse;
+              if (Array.isArray(data) && data.length > 0) {
+                const response = { status: 200, data };
+                cachedTree = response;
+                cachedTreeExpiresAt = Date.now() + TREE_CACHE_TTL_MS;
+                return response;
+              }
             }
+          } catch (dbErr) {
+            console.warn('[Curriculum] MongoDB ağaç derleme uyarısı:', dbErr.message);
           }
-          throw error;
-        })
-        .finally(() => { treeRequest = null; });
+        }
+
+        // 2. Harici servis tanımlıysa kontrol et (yalnızca 2xx geçerli yanıtları kabul et)
+        try {
+          const response = await service.getTree();
+          if (response && response.status >= 200 && response.status < 300 && Array.isArray(response.data) && response.data.length > 0) {
+            cachedTree = response;
+            cachedTreeExpiresAt = Date.now() + TREE_CACHE_TTL_MS;
+            return response;
+          }
+          if (response?.status === 429) {
+            console.warn('[Curriculum] Harici servis 429 (Hız sınırı) döndürdü, yerel MEB müfredat yedeğine geçiliyor.');
+          }
+        } catch (serviceErr) {
+          console.warn('[Curriculum] Harici servis bağlantı uyarısı:', serviceErr.code || serviceErr.message);
+        }
+
+        // 3. Kesintisiz garanti yedeği: lib/meb-curriculum-tree.json (Tek Doğruluk Kaynağı)
+        const fallbackData = buildCurriculumTreeFromJson(null);
+        const fallbackResponse = { status: 200, data: fallbackData };
+        cachedTree = fallbackResponse;
+        cachedTreeExpiresAt = Date.now() + TREE_CACHE_TTL_MS;
+        return fallbackResponse;
+      })().finally(() => {
+        treeRequest = null;
+      });
     }
     return treeRequest;
   }
 
   async function getTreeWithFallback(parentId) {
-    if (parentId === undefined) {
+    if (parentId === undefined || parentId === null) {
       return getRootTree();
     }
-    try {
-      return await service.getTree(parentId);
-    } catch (error) {
-      if (typeof getDb === 'function') {
+    if (typeof getDb === 'function') {
+      try {
         const db = getDb();
         if (db) {
           const data = await buildCurriculumTreeFromMongo(db, parentId);
-          return { status: 200, data };
+          if (Array.isArray(data) && data.length > 0) {
+            return { status: 200, data };
+          }
         }
-      }
-      throw error;
+      } catch (_) {}
     }
+    try {
+      const response = await service.getTree(parentId);
+      if (response && response.status >= 200 && response.status < 300 && response.data) {
+        return response;
+      }
+    } catch (_) {}
+    return { status: 200, data: buildCurriculumTreeFromJson(parentId) };
   }
 
   async function forward(res, operation) {
     try {
       const response = await operation();
-      if (response.status < 200 || response.status >= 500 ||
-          (response.status >= 300 && response.status < 400) || response.status === 401) {
-        console.error('Müfredat servisi beklenmeyen durum döndürdü:', response.status);
-        return res.status(502).json({ mesaj: 'Müfredat servisi yanıt veremedi.' });
+      if (!response || response.status < 200 || response.status >= 300) {
+        if (response?.status === 401 || response?.status === 403) {
+          return res.status(response.status).json(response.data || { mesaj: 'Yetkisiz erişim.' });
+        }
+        console.warn('Müfredat servisi 2xx döndürmedi (durum: ' + response?.status + '), yerel ağaç döndürülüyor.');
+        const fallback = buildCurriculumTreeFromJson(null);
+        return res.status(200).json(fallback);
       }
       return res.status(response.status).json(response.data);
     } catch (error) {
-      console.error('Müfredat servisine erişilemedi:', error.code || error.message);
-      const configurationMessages = {
-        CURRICULUM_NOT_CONFIGURED: 'CURRICULUM_SERVICE_TOKEN ayarı eksik veya geçersiz.',
-        CURRICULUM_SERVICE_URL_NOT_CONFIGURED: 'Production ortamında CURRICULUM_SERVICE_URL ayarlanmalıdır.',
-        CURRICULUM_SERVICE_URL_INVALID: 'CURRICULUM_SERVICE_URL geçerli bir HTTP(S) adresi olmalıdır.',
-        CURRICULUM_SERVICE_URL_LOOPBACK: 'Production CURRICULUM_SERVICE_URL localhost adresi olamaz.'
-      };
-      if (configurationMessages[error.code]) {
-        return res.status(503).json({
-          kod: error.code,
-          mesaj: configurationMessages[error.code]
-        });
-      }
-      if (['ECONNABORTED', 'ECONNREFUSED', 'ECONNRESET', 'ENOTFOUND',
-        'EHOSTUNREACH', 'ENETUNREACH', 'ETIMEDOUT'].includes(error.code)) {
-        return res.status(503).json({
-          kod: 'CURRICULUM_SERVICE_UNREACHABLE',
-          mesaj: 'Python müfredat servisine bağlanılamadı; internal URL ve portu kontrol edin.'
-        });
-      }
-      return res.status(503).json({
-        kod: 'CURRICULUM_SERVICE_FAILURE',
-        mesaj: 'Müfredat servisine erişilemiyor.'
-      });
+      console.warn('Müfredat servisi hatası, yerel ağaç döndürülüyor:', error.message);
+      const fallback = buildCurriculumTreeFromJson(null);
+      return res.status(200).json(fallback);
     }
   }
 

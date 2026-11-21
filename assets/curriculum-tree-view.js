@@ -51,6 +51,69 @@
     return [...new Set(skills)];
   }
 
+  function buildClientFallbackTree() {
+    const mufredat = (typeof window !== 'undefined' ? window.MATEMATIK_MUFREDATI : null) || {};
+    const stages = [
+      { id: 'kademe-ortaokul', node_type: 'KADEME', title: 'Ortaokul (5-8. Sınıf)', children: [] },
+      { id: 'kademe-lise', node_type: 'KADEME', title: 'Ortaöğretim / Lise (9-12. Sınıf)', children: [] }
+    ];
+    const grades = [5, 6, 7, 8, 9, 10, 11, 12];
+    for (const g of grades) {
+      const stage = g <= 8 ? stages[0] : stages[1];
+      const gradeNode = {
+        id: `sinif-${g}`,
+        parent_id: stage.id,
+        node_type: 'SINIF',
+        title: `${g}. Sınıf`,
+        code: `MEB.SINIF.${g}`,
+        children: []
+      };
+      stage.children.push(gradeNode);
+
+      const temalar = mufredat[String(g)] || mufredat[g] || [];
+      temalar.forEach((t, tIdx) => {
+        const temaTitle = t.title || t.unit_topic || `${tIdx + 1}. Tema`;
+        const temaNode = {
+          id: `tema-${g}-${tIdx + 1}`,
+          parent_id: gradeNode.id,
+          node_type: 'TEMA_UNITE',
+          title: temaTitle,
+          code: `MEB.MAT.${g}.T${tIdx + 1}`,
+          content_count: 0,
+          children: []
+        };
+        gradeNode.children.push(temaNode);
+
+        const topics = t.topics || [];
+        topics.forEach((topicName, kIdx) => {
+          const kazanimNode = {
+            id: `kazanim-${g}-${tIdx + 1}-${kIdx + 1}`,
+            parent_id: temaNode.id,
+            node_type: 'KAZANIM_CIKTI',
+            title: topicName,
+            code: `MAT.${g}.${tIdx + 1}.${kIdx + 1}`,
+            content_count: 0,
+            children: [
+              {
+                id: `beceri-${g}-${tIdx + 1}-${kIdx + 1}`,
+                parent_id: `kazanim-${g}-${tIdx + 1}-${kIdx + 1}`,
+                node_type: 'ALT_BECERI',
+                title: `${topicName} - Matematiksel Beceriler`,
+                code: `MAT.${g}.${tIdx + 1}.${kIdx + 1}.BECERI`,
+                metadata: {
+                  beceriler: ['Matematiksel Muhakeme', 'Problem Çözme', 'İlişkilendirme', 'İletişim']
+                },
+                children: []
+              }
+            ]
+          };
+          temaNode.children.push(kazanimNode);
+        });
+      });
+    }
+    return stages;
+  }
+
   function createCurriculumTreeView(host, options = {}) {
     const doc = host.ownerDocument;
     const fetchTree = options.fetchTree || (() => fetch('/api/v1/curriculum/tree', {credentials: 'same-origin'}));
@@ -174,6 +237,10 @@
     }
 
     async function load() {
+      // Ağaç zaten yüklüyse yeniden çekip arayüzü sıfırlama (sekmeler arası geçişte hız ve konfor sağlar)
+      if (state.tree && state.tree.length > 0) {
+        return;
+      }
       const request = ++state.request;
       const loading = el('p', 'ctv-status', 'Müfredat yükleniyor…');
       loading.setAttribute('role', 'status');
@@ -184,6 +251,16 @@
         if (!response.ok) {
           if (response.status === 401) throw new Error('Oturumunuz sona erdi. Yeniden giriş yapın.');
           if (response.status === 403) throw new Error('Müfredatı görüntüleme yetkiniz bulunmuyor.');
+          
+          // 429 veya diğer geçici sunucu hatalarında istemci yedeğini devreye sok
+          const fallbackData = buildClientFallbackTree();
+          if (fallbackData && fallbackData.length > 0) {
+            console.warn(`[CurriculumView] Sunucu yanıtı (${response.status}), yerel MEB müfredat yedeği açıldı.`);
+            state.tree = fallbackData;
+            state.grade = state.theme = state.outcome = null;
+            render();
+            return;
+          }
           throw new Error(`Müfredat yüklenemedi (${response.status}).`);
         }
         const data = await response.json();
@@ -195,6 +272,15 @@
         render();
       } catch (error) {
         if (request !== state.request) return;
+        // İstemci yedeği (offline / 429 kurtarma)
+        const fallbackData = buildClientFallbackTree();
+        if (fallbackData && fallbackData.length > 0) {
+          console.warn('[CurriculumView] Ağ/servis hatası sonrasında yerel MEB müfredat yedeği başarıyla açıldı:', error.message);
+          state.tree = fallbackData;
+          state.grade = state.theme = state.outcome = null;
+          render();
+          return;
+        }
         console.error('Müfredat ağacı yüklenemedi:', error);
         host.replaceChildren();
         const status = el('div', 'ctv-error');
@@ -202,7 +288,7 @@
         status.appendChild(el('p', '', error.message || 'Müfredat yüklenemedi.'));
         const retry = el('button', 'ctv-retry', 'Tekrar dene');
         retry.type = 'button';
-        retry.addEventListener('click', load);
+        retry.addEventListener('click', () => { state.tree = []; load(); });
         status.appendChild(retry);
         host.appendChild(status);
       } finally {
