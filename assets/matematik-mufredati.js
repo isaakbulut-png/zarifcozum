@@ -184,8 +184,10 @@ window.MATEMATIK_MUFREDATI = {
       "topics": [
         "Cisimlerin Farklı Yönlerden Görünümleri",
         "Dikdörtgenler Prizmasının Açınımı ve Yüzey Alanı",
-        "Dikdörtgenler Prizmasının Hacim Bağıntısı ve Hacim Ölçme Birimleri",
-        "Prizmalarda Yüzey Alanı ve Hacim Problemleri"
+        "Hacmi Eş Nesneler Aracılığıyla Yorumlama",
+        "Dikdörtgenler Prizmasının Hacim Bağıntısını Elde Etme",
+        "Hacim Ölçme Birimleri",
+        "Dikdörtgenler Prizması ile Modellenen Cisimlerin Yüzey Alanları ve Hacimlerine Yönelik Problemler"
       ]
     },
     {

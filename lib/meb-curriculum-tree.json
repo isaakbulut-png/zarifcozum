@@ -488,22 +488,32 @@
           {
             "name": "Cisimlerin Farklı Yönlerden Görünümleri",
             "outcome_code": "MAT.7.4.1",
-            "official_boundary": "Eş küplerle oluşturulan yapılar."
+            "official_boundary": "Üç boyutlu cisimlerin ve eş küplerle oluşturulan yapıların farklı yönlerden iki boyutlu görünümleri."
           },
           {
             "name": "Dikdörtgenler Prizmasının Açınımı ve Yüzey Alanı",
             "outcome_code": "MAT.7.4.2",
-            "official_boundary": "Prizma açınımı ve yüzey alanı bağıntısı."
+            "official_boundary": "Dikdörtgenler prizmasının açınımını çizme ve yüzey alanı bağıntısını oluşturma."
           },
           {
-            "name": "Dikdörtgenler Prizmasının Hacim Bağıntısı ve Hacim Ölçme Birimleri",
+            "name": "Hacmi Eş Nesneler Aracılığıyla Yorumlama",
+            "outcome_code": "MAT.7.4.3",
+            "official_boundary": "Prizmaların hacmini birim küpler ve eş nesneler yardımıyla sayarak yorumlama."
+          },
+          {
+            "name": "Dikdörtgenler Prizmasının Hacim Bağıntısını Elde Etme",
             "outcome_code": "MAT.7.4.4",
-            "official_boundary": "Hacim bağıntısı ve sıvı ölçüleriyle ilişkilendirme."
+            "official_boundary": "Taban alanı ile yüksekliğin çarpımı olarak hacim bağıntısını elde etme."
           },
           {
-            "name": "Prizmalarda Yüzey Alanı ve Hacim Problemleri",
+            "name": "Hacim Ölçme Birimleri",
+            "outcome_code": "MAT.7.4.5",
+            "official_boundary": "Standart hacim ölçme birimleri (metreküp, desimetreküp, santimetreküp, milimetreküp) ve dönüşümleri."
+          },
+          {
+            "name": "Dikdörtgenler Prizması ile Modellenen Cisimlerin Yüzey Alanları ve Hacimlerine Yönelik Problemler",
             "outcome_code": "MAT.7.4.6",
-            "official_boundary": "Gerçek yaşam prizma modelleri."
+            "official_boundary": "Gerçek yaşam durumlarında prizmaların yüzey alanı ve hacmini içeren problemler."
           }
         ]
       },

@@ -136,6 +136,17 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Çok Adımlı İşlemler'
   ], '7. sınıf 1. Tema MEB içindekiler görseliyle birebir aynı 8 alt konuyu içermelidir');
 
+  // 7. Sınıf 2. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (6 alt konu)
+  const grade7Tema2Subs = getSubTopics(7, '2. Tema: Geometrik Nicelikler (1)').map(s => s.name);
+  assert.deepEqual(grade7Tema2Subs, [
+    'Cisimlerin Farklı Yönlerden Görünümleri',
+    'Dikdörtgenler Prizmasının Açınımı ve Yüzey Alanı',
+    'Hacmi Eş Nesneler Aracılığıyla Yorumlama',
+    'Dikdörtgenler Prizmasının Hacim Bağıntısını Elde Etme',
+    'Hacim Ölçme Birimleri',
+    'Dikdörtgenler Prizması ile Modellenen Cisimlerin Yüzey Alanları ve Hacimlerine Yönelik Problemler'
+  ], '7. sınıf 2. Tema MEB içindekiler görseliyle birebir aynı 6 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');
