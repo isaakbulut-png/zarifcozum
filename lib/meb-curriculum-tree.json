@@ -106,19 +106,19 @@
       "2. Tema: Sayılar ve Nicelikler (1): Doğal Sayılar ve İşlemler": {
         "alt_konular": [
           {
+            "name": "Doğal Sayılar ve İşlemler",
+            "outcome_code": "MAT.5.1.1",
+            "official_boundary": "Çok basamaklı doğal sayılar ve dört işlem süreçleri."
+          },
+          {
             "name": "Çok Basamaklı Doğal Sayıları Okuma ve Yazma",
             "outcome_code": "MAT.5.1.1",
-            "official_boundary": "Altı ve daha çok basamaklı sayıların basamak ve bölükleri."
+            "official_boundary": "Altı ve daha çok basamaklı sayıların basamak ve bölükleri, okunuşu ve yazılışı."
           },
           {
-            "name": "Çok Basamaklı Doğal Sayılarda Basamak Değeri",
-            "outcome_code": "MAT.5.1.1",
-            "official_boundary": "Basamak değeri ve çözümlenmiş biçimler."
-          },
-          {
-            "name": "Dört İşlem İçeren Gerçek Yaşam Problemleri",
+            "name": "Gerçek Yaşam Problemlerini Çözebilme",
             "outcome_code": "MAT.5.1.2",
-            "official_boundary": "Doğal sayılarla dört işlem stratejileri ve günlük hayat problemleri."
+            "official_boundary": "Doğal sayılarla dört işlem stratejilerini kullanarak günlük yaşam problemlerini çözebilme."
           }
         ]
       },

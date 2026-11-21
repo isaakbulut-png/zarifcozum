@@ -32,9 +32,9 @@ window.MATEMATIK_MUFREDATI = {
       "title": "2. Tema: Sayılar ve Nicelikler (1): Doğal Sayılar ve İşlemler",
       "unit_topic": "Sayılar ve Nicelikler (1): Doğal Sayılar ve İşlemler",
       "topics": [
+        "Doğal Sayılar ve İşlemler",
         "Çok Basamaklı Doğal Sayıları Okuma ve Yazma",
-        "Çok Basamaklı Doğal Sayılarda Basamak Değeri",
-        "Dört İşlem İçeren Gerçek Yaşam Problemleri"
+        "Gerçek Yaşam Problemlerini Çözebilme"
       ]
     },
     {

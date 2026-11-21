@@ -55,7 +55,15 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     assert.ok(grade5Tema1Subs.includes(exp), `Kitap görselindeki "${exp}" başlığı alt konularda bulunmalıdır`);
   }
 
-  // 4. 5. Sınıf 4. Tema: Sadece Kesirler (Ondalık Gösterim ve Yüzdeler bağımsız konu olarak 5'te yer almamalı)
+  // 4. 5. Sınıf 2. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü
+  const grade5Tema2Subs = getSubTopics(5, '2. Tema: Sayılar ve Nicelikler (1): Doğal Sayılar ve İşlemler').map(s => s.name);
+  assert.deepEqual(grade5Tema2Subs, [
+    'Doğal Sayılar ve İşlemler',
+    'Çok Basamaklı Doğal Sayıları Okuma ve Yazma',
+    'Gerçek Yaşam Problemlerini Çözebilme'
+  ], '5. sınıf 2. Tema MEB içindekiler görseliyle birebir aynı 3 alt konuyu içermelidir');
+
+  // 5. 5. Sınıf 4. Tema: Sadece Kesirler (Ondalık Gösterim ve Yüzdeler bağımsız konu olarak 5\'te yer almamalı)
   const grade5Tema4Subs = getSubTopics(5, '4. Tema: Sayılar ve Nicelikler (2): Kesirler').map(s => s.name);
   assert.equal(grade5Tema4Subs.length, 2, '5. sınıf 4. Tema MEB kitabındaki gibi tam 2 alt konudan oluşmalıdır');
   assert.ok(grade5Tema4Subs.includes('Kesirleri Farklı Biçimlerde Temsil Etme'), 'Kesirleri Farklı Biçimlerde Temsil Etme bulunmalıdır');
