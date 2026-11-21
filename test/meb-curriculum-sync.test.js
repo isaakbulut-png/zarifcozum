@@ -1,70 +1,63 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { getCurriculumTree, getGrades, getThemes, getSubTopics, findSubTopicMeta } = require('../lib/meb-curriculum');
+const fs = require('fs');
+const path = require('path');
+const { getCurriculumTree, getGrades, getThemes, getSubTopics } = require('../lib/meb-curriculum');
 
-test('MEB Maarif Müfredatı - Sınıf, Ders, Tema ve Alt Konu Ağacı Senkronizasyonu', () => {
+test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü', () => {
+  const tree = getCurriculumTree();
   const grades = getGrades();
-  assert.deepEqual(grades, [5, 6, 7, 8, 9, 10, 11, 12], '5-12 sınıflar eksiksiz olmalı');
 
-  // 5. Sınıf kontrolü
-  const g5Themes = getThemes(5);
-  assert.ok(g5Themes.includes('Sayılar ve Nicelikler'), '5. sınıfta Sayılar ve Nicelikler bulunmalı');
-  assert.ok(g5Themes.includes('Geometrik Şekiller'), '5. sınıfta Geometrik Şekiller bulunmalı');
+  // 1. Tüm sınıflar mevcut olmalı (5-12)
+  assert.deepEqual(grades, [5, 6, 7, 8, 9, 10, 11, 12], '5-12 sınıfların tamamı müfredat ağacında olmalıdır');
+
+  // 2. 8. ve 12. Sınıf Eski Müfredat Koruma Kontrolü
+  const grade8Themes = getThemes(8);
+  assert.ok(grade8Themes.some(t => t.includes('Sayılar ve İşlemler')), '8. sınıf Sayılar ve İşlemler korunmalıdır');
+  assert.ok(grade8Themes.some(t => t.includes('Cebir')), '8. sınıf Cebir korunmalıdır');
+  assert.ok(grade8Themes.some(t => t.includes('Geometri')), '8. sınıf Geometri korunmalıdır');
   
-  const g5Subs = getSubTopics(5, 'Sayılar ve Nicelikler').map(s => s.name);
-  assert.ok(g5Subs.includes('Milyonlar'), 'Milyonlar alt konusu bulunmalı');
+  const grade8SubTopics = getSubTopics(8, '1. Tema: Sayılar ve İşlemler').map(s => s.name);
+  assert.ok(grade8SubTopics.includes('Çarpanlar ve Katlar (EBOB - EKOK)'), '8. sınıf EBOB-EKOK korunmalıdır');
+  assert.ok(grade8SubTopics.includes('Kareköklü İfadeler'), '8. sınıf Kareköklü İfadeler korunmalıdır');
 
-  // Kazanım kodu ve resmî sınır kontrolü
-  const meta = findSubTopicMeta(5, 'Sayılar ve Nicelikler', 'Milyonlar');
-  assert.equal(meta.outcome_code, 'MAT.5.1.1');
-  assert.ok(meta.official_boundary.includes('dokuz basamaklı'), 'Milyonlar için resmi MEB sınır bilgisi bulunmalı');
+  const grade12Themes = getThemes(12);
+  assert.ok(grade12Themes.some(t => t.includes('Türev')), '12. sınıf Türev korunmalıdır');
+  assert.ok(grade12Themes.some(t => t.includes('İntegral')), '12. sınıf İntegral korunmalıdır');
+  assert.ok(grade12Themes.some(t => t.includes('Trigonometri')), '12. sınıf Trigonometri korunmalıdır');
 
-  // 6. Sınıf gerçek ders kitabı alt konu kontrolü
-  const g6Themes = getThemes(6);
-  assert.ok(g6Themes.includes('Sayılar ve Nicelikler'), '6. sınıfta Sayılar ve Nicelikler bulunmalı');
-  const g6Subs = getSubTopics(6, 'Sayılar ve Nicelikler').map(s => s.name);
-  assert.ok(g6Subs.includes('Çarpanlar ve Katlar'), 'Çarpanlar ve Katlar bulunmalı');
-  assert.ok(g6Subs.includes('Kalansız Bölünebilme'), 'Kalansız Bölünebilme bulunmalı');
-  assert.ok(g6Subs.includes('Asal Sayılar'), 'Asal Sayılar bulunmalı');
-  assert.ok(g6Subs.includes('Ortak Bölen ve Ortak Kat'), 'Ortak Bölen ve Ortak Kat bulunmalı');
+  // 3. 6. Sınıf Maarif Modeli ve Gerçek Kitap Başlığı Doğrulaması (Kullanıcının özellikle belirttiği tema)
+  const grade6Themes = getThemes(6);
+  assert.ok(grade6Themes.includes('3. Tema: Sayılar ve Nicelikler (2)'), '6. sınıf kitabındaki "3. Tema: Sayılar ve Nicelikler (2)" tam adıyla bulunmalıdır');
+  const grade6Tema3Subs = getSubTopics(6, '3. Tema: Sayılar ve Nicelikler (2)').map(s => s.name);
+  assert.ok(grade6Tema3Subs.includes('Ondalık Gösterimlerde Basamak Değeri'), 'Ondalık Gösterimler yer almalıdır');
+  assert.ok(grade6Tema3Subs.includes('Kesir ile Bölme İşlemi İlişkisi'), 'Kesir ile Bölme yer almalıdır');
+  assert.ok(grade6Tema3Subs.includes('Standart Uzunluk Ölçme Birimleri'), 'Uzunluk Ölçme yer almalıdır');
 
-  // 9. Sınıf kontrolü
-  const g9Themes = getThemes(9);
-  assert.ok(g9Themes.includes('Sayılar'), '9. sınıfta Sayılar bulunmalı');
-  const g9Subs = getSubTopics(9, 'Sayılar').map(s => s.name);
-  assert.ok(g9Subs.includes('Kümeler ve Kümelerde İşlemler'));
-});
+  // 4. 10. Sınıf Maarif Modeli Doğrulaması
+  const grade10Themes = getThemes(10);
+  assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');
+  assert.ok(grade10Themes.includes('2. Tema: İstatistiksel Araştırma Süreci'), '10. Sınıf 2. Tema İstatistiksel Araştırma Süreci olmalıdır');
+  assert.ok(grade10Themes.includes('6. Tema: Analitik İnceleme'), '10. Sınıf 6. Tema Analitik İnceleme olmalıdır');
 
-test('Pinecone ders_kitabi Katı Metadata Filtreleme Objesi Doğrulaması', () => {
-  const grade = 6;
-  const filterQuery = {
-    $or: [
-      { not: { $eq: Number(grade) } },
-      { grade: { $eq: Number(grade) } }
-    ]
-  };
+  // 5. Şablon / Kitap Çöp Başlıklarının Temizlendiği Doğrulaması
+  const forbiddenTitles = [
+    'Hazır Mıyız?', 'Başlayalım', 'İzleme Testi', 'Ölçme ve Değerlendirme',
+    'Öz Değerlendirme', 'Sıra Sizde', 'Etkinlik', 'Cevap Anahtarı', 'Sözlük'
+  ];
 
-  assert.equal(filterQuery.$or[0].not.$eq, 6);
-  assert.equal(filterQuery.$or[1].grade.$eq, 6);
-  assert.equal(filterQuery.$or.length, 2, 'Hem not hem grade alanlarını desteklemeli');
-});
-
-test('Türkiye Yüzyılı Maarif Modeli Açık Uçlu Soru ve Rubrik Doğrulaması', () => {
-  const sampleOpenEndedQuestion = {
-    text: "Bir mimar, enerji tasarruflu bir çatı tasarımı için ikizkenar üçgen şeklinde güneş panelleri kullanmaktadır. Taban uzunluğu $8$ metre olan panelin tepe açısı $60^\\circ$ olduğuna göre çatı eğimini modelleyerek panelin diğer kenar uzunluklarını adım adım bulunuz.",
-    solution: "1. Adım: İkizkenar üçgende taban açıları eşittir. Tepe açısı $60^\\circ$ ise taban açıları $(180^\\circ - 60^\\circ) / 2 = 60^\\circ$ bulunur.\n2. Adım: Tüm iç açıları $60^\\circ$ olduğundan üçgen eşkenardır.\n3. Adım: Dolayısıyla tüm kenar uzunlukları taban gibi $8$ metredir.",
-    rubric: [
-      { criterion: "Üçgenin açı özelliklerini ve eşitliklerini modelleme", points: 30 },
-      { criterion: "Eşkenar üçgen çıkarımını muhakeme etme", points: 40 },
-      { criterion: "Kenar uzunluklarını birimle doğru hesaplama", points: 30 }
-    ],
-    outcomeCode: "MAT.5.3.7",
-    questionType: "open_ended"
-  };
-
-  assert.ok(sampleOpenEndedQuestion.text.includes('$'), 'LaTeX ifadeleri tek dolar içinde olmalı');
-  assert.ok(sampleOpenEndedQuestion.solution.length > 20, 'Beklenen çözüm adımları dolu olmalı');
-  assert.equal(sampleOpenEndedQuestion.rubric.length, 3, 'Rubrik 3 kriter içermeli');
-  const totalPoints = sampleOpenEndedQuestion.rubric.reduce((acc, r) => acc + r.points, 0);
-  assert.equal(totalPoints, 100, 'Rubrik toplamı 100 puan olmalı');
+  for (const grade of grades) {
+    const themes = getThemes(grade);
+    for (const t of themes) {
+      for (const forbidden of forbiddenTitles) {
+        assert.ok(!t.includes(forbidden), `Tema başlığında "${forbidden}" bulunamaz (Sınıf ${grade}: ${t})`);
+      }
+      const subs = getSubTopics(grade, t);
+      for (const s of subs) {
+        for (const forbidden of forbiddenTitles) {
+          assert.notEqual(s.name.trim(), forbidden, `Alt konu başlığı "${forbidden}" olamaz (Sınıf ${grade}, Tema ${t})`);
+        }
+      }
+    }
+  }
 });
