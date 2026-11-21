@@ -227,7 +227,7 @@ function createPratikRouter({
     const uye = kim.girisYapti && Boolean(await uyeMi(kim.kullanici));
     const karar = kim.girisYapti ? await ozellikErisimi(kim.kullanici, ozellik) : null;
     if (karar && !karar.izin) return { kim, uye, limitYok: false, izin: false, karar };
-    const limitYok = kim.girisYapti && (karar ? karar.limitYok : (uye || kim.kullanici?.role === 'student'));
+    const limitYok = kim.girisYapti && (karar ? karar.limitYok : uye);
     if (limitYok) return { kim, uye, limitYok, izin: true };
     const ziyaretciIzinli = karar ? true : ozellik === 'konu'
       ? haklar.ozetGorebilir
@@ -248,7 +248,7 @@ function createPratikRouter({
       kararlar[ozellik] = kim.girisYapti ? await ozellikErisimi(kim.kullanici, ozellik) : null;
     }
     const sinirYok = ozellik => kim.girisYapti &&
-      (kararlar[ozellik] ? kararlar[ozellik].limitYok : (uye || kim.kullanici?.role === 'student'));
+      (kararlar[ozellik] ? kararlar[ozellik].limitYok : uye);
     const limitYok = sinirYok('test');
     const soruKullanilan = limitYok ? 0 : await kullanilanSoruSayisi(kim.anahtar, haklar);
     const ozellikler = {};

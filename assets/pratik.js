@@ -168,11 +168,7 @@
       listeTuru = '';
     };
 
-    String(metin)
-      .replace(/<svg\b[\s\S]*?<\/svg\s*>/gi, svg => svg.replace(/\r?\n/g, ' '))
-      .replace(/<figure\b[\s\S]*?<\/figure\s*>/gi, fig => fig.replace(/\r?\n/g, ' '))
-      .replace(/<table\b[\s\S]*?<\/table\s*>/gi, tbl => tbl.replace(/\r?\n/g, ' '))
-      .split(/\r?\n/).forEach(satir => {
+    String(metin).replace(/<svg\b[\s\S]*?<\/svg\s*>/gi, svg => svg.replace(/\r?\n/g, ' ')).split(/\r?\n/).forEach(satir => {
       const temiz = satir.trim();
       if (!temiz) {
         paragrafiEkle();
@@ -271,8 +267,7 @@
 
     function durumSerit() {
       if (!durum) return el('div');
-      if (durum.girisYapti && durum.uye) return el('div', { class: 'zp-serit zp-uye' }, 'Üyelik aktif: sınırsız erişim');
-      if (durum.girisYapti && durum.limitYok) return el('div', { class: 'zp-serit zp-uye' }, 'Giriş yapıldı: sınırsız erişim');
+      if (durum.girisYapti && (durum.uye || durum.limitYok)) return el('div', { class: 'zp-serit zp-uye' }, 'Üyelik aktif: sınırsız erişim');
       const soruKalan = durum.ziyaretciHaklari ? durum.ziyaretciHaklari.soru.kalan : 0;
       if (mod === 'konu') {
         if (!durum.girisYapti) return el('div', { class: 'zp-serit' },
