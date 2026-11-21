@@ -324,9 +324,9 @@ window.MATEMATIK_MUFREDATI = {
       "title": "2. Tema: Nicelikler ve Değişimler",
       "unit_topic": "Nicelikler ve Değişimler",
       "topics": [
-        "Doğrusal Fonksiyon Kavramı ve Gösterimi",
-        "Doğrusal Fonksiyonların Grafikleri ve Eğim",
-        "Doğrusal Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler"
+        "Doğrusal Fonksiyonlar ve Nitel Özellikleri",
+        "Mutlak Değer Fonksiyonu ve Nitel Özellikleri",
+        "Doğrusal Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler İçeren Problemler"
       ]
     },
     {

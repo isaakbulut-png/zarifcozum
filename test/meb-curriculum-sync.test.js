@@ -208,6 +208,14 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Gerçek Sayıların İşlem Özelliklerini Cebirsel Olarak İfade Etme'
   ], '9. sınıf 1. Tema MEB içindekiler görseliyle birebir aynı 4 alt konuyu içermelidir');
 
+  // 9. Sınıf 2. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (3 alt konu)
+  const grade9Tema2Subs = getSubTopics(9, '2. Tema: Nicelikler ve Değişimler').map(s => s.name);
+  assert.deepEqual(grade9Tema2Subs, [
+    'Doğrusal Fonksiyonlar ve Nitel Özellikleri',
+    'Mutlak Değer Fonksiyonu ve Nitel Özellikleri',
+    'Doğrusal Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler İçeren Problemler'
+  ], '9. sınıf 2. Tema MEB içindekiler görseliyle birebir aynı 3 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

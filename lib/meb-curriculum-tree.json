@@ -826,19 +826,19 @@
       "2. Tema: Nicelikler ve Değişimler": {
         "alt_konular": [
           {
-            "name": "Doğrusal Fonksiyon Kavramı ve Gösterimi",
+            "name": "Doğrusal Fonksiyonlar ve Nitel Özellikleri",
             "outcome_code": "MAT.9.2.1",
-            "official_boundary": "f(x) = x doğrusal referans fonksiyonu ve nitel özellikleri."
+            "official_boundary": "f(x) = x doğrusal referans fonksiyonu, nitel özellikleri, grafiği ve eğim ilişkisi."
           },
           {
-            "name": "Doğrusal Fonksiyonların Grafikleri ve Eğim",
-            "outcome_code": "MAT.9.2.1",
-            "official_boundary": "Doğrunun eğimi ve grafik çizimi."
+            "name": "Mutlak Değer Fonksiyonu ve Nitel Özellikleri",
+            "outcome_code": "MAT.9.2.2",
+            "official_boundary": "f(x) = |x| referans mutlak değer fonksiyonu, parçalı fonksiyon gösterimi ve nitel özellikleri."
           },
           {
-            "name": "Doğrusal Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler",
+            "name": "Doğrusal Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler İçeren Problemler",
             "outcome_code": "MAT.9.2.3",
-            "official_boundary": "Birinci dereceden denklem ve eşitsizliklerin fonksiyonel çözümü."
+            "official_boundary": "Birinci dereceden denklem ve eşitsizliklerin grafiksel/fonksiyonel yorumu ve gerçek yaşam problemleri."
           }
         ]
       },
