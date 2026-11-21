@@ -340,9 +340,10 @@ window.MATEMATIK_MUFREDATI = {
       "title": "4. Tema: Eşlik ve Benzerlik",
       "unit_topic": "Eşlik ve Benzerlik",
       "topics": [
-        "Geometrik Dönüşümler ve Özellikleri (Yansıma, Öteleme, Dönme)",
-        "Üçgenlerde Eşlik Koşulları",
-        "Üçgenlerde Benzerlik Teoremleri ve Benzerlik Oranı",
+        "Geometrik Dönüşümler",
+        "Eşlik ve Benzerlik Koşulları",
+        "Benzer Üçgenler Oluşturma",
+        "Tales, Öklid ve Pisagor Teoremleri",
         "Eşlik ve Benzerlik Problemleri"
       ]
     },

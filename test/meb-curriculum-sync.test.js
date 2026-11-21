@@ -222,6 +222,16 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Üçgende Açı ve Kenarla İlgili Özellikler ve Bu Özellikler Arasındaki İlişkiler'
   ], '9. sınıf 3. Tema MEB içindekiler görseliyle birebir aynı tek alt konuyu içermelidir');
 
+  // 9. Sınıf 4. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (5 alt konu)
+  const grade9Tema4Subs = getSubTopics(9, '4. Tema: Eşlik ve Benzerlik').map(s => s.name);
+  assert.deepEqual(grade9Tema4Subs, [
+    'Geometrik Dönüşümler',
+    'Eşlik ve Benzerlik Koşulları',
+    'Benzer Üçgenler Oluşturma',
+    'Tales, Öklid ve Pisagor Teoremleri',
+    'Eşlik ve Benzerlik Problemleri'
+  ], '9. sınıf 4. Tema MEB içindekiler görseliyle birebir aynı 5 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

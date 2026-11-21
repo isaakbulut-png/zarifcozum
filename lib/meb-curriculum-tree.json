@@ -854,24 +854,29 @@
       "4. Tema: Eşlik ve Benzerlik": {
         "alt_konular": [
           {
-            "name": "Geometrik Dönüşümler ve Özellikleri (Yansıma, Öteleme, Dönme)",
+            "name": "Geometrik Dönüşümler",
             "outcome_code": "MAT.9.4.1",
-            "official_boundary": "Düzlemde şekillerin dönüşümleri ve korunan özellikler."
+            "official_boundary": "Düzlemde öteleme, yansıma ve dönme dönüşümleri ile korunan geometrik özellikler."
           },
           {
-            "name": "Üçgenlerde Eşlik Koşulları",
+            "name": "Eşlik ve Benzerlik Koşulları",
             "outcome_code": "MAT.9.4.2",
-            "official_boundary": "K.A.K., A.K.A. ve K.K.K. eşlik teoremleri."
+            "official_boundary": "Üçgenlerde eşlik ve benzerlik koşulları (K.A.K., A.K.A., K.K.K. ve A.A. benzerliği)."
           },
           {
-            "name": "Üçgenlerde Benzerlik Teoremleri ve Benzerlik Oranı",
+            "name": "Benzer Üçgenler Oluşturma",
             "outcome_code": "MAT.9.4.2",
-            "official_boundary": "Thales, temel benzerlik ve benzerlik teoremleri."
+            "official_boundary": "Cetvel, pergel ve dinamik geometri yazılımlarıyla benzer üçgenler inşa etme ve benzerlik oranı."
+          },
+          {
+            "name": "Tales, Öklid ve Pisagor Teoremleri",
+            "outcome_code": "MAT.9.4.3",
+            "official_boundary": "Tales teoremi, dik üçgende Öklid bağıntıları ve Pisagor teoremi."
           },
           {
             "name": "Eşlik ve Benzerlik Problemleri",
-            "outcome_code": "MAT.9.4.2",
-            "official_boundary": "Gerçek yaşam durumlarında benzerlik ve oran modellemeleri."
+            "outcome_code": "MAT.9.4.4",
+            "official_boundary": "Eşlik, benzerlik, Tales, Öklid ve Pisagor teoremlerini içeren gerçek yaşam problemleri."
           }
         ]
       },
