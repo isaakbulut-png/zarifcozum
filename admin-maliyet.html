@@ -204,7 +204,15 @@
       0%, 100% { opacity: 0.6; }
       50% { opacity: 1; }
     }
+    .is-embedded .header { display: none !important; }
+    .is-embedded body { background: #fff; }
+    .is-embedded .container { padding: 16px 20px 32px; max-width: 100%; }
   </style>
+  <script>
+    if (window.self !== window.top || new URLSearchParams(window.location.search).get('embedded') === '1') {
+      document.documentElement.classList.add('is-embedded');
+    }
+  </script>
 </head>
 <body>
   <header class="header">

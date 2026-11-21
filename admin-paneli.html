@@ -680,11 +680,11 @@
 
     <!-- SİSTEM & TASARIM -->
     <div class="nav-title" data-admin-roles="superadmin">Sistem & Ayarlar</div>
-    <a class="nav-btn" href="/admin-maliyet.html" target="_blank" data-admin-roles="superadmin" style="text-decoration:none">
+    <button class="nav-btn" type="button" data-view="ai-maliyet" data-admin-roles="superadmin">
       <svg viewBox="0 0 24 24" style="stroke:#38bdf8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       <span class="nav-text">📊 AI Maliyet &amp; Token</span>
       <span class="nav-badge" style="background:#0284c7;color:#fff">Canlı</span>
-    </a>
+    </button>
     <button class="nav-btn" type="button" data-view="system-health" data-admin-roles="superadmin">
       <svg viewBox="0 0 24 24" style="stroke:#10b981"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
       <span class="nav-text">Sistem Sağlığı & Güvenlik</span>
@@ -1234,9 +1234,9 @@
             </div>
           </div>
           <div style="display:flex; gap:10px;">
-            <a href="/admin-maliyet.html" target="_blank" class="btn" style="background:#4f46e5; color:#fff; border-color:#4338ca;">
-              📊 Detaylı Finansal Maliyet Dashboard ↗
-            </a>
+            <button type="button" class="btn" onclick="showView('ai-maliyet')" style="background:#4f46e5; color:#fff; border-color:#4338ca;">
+              📊 Detaylı Finansal Maliyet Dashboard
+            </button>
             <button type="button" class="btn" id="btnAiAuditRefresh">
               🔄 Canlı Verileri Yenile
             </button>
@@ -1417,6 +1417,34 @@
             🎯 Yapay Zekâ Soru Sihirbazı ↗
           </a>
         </div>
+      </div>
+    </section>
+
+    <!-- 11b. AI MALİYET & TOKEN TAKİP SİSTEMİ -->
+    <section id="view-ai-maliyet" hidden>
+      <div class="panel" style="margin-top:0; padding:18px 24px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h3 style="margin:0 0 4px 0; font-size:1.15rem; color:#231810; display:flex; align-items:center; gap:8px;">
+              <span>📊</span>
+              <span>AI Maliyet &amp; Token Takip Sistemi</span>
+            </h3>
+            <p class="notice" style="margin:0; font-size:0.86rem; color:#64748b;">
+              Canlı model tüketimi, USD/TL maliyet dökümleri, önbellek tasarruf oranları ve detaylı kullanım analitiği.
+            </p>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button type="button" class="btn" style="background:#ea580c; color:#fff;" onclick="const f=document.getElementById('iframeAiMaliyet'); if(f&&f.contentWindow){ if(typeof f.contentWindow.loadData==='function') f.contentWindow.loadData(); else f.contentWindow.location.reload(); }">
+              🔄 Canlı Verileri Yenile
+            </button>
+            <a href="/admin-maliyet.html" target="_blank" class="btn light" title="Yeni Sekmede Tam Ekran Aç">
+              Tam Ekran ↗
+            </a>
+          </div>
+        </div>
+      </div>
+      <div style="width:100%; border-radius:14px; overflow:hidden; border:1px solid #ebd9c8; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+        <iframe id="iframeAiMaliyet" src="/admin-maliyet.html?embedded=1" style="width:100%; height:calc(100vh - 210px); min-height:850px; border:none; display:block;" title="AI Maliyet ve Token Takip Paneli"></iframe>
       </div>
     </section>
 
@@ -1685,6 +1713,7 @@
         'maarif-curriculum': 'Maarif Müfredat Gezgini',
         'ai-audit': 'AI Denetim & Kota Yönetimi',
         'ai-content': 'AI İçerik Stüdyosu',
+        'ai-maliyet': 'AI Maliyet & Token Takip Sistemi',
         'content-pool': '📚 Merkezi İçerik Havuzu',
         'system-health': 'Sistem Sağlığı ve Güvenlik'
       };
@@ -1708,6 +1737,7 @@
         'maarif-curriculum': '5–12. sınıf Türkiye Yüzyılı Maarif Modeli ağacı',
         'ai-audit': 'Yapay zekâ tüketim analizi, ajan performansı ve kullanıcı bazlı canlı kota kontrolleri',
         'ai-content': 'Yapay zekâ destekli soru ve test üretim stüdyosu',
+        'ai-maliyet': 'Gerçek zamanlı token harcamaları, kur/maliyet analizleri ve önbellek tasarruf paneli',
         'content-pool': 'AI soru taslakları, onaylı sorular, PDF dokümanları, konu anlatımları ve Cloudflare R2 arşivi',
         'system-health': 'Render, PostgreSQL, MongoDB, Cloudflare R2, Cloudinary, SSL ve CDN Canlı Teşhisi'
       };
@@ -1751,6 +1781,12 @@
         'maarif-curriculum': loadAdminCurriculumTree,
         'ai-audit': loadAiAudit,
         'ai-content': () => {},
+        'ai-maliyet': () => {
+          const f = document.getElementById('iframeAiMaliyet');
+          if (f && f.contentWindow && typeof f.contentWindow.loadData === 'function') {
+            f.contentWindow.loadData();
+          }
+        },
         'content-pool': loadContentPool,
         'system-health': () => {
           if (typeof window.initSystemHealthApp === 'function') {
