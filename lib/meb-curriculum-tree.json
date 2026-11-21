@@ -916,12 +916,12 @@
       "7. Tema: Veriden Olasılığa": {
         "alt_konular": [
           {
-            "name": "Deneysel Olasılık",
+            "name": "7.1. Deneysel Olasılık",
             "outcome_code": "MAT.9.7.1",
             "official_boundary": "Olayların gerçekleşme olasılığını deney, simülasyon ve gözleme dayalı olarak tahmin etme."
           },
           {
-            "name": "Teorik Olasılık",
+            "name": "7.2. Teorik Olasılık",
             "outcome_code": "MAT.9.7.2",
             "official_boundary": "Olayların teorik olasılığına ilişkin tümevarımsal akıl yürütme ve eş olası durumlar."
           }

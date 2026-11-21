@@ -167,12 +167,22 @@ router.post('/register', registerLimiter, async (req, res) => {
     return res.status(400).json({ mesaj: 'Geçerli bir kullanıcı tipi seçin.' });
   }
 
+  const brans = typeof body.brans === 'string' ? body.brans.trim().slice(0, 100) : '';
+  const okulKurumAdi = typeof body.okulKurumAdi === 'string' ? body.okulKurumAdi.trim().slice(0, 150) : '';
+  const basvuruNotu = typeof body.basvuruNotu === 'string' ? body.basvuruNotu.trim().slice(0, 500) : '';
+
+  let basvuruDurumu = 'onaylandi';
+  let ogretmenTipi = 'standart_ogretmen';
+
   if (role === 'teacher') {
-    if (!process.env.TEACHER_REGISTRATION_CODE) {
-      return res.status(503).json({ mesaj: 'Öğretmen kaydı şu anda etkin değil.' });
-    }
-    if (!teacherCodeIsValid(body.teacherCode)) {
-      return res.status(403).json({ mesaj: 'Öğretmen davet kodu geçersiz.' });
+    const hasCode = typeof body.teacherCode === 'string' && body.teacherCode.trim().length > 0;
+    if (hasCode) {
+      if (!teacherCodeIsValid(body.teacherCode)) {
+        return res.status(403).json({ mesaj: 'Öğretmen davet kodu geçersiz.' });
+      }
+      basvuruDurumu = 'onaylandi';
+    } else {
+      basvuruDurumu = 'inceleme_suruyor';
     }
   }
 
@@ -363,18 +373,25 @@ router.post('/auth/google', (req, res, next) => {
         if (!['student', 'teacher'].includes(requestedRole)) {
           return res.status(400).json({ mesaj: 'Geçerli bir kullanıcı tipi seçin.' });
         }
+        let googleBasvuruDurumu = 'onaylandi';
+        let googleOgretmenTipi = 'standart_ogretmen';
         if (requestedRole === 'teacher') {
-          if (!process.env.TEACHER_REGISTRATION_CODE) {
-            return res.status(503).json({ mesaj: 'Öğretmen kaydı şu anda etkin değil.' });
-          }
-          if (!teacherCodeIsValid(req.body?.teacherCode)) {
-            return res.status(403).json({ mesaj: 'Öğretmen davet kodu geçersiz.' });
+          const hasTeacherCode = typeof req.body?.teacherCode === 'string' && req.body.teacherCode.trim().length > 0;
+          if (hasTeacherCode) {
+            if (!teacherCodeIsValid(req.body.teacherCode)) {
+              return res.status(403).json({ mesaj: 'Öğretmen davet kodu geçersiz.' });
+            }
+            googleBasvuruDurumu = 'onaylandi';
+          } else {
+            googleBasvuruDurumu = 'inceleme_suruyor';
           }
         }
         user = await User.create({
           name: String(profile.name || email.split('@')[0]).trim().slice(0, 100),
           email,
           role: requestedRole,
+          basvuruDurumu: googleBasvuruDurumu,
+          ogretmenTipi: googleOgretmenTipi,
           googleId: profile.sub
         });
       }
