@@ -147,6 +147,18 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Dikdörtgenler Prizması ile Modellenen Cisimlerin Yüzey Alanları ve Hacimlerine Yönelik Problemler'
   ], '7. sınıf 2. Tema MEB içindekiler görseliyle birebir aynı 6 alt konuyu içermelidir');
 
+  // 7. Sınıf 3. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (7 alt konu)
+  const grade7Tema3Subs = getSubTopics(7, '3. Tema: İstatistiksel Araştırma Süreci').map(s => s.name);
+  assert.deepEqual(grade7Tema3Subs, [
+    'Kategorik ve Nicel Veri Dağılımları',
+    'İstatistiksel Araştırma Süreci Adımları',
+    'Araştırma Sorusunu Belirleme',
+    'Verileri Toplama ve Analize Hazırlama',
+    'Veri Analizi (Görselleştirme ve Özetleme)',
+    'Veriyi Yorumlama ve Karar Verme',
+    'İstatistiksel Araştırma Süreçlerinin İncelenmesi'
+  ], '7. sınıf 3. Tema MEB içindekiler görseliyle birebir aynı 7 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

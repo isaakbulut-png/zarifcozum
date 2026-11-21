@@ -520,14 +520,39 @@
       "3. Tema: İstatistiksel Araştırma Süreci": {
         "alt_konular": [
           {
-            "name": "Kategorik ve Nicel (Sürekli) Veri Dağılımları",
+            "name": "Kategorik ve Nicel Veri Dağılımları",
             "outcome_code": "MAT.7.6.1",
-            "official_boundary": "Çizgi ve daire grafiği oluşturma."
+            "official_boundary": "Kategorik ve nicel (kesikli/sürekli) verilerin özellikleri ve dağılım yapıları."
+          },
+          {
+            "name": "İstatistiksel Araştırma Süreci Adımları",
+            "outcome_code": "MAT.7.6.1",
+            "official_boundary": "İstatistiksel problem çözme ve araştırma sürecinin temel aşamaları."
+          },
+          {
+            "name": "Araştırma Sorusunu Belirleme",
+            "outcome_code": "MAT.7.6.1",
+            "official_boundary": "Veri toplamayı gerektiren amaca uygun ve ölçülebilir araştırma soruları oluşturma."
+          },
+          {
+            "name": "Verileri Toplama ve Analize Hazırlama",
+            "outcome_code": "MAT.7.6.1",
+            "official_boundary": "Uygun örneklemden veri toplama, verileri düzenleme ve analize hazır hâle getirme."
+          },
+          {
+            "name": "Veri Analizi (Görselleştirme ve Özetleme)",
+            "outcome_code": "MAT.7.6.1",
+            "official_boundary": "Veri setlerini uygun grafik (çizgi, daire, sütun) ve özet istatistiklerle temsil etme."
+          },
+          {
+            "name": "Veriyi Yorumlama ve Karar Verme",
+            "outcome_code": "MAT.7.6.1",
+            "official_boundary": "Elde edilen analizlere dayalı çıkarım yapma, veriyi yorumlama ve karar alma."
           },
           {
             "name": "İstatistiksel Araştırma Süreçlerinin İncelenmesi",
             "outcome_code": "MAT.7.6.2",
-            "official_boundary": "Grafiklerin yorumlanması ve yanıltıcı durumlar."
+            "official_boundary": "Yayınlanan istatistiki rapor ve araştırmaları eleştirel gözle değerlendirme, yanıltıcı gösterimleri fark etme."
           }
         ]
       },

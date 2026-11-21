@@ -194,7 +194,12 @@ window.MATEMATIK_MUFREDATI = {
       "title": "3. Tema: İstatistiksel Araştırma Süreci",
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "topics": [
-        "Kategorik ve Nicel (Sürekli) Veri Dağılımları",
+        "Kategorik ve Nicel Veri Dağılımları",
+        "İstatistiksel Araştırma Süreci Adımları",
+        "Araştırma Sorusunu Belirleme",
+        "Verileri Toplama ve Analize Hazırlama",
+        "Veri Analizi (Görselleştirme ve Özetleme)",
+        "Veriyi Yorumlama ve Karar Verme",
         "İstatistiksel Araştırma Süreçlerinin İncelenmesi"
       ]
     },
