@@ -401,19 +401,34 @@
       "7. Tema: Geometrik Nicelikler": {
         "alt_konular": [
           {
-            "name": "Paralelkenar ve Üçgenin Alanı",
-            "outcome_code": "MAT.6.4.2",
-            "official_boundary": "Paralelkenar ve üçgende taban-yükseklik bağıntısı ve alan hesabı."
-          },
-          {
             "name": "Alan Ölçme Birimleri",
             "outcome_code": "MAT.6.4.1",
             "official_boundary": "Metrekare, desimetrekare, santimetrekare ve milimetrekare dönüşümleri."
           },
           {
+            "name": "Paralelkenar ve Üçgenin Alanı",
+            "outcome_code": "MAT.6.4.2",
+            "official_boundary": "Paralelkenar ve üçgende taban-yükseklik bağıntısı ve alan hesabı."
+          },
+          {
+            "name": "Gerçek Yaşam Problemleri",
+            "outcome_code": "MAT.6.4.3",
+            "official_boundary": "Alan ölçme ve geometrik şekillerin alanı ile ilgili gerçek yaşam problemleri."
+          },
+          {
             "name": "Çemberin ve Çapının Uzunlukları Arasındaki İlişki",
             "outcome_code": "MAT.6.4.4",
-            "official_boundary": "Çevre formülü ve pi (π) sayısı."
+            "official_boundary": "Çemberin uzunluğu ile çapı arasındaki oran, pi (π) sayısı ve çevre bağıntısı."
+          },
+          {
+            "name": "Gerçek Yaşam Problemleri",
+            "outcome_code": "MAT.6.4.5",
+            "official_boundary": "Çemberin çevresi ve uzunluk bağıntıları içeren gerçek yaşam problemleri."
+          },
+          {
+            "name": "Çemberde Merkez Açı ve Merkez Açının Gördüğü Yayın Uzunluğu",
+            "outcome_code": "MAT.6.4.6",
+            "official_boundary": "Merkez açı, merkez açının gördüğü yay ve bu yayın uzunluğunu hesaplama."
           }
         ]
       }

@@ -154,9 +154,12 @@ window.MATEMATIK_MUFREDATI = {
       "title": "7. Tema: Geometrik Nicelikler",
       "unit_topic": "Geometrik Nicelikler",
       "topics": [
-        "Paralelkenar ve Üçgenin Alanı",
         "Alan Ölçme Birimleri",
-        "Çemberin ve Çapının Uzunlukları Arasındaki İlişki"
+        "Paralelkenar ve Üçgenin Alanı",
+        "Gerçek Yaşam Problemleri",
+        "Çemberin ve Çapının Uzunlukları Arasındaki İlişki",
+        "Gerçek Yaşam Problemleri",
+        "Çemberde Merkez Açı ve Merkez Açının Gördüğü Yayın Uzunluğu"
       ]
     }
   ],

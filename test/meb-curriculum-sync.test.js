@@ -112,6 +112,17 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Algoritma'
   ], '6. sınıf 6. Tema MEB içindekiler görseliyle birebir aynı 3 alt konuyu içermelidir');
 
+  // 6. Sınıf 7. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (6 alt konu)
+  const grade6Tema7Subs = getSubTopics(6, '7. Tema: Geometrik Nicelikler').map(s => s.name);
+  assert.deepEqual(grade6Tema7Subs, [
+    'Alan Ölçme Birimleri',
+    'Paralelkenar ve Üçgenin Alanı',
+    'Gerçek Yaşam Problemleri',
+    'Çemberin ve Çapının Uzunlukları Arasındaki İlişki',
+    'Gerçek Yaşam Problemleri',
+    'Çemberde Merkez Açı ve Merkez Açının Gördüğü Yayın Uzunluğu'
+  ], '6. sınıf 7. Tema MEB içindekiler görseliyle birebir aynı 6 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');
