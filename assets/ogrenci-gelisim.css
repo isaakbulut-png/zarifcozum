@@ -107,3 +107,419 @@
   100%{transform:scale(1);box-shadow:0 0 0 0 rgba(122,79,45,0)}
 }
 .gz-pulse-glow{animation:gzPulse 1s ease 2}
+
+/* ==========================================================================
+   ZARİFÇÖZÜM MODERN RENKLİ DASHBOARD TASARIM SİSTEMİ
+   ========================================================================== */
+
+/* Tam Genişlik ve Akıcı Grid Kartları */
+.zp-card-white {
+  background: #ffffff;
+  border: 1px solid #e8e2d8;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  margin-bottom: 20px;
+}
+
+/* Renkli KPI Kartları */
+.zp-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 12px 0 24px;
+}
+.zp-kpi-card {
+  background: #ffffff;
+  border: 1px solid #e8e2d8;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.zp-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+.zp-kpi-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.zp-kpi-icon.blue { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+.zp-kpi-icon.emerald { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+.zp-kpi-icon.orange { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+.zp-kpi-icon.purple { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+
+.zp-kpi-content {
+  flex: 1;
+  min-width: 0;
+}
+.zp-kpi-label {
+  font-size: 0.82rem;
+  color: #78716c;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.zp-kpi-val {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #1c1917;
+  line-height: 1.15;
+  margin-bottom: 4px;
+}
+.zp-kpi-sub {
+  font-size: 0.78rem;
+  color: #a8a29e;
+}
+
+/* Üst Kaldığın Yerden Devam Et Hero Banner */
+.zp-resume-hero {
+  background: linear-gradient(135deg, #2b1810 0%, #3f2214 45%, #4338ca 100%);
+  border-radius: 18px;
+  padding: 24px 28px;
+  color: #ffffff;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(43, 24, 16, 0.18);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.zp-resume-hero h2 {
+  color: #ffffff;
+  font-size: 1.35rem;
+  margin: 6px 0 8px;
+  font-weight: 800;
+}
+.zp-resume-hero p {
+  color: #cbd5e1;
+  font-size: 0.88rem;
+  margin: 0;
+}
+.zp-resume-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #fed7aa;
+}
+.zp-resume-btn {
+  background: #ffffff;
+  color: #3b2214;
+  font-weight: 700;
+  font-size: 0.92rem;
+  padding: 12px 24px;
+  border-radius: 12px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  border: none;
+  cursor: pointer;
+}
+.zp-resume-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+  background: #fffaf5;
+}
+
+/* Kategori ve Durum Rozetleri */
+.zp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.zp-badge-maarif { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+.zp-badge-new { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.zp-badge-urgent { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.zp-badge-done { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+.zp-badge-pending { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.zp-badge-purple { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+
+/* Dinamik İlerleme Çubuğu Seviyeleri */
+.zp-progress-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: #f1ede4;
+  overflow: hidden;
+  position: relative;
+  margin: 6px 0;
+}
+.zp-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+.zp-progress-fill.good { background: #10b981; }
+.zp-progress-fill.mid { background: #f59e0b; }
+.zp-progress-fill.low { background: #ef4444; }
+
+/* 7 Günlük Haftalık Çizelge */
+.zp-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(130px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+.zp-week-col {
+  background: #ffffff;
+  border: 1px solid #e8e2d8;
+  border-radius: 14px;
+  padding: 12px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+}
+.zp-week-col.is-today {
+  border: 2px solid #ea580c;
+  background: #fffcf8;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.08);
+}
+.zp-week-day-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #4a2e1a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1ede4;
+  margin-bottom: 10px;
+}
+.zp-week-col.is-today .zp-week-day-title {
+  color: #ea580c;
+}
+.zp-week-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.zp-cal-pill {
+  font-size: 0.74rem;
+  padding: 6px 8px;
+  border-radius: 8px;
+  line-height: 1.35;
+  font-weight: 600;
+  display: block;
+}
+.zp-cal-pill.live { background: #fee2e2; color: #991b1b; border-left: 3px solid #ef4444; }
+.zp-cal-pill.task { background: #eff6ff; color: #1e40af; border-left: 3px solid #3b82f6; }
+.zp-cal-pill.study { background: #ecfdf5; color: #065f46; border-left: 3px solid #10b981; }
+.zp-cal-pill.exam { background: #fef3c7; color: #92400e; border-left: 3px solid #f59e0b; }
+
+/* Modern Boş Durum (Empty State) */
+.zp-empty-state {
+  text-align: center;
+  padding: 40px 24px;
+  background: #ffffff;
+  border: 1px dashed #d9d3c3;
+  border-radius: 16px;
+  margin: 16px 0;
+}
+.zp-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #faf5ee;
+  color: #7a4f2d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 14px;
+}
+.zp-empty-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #3d2414;
+  margin: 0 0 6px;
+}
+.zp-empty-desc {
+  font-size: 0.88rem;
+  color: #78716c;
+  max-width: 440px;
+  margin: 0 auto 16px;
+  line-height: 1.5;
+}
+
+/* Test Çöz 3 Çalışma Modu Kartları */
+.zp-study-modes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+.zp-mode-card {
+  background: #ffffff;
+  border: 1px solid #e8e2d8;
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.zp-mode-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+.zp-mode-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+.zp-mode-card.mode-fast::before { background: #3b82f6; }
+.zp-mode-card.mode-master::before { background: #10b981; }
+.zp-mode-card.mode-maarif::before { background: #ea580c; }
+
+/* Yazılıya Hazırlık 4'lü Kart Grid */
+.zp-yazili-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin: 20px 0;
+}
+.zp-yazili-card {
+  background: #ffffff;
+  border: 1px solid #e8e2d8;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease;
+}
+.zp-yazili-card:hover {
+  transform: translateY(-3px);
+}
+.zp-yazili-header {
+  padding: 14px 18px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.zp-yazili-header.p1 { background: linear-gradient(135deg, #1e40af, #3b82f6); }
+.zp-yazili-header.p2 { background: linear-gradient(135deg, #065f46, #10b981); }
+.zp-yazili-header.p3 { background: linear-gradient(135deg, #7c2d12, #ea580c); }
+.zp-yazili-header.p4 { background: linear-gradient(135deg, #581c87, #8b5cf6); }
+.zp-yazili-body {
+  padding: 18px;
+}
+
+/* Video Dersler 3 Sütunlu Grid */
+.zp-video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+.zp-video-card {
+  background: #ffffff;
+  border: 1px solid #e8e2d8;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.zp-video-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+.zp-video-thumb {
+  position: relative;
+  height: 160px;
+  background: linear-gradient(135deg, #382315 0%, #5a351d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+.zp-video-duration {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* Asistanla Soru Çöz 2 Sütunlu Panel İçi Çalışma Alanı */
+.zp-asistan-workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 16px;
+}
+@media (max-width: 900px) {
+  .zp-asistan-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sekmeli Filtre Çubuğu (Ödevler vb.) */
+.zp-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0 16px;
+  border-bottom: 1px solid #f1ede4;
+  margin-bottom: 16px;
+}
+.zp-filter-btn {
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid #d9d3c3;
+  background: #ffffff;
+  color: #523520;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.zp-filter-btn:hover {
+  background: #fdf8f4;
+  border-color: #7a4f2d;
+}
+.zp-filter-btn.active {
+  background: #7a4f2d;
+  color: #ffffff;
+  border-color: #7a4f2d;
+}

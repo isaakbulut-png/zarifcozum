@@ -36,14 +36,48 @@
     const goal = ozet.haftalikHedef;
     const goalPct = goal ? Math.min(100, Math.round(ozet.haftalikDakika * 100 / goal)) : 0;
     const change = ozet.testBasarisi.degisim;
-    return `<div class="gz-kpis">
-      <article class="gz-kpi"><span>Günlük çalışma</span><strong>${esc(fmtMin(ozet.bugunDakika))}</strong><small>${ozet.bugunDakika ? 'Bugün kaydedildi' : 'Bugün henüz çalışma girilmedi'}</small></article>
-      <article class="gz-kpi"><span>Haftalık hedef</span><strong>${goal ? `${esc(fmtMin(ozet.haftalikDakika))} <em>/ ${esc(fmtMin(goal))}</em>` : '—'}</strong>
-        ${goal ? `<div class="gz-progress"><i style="width:${goalPct}%"></i></div><small>%${goalPct} tamamlandı</small>` : '<small>Henüz hedef belirlenmedi</small>'}</article>
-      <article class="gz-kpi"><span>Test başarısı</span><strong>${ozet.testBasarisi.ortalama === null ? '—' : `%${ozet.testBasarisi.ortalama}`}</strong>
-        <small>${change === null ? `${ozet.testBasarisi.sayi} test çözüldü` : `${change >= 0 ? '▲' : '▼'} ${Math.abs(change)} puan (önceki 10 teste göre)`}</small></article>
-      <article class="gz-kpi"><span>Çalışma serisi</span><strong>${ozet.seri} <em>gün</em></strong><small>${ozet.bugunDakika ? 'Seri bugün de devam ediyor' : ozet.seri ? 'Bugün çalışırsan seri sürer' : 'Bugün yeni seri başlat'}</small></article>
-      <article class="gz-kpi"><span>Tamamlanan konu</span><strong>${ozet.tamamlananKonu}</strong><small>${ozet.eksikKonu} eksik kazanım</small></article>
+    const avgScore = ozet.testBasarisi.ortalama;
+    const streak = ozet.seri || 0;
+    const totalQuestions = ozet.testBasarisi.sayi || 0;
+
+    return `<div class="zp-kpi-grid">
+      <article class="zp-kpi-card">
+        <div class="zp-kpi-icon blue"><span>📘</span></div>
+        <div class="zp-kpi-content">
+          <div class="zp-kpi-label">Toplam Soru / Test</div>
+          <div class="zp-kpi-val">${totalQuestions} <small style="font-size:0.8rem;font-weight:600;color:#2563eb">test</small></div>
+          <div class="zp-kpi-sub">${ozet.bugunDakika ? `${fmtMin(ozet.bugunDakika)} bugün çalışıldı` : 'Bugün henüz test girilmedi'}</div>
+        </div>
+      </article>
+
+      <article class="zp-kpi-card">
+        <div class="zp-kpi-icon emerald"><span>🎯</span></div>
+        <div class="zp-kpi-content">
+          <div class="zp-kpi-label">Başarı Oranı</div>
+          <div class="zp-kpi-val" style="color:#059669">${avgScore === null ? '—' : `%${avgScore}`}</div>
+          <div class="zp-kpi-sub" style="color:${(change || 0) >= 0 ? '#059669' : '#dc2626'}">
+            ${change === null ? 'Genel ortalama' : `${change >= 0 ? '▲ +' : '▼ '}${change} puan (son 10 teste göre)`}
+          </div>
+        </div>
+      </article>
+
+      <article class="zp-kpi-card">
+        <div class="zp-kpi-icon orange"><span>🔥</span></div>
+        <div class="zp-kpi-content">
+          <div class="zp-kpi-label">Günlük Seri</div>
+          <div class="zp-kpi-val" style="color:#ea580c">${streak} <small style="font-size:0.8rem;font-weight:600;color:#ea580c">gün</small></div>
+          <div class="zp-kpi-sub">${ozet.bugunDakika ? 'Harika! Seri bugün korundu' : streak ? 'Bugün çalışırsan serin sürer' : 'Bugün yeni seri başlat'}</div>
+        </div>
+      </article>
+
+      <article class="zp-kpi-card">
+        <div class="zp-kpi-icon purple"><span>⏱️</span></div>
+        <div class="zp-kpi-content">
+          <div class="zp-kpi-label">Haftalık Hedef</div>
+          <div class="zp-kpi-val" style="color:#7c3aed">${goal ? fmtMin(ozet.haftalikDakika) : '—'}</div>
+          <div class="zp-kpi-sub">${goal ? `%${goalPct} tamamlandı (Hedef: ${fmtMin(goal)})` : 'Henüz hedef belirlenmedi'}</div>
+        </div>
+      </article>
     </div>`;
   }
 
@@ -80,59 +114,142 @@
     const total = units.reduce((sum, unit) => sum + unit.topics.length, 0);
     const done = [...byKey.values()].filter(row => row.status === 'tamamlandi').length;
     const missing = [...byKey.values()].filter(row => row.status === 'eksik');
-    return `<div class="gz-summary"><strong>%${total ? Math.round(done * 100 / total) : 0}</strong> kazanım tamamlandı <small>(${done}/${total})</small>
-      <div class="gz-progress"><i style="width:${total ? Math.round(done * 100 / total) : 0}%"></i></div></div>
-      ${missing.length ? `<div class="gz-alert"><b>Eksik kazanımlar (${missing.length})</b><ul>${missing.map(row => `<li>${esc(row.topic)} <small>· ${esc(row.unit)}</small></li>`).join('')}</ul></div>` : ''}
+    const totalPct = total ? Math.round(done * 100 / total) : 0;
+    const totalTone = totalPct >= 70 ? 'good' : (totalPct >= 40 ? 'mid' : 'low');
+
+    return `<div class="zp-card-white" style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+        <div>
+          <strong style="font-size:1.15rem;color:#1c1917;">%${totalPct}</strong>
+          <span style="font-size:0.9rem;color:#78716c;margin-left:6px;">kazanım tamamlandı (${done}/${total})</span>
+        </div>
+        <span class="zp-badge zp-badge-maarif">🏛️ Türkiye Yüzyılı Maarif Modeli</span>
+      </div>
+      <div class="zp-progress-bar"><div class="zp-progress-fill ${totalTone}" style="width:${totalPct}%"></div></div>
+    </div>
+    ${missing.length ? `<div class="zp-card-white" style="border-left:4px solid #ef4444;background:#fff5f5;margin-bottom:16px;">
+      <b style="color:#991b1b;font-size:0.95rem;">⚠️ Eksik veya Pekiştirilmesi Gereken Kazanımlar (${missing.length})</b>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+        ${missing.map(row => `<span class="zp-badge zp-badge-urgent" style="font-size:0.8rem;">${esc(row.topic)} · <small>${esc(row.unit)}</small></span>`).join('')}
+      </div>
+    </div>` : ''}
+    <div style="display:grid;gap:14px;">
       ${units.map((unit, unitIndex) => {
         const unitDone = unit.topics.filter(topic => byKey.get(`${unit.title}||${topic}`)?.status === 'tamamlandi').length;
         const pct = Math.round(unitDone * 100 / unit.topics.length);
-        return `<details class="gz-unit"${unitIndex === 0 ? ' open' : ''}><summary><span>${esc(unit.title)}</span><b>%${pct}</b></summary>
-          <div class="gz-progress"><i style="width:${pct}%"></i></div>
+        const tone = pct >= 70 ? 'good' : (pct >= 40 ? 'mid' : 'low');
+        return `<details class="zp-card-white" style="padding:16px 20px;"${unitIndex === 0 ? ' open' : ''}>
+          <summary style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:700;color:#3d2414;font-size:1rem;">
+            <span>${esc(unit.title)}</span>
+            <span class="zp-badge ${pct >= 70 ? 'zp-badge-done' : (pct >= 40 ? 'zp-badge-pending' : 'zp-badge-urgent')}">%${pct} Tamamlandı</span>
+          </summary>
+          <div class="zp-progress-bar" style="margin:12px 0 16px;"><div class="zp-progress-fill ${tone}" style="width:${pct}%"></div></div>
+          <div style="display:grid;gap:8px;">
           ${unit.topics.map((topic, topicIndex) => {
             const row = byKey.get(`${unit.title}||${topic}`);
             const status = row?.status || 'yok';
-            const accBadge = row && row.totalAttempted > 0
-              ? `<span class="gz-chip" style="font-size:.72rem;margin-left:6px" title="${row.correctCount}/${row.totalAttempted} doğru">🎯 %${row.accuracyRate ?? Math.round(row.correctCount * 100 / row.totalAttempted)} (${row.correctCount}/${row.totalAttempted})</span>`
+            const accRate = row && row.totalAttempted > 0 ? (row.accuracyRate ?? Math.round(row.correctCount * 100 / row.totalAttempted)) : null;
+            const accBadge = accRate !== null
+              ? `<span class="zp-badge ${accRate >= 70 ? 'zp-badge-done' : (accRate >= 40 ? 'zp-badge-pending' : 'zp-badge-urgent')}" title="${row.correctCount}/${row.totalAttempted} doğru">🎯 %${accRate} Başarı</span>`
               : '';
-            return `<div class="gz-topic status-${status}"><span>${esc(topic)}${row?.updatedBy === 'teacher' ? ' <small>· öğretmen işaretledi</small>' : ''}${accBadge}</span>
-              ${editable ? `<select data-gz-kazanim data-grade="${esc(grade)}" data-u="${unitIndex}" data-t="${topicIndex}" aria-label="${esc(topic)} durumu">
-                ${Object.entries(STATUS_LABEL).map(([value, label]) => `<option value="${value}"${value === status ? ' selected' : ''}>${label}</option>`).join('')}</select>`
-                : `<em>${STATUS_LABEL[status]}</em>`}</div>`;
-          }).join('')}</details>`;
-      }).join('')}`;
+            return `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:10px 12px;background:#fcfbf9;border:1px solid #f1ede4;border-radius:10px;">
+              <div style="flex:1;min-width:200px;">
+                <span style="font-weight:600;font-size:0.92rem;color:#1c1917;">${esc(topic)}</span>
+                ${row?.updatedBy === 'teacher' ? '<small style="color:#d97706;margin-left:6px;font-weight:600;">· 👨‍🏫 öğretmen onaylı</small>' : ''}
+                <span style="margin-left:8px;">${accBadge}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button type="button" class="gz-btn-mini" data-go-topic="${esc(topic)}" style="background:#eff6ff;color:#1e40af;border-color:#bfdbfe;font-size:0.75rem;">📖 Konuyu Çalış</button>
+                <button type="button" class="gz-btn-mini" data-go-test="${esc(topic)}" style="background:#ecfdf5;color:#065f46;border-color:#a7f3d0;font-size:0.75rem;">✏️ Test Çöz</button>
+                ${editable ? `<select data-gz-kazanim data-grade="${esc(grade)}" data-u="${unitIndex}" data-t="${topicIndex}" style="padding:4px 8px;border-radius:8px;font-size:0.78rem;" aria-label="${esc(topic)} durumu">
+                  ${Object.entries(STATUS_LABEL).map(([value, label]) => `<option value="${value}"${value === status ? ' selected' : ''}>${label}</option>`).join('')}</select>`
+                  : `<em style="font-size:0.8rem;color:#78716c;">${STATUS_LABEL[status]}</em>`}
+              </div>
+            </div>`;
+          }).join('')}
+          </div>
+        </details>`;
+      }).join('')}
+    </div>`;
   }
 
   function testsHtml(data) {
     const {testler, ozet} = data;
     if (!testler.length) return empty('Henüz çözülmüş test veya deneme yok.');
     const recent = testler.slice(0, 12).reverse();
-    return `<div class="gz-chips"><span class="gz-chip">${ozet.toplam} test</span>
-      <span class="gz-chip">Kazanım testi ort.: ${ozet.kazanimOrtalama === null ? '—' : `%${ozet.kazanimOrtalama}`}</span>
-      <span class="gz-chip">Deneme ort.: ${ozet.denemeOrtalama === null ? '—' : `%${ozet.denemeOrtalama}`}</span>
-      <span class="gz-chip ok">${ozet.dogru} doğru</span><span class="gz-chip bad">${ozet.yanlis} yanlış</span><span class="gz-chip">${ozet.bos} boş</span></div>
-      <h4 class="gz-sub">Son sonuçlar</h4>
+    return `<div class="zp-card-white">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+        <span class="zp-badge zp-badge-purple">📝 Toplam ${ozet.toplam} Test</span>
+        <span class="zp-badge zp-badge-maarif">Kazanım Testi Ort.: ${ozet.kazanimOrtalama === null ? '—' : `%${ozet.kazanimOrtalama}`}</span>
+        <span class="zp-badge zp-badge-pending">Deneme Ort.: ${ozet.denemeOrtalama === null ? '—' : `%${ozet.denemeOrtalama}`}</span>
+        <span class="zp-badge zp-badge-done">✅ ${ozet.dogru} Doğru</span>
+        <span class="zp-badge zp-badge-urgent">❌ ${ozet.yanlis} Yanlış</span>
+        <span class="zp-badge" style="background:#f3f4f6;color:#4b5563;">⚪ ${ozet.bos} Boş</span>
+      </div>
+      <h4 class="gz-sub" style="margin-top:0;">Son Sonuçlar Gelişim Grafiği</h4>
       ${bars(recent.map(item => ({value: item.score || 0, top: item.score === null ? '' : `%${item.score}`, label: fmtShort(item.createdAt), tone: item.type === 'deneme' ? 'alt' : '', title: item.title})), 100)}
-      <p class="gz-legend"><i></i> Kazanım testi <i class="alt"></i> Deneme sınavı</p>
-      <div class="gz-table-wrap"><table class="gz-table"><thead><tr><th>Tür</th><th>Test</th><th>Puan</th><th>D / Y / B</th><th>Tarih</th><th>İşlem</th></tr></thead>
-      <tbody>${testler.map(item => `<tr><td>${item.type === 'deneme' ? 'Deneme' : 'Kazanım'}</td><td>${esc(item.title)}</td><td>${item.score === null ? '—' : `%${item.score}`}</td>
+      <p class="gz-legend" style="margin-top:8px;"><i></i> Kazanım testi <i class="alt"></i> Deneme sınavı</p>
+      <div class="gz-table-wrap" style="margin-top:16px;"><table class="gz-table"><thead><tr><th>Tür</th><th>Test</th><th>Puan</th><th>D / Y / B</th><th>Tarih</th><th>İşlem</th></tr></thead>
+      <tbody>${testler.map(item => `<tr><td><span class="zp-badge ${item.type === 'deneme' ? 'zp-badge-pending' : 'zp-badge-maarif'}">${item.type === 'deneme' ? 'Deneme' : 'Kazanım'}</span></td>
+        <td><strong>${esc(item.title)}</strong></td><td><strong style="color:${(item.score || 0) >= 70 ? '#059669' : ((item.score || 0) >= 50 ? '#d97706' : '#dc2626')}">${item.score === null ? '—' : `%${item.score}`}</strong></td>
         <td>${item.dogru} / ${item.yanlis} / ${item.bos}</td><td>${esc(new Date(item.createdAt).toLocaleDateString('tr-TR'))}</td>
-        <td><button type="button" class="gz-btn-mini gz-karne-btn" data-gz-test-karne="${esc(item.id)}" title="Soru soru detaylı sınav karnesini incele">📊 Detay / Karne</button></td></tr>`).join('')}</tbody></table></div>`;
+        <td><button type="button" class="gz-btn-mini gz-karne-btn" data-gz-test-karne="${esc(item.id)}" title="Soru soru detaylı sınav karnesini incele">📊 Detay / Karne</button></td></tr>`).join('')}</tbody></table></div>
+    </div>`;
   }
 
   function calendarHtml(events) {
-    if (!events.length) return empty('Önümüzdeki 60 gün için takvim kaydı yok.');
-    const groups = new Map();
-    events.forEach(item => {
-      const key = localDay(item.startsAt);
-      groups.set(key, [...(groups.get(key) || []), item]);
-    });
-    const now = Date.now();
-    return [...groups].map(([, items]) => `<section class="gz-day"><h4>${esc(fmtDate(items[0].startsAt))}</h4>
-      <ul class="gz-list">${items.map(item => `<li class="${new Date(item.startsAt).getTime() < now ? 'is-past' : ''}">
-        <span class="gz-chip kind-${esc(item.kind)}">${esc(KIND[item.kind] || item.kind)}</span>
-        <div><strong>${esc(item.title)}</strong><small>${esc(fmtTime(item.startsAt))}${item.note ? ` · ${esc(item.note)}` : ''}${item.status ? ` · ${esc(item.status)}` : ''}</small></div>
-        ${item.link ? `<a class="gz-link" href="${esc(item.link)}" target="_blank" rel="noopener noreferrer">Derse katıl</a>` : ''}
-        ${item.deletable ? `<button class="gz-link" type="button" data-gz-delete-event="${esc(item.id)}">Sil</button>` : ''}</li>`).join('')}</ul></section>`).join('');
+    const daysName = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+    const now = new Date();
+    const currentDay = now.getDay();
+    const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + mondayOffset);
+    monday.setHours(0, 0, 0, 0);
+
+    const weekDays = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const isToday = d.toDateString() === now.toDateString();
+      const dateStr = d.toLocaleDateString('sv-SE', {timeZone: 'Europe/Istanbul'});
+      const dayEvents = events.filter(e => localDay(e.startsAt) === dateStr);
+      weekDays.push({
+        name: daysName[i],
+        shortDate: d.toLocaleDateString('tr-TR', {day: 'numeric', month: 'short'}),
+        isToday,
+        events: dayEvents
+      });
+    }
+
+    const gridHtml = `<div class="zp-week-grid">${weekDays.map(d => `
+      <div class="zp-week-col${d.isToday ? ' is-today' : ''}">
+        <div class="zp-week-day-title">
+          <span>${d.name}</span>
+          <small>${d.shortDate}</small>
+        </div>
+        <div class="zp-week-events-list">
+          ${d.events.length ? d.events.map(e => {
+            const pillKind = e.kind === 'canli-ders' ? 'live' : (e.kind === 'sinav' ? 'exam' : (e.kind === 'odev' ? 'task' : 'study'));
+            return `<div class="zp-cal-pill ${pillKind}" title="${esc(e.note || e.title)}">
+              <strong>${esc(fmtTime(e.startsAt))}</strong> ${esc(e.title)}
+            </div>`;
+          }).join('') : '<small style="color:#a8a29e;text-align:center;margin:auto 0;">Plan yok</small>'}
+        </div>
+      </div>
+    `).join('')}</div>`;
+
+    return `<div class="zp-card-white">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px;">
+        <div>
+          <h3 style="margin:0 0 4px;font-size:1.15rem;color:#3d2414;">📅 Haftalık Çalışma Programı Çizelgesi</h3>
+          <p class="feed-status" style="margin:0;">Pazartesi'den Pazar'a haftalık ders ve etüt akışın. Bugünün planı turuncu ile vurgulanmıştır.</p>
+        </div>
+        <button type="button" class="btn" id="btnAiWeeklyPlan" style="background:#7a4f2d;color:#fff;padding:9px 18px;border-radius:10px;font-size:0.85rem;font-weight:700;display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:none;">
+          <span>🤖 AI Koç ile 1 Tıkta Haftalık Çalışma Planı Oluştur</span>
+        </button>
+      </div>
+      ${gridHtml}
+    </div>`;
   }
 
   function commentsHtml(report, teacher) {
@@ -150,22 +267,98 @@
       <h4 class="gz-sub">Veliye gönderilen raporlar</h4>${reports.length ? reports.map(row).join('') : empty('Henüz veli raporu hazırlanmadı.')}`;
   }
 
+  let weeklyChartInstance = null;
+  function renderWeeklyChart(haftalar) {
+    const canvas = document.getElementById('gzWeeklyChart');
+    if (!canvas || !window.Chart) return;
+    if (weeklyChartInstance) {
+      weeklyChartInstance.destroy();
+      weeklyChartInstance = null;
+    }
+    const labels = haftalar.map(h => fmtShort(h.baslangic));
+    const minutes = haftalar.map(h => h.dakika || 0);
+    const scores = haftalar.map(h => h.testOrtalama || 0);
+
+    weeklyChartInstance = new window.Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Çalışma Süresi (Dakika)',
+            data: minutes,
+            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+            borderColor: '#3b82f6',
+            borderWidth: 1,
+            borderRadius: 6,
+            yAxisID: 'y'
+          },
+          {
+            label: 'Test Başarı Ortalaması (%)',
+            data: scores,
+            type: 'line',
+            borderColor: '#10b981',
+            backgroundColor: '#10b981',
+            pointRadius: 4,
+            tension: 0.3,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'top', labels: { font: { family: 'inherit', size: 12 } } }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Dakika', font: { weight: 'bold' } }
+          },
+          y1: {
+            beginAtZero: true,
+            max: 100,
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            title: { display: true, text: 'Başarı %', font: { weight: 'bold' } }
+          }
+        }
+      }
+    });
+  }
+
   function reportHtml(report, teacher) {
-    const lists = (title, items, tone, isWeak = false) => `<div class="gz-card ${tone}"><h4>${title}</h4>${items.length
+    const lists = (title, items, tone, isWeak = false) => `<div class="zp-card-white" style="border-left:4px solid ${isWeak ? '#ef4444' : '#10b981'};margin-bottom:0;">
+      <h4 style="margin:0 0 12px;font-size:1.05rem;color:#1c1917;">${title}</h4>${items.length
       ? `<ul class="gz-list">${items.map(item => `<li><div style="flex:1"><strong>${esc(item.konu)}</strong><small>${esc(item.kaynak)}</small></div>
-         ${isWeak && !teacher ? `<button type="button" class="gz-btn-mini gz-ai-topic-btn" data-gz-ai-topic="${esc(item.konu)}" title="Bu konuyu AI Mentör ile birebir çalış">🤖 AI Mentör ile Çalış</button>` : ''}
+         ${isWeak && !teacher ? `<button type="button" class="gz-btn-mini gz-ai-topic-btn" data-gz-ai-topic="${esc(item.konu)}" title="Bu konuyu AI Mentör ile birebir çalış">🤖 AI ile Pekiştir</button>` : ''}
          </li>`).join('')}</ul>` : empty('Henüz yeterli veri yok.')}</div>`;
-    return `<h4 class="gz-sub">Haftalık gelişim (son 6 hafta)</h4>
-      ${bars(report.haftalar.map(week => ({value: week.dakika, top: week.dakika ? fmtMin(week.dakika) : '', label: fmtShort(week.baslangic),
-        title: `${week.testSayisi} test · ${week.testOrtalama === null ? 'test yok' : `ortalama %${week.testOrtalama}`} · ${week.teslimEdilenOdev} ödev teslimi`})), 0)}
+
+    return `<div class="zp-card-white">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <h4 style="margin:0;font-size:1.15rem;color:#3d2414;">📈 Haftalık Başarı ve Soru Çözüm Analizi</h4>
+        <span class="zp-badge zp-badge-purple">📊 Chart.js İnteraktif İstatistik</span>
+      </div>
+      <div style="height:240px;position:relative;margin-bottom:16px;">
+        <canvas id="gzWeeklyChart"></canvas>
+      </div>
       <div class="gz-table-wrap"><table class="gz-table"><thead><tr><th>Hafta</th><th>Çalışma</th><th>Test</th><th>Test ort.</th><th>Teslim edilen ödev</th></tr></thead><tbody>
-      ${report.haftalar.map(week => `<tr><td>${esc(fmtShort(week.baslangic))}</td><td>${esc(fmtMin(week.dakika))}</td><td>${week.testSayisi}</td>
-        <td>${week.testOrtalama === null ? '—' : `%${week.testOrtalama}`}</td><td>${week.teslimEdilenOdev}</td></tr>`).join('')}</tbody></table></div>
-      <div class="gz-two">${lists('Güçlü konular', report.guclu, 'good', false)}${lists('Geliştirilecek konular', report.zayif, 'weak', true)}</div>
-      <h4 class="gz-sub">Konu / ders bazlı ödev başarısı</h4>
-      ${report.konuBasarisi.length ? `<ul class="gz-list">${report.konuBasarisi.map(item => `<li><div><strong>${esc(item.konu)}</strong><small>${item.sayi} değerlendirilmiş ödev</small></div>
-        <b>%${item.ortalama}</b></li>`).join('')}</ul>` : empty('Değerlendirilmiş ödev bulunmuyor.')}
-      ${commentsHtml(report, teacher)}`;
+      ${report.haftalar.map(week => `<tr><td><strong>${esc(fmtShort(week.baslangic))}</strong></td><td>${esc(fmtMin(week.dakika))}</td><td>${week.testSayisi} test</td>
+        <td><span class="zp-badge ${(week.testOrtalama || 0) >= 70 ? 'zp-badge-done' : ((week.testOrtalama || 0) >= 40 ? 'zp-badge-pending' : 'zp-badge-urgent')}">${week.testOrtalama === null ? '—' : `%${week.testOrtalama}`}</span></td>
+        <td>${week.teslimEdilenOdev} ödev</td></tr>`).join('')}</tbody></table></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:16px;">
+      ${lists('🌟 Güçlü Olduğum Konular', report.guclu, 'good', false)}
+      ${lists('🎯 Geliştirilmesi Gereken Konular', report.zayif, 'weak', true)}
+    </div>
+    <div class="zp-card-white">
+      <h4 style="margin:0 0 12px;font-size:1.05rem;color:#1c1917;">📚 Konu / Ders Bazlı Ödev Başarısı</h4>
+      ${report.konuBasarisi.length ? `<ul class="gz-list">${report.konuBasarisi.map(item => `<li><div style="flex:1"><strong>${esc(item.konu)}</strong><small>${item.sayi} değerlendirilmiş ödev</small></div>
+        <span class="zp-badge ${item.ortalama >= 70 ? 'zp-badge-done' : (item.ortalama >= 40 ? 'zp-badge-pending' : 'zp-badge-urgent')}">%${item.ortalama}</span></li>`).join('')}</ul>` : empty('Değerlendirilmiş ödev bulunmuyor.')}
+    </div>
+    ${commentsHtml(report, teacher)}`;
   }
 
   function showKarneModal(test) {
@@ -298,9 +491,14 @@
         </article>` : `<p class="gz-empty">Henüz öğretmen değerlendirmesi bulunmuyor. Öğretmenin ödev ve testlerini inceledikçe buraya özel tavsiyeler ekleyecektir.</p>`;
       if (goalInput && document.activeElement !== goalInput) goalInput.value = state.ozet.haftalikHedef || '';
       $('gzKazanim').innerHTML = kazanimHtml(state.grade, state.kazanimlar, true);
-      if (state.testler) $('gzTestler').innerHTML = testsHtml(state.testler);
+      if (state.testler && $('gzTestler')) $('gzTestler').innerHTML = testsHtml(state.testler);
       $('gzTakvim').innerHTML = calendarHtml(state.takvim.map(item => ({...item, deletable: item.deletable && item.createdBy === 'student'})));
-      if (state.rapor) $('gzRapor').innerHTML = reportHtml(state.rapor, false);
+      if (state.rapor) {
+        $('gzRapor').innerHTML = reportHtml(state.rapor, false);
+        if (state.rapor.haftalar) {
+          setTimeout(() => renderWeeklyChart(state.rapor.haftalar), 60);
+        }
+      }
     }
 
     async function load() {
@@ -377,6 +575,39 @@
       const karneBtn = event.target.closest?.('[data-gz-test-karne]');
       const aiTopicBtn = event.target.closest?.('[data-gz-ai-topic]');
       const closeModal = event.target.closest?.('[data-gz-close-modal]');
+      const goTopic = event.target.closest?.('[data-go-topic]');
+      const goTest = event.target.closest?.('[data-go-test]');
+      const aiWeeklyPlan = event.target.closest?.('#btnAiWeeklyPlan');
+
+      if (goTopic) {
+        if (typeof window.showPanel === 'function') window.showPanel('konu-anlatimlari', true);
+        else location.hash = '#konu-anlatimlari';
+        return;
+      }
+
+      if (goTest) {
+        if (typeof window.showPanel === 'function') window.showPanel('test-coz', true);
+        else location.hash = '#test-coz';
+        return;
+      }
+
+      if (aiWeeklyPlan) {
+        if (typeof window.showPanel === 'function') window.showPanel('ai-mentor-panel', true);
+        else location.hash = '#ai-mentor-panel';
+        const kocPill = document.querySelector('.student-ai-pill[data-role="ai_koc"]');
+        if (kocPill) kocPill.click();
+        const input = document.getElementById('studentAiInput') || document.getElementById('studentAiChatInput');
+        if (input) {
+          input.value = "Hocam, MEB Maarif Modeli müfredatımı ve bu haftaki eksik kazanımlarımı dikkate alarak bana 7 günlük detaylı, dengeli bir haftalık çalışma programı hazırlar mısınız?";
+          input.focus();
+          const sendBtn = document.getElementById('studentAiSubmit') || document.getElementById('studentAiSendBtn');
+          if (sendBtn) {
+            sendBtn.classList.add('gz-pulse-glow');
+            setTimeout(() => sendBtn.classList.remove('gz-pulse-glow'), 2500);
+          }
+        }
+        return;
+      }
 
       if (log) await run('gzStudyStatus', () => api(`/api/student/gelisim/calisma/${encodeURIComponent(log.dataset.gzDeleteLog)}`, {method: 'DELETE'}));
       if (reminder) await run('gzReminderStatus', () => api(`/api/student/gelisim/hatirlatici/${encodeURIComponent(reminder.dataset.gzDeleteEvent)}`, {method: 'DELETE'}));
