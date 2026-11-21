@@ -621,14 +621,24 @@
       "7. Tema: Veriden Olasılığa": {
         "alt_konular": [
           {
-            "name": "Eşit Olasılıklı Olaylar ve Tümleyen Olay",
-            "outcome_code": "MAT.7.7.1",
-            "official_boundary": "Eşit şansa sahip olma ve tümleyen olayın olasılığı."
+            "name": "Teorik Olasılık",
+            "outcome_code": "MAT.7.7.2",
+            "official_boundary": "Olası durumları belirleme ve teorik olasılık değerini hesaplama."
           },
           {
-            "name": "Teorik Olasılık ve Ayrık Olaylar",
+            "name": "Tümleyen Olay",
+            "outcome_code": "MAT.7.7.1",
+            "official_boundary": "Bir olayın gerçekleşmeme olasılığı ve tümleyen olaylar toplamı (P(A) + P(A') = 1)."
+          },
+          {
+            "name": "Eşit Olasılıklı Olaylar",
+            "outcome_code": "MAT.7.7.1",
+            "official_boundary": "Her bir çıktının eşit şansa sahip olduğu durumlar ve olasılık ilişkisi."
+          },
+          {
+            "name": "Ayrık ve Ayrık Olmayan Olaylar",
             "outcome_code": "MAT.7.7.3",
-            "official_boundary": "Ayrık ve ayrık olmayan olayların olasılığı."
+            "official_boundary": "Ortak elemanı olan ve olmayan olayların karşılaştırılması ve olasılıklarının incelenmesi."
           }
         ]
       },

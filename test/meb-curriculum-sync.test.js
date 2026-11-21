@@ -170,6 +170,15 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Doğru Orantı Problemleri'
   ], '7. sınıf 6. Tema MEB içindekiler görseliyle birebir aynı 6 alt konuyu içermelidir');
 
+  // 7. Sınıf 7. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (4 alt konu)
+  const grade7Tema7Subs = getSubTopics(7, '7. Tema: Veriden Olasılığa').map(s => s.name);
+  assert.deepEqual(grade7Tema7Subs, [
+    'Teorik Olasılık',
+    'Tümleyen Olay',
+    'Eşit Olasılıklı Olaylar',
+    'Ayrık ve Ayrık Olmayan Olaylar'
+  ], '7. sınıf 7. Tema MEB içindekiler görseliyle birebir aynı 4 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

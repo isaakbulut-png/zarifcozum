@@ -235,8 +235,10 @@ window.MATEMATIK_MUFREDATI = {
       "title": "7. Tema: Veriden Olasılığa",
       "unit_topic": "Veriden Olasılığa",
       "topics": [
-        "Eşit Olasılıklı Olaylar ve Tümleyen Olay",
-        "Teorik Olasılık ve Ayrık Olaylar"
+        "Teorik Olasılık",
+        "Tümleyen Olay",
+        "Eşit Olasılıklı Olaylar",
+        "Ayrık ve Ayrık Olmayan Olaylar"
       ]
     },
     {
