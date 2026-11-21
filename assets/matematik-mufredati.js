@@ -418,7 +418,7 @@ window.MATEMATIK_MUFREDATI = {
       "unit_topic": "Sayma, Algoritma ve Bilişim",
       "topics": [
         "5.1. Sayma Stratejileri",
-        "5.2. Algoritma Temelli Problem Çözme"
+        "5.2. Cebirsel ve Fonksiyonel İşlemlerin Algoritmik Yapısı"
       ]
     },
     {

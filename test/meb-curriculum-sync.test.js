@@ -265,6 +265,13 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     '4.6. Gerçek Sayılarda Tanımlı Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler İçeren Problemler'
   ], '10. sınıf 4. Tema MEB içindekiler görseliyle birebir aynı 6 alt konuyu içermelidir');
 
+  // 10. Sınıf 5. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (2 alt konu)
+  const grade10Tema5Subs = getSubTopics(10, '5. Tema: Sayma, Algoritma ve Bilişim').map(s => s.name);
+  assert.deepEqual(grade10Tema5Subs, [
+    '5.1. Sayma Stratejileri',
+    '5.2. Cebirsel ve Fonksiyonel İşlemlerin Algoritmik Yapısı'
+  ], '10. sınıf 5. Tema MEB içindekiler görseliyle birebir aynı 2 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

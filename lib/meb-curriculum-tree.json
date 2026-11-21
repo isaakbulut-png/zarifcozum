@@ -1033,9 +1033,9 @@
             "official_boundary": "Sıralama (Permütasyon), Seçme (Kombinasyon) ve Pascal Üçgeni."
           },
           {
-            "name": "5.2. Algoritma Temelli Problem Çözme",
+            "name": "5.2. Cebirsel ve Fonksiyonel İşlemlerin Algoritmik Yapısı",
             "outcome_code": "MAT.10.5.2",
-            "official_boundary": "Cebirsel ve fonksiyonel işlemlerin algoritmik akış şemaları."
+            "official_boundary": "Cebirsel ve fonksiyonel işlemlerin algoritmik yapısı, akış şemaları ve bilişimsel düşünme."
           }
         ]
       },
