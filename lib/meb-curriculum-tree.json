@@ -994,19 +994,34 @@
       "4. Tema: Nicelikler ve Değişimler": {
         "alt_konular": [
           {
-            "name": "4.1. Fonksiyon Kavramı ve Gösterimi",
+            "name": "4.1. Gerçek Sayılarda Fonksiyon Olma Şartları",
             "outcome_code": "MAT.10.4.1",
-            "official_boundary": "Tanım, değer, görüntü kümesi; bire bir ve örten fonksiyonlar."
+            "official_boundary": "Gerçek sayılarda tanımlı bağıntıların fonksiyon olma şartları, tanım, değer ve görüntü kümeleri."
           },
           {
-            "name": "4.2. Karesel Referans Fonksiyon",
+            "name": "4.2. Karesel Fonksiyon ve Nitel Özellikleri",
             "outcome_code": "MAT.10.4.2",
-            "official_boundary": "f(x) = x² karesel fonksiyonu, tepe noktası ve parabol grafiği."
+            "official_boundary": "f(x) = x² karesel referans fonksiyonu, nitel özellikleri, tepe noktası, artanlık-azalanlık ve grafik gösterimi."
           },
           {
-            "name": "4.3. İkinci Dereceden Bir Bilinmeyenli Denklemler",
+            "name": "4.3. Karekök Fonksiyonu ve Nitel Özellikleri",
             "outcome_code": "MAT.10.4.3",
-            "official_boundary": "Diskriminant yöntemi ve köklerin incelenmesi."
+            "official_boundary": "f(x) = √x karekök referans fonksiyonu, tanım ve görüntü kümesi, nitel özellikleri ve grafik gösterimi."
+          },
+          {
+            "name": "4.4. Rasyonel Fonksiyon ve Nitel Özellikleri",
+            "outcome_code": "MAT.10.4.4",
+            "official_boundary": "f(x) = 1/x rasyonel referans fonksiyonu, tanımsızlık durumları, nitel özellikleri ve grafik gösterimi."
+          },
+          {
+            "name": "4.5. Doğrusal, Karesel, Karekök ve Rasyonel Fonksiyonların Ters Fonksiyonları",
+            "outcome_code": "MAT.10.4.5",
+            "official_boundary": "Bire bir ve örtenlik koşulları altında fonksiyonların tersini cebirsel ve grafiksel olarak belirleme."
+          },
+          {
+            "name": "4.6. Gerçek Sayılarda Tanımlı Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler İçeren Problemler",
+            "outcome_code": "MAT.10.4.6",
+            "official_boundary": "Fonksiyon modelleri ile ifade edilen denklem ve eşitsizlikleri çözme ve gerçek yaşam problemleri."
           }
         ]
       },

@@ -254,6 +254,17 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     '3.3. Bölünebilme'
   ], '10. sınıf 3. Tema MEB içindekiler görseliyle birebir aynı 3 alt konuyu içermelidir');
 
+  // 10. Sınıf 4. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (6 alt konu)
+  const grade10Tema4Subs = getSubTopics(10, '4. Tema: Nicelikler ve Değişimler').map(s => s.name);
+  assert.deepEqual(grade10Tema4Subs, [
+    '4.1. Gerçek Sayılarda Fonksiyon Olma Şartları',
+    '4.2. Karesel Fonksiyon ve Nitel Özellikleri',
+    '4.3. Karekök Fonksiyonu ve Nitel Özellikleri',
+    '4.4. Rasyonel Fonksiyon ve Nitel Özellikleri',
+    '4.5. Doğrusal, Karesel, Karekök ve Rasyonel Fonksiyonların Ters Fonksiyonları',
+    '4.6. Gerçek Sayılarda Tanımlı Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler İçeren Problemler'
+  ], '10. sınıf 4. Tema MEB içindekiler görseliyle birebir aynı 6 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

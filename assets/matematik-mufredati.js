@@ -405,9 +405,12 @@ window.MATEMATIK_MUFREDATI = {
       "title": "4. Tema: Nicelikler ve Değişimler",
       "unit_topic": "Nicelikler ve Değişimler",
       "topics": [
-        "4.1. Fonksiyon Kavramı ve Gösterimi",
-        "4.2. Karesel Referans Fonksiyon",
-        "4.3. İkinci Dereceden Bir Bilinmeyenli Denklemler"
+        "4.1. Gerçek Sayılarda Fonksiyon Olma Şartları",
+        "4.2. Karesel Fonksiyon ve Nitel Özellikleri",
+        "4.3. Karekök Fonksiyonu ve Nitel Özellikleri",
+        "4.4. Rasyonel Fonksiyon ve Nitel Özellikleri",
+        "4.5. Doğrusal, Karesel, Karekök ve Rasyonel Fonksiyonların Ters Fonksiyonları",
+        "4.6. Gerçek Sayılarda Tanımlı Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler İçeren Problemler"
       ]
     },
     {
