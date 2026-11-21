@@ -674,24 +674,29 @@
       "9. Tema: Geometrik Nicelikler (2)": {
         "alt_konular": [
           {
-            "name": "Dairenin Alanı ve Daire Diliminin Alanı",
+            "name": "Dairenin Alanı",
             "outcome_code": "MAT.7.4.7",
-            "official_boundary": "Daire alanı ve merkez açıya bağlı dilim alanı."
+            "official_boundary": "Yarıçapı verilen dairenin alan bağıntısını oluşturma ve hesaplama."
+          },
+          {
+            "name": "Daire Diliminin Alanı",
+            "outcome_code": "MAT.7.4.8",
+            "official_boundary": "Merkez açının ölçüsü ile daire diliminin alanı arasındaki orantı ilişkisi ve alan hesabı."
           },
           {
             "name": "Eşkenar Dörtgenin Alanı",
             "outcome_code": "MAT.7.4.9",
-            "official_boundary": "Köşegenler çarpımının yarısı formülü."
+            "official_boundary": "Eşkenar dörtgenin alan bağıntısını köşegenler ve taban-yükseklik yardımıyla oluşturma."
           },
           {
             "name": "Yamuğun Alanı",
             "outcome_code": "MAT.7.4.9",
-            "official_boundary": "Alt-üst taban toplamı çarpı yükseklik bölü 2."
+            "official_boundary": "Yamuğun alan bağıntısını paralelkenar ve üçgene ayırarak oluşturma ve alan hesabı."
           },
           {
-            "name": "Daire, Eşkenar Dörtgen ve Yamuğun Alanına İlişkin Problemler",
+            "name": "Daire, Daire Dilimi, Eşkenar Dörtgen ve Yamuğun Alanına İlişkin Problemler",
             "outcome_code": "MAT.7.4.10",
-            "official_boundary": "Gerçek yaşam karma alan problemleri."
+            "official_boundary": "Daire, daire dilimi, eşkenar dörtgen ve yamuk içeren çok adımlı gerçek yaşam alan problemleri."
           }
         ]
       }

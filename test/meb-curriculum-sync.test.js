@@ -189,6 +189,16 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Algoritmayı Yapılandırma'
   ], '7. sınıf 8. Tema MEB içindekiler görseliyle birebir aynı 5 alt konuyu içermelidir');
 
+  // 7. Sınıf 9. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (5 alt konu)
+  const grade7Tema9Subs = getSubTopics(7, '9. Tema: Geometrik Nicelikler (2)').map(s => s.name);
+  assert.deepEqual(grade7Tema9Subs, [
+    'Dairenin Alanı',
+    'Daire Diliminin Alanı',
+    'Eşkenar Dörtgenin Alanı',
+    'Yamuğun Alanı',
+    'Daire, Daire Dilimi, Eşkenar Dörtgen ve Yamuğun Alanına İlişkin Problemler'
+  ], '7. sınıf 9. Tema MEB içindekiler görseliyle birebir aynı 5 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

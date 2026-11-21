@@ -256,10 +256,11 @@ window.MATEMATIK_MUFREDATI = {
       "title": "9. Tema: Geometrik Nicelikler (2)",
       "unit_topic": "Geometrik Nicelikler (2)",
       "topics": [
-        "Dairenin Alanı ve Daire Diliminin Alanı",
+        "Dairenin Alanı",
+        "Daire Diliminin Alanı",
         "Eşkenar Dörtgenin Alanı",
         "Yamuğun Alanı",
-        "Daire, Eşkenar Dörtgen ve Yamuğun Alanına İlişkin Problemler"
+        "Daire, Daire Dilimi, Eşkenar Dörtgen ve Yamuğun Alanına İlişkin Problemler"
       ]
     }
   ],
