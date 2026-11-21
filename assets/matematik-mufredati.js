@@ -248,7 +248,8 @@ window.MATEMATIK_MUFREDATI = {
         "Cebirsel İfadelerle İşlemler",
         "Denklemler",
         "Eşitsizlikler",
-        "İspat ve Algoritmayı Yapılandırma"
+        "İspat",
+        "Algoritmayı Yapılandırma"
       ]
     },
     {

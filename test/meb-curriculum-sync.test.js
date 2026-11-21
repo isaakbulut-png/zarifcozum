@@ -179,6 +179,16 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Ayrık ve Ayrık Olmayan Olaylar'
   ], '7. sınıf 7. Tema MEB içindekiler görseliyle birebir aynı 4 alt konuyu içermelidir');
 
+  // 7. Sınıf 8. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (5 alt konu)
+  const grade7Tema8Subs = getSubTopics(7, '8. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler').map(s => s.name);
+  assert.deepEqual(grade7Tema8Subs, [
+    'Cebirsel İfadelerle İşlemler',
+    'Denklemler',
+    'Eşitsizlikler',
+    'İspat',
+    'Algoritmayı Yapılandırma'
+  ], '7. sınıf 8. Tema MEB içindekiler görseliyle birebir aynı 5 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

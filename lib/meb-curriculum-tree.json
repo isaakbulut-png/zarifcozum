@@ -647,7 +647,7 @@
           {
             "name": "Cebirsel İfadelerle İşlemler",
             "outcome_code": "MAT.7.2.1",
-            "official_boundary": "Toplama, çıkarma ve rasyonel sayıyla çarpma."
+            "official_boundary": "Cebirsel ifadelerle toplama ve çıkarma işlemleri ile bir cebirsel ifadeyi bir rasyonel sayı ile çarpma."
           },
           {
             "name": "Denklemler",
@@ -657,12 +657,17 @@
           {
             "name": "Eşitsizlikler",
             "outcome_code": "MAT.7.2.2",
-            "official_boundary": "Eşitsizlikler ve sayı doğrusunda gösterimi."
+            "official_boundary": "Birinci dereceden bir bilinmeyenli eşitsizlikler ve sayı doğrusunda gösterimi."
           },
           {
-            "name": "İspat ve Algoritmayı Yapılandırma",
+            "name": "İspat",
             "outcome_code": "MAT.7.2.3",
-            "official_boundary": "Sayısal örüntülerde ispat adımları ve algoritma."
+            "official_boundary": "Matematiksel iddia ve genellemelerin doğrulama/ispat süreçleri."
+          },
+          {
+            "name": "Algoritmayı Yapılandırma",
+            "outcome_code": "MAT.7.2.3",
+            "official_boundary": "Örüntü ve denklem çözme adımlarının algoritmik yapılar ve akış şemalarıyla yapılandırılması."
           }
         ]
       },
