@@ -7,34 +7,99 @@
       "1. Tema: Geometrik Şekiller": {
         "alt_konular": [
           {
-            "name": "Temel Geometrik Şekiller ve Özellikleri (Nokta, Çember, Dikme)",
+            "name": "Temel Geometrik Şekiller ve Özellikleri",
             "outcome_code": "MAT.5.3.1",
-            "official_boundary": "Nokta, çember ve dikme çizimleri; temel geometrik araçlar."
+            "official_boundary": "Temel geometrik çizimler için araç ve teknoloji."
+          },
+          {
+            "name": "Nokta",
+            "outcome_code": "MAT.5.3.1",
+            "official_boundary": "Nokta tanımı, sembolik gösterimi ve düzlemdeki konumu."
+          },
+          {
+            "name": "Çember",
+            "outcome_code": "MAT.5.3.1",
+            "official_boundary": "Pergel ile çember çizimi, merkez ve yarıçap."
+          },
+          {
+            "name": "Dikme",
+            "outcome_code": "MAT.5.3.1",
+            "official_boundary": "Bir doğruya üzerindeki veya dışındaki bir noktadan dikme çizme."
           },
           {
             "name": "Temel Geometrik Çizimlerin Özellikleri",
             "outcome_code": "MAT.5.3.2",
-            "official_boundary": "Temel geometrik çizimlere dayalı deneyimler ve çizim araçları."
+            "official_boundary": "Doğru, doğru parçası ve ışın çizimleri."
           },
           {
-            "name": "Açıları Ölçme ve Açı Nasıl Ölçülür?",
+            "name": "Açıları Ölçme",
             "outcome_code": "MAT.5.3.3",
-            "official_boundary": "Açıölçer (iletki) kullanımı ve açı ölçümü."
+            "official_boundary": "Açı kavramı, dar, dik, geniş ve doğru açılar."
           },
           {
-            "name": "Doğruların Yolculuğu (Doğruların Kesişimi, Paralelliği ve Açılar)",
+            "name": "Açı Nasıl Ölçülür?",
+            "outcome_code": "MAT.5.3.3",
+            "official_boundary": "Açıölçer (iletki) ile açı ölçümü ve derece birimi."
+          },
+          {
+            "name": "Doğruların Yolculuğu",
             "outcome_code": "MAT.5.3.4",
-            "official_boundary": "İki ve üç doğrunun durumları, iki paralel doğru ve bir kesen."
+            "official_boundary": "Düzlemde doğruların birbirine göre durumları ve oluşan açılar."
           },
           {
-            "name": "Doğrulardan Çokgenlere ve Çokgenlerin Temel Elemanları",
+            "name": "İki Doğrunun Kesişimi",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Kesişen doğrular ve kesişim noktası."
+          },
+          {
+            "name": "Düzlemde Açı Oluşturmayan Doğrular",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Paralel doğrular ve aralarındaki uzaklık."
+          },
+          {
+            "name": "İki Doğrunun Çakışması",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Bütün noktaları ortak olan çakışık doğrular."
+          },
+          {
+            "name": "Üç Doğrunun Paralelliği",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Birbirine paralel üç doğrunun düzlemdeki durumu."
+          },
+          {
+            "name": "Üç Doğrunun Bir Noktada Kesişimi",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Noktadaş doğrular."
+          },
+          {
+            "name": "Üç Doğrunun İkişer İkişer Kesişimi",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Üç doğrunun ikişer ikişer kesişmesiyle oluşan üçgen bölge."
+          },
+          {
+            "name": "İki Paralel Doğru ve Bir Kesen",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "İki paralel doğrunun bir kesenle yaptığı açılar."
+          },
+          {
+            "name": "Doğrulardan Çokgenlere",
             "outcome_code": "MAT.5.3.5",
-            "official_boundary": "Çokgenlerin kenar, köşe ve açı özellikleri."
+            "official_boundary": "Ardışık kesişen doğru parçalarının oluşturduğu kapalı şekiller."
           },
           {
-            "name": "Üçgen ve Üçgen İnşası",
+            "name": "Çokgenlerin Temel Elemanları",
+            "outcome_code": "MAT.5.3.6",
+            "official_boundary": "Kenar, köşe, iç açı ve köşegen kavramları."
+          },
+          {
+            "name": "Üçgen",
             "outcome_code": "MAT.5.3.7",
-            "official_boundary": "Pergel ve cetvelle üçgen inşası ve kenar bağıntıları."
+            "official_boundary": "Açılarına ve kenarlarına göre üçgen çeşitleri."
+          },
+          {
+            "name": "Üçgen İnşası",
+            "outcome_code": "MAT.5.3.7",
+            "official_boundary": "Cetvel, pergel ve iletki yardımıyla üçgen çizimi ve kenar bağıntıları."
           }
         ]
       },

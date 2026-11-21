@@ -7,12 +7,25 @@ window.MATEMATIK_MUFREDATI = {
       "title": "1. Tema: Geometrik Şekiller",
       "unit_topic": "Geometrik Şekiller",
       "topics": [
-        "Temel Geometrik Şekiller ve Özellikleri (Nokta, Çember, Dikme)",
+        "Temel Geometrik Şekiller ve Özellikleri",
+        "Nokta",
+        "Çember",
+        "Dikme",
         "Temel Geometrik Çizimlerin Özellikleri",
-        "Açıları Ölçme ve Açı Nasıl Ölçülür?",
-        "Doğruların Yolculuğu (Doğruların Kesişimi, Paralelliği ve Açılar)",
-        "Doğrulardan Çokgenlere ve Çokgenlerin Temel Elemanları",
-        "Üçgen ve Üçgen İnşası"
+        "Açıları Ölçme",
+        "Açı Nasıl Ölçülür?",
+        "Doğruların Yolculuğu",
+        "İki Doğrunun Kesişimi",
+        "Düzlemde Açı Oluşturmayan Doğrular",
+        "İki Doğrunun Çakışması",
+        "Üç Doğrunun Paralelliği",
+        "Üç Doğrunun Bir Noktada Kesişimi",
+        "Üç Doğrunun İkişer İkişer Kesişimi",
+        "İki Paralel Doğru ve Bir Kesen",
+        "Doğrulardan Çokgenlere",
+        "Çokgenlerin Temel Elemanları",
+        "Üçgen",
+        "Üçgen İnşası"
       ]
     },
     {

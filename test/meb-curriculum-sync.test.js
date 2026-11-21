@@ -24,12 +24,36 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
   assert.ok(grade12Themes.some(t => t.includes('İntegral')), '12. sınıf İntegral korunmalıdır');
   assert.ok(grade12Themes.some(t => t.includes('Trigonometri')), '12. sınıf Trigonometri korunmalıdır');
 
-  // 3. 5. Sınıf Kitap Birebir Başlıkları
-  const grade5Themes = getThemes(5);
-  assert.ok(grade5Themes.some(t => t.includes('1. Tema: Geometrik Şekiller')), '5. sınıf 1. Tema mevcut olmalıdır');
+  // 3. 5. Sınıf 1. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü
   const grade5Tema1Subs = getSubTopics(5, '1. Tema: Geometrik Şekiller').map(s => s.name);
-  assert.ok(grade5Tema1Subs.some(s => s.includes('Doğruların Yolculuğu')), 'Kitaptaki "Doğruların Yolculuğu" başlığı bulunmalıdır');
-  assert.ok(grade5Tema1Subs.some(s => s.includes('Üçgen ve Üçgen İnşası')), 'Kitaptaki "Üçgen İnşası" başlığı bulunmalıdır');
+  assert.equal(grade5Tema1Subs.length, 19, '5. sınıf 1. Tema MEB içindekiler sayfasındaki 19 alt konunun tamamını içermelidir');
+  
+  // Kitaptaki her bir alt başlığın varlığını doğrula
+  const expectedGrade5Subs = [
+    'Temel Geometrik Şekiller ve Özellikleri',
+    'Nokta',
+    'Çember',
+    'Dikme',
+    'Temel Geometrik Çizimlerin Özellikleri',
+    'Açıları Ölçme',
+    'Açı Nasıl Ölçülür?',
+    'Doğruların Yolculuğu',
+    'İki Doğrunun Kesişimi',
+    'Düzlemde Açı Oluşturmayan Doğrular',
+    'İki Doğrunun Çakışması',
+    'Üç Doğrunun Paralelliği',
+    'Üç Doğrunun Bir Noktada Kesişimi',
+    'Üç Doğrunun İkişer İkişer Kesişimi',
+    'İki Paralel Doğru ve Bir Kesen',
+    'Doğrulardan Çokgenlere',
+    'Çokgenlerin Temel Elemanları',
+    'Üçgen',
+    'Üçgen İnşası'
+  ];
+
+  for (const exp of expectedGrade5Subs) {
+    assert.ok(grade5Tema1Subs.includes(exp), `Kitap görselindeki "${exp}" başlığı alt konularda bulunmalıdır`);
+  }
 
   // 4. 5. Sınıf 4. Tema: Sadece Kesirler (Ondalık Gösterim ve Yüzdeler bağımsız konu olarak 5'te yer almamalı)
   const grade5Tema4Subs = getSubTopics(5, '4. Tema: Sayılar ve Nicelikler (2): Kesirler').map(s => s.name);
