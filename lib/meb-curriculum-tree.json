@@ -975,14 +975,19 @@
       "3. Tema: Sayılar": {
         "alt_konular": [
           {
-            "name": "3.1. Bir Doğal Sayının Asal Çarpanları - Bölenleri",
+            "name": "3.1. Bir Doğal Sayının Asal Çarpanları-Bölenleri",
             "outcome_code": "MAT.10.3.1",
-            "official_boundary": "Asal çarpanlara ayırma, pozitif bölen sayısı."
+            "official_boundary": "Asal çarpanlara ayırma, pozitif tam sayı bölenleri ve bölen sayısı."
           },
           {
-            "name": "3.2. En Büyük Ortak Bölen - En Küçük Ortak Kat",
+            "name": "3.2. En Büyük Ortak Bölen-En Küçük Ortak Kat",
             "outcome_code": "MAT.10.3.2",
-            "official_boundary": "EBOB-EKOK özellikleri ve periyodik durum problemleri."
+            "official_boundary": "EBOB-EKOK özellikleri, algoritmaları ve periyodik durum problemleri."
+          },
+          {
+            "name": "3.3. Bölünebilme",
+            "outcome_code": "MAT.10.3.3",
+            "official_boundary": "Bölünebilme kuralları, kalan ilişkileri ve bölünebilme temelli gerçek yaşam problemleri."
           }
         ]
       },

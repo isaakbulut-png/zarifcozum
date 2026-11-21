@@ -246,6 +246,14 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Teorik Olasılık'
   ], '9. sınıf 7. Tema MEB içindekiler görseliyle birebir aynı 2 alt konuyu içermelidir');
 
+  // 10. Sınıf 3. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (3 alt konu)
+  const grade10Tema3Subs = getSubTopics(10, '3. Tema: Sayılar').map(s => s.name);
+  assert.deepEqual(grade10Tema3Subs, [
+    '3.1. Bir Doğal Sayının Asal Çarpanları-Bölenleri',
+    '3.2. En Büyük Ortak Bölen-En Küçük Ortak Kat',
+    '3.3. Bölünebilme'
+  ], '10. sınıf 3. Tema MEB içindekiler görseliyle birebir aynı 3 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

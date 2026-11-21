@@ -396,8 +396,9 @@ window.MATEMATIK_MUFREDATI = {
       "title": "3. Tema: Sayılar",
       "unit_topic": "Sayılar",
       "topics": [
-        "3.1. Bir Doğal Sayının Asal Çarpanları - Bölenleri",
-        "3.2. En Büyük Ortak Bölen - En Küçük Ortak Kat"
+        "3.1. Bir Doğal Sayının Asal Çarpanları-Bölenleri",
+        "3.2. En Büyük Ortak Bölen-En Küçük Ortak Kat",
+        "3.3. Bölünebilme"
       ]
     },
     {
