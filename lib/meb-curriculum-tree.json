@@ -382,14 +382,19 @@
       "6. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler": {
         "alt_konular": [
           {
-            "name": "Bilinmeyen Nicelikler ve Cebirsel İfadeler",
+            "name": "Bilinmeyen Nicelikler",
             "outcome_code": "MAT.6.2.1",
-            "official_boundary": "Değişken, terim, katsayı ve cebirsel ifadenin değerini hesaplama."
+            "official_boundary": "Değişken, terim, katsayı ve basit cebirsel ifadelerin anlamı ve temsili."
           },
           {
-            "name": "Örüntüler ve Algoritma",
+            "name": "Örüntüler",
             "outcome_code": "MAT.6.2.2",
-            "official_boundary": "Sayı ve şekil örüntülerinin kuralı ve akış şemaları."
+            "official_boundary": "Sayı ve şekil örüntülerinin kuralını belirleme ve genelleme."
+          },
+          {
+            "name": "Algoritma",
+            "outcome_code": "MAT.6.2.2",
+            "official_boundary": "Örüntü ve işlem adımlarını algoritmik yapılarla ifade etme ve akış şemaları."
           }
         ]
       },

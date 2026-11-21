@@ -145,8 +145,9 @@ window.MATEMATIK_MUFREDATI = {
       "title": "6. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler",
       "unit_topic": "İşlemlerle Cebirsel Düşünme ve Değişimler",
       "topics": [
-        "Bilinmeyen Nicelikler ve Cebirsel İfadeler",
-        "Örüntüler ve Algoritma"
+        "Bilinmeyen Nicelikler",
+        "Örüntüler",
+        "Algoritma"
       ]
     },
     {

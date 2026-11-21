@@ -104,6 +104,14 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Sonuç veya Yorumları Tartışma'
   ], '6. sınıf 4. Tema MEB içindekiler görseliyle birebir aynı 8 alt konuyu içermelidir');
 
+  // 6. Sınıf 6. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (3 alt konu: Bilinmeyen Nicelikler, Örüntüler, Algoritma)
+  const grade6Tema6Subs = getSubTopics(6, '6. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler').map(s => s.name);
+  assert.deepEqual(grade6Tema6Subs, [
+    'Bilinmeyen Nicelikler',
+    'Örüntüler',
+    'Algoritma'
+  ], '6. sınıf 6. Tema MEB içindekiler görseliyle birebir aynı 3 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');
