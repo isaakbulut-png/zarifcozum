@@ -845,19 +845,9 @@
       "3. Tema: Geometrik Şekiller": {
         "alt_konular": [
           {
-            "name": "Üçgende Açı ve Kenar Özellikleri",
+            "name": "Üçgende Açı ve Kenarla İlgili Özellikler ve Bu Özellikler Arasındaki İlişkiler",
             "outcome_code": "MAT.9.3.1",
-            "official_boundary": "Üçgende açılar, açı-kenar bağıntıları."
-          },
-          {
-            "name": "Üçgenin Yardımcı Elemanları",
-            "outcome_code": "MAT.9.3.1",
-            "official_boundary": "Yükseklik, açıortay ve kenarortay bağıntıları."
-          },
-          {
-            "name": "Pisagor Teoremi ve Öklid Bağıntıları",
-            "outcome_code": "MAT.9.3.1",
-            "official_boundary": "Dik üçgende metrik bağıntılar ve uygulamalar."
+            "official_boundary": "Üçgende iç ve dış açılar, açı-kenar bağıntıları, üçgen eşitsizliği ve bu özellikler arasındaki ilişkiler."
           }
         ]
       },

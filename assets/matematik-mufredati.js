@@ -333,9 +333,7 @@ window.MATEMATIK_MUFREDATI = {
       "title": "3. Tema: Geometrik Şekiller",
       "unit_topic": "Geometrik Şekiller",
       "topics": [
-        "Üçgende Açı ve Kenar Özellikleri",
-        "Üçgenin Yardımcı Elemanları",
-        "Pisagor Teoremi ve Öklid Bağıntıları"
+        "Üçgende Açı ve Kenarla İlgili Özellikler ve Bu Özellikler Arasındaki İlişkiler"
       ]
     },
     {

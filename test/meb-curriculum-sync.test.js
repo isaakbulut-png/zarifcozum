@@ -216,6 +216,12 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Doğrusal Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler İçeren Problemler'
   ], '9. sınıf 2. Tema MEB içindekiler görseliyle birebir aynı 3 alt konuyu içermelidir');
 
+  // 9. Sınıf 3. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (1 alt konu)
+  const grade9Tema3Subs = getSubTopics(9, '3. Tema: Geometrik Şekiller').map(s => s.name);
+  assert.deepEqual(grade9Tema3Subs, [
+    'Üçgende Açı ve Kenarla İlgili Özellikler ve Bu Özellikler Arasındaki İlişkiler'
+  ], '9. sınıf 3. Tema MEB içindekiler görseliyle birebir aynı tek alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');
