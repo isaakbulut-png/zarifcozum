@@ -6,7 +6,7 @@ import { GoogleGenAI } from '@google/genai';
 import { Pinecone } from '@pinecone-database/pinecone';
 import outcome from './lib/meb-outcome.js';
 import mebCurriculum from './lib/meb-curriculum.js';
-const { findSubTopicMeta } = mebCurriculum;
+const { findSubTopicMeta, getCurriculumTree } = mebCurriculum;
 
 // .env öncelikli, eksikler baglanti_adresi.env'den tamamlanır
 const kokDizin = path.dirname(fileURLToPath(import.meta.url));
@@ -40,29 +40,60 @@ Gerektiğinde şekli metinde doğrudan <svg>...</svg> ile göster. SVG yalnızca
 viewBox kullan, CSS, style, class, transform, bağlantı, animasyon, betik, dış kaynak, foreignObject veya SVG dışı HTML kullanma. Örnek: <svg viewBox="0 0 100 100"><polygon points="50,10 10,90 90,90" fill="none" stroke="#4F46E5" stroke-width="3"/></svg>.`;
 
 export async function mufredatKonulariniGetir(grade) {
+  // 1. Önce doğrudan Single Source of Truth meb-curriculum.js üzerinden konuları derle (sıfır gecikme, 100% MEB Maarif uyumu)
+  if (typeof getCurriculumTree === 'function') {
+    const tree = getCurriculumTree();
+    const gradeData = tree[grade] || tree[String(grade)];
+    if (gradeData && gradeData.temalar) {
+      const konular = [];
+      for (const [unite, temaObj] of Object.entries(gradeData.temalar)) {
+        for (const sub of (temaObj.alt_konular || [])) {
+          konular.push({
+            unite,
+            dosya_adi: sub.name,
+            outcome_code: sub.outcome_code || '',
+            boundary: sub.official_boundary || ''
+          });
+        }
+      }
+      if (konular.length > 0) {
+        return konular.sort((a, b) =>
+          a.unite.localeCompare(b.unite, 'tr') || a.dosya_adi.localeCompare(b.dosya_adi, 'tr'));
+      }
+    }
+  }
+
+  // 2. Pinecone'da açıkça "klavuz" namespace'ini sorgula (boş/__default__ asla kullanılmaz)
   const filter = { grade: { $eq: Number(grade) } };
   const konular = new Map();
   let paginationToken;
 
-  do {
-    const sonuc = await pineconeIndex.fetchByMetadata({
-      filter,
-      limit: 1000,
-      ...(paginationToken ? { paginationToken } : {})
-    });
+  try {
+    const klavuzNs = pineconeIndex.namespace(KLAVUZ_NAMESPACE);
+    do {
+      const sonuc = await klavuzNs.fetchByMetadata({
+        filter,
+        limit: 1000,
+        ...(paginationToken ? { paginationToken } : {})
+      });
 
-    for (const kayit of Object.values(sonuc.records || {})) {
-      const unite = typeof kayit.metadata?.unit_topic === 'string' ? kayit.metadata.unit_topic.trim() : '';
-      const dosyaAdi = typeof kayit.metadata?.official_description === 'string'
-        ? kayit.metadata.official_description.trim().replace(/^["']|["']$/g, '')
-        : '';
-      if (!unite || !dosyaAdi) continue;
-      const anahtar = `${unite.toLocaleLowerCase('tr-TR')}\0${dosyaAdi.toLocaleLowerCase('tr-TR')}`;
-      if (!konular.has(anahtar)) konular.set(anahtar, { unite, dosya_adi: dosyaAdi });
-    }
+      for (const kayit of Object.values(sonuc.records || {})) {
+        const unite = typeof kayit.metadata?.theme === 'string'
+          ? kayit.metadata.theme.trim()
+          : (typeof kayit.metadata?.unit_topic === 'string' ? kayit.metadata.unit_topic.trim() : '');
+        const dosyaAdi = typeof kayit.metadata?.official_description === 'string'
+          ? kayit.metadata.official_description.trim().replace(/^["']|["']$/g, '')
+          : (typeof kayit.metadata?.sub_topic === 'string' ? kayit.metadata.sub_topic.trim() : '');
+        if (!unite || !dosyaAdi) continue;
+        const anahtar = `${unite.toLocaleLowerCase('tr-TR')}\0${dosyaAdi.toLocaleLowerCase('tr-TR')}`;
+        if (!konular.has(anahtar)) konular.set(anahtar, { unite, dosya_adi: dosyaAdi });
+      }
 
-    paginationToken = sonuc.pagination?.next;
-  } while (paginationToken);
+      paginationToken = sonuc.pagination?.next;
+    } while (paginationToken);
+  } catch (err) {
+    console.warn('[MufredatKonulari] Pinecone klavuz fetchByMetadata atlandı:', err.message);
+  }
 
   return [...konular.values()].sort((a, b) =>
     a.unite.localeCompare(b.unite, 'tr') || a.dosya_adi.localeCompare(b.dosya_adi, 'tr'));
@@ -74,20 +105,43 @@ export async function konuOzetiGetir(grade, topic) {
   const anahtar = `${Number(grade)}\0${topic}`;
   if (ozetOnbellegi.has(anahtar)) return ozetOnbellegi.get(anahtar);
 
-  const sonuc = await pineconeIndex.fetchByMetadata({
-    filter: {
-      grade: { $eq: Number(grade) },
-      official_description: { $eq: topic }
-    },
-    limit: 10
-  });
-  const kayit = Object.values(sonuc.records || {}).find(k =>
-    Number(k.metadata?.grade) === Number(grade) &&
-    k.metadata?.official_description === topic);
-  const hamMetin = typeof kayit?.metadata?.text === 'string'
-    ? kayit.metadata.text.replace(/\s+/g, ' ').trim().slice(0, 4000)
-    : '';
-  if (!hamMetin) return '';
+  let hamMetin = '';
+  // 1. Önce meb-curriculum'dan resmi kazanım sınırını ve temasını al
+  const meta = typeof findSubTopicMeta === 'function' ? findSubTopicMeta(grade, null, topic) : null;
+  if (meta) {
+    hamMetin = `Sınıf: ${grade}. Sınıf\nKonu: ${topic}\nResmi Kazanım Kodu: ${meta.outcome_code || ''}\nResmi Sınırlar: ${meta.official_boundary || 'Müfredat sınırlarına sadık kalın.'}\nÜnite: ${meta.unit_topic || ''}`;
+  }
+
+  // 2. Pinecone "klavuz" ve "ders_kitabi" namespace'lerinden ilgili içerikleri çek
+  try {
+    const searchText = `${grade}. sınıf ${topic}`;
+    const embeddingResponse = await aiClient.models.embedContent({
+      model: 'gemini-embedding-001',
+      contents: searchText,
+      config: { taskType: 'RETRIEVAL_QUERY', outputDimensionality: 768 }
+    });
+    const queryVector = embeddingResponse.embedding?.values || embeddingResponse.embeddings?.[0]?.values;
+    if (queryVector) {
+      const filter = { grade: { $eq: Number(grade) } };
+      const [klavuzRes, kitapRes] = await Promise.all([
+        pineconeIndex.namespace(KLAVUZ_NAMESPACE).query({ vector: queryVector, topK: 2, includeMetadata: true, filter }).catch(() => ({ matches: [] })),
+        pineconeIndex.namespace(DERS_KITABI_NAMESPACE).query({ vector: queryVector, topK: 2, includeMetadata: true, filter }).catch(() => ({ matches: [] }))
+      ]);
+      const ekMetinler = [...(klavuzRes.matches || []), ...(kitapRes.matches || [])]
+        .map(m => m.metadata?.text)
+        .filter(Boolean)
+        .slice(0, 2);
+      if (ekMetinler.length) {
+        hamMetin += '\n\n[İLGİLİ MEB MÜFREDAT VE KİTAP İÇERİĞİ]:\n' + ekMetinler.join('\n---\n');
+      }
+    }
+  } catch (err) {
+    console.warn('[KonuOzeti] Pinecone RAG atlandı:', err.message);
+  }
+
+  if (!hamMetin) {
+    hamMetin = `${grade}. sınıf Matematik müfredatı: ${topic}`;
+  }
 
   const response = await aiClient.models.generateContent({
     model: resolveAIModel('konu_ozeti'),
@@ -124,27 +178,37 @@ export async function konuOzetiGetir(grade, topic) {
 }
 
 export async function konuAnlatimiZenginlestir(grade, topic) {
-  const sonuc = await pineconeIndex.fetchByMetadata({
-    filter: {
-      grade: { $eq: Number(grade) },
-      official_description: { $eq: topic }
-    },
-    limit: 10
-  });
-  const kayit = Object.values(sonuc.records || {}).find(k =>
-    Number(k.metadata?.grade) === Number(grade) &&
-    k.metadata?.official_description === topic);
-  const hamIcerik = typeof kayit?.metadata?.text === 'string'
-    ? kayit.metadata.text.trim()
-    : '';
-  if (!hamIcerik) throw new Error('Bu sınıf ve konu için Pinecone’da ham müfredat içeriği bulunamadı.');
+  let hamIcerik = '';
+  const meta = typeof findSubTopicMeta === 'function' ? findSubTopicMeta(grade, null, topic) : null;
+  if (meta) {
+    hamIcerik = `Sınıf: ${grade}. Sınıf\nKonu: ${topic}\nResmi Kazanım Kodu: ${meta.outcome_code || ''}\nResmi Müfredat Sınırları: ${meta.official_boundary || 'MEB öğretim sınırları'}\nÜnite: ${meta.unit_topic || ''}`;
+  }
+
+  // Pinecone "ders_kitabi" ve "klavuz" namespace'lerinden içerik zenginleştirme (RAG)
+  try {
+    const ragMetni = await getStrictMebContext({
+      grade,
+      subTopic: topic,
+      unitTopic: meta?.unit_topic || '',
+      queryText: `${grade}. sınıf ${topic}`
+    });
+    if (ragMetni) {
+      hamIcerik += '\n\n' + ragMetni;
+    }
+  } catch (err) {
+    console.warn('[KonuAnlatimi] RAG bağlamı atlandı:', err.message);
+  }
+
+  if (!hamIcerik) {
+    hamIcerik = `${grade}. sınıf Matematik müfredatı: ${topic}`;
+  }
 
   const response = await aiClient.models.generateContent({
     model: resolveAIModel('ders_notu'),
     contents: [
       `Sınıf seviyesi: ${grade}. sınıf`,
       `Konu/kazanım: ${topic}`,
-      'Pinecone’dan alınan ham müfredat içeriği:',
+      'Pinecone ve MEB Müfredatından alınan zengin içerik:',
       hamIcerik
     ].join('\n\n'),
     config: {
@@ -275,12 +339,21 @@ export async function getStrictMebContext({ grade, unitTopic, subTopic, ders = '
 
     const queryVector = embeddingResponse.embedding?.values || embeddingResponse.embeddings?.[0]?.values;
     if (queryVector) {
-      const searchResults = await dersKitabiNs.query({
-        vector: queryVector,
-        topK: 8,
-        includeMetadata: true,
-        filter: filterQuery
-      });
+      const klavuzNs = pineconeIndex.namespace(KLAVUZ_NAMESPACE);
+      const [searchResults, klavuzResults] = await Promise.all([
+        dersKitabiNs.query({
+          vector: queryVector,
+          topK: 8,
+          includeMetadata: true,
+          filter: filterQuery
+        }).catch(() => ({ matches: [] })),
+        klavuzNs.query({
+          vector: queryVector,
+          topK: 4,
+          includeMetadata: true,
+          filter: filterQuery
+        }).catch(() => ({ matches: [] }))
+      ]);
 
       const relevantMatches = (searchResults.matches || []).filter(m => (m.score || 0) >= 0.45);
       if (relevantMatches.length > 0) {
@@ -312,9 +385,17 @@ export async function getStrictMebContext({ grade, unitTopic, subTopic, ders = '
           return `[MEB DERS KİTABI SAYFA ${sayfa} - ${kitap} / ${tema}]\n${rawText.slice(0, 2000)}`;
         }).join('\n\n---\n\n');
       }
+
+      const relevantKlavuz = (klavuzResults.matches || []).filter(m => (m.score || 0) >= 0.45).slice(0, 2);
+      if (relevantKlavuz.length > 0) {
+        const klavuzMetin = relevantKlavuz.map(m => m.metadata?.text || '').filter(Boolean).join('\n---\n');
+        if (klavuzMetin) {
+          pineconeRagContext += (pineconeRagContext ? '\n\n' : '') + `[MAARİF MODELİ KILAVUZ TALİMATLARI]\n${klavuzMetin.slice(0, 2000)}`;
+        }
+      }
     }
   } catch (error) {
-    console.warn('[RAG] Pinecone ders_kitabi katı filtreleme uyarısı:', error.message);
+    console.warn('[RAG] Pinecone ders_kitabi/klavuz katı filtreleme uyarısı:', error.message);
   }
 
   const parts = [
@@ -328,14 +409,15 @@ export async function getStrictMebContext({ grade, unitTopic, subTopic, ders = '
   ];
 
   if (pineconeRagContext) {
-    parts.push(`\n[PINECONE KAT'Î FİLTRELİ DERS KİTABI VERİLERİ (RAG)]\n${pineconeRagContext}`);
+    parts.push(`\n[PINECONE KAT'Î FİLTRELİ DERS KİTABI VE KILAVUZ VERİLERİ (RAG)]\n${pineconeRagContext}`);
   }
 
   return parts.filter(Boolean).join('\n');
 }
 
 /**
- * Öğrenci mesajına göre Pinecone'dan ilgili kazanımı, kılavuzu ve ders kitabı örneklerini bulur (RAG).
+ * Öğrenci mesajına göre Pinecone'dan açıkça "klavuz" ve "ders_kitabi" namespace'lerini arar (RAG).
+ * Boş/__default__ namespace asla kullanılmaz.
  */
 async function getMebConstraints(ogrenciMesaji, grade, topicContext = {}) {
   const trimmed = String(ogrenciMesaji || '').trim();
@@ -380,27 +462,24 @@ async function getMebConstraints(ogrenciMesaji, grade, topicContext = {}) {
 
     const queryOptions = {
       vector: queryVector,
-      topK: 2,
+      topK: 3,
       includeMetadata: true,
       ...(grade && { filter: filterQuery }),
     };
 
-    // 3. Pinecone'da kazanımları, kılavuz talimatlarını ve ders kitabı sayfalarını paralel aratıyoruz
-    const [searchResults, klavuzResults, kitapResults] = await Promise.all([
-      pineconeIndex.query(queryOptions),
+    // 3. Pinecone'da açıkça "klavuz" ve "ders_kitabi" namespace'lerini paralel aratıyoruz (boş/__default__ kullanılmaz)
+    const [klavuzResults, kitapResults] = await Promise.all([
       pineconeIndex.namespace(KLAVUZ_NAMESPACE).query(queryOptions).catch(() => ({ matches: [] })),
       pineconeIndex.namespace(DERS_KITABI_NAMESPACE).query(queryOptions).catch(() => ({ matches: [] })),
     ]);
 
-    // Katı benzerlik eşiği (score >= 0.72): Alakasız veya düşük puanlı metinleri sisteme gömüp token harcama
-    const MIN_SCORE = 0.72;
-    const topKazanim = searchResults.matches?.[0];
-    const ilkKazanim = (topKazanim && (topKazanim.score || 0) >= MIN_SCORE) ? (topKazanim.metadata || {}) : {};
+    // Katı benzerlik eşiği (score >= 0.50): Alakasız veya düşük puanlı metinleri sisteme gömüp token harcama
+    const MIN_SCORE = 0.50;
     const klavuzMatches = (klavuzResults?.matches || []).filter(m => (m.score || 0) >= MIN_SCORE);
     const kitapMatches = (kitapResults?.matches || []).filter(m => (m.score || 0) >= MIN_SCORE);
 
-    if (Object.keys(ilkKazanim).length > 0 || klavuzMatches.length > 0 || kitapMatches.length > 0) {
-      return buildConstraintText(ilkKazanim, klavuzMatches, kitapMatches);
+    if (klavuzMatches.length > 0 || kitapMatches.length > 0) {
+      return buildConstraintText({}, klavuzMatches, kitapMatches);
     }
     
     return "Genel 5-12. sınıf Türkiye Yüzyılı Maarif Modeli matematik müfredat sınırlarına ve pedagojisine sadık kal.";

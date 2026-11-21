@@ -205,7 +205,7 @@ async function main() {
   const index = pc.index(INDEX_ADI);
 
   const kazanimKayitlari = kayitlariOku();
-  await kayitlariYukle(ai, index, kazanimKayitlari, 'kazanım');
+  await kayitlariYukle(ai, index.namespace(KLAVUZ_NAMESPACE), kazanimKayitlari, 'kazanım');
 
   const klavuzKayitlari = klavuzKayitlariniOku();
   if (klavuzKayitlari.length) {
