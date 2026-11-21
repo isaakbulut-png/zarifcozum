@@ -91,6 +91,19 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
   assert.ok(grade6Tema3Subs.includes('Kesir ile Bölme İşlemi İlişkisi'), 'Kesir ile Bölme yer almalıdır');
   assert.ok(grade6Tema3Subs.includes('Uzunluk Ölçme Birimleri'), 'Uzunluk Ölçme yer almalıdır');
 
+  // 6. Sınıf 4. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (8 alt konu)
+  const grade6Tema4Subs = getSubTopics(6, '4. Tema: İstatistiksel Araştırma Süreci').map(s => s.name);
+  assert.deepEqual(grade6Tema4Subs, [
+    'Kategorik ve Nicel Veriye Dayanan Araştırma Sorusu Oluşturma',
+    'Araştırma Sorularında Sağlanması Gereken Ölçütler',
+    'İstatistiksel Araştırma Sürecinde Planlama',
+    'Anket Sorusu Hazırlama',
+    'Verileri Görselleştirme ve Özetleme',
+    'Verileri Görselleştirme ve Özetleme (Merkezî Eğilim Ölçüleri)',
+    'Sonuçları Yorumlama',
+    'Sonuç veya Yorumları Tartışma'
+  ], '6. sınıf 4. Tema MEB içindekiler görseliyle birebir aynı 8 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

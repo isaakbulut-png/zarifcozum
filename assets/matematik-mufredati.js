@@ -123,9 +123,13 @@ window.MATEMATIK_MUFREDATI = {
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "topics": [
         "Kategorik ve Nicel Veriye Dayanan Araştırma Sorusu Oluşturma",
-        "Araştırma Sorularında Sağlanması Gereken Ölçütler ve Planlama",
+        "Araştırma Sorularında Sağlanması Gereken Ölçütler",
+        "İstatistiksel Araştırma Sürecinde Planlama",
+        "Anket Sorusu Hazırlama",
+        "Verileri Görselleştirme ve Özetleme",
         "Verileri Görselleştirme ve Özetleme (Merkezî Eğilim Ölçüleri)",
-        "Sonuçları Yorumlama ve Tartışma"
+        "Sonuçları Yorumlama",
+        "Sonuç veya Yorumları Tartışma"
       ]
     },
     {

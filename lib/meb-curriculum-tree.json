@@ -321,22 +321,42 @@
           {
             "name": "Kategorik ve Nicel Veriye Dayanan Araştırma Sorusu Oluşturma",
             "outcome_code": "MAT.6.5.1",
-            "official_boundary": "İki gruba yönelik karşılaştırmalı araştırma soruları."
+            "official_boundary": "İki gruba veya değişkenliğe dayanan araştırma soruları oluşturma."
           },
           {
-            "name": "Araştırma Sorularında Sağlanması Gereken Ölçütler ve Planlama",
+            "name": "Araştırma Sorularında Sağlanması Gereken Ölçütler",
             "outcome_code": "MAT.6.5.1",
-            "official_boundary": "Ölçütlere uygun veri toplama planı ve anket hazırlama."
+            "official_boundary": "Araştırma sorularının açık, amaca uygun ve ölçülebilir olması ölçütleri."
+          },
+          {
+            "name": "İstatistiksel Araştırma Sürecinde Planlama",
+            "outcome_code": "MAT.6.5.1",
+            "official_boundary": "Veri toplama adımları ve çalışma planı oluşturma."
+          },
+          {
+            "name": "Anket Sorusu Hazırlama",
+            "outcome_code": "MAT.6.5.1",
+            "official_boundary": "Amaca uygun ve yönlendirici olmayan anket soruları hazırlama."
+          },
+          {
+            "name": "Verileri Görselleştirme ve Özetleme",
+            "outcome_code": "MAT.6.5.2",
+            "official_boundary": "Toplanan verileri uygun tablo ve grafiklerle gösterme ve özetleme."
           },
           {
             "name": "Verileri Görselleştirme ve Özetleme (Merkezî Eğilim Ölçüleri)",
             "outcome_code": "MAT.6.5.2",
-            "official_boundary": "Aritmetik ortalama, ortanca ve açıklık hesaplama."
+            "official_boundary": "Aritmetik ortalama, ortanca (medyan) ve tepe değer (mod) gibi merkezî eğilim ölçüleri."
           },
           {
-            "name": "Sonuçları Yorumlama ve Tartışma",
+            "name": "Sonuçları Yorumlama",
             "outcome_code": "MAT.6.5.2",
-            "official_boundary": "Veriye dayalı karar alma ve yanıltıcı grafikleri belirleme."
+            "official_boundary": "Elde edilen istatistiksel sonuçları ve özetleri doğru yorumlama."
+          },
+          {
+            "name": "Sonuç veya Yorumları Tartışma",
+            "outcome_code": "MAT.6.5.2",
+            "official_boundary": "Çıkarımları tartışma, genellemeleri ve olası yanılgıları değerlendirme."
           }
         ]
       },
