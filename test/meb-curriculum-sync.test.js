@@ -272,6 +272,13 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     '5.2. Cebirsel ve Fonksiyonel İşlemlerin Algoritmik Yapısı'
   ], '10. sınıf 5. Tema MEB içindekiler görseliyle birebir aynı 2 alt konuyu içermelidir');
 
+  // 10. Sınıf 6. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (2 alt konu)
+  const grade10Tema6Subs = getSubTopics(10, '6. Tema: Analitik İnceleme').map(s => s.name);
+  assert.deepEqual(grade10Tema6Subs, [
+    '6.1. Dik Koordinat Sisteminde Noktanın Analitik İncelenmesi',
+    '6.2. Dik Koordinat Sisteminde Doğrunun Analitik İncelenmesi'
+  ], '10. sınıf 6. Tema MEB içindekiler görseliyle birebir aynı 2 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

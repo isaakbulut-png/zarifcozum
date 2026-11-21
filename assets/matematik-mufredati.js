@@ -425,7 +425,8 @@ window.MATEMATIK_MUFREDATI = {
       "title": "6. Tema: Analitik İnceleme",
       "unit_topic": "Analitik İnceleme",
       "topics": [
-        "6.1. Doğrunun Analitik İncelenmesi"
+        "6.1. Dik Koordinat Sisteminde Noktanın Analitik İncelenmesi",
+        "6.2. Dik Koordinat Sisteminde Doğrunun Analitik İncelenmesi"
       ]
     },
     {

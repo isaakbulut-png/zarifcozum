@@ -1042,9 +1042,14 @@
       "6. Tema: Analitik İnceleme": {
         "alt_konular": [
           {
-            "name": "6.1. Doğrunun Analitik İncelenmesi",
+            "name": "6.1. Dik Koordinat Sisteminde Noktanın Analitik İncelenmesi",
+            "outcome_code": "MAT.10.6.1",
+            "official_boundary": "Dik koordinat sisteminde nokta, iki nokta arasındaki uzaklık ve bir doğru parçasını belli bir oranda bölen noktanın koordinatları."
+          },
+          {
+            "name": "6.2. Dik Koordinat Sisteminde Doğrunun Analitik İncelenmesi",
             "outcome_code": "MAT.10.6.2",
-            "official_boundary": "İki nokta arası uzaklık, doğrunun eğimi, denklemi ve durumları."
+            "official_boundary": "Doğrunun eğimi, eğim açısı, farklı biçimlerdeki doğru denklemleri, doğruların birbirine göre durumları ve noktanın doğruya uzaklığı."
           }
         ]
       },
