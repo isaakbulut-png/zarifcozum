@@ -904,17 +904,12 @@
           {
             "name": "Tek Nicel Değişkenli Veri Dağılımları",
             "outcome_code": "MAT.9.6.1",
-            "official_boundary": "Kesikli ve sürekli nicel veriler."
+            "official_boundary": "Tek nicel değişkenli verilerin histogram, kutu grafiği, yayılım ve merkezî eğilim ölçüleriyle temsili."
           },
           {
-            "name": "Kutu Grafiği (Boxplot) ve Yayılım Ölçüleri",
-            "outcome_code": "MAT.9.6.1",
-            "official_boundary": "Açıklık, çeyrekler açıklığı, standart sapma ve kutu grafiği."
-          },
-          {
-            "name": "Verileri Yorumlama ve Karşılaştırma",
+            "name": "Başkaları Tarafından Oluşturulan Tek Nicel Değişkenli Veri Dağılımlarını İnceleme",
             "outcome_code": "MAT.9.6.2",
-            "official_boundary": "İki grubun nicel verilerini grafiklerle karşılaştırma."
+            "official_boundary": "Rapor ve yayınlardaki veri dağılımlarını eleştirel gözle inceleme, yorumlama ve karşılaştırma."
           }
         ]
       },

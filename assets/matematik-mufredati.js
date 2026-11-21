@@ -361,8 +361,7 @@ window.MATEMATIK_MUFREDATI = {
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "topics": [
         "Tek Nicel Değişkenli Veri Dağılımları",
-        "Kutu Grafiği (Boxplot) ve Yayılım Ölçüleri",
-        "Verileri Yorumlama ve Karşılaştırma"
+        "Başkaları Tarafından Oluşturulan Tek Nicel Değişkenli Veri Dağılımlarını İnceleme"
       ]
     },
     {

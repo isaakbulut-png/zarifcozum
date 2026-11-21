@@ -232,6 +232,13 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Eşlik ve Benzerlik Problemleri'
   ], '9. sınıf 4. Tema MEB içindekiler görseliyle birebir aynı 5 alt konuyu içermelidir');
 
+  // 9. Sınıf 6. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (2 alt konu)
+  const grade9Tema6Subs = getSubTopics(9, '6. Tema: İstatistiksel Araştırma Süreci').map(s => s.name);
+  assert.deepEqual(grade9Tema6Subs, [
+    'Tek Nicel Değişkenli Veri Dağılımları',
+    'Başkaları Tarafından Oluşturulan Tek Nicel Değişkenli Veri Dağılımlarını İnceleme'
+  ], '9. sınıf 6. Tema MEB içindekiler görseliyle birebir aynı 2 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');
