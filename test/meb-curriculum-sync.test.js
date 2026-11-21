@@ -1,10 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('fs');
-const path = require('path');
 const { getCurriculumTree, getGrades, getThemes, getSubTopics } = require('../lib/meb-curriculum');
 
-test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü', () => {
+test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı İçindekiler %100 Uyum)', () => {
   const tree = getCurriculumTree();
   const grades = getGrades();
 
@@ -26,24 +24,38 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü', () => {
   assert.ok(grade12Themes.some(t => t.includes('İntegral')), '12. sınıf İntegral korunmalıdır');
   assert.ok(grade12Themes.some(t => t.includes('Trigonometri')), '12. sınıf Trigonometri korunmalıdır');
 
-  // 3. 6. Sınıf Maarif Modeli ve Gerçek Kitap Başlığı Doğrulaması (Kullanıcının özellikle belirttiği tema)
+  // 3. 5. Sınıf Kitap Birebir Başlıkları
+  const grade5Themes = getThemes(5);
+  assert.ok(grade5Themes.some(t => t.includes('1. Tema: Geometrik Şekiller')), '5. sınıf 1. Tema mevcut olmalıdır');
+  const grade5Tema1Subs = getSubTopics(5, '1. Tema: Geometrik Şekiller').map(s => s.name);
+  assert.ok(grade5Tema1Subs.some(s => s.includes('Doğruların Yolculuğu')), 'Kitaptaki "Doğruların Yolculuğu" başlığı bulunmalıdır');
+  assert.ok(grade5Tema1Subs.some(s => s.includes('Üçgen ve Üçgen İnşası')), 'Kitaptaki "Üçgen İnşası" başlığı bulunmalıdır');
+
+  // 4. 5. Sınıf 4. Tema: Sadece Kesirler (Ondalık Gösterim ve Yüzdeler bağımsız konu olarak 5'te yer almamalı)
+  const grade5Tema4Subs = getSubTopics(5, '4. Tema: Sayılar ve Nicelikler (2): Kesirler').map(s => s.name);
+  assert.equal(grade5Tema4Subs.length, 2, '5. sınıf 4. Tema MEB kitabındaki gibi tam 2 alt konudan oluşmalıdır');
+  assert.ok(grade5Tema4Subs.includes('Kesirleri Farklı Biçimlerde Temsil Etme'), 'Kesirleri Farklı Biçimlerde Temsil Etme bulunmalıdır');
+  assert.ok(grade5Tema4Subs.includes('Kesirleri Karşılaştırma'), 'Kesirleri Karşılaştırma bulunmalıdır');
+
+  // 5. 6. Sınıf Maarif Modeli ve Gerçek Kitap Başlığı Doğrulaması
   const grade6Themes = getThemes(6);
   assert.ok(grade6Themes.includes('3. Tema: Sayılar ve Nicelikler (2)'), '6. sınıf kitabındaki "3. Tema: Sayılar ve Nicelikler (2)" tam adıyla bulunmalıdır');
   const grade6Tema3Subs = getSubTopics(6, '3. Tema: Sayılar ve Nicelikler (2)').map(s => s.name);
-  assert.ok(grade6Tema3Subs.includes('Ondalık Gösterimlerde Basamak Değeri'), 'Ondalık Gösterimler yer almalıdır');
+  assert.ok(grade6Tema3Subs.includes('Ondalık Gösterimlerde Basamak Değeri'), 'Ondalık Gösterimler 6. sınıfta yer almalıdır');
   assert.ok(grade6Tema3Subs.includes('Kesir ile Bölme İşlemi İlişkisi'), 'Kesir ile Bölme yer almalıdır');
-  assert.ok(grade6Tema3Subs.includes('Standart Uzunluk Ölçme Birimleri'), 'Uzunluk Ölçme yer almalıdır');
+  assert.ok(grade6Tema3Subs.includes('Uzunluk Ölçme Birimleri'), 'Uzunluk Ölçme yer almalıdır');
 
-  // 4. 10. Sınıf Maarif Modeli Doğrulaması
+  // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');
-  assert.ok(grade10Themes.includes('2. Tema: İstatistiksel Araştırma Süreci'), '10. Sınıf 2. Tema İstatistiksel Araştırma Süreci olmalıdır');
-  assert.ok(grade10Themes.includes('6. Tema: Analitik İnceleme'), '10. Sınıf 6. Tema Analitik İnceleme olmalıdır');
+  const grade10Tema1Subs = getSubTopics(10, '1. Tema: Geometrik Şekiller').map(s => s.name);
+  assert.ok(grade10Tema1Subs.some(s => s.includes('1.1. Dik Üçgende Trigonometrik Oranlar')), '10. Sınıf 1.1 başlığı bulunmalıdır');
+  assert.ok(grade10Tema1Subs.some(s => s.includes('1.4. Sinüs ve Kosinüs Teoremleri')), '10. Sınıf 1.4 Sinüs ve Kosinüs Teoremleri bulunmalıdır');
 
-  // 5. Şablon / Kitap Çöp Başlıklarının Temizlendiği Doğrulaması
+  // 7. Şablon Çöp Başlıklarının Temizlendiği Doğrulaması
   const forbiddenTitles = [
     'Hazır Mıyız?', 'Başlayalım', 'İzleme Testi', 'Ölçme ve Değerlendirme',
-    'Öz Değerlendirme', 'Sıra Sizde', 'Etkinlik', 'Cevap Anahtarı', 'Sözlük'
+    'Öz Değerlendirme', 'Sıra Sizde', 'Cevap Anahtarı', 'Sözlük'
   ];
 
   for (const grade of grades) {

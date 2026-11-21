@@ -1,5 +1,5 @@
 // Türkiye Yüzyılı Maarif Modeli ve Resmî MEB Müfredatı (5-12. Sınıflar)
-// Pinecone meb-mufredat ve MEB ders kitapları ile %100 senkronize
+// MEB Ders Kitapları Basılı İçindekiler Sayfaları ile %100 Birebir Senkronize
 
 window.MATEMATIK_MUFREDATI = {
   "5": [
@@ -7,70 +7,64 @@ window.MATEMATIK_MUFREDATI = {
       "title": "1. Tema: Geometrik Şekiller",
       "unit_topic": "Geometrik Şekiller",
       "topics": [
-        "Nokta, Doğru, Doğru Parçası ve Işın",
-        "Düzlemde Doğruların Birbirine Göre Durumları",
-        "Açılar ve Açı Ölçümü",
-        "Çokgenler ve Özellikleri",
-        "Çember ve Kenar Özellikleri"
+        "Temel Geometrik Şekiller ve Özellikleri (Nokta, Çember, Dikme)",
+        "Temel Geometrik Çizimlerin Özellikleri",
+        "Açıları Ölçme ve Açı Nasıl Ölçülür?",
+        "Doğruların Yolculuğu (Doğruların Kesişimi, Paralelliği ve Açılar)",
+        "Doğrulardan Çokgenlere ve Çokgenlerin Temel Elemanları",
+        "Üçgen ve Üçgen İnşası"
       ]
     },
     {
-      "title": "2. Tema: Sayılar ve Nicelikler (1)",
-      "unit_topic": "Sayılar ve Nicelikler (1)",
+      "title": "2. Tema: Sayılar ve Nicelikler (1): Doğal Sayılar ve İşlemler",
+      "unit_topic": "Sayılar ve Nicelikler (1): Doğal Sayılar ve İşlemler",
       "topics": [
-        "Milyonlar ve Çok Basamaklı Sayılar",
-        "Doğal Sayılarda Basamak Değerleri",
-        "Doğal Sayılarla İşlemler ve Stratejiler",
-        "Gerçek Yaşam Problemleri"
+        "Çok Basamaklı Doğal Sayıları Okuma ve Yazma",
+        "Çok Basamaklı Doğal Sayılarda Basamak Değeri",
+        "Dört İşlem İçeren Gerçek Yaşam Problemleri"
       ]
     },
     {
       "title": "3. Tema: Geometrik Nicelikler",
       "unit_topic": "Geometrik Nicelikler",
       "topics": [
-        "Dikdörtgende Çevre Uzunluğu",
-        "Birim Karelerle Alan Kaplama",
-        "Dikdörtgenin Alan Bağıntısı",
-        "Çevre Uzunluğu ve Alan Arasındaki İlişkiler"
+        "Dikdörtgenin Çevre Uzunluğu",
+        "Dikdörtgenin Alanı",
+        "Dikdörtgende Çevre Uzunluğu ve Alan"
       ]
     },
     {
-      "title": "4. Tema: Sayılar ve Nicelikler (2)",
-      "unit_topic": "Sayılar ve Nicelikler (2)",
+      "title": "4. Tema: Sayılar ve Nicelikler (2): Kesirler",
+      "unit_topic": "Sayılar ve Nicelikler (2): Kesirler",
       "topics": [
-        "Kesirler ve Farklı Temsilleri",
-        "Kesirlerin Karşılaştırılması ve Sıralanması",
-        "Ondalık Gösterim ve Basamak Değerleri",
-        "Yüzdeler"
+        "Kesirleri Farklı Biçimlerde Temsil Etme",
+        "Kesirleri Karşılaştırma"
       ]
     },
     {
       "title": "5. Tema: İstatistiksel Araştırma Süreci",
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "topics": [
-        "Kategorik Veriye Dayalı Araştırma Sorusu",
-        "Veri Toplama ve Tablolar",
-        "Sütun Grafiği ve Yorumlama",
-        "İstatistiksel Sonuç ve Yorumları Tartışma"
+        "İstatistiksel Araştırma Adımları ve Anket Sorusu Yazma",
+        "Veri Görselleştirme Araçları (Sütun ve Daire Grafiği)",
+        "İstatistik Okuryazarlığı ve Verilerin Değişebilirliği"
       ]
     },
     {
-      "title": "6. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler",
-      "unit_topic": "İşlemlerle Cebirsel Düşünme ve Değişimler",
+      "title": "6. Tema: İşlemlerle Cebirsel Düşünme",
+      "unit_topic": "İşlemlerle Cebirsel Düşünme",
       "topics": [
         "Eşitliğin Korunumu ve İşlem Özellikleri",
         "İşlem Önceliği",
-        "Sayı ve Şekil Örüntüleri",
-        "Algoritma ve Akış Şemaları"
+        "Sayı ve Şekil Örüntüleri"
       ]
     },
     {
       "title": "7. Tema: Veriden Olasılığa",
       "unit_topic": "Veriden Olasılığa",
       "topics": [
-        "Olasılık Spektrumu (İmkânsız ve Kesin Olaylar)",
-        "Olayların Olasılıklarını Karşılaştırma",
-        "Adil Oyun Tasarımı"
+        "Olayların Olasılığı",
+        "Olasılık Spektrumu (İmkânsız ve Kesin Olaylar)"
       ]
     }
   ],
@@ -79,19 +73,19 @@ window.MATEMATIK_MUFREDATI = {
       "title": "1. Tema: Sayılar ve Nicelikler (1)",
       "unit_topic": "Sayılar ve Nicelikler (1)",
       "topics": [
-        "Çarpanlar ve Katlar",
+        "Çarpanlar",
+        "Katlar",
         "Kalansız Bölünebilme",
         "Asal Sayılar",
-        "Ortak Bölen ve Ortak Kat"
+        "Ortak Kat",
+        "Ortak Bölen"
       ]
     },
     {
-      "title": "2. Tema: Geometrik Şekiller",
-      "unit_topic": "Geometrik Şekiller",
+      "title": "2. Tema: Veriden Olasılığa",
+      "unit_topic": "Veriden Olasılığa",
       "topics": [
-        "Düzlemde İki Paralel Doğru ve Bir Kesen ile Oluşan Açılar",
-        "Dörtgenlerin Özellikleri",
-        "Çokgenlerin Açı Problemleri"
+        "Bir Olayın Olasılığını Gözleme Dayalı Tahmin Etme"
       ]
     },
     {
@@ -102,43 +96,43 @@ window.MATEMATIK_MUFREDATI = {
         "Ondalık Gösterimlerde Yuvarlama",
         "Kesir ile Bölme İşlemi İlişkisi",
         "Gerçek Yaşam Problemleri",
-        "Standart Uzunluk Ölçme Birimleri"
+        "Uzunluk Ölçme Birimleri"
       ]
     },
     {
-      "title": "4. Tema: Geometrik Nicelikler",
-      "unit_topic": "Geometrik Nicelikler",
-      "topics": [
-        "Paralelkenar ve Üçgenin Alanı",
-        "Alan Ölçme Birimleri",
-        "Çemberin ve Çapının Uzunlukları Arasındaki İlişki",
-        "Merkez Açı ve Yay Uzunluğu"
-      ]
-    },
-    {
-      "title": "5. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler",
-      "unit_topic": "İşlemlerle Cebirsel Düşünme ve Değişimler",
-      "topics": [
-        "Bilinmeyen Nicelikler ve Cebirsel İfadeler",
-        "Sayı ve Şekil Örüntüleri",
-        "Algoritma ve Akış Şemaları"
-      ]
-    },
-    {
-      "title": "6. Tema: İstatistiksel Araştırma Süreci",
+      "title": "4. Tema: İstatistiksel Araştırma Süreci",
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "topics": [
-        "İstatistiksel Araştırma Sürecinde Planlama",
-        "Araştırma Sorularında Sağlanması Gereken Ölçütler",
+        "Kategorik ve Nicel Veriye Dayanan Araştırma Sorusu Oluşturma",
+        "Araştırma Sorularında Sağlanması Gereken Ölçütler ve Planlama",
         "Verileri Görselleştirme ve Özetleme (Merkezî Eğilim Ölçüleri)",
         "Sonuçları Yorumlama ve Tartışma"
       ]
     },
     {
-      "title": "7. Tema: Veriden Olasılığa",
-      "unit_topic": "Veriden Olasılığa",
+      "title": "5. Tema: Geometrik Şekiller",
+      "unit_topic": "Geometrik Şekiller",
       "topics": [
-        "Bir Olayın Olasılığını Gözleme Dayalı Tahmin Etme"
+        "Düzlemde İki Paralel Doğru ve Bir Kesen ile Oluşturulan Açılar",
+        "Düzlemde İki Paralel Doğrunun İki Kesenle Oluşturduğu Şekiller",
+        "Üçgenin Açıları ve Dörtgenlerin Özellikleri"
+      ]
+    },
+    {
+      "title": "6. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler",
+      "unit_topic": "İşlemlerle Cebirsel Düşünme ve Değişimler",
+      "topics": [
+        "Bilinmeyen Nicelikler ve Cebirsel İfadeler",
+        "Örüntüler ve Algoritma"
+      ]
+    },
+    {
+      "title": "7. Tema: Geometrik Nicelikler",
+      "unit_topic": "Geometrik Nicelikler",
+      "topics": [
+        "Paralelkenar ve Üçgenin Alanı",
+        "Alan Ölçme Birimleri",
+        "Çemberin ve Çapının Uzunlukları Arasındaki İlişki"
       ]
     }
   ],
@@ -160,8 +154,7 @@ window.MATEMATIK_MUFREDATI = {
       "topics": [
         "Cisimlerin Farklı Yönlerden Görünümleri",
         "Dikdörtgenler Prizmasının Açınımı ve Yüzey Alanı",
-        "Dikdörtgenler Prizmasının Hacim Bağıntısı",
-        "Hacim Ölçme Birimleri",
+        "Dikdörtgenler Prizmasının Hacim Bağıntısı ve Hacim Ölçme Birimleri",
         "Prizmalarda Yüzey Alanı ve Hacim Problemleri"
       ]
     },
@@ -185,8 +178,8 @@ window.MATEMATIK_MUFREDATI = {
       "title": "5. Tema: Geometrik Şekiller",
       "unit_topic": "Geometrik Şekiller",
       "topics": [
-        "Üçgende Açıortay, Yükseklik ve Kenarortay",
-        "Üçgende Kenarortay İnşası"
+        "Üçgende Açıortay, Yükseklik, Kenar Orta Dikme ve Kenarortay",
+        "Üçgende Kenarortay ve İnşası"
       ]
     },
     {
@@ -194,7 +187,6 @@ window.MATEMATIK_MUFREDATI = {
       "unit_topic": "Sayılar ve Nicelikler (2)",
       "topics": [
         "Oran ve Orantı",
-        "Doğru Orantı ve Ters Orantı",
         "Doğru Orantı Problemleri ve Yüzdeler"
       ]
     },
@@ -202,9 +194,8 @@ window.MATEMATIK_MUFREDATI = {
       "title": "7. Tema: Veriden Olasılığa",
       "unit_topic": "Veriden Olasılığa",
       "topics": [
-        "Eşit Olasılıklı Olaylar",
-        "Tümleyen Olay ve Teorik Olasılık",
-        "Ayrık ve Ayrık Olmayan Olaylar"
+        "Eşit Olasılıklı Olaylar ve Tümleyen Olay",
+        "Teorik Olasılık ve Ayrık Olaylar"
       ]
     },
     {
@@ -212,19 +203,19 @@ window.MATEMATIK_MUFREDATI = {
       "unit_topic": "İşlemlerle Cebirsel Düşünme ve Değişimler",
       "topics": [
         "Cebirsel İfadelerle İşlemler",
-        "Birinci Dereceden Bir Bilinmeyenli Denklemler",
-        "Birinci Dereceden Bir Bilinmeyenli Eşitsizlikler",
-        "Matematiksel İspat ve Algoritma"
+        "Denklemler",
+        "Eşitsizlikler",
+        "İspat ve Algoritmayı Yapılandırma"
       ]
     },
     {
       "title": "9. Tema: Geometrik Nicelikler (2)",
       "unit_topic": "Geometrik Nicelikler (2)",
       "topics": [
-        "Daire ve Daire Diliminin Alanı",
+        "Dairenin Alanı ve Daire Diliminin Alanı",
         "Eşkenar Dörtgenin Alanı",
         "Yamuğun Alanı",
-        "Daire, Eşkenar Dörtgen ve Yamuk Alan Problemleri"
+        "Daire, Eşkenar Dörtgen ve Yamuğun Alanına İlişkin Problemler"
       ]
     }
   ],
@@ -278,10 +269,10 @@ window.MATEMATIK_MUFREDATI = {
       "title": "1. Tema: Sayılar",
       "unit_topic": "Sayılar",
       "topics": [
-        "Gerçek Sayılar ve Sayı Kümeleri",
-        "Üslü ve Köklü Gösterimlerle İşlemler",
-        "Gerçek Sayı Aralıkları ve Gösterimi",
-        "Mutlak Değer ve Özellikleri"
+        "Gerçek Sayıların Üslü ve Köklü Gösterimleri ile Yapılan İşlemler",
+        "Gerçek Sayı Aralıklarının Gösterimi ve Aralıklarla İlgili İşlemler",
+        "Sayı Kümeleri ve İşlem Özellikleri",
+        "Gerçek Sayıların İşlem Özelliklerini Cebirsel Olarak İfade Etme"
       ]
     },
     {
@@ -289,7 +280,7 @@ window.MATEMATIK_MUFREDATI = {
       "unit_topic": "Nicelikler ve Değişimler",
       "topics": [
         "Doğrusal Fonksiyon Kavramı ve Gösterimi",
-        "Doğrusal Fonksiyon Grafikleri ve Eğim",
+        "Doğrusal Fonksiyonların Grafikleri ve Eğim",
         "Doğrusal Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler"
       ]
     },
@@ -306,20 +297,19 @@ window.MATEMATIK_MUFREDATI = {
       "title": "4. Tema: Eşlik ve Benzerlik",
       "unit_topic": "Eşlik ve Benzerlik",
       "topics": [
-        "Geometrik Dönüşümler",
+        "Geometrik Dönüşümler ve Özellikleri (Yansıma, Öteleme, Dönme)",
         "Üçgenlerde Eşlik Koşulları",
         "Üçgenlerde Benzerlik Teoremleri ve Benzerlik Oranı",
-        "Gerçek Yaşam Durumlarında Benzerlik Problemleri"
+        "Eşlik ve Benzerlik Problemleri"
       ]
     },
     {
       "title": "5. Tema: Algoritma ve Bilişim",
       "unit_topic": "Algoritma ve Bilişim",
       "topics": [
-        "Algoritmik Düşünme ve Akış Şemaları",
-        "Mantık Bağlaçları",
-        "Açık Önermeler ve Niceleyiciler",
-        "Matematiksel İspat Yöntemleri"
+        "Algoritma Temelli Problemler",
+        "Mantık Bağlaçları ve Niceleyiciler",
+        "Mantık Bağlaçları ve Niceleyicilerin Algoritmik Problemlerde Kullanımı"
       ]
     },
     {
@@ -345,65 +335,58 @@ window.MATEMATIK_MUFREDATI = {
       "title": "1. Tema: Geometrik Şekiller",
       "unit_topic": "Geometrik Şekiller",
       "topics": [
-        "Dik Üçgende Trigonometrik Oranlar",
-        "Trigonometrik Özdeşlikler",
-        "Üçgenin Yardımcı Elemanlarının Özellikleri"
+        "1.1. Dik Üçgende Trigonometrik Oranlar ve Trigonometrik Özdeşlikler",
+        "1.2. Üçgende Yardımcı Elemanlar",
+        "1.3. Üçgenin Alanı",
+        "1.4. Sinüs ve Kosinüs Teoremleri"
       ]
     },
     {
       "title": "2. Tema: İstatistiksel Araştırma Süreci",
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "topics": [
-        "İki Kategorik Değişkenli Veri Toplama ve Araştırma Sorusu",
-        "Çapraz Tablolar ve Kümelendirilmiş Sütun Grafikleri",
-        "İki Kategorik Değişken Arasındaki İlişkinin Analizi"
+        "2.1. İki Kategorik Değişkenli Veriler",
+        "2.2. Başkaları Tarafından Oluşturulan İki Kategorik Değişkenli Verileri İnceleme"
       ]
     },
     {
       "title": "3. Tema: Sayılar",
       "unit_topic": "Sayılar",
       "topics": [
-        "Doğal Sayıların Asal Çarpanları ve Bölenleri",
-        "Ortak Bölenler ve En Büyük Ortak Bölen (EBOB)",
-        "Ortak Katlar ve En Küçük Ortak Kat (EKOK)"
+        "3.1. Bir Doğal Sayının Asal Çarpanları - Bölenleri",
+        "3.2. En Büyük Ortak Bölen - En Küçük Ortak Kat"
       ]
     },
     {
       "title": "4. Tema: Nicelikler ve Değişimler",
       "unit_topic": "Nicelikler ve Değişimler",
       "topics": [
-        "Fonksiyon Kavramı ve Gerçek Sayılarda Fonksiyon Olma Şartları",
-        "Karesel Referans Fonksiyon (f(x) = x²) ve Parabol",
-        "İkinci Dereceden Bir Bilinmeyenli Denklemler"
+        "4.1. Fonksiyon Kavramı ve Gösterimi",
+        "4.2. Karesel Referans Fonksiyon",
+        "4.3. İkinci Dereceden Bir Bilinmeyenli Denklemler"
       ]
     },
     {
       "title": "5. Tema: Sayma, Algoritma ve Bilişim",
       "unit_topic": "Sayma, Algoritma ve Bilişim",
       "topics": [
-        "Sayma Stratejileri (Toplama ve Çarpma Yoluyla)",
-        "Sıralama (Permütasyon)",
-        "Seçme (Kombinasyon)",
-        "Pascal Üçgeni ve Binom Açılımı",
-        "Algoritmik Problem Çözme"
+        "5.1. Sayma Stratejileri",
+        "5.2. Algoritma Temelli Problem Çözme"
       ]
     },
     {
       "title": "6. Tema: Analitik İnceleme",
       "unit_topic": "Analitik İnceleme",
       "topics": [
-        "İki Nokta Arasındaki Uzaklık ve Orta Nokta",
-        "Doğrunun Analitik İncelenmesi (Eğim ve Denklem)",
-        "Doğruların Birbirine Göre Durumları"
+        "6.1. Doğrunun Analitik İncelenmesi"
       ]
     },
     {
       "title": "7. Tema: Veriden Olasılığa",
       "unit_topic": "Veriden Olasılığa",
       "topics": [
-        "Koşullu Olasılık",
-        "Bağımlı ve Bağımsız Olaylar",
-        "Bayes Teoremi"
+        "7.1. Koşullu Olasılık",
+        "7.2. Bayes Teoremi"
       ]
     }
   ],
@@ -412,48 +395,45 @@ window.MATEMATIK_MUFREDATI = {
       "title": "1. Tema: İstatistiksel Araştırma Süreci",
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "topics": [
-        "İki Nicel Değişkenli Veriler ve İstatistiksel Bağlam",
-        "Serpme (Saçılım) Diyagramları",
-        "Bölgelere Göre Sayım Oranı (BSO) ve Korelasyon Katsayısı"
+        "1.1. İki Nicel Değişkenli Veriler",
+        "1.2. Başkaları Tarafından Oluşturulan İki Nicel Değişkenli Verileri İnceleme"
       ]
     },
     {
       "title": "2. Tema: Geometrik Şekiller",
       "unit_topic": "Geometrik Şekiller",
       "topics": [
-        "Dörtgenlerin Özellikleri",
-        "Özel Dörtgenler Arasındaki İlişkiler",
-        "Çokgenlerin Sınıflandırılması ve Dışbükey Çokgenler",
-        "Düzgün Çokgenlerde Alan Hesabı ve Problemler"
+        "2.1. Dörtgenlerin Özellikleri",
+        "2.2. Özel Dörtgenler Arasındaki İlişkiler",
+        "2.3. Çokgenlerin Sınıflandırılması",
+        "2.4. Dışbükey Çokgenlerin Özellikleri",
+        "2.5. Çokgenlerle İlgili Problemler"
       ]
     },
     {
-      "title": "3. Tema: Nicelikler ve Değişimler (1) - Trigonometri",
-      "unit_topic": "Nicelikler ve Değişimler (1) - Trigonometri",
+      "title": "3. Tema: Nicelikler ve Değişimler (1)",
+      "unit_topic": "Nicelikler ve Değişimler (1)",
       "topics": [
-        "Açı Ölçme Birimleri",
-        "Trigonometrik Referans Fonksiyonları",
-        "Trigonometrik Fonksiyonların Nitel Özellikleri ve Grafikleri",
-        "Trigonometrik Fonksiyonlarla İfade Edilebilen Denklemler"
+        "3.1. Trigonometrik Fonksiyonlar ve Nitel Özellikleri",
+        "3.2. Trigonometrik Fonksiyonlarla İfade Edilebilen Denklemler İçeren Problemler"
       ]
     },
     {
-      "title": "4. Tema: Nicelikler ve Değişimler (2) - Üstel ve Logaritmik Fonksiyonlar",
-      "unit_topic": "Nicelikler ve Değişimler (2) - Üstel ve Logaritmik Fonksiyonlar",
+      "title": "4. Tema: Nicelikler ve Değişimler (2)",
+      "unit_topic": "Nicelikler ve Değişimler (2)",
       "topics": [
-        "Üstel Referans Fonksiyonun Tanımlanması ve Nitel Özellikleri",
-        "Üstel Fonksiyonların Ters Fonksiyonları",
-        "Logaritmik Referans Fonksiyonlar ve Nitel Özellikleri",
-        "Üstel ve Logaritmik Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler"
+        "4.1. Üstel Fonksiyonlar ve Nitel Özellikleri",
+        "4.2. Üstel Fonksiyonların Ters Fonksiyonları",
+        "4.3. Logaritmik Fonksiyonlar ve Nitel Özellikleri",
+        "4.4. Üstel ve Logaritmik Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler İçeren Problemler"
       ]
     },
     {
-      "title": "5. Tema: Nicelikler ve Değişimler (3) - Fonksiyonlar",
-      "unit_topic": "Nicelikler ve Değişimler (3) - Fonksiyonlar",
+      "title": "5. Tema: Nicelikler ve Değişimler (3)",
+      "unit_topic": "Nicelikler ve Değişimler (3)",
       "topics": [
-        "Fonksiyonların Bileşkesi",
-        "Fonksiyonlarda Dört İşlem",
-        "Bileşke Fonksiyonların Nitel Özellikleri"
+        "5.1. Fonksiyonların Bileşkesi",
+        "5.2. Fonksiyonlarda Dört İşlem"
       ]
     }
   ],
