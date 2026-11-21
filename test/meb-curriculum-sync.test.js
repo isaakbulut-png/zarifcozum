@@ -159,6 +159,17 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'İstatistiksel Araştırma Süreçlerinin İncelenmesi'
   ], '7. sınıf 3. Tema MEB içindekiler görseliyle birebir aynı 7 alt konuyu içermelidir');
 
+  // 7. Sınıf 6. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (6 alt konu)
+  const grade7Tema6Subs = getSubTopics(7, '6. Tema: Sayılar ve Nicelikler (2)').map(s => s.name);
+  assert.deepEqual(grade7Tema6Subs, [
+    'Oran',
+    'Birimli Birimsiz Oran',
+    'Denk Oran',
+    'Birim Oran',
+    'Orantı',
+    'Doğru Orantı Problemleri'
+  ], '7. sınıf 6. Tema MEB içindekiler görseliyle birebir aynı 6 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

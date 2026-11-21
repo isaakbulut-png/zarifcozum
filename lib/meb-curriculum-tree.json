@@ -587,14 +587,34 @@
       "6. Tema: Sayılar ve Nicelikler (2)": {
         "alt_konular": [
           {
-            "name": "Oran ve Orantı",
+            "name": "Oran",
             "outcome_code": "MAT.7.1.5",
-            "official_boundary": "İki çokluğun oranı ve orantı oluşturma."
+            "official_boundary": "İki çokluğun birbirine bölünerek karşılaştırılması ve oran kavramı."
           },
           {
-            "name": "Doğru Orantı Problemleri ve Yüzdeler",
+            "name": "Birimli Birimsiz Oran",
+            "outcome_code": "MAT.7.1.5",
+            "official_boundary": "Aynı veya farklı birimlere sahip çoklukların oranı (birimli ve birimsiz oran)."
+          },
+          {
+            "name": "Denk Oran",
+            "outcome_code": "MAT.7.1.5",
+            "official_boundary": "Sadeleştirme ve genişletme yoluyla denk oranlar oluşturma."
+          },
+          {
+            "name": "Birim Oran",
+            "outcome_code": "MAT.7.1.5",
+            "official_boundary": "Paydası 1 birim olan oran ve birim oranla karşılaştırma stratejileri."
+          },
+          {
+            "name": "Orantı",
+            "outcome_code": "MAT.7.1.6",
+            "official_boundary": "İki oranın eşitliği, orantı sabiti ve içler-dışlar çarpımı özelliği."
+          },
+          {
+            "name": "Doğru Orantı Problemleri",
             "outcome_code": "MAT.7.1.7",
-            "official_boundary": "Doğru orantı ve yüzde problemleri."
+            "official_boundary": "Doğru orantılı çokluklar ve gerçek yaşam problemleri."
           }
         ]
       },

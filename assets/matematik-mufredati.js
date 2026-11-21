@@ -223,8 +223,12 @@ window.MATEMATIK_MUFREDATI = {
       "title": "6. Tema: Sayılar ve Nicelikler (2)",
       "unit_topic": "Sayılar ve Nicelikler (2)",
       "topics": [
-        "Oran ve Orantı",
-        "Doğru Orantı Problemleri ve Yüzdeler"
+        "Oran",
+        "Birimli Birimsiz Oran",
+        "Denk Oran",
+        "Birim Oran",
+        "Orantı",
+        "Doğru Orantı Problemleri"
       ]
     },
     {
