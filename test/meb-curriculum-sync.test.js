@@ -123,6 +123,19 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
     'Çemberde Merkez Açı ve Merkez Açının Gördüğü Yayın Uzunluğu'
   ], '6. sınıf 7. Tema MEB içindekiler görseliyle birebir aynı 6 alt konuyu içermelidir');
 
+  // 7. Sınıf 1. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (8 alt konu)
+  const grade7Tema1Subs = getSubTopics(7, '1. Tema: Sayılar ve Nicelikler (1)').map(s => s.name);
+  assert.deepEqual(grade7Tema1Subs, [
+    'Tam Sayılar',
+    'Rasyonel Sayılar',
+    'Mutlak Değer',
+    'Rasyonel Sayıların Farklı Temsilleri',
+    'Rasyonel Sayılarda Karşılaştırma ve Sıralama',
+    'Tam Sayılarla İşlemler ve Problem Çözme',
+    'Rasyonel Sayılarla İşlemler ve Problem Çözme',
+    'Çok Adımlı İşlemler'
+  ], '7. sınıf 1. Tema MEB içindekiler görseliyle birebir aynı 8 alt konuyu içermelidir');
+
   // 6. 10. Sınıf Maarif Modeli Numaralandırılmış Kitap Başlıkları Doğrulaması
   const grade10Themes = getThemes(10);
   assert.ok(grade10Themes.includes('1. Tema: Geometrik Şekiller'), '10. Sınıf 1. Tema Geometrik Şekiller olmalıdır');

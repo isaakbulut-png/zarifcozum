@@ -168,11 +168,14 @@ window.MATEMATIK_MUFREDATI = {
       "title": "1. Tema: Sayılar ve Nicelikler (1)",
       "unit_topic": "Sayılar ve Nicelikler (1)",
       "topics": [
-        "Tam Sayılar ve Mutlak Değer",
-        "Tam Sayılarla İşlemler ve Problem Çözme",
-        "Rasyonel Sayılar ve Farklı Temsilleri",
+        "Tam Sayılar",
+        "Rasyonel Sayılar",
+        "Mutlak Değer",
+        "Rasyonel Sayıların Farklı Temsilleri",
         "Rasyonel Sayılarda Karşılaştırma ve Sıralama",
-        "Rasyonel Sayılarla İşlemler ve Çok Adımlı İşlemler"
+        "Tam Sayılarla İşlemler ve Problem Çözme",
+        "Rasyonel Sayılarla İşlemler ve Problem Çözme",
+        "Çok Adımlı İşlemler"
       ]
     },
     {

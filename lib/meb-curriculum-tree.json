@@ -442,29 +442,44 @@
       "1. Tema: Sayılar ve Nicelikler (1)": {
         "alt_konular": [
           {
-            "name": "Tam Sayılar ve Mutlak Değer",
+            "name": "Tam Sayılar",
             "outcome_code": "MAT.7.1.1",
-            "official_boundary": "Tam sayılar, yönlü sayılar ve sayı doğrusunda mutlak değer."
+            "official_boundary": "Tam sayılar kavramı, yönlü sayılar ve sayı doğrusunda gösterimi."
           },
           {
-            "name": "Tam Sayılarla İşlemler ve Problem Çözme",
-            "outcome_code": "MAT.7.1.1",
-            "official_boundary": "Toplama, çıkarma, çarpma ve bölme işlemleri."
-          },
-          {
-            "name": "Rasyonel Sayılar ve Farklı Temsilleri",
+            "name": "Rasyonel Sayılar",
             "outcome_code": "MAT.7.1.2",
-            "official_boundary": "Rasyonel sayı tanımı, devirli ondalık gösterim."
+            "official_boundary": "Rasyonel sayı tanımı, a/b biçiminde ifade etme ve sayı doğrusunda gösterme."
+          },
+          {
+            "name": "Mutlak Değer",
+            "outcome_code": "MAT.7.1.1",
+            "official_boundary": "Tam sayıların başlangıç noktasına olan uzaklığı ve mutlak değer kavramı."
+          },
+          {
+            "name": "Rasyonel Sayıların Farklı Temsilleri",
+            "outcome_code": "MAT.7.1.2",
+            "official_boundary": "Rasyonel sayıların ondalık gösterimi ve devirli ondalık açılımlar."
           },
           {
             "name": "Rasyonel Sayılarda Karşılaştırma ve Sıralama",
             "outcome_code": "MAT.7.1.3",
-            "official_boundary": "Pozitif ve negatif rasyonel sayıları sıralama."
+            "official_boundary": "Pozitif ve negatif rasyonel sayıları sıralama ve karşılaştırma stratejileri."
           },
           {
-            "name": "Rasyonel Sayılarla İşlemler ve Çok Adımlı İşlemler",
+            "name": "Tam Sayılarla İşlemler ve Problem Çözme",
+            "outcome_code": "MAT.7.1.1",
+            "official_boundary": "Tam sayılarla toplama, çıkarma, çarpma ve bölme işlemleri ile günlük hayat problemleri."
+          },
+          {
+            "name": "Rasyonel Sayılarla İşlemler ve Problem Çözme",
             "outcome_code": "MAT.7.1.4",
-            "official_boundary": "Dört işlem ve çok adımlı rasyonel sayı problemleri."
+            "official_boundary": "Rasyonel sayılarla dört işlem ve problem çözme süreçleri."
+          },
+          {
+            "name": "Çok Adımlı İşlemler",
+            "outcome_code": "MAT.7.1.4",
+            "official_boundary": "Rasyonel sayılarda birden fazla işlem adımı ve işlem önceliği gerektiren işlemler."
           }
         ]
       },
