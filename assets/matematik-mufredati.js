@@ -58,9 +58,15 @@ window.MATEMATIK_MUFREDATI = {
       "title": "5. Tema: İstatistiksel Araştırma Süreci",
       "unit_topic": "İstatistiksel Araştırma Süreci",
       "topics": [
-        "İstatistiksel Araştırma Adımları ve Anket Sorusu Yazma",
-        "Veri Görselleştirme Araçları (Sütun ve Daire Grafiği)",
-        "İstatistik Okuryazarlığı ve Verilerin Değişebilirliği"
+        "İstatistiksel Araştırma Süreci",
+        "İstatistik Nedir?",
+        "İstatistiksel Araştırma Adımları",
+        "Araştırma Sorusuna Uygun Anket Sorusu Yazma",
+        "Veri Görselleştirme Araçları",
+        "Sütun Grafiği",
+        "Daire Grafiği",
+        "İstatistik Okuryazarlığı",
+        "Verilerin Değişebilirliği"
       ]
     },
     {

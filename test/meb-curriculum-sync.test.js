@@ -69,6 +69,20 @@ test('MEB Müfredat Ağacı Doğrulama ve Sınıf Bütünlüğü (Ders Kitabı �
   assert.ok(grade5Tema4Subs.includes('Kesirleri Farklı Biçimlerde Temsil Etme'), 'Kesirleri Farklı Biçimlerde Temsil Etme bulunmalıdır');
   assert.ok(grade5Tema4Subs.includes('Kesirleri Karşılaştırma'), 'Kesirleri Karşılaştırma bulunmalıdır');
 
+  // 6. 5. Sınıf 5. Tema MEB Kitap Görseli Birebir Eşleşme Kontrolü (9 alt konu)
+  const grade5Tema5Subs = getSubTopics(5, '5. Tema: İstatistiksel Araştırma Süreci').map(s => s.name);
+  assert.deepEqual(grade5Tema5Subs, [
+    'İstatistiksel Araştırma Süreci',
+    'İstatistik Nedir?',
+    'İstatistiksel Araştırma Adımları',
+    'Araştırma Sorusuna Uygun Anket Sorusu Yazma',
+    'Veri Görselleştirme Araçları',
+    'Sütun Grafiği',
+    'Daire Grafiği',
+    'İstatistik Okuryazarlığı',
+    'Verilerin Değişebilirliği'
+  ], '5. sınıf 5. Tema MEB içindekiler görseliyle birebir aynı 9 alt konuyu içermelidir');
+
   // 5. 6. Sınıf Maarif Modeli ve Gerçek Kitap Başlığı Doğrulaması
   const grade6Themes = getThemes(6);
   assert.ok(grade6Themes.includes('3. Tema: Sayılar ve Nicelikler (2)'), '6. sınıf kitabındaki "3. Tema: Sayılar ve Nicelikler (2)" tam adıyla bulunmalıdır');

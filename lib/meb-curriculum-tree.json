@@ -158,19 +158,49 @@
       "5. Tema: İstatistiksel Araştırma Süreci": {
         "alt_konular": [
           {
-            "name": "İstatistiksel Araştırma Adımları ve Anket Sorusu Yazma",
+            "name": "İstatistiksel Araştırma Süreci",
             "outcome_code": "MAT.5.5.1",
-            "official_boundary": "Araştırma sorusu ve veri toplama planlaması."
+            "official_boundary": "İstatistiksel araştırma döngüsü ve temel kavramlar."
           },
           {
-            "name": "Veri Görselleştirme Araçları (Sütun ve Daire Grafiği)",
-            "outcome_code": "MAT.5.5.2",
-            "official_boundary": "Sıklık tablosu, sütun grafiği ve daire grafiği."
+            "name": "İstatistik Nedir?",
+            "outcome_code": "MAT.5.5.1",
+            "official_boundary": "İstatistiğin tanımı, günlük yaşamdaki yeri ve önemi."
           },
           {
-            "name": "İstatistik Okuryazarlığı ve Verilerin Değişebilirliği",
+            "name": "İstatistiksel Araştırma Adımları",
+            "outcome_code": "MAT.5.5.1",
+            "official_boundary": "Soru oluşturma, veri toplama, analiz ve yorumlama basamakları."
+          },
+          {
+            "name": "Araştırma Sorusuna Uygun Anket Sorusu Yazma",
+            "outcome_code": "MAT.5.5.1",
+            "official_boundary": "Araştırma amacına uygun, tarafsız ve net anket soruları hazırlama."
+          },
+          {
+            "name": "Veri Görselleştirme Araçları",
             "outcome_code": "MAT.5.5.2",
-            "official_boundary": "Veriye dayalı çıkarım yapma ve yanıltıcı durumları fark etme."
+            "official_boundary": "Toplanan verileri uygun grafik ve tablolara dönüştürme."
+          },
+          {
+            "name": "Sütun Grafiği",
+            "outcome_code": "MAT.5.5.2",
+            "official_boundary": "Kategorik verileri temsil etmek için sütun grafiği oluşturma ve okuma."
+          },
+          {
+            "name": "Daire Grafiği",
+            "outcome_code": "MAT.5.5.2",
+            "official_boundary": "Bütünün parçalarını göstermek için daire grafiği oluşturma ve okuma."
+          },
+          {
+            "name": "İstatistik Okuryazarlığı",
+            "outcome_code": "MAT.5.5.2",
+            "official_boundary": "Medyada ve raporlarda yer alan istatistiki verileri ve grafikleri doğru anlama ve yorumlama."
+          },
+          {
+            "name": "Verilerin Değişebilirliği",
+            "outcome_code": "MAT.5.5.2",
+            "official_boundary": "Verilerdeki değişkenlik ve farklı durumlarda değişebilirlik özellikleri."
           }
         ]
       },
