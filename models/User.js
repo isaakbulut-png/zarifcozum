@@ -185,6 +185,26 @@ const userSchema = new mongoose.Schema({
     default: null,
     index: true
   },
+  grade: {
+    type: Number,
+    enum: [5, 6, 7, 8, 9, 10, 11, 12, null],
+    default: null,
+    index: true
+  },
+  parentContact: {
+    type: String,
+    trim: true,
+    maxlength: 100,
+    default: null
+  },
+  guardianConsentAccepted: {
+    type: Boolean,
+    default: false
+  },
+  guardianConsentAt: {
+    type: Date,
+    default: null
+  },
   seciliTelafiSinif: {
     type: Number,
     enum: [5, 6, 7, 8, 9, 10, 11, 12, null],
@@ -295,7 +315,13 @@ const userSchema = new mongoose.Schema({
   },
   subscriptionStatus: {
     type: String,
-    enum: ['free', 'active', 'expired'],
+    enum: ['free', 'active', 'expired', 'cancelled'],
+    default: 'active',
+    index: true
+  },
+  subscriptionTier: {
+    type: String,
+    enum: ['free', 'temel', 'standart', 'vip'],
     default: 'free',
     index: true
   },
@@ -313,6 +339,15 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
     index: true
+  },
+  subscriptionEndDate: {
+    type: Date,
+    default: null,
+    index: true
+  },
+  dailyAiUsage: {
+    count: { type: Number, default: 0 },
+    lastResetDate: { type: Date, default: Date.now }
   },
   paymentGatewayCustomerId: {
     type: String,
@@ -366,6 +401,31 @@ userSchema.methods.setPassword = async function (password) {
 };
 
 userSchema.pre('validate', async function () {
+  // Sınıf (grade <-> kayitliSinif) senkronizasyonu
+  if (this.grade && !this.kayitliSinif) this.kayitliSinif = this.grade;
+  if (this.kayitliSinif && !this.grade) this.grade = this.kayitliSinif;
+
+  // Paket / Tier senkronizasyonu
+  if (this.subscriptionTier) {
+    if (this.subscriptionTier !== 'free' && !this.subscriptionPlan) {
+      this.subscriptionPlan = this.subscriptionTier;
+    }
+    if (!this.paketTipi || this.paketTipi === 'free') {
+      this.paketTipi = this.subscriptionTier;
+    }
+  } else if (this.subscriptionPlan) {
+    this.subscriptionTier = this.subscriptionPlan;
+  } else if (this.paketTipi && ['free', 'temel', 'standart', 'vip'].includes(this.paketTipi)) {
+    this.subscriptionTier = this.paketTipi;
+  }
+
+  // Bitiş tarihi (subscriptionEndDate <-> expiresAt) senkronizasyonu
+  if (this.subscriptionEndDate && !this.expiresAt) {
+    this.expiresAt = this.subscriptionEndDate;
+  } else if (this.expiresAt && !this.subscriptionEndDate) {
+    this.subscriptionEndDate = this.expiresAt;
+  }
+
   if (this.role !== 'student' || this.parentConnectionCode) return;
   for (let attempt = 0; attempt < 10; attempt += 1) {
     const code = createParentConnectionCode();

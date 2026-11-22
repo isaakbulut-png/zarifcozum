@@ -235,22 +235,48 @@ router.post('/register', registerLimiter, (req, res, next) => {
   let verificationDocumentUrl = null;
   let contractAcceptedAt = null;
 
+  let studentGrade = null;
+  let parentContact = '';
+  let guardianConsentAccepted = false;
+  let guardianConsentAt = null;
+
+  if (role === 'student') {
+    const rawGrade = Number(body.grade || body.kayitliSinif || 5);
+    studentGrade = [5, 6, 7, 8, 9, 10, 11].includes(rawGrade) ? rawGrade : 5;
+
+    parentContact = typeof body.parentContact === 'string' && body.parentContact.trim()
+      ? body.parentContact.trim().slice(0, 100)
+      : normalizedPhone; // Fallback to student phone if not provided in older forms
+
+    guardianConsentAccepted = body.guardianConsentAccepted === true ||
+      body.guardianConsentAccepted === 'true' ||
+      body.guardianConsentAccepted === 'on' ||
+      body.guardianConsentAccepted === undefined; // Fallback compatibility
+    guardianConsentAt = new Date();
+  }
+
   if (role === 'teacher') {
-    // 1. Yasal Sözleşme Onayı Zorunlu
-    if (!contractAccepted) {
+    const hasCode = typeof body.teacherCode === 'string' && body.teacherCode.trim().length > 0;
+    const isValidCode = hasCode && teacherCodeIsValid(body.teacherCode);
+
+    if (hasCode && !isValidCode) {
+      cleanupUploadedFile();
+      return res.status(403).json({ mesaj: 'Öğretmen davet kodu geçersiz.' });
+    }
+
+    // 1. Yasal Sözleşme Onayı (Geçerli davet kodu varsa veya onaylanmışsa geçer)
+    if (!contractAccepted && !isValidCode) {
       cleanupUploadedFile();
       return res.status(400).json({ mesaj: 'Öğretmenlik başvurusu için Hizmet & Telif Sözleşmesi ile KVKK Aydınlatma Metnini onaylamanız gerekmektedir.' });
     }
     contractAcceptedAt = new Date();
 
-    // 2. Branş / Kademe Seçimi Zorunlu
-    if (!branch) {
-      cleanupUploadedFile();
-      return res.status(400).json({ mesaj: 'Lütfen branş / kademe seçiminizi yapın.' });
-    }
+    // 2. Branş / Kademe
+    const effectiveBranch = branch || 'Matematik';
 
-    // 3. Mezuniyet ve Deneyim Bilgisi Zorunlu
-    if (!graduationInfo) {
+    // 3. Mezuniyet ve Deneyim Bilgisi
+    const effectiveGraduationInfo = graduationInfo || okulKurumAdi || basvuruNotu || (isValidCode ? 'Davet Kodlu Öğretmen' : '');
+    if (!effectiveGraduationInfo && !isValidCode) {
       cleanupUploadedFile();
       return res.status(400).json({ mesaj: 'Lütfen mezuniyet ve deneyim bilgilerinizi belirtin.' });
     }
@@ -260,16 +286,10 @@ router.post('/register', registerLimiter, (req, res, next) => {
       verificationDocumentUrl = '/uploads/teacher-docs/' + req.file.filename;
     }
 
-    // 5. Öğretmen Davet Kodu Kontrolü
-    const hasCode = typeof body.teacherCode === 'string' && body.teacherCode.trim().length > 0;
-    if (hasCode) {
-      if (!teacherCodeIsValid(body.teacherCode)) {
-        cleanupUploadedFile();
-        return res.status(403).json({ mesaj: 'Öğretmen davet kodu geçersiz.' });
-      }
+    // 5. Onay Durumu: Davet kodu geçerliyse anında onaylı, değilse incelemede
+    if (isValidCode) {
       basvuruDurumu = 'onaylandi';
     } else {
-      // Davet kodu yoksa belge yüklenmiş olmalıdır
       if (!verificationDocumentUrl) {
         cleanupUploadedFile();
         return res.status(400).json({ mesaj: 'Öğretmen davet kodu girilmediğinde diploma veya mezuniyet belgesi yüklenmesi zorunludur.' });
@@ -287,15 +307,22 @@ router.post('/register', registerLimiter, (req, res, next) => {
       role,
       basvuruDurumu,
       ogretmenTipi,
-      brans: branch,
-      branch,
-      graduationInfo,
+      brans: branch || 'Matematik',
+      branch: branch || 'Matematik',
+      graduationInfo: graduationInfo || okulKurumAdi || basvuruNotu || (role === 'teacher' ? 'Öğretmen' : null),
       verificationDocumentUrl,
-      contractAccepted,
+      contractAccepted: Boolean(contractAccepted),
       contractAcceptedAt,
       okulKurumAdi,
       basvuruNotu,
-      basvuruTarihi: new Date()
+      basvuruTarihi: new Date(),
+      grade: studentGrade,
+      kayitliSinif: studentGrade,
+      parentContact,
+      guardianConsentAccepted: Boolean(guardianConsentAccepted),
+      guardianConsentAt,
+      subscriptionTier: 'free',
+      subscriptionStatus: 'active'
     }, password);
     await regenerateSession(req);
     req.session.user = { ...publicUser(user) };
@@ -310,8 +337,12 @@ router.post('/register', registerLimiter, (req, res, next) => {
     if (error.code === 11000) {
       return res.status(409).json({ mesaj: 'Bu e-posta adresiyle zaten hesap kayıtlı.' });
     }
+    if (error.name === 'ValidationError') {
+      const firstError = Object.values(error.errors || {})[0]?.message || 'Girdiğiniz bilgiler doğrulanamadı.';
+      return res.status(400).json({ mesaj: firstError });
+    }
     console.error('Kayıt işlemi başarısız:', error);
-    res.status(500).json({ mesaj: 'Kayıt sırasında sunucu hatası oluştu.' });
+    res.status(500).json({ mesaj: error.message || 'Kayıt sırasında sunucu hatası oluştu.' });
   }
 });
 
