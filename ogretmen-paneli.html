@@ -153,14 +153,19 @@ td.net{font-weight:700;color:var(--navy-900)}
 .teacher-sidebar .gz-side-label{display:flex;align-items:center;gap:7px;margin:12px 6px 4px;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#c4b5a8;font-weight:700}
 .teacher-sidebar .gz-label-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--orange,#c2570c);opacity:.9}
 .teacher-sidebar .teacher-nav-links{display:flex;flex-direction:column;gap:3px}
-.teacher-sidebar .teacher-nav-links a{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:10px;color:#e5ded8;font-weight:500;font-size:.86rem;line-height:1.3;text-decoration:none;border-left:3px solid transparent;transition:all .18s ease;white-space:nowrap}
+.teacher-sidebar .teacher-nav-links a{display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:8px 10px;border-radius:10px;color:#e5ded8;font-weight:500;font-size:.86rem;line-height:1.3;text-decoration:none;border-left:3px solid transparent;transition:all .18s ease;white-space:nowrap;text-align:left}
 .teacher-sidebar .teacher-nav-links a:hover{background:rgba(255,255,255,0.08);color:#fff;transform:translateX(2px)}
 .teacher-sidebar .teacher-nav-links a[aria-current="page"]{background:linear-gradient(135deg, rgba(214,69,43,0.28), rgba(122,79,45,0.45));color:#fff;font-weight:600;border-left-color:#f97316;box-shadow:0 4px 12px rgba(0,0,0,0.18)}
-.teacher-sidebar .teacher-nav-links a > svg{width:19px;height:19px;flex-shrink:0;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s ease}
+.teacher-sidebar .teacher-nav-links a > svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s ease}
 .teacher-sidebar .teacher-nav-links a:hover > svg{transform:scale(1.12)}
-.teacher-sidebar .nav-text{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.teacher-sidebar .nav-text{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;display:block}
 .teacher-sidebar .nav-text small{display:none!important}
 .teacher-sidebar a{color:#e3dcd6;text-decoration:none}
+.logout-button{width:100%;margin-top:6px;padding:8px 12px;border:1px solid rgba(255,255,255,0.14);border-radius:9px;background:rgba(255,255,255,0.04);color:#e5ded8;display:flex;align-items:center;gap:9px;font-weight:600;font-size:.82rem;cursor:pointer;transition:all .18s ease;text-align:left}
+.logout-button svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logout-button:hover{background:rgba(255,255,255,0.1);border-color:rgba(249,115,22,0.5);color:#fff;transform:translateX(2px)}
+.logout-button.danger{color:#fca5a5;border-color:rgba(239,68,68,0.25)}
+.logout-button.danger:hover{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.45);color:#fee2e2}
 .teacher-content{min-width:0}
 .dashboard-head{display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap;margin:4px 0 20px}
 .dashboard-head h2{font-family:var(--head);font-size:1.45rem;color:var(--navy-900)}
@@ -903,8 +908,6 @@ body.teacher-menu-open {
       <a class="btn ghost" href="index.html">Ana sayfa</a>
       <a class="btn sm" id="topAdminPanelBtn" href="/admin-paneli.html" style="background:#2c1a0e;color:#fff;text-decoration:none;font-weight:600;display:none;align-items:center;gap:6px">🛡️ Yönetim Paneli ↗</a>
       <select id="sinav" aria-label="Sınav seçin" hidden></select>
-      <button class="btn ghost" id="changePasswordButton" type="button" hidden>Şifre değiştir</button>
-      <button class="btn ghost" id="cikis" type="button" hidden>Çıkış</button>
     </div>
   </div>
 </header>
@@ -956,7 +959,7 @@ body.teacher-menu-open {
       <div class="gz-side-label"><span class="gz-label-dot" style="background:#10b981"></span> İçerik ve Müfredat</div>
       <div class="teacher-nav-links">
         <a href="#curriculum"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/></svg><span class="nav-text">Müfredat &amp; Dersler</span></a>
-        <a href="#ai-curriculum-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg><span class="nav-text">🧠 Konu Anlatımı Üret</span></a>
+        <a href="#ai-curriculum-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg><span class="nav-text">Konu Anlatımı Üret</span></a>
       </div>
     </div>
 
@@ -973,7 +976,7 @@ body.teacher-menu-open {
       <div class="teacher-nav-links">
         <a href="#quiz-builder" title="Soru &amp; Test Hazırlama Merkezi"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="m8 9 2 2 4-4M8 16h8"/></svg><span class="nav-text">Soru &amp; Test Hazırlama Merkezi<small style="display:none">(Formüllü, Resimli ve AI Testleri)</small></span></a>
         <a href="#image-questions"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h.01M21 15l-5-5L5 21"/></svg><span class="nav-text">Resimli Soru &amp; Deneme</span></a>
-        <a href="#ai-question-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6z"/></svg><span class="nav-text">✨ AI ile Soru Üret</span></a>
+        <a href="#ai-question-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6z"/></svg><span class="nav-text">AI ile Soru Üret</span></a>
         <a href="#student-results"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="nav-text">Öğrenci Test Sonuçları</span></a>
         <a href="#analytics"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20V4M4 20h17"/><path d="m7 15 4-4 3 2 6-7"/></svg><span class="nav-text">Başarı Analizi</span></a>
       </div>
@@ -992,15 +995,29 @@ body.teacher-menu-open {
         <a href="#library"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 3h12a2 2 0 0 1 2 2v16H7a2 2 0 0 1-2-2z"/><path d="M5 17a2 2 0 0 1 2-2h12M9 7h6M9 10h6"/></svg><span class="nav-text">PDF Kütüphanesi</span></a>
         <a href="#announcements"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 14V9a2 2 0 0 1 2-2h4l8-4v17l-8-4H6a2 2 0 0 1-2-2z"/><path d="m8 16 1.5 5h4L12 17M21 8v7"/></svg><span class="nav-text">Duyurular</span></a>
         <a href="#teacher-settings"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.1h-2.6v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6.4v-2.6h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.1H15v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1V14h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="nav-text">Profil ve Ayarlar</span></a>
-        <a href="/admin-paneli.html" id="sidebarAdminPanelLink" style="display:none;align-items:center;gap:11px;font-weight:700;color:#c2570c;background:#fff7ed;border:1px dashed #fed7aa;padding:8px 12px;border-radius:10px;margin-top:6px;text-decoration:none" title="Yönetici paneline geçiş yap">
-          <svg aria-hidden="true" viewBox="0 0 24 24" style="stroke:#c2570c;width:19px;height:19px;fill:none;stroke-width:2;flex-shrink:0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span class="nav-text">🛡️ Yönetim Paneli</span>
-        </a>
       </div>
     </div>
   </nav>
 
   <div class="teacher-sidebar-note"><span class="teacher-status-dot"></span> Eğitim Yönetim Paneli</div>
+
+  <div class="side-footer" style="margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;align-items:center;gap:11px;padding:4px 6px 6px">
+      <div class="avatar" id="teacherAvatar" style="width:36px;height:36px;border-radius:50%;background:#523520;border:2px solid #f97316;display:grid;place-items:center;font-weight:700;font-size:.88rem;color:#fff;flex-shrink:0">Ö</div>
+      <div style="min-width:0;overflow:hidden">
+        <div id="teacherName" style="font-size:.84rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Öğretmen</div>
+        <small id="teacherEmail" style="display:block;color:#b7aba0;font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Giriş yapıldı</small>
+      </div>
+    </div>
+    <button class="logout-button" id="changePasswordButton" type="button" hidden>
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>Şifre değiştir</span>
+    </button>
+    <button class="logout-button danger" id="cikis" type="button" hidden>
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span>Çıkış yap</span>
+    </button>
+  </div>
 </aside>
 <button class="teacher-sidebar-backdrop" id="teacherSidebarBackdrop" type="button" aria-label="Menüyü kapat" tabindex="-1"></button>
 <main class="wrap teacher-content">
@@ -1905,6 +1922,9 @@ body.teacher-menu-open {
     window.dispatchEvent(new CustomEvent('curriculum-tree:open'));
     $('cikis').hidden = false;
     $('changePasswordButton').hidden = false;
+    if ($('teacherName')) $('teacherName').textContent = oturum.user?.name || oturum.user?.email?.split('@')[0] || 'Öğretmen';
+    if ($('teacherEmail')) $('teacherEmail').textContent = oturum.user?.email || 'Öğretmen Hesabı';
+    if ($('teacherAvatar')) $('teacherAvatar').textContent = ((oturum.user?.name || oturum.user?.email || 'Ö')[0] || 'Ö').toUpperCase();
     if (oturum.user?.adminRole || oturum.user?.role === 'admin' || (oturum.user?.email && oturum.user.email.toLowerCase() === 'isa.agbulut@gmail.com')) {
       if ($('topAdminPanelBtn')) $('topAdminPanelBtn').style.display = 'inline-flex';
       if ($('sidebarAdminPanelLink')) $('sidebarAdminPanelLink').style.display = 'flex';
