@@ -120,6 +120,18 @@ td.net{font-weight:700;color:var(--navy-900)}
 .formula-templates .btn{padding:8px 12px}
 #quizFormulaInput{width:100%;min-height:90px}
 #quizFormulaPreview{min-height:50px;overflow:auto;padding:10px}
+#centralBankDialog{width:min(880px,calc(100% - 32px));max-height:88vh;padding:24px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);box-shadow:0 20px 60px rgba(49,36,24,.25)}
+#centralBankDialog[open]{display:flex;flex-direction:column}
+#centralBankDialog::backdrop,#assignHomeworkDialog::backdrop{background:rgba(16,30,42,.55)}
+.central-question-item{padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:border-color .15s,background .15s}
+.central-question-item:hover{border-color:var(--orange,#c2570c);background:#fffaf5}
+.central-question-item.selected{border-color:var(--orange,#c2570c);background:#fff4ec}
+.central-q-checkbox{margin-top:4px;accent-color:var(--orange,#c2570c);width:18px;height:18px;cursor:pointer}
+.badge-grade{font-size:11px;padding:2px 7px;border-radius:12px;background:#e0f2fe;color:#0369a1;font-weight:600}
+.badge-diff{font-size:11px;padding:2px 7px;border-radius:12px;font-weight:600}
+.badge-diff-kolay{background:#dcfce7;color:#15803d}
+.badge-diff-orta{background:#fef3c7;color:#b45309}
+.badge-diff-zor{background:#fee2e2;color:#b91c1c}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -1330,7 +1342,8 @@ body.teacher-menu-open {
         <div class="math-editor-section" id="math-question-editor">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
             <h3 style="margin:0">Formüllü ve Çoktan Seçmeli Sorular</h3>
-            <div style="display:flex;gap:8px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn sm" id="btnOpenCentralBank" type="button" style="background:var(--orange,#c2570c);color:#fff;border-color:var(--orange,#c2570c);font-weight:600">📚 Merkezi Soru Havuzundan Soru Çek</button>
               <a class="btn sm light" href="#image-questions" style="text-decoration:none">📷 Resimli Soru Yükle</a>
               <a class="btn sm light" href="#ai-question-wizard" style="text-decoration:none;background:#f3e8ff;color:#7e22ce;border-color:#d8b4fe">✨ AI'dan Soru Üret</a>
             </div>
@@ -1340,6 +1353,7 @@ body.teacher-menu-open {
         </div>
         <div class="button-row">
           <button class="btn light" id="addQuestion" type="button">+ Soru ekle</button>
+          <button class="btn light" id="btnOpenCentralBankBottom" type="button">📚 Havuzdan Soru Seç</button>
           <button class="btn" type="submit">Testi Yayınla</button>
           <a class="btn light" href="#image-questions" style="text-decoration:none">📷 Resimli Soru Ekle</a>
           <a class="btn light" href="#ai-question-wizard" style="text-decoration:none;background:#f3e8ff;color:#7e22ce;border-color:#d8b4fe">✨ AI Soru Sihirbazı</a>
@@ -1669,6 +1683,110 @@ body.teacher-menu-open {
   </div>
 </dialog>
 
+<dialog id="centralBankDialog" aria-labelledby="centralBankTitle">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:24px" aria-hidden="true">📚</span>
+      <div>
+        <h3 id="centralBankTitle" style="margin:0;font-size:1.15rem;color:var(--navy-900)">Merkezi Soru ve İçerik Havuzu</h3>
+        <p class="hint" style="margin:2px 0 0">Maarif müfredatına uygun soru bankasından filtreleyin, seçin ve testinize tek tıkla aktarın.</p>
+      </div>
+    </div>
+    <button class="btn light sm" type="button" id="closeCentralBankDialog" style="border:none;font-size:18px;cursor:pointer;padding:4px 8px">✕</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px;background:#fbf8f3;padding:12px;border-radius:10px;border:1px solid #ebd9c8">
+    <div>
+      <label for="centralGradeFilter" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Sınıf</label>
+      <select id="centralGradeFilter" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--line)">
+        <option value="">Tüm Sınıflar</option>
+        <option value="5">5. Sınıf</option>
+        <option value="6">6. Sınıf</option>
+        <option value="7">7. Sınıf</option>
+        <option value="8">8. Sınıf (LGS)</option>
+        <option value="9">9. Sınıf</option>
+        <option value="10">10. Sınıf</option>
+        <option value="11">11. Sınıf</option>
+        <option value="12">12. Sınıf (YKS/TYT/AYT)</option>
+      </select>
+    </div>
+    <div>
+      <label for="centralDifficultyFilter" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Zorluk Seviyesi</label>
+      <select id="centralDifficultyFilter" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--line)">
+        <option value="">Tümü</option>
+        <option value="kolay">Kolay</option>
+        <option value="orta">Orta</option>
+        <option value="zor">Zor</option>
+      </select>
+    </div>
+    <div style="grid-column: span 2">
+      <label for="centralSearchFilter" style="font-size:12px;font-weight:600;display:block;margin-bottom:4px">Konu / Kazanım / Soru Ara</label>
+      <div style="display:flex;gap:6px">
+        <input type="text" id="centralSearchFilter" placeholder="Örn: Kesirler, MAT.6.1, Üslü Sayılar..." style="flex:1;padding:6px 10px;border-radius:6px;border:1px solid var(--line)">
+        <button class="btn light sm" type="button" id="btnFilterCentralBank">🔍 Ara</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="centralBankList" style="flex:1;overflow-y:auto;max-height:420px;display:flex;flex-direction:column;gap:10px;padding-right:6px">
+    <p class="hint" style="text-align:center;padding:24px">Sorular aranıyor…</p>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
+    <span style="font-size:13px;color:var(--muted)">Seçilen: <strong id="centralSelectedCount" style="color:var(--text)">0</strong> soru</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn light" type="button" id="cancelCentralBank">Kapat</button>
+      <button class="btn" type="button" id="btnTransferQuestions" disabled style="background:var(--orange,#c2570c);color:#fff;font-weight:600">Seçilen Soruları Teste Ekle</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="password-dialog" id="assignHomeworkDialog" aria-labelledby="assignHomeworkTitle" style="width:min(520px, calc(100% - 32px))">
+  <form id="assignHomeworkForm">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h2 id="assignHomeworkTitle" style="margin:0;font-size:1.2rem">📝 Testi Ödev Olarak Ata</h2>
+      <button type="button" id="closeAssignHomeworkDialog" style="border:none;background:none;font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <p style="font-size:0.9rem;color:var(--muted);margin-bottom:14px">Hazırladığınız bu testi sınıfınıza veya öğrencilerinize dijital ödev olarak atayın.</p>
+    
+    <input type="hidden" id="assignQuizId">
+    <div class="field">
+      <label for="assignQuizTitleInput">Ödev Başlığı</label>
+      <input id="assignQuizTitleInput" required maxlength="160">
+    </div>
+    <div class="field" style="margin-top:10px">
+      <label for="assignGrade">Sınıf Düzeyi</label>
+      <select id="assignGrade" required style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--line)">
+        <option value="5">5. Sınıf</option>
+        <option value="6">6. Sınıf</option>
+        <option value="7">7. Sınıf</option>
+        <option value="8">8. Sınıf (LGS)</option>
+        <option value="9">9. Sınıf</option>
+        <option value="10">10. Sınıf</option>
+        <option value="11">11. Sınıf</option>
+        <option value="12">12. Sınıf (YKS/TYT/AYT)</option>
+      </select>
+    </div>
+    <div class="field" style="margin-top:10px">
+      <label for="assignSection">Şube (İsteğe Bağlı)</label>
+      <input id="assignSection" maxlength="12" placeholder="Örn: A, B veya boş bırakın (Tüm şubeler)">
+    </div>
+    <div class="field" style="margin-top:10px">
+      <label for="assignDueAt">Son Teslim Tarihi ve Saati</label>
+      <input id="assignDueAt" type="datetime-local" required style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--line)">
+    </div>
+    <div class="field" style="margin-top:10px">
+      <label for="assignNote">Öğrencilere Not (İsteğe Bağlı)</label>
+      <textarea id="assignNote" maxlength="500" placeholder="Örn: Süre 40 dakikadır. Lütfen soruları dikkatlice çözün." style="width:100%;min-height:60px"></textarea>
+    </div>
+    <p class="status" id="assignHomeworkStatus" role="status" style="margin-top:10px"></p>
+    <div class="button-row" style="margin-top:16px;justify-content:flex-end;display:flex;gap:8px">
+      <button class="btn light" type="button" id="cancelAssignHomework">Vazgeç</button>
+      <button class="btn" type="submit" style="background:var(--orange,#c2570c);color:#fff;font-weight:600">Ödevi Ata</button>
+    </div>
+  </form>
+</dialog>
+
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js" integrity="sha384-reiVBUvj2HgLgCZalqLFSMBVD9LdtiwGyybRGCq2AfP8Rgebz5DxEnwKp4FpagKV" crossorigin="anonymous"></script>
 <script src="assets/math-text.js"></script>
@@ -1702,9 +1820,11 @@ body.teacher-menu-open {
 
   // ---- Oturumlu sunucu isteği ----
   async function api(yol, ayar = {}) {
+    const isFormData = typeof FormData !== 'undefined' && ayar.body instanceof FormData;
+    const defaultHeaders = isFormData ? {} : {'Content-Type': 'application/json'};
     const r = await fetch(API + yol, {
       ...ayar,
-      headers: {'Content-Type': 'application/json', ...(ayar.headers || {})}
+      headers: {...defaultHeaders, ...(ayar.headers || {})}
     });
     const d = await r.json().catch(() => ({}));
     if (r.status === 401 || r.status === 403) {
@@ -1818,7 +1938,10 @@ body.teacher-menu-open {
     $('quizList').innerHTML = yonetim.quizler.length
       ? yonetim.quizler.map(quiz => `<article class="data-item">
           <div><strong>${esc(quiz.title)}</strong><p>${quiz.soruSayisi} soru · ${tarihSaat(quiz.createdAt)}</p></div>
-          ${quiz.aiYayin ? `<button class="btn light" type="button" data-delete-ai-quiz="${esc(quiz.id)}">Testi sil</button>` : ''}
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="btn light sm" type="button" data-assign-quiz="${esc(quiz.id)}" data-quiz-title="${esc(quiz.title)}" style="font-weight:600">📝 Ödev Olarak Ata</button>
+            ${quiz.aiYayin ? `<button class="btn light sm" type="button" data-delete-ai-quiz="${esc(quiz.id)}">Testi sil</button>` : ''}
+          </div>
         </article>`).join('')
       : '<p class="empty">Henüz yayınlanmış test yok.</p>';
     $('announcementList').innerHTML = yonetim.duyurular.length
@@ -1908,6 +2031,11 @@ body.teacher-menu-open {
   });
 
   $('quizList').addEventListener('click', async event => {
+    const assignButton = event.target.closest('[data-assign-quiz]');
+    if (assignButton) {
+      openAssignHomeworkModal(assignButton.dataset.assignQuiz, assignButton.dataset.quizTitle);
+      return;
+    }
     const button = event.target.closest('[data-delete-ai-quiz]');
     if (!button) return;
     const quizId = button.dataset.deleteAiQuiz;
@@ -2119,7 +2247,7 @@ body.teacher-menu-open {
         if (outcomeCode) question.outcomeCode = outcomeCode;
         return question;
       });
-      await api('/api/ogretmen/quizler', {
+      const createdQuizRes = await api('/api/ogretmen/quizler', {
         method: 'POST',
         body: JSON.stringify({
           title: $('quizTitle').value,
@@ -2127,13 +2255,19 @@ body.teacher-menu-open {
           questions
         })
       });
+      const publishedQuizId = createdQuizRes?.quiz?.id;
+      const publishedQuizTitle = createdQuizRes?.quiz?.title || $('quizTitle').value;
       form.reset();
       $('questionList').replaceChildren();
       soruEkle();
       try {
         yonetim = await api('/api/ogretmen/yonetim');
         yonetimCiz();
-        durumYaz('quizStatus', 'Test yayınlandı; öğrenciler panelinde görebilir.', 'ok');
+        const assignPrompt = publishedQuizId
+          ? `Test yayınlandı! <button class="btn light sm" type="button" onclick="window.zarifOpenAssignQuiz('${publishedQuizId}', '${esc(publishedQuizTitle)}')">📝 Bu Testi Şimdi Sınıfa Ödev Olarak Ata</button>`
+          : 'Test yayınlandı; öğrenciler panelinde görebilir.';
+        $('quizStatus').innerHTML = assignPrompt;
+        $('quizStatus').className = 'status ok';
       } catch (error) {
         durumYaz('quizStatus', 'Test yayınlandı, ancak liste yenilenemedi: ' + error.message, 'error');
       }
@@ -2141,6 +2275,302 @@ body.teacher-menu-open {
       durumYaz('quizStatus', 'Test yayınlanamadı: ' + error.message, 'error');
     } finally {
       button.disabled = false;
+    }
+  });
+
+  // ---- Merkezi Soru Havuzu & Ödev Atama Entegrasyonu ----
+  let centralBankQuestions = [];
+  const selectedCentralQuestionIds = new Set();
+
+  function soruEkleWithData(data) {
+    if ($('questionList').children.length >= 50) {
+      durumYaz('quizStatus', 'Bir testte en fazla 50 soru olabilir.', 'error');
+      return null;
+    }
+    soruEkle();
+    const cards = $('questionList').querySelectorAll('.question-card');
+    const article = cards[cards.length - 1];
+    if (!article) return null;
+
+    // 1. Soru metni
+    const editor = questionEditors.get(article);
+    if (editor) {
+      const qText = data.text || (data.topic ? `[${data.topic}]` : '');
+      if (qText) {
+        if (qText.includes('<p>') || qText.includes('<br>')) {
+          editor.root.innerHTML = qText;
+        } else {
+          editor.setText(qText + '\n');
+        }
+      }
+    }
+
+    // 2. Şıklar
+    if (data.options) {
+      if (Array.isArray(data.options)) {
+        data.options.forEach((opt, idx) => {
+          const letter = typeof opt === 'object' && opt.label ? opt.label : ['A', 'B', 'C', 'D', 'E'][idx];
+          const val = typeof opt === 'object' && opt.text !== undefined ? opt.text : String(opt);
+          const input = article.querySelector(`.option-${letter}`);
+          if (input) input.value = val;
+        });
+      } else if (typeof data.options === 'object') {
+        ['A', 'B', 'C', 'D'].forEach(letter => {
+          const input = article.querySelector(`.option-${letter}`);
+          if (input && data.options[letter] !== undefined) {
+            input.value = typeof data.options[letter] === 'string' ? data.options[letter] : (data.options[letter].text || '');
+          }
+        });
+      }
+    }
+
+    // 3. Doğru Cevap
+    const ans = data.answer || data.cevap;
+    if (ans) {
+      const ansSelect = article.querySelector('.correct-answer');
+      if (ansSelect) ansSelect.value = String(ans).trim().toUpperCase();
+    }
+
+    // 4. Kazanım kodu
+    if (data.outcomeCode) {
+      const outcomeInput = article.querySelector('.question-outcome');
+      if (outcomeInput) outcomeInput.value = data.outcomeCode;
+    }
+
+    // 5. SVG
+    if (data.svg) {
+      const svgTextarea = article.querySelector('.question-svg-code');
+      if (svgTextarea) {
+        const svgStr = typeof data.svg === 'string' ? data.svg : JSON.stringify(data.svg);
+        svgTextarea.value = svgStr;
+        const preview = article.querySelector('.question-svg-preview');
+        if (preview && window.zarifSafeSvg && typeof data.svg === 'string') {
+          try {
+            window.zarifSafeSvg.render(preview, window.zarifSafeSvg.parse(data.svg));
+          } catch (e) {}
+        }
+      }
+    }
+    return article;
+  }
+
+  async function loadCentralBankQuestions() {
+    const listEl = $('centralBankList');
+    listEl.innerHTML = '<p class="hint" style="text-align:center;padding:24px">Sorular taranıyor ve yükleniyor…</p>';
+    selectedCentralQuestionIds.clear();
+    updateCentralSelectionUI();
+
+    const grade = $('centralGradeFilter').value;
+    const diff = $('centralDifficultyFilter').value;
+    const search = $('centralSearchFilter').value.trim();
+
+    try {
+      const params = new URLSearchParams();
+      params.set('limit', '50');
+      if (grade) params.set('grade', grade);
+      if (diff) params.set('difficulty', diff);
+      if (search) params.set('search', search);
+
+      const res = await api('/api/sorular?' + params.toString());
+      centralBankQuestions = Array.isArray(res.sorular) ? res.sorular : [];
+
+      if (!centralBankQuestions.length) {
+        listEl.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--muted)">
+          <p style="font-size:1.1rem;margin-bottom:6px">🔍 Eşleşen soru bulunamadı.</p>
+          <small>Filtreleri temizleyerek veya farklı bir arama terimi girerek tekrar deneyin.</small>
+        </div>`;
+        return;
+      }
+
+      listEl.innerHTML = centralBankQuestions.map(q => {
+        const diffClass = q.difficulty ? `badge-diff-${q.difficulty}` : 'badge-diff-orta';
+        const diffLabel = q.difficulty ? (q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1)) : 'Orta';
+        const gradeLabel = q.grade ? `${q.grade}. Sınıf` : 'Tüm Sınıflar';
+        const qTextPreview = (q.text || '').replace(/<[^>]+>/g, '').trim().slice(0, 160) || (q.topic ? `[${q.topic}] Soru İçeriği` : 'Görsel / Şekilli Soru');
+        
+        let optionsPreview = '';
+        if (q.options) {
+          const opts = Array.isArray(q.options) ? q.options : Object.entries(q.options).map(([label, text]) => ({ label, text }));
+          optionsPreview = opts.slice(0, 4).map(o => {
+            const lbl = o.label || o[0];
+            const val = (o.text || o[1] || '').toString().slice(0, 40);
+            const isCorrect = (q.answer && q.answer === lbl) || (q.cevap && q.cevap === lbl);
+            return `<span style="font-size:11px;padding:1px 6px;border-radius:4px;border:1px solid ${isCorrect ? '#86efac' : '#e2e8f0'};background:${isCorrect ? '#f0fdf4' : '#fff'};color:${isCorrect ? '#166534' : 'inherit'}"><strong>${lbl}:</strong> ${esc(val)}</span>`;
+          }).join(' ');
+        }
+
+        return `<article class="central-question-item" data-id="${esc(q.id || q._id)}">
+          <input type="checkbox" class="central-q-checkbox" data-id="${esc(q.id || q._id)}">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
+              <span class="badge-grade">${esc(gradeLabel)}</span>
+              <span class="badge-diff ${diffClass}">${esc(diffLabel)}</span>
+              ${q.outcomeCode ? `<code style="font-size:11px;background:#f1f5f9;padding:2px 6px;border-radius:4px">${esc(q.outcomeCode)}</code>` : ''}
+              ${q.topic ? `<span style="font-size:11px;color:var(--muted)">🏷️ ${esc(q.topic)}</span>` : ''}
+              ${q.format === 'image' || q.imageUrl ? '<span style="font-size:11px;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px">📷 Resimli</span>' : ''}
+              ${q.svg ? '<span style="font-size:11px;background:#f3e8ff;color:#6b21a8;padding:1px 6px;border-radius:4px">📐 SVG Şekilli</span>' : ''}
+            </div>
+            <p style="margin:0 0 8px;font-size:0.92rem;line-height:1.45;color:var(--text)">${esc(qTextPreview)}${qTextPreview.length >= 160 ? '…' : ''}</p>
+            ${optionsPreview ? `<div style="display:flex;gap:6px;flex-wrap:wrap">${optionsPreview}</div>` : ''}
+          </div>
+        </article>`;
+      }).join('');
+
+    } catch (err) {
+      listEl.innerHTML = `<p class="status error" style="padding:16px;text-align:center">Sorular yüklenirken hata oluştu: ${esc(err.message)}</p>`;
+    }
+  }
+
+  function updateCentralSelectionUI() {
+    const count = selectedCentralQuestionIds.size;
+    $('centralSelectedCount').textContent = count;
+    $('btnTransferQuestions').disabled = count === 0;
+    $('btnTransferQuestions').textContent = count > 0 ? `${count} Soruyu Teste Ekle` : 'Seçilen Soruları Teste Ekle';
+
+    const cards = $('centralBankList').querySelectorAll('.central-question-item');
+    cards.forEach(card => {
+      const id = card.dataset.id;
+      const cb = card.querySelector('.central-q-checkbox');
+      const isSel = selectedCentralQuestionIds.has(id);
+      if (cb) cb.checked = isSel;
+      card.classList.toggle('selected', isSel);
+    });
+  }
+
+  function openCentralBankModal() {
+    $('centralBankDialog').showModal();
+    loadCentralBankQuestions();
+  }
+
+  function closeCentralBankModal() {
+    if ($('centralBankDialog').open) $('centralBankDialog').close();
+  }
+
+  function transferSelectedQuestions() {
+    if (!selectedCentralQuestionIds.size) return;
+
+    const existingCards = $('questionList').querySelectorAll('.question-card');
+    if (existingCards.length === 1) {
+      const firstEditor = questionEditors.get(existingCards[0]);
+      const firstText = firstEditor ? firstEditor.getText().trim() : '';
+      const firstOptA = existingCards[0].querySelector('.option-A')?.value.trim() || '';
+      if (!firstText && !firstOptA) {
+        existingCards[0].remove();
+      }
+    }
+
+    let addedCount = 0;
+    selectedCentralQuestionIds.forEach(id => {
+      const q = centralBankQuestions.find(item => String(item.id || item._id) === String(id));
+      if (q) {
+        soruEkleWithData(q);
+        addedCount++;
+      }
+    });
+
+    closeCentralBankModal();
+    durumYaz('quizStatus', `${addedCount} adet soru merkezi havuzdan teste başarıyla eklendi! Şıkları inceleyip Testi Yayınla butonuna basabilirsiniz.`, 'ok');
+    $('math-question-editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Havuz Buton ve Dinleyicileri
+  $('btnOpenCentralBank')?.addEventListener('click', openCentralBankModal);
+  $('btnOpenCentralBankBottom')?.addEventListener('click', openCentralBankModal);
+  $('closeCentralBankDialog')?.addEventListener('click', closeCentralBankModal);
+  $('cancelCentralBank')?.addEventListener('click', closeCentralBankModal);
+  $('btnFilterCentralBank')?.addEventListener('click', loadCentralBankQuestions);
+  $('centralGradeFilter')?.addEventListener('change', loadCentralBankQuestions);
+  $('centralDifficultyFilter')?.addEventListener('change', loadCentralBankQuestions);
+  $('centralSearchFilter')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      loadCentralBankQuestions();
+    }
+  });
+
+  $('centralBankList')?.addEventListener('click', e => {
+    const card = e.target.closest('.central-question-item');
+    if (!card) return;
+    const id = card.dataset.id;
+    if (!id) return;
+    
+    if (selectedCentralQuestionIds.has(id)) {
+      selectedCentralQuestionIds.delete(id);
+    } else {
+      if ($('questionList').children.length + selectedCentralQuestionIds.size >= 50) {
+        alert('Bir teste en fazla 50 soru ekleyebilirsiniz.');
+        return;
+      }
+      selectedCentralQuestionIds.add(id);
+    }
+    updateCentralSelectionUI();
+  });
+
+  $('btnTransferQuestions')?.addEventListener('click', transferSelectedQuestions);
+
+  // ---- Ödev Atama Dialog Logic ----
+  function openAssignHomeworkModal(quizId, quizTitle) {
+    $('assignQuizId').value = quizId;
+    $('assignQuizTitleInput').value = quizTitle ? `Ödev: ${quizTitle}` : 'Dijital Test Ödevi';
+    
+    const d = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    d.setHours(23, 59, 0, 0);
+    const pad = n => String(n).padStart(2, '0');
+    const localIso = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    $('assignDueAt').value = localIso;
+    $('assignDueAt').min = new Date().toISOString().slice(0, 16);
+    
+    $('assignNote').value = '';
+    $('assignHomeworkStatus').textContent = '';
+    $('assignHomeworkDialog').showModal();
+  }
+  window.zarifOpenAssignQuiz = openAssignHomeworkModal;
+
+  function closeAssignHomeworkModal() {
+    if ($('assignHomeworkDialog').open) $('assignHomeworkDialog').close();
+  }
+  $('closeAssignHomeworkDialog')?.addEventListener('click', closeAssignHomeworkModal);
+  $('cancelAssignHomework')?.addEventListener('click', closeAssignHomeworkModal);
+
+  $('assignHomeworkForm')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const btn = event.currentTarget.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    $('assignHomeworkStatus').className = 'status';
+    $('assignHomeworkStatus').textContent = 'Ödev oluşturuluyor ve öğrencilere atanıyor…';
+
+    try {
+      const quizId = $('assignQuizId').value;
+      const title = $('assignQuizTitleInput').value.trim();
+      const grade = Number($('assignGrade').value);
+      const section = $('assignSection').value.trim().toLocaleUpperCase('tr-TR');
+      const dueAt = new Date($('assignDueAt').value).toISOString();
+      const description = $('assignNote').value.trim() || `Test: ${title}`;
+
+      const formData = new FormData();
+      formData.set('title', title);
+      formData.set('grade', String(grade));
+      if (section) formData.set('section', section);
+      formData.set('dueAt', dueAt);
+      formData.set('type', 'online');
+      formData.set('quizId', quizId);
+      formData.set('description', description);
+
+      const res = await api('/api/ogretmen/odevler', {
+        method: 'POST',
+        body: formData
+      });
+
+      $('assignHomeworkStatus').className = 'status ok';
+      $('assignHomeworkStatus').textContent = res.mesaj || 'Ödev başarıyla ilgili sınıftaki öğrencilere atandı!';
+      setTimeout(() => {
+        closeAssignHomeworkModal();
+      }, 1500);
+    } catch (err) {
+      $('assignHomeworkStatus').className = 'status error';
+      $('assignHomeworkStatus').textContent = 'Ödev atanamadı: ' + err.message;
+    } finally {
+      btn.disabled = false;
     }
   });
 

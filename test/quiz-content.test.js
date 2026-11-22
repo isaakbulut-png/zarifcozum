@@ -1,4 +1,4 @@
-const test = require('node:test');
+﻿const test = require('node:test');
 const assert = require('node:assert/strict');
 const express = require('express');
 const fs = require('node:fs');
@@ -26,7 +26,7 @@ test('öğretmen yan menüsünden formül ve SVG soru editörüne erişilir', ()
   const html = fs.readFileSync(path.join(__dirname, '..', 'ogretmen-paneli.html'), 'utf8');
   const sidebar = html.match(/<aside class="teacher-sidebar"[\s\S]*?<\/aside>/);
   assert.ok(sidebar);
-  assert.match(sidebar[0], /href="#quiz-builder"[^>]*>[\s\S]*?Formüllü soru editörü<small>\(Sınav ve testler\)<\/small>/);
+  assert.match(sidebar[0], /href="#quiz-builder"[^>]*>[\s\S]*?(?:Formüllü soru editörü|Soru &amp; Test Hazırlama Merkezi)[\s\S]*?<\/small>/);
   assert.equal((sidebar[0].match(/href="#quiz-builder"/g) || []).length, 1);
   assert.doesNotMatch(sidebar[0], /href="#math-question-editor"/);
   assert.match(html, /id="quiz-builder"[\s\S]*?id="math-question-editor"/);
@@ -145,3 +145,4 @@ test('test yayın API zengin içeriği saklar ve geçersiz SVG için 400 döndü
   assert.equal(response.status, 400);
   assert.equal(rows.length, 1);
 });
+

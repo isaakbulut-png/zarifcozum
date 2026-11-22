@@ -26,15 +26,42 @@ function createSorularRouter({ requireStaff, yukleyici = cloudinaryYukleyici, Ad
     limits: { fileSize: MAKS_BOYUT, files: 1 }
   }).single('resim');
 
-  const gorunum = ({ _id, imageUrl, imageFile, ders, siraNo, answer, createdAt }) => (
-    { id: _id.toString(), imageUrl, imageFile, ders, siraNo, answer, createdAt }
-  );
+  const gorunum = (s) => ({
+    id: s._id.toString(),
+    _id: s._id.toString(),
+    imageUrl: s.imageUrl,
+    imageFile: s.imageFile,
+    ders: s.ders,
+    grade: s.grade,
+    topic: s.topic,
+    difficulty: s.difficulty,
+    format: s.format,
+    text: s.text,
+    options: s.options,
+    answer: s.answer,
+    svg: s.svg,
+    outcomeCode: s.outcomeCode,
+    siraNo: s.siraNo,
+    createdAt: s.createdAt
+  });
 
   router.get('/', async (req, res) => {
     try {
-      const filtre = typeof req.query.ders === 'string' && req.query.ders.trim()
-        ? { ders: req.query.ders.trim().toLocaleLowerCase('tr-TR') } : {};
-      const sorular = await Soru.find(filtre).sort({ ders: 1, siraNo: 1, imageFile: 1 }).limit(500).lean();
+      const filtre = {};
+      if (typeof req.query.ders === 'string' && req.query.ders.trim() && req.query.ders !== 'all') {
+        filtre.ders = req.query.ders.trim().toLocaleLowerCase('tr-TR');
+      }
+      if (req.query.grade && req.query.grade !== 'all') {
+        filtre.grade = Number(req.query.grade);
+      }
+      if (req.query.difficulty && req.query.difficulty !== 'all') {
+        filtre.difficulty = req.query.difficulty.toLowerCase();
+      }
+      if (req.query.search && req.query.search.trim()) {
+        const regex = new RegExp(req.query.search.trim(), 'i');
+        filtre.$or = [{ topic: regex }, { text: regex }, { outcomeCode: regex }];
+      }
+      const sorular = await Soru.find(filtre).sort({ grade: 1, topic: 1, siraNo: 1, createdAt: -1 }).limit(100).lean();
       res.json({ sorular: sorular.map(gorunum) });
     } catch (err) {
       console.error('❌ Sorular listelenemedi:', err);
