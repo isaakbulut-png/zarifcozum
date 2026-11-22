@@ -135,21 +135,32 @@ td.net{font-weight:700;color:var(--navy-900)}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
-.teacher-layout{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:22px;max-width:1480px;margin:0 auto}
-.teacher-layout.authenticated{grid-template-columns:250px minmax(0,1fr)}
-.teacher-sidebar{position:sticky;top:18px;margin:24px 0 24px 8px;padding:18px 12px;background:var(--navy-900);border-radius:16px;color:#fff}
-.teacher-live-cta{display:block;width:100%;margin:0 0 9px;padding:12px 10px;border:0;border-radius:9px;background:var(--orange);color:#fff;text-align:center;text-decoration:none;font-size:.86rem;font-weight:700;box-shadow:none}
-.teacher-live-cta:hover{background:var(--orange-dark)}
+.teacher-layout{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:24px;max-width:1480px;margin:0 auto}
+.teacher-layout.authenticated{grid-template-columns:285px minmax(0,1fr)}
+.teacher-sidebar{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;margin:14px 0 24px 8px;padding:18px 14px;background:linear-gradient(180deg, #322013 0%, #24150b 100%);border:1px solid rgba(255, 255, 255, 0.08);border-radius:16px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,0.22);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.18) transparent}
+.teacher-sidebar::-webkit-scrollbar{width:5px}
+.teacher-sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.18);border-radius:99px}
+.teacher-live-cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 8px;padding:10px 12px;border:0;border-radius:10px;background:linear-gradient(135deg, #d6452b 0%, #b73520 100%);color:#fff;text-align:center;text-decoration:none;font-size:.85rem;font-weight:700;box-shadow:0 4px 12px rgba(183,53,32,0.3);transition:all .18s ease}
+.teacher-live-cta:hover{background:linear-gradient(135deg, #e45339 0%, #c43c26 100%);transform:translateY(-1px);box-shadow:0 6px 16px rgba(183,53,32,0.45);color:#fff}
 .teacher-live-cta:disabled{opacity:.65;cursor:wait}
-.teacher-live-cta.secondary{background:transparent}
-.teacher-live-cta.secondary:hover{background:var(--orange-dark)}
-.teacher-live-status{min-height:1.2em;margin:0 2px 12px;color:#f4d7c1;font-size:.75rem}
-.teacher-sidebar strong{display:block;padding:4px 10px 14px;font-family:var(--head);font-size:.92rem}
-.teacher-sidebar nav{display:grid;gap:5px}
-.teacher-sidebar a{padding:10px;border-radius:8px;color:#e3dcd6;text-decoration:none;font-size:.88rem}
-.teacher-sidebar a:hover,.teacher-sidebar a:focus-visible{background:var(--navy-700);color:#fff}
-.teacher-sidebar .nav-label{display:block;width:auto;text-align:left;font-size:inherit;color:inherit;line-height:1.3}
-.teacher-sidebar .nav-label small{display:block;font-size:.75rem;color:#c8bfb8}
+.teacher-live-cta.secondary{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);color:#f5ebe3;box-shadow:none}
+.teacher-live-cta.secondary:hover{border-color:rgba(214,69,43,0.5);background:rgba(214,69,43,0.2);color:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+.teacher-live-status{min-height:1.2em;margin:0 2px 10px;color:#f4d7c1;font-size:.74rem;line-height:1.3}
+.teacher-sidebar strong{display:none}
+.teacher-sidebar nav{display:flex;flex-direction:column;gap:4px}
+.teacher-nav-group{display:flex;flex-direction:column;gap:3px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.teacher-nav-group:last-of-type{border-bottom:0;padding-bottom:0}
+.teacher-sidebar .gz-side-label{display:flex;align-items:center;gap:7px;margin:12px 6px 4px;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#c4b5a8;font-weight:700}
+.teacher-sidebar .gz-label-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--orange,#c2570c);opacity:.9}
+.teacher-sidebar .teacher-nav-links{display:flex;flex-direction:column;gap:3px}
+.teacher-sidebar .teacher-nav-links a{display:flex;align-items:center;gap:11px;padding:8px 12px;border-radius:10px;color:#e5ded8;font-weight:500;font-size:.86rem;line-height:1.3;text-decoration:none;border-left:3px solid transparent;transition:all .18s ease;white-space:nowrap}
+.teacher-sidebar .teacher-nav-links a:hover{background:rgba(255,255,255,0.08);color:#fff;transform:translateX(2px)}
+.teacher-sidebar .teacher-nav-links a[aria-current="page"]{background:linear-gradient(135deg, rgba(214,69,43,0.28), rgba(122,79,45,0.45));color:#fff;font-weight:600;border-left-color:#f97316;box-shadow:0 4px 12px rgba(0,0,0,0.18)}
+.teacher-sidebar .teacher-nav-links a > svg{width:19px;height:19px;flex-shrink:0;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s ease}
+.teacher-sidebar .teacher-nav-links a:hover > svg{transform:scale(1.12)}
+.teacher-sidebar .nav-text{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.teacher-sidebar .nav-text small{display:none!important}
+.teacher-sidebar a{color:#e3dcd6;text-decoration:none}
 .teacher-content{min-width:0}
 .dashboard-head{display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap;margin:4px 0 20px}
 .dashboard-head h2{font-family:var(--head);font-size:1.45rem;color:var(--navy-900)}
@@ -406,59 +417,26 @@ main .site-breadcrumb a:focus-visible {
 .teacher-nav-group:last-of-type {
   border-bottom: 0;
 }
-.teacher-nav-group > summary {
-  display: flex;
-  min-height: 34px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 8px;
-  color: #cbb8ac;
-  cursor: pointer;
-  font-size: .74rem;
-  font-weight: 600;
-  letter-spacing: .05em;
-  list-style: none;
-  border-radius: 6px;
-  transition: color .15s ease, background .15s ease;
-}
-.teacher-nav-group > summary:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.04);
-}
-.teacher-nav-group > summary::-webkit-details-marker {
-  display: none;
-}
-.teacher-nav-group > summary::after {
-  width: 6px;
-  height: 6px;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  content: "";
-  transform: rotate(45deg) translateY(-1px);
-  transition: transform .18s ease;
-  opacity: .75;
-}
-.teacher-nav-group[open] > summary::after {
-  transform: rotate(225deg) translate(-1px, 0);
-}
 .teacher-nav-links {
-  display: grid;
-  gap: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
   margin-top: 2px;
 }
 .teacher-sidebar .teacher-nav-links a {
   display: flex;
   min-height: 38px;
   align-items: center;
-  gap: 10px;
-  padding: 7px 10px;
+  gap: 11px;
+  padding: 8px 12px;
   border-left: 3px solid transparent;
-  border-radius: 8px;
+  border-radius: 10px;
   color: #ded1c7;
-  font-size: .84rem;
-  line-height: 1.25;
+  font-size: .86rem;
+  line-height: 1.3;
   text-decoration: none;
-  transition: background .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease;
+  white-space: nowrap;
+  transition: background .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s ease;
 }
 .teacher-sidebar .teacher-nav-links a > svg {
   width: 18px;
@@ -847,8 +825,7 @@ body.teacher-menu-open {
     overflow: visible;
   }
   .teacher-sidebar .teacher-nav-links a {
-    flex: initial;
-    white-space: normal;
+    white-space: nowrap;
   }
   .teacher-sidebar .teacher-nav-links a[aria-current="page"] {
     box-shadow: none;
@@ -911,8 +888,7 @@ body.teacher-menu-open {
   .teacher-sidebar-backdrop,
   .quick-action-grid a,
   .teacher-kpi,
-  .dashboard-card,
-  .teacher-nav-group > summary::after {
+  .dashboard-card {
     transition: none;
   }
 }
@@ -935,15 +911,30 @@ body.teacher-menu-open {
 
 <div class="teacher-layout">
 <aside class="teacher-sidebar" id="teacherSidebar" hidden>
-  <div class="teacher-brand"><span class="teacher-brand-mark">Z</span><span>Zarif Çözüm<small>Öğretmen çalışma alanı</small></span></div>
-  <a class="teacher-live-cta" href="#lessons">
-    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-    <span>Canlı Ders Oluştur</span>
+  <div class="teacher-brand" style="display:flex;align-items:center;gap:12px;padding:0 4px 14px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:12px">
+    <span class="teacher-brand-mark" style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg, #d6452b 0%, #b73520 100%);display:grid;place-items:center;font-family:var(--head);font-weight:700;font-size:1.2rem;color:#fff;box-shadow:0 4px 12px rgba(183,53,32,0.35);flex-shrink:0">Z</span>
+    <div>
+      <div style="font-family:var(--head);font-weight:700;font-size:1.05rem;line-height:1.2;color:#fff">ZarifÇözüm</div>
+      <span style="display:inline-flex;align-items:center;gap:4px;margin-top:3px;padding:2px 8px;border-radius:999px;background:rgba(249,115,22,0.2);border:1px solid rgba(249,115,22,0.35);color:#fb923c;font-size:.72rem;font-weight:600;letter-spacing:.02em">👨‍🏫 Öğretmen Çalışma Alanı</span>
+    </div>
+  </div>
+
+  <a class="home-link" href="index.html" style="display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:8px 12px;border:1px solid rgba(255,255,255,0.12);border-radius:10px;background:rgba(255,255,255,0.04);color:#e5ded8;font-size:.84rem;font-weight:600;text-decoration:none;transition:all .18s ease">
+    <svg viewBox="0 0 24 24" style="width:17px;height:17px;flex-shrink:0;stroke:#fb923c;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    <span>Ana Sayfaya Dön</span>
   </a>
-  <button class="teacher-live-cta secondary" id="sidebarQuickLive" type="button">
-    <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="m10 8 6 4-6 4z"/></svg>
-    <span>Anında Canlı Ders Başlat</span>
-  </button>
+
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+    <a class="teacher-live-cta" href="#lessons">
+      <svg aria-hidden="true" viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Canlı Ders Oluştur</span>
+    </a>
+    <button class="teacher-live-cta secondary" id="sidebarQuickLive" type="button">
+      <svg aria-hidden="true" viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2"><circle cx="12" cy="12" r="8"/><path d="m10 8 6 4-6 4z"/></svg>
+      <span>Anında Canlı Ders Başlat</span>
+    </button>
+  </div>
+
   <p class="teacher-live-status" id="sidebarLiveStatus" role="status" aria-live="polite"></p>
   <p class="teacher-live-status" id="sidebarAktifCanliBilgi" role="status" aria-live="polite">Canlı ders durumu yükleniyor…</p>
   <div id="sidebarAktifCanliIslemler" hidden>
@@ -951,59 +942,65 @@ body.teacher-menu-open {
     <button class="teacher-live-cta" id="sidebarCanliSonlandir" type="button">Dersi sonlandır</button>
   </div>
   <p class="teacher-live-status" id="sidebarAktifCanliHata" role="status" aria-live="polite"></p>
-  <strong>YÖNETİM MENÜSÜ</strong>
+
   <nav aria-label="Öğretmen paneli bölümleri">
-    <details class="teacher-nav-group" open>
-      <summary>Genel</summary>
+    <div class="teacher-nav-group">
+      <div class="gz-side-label"><span class="gz-label-dot" style="background:#60a5fa"></span> Genel</div>
       <div class="teacher-nav-links">
-        <a href="#overview" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Ana sayfa</a>
-        <a href="#ai-mentor-panel"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM9 13a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>AI Mentör Asistanı</a>
+        <a href="#overview" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span class="nav-text">Genel Bakış</span></a>
+        <a href="#ai-mentor-panel"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2zM9 13a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg><span class="nav-text">AI Mentör Asistanı</span></a>
       </div>
-    </details>
-    <details class="teacher-nav-group" open>
-      <summary>İçerik ve Müfredat</summary>
+    </div>
+
+    <div class="teacher-nav-group">
+      <div class="gz-side-label"><span class="gz-label-dot" style="background:#10b981"></span> İçerik ve Müfredat</div>
       <div class="teacher-nav-links">
-        <a href="#curriculum"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/></svg>Maarif Müfredat &amp; Dersler</a>
-        <a href="#ai-curriculum-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg>🧠 Maarif Konu Anlatımı Üret</a>
+        <a href="#curriculum"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/></svg><span class="nav-text">Müfredat &amp; Dersler</span></a>
+        <a href="#ai-curriculum-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg><span class="nav-text">🧠 Konu Anlatımı Üret</span></a>
       </div>
-    </details>
-    <details class="teacher-nav-group" open>
-      <summary>Öğrenciler</summary>
+    </div>
+
+    <div class="teacher-nav-group">
+      <div class="gz-side-label"><span class="gz-label-dot" style="background:#38bdf8"></span> Öğrenciler</div>
       <div class="teacher-nav-links">
-        <a href="#students"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20v-1.5a7 7 0 0 1 14 0V20z"/></svg>Öğrenciler</a>
-        <a href="#assignments"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 4h8l2 2h3v15H3V6h3z"/><path d="M8 4V2h8v4M7 11h10M7 15l2 2 4-4"/></svg>Ödev yönetimi</a>
+        <a href="#students"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20v-1.5a7 7 0 0 1 14 0V20z"/></svg><span class="nav-text">Öğrenci Listesi</span></a>
+        <a href="#assignments"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M8 4h8l2 2h3v15H3V6h3z"/><path d="M8 4V2h8v4M7 11h10M7 15l2 2 4-4"/></svg><span class="nav-text">Ödev Yönetimi</span></a>
       </div>
-    </details>
-    <details class="teacher-nav-group" open>
-      <summary>Ölçme ve Soru Havuzu</summary>
+    </div>
+
+    <div class="teacher-nav-group">
+      <div class="gz-side-label"><span class="gz-label-dot" style="background:#f472b6"></span> Ölçme ve Soru Havuzu</div>
       <div class="teacher-nav-links">
-        <a href="#quiz-builder"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="m8 9 2 2 4-4M8 16h8"/></svg><span class="nav-label">Soru &amp; Test Hazırlama Merkezi<small>(Formüllü, Resimli ve AI Testleri)</small></span></a>
-        <a href="#image-questions"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h.01M21 15l-5-5L5 21"/></svg>Resimli Soru &amp; Deneme Yükle</a>
-        <a href="#ai-question-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6z"/></svg>✨ Yapay Zekâ İle Soru Üret</a>
-        <a href="#student-results"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Öğrenci Test Sonuçları</a>
-        <a href="#analytics"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20V4M4 20h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>Başarı analizi</a>
+        <a href="#quiz-builder" title="Soru &amp; Test Hazırlama Merkezi"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="m8 9 2 2 4-4M8 16h8"/></svg><span class="nav-text">Soru &amp; Test Hazırlama Merkezi<small style="display:none">(Formüllü, Resimli ve AI Testleri)</small></span></a>
+        <a href="#image-questions"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h.01M21 15l-5-5L5 21"/></svg><span class="nav-text">Resimli Soru &amp; Deneme</span></a>
+        <a href="#ai-question-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6z"/></svg><span class="nav-text">✨ AI ile Soru Üret</span></a>
+        <a href="#student-results"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="nav-text">Öğrenci Test Sonuçları</span></a>
+        <a href="#analytics"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20V4M4 20h17"/><path d="m7 15 4-4 3 2 6-7"/></svg><span class="nav-text">Başarı Analizi</span></a>
       </div>
-    </details>
-    <details class="teacher-nav-group" open>
-      <summary>Canlı ders</summary>
+    </div>
+
+    <div class="teacher-nav-group">
+      <div class="gz-side-label"><span class="gz-label-dot" style="background:#f87171"></span> Canlı Ders</div>
       <div class="teacher-nav-links">
-        <a href="#lessons"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Canlı dersler</a>
+        <a href="#lessons"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="nav-text">Canlı Dersler</span></a>
       </div>
-    </details>
-    <details class="teacher-nav-group" open>
-      <summary>Kütüphane ve ayarlar</summary>
+    </div>
+
+    <div class="teacher-nav-group">
+      <div class="gz-side-label"><span class="gz-label-dot" style="background:#94a3b8"></span> Kütüphane ve Ayarlar</div>
       <div class="teacher-nav-links">
-        <a href="#library"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 3h12a2 2 0 0 1 2 2v16H7a2 2 0 0 1-2-2z"/><path d="M5 17a2 2 0 0 1 2-2h12M9 7h6M9 10h6"/></svg>PDF kütüphanesi</a>
-        <a href="#announcements"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 14V9a2 2 0 0 1 2-2h4l8-4v17l-8-4H6a2 2 0 0 1-2-2z"/><path d="m8 16 1.5 5h4L12 17M21 8v7"/></svg>Duyurular</a>
-        <a href="#teacher-settings"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.1h-2.6v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6.4v-2.6h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.1H15v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1V14h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Profil ve ayarlar</a>
-        <a href="/admin-paneli.html" id="sidebarAdminPanelLink" style="display:none;align-items:center;gap:8px;font-weight:700;color:#c2570c;background:#fff7ed;border:1px dashed #fed7aa;padding:8px 12px;border-radius:8px;margin-top:8px;text-decoration:none" title="Yönetici paneline geçiş yap">
-          <svg aria-hidden="true" viewBox="0 0 24 24" style="stroke:#c2570c;width:18px;height:18px;fill:none;stroke-width:2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          🛡️ Yönetim Paneli
+        <a href="#library"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 3h12a2 2 0 0 1 2 2v16H7a2 2 0 0 1-2-2z"/><path d="M5 17a2 2 0 0 1 2-2h12M9 7h6M9 10h6"/></svg><span class="nav-text">PDF Kütüphanesi</span></a>
+        <a href="#announcements"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 14V9a2 2 0 0 1 2-2h4l8-4v17l-8-4H6a2 2 0 0 1-2-2z"/><path d="m8 16 1.5 5h4L12 17M21 8v7"/></svg><span class="nav-text">Duyurular</span></a>
+        <a href="#teacher-settings"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.1h-2.6v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6.4v-2.6h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.1H15v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1V14h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="nav-text">Profil ve Ayarlar</span></a>
+        <a href="/admin-paneli.html" id="sidebarAdminPanelLink" style="display:none;align-items:center;gap:11px;font-weight:700;color:#c2570c;background:#fff7ed;border:1px dashed #fed7aa;padding:8px 12px;border-radius:10px;margin-top:6px;text-decoration:none" title="Yönetici paneline geçiş yap">
+          <svg aria-hidden="true" viewBox="0 0 24 24" style="stroke:#c2570c;width:19px;height:19px;fill:none;stroke-width:2;flex-shrink:0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span class="nav-text">🛡️ Yönetim Paneli</span>
         </a>
       </div>
-    </details>
+    </div>
   </nav>
-  <div class="teacher-sidebar-note"><span class="teacher-status-dot"></span> Eğitim yönetim paneli</div>
+
+  <div class="teacher-sidebar-note"><span class="teacher-status-dot"></span> Eğitim Yönetim Paneli</div>
 </aside>
 <button class="teacher-sidebar-backdrop" id="teacherSidebarBackdrop" type="button" aria-label="Menüyü kapat" tabindex="-1"></button>
 <main class="wrap teacher-content">
