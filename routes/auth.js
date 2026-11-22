@@ -379,8 +379,9 @@ async function loginHandler(req, res, parentOnly = false) {
   }
 }
 
-router.post('/login', loginLimiter, (req, res) => loginHandler(req, res));
-router.post('/parent/login', loginLimiter, (req, res) => loginHandler(req, res, true));
+const textFieldsOnly = multer().none();
+router.post('/login', loginLimiter, textFieldsOnly, (req, res) => loginHandler(req, res));
+router.post('/parent/login', loginLimiter, textFieldsOnly, (req, res) => loginHandler(req, res, true));
 
 router.post('/parent/register', registerLimiter, async (req, res) => {
   if (!await ensureRegistrationEnabled(res)) return;

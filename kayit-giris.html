@@ -1271,16 +1271,23 @@
           }
         }
 
-        const formData = new FormData(event.currentTarget);
-
         try {
-          const response = await fetch(event.currentTarget.action, {
-            method: event.currentTarget.method.toUpperCase(),
-            body: formData,
-            credentials: 'same-origin'
-          });
-          const result = await response.json();
-          if (!response.ok) throw new Error(result.mesaj || 'İşlem tamamlanamadı.');
+          let result;
+          if (registering) {
+            const formData = new FormData(event.currentTarget);
+            const response = await fetch(event.currentTarget.action, {
+              method: event.currentTarget.method.toUpperCase(),
+              body: formData,
+              credentials: 'same-origin'
+            });
+            result = await response.json();
+            if (!response.ok) throw new Error(result.mesaj || 'İşlem tamamlanamadı.');
+          } else {
+            result = await postJson(event.currentTarget.action, {
+              email: $('email').value.trim(),
+              password: $('password').value
+            });
+          }
           window.location.assign(result.redirectTo);
         } catch (error) {
           $('message').textContent = error.message || 'Sunucuya bağlanılamadı.';

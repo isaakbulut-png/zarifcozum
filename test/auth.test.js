@@ -494,3 +494,39 @@ test('password reset emails use hashed, expiring tokens without revealing accoun
     }
   }
 });
+
+test('login accepts both application/json and multipart/form-data payloads', async () => {
+  const user = {
+    _id: '507f1f77bcf86cd799439011',
+    name: 'Öğretmen',
+    role: 'teacher',
+    email: 'teacher@example.com',
+    verifyPassword: async password => password === 'secret12345',
+    toObject: () => ({ _id: '507f1f77bcf86cd799439011', name: 'Öğretmen', role: 'teacher', email: 'teacher@example.com' })
+  };
+  const restoreFind = stub(User, 'findOne', () => ({
+    select: () => user
+  }));
+  try {
+    await withServer(undefined, async base => {
+      // 1. JSON login
+      const jsonRes = await fetch(`${base}/login`, post({
+        email: 'teacher@example.com',
+        password: 'secret12345'
+      }));
+      assert.equal(jsonRes.status, 200);
+
+      // 2. FormData (multipart/form-data) login
+      const formData = new FormData();
+      formData.append('email', 'teacher@example.com');
+      formData.append('password', 'secret12345');
+      const formRes = await fetch(`${base}/login`, {
+        method: 'POST',
+        body: formData
+      });
+      assert.equal(formRes.status, 200);
+    });
+  } finally {
+    restoreFind();
+  }
+});
