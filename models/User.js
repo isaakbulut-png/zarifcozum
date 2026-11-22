@@ -106,6 +106,31 @@ const userSchema = new mongoose.Schema({
     maxlength: 100,
     default: null
   },
+  branch: {
+    type: String,
+    trim: true,
+    maxlength: 100,
+    default: null
+  },
+  graduationInfo: {
+    type: String,
+    trim: true,
+    maxlength: 300,
+    default: null
+  },
+  verificationDocumentUrl: {
+    type: String,
+    trim: true,
+    default: null
+  },
+  contractAccepted: {
+    type: Boolean,
+    default: false
+  },
+  contractAcceptedAt: {
+    type: Date,
+    default: null
+  },
   okulKurumAdi: {
     type: String,
     trim: true,

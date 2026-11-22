@@ -410,6 +410,94 @@
       line-height: 1.4;
     }
 
+    /* Öğretmen Alanları Yumuşak Geçiş */
+    #teacherApplicationFields {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      background: rgba(194, 87, 12, 0.03);
+      border: 1px solid #ebd9c8;
+      border-radius: 12px;
+      padding: 14px 14px 4px 14px;
+      margin-bottom: 14px;
+    }
+
+    /* Yasal Modal Stilleri */
+    .legal-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(44, 26, 14, 0.65);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 16px;
+    }
+    .legal-modal-backdrop[hidden] {
+      display: none !important;
+    }
+    .legal-modal-card {
+      background: #fffaf5;
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      max-width: 650px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 60px rgba(58, 38, 24, 0.3);
+      overflow: hidden;
+      animation: modalFadeIn 0.25s ease;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .legal-modal-header {
+      padding: 18px 24px;
+      background: #fbf1e8;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .legal-modal-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--navy-900);
+      margin: 0;
+    }
+    .legal-modal-close {
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      line-height: 1;
+      color: var(--muted-text);
+      cursor: pointer;
+      padding: 0 4px;
+    }
+    .legal-modal-close:hover {
+      color: var(--terracotta);
+    }
+    .legal-modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--navy-800);
+    }
+    .legal-modal-body h4 {
+      margin: 14px 0 6px 0;
+      font-size: 0.95rem;
+      color: var(--terracotta);
+    }
+    .legal-modal-footer {
+      padding: 14px 24px;
+      background: #fbf1e8;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+    }
+
     .message {
       min-height: 1.4em;
       margin: 12px 0 0;
@@ -593,20 +681,49 @@
           <!-- Öğretmen Başvuru Alanları -->
           <div id="teacherApplicationFields" hidden>
             <div class="field-wrap" style="margin-bottom:12px;">
-              <label for="brans">Branşınız</label>
-              <input id="brans" name="brans" type="text" placeholder="Örn. Matematik, Geometri, Fen Bilimleri" disabled>
+              <label for="branch">Branş / Kademe Seçimi <span style="color:#b91c1c;">*</span></label>
+              <select id="branch" name="branch" disabled>
+                <option value="" disabled selected>Kademe ve branş seçin</option>
+                <option value="Ortaokul Matematik (5-8)">Ortaokul Matematik (5-8)</option>
+                <option value="Lise Matematik (9-12)">Lise Matematik (9-12)</option>
+                <option value="Her İkisi (5-12)">Her İkisi (5-12 Matematik)</option>
+              </select>
             </div>
+
             <div class="field-wrap" style="margin-bottom:12px;">
-              <label for="okulKurumAdi">Görev Yaptığınız Okul veya Kurum</label>
-              <input id="okulKurumAdi" name="okulKurumAdi" type="text" placeholder="Örn. Atatürk Anadolu Lisesi / Etüt Merkezi" disabled>
+              <label for="graduationInfo">Mezuniyet ve Deneyim Bilgisi <span style="color:#b91c1c;">*</span></label>
+              <input id="graduationInfo" name="graduationInfo" type="text" placeholder="Örn: Ondokuz Mayıs Üni. - Matematik Öğretmenliği / 5 Yıl" maxlength="300" disabled>
             </div>
+
+            <div class="field-wrap" style="margin-bottom:12px;">
+              <label for="okulKurumAdi">Görev Yaptığınız Okul veya Kurum (İsteğe bağlı)</label>
+              <input id="okulKurumAdi" name="okulKurumAdi" type="text" placeholder="Örn: Atatürk Anadolu Lisesi / Etüt Merkezi" maxlength="150" disabled>
+            </div>
+
             <div class="field-wrap" style="margin-bottom:12px;">
               <label for="basvuruNotu">Başvuru Notu (İsteğe bağlı)</label>
-              <input id="basvuruNotu" name="basvuruNotu" type="text" placeholder="Deneyiminiz veya uzmanlık alanınız..." disabled>
+              <input id="basvuruNotu" name="basvuruNotu" type="text" placeholder="Uzmanlık veya eklemek istediğiniz bilgiler..." maxlength="500" disabled>
             </div>
-            <div class="field-wrap">
-              <label for="teacherCode">Varsa Davet / Hızlı Aktivasyon Kodu (İsteğe bağlı)</label>
-              <input id="teacherCode" name="teacherCode" type="password" placeholder="Kodunuz varsa doğrudan onaylanır" autocomplete="off" disabled>
+
+            <div class="field-wrap" style="margin-bottom:12px;">
+              <label for="teacherCode">Öğretmen Kodu (Davet / Hızlı Aktivasyon Kodu - İsteğe bağlı)</label>
+              <input id="teacherCode" name="teacherCode" type="password" placeholder="Varsa davet kodunuzu girin" autocomplete="off" disabled>
+              <small id="teacherCodeHelp" style="display:block; margin-top:4px; font-size:0.75rem; color:#8b7260;">Kodunuz varsa başvurunuz anında onaylanır; belge yükleme zorunlu değildir.</small>
+            </div>
+
+            <div class="field-wrap" id="docUploadWrap" style="margin-bottom:14px;">
+              <label for="verificationDocument">Öğretmenlik veya Mezuniyet Belgesi <span id="docRequiredStar" style="color:#b91c1c;">*</span></label>
+              <input id="verificationDocument" name="verificationDocument" type="file" accept=".pdf,image/jpeg,image/png" disabled>
+              <small id="docHelpText" style="display:block; margin-top:4px; font-size:0.75rem; color:#8b7260;">PDF, JPG veya PNG formatında (maks. 5MB). Öğretmen kodunuz yoksa yüklemeniz zorunludur.</small>
+            </div>
+
+            <div class="field-wrap" style="margin-bottom:14px;">
+              <label style="display:flex; align-items:flex-start; gap:10px; font-size:0.83rem; line-height:1.45; cursor:pointer; color:#3a2618;">
+                <input type="checkbox" id="contractAccepted" name="contractAccepted" value="true" style="margin-top:2px; accent-color:var(--terracotta); width:18px; height:18px; cursor:pointer;" disabled>
+                <span>
+                  <a href="javascript:void(0)" id="openContractModal" style="color:var(--terracotta); font-weight:700; text-decoration:underline;">Öğretmen Hizmet &amp; Telif Sözleşmesi</a> ile <a href="javascript:void(0)" id="openKvkkModal" style="color:var(--terracotta); font-weight:700; text-decoration:underline;">KVKK Aydınlatma Metni</a>'ni okudum, kabul ediyorum. <span style="color:#b91c1c;">*</span>
+                </span>
+              </label>
             </div>
           </div>
 
@@ -674,6 +791,22 @@
     </main>
   </div>
 </div>
+
+  <!-- Yasal Sözleşme & KVKK Modalı -->
+  <div id="legalModal" class="legal-modal-backdrop" hidden>
+    <div class="legal-modal-card" role="dialog" aria-modal="true" aria-labelledby="legalModalTitle">
+      <div class="legal-modal-header">
+        <h3 id="legalModalTitle">Öğretmen Hizmet &amp; Telif Sözleşmesi</h3>
+        <button type="button" id="closeLegalModal" class="legal-modal-close" aria-label="Kapat">&times;</button>
+      </div>
+      <div class="legal-modal-body" id="legalModalBody">
+        <!-- İçerik Dinamik Yüklenir -->
+      </div>
+      <div class="legal-modal-footer">
+        <button type="button" class="primary" id="acceptLegalModalBtn" style="width:auto; padding:9px 24px;">Okudum ve Kabul Ediyorum</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     (() => {
@@ -752,10 +885,23 @@
         const isTeacherReg = registering && !parentMode && $('role').value === 'teacher';
         if ($('teacherApplicationFields')) {
           $('teacherApplicationFields').hidden = !isTeacherReg;
-          $('brans').disabled = !isTeacherReg;
-          $('okulKurumAdi').disabled = !isTeacherReg;
-          $('basvuruNotu').disabled = !isTeacherReg;
-          $('teacherCode').disabled = !isTeacherReg;
+          if ($('branch')) {
+            $('branch').disabled = !isTeacherReg;
+            $('branch').required = isTeacherReg;
+          }
+          if ($('graduationInfo')) {
+            $('graduationInfo').disabled = !isTeacherReg;
+            $('graduationInfo').required = isTeacherReg;
+          }
+          if ($('okulKurumAdi')) $('okulKurumAdi').disabled = !isTeacherReg;
+          if ($('basvuruNotu')) $('basvuruNotu').disabled = !isTeacherReg;
+          if ($('teacherCode')) $('teacherCode').disabled = !isTeacherReg;
+          if ($('verificationDocument')) $('verificationDocument').disabled = !isTeacherReg;
+          if ($('contractAccepted')) {
+            $('contractAccepted').disabled = !isTeacherReg;
+            $('contractAccepted').required = isTeacherReg;
+          }
+          updateTeacherDocRequirement();
         }
         
         $('authTitle').textContent = parentRegistration
@@ -800,6 +946,75 @@
 
         $('message').textContent = '';
       }
+
+      function updateTeacherDocRequirement() {
+        const hasCode = $('teacherCode') && $('teacherCode').value.trim().length > 0;
+        const star = $('docRequiredStar');
+        const help = $('docHelpText');
+        const fileInput = $('verificationDocument');
+        const isTeacherReg = mode === 'register' && $('role').value === 'teacher' && !parentMode;
+
+        if (hasCode) {
+          if (star) star.style.display = 'none';
+          if (fileInput) fileInput.required = false;
+          if (help) help.textContent = 'Öğretmen kodunuz girildiği için belge yüklemek opsiyoneldir.';
+        } else {
+          if (star) star.style.display = 'inline';
+          if (fileInput && isTeacherReg) {
+            fileInput.required = true;
+          }
+          if (help) help.textContent = 'PDF, JPG veya PNG formatında (maks. 5MB). Kod girilmediğinde zorunludur.';
+        }
+      }
+      $('teacherCode')?.addEventListener('input', updateTeacherDocRequirement);
+
+      const CONTRACT_TEXT = `
+        <h4>1. TARAFLAR VE KAPSAM</h4>
+        <p>İşbu Öğretmen Hizmet &amp; Telif Sözleşmesi ("Sözleşme"), ZarifÇözüm Eğitim Teknolojileri Platformu ile platforma Öğretmen veya İçerik Üreticisi olarak kayıt yaptıran kullanıcı arasında akdedilmiştir.</p>
+        <h4>2. İÇERİK ÜRETİMİ VE TELİF HAKLARI</h4>
+        <p>Öğretmen, platform kapsamında hazırladığı veya katkı sunduğu çoktan seçmeli, açık uçlu soruların, konu özetlerinin, çözüm analizlerinin ve telafi materyallerinin özgün olduğunu, üçüncü şahısların fikri ve sınai mülkiyet haklarını ihlal etmediğini kabul ve taahhüt eder. Üretilen içeriklerin platform bünyesindeki dijital çoğaltma, yayınlama ve işleme hakları ZarifÇözüm'e aittir.</p>
+        <h4>3. MAARİF MODELİ STANDARTLARI</h4>
+        <p>Öğretmen, T.C. Millî Eğitim Bakanlığı Türkiye Yüzyılı Maarif Modeli öğretim programlarına, erdem-değer-eylem çerçevesine ve Soru Yazım Kılavuzlarına uygun hareket etmeyi; müfredat dışı veya pedagojik açıdan sakıncalı içerik oluşturmamayı taahhüt eder.</p>
+        <h4>4. HESAP GÜVENLİĞİ VE YETKİLENDİRME</h4>
+        <p>Öğretmen, hesabını yalnızca kendisi kullanabilir; yapay zekâ soru sihirbazı ve içerik havuzunu ticari suistimal amacıyla üçüncü şahıslara devredemez.</p>
+      `;
+
+      const KVKK_TEXT = `
+        <h4>6698 SAYILI KVKK KAPSAMINDA ÖĞRETMEN BAŞVURU AYDINLATMA METNİ</h4>
+        <p>ZarifÇözüm ("Platform") olarak; 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca, öğretmen adaylarımızın başvuru süreçlerinde paylaştıkları kişisel verilerin güvenliğine ve gizliliğine azami hassasiyet göstermekteyiz.</p>
+        <h4>İŞLENEN KİŞİSEL VERİLER</h4>
+        <p>Başvuru sırasında toplanan ad, soyad, e-posta adresi, telefon numarası, branş/kademe bilgisi, mezuniyet ve deneyim beyanı ile yüklenen diploma/öğretmenlik belgesi verileriniz işlenmektedir.</p>
+        <h4>VERİ İŞLEME AMACI VE SAKLAMA SÜRESİ</h4>
+        <p>Kişisel verileriniz ve yüklenen resmi belgeleriniz; öğretmenlik niteliklerinin doğrulanması, admin onay sürecinin işletilmesi, platform güvenliğinin sağlanması ve yasal yükümlülüklerin ifası amacıyla güvenli sunucularda saklanmaktadır. Belgeler üçüncü kişi veya kurumlara ticari gayeyle asla aktarılmaz.</p>
+        <h4>HAKLARINIZ</h4>
+        <p>KVKK'nın 11. maddesi uyarınca veri sahibi olarak verilerinizin silinmesini, düzeltilmesini veya işlenme amacını öğrenme hakkına her zaman sahipsiniz.</p>
+      `;
+
+      function openLegalModal(title, content) {
+        if ($('legalModalTitle')) $('legalModalTitle').textContent = title;
+        if ($('legalModalBody')) $('legalModalBody').innerHTML = content;
+        if ($('legalModal')) $('legalModal').hidden = false;
+      }
+      function closeLegalModal() {
+        if ($('legalModal')) $('legalModal').hidden = true;
+      }
+
+      $('openContractModal')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        openLegalModal('Öğretmen Hizmet & Telif Sözleşmesi', CONTRACT_TEXT);
+      });
+      $('openKvkkModal')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        openLegalModal('KVKK Öğretmen Başvuru Aydınlatma Metni', KVKK_TEXT);
+      });
+      $('closeLegalModal')?.addEventListener('click', closeLegalModal);
+      $('acceptLegalModalBtn')?.addEventListener('click', () => {
+        if ($('contractAccepted')) $('contractAccepted').checked = true;
+        closeLegalModal();
+      });
+      $('legalModal')?.addEventListener('click', (e) => {
+        if (e.target === $('legalModal')) closeLegalModal();
+      });
 
       $('loginMode').addEventListener('click', () => {
         parentMode = false;
@@ -866,7 +1081,10 @@
             intent: mode === 'register' ? 'register' : 'login',
             role: $('role').value,
             teacherCode: $('teacherCode')?.value || '',
-            brans: $('brans')?.value || '',
+            branch: $('branch')?.value || '',
+            brans: $('branch')?.value || '',
+            graduationInfo: $('graduationInfo')?.value || '',
+            contractAccepted: $('contractAccepted')?.checked || false,
             okulKurumAdi: $('okulKurumAdi')?.value || '',
             basvuruNotu: $('basvuruNotu')?.value || ''
           });
@@ -905,12 +1123,46 @@
         event.preventDefault();
         $('submitButton').disabled = true;
         $('message').textContent = '';
-        const data = Object.fromEntries(new FormData(event.currentTarget));
+
+        const registering = mode === 'register';
+        const isTeacherReg = registering && !parentMode && $('role').value === 'teacher';
+
+        if (isTeacherReg) {
+          if (!$('contractAccepted') || !$('contractAccepted').checked) {
+            setMessage('message', 'Lütfen Sözleşme ve KVKK metnini onaylayın.');
+            $('submitButton').disabled = false;
+            return;
+          }
+          if (!$('branch') || !$('branch').value) {
+            setMessage('message', 'Lütfen branş / kademe seçiminizi yapın.');
+            $('submitButton').disabled = false;
+            return;
+          }
+          if (!$('graduationInfo') || !$('graduationInfo').value.trim()) {
+            setMessage('message', 'Lütfen mezuniyet ve deneyim bilgilerinizi belirtin.');
+            $('submitButton').disabled = false;
+            return;
+          }
+          const hasCode = $('teacherCode') && $('teacherCode').value.trim().length > 0;
+          const fileInput = $('verificationDocument');
+          if (!hasCode && (!fileInput || !fileInput.files || fileInput.files.length === 0)) {
+            setMessage('message', 'Davet kodunuz yoksa lütfen mezuniyet veya öğretmenlik belgenizi yükleyin.');
+            $('submitButton').disabled = false;
+            return;
+          }
+          if (fileInput && fileInput.files && fileInput.files[0] && fileInput.files[0].size > 5 * 1024 * 1024) {
+            setMessage('message', 'Yüklenen belge 5 MB boyut sınırını aşıyor.');
+            $('submitButton').disabled = false;
+            return;
+          }
+        }
+
+        const formData = new FormData(event.currentTarget);
+
         try {
           const response = await fetch(event.currentTarget.action, {
             method: event.currentTarget.method.toUpperCase(),
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
+            body: formData,
             credentials: 'same-origin'
           });
           const result = await response.json();

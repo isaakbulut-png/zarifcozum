@@ -1,12 +1,45 @@
 const crypto = require('crypto');
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const { rateLimit } = require('express-rate-limit');
+const multer = require('multer');
 const nodemailer = require('nodemailer');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const Parent = require('../models/Parent');
 const SystemConfig = require('../models/SystemConfig');
 const { adminRoleOf } = require('../lib/admin-rbac');
+
+const teacherDocsDir = path.join(__dirname, '..', 'uploads', 'teacher-docs');
+if (!fs.existsSync(teacherDocsDir)) {
+  fs.mkdirSync(teacherDocsDir, { recursive: true });
+}
+
+const teacherDocStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, teacherDocsDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(8).toString('hex');
+    cb(null, 'doc-' + uniqueSuffix + ext);
+  }
+});
+
+const teacherDocUpload = multer({
+  storage: teacherDocStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.pdf', '.jpg', '.jpeg', '.png'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Sadece PDF, JPG veya PNG formatında belgeler yüklenebilir.'));
+    }
+  }
+});
 
 const router = express.Router();
 const requireRole = createRequireRole(User, Parent);
@@ -141,8 +174,21 @@ function redirectForRole(role, adminRole) {
   return '/ogrenci-paneli.html';
 }
 
-router.post('/register', registerLimiter, async (req, res) => {
-  if (!await ensureRegistrationEnabled(res)) return;
+router.post('/register', registerLimiter, (req, res, next) => {
+  teacherDocUpload.single('verificationDocument')(req, res, err => {
+    if (err) {
+      if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ mesaj: 'Yüklenen belge 5 MB boyut sınırını aşıyor.' });
+      }
+      return res.status(400).json({ mesaj: err.message || 'Belge yüklenirken bir hata oluştu.' });
+    }
+    next();
+  });
+}, async (req, res) => {
+  if (!await ensureRegistrationEnabled(res)) {
+    if (req.file) { try { fs.unlinkSync(req.file.path); } catch {} }
+    return;
+  }
   const body = req.body || {};
   const name = typeof body.name === 'string' ? body.name.trim() : '';
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
@@ -150,38 +196,84 @@ router.post('/register', registerLimiter, async (req, res) => {
   const password = body.password;
   const role = body.role;
 
+  const cleanupUploadedFile = () => {
+    if (req.file) { try { fs.unlinkSync(req.file.path); } catch {} }
+  };
+
   if (!name || name.length > 100 || !isValidEmail(email)) {
+    cleanupUploadedFile();
     return res.status(400).json({ mesaj: 'Ad veya e-posta biçimi geçersiz.' });
   }
   if (!/^(\+90|0)?5\d{9}$/.test(phone)) {
+    cleanupUploadedFile();
     return res.status(400).json({ mesaj: 'Telefon numarasını 05xx xxx xx xx formatında girin.' });
   }
   const normalizedPhone = `0${phone.slice(-10)}`;
   if (!validPassword(password)) {
+    cleanupUploadedFile();
     return res.status(400).json({ mesaj: 'Şifre 10–72 bayt uzunluğunda olmalıdır.' });
   }
   if (!passwordsMatch(password, body.passwordConfirmation)) {
+    cleanupUploadedFile();
     return res.status(400).json({ mesaj: 'Şifreler eşleşmiyor.' });
   }
   if (!['student', 'teacher'].includes(role)) {
+    cleanupUploadedFile();
     return res.status(400).json({ mesaj: 'Geçerli bir kullanıcı tipi seçin.' });
   }
 
-  const brans = typeof body.brans === 'string' ? body.brans.trim().slice(0, 100) : '';
+  const branch = typeof body.branch === 'string' && body.branch.trim()
+    ? body.branch.trim().slice(0, 100)
+    : (typeof body.brans === 'string' ? body.brans.trim().slice(0, 100) : '');
+  const graduationInfo = typeof body.graduationInfo === 'string' ? body.graduationInfo.trim().slice(0, 300) : '';
   const okulKurumAdi = typeof body.okulKurumAdi === 'string' ? body.okulKurumAdi.trim().slice(0, 150) : '';
   const basvuruNotu = typeof body.basvuruNotu === 'string' ? body.basvuruNotu.trim().slice(0, 500) : '';
+  const contractAccepted = body.contractAccepted === true || body.contractAccepted === 'true' || body.contractAccepted === 'on';
 
   let basvuruDurumu = 'onaylandi';
   let ogretmenTipi = 'standart_ogretmen';
+  let verificationDocumentUrl = null;
+  let contractAcceptedAt = null;
 
   if (role === 'teacher') {
+    // 1. Yasal Sözleşme Onayı Zorunlu
+    if (!contractAccepted) {
+      cleanupUploadedFile();
+      return res.status(400).json({ mesaj: 'Öğretmenlik başvurusu için Hizmet & Telif Sözleşmesi ile KVKK Aydınlatma Metnini onaylamanız gerekmektedir.' });
+    }
+    contractAcceptedAt = new Date();
+
+    // 2. Branş / Kademe Seçimi Zorunlu
+    if (!branch) {
+      cleanupUploadedFile();
+      return res.status(400).json({ mesaj: 'Lütfen branş / kademe seçiminizi yapın.' });
+    }
+
+    // 3. Mezuniyet ve Deneyim Bilgisi Zorunlu
+    if (!graduationInfo) {
+      cleanupUploadedFile();
+      return res.status(400).json({ mesaj: 'Lütfen mezuniyet ve deneyim bilgilerinizi belirtin.' });
+    }
+
+    // 4. Belge varsa yolu belirle
+    if (req.file) {
+      verificationDocumentUrl = '/uploads/teacher-docs/' + req.file.filename;
+    }
+
+    // 5. Öğretmen Davet Kodu Kontrolü
     const hasCode = typeof body.teacherCode === 'string' && body.teacherCode.trim().length > 0;
     if (hasCode) {
       if (!teacherCodeIsValid(body.teacherCode)) {
+        cleanupUploadedFile();
         return res.status(403).json({ mesaj: 'Öğretmen davet kodu geçersiz.' });
       }
       basvuruDurumu = 'onaylandi';
     } else {
+      // Davet kodu yoksa belge yüklenmiş olmalıdır
+      if (!verificationDocumentUrl) {
+        cleanupUploadedFile();
+        return res.status(400).json({ mesaj: 'Öğretmen davet kodu girilmediğinde diploma veya mezuniyet belgesi yüklenmesi zorunludur.' });
+      }
       basvuruDurumu = 'inceleme_suruyor';
     }
   }
@@ -195,7 +287,12 @@ router.post('/register', registerLimiter, async (req, res) => {
       role,
       basvuruDurumu,
       ogretmenTipi,
-      brans,
+      brans: branch,
+      branch,
+      graduationInfo,
+      verificationDocumentUrl,
+      contractAccepted,
+      contractAcceptedAt,
       okulKurumAdi,
       basvuruNotu,
       basvuruTarihi: new Date()
@@ -209,6 +306,7 @@ router.post('/register', registerLimiter, async (req, res) => {
       redirectTo: redirectForRole(user.role, adminRoleOf(user))
     });
   } catch (error) {
+    cleanupUploadedFile();
     if (error.code === 11000) {
       return res.status(409).json({ mesaj: 'Bu e-posta adresiyle zaten hesap kayıtlı.' });
     }
@@ -375,7 +473,14 @@ router.post('/auth/google', (req, res, next) => {
         }
         let googleBasvuruDurumu = 'onaylandi';
         let googleOgretmenTipi = 'standart_ogretmen';
+        const googleBranch = typeof req.body?.branch === 'string' ? req.body.branch.trim().slice(0, 100) : (typeof req.body?.brans === 'string' ? req.body.brans.trim().slice(0, 100) : '');
+        const googleGraduationInfo = typeof req.body?.graduationInfo === 'string' ? req.body.graduationInfo.trim().slice(0, 300) : '';
+        const googleContractAccepted = req.body?.contractAccepted === true || req.body?.contractAccepted === 'true' || req.body?.contractAccepted === 'on';
+
         if (requestedRole === 'teacher') {
+          if (!googleContractAccepted) {
+            return res.status(400).json({ mesaj: 'Öğretmenlik başvurusu için Hizmet & Telif Sözleşmesi ile KVKK Aydınlatma Metnini onaylamanız gerekmektedir.' });
+          }
           const hasTeacherCode = typeof req.body?.teacherCode === 'string' && req.body.teacherCode.trim().length > 0;
           if (hasTeacherCode) {
             if (!teacherCodeIsValid(req.body.teacherCode)) {
@@ -392,6 +497,11 @@ router.post('/auth/google', (req, res, next) => {
           role: requestedRole,
           basvuruDurumu: googleBasvuruDurumu,
           ogretmenTipi: googleOgretmenTipi,
+          branch: googleBranch || null,
+          brans: googleBranch || null,
+          graduationInfo: googleGraduationInfo || null,
+          contractAccepted: googleContractAccepted,
+          contractAcceptedAt: googleContractAccepted ? new Date() : null,
           googleId: profile.sub
         });
       }

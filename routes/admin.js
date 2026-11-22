@@ -1838,7 +1838,7 @@ function createAdminRouter({
 
       const [basvurular, bekleyenSayisi] = await Promise.all([
         User.find(filter)
-          .select('name email phone telefon brans okulKurumAdi basvuruNotu basvuruDurumu ogretmenTipi basvuruTarihi onayTarihi createdAt')
+          .select('name email phone telefon brans branch graduationInfo verificationDocumentUrl contractAccepted contractAcceptedAt okulKurumAdi basvuruNotu basvuruDurumu ogretmenTipi basvuruTarihi onayTarihi createdAt')
           .sort({ basvuruTarihi: -1, createdAt: -1 })
           .limit(200)
           .lean(),
@@ -1850,7 +1850,12 @@ function createAdminRouter({
         name: b.name || 'İsimsiz',
         email: b.email,
         phone: b.phone || b.telefon || '—',
-        brans: b.brans || 'Belirtilmedi',
+        brans: b.branch || b.brans || 'Belirtilmedi',
+        branch: b.branch || b.brans || 'Belirtilmedi',
+        graduationInfo: b.graduationInfo || '—',
+        verificationDocumentUrl: b.verificationDocumentUrl || null,
+        contractAccepted: Boolean(b.contractAccepted),
+        contractAcceptedAt: b.contractAcceptedAt || null,
         okulKurumAdi: b.okulKurumAdi || 'Belirtilmedi',
         basvuruNotu: b.basvuruNotu || '',
         basvuruDurumu: b.basvuruDurumu || 'inceleme_suruyor',
