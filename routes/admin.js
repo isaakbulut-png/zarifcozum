@@ -450,14 +450,18 @@ function createAdminRouter({
       if (revoke) {
         target.subscriptionStatus = 'free';
         target.subscriptionPlan = null;
+        target.subscriptionTier = 'free';
         target.subscriptionType = null;
         target.expiresAt = null;
+        target.subscriptionEndDate = null;
         target.paketTipi = 'free';
       } else {
         target.subscriptionStatus = 'active';
         target.subscriptionPlan = plan;
+        target.subscriptionTier = plan;
         target.subscriptionType = days >= 360 ? 'annual' : 'monthly';
         target.expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+        target.subscriptionEndDate = target.expiresAt;
         target.paketTipi = plan;
       }
       await target.save();

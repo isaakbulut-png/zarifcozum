@@ -410,8 +410,9 @@
       line-height: 1.4;
     }
 
-    /* Öğretmen Alanları Yumuşak Geçiş */
-    #teacherApplicationFields {
+    /* Öğretmen ve Öğrenci Alanları Yumuşak Geçiş */
+    #teacherApplicationFields,
+    #studentApplicationFields {
       transition: opacity 0.3s ease, transform 0.3s ease;
       background: rgba(194, 87, 12, 0.03);
       border: 1px solid #ebd9c8;
@@ -727,6 +728,38 @@
             </div>
           </div>
 
+          <!-- Öğrenci Sınıf ve Veli Onay Alanları -->
+          <div id="studentApplicationFields" hidden>
+            <div class="field-wrap" style="margin-bottom:12px;">
+              <label for="grade">Sınıf Düzeyi <span style="color:#b91c1c;">*</span></label>
+              <select id="grade" name="grade" disabled>
+                <option value="" disabled selected>Sınıfınızı seçin</option>
+                <option value="5">5. Sınıf (Ortaokul)</option>
+                <option value="6">6. Sınıf (Ortaokul)</option>
+                <option value="7">7. Sınıf (Ortaokul)</option>
+                <option value="8">8. Sınıf (LGS Hazırlık)</option>
+                <option value="9">9. Sınıf (Lise)</option>
+                <option value="10">10. Sınıf (Lise)</option>
+                <option value="11">11. Sınıf (YKS Temel / Lise)</option>
+              </select>
+            </div>
+
+            <div class="field-wrap" style="margin-bottom:12px;">
+              <label for="parentContact">Veli E-posta veya Telefon Numarası <span style="color:#b91c1c;">*</span></label>
+              <input id="parentContact" name="parentContact" type="text" placeholder="Örn: 05xx xxx xx xx veya veli@ornek.com" maxlength="100" disabled>
+              <small style="display:block; margin-top:4px; font-size:0.75rem; color:#8b7260;">18 yaşından küçük öğrenciler için yasal bilgilendirme ve onay kaydı amacıyla zorunludur.</small>
+            </div>
+
+            <div class="field-wrap" style="margin-bottom:14px;">
+              <label style="display:flex; align-items:flex-start; gap:10px; font-size:0.83rem; line-height:1.45; cursor:pointer; color:#3a2618;">
+                <input type="checkbox" id="guardianConsentAccepted" name="guardianConsentAccepted" value="true" style="margin-top:2px; accent-color:var(--terracotta); width:18px; height:18px; cursor:pointer;" disabled>
+                <span>
+                  <a href="javascript:void(0)" id="openTermsModal" style="color:var(--terracotta); font-weight:700; text-decoration:underline;">Kullanım Koşulları</a>, <a href="javascript:void(0)" id="openStudentKvkkModal" style="color:var(--terracotta); font-weight:700; text-decoration:underline;">KVKK Aydınlatma Metni</a> ve 18 yaşından küçük kullanıcılar için <a href="javascript:void(0)" id="openGuardianModal" style="color:var(--terracotta); font-weight:700; text-decoration:underline;">Veli/Vasi Açık Rıza Beyanı</a>'nı velim ile birlikte okudum, onaylıyorum. <span style="color:#b91c1c;">*</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
           <div id="parentCodeField" class="field-wrap" hidden>
             <label for="parentConnectionCode">6 karakterli veli bağlantı kodu</label>
             <input id="parentConnectionCode" name="parentConnectionCode" autocomplete="off" autocapitalize="characters" maxlength="6" pattern="[A-Za-z0-9]{6}" disabled>
@@ -883,6 +916,8 @@
         $('passwordConfirmation').required = registering;
         $('password').autocomplete = registering ? 'new-password' : 'current-password';
         const isTeacherReg = registering && !parentMode && $('role').value === 'teacher';
+        const isStudentReg = registering && !parentMode && $('role').value === 'student';
+
         if ($('teacherApplicationFields')) {
           $('teacherApplicationFields').hidden = !isTeacherReg;
           if ($('branch')) {
@@ -902,6 +937,22 @@
             $('contractAccepted').required = isTeacherReg;
           }
           updateTeacherDocRequirement();
+        }
+
+        if ($('studentApplicationFields')) {
+          $('studentApplicationFields').hidden = !isStudentReg;
+          if ($('grade')) {
+            $('grade').disabled = !isStudentReg;
+            $('grade').required = isStudentReg;
+          }
+          if ($('parentContact')) {
+            $('parentContact').disabled = !isStudentReg;
+            $('parentContact').required = isStudentReg;
+          }
+          if ($('guardianConsentAccepted')) {
+            $('guardianConsentAccepted').disabled = !isStudentReg;
+            $('guardianConsentAccepted').required = isStudentReg;
+          }
         }
         
         $('authTitle').textContent = parentRegistration
@@ -990,26 +1041,70 @@
         <p>KVKK'nın 11. maddesi uyarınca veri sahibi olarak verilerinizin silinmesini, düzeltilmesini veya işlenme amacını öğrenme hakkına her zaman sahipsiniz.</p>
       `;
 
-      function openLegalModal(title, content) {
+      const TERMS_TEXT = `
+        <h4>1. TARAFLAR VE AMAC</h4>
+        <p>İşbu Kullanım Koşulları, ZarifÇözüm Eğitim Platformu tarafından sunulan dijital eğitim içerikleri, yapay zekâ destekli soru çözümü ve rehberlik hizmetlerinin kullanım kurallarını düzenler.</p>
+        <h4>2. HİZMETİN KULLANIMI VE YAŞ SINIRI</h4>
+        <p>Platformumuz 5–11. sınıf kademelerindeki öğrencilerin MEB Türkiye Yüzyılı Maarif Modeli kazanımlarına uygun şekilde öğrenmelerini desteklemek üzere tasarlanmıştır. 18 yaşından küçük öğrencilerin kayıt işlemleri veli/vasi gözetiminde ve onayında gerçekleştirilmelidir.</p>
+        <h4>3. HESAP GÜVENLİĞİ VE ETİK KULLANIM</h4>
+        <p>Kullanıcılar hesap erişim şifrelerini gizli tutmakla yükümlüdür. AI Mentör ve soru havuzunun kötüye kullanımı, etik dışı sorgular yapılması veya telif haklarına aykırı girişimler hesabın kısıtlanmasına neden olabilir.</p>
+      `;
+
+      const STUDENT_KVKK_TEXT = `
+        <h4>6698 SAYILI KVKK KAPSAMINDA ÖĞRENCİ VE VELİ AYDINLATMA METNİ</h4>
+        <p>ZarifÇözüm olarak, öğrencilerimizin ve velilerimizin kişisel verilerinin korunmasına büyük önem veriyoruz.</p>
+        <h4>İŞLENEN KİŞİSEL VERİLER</h4>
+        <p>Öğrencinin adı, soyadı, sınıf seviyesi, e-posta adresi, telefon numarası ile veli irtibat bilgisi (telefon/e-posta) ve öğrenme performansı (çözülen sorular, AI sohbet etkileşimleri) işlenmektedir.</p>
+        <h4>VERİ İŞLEME AMACI</h4>
+        <p>Verileriniz; kişiselleştirilmiş Maarif Modeli öğrenme yol haritası sunulması, veli bilgilendirme mekanizmasının işletilmesi ve platform güvenliğinin sağlanması amacıyla işlenir. Veriler üçüncü şahıslara veya reklam amaçlı kurumlara kesinlikle satılmaz veya aktarılmaz.</p>
+      `;
+
+      const GUARDIAN_CONSENT_TEXT = `
+        <h4>18 YAŞINDAN KÜÇÜK KULLANICILAR İÇİN VELİ / VASİ AÇIK RIZA BEYANI</h4>
+        <p>Velisi/vasisi bulunduğum öğrencinin ZarifÇözüm platformuna üye olmasına, MEB Türkiye Yüzyılı Maarif Modeli kapsamındaki eğitim içeriklerinden, testlerden ve AI Mentör rehberliğinden faydalanmasına izin veriyorum.</p>
+        <p>Kullanım Koşulları ve KVKK Aydınlatma Metni'nde belirtilen ilkeler doğrultusunda, öğrencimin adı-soyadı, sınıf seviyesi, öğrenme gelişim verileri ve şahsıma ait veli iletişim bilgilerimin işlenmesini; sınav ve bilgilendirme bildirimlerinin tarafıma iletilmesini özgür irademle kabul ve beyan ederim.</p>
+      `;
+
+      let currentLegalTarget = null;
+      function openLegalModal(title, content, targetInputId = null) {
+        currentLegalTarget = targetInputId;
         if ($('legalModalTitle')) $('legalModalTitle').textContent = title;
         if ($('legalModalBody')) $('legalModalBody').innerHTML = content;
         if ($('legalModal')) $('legalModal').hidden = false;
       }
       function closeLegalModal() {
+        currentLegalTarget = null;
         if ($('legalModal')) $('legalModal').hidden = true;
       }
 
       $('openContractModal')?.addEventListener('click', (e) => {
         e.preventDefault();
-        openLegalModal('Öğretmen Hizmet & Telif Sözleşmesi', CONTRACT_TEXT);
+        openLegalModal('Öğretmen Hizmet & Telif Sözleşmesi', CONTRACT_TEXT, 'contractAccepted');
       });
       $('openKvkkModal')?.addEventListener('click', (e) => {
         e.preventDefault();
-        openLegalModal('KVKK Öğretmen Başvuru Aydınlatma Metni', KVKK_TEXT);
+        openLegalModal('KVKK Öğretmen Başvuru Aydınlatma Metni', KVKK_TEXT, 'contractAccepted');
+      });
+      $('openTermsModal')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        openLegalModal('Kullanım Koşulları', TERMS_TEXT, 'guardianConsentAccepted');
+      });
+      $('openStudentKvkkModal')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        openLegalModal('Öğrenci & Veli KVKK Aydınlatma Metni', STUDENT_KVKK_TEXT, 'guardianConsentAccepted');
+      });
+      $('openGuardianModal')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        openLegalModal('18 Yaş Altı Veli / Vasi Açık Rıza Beyanı', GUARDIAN_CONSENT_TEXT, 'guardianConsentAccepted');
       });
       $('closeLegalModal')?.addEventListener('click', closeLegalModal);
       $('acceptLegalModalBtn')?.addEventListener('click', () => {
-        if ($('contractAccepted')) $('contractAccepted').checked = true;
+        if (currentLegalTarget && $(currentLegalTarget)) {
+          $(currentLegalTarget).checked = true;
+        } else {
+          if ($('contractAccepted')) $('contractAccepted').checked = true;
+          if ($('guardianConsentAccepted')) $('guardianConsentAccepted').checked = true;
+        }
         closeLegalModal();
       });
       $('legalModal')?.addEventListener('click', (e) => {
@@ -1126,6 +1221,25 @@
 
         const registering = mode === 'register';
         const isTeacherReg = registering && !parentMode && $('role').value === 'teacher';
+        const isStudentReg = registering && !parentMode && $('role').value === 'student';
+
+        if (isStudentReg) {
+          if (!$('grade') || !$('grade').value) {
+            setMessage('message', 'Lütfen sınıf düzeyinizi seçin (5-11. Sınıf).');
+            $('submitButton').disabled = false;
+            return;
+          }
+          if (!$('parentContact') || !$('parentContact').value.trim()) {
+            setMessage('message', 'Lütfen veli e-posta veya telefon numarasını girin.');
+            $('submitButton').disabled = false;
+            return;
+          }
+          if (!$('guardianConsentAccepted') || !$('guardianConsentAccepted').checked) {
+            setMessage('message', 'Lütfen Kullanım Koşulları, KVKK ve Veli Açık Rıza Beyanını onaylayın.');
+            $('submitButton').disabled = false;
+            return;
+          }
+        }
 
         if (isTeacherReg) {
           if (!$('contractAccepted') || !$('contractAccepted').checked) {
