@@ -899,6 +899,7 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
     if (assignedQuizIds.length) {
       quizler.push(...await quizKoleksiyonu.find({_id: {$in: assignedQuizIds}, source: 'curriculum_assignment'}).toArray());
     }
+    const teacherIds = profiles.map(p => p.teacherId).filter(Boolean);
     const tamamlananQuizler = new Set(sonuclar.map(result => result.quizId.toString()));
     res.json({
       parentConnectionCode,
@@ -914,18 +915,31 @@ app.get(['/api/student/dashboard', '/api/ogrenci/icerik'], ogrenciKontrol, async
         status: lesson.kind === 'live' ? lesson.status : 'scheduled',
         link: lesson.kind === 'live' ? '' : lesson.link
       })),
-      quizler: quizler.map(({ _id, title, description, questions, createdAt }) => ({
-        id: _id.toString(), title, description,
-        soruSayisi: questions.length, createdAt,
-        tamamlandi: tamamlananQuizler.has(_id.toString()),
-        questions: questions.map(studentQuestion)
-      })),
+      quizler: quizler.map(({ _id, title, description, questions, createdAt, createdBy, teacherId }) => {
+        const isAssigned = assignedQuizIds.some(id => id.toString() === _id.toString());
+        const isTeacherAssigned = Boolean(
+          isAssigned ||
+          (createdBy && teacherIds.includes(createdBy)) ||
+          (teacherId && teacherIds.includes(teacherId))
+        );
+        return {
+          id: _id.toString(),
+          title,
+          description,
+          soruSayisi: questions.length,
+          createdAt,
+          tamamlandi: tamamlananQuizler.has(_id.toString()),
+          isTeacherAssigned,
+          questions: questions.map(studentQuestion)
+        };
+      }),
       duyurular: duyurular.map(({ _id, message, createdAt, expiresAt, durationDays, createdBy }) => ({
         id: _id.toString(),
         message,
         createdAt,
         expiresAt: expiresAt || null,
         durationDays: durationDays || null,
+        isTeacherAnnouncement: Boolean(createdBy && teacherIds.includes(createdBy)),
         isOwner: createdBy === req.session.user.id || req.session.user.role === 'admin'
       })),
       sonuclar: sonuclar.map(({ _id, quizId, quizTitle, score, correctCount, totalCount, createdAt }) => ({
