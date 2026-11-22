@@ -192,8 +192,310 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="assets/brand-mark.png">
-<link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="assets/anasayfa.css">
+<link rel="stylesheet" href="assets/style.css?v=20261122_saas2">
+<link rel="stylesheet" href="assets/anasayfa.css?v=20261122_saas2">
+<style id="saas-pricing-modern-css">
+/* Modern SaaS Fiyatlandırma Kartları (Pricing Cards) */
+.subscription-pricing-section {
+  padding: 80px 0 90px !important;
+  background: var(--color-bg, #fbf1e8) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.subscription-pricing-header {
+  text-align: center !important;
+  max-width: 720px !important;
+  margin: 0 auto 48px !important;
+  padding: 0 16px !important;
+}
+
+.subscription-pricing-header h2 {
+  font-family: var(--font-display, 'Clash Display', sans-serif) !important;
+  font-size: clamp(1.8rem, 3.5vw, 2.4rem) !important;
+  font-weight: 700 !important;
+  color: #1e1b18 !important;
+  letter-spacing: -0.02em !important;
+  margin: 0 0 12px !important;
+  text-align: center !important;
+}
+
+.subscription-pricing-header p {
+  font-size: 1.05rem !important;
+  color: #6a5a4d !important;
+  line-height: 1.55 !important;
+  margin: 0 !important;
+  text-align: center !important;
+}
+
+.subscription-pricing-grid, .pricing {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 24px !important;
+  max-width: 1140px !important;
+  margin: 0 auto !important;
+  padding: 0 16px !important;
+  align-items: stretch !important;
+  box-sizing: border-box !important;
+}
+
+/* Yan Kartlar: Temel ve VIP (Açık / Krem Kartlar) */
+.subscription-plan-card, .plan {
+  background: #ffffff !important;
+  border: 1.5px solid #e5dcce !important;
+  border-radius: 20px !important;
+  padding: 36px 28px 32px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  box-shadow: 0 4px 20px rgba(44, 26, 14, 0.04) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+}
+
+.subscription-plan-card:hover, .plan:not(.featured):hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 32px rgba(44, 26, 14, 0.08) !important;
+  border-color: #d1c1af !important;
+}
+
+/* Üst Başlık ve Kısa Açıklama */
+.subscription-plan-intro {
+  margin-bottom: 16px !important;
+  text-align: left !important;
+}
+
+.subscription-plan-name {
+  font-family: var(--font-display, 'Clash Display', sans-serif) !important;
+  font-size: 1.45rem !important;
+  font-weight: 700 !important;
+  color: #1f140c !important;
+  margin: 0 0 6px !important;
+  letter-spacing: -0.01em !important;
+  text-align: left !important;
+}
+
+.subscription-plan-description {
+  font-size: 0.9rem !important;
+  color: #786455 !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+  text-align: left !important;
+}
+
+/* Fiyat Alanı */
+.subscription-plan-price, .plan .price {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 4px !important;
+  margin-bottom: 2px !important;
+  text-align: left !important;
+}
+
+.subscription-plan-amount {
+  font-family: var(--font-display, 'Clash Display', sans-serif) !important;
+  font-size: 2.35rem !important;
+  font-weight: 800 !important;
+  color: #1f140c !important;
+  line-height: 1 !important;
+}
+
+.subscription-plan-period {
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  color: #786455 !important;
+}
+
+.subscription-plan-tax-note {
+  font-size: 0.78rem !important;
+  color: #968375 !important;
+  margin: 0 0 20px !important;
+  text-align: left !important;
+}
+
+/* Fiyatın Hemen Altındaki Tam Genişlik Buton (CTA) */
+.subscription-plan-cta {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: block !important;
+  text-align: center !important;
+  padding: 13px 18px !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  border: 1.5px solid #2c1a0e !important;
+  background: #ffffff !important;
+  color: #2c1a0e !important;
+  transition: all 0.15s ease !important;
+  margin: 0 0 22px 0 !important;
+  line-height: 1.2 !important;
+  font-family: inherit !important;
+}
+
+.subscription-plan-cta:hover {
+  background: #2c1a0e !important;
+  color: #ffffff !important;
+  border-color: #2c1a0e !important;
+}
+
+/* Ayırıcı Çizgi */
+.subscription-plan-divider {
+  border: none !important;
+  border-top: 1px solid #eee5d8 !important;
+  margin: 0 0 18px !important;
+}
+
+/* Özellik Listesi */
+.subscription-plan-features, .plan ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  text-align: left !important;
+  flex: 1 !important;
+}
+
+.subscription-plan-features li, .plan li {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  font-size: 0.88rem !important;
+  line-height: 1.5 !important;
+  color: #3d2d22 !important;
+  text-align: left !important;
+}
+
+.subscription-plan-features li strong, .plan li strong {
+  font-weight: 600 !important;
+  color: #1f140c !important;
+}
+
+.subscription-feature-check {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 18px !important;
+  height: 18px !important;
+  flex-shrink: 0 !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  color: #16a34a !important;
+  margin-top: 1px !important;
+}
+
+.subscription-feature-muted {
+  color: #8c786a !important;
+  opacity: 0.75 !important;
+}
+
+.subscription-feature-muted .subscription-feature-check {
+  color: #9ca3af !important;
+}
+
+/* Orta Kart: Standart Paket (Koyu Kahve #2c1a0e Öne Çıkarılmış Kart) */
+.subscription-plan-card-featured, .plan.featured {
+  background: #2c1a0e !important;
+  border: 1.5px solid #3d2514 !important;
+  color: #f5ede4 !important;
+  transform: translateY(-8px) !important;
+  box-shadow: 0 16px 44px rgba(44, 26, 14, 0.28) !important;
+  z-index: 2 !important;
+}
+
+.subscription-plan-card-featured:hover, .plan.featured:hover {
+  transform: translateY(-12px) !important;
+  box-shadow: 0 20px 50px rgba(44, 26, 14, 0.32) !important;
+}
+
+.subscription-featured-badge, .plan.featured::before {
+  position: absolute !important;
+  top: -14px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: #c6923b !important;
+  color: #ffffff !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+  padding: 4px 18px !important;
+  border-radius: 999px !important;
+  letter-spacing: 0.03em !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 4px 12px rgba(198, 146, 59, 0.35) !important;
+  white-space: nowrap !important;
+}
+
+.subscription-plan-card-featured .subscription-plan-name {
+  color: #ffffff !important;
+}
+
+.subscription-plan-card-featured .subscription-plan-description {
+  color: #cbd5e1 !important;
+}
+
+.subscription-plan-card-featured .subscription-plan-amount {
+  color: #ffffff !important;
+}
+
+.subscription-plan-card-featured .subscription-plan-period {
+  color: #94a3b8 !important;
+}
+
+.subscription-plan-card-featured .subscription-plan-tax-note {
+  color: #a39587 !important;
+}
+
+.subscription-plan-card-featured .subscription-plan-cta,
+.subscription-plan-cta.featured-cta {
+  background: #c6923b !important;
+  border: 1.5px solid #c6923b !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(198, 146, 59, 0.35) !important;
+}
+
+.subscription-plan-card-featured .subscription-plan-cta:hover,
+.subscription-plan-cta.featured-cta:hover {
+  background: #d9a54e !important;
+  border-color: #d9a54e !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px rgba(198, 146, 59, 0.45) !important;
+}
+
+.subscription-plan-card-featured .subscription-plan-divider {
+  border-top-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.subscription-plan-card-featured .subscription-plan-features li {
+  color: #e2e8f0 !important;
+}
+
+.subscription-plan-card-featured .subscription-plan-features li strong {
+  color: #ffffff !important;
+}
+
+.subscription-plan-card-featured .subscription-feature-check {
+  color: #f59e0b !important;
+}
+
+/* Mobil ve Tablet Duyarlılığı (Responsive) */
+@media (max-width: 960px) {
+  .subscription-pricing-grid, .pricing {
+    grid-template-columns: 1fr !important;
+    max-width: 460px !important;
+    gap: 36px !important;
+  }
+  .subscription-plan-card-featured, .plan.featured {
+    transform: none !important;
+  }
+  .subscription-plan-card-featured:hover, .plan.featured:hover {
+    transform: translateY(-4px) !important;
+  }
+}
+</style>
 </head>
 <body class="homepage">
 <!-- TOP ANNOUNCEMENT BANNER -->
