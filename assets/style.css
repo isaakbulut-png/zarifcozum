@@ -259,16 +259,302 @@ section.block { padding-block: clamp(var(--space-12), 7vw, var(--space-24)); }
 @media (max-width: 900px) { .steps { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .steps { grid-template-columns: 1fr; } }
 
-.pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); align-items: stretch; }
-.plan { position: relative; display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-6); }
-.plan.featured { border-color: var(--color-primary); box-shadow: var(--shadow-md); }
-.plan .price { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.02em; }
-.plan .price small { font-family: var(--font-body); font-size: var(--text-sm); color: var(--color-text-muted); font-weight: 500; }
-.plan ul { display: grid; gap: var(--space-2); font-size: var(--text-sm); color: var(--color-text-muted); flex: 1; }
-.plan li { display: flex; gap: var(--space-2); align-items: flex-start; }
-.plan li::before { content: '✓'; color: var(--color-success); font-weight: 700; flex: none; }
-.plan li.no::before { content: '—'; color: var(--color-text-faint); }
-@media (max-width: 900px) { .pricing { grid-template-columns: 1fr; } }
+/* Modern SaaS Fiyatlandırma Kartları */
+.subscription-pricing-section {
+  padding: 80px 0 90px;
+  background: var(--color-bg, #fbf1e8);
+}
+
+.subscription-pricing-header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 48px;
+}
+
+.subscription-pricing-header h2 {
+  font-family: var(--font-display, 'Clash Display', sans-serif);
+  font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+  font-weight: 700;
+  color: #1e1b18;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+.subscription-pricing-header p {
+  font-size: 1.05rem;
+  color: #6a5a4d;
+  line-height: 1.55;
+  margin: 0;
+  text-align: center;
+}
+
+.subscription-pricing-grid, .pricing {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1140px;
+  margin: 0 auto;
+  align-items: stretch;
+}
+
+/* Yan Kartlar: Temel ve VIP (Açık / Krem Kartlar) */
+.subscription-plan-card, .plan {
+  background: #ffffff;
+  border: 1.5px solid #e5dcce;
+  border-radius: 20px;
+  padding: 36px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(44, 26, 14, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.subscription-plan-card:hover, .plan:not(.featured):hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(44, 26, 14, 0.08);
+  border-color: #d1c1af;
+}
+
+/* Üst Başlık ve Kısa Açıklama */
+.subscription-plan-intro {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.subscription-plan-name {
+  font-family: var(--font-display, 'Clash Display', sans-serif);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #1f140c;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+  text-align: left;
+}
+
+.subscription-plan-description {
+  font-size: 0.9rem;
+  color: #786455;
+  line-height: 1.4;
+  margin: 0;
+  text-align: left;
+}
+
+/* Fiyat Alanı */
+.subscription-plan-price, .plan .price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 2px;
+  text-align: left;
+}
+
+.subscription-plan-amount {
+  font-family: var(--font-display, 'Clash Display', sans-serif);
+  font-size: 2.35rem;
+  font-weight: 800;
+  color: #1f140c;
+  line-height: 1;
+}
+
+.subscription-plan-period {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #786455;
+}
+
+.subscription-plan-tax-note {
+  font-size: 0.78rem;
+  color: #968375;
+  margin: 0 0 20px;
+  text-align: left;
+}
+
+/* Fiyatın Hemen Altındaki Tam Genişlik Buton (CTA) */
+.subscription-plan-cta {
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+  text-align: center;
+  padding: 13px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1.5px solid #2c1a0e;
+  background: #ffffff;
+  color: #2c1a0e;
+  transition: all 0.15s ease;
+  margin: 0 0 22px 0;
+  line-height: 1.2;
+}
+
+.subscription-plan-cta:hover {
+  background: #2c1a0e;
+  color: #ffffff;
+  border-color: #2c1a0e;
+}
+
+/* Ayırıcı Çizgi */
+.subscription-plan-divider {
+  border: none;
+  border-top: 1px solid #eee5d8;
+  margin: 0 0 18px;
+}
+
+/* Özellik Listesi */
+.subscription-plan-features, .plan ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  flex: 1;
+}
+
+.subscription-plan-features li, .plan li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #3d2d22;
+  text-align: left;
+}
+
+.subscription-plan-features li strong, .plan li strong {
+  font-weight: 600;
+  color: #1f140c;
+}
+
+.subscription-feature-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: #0d9488;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.subscription-feature-muted {
+  color: #8c786a;
+  opacity: 0.8;
+}
+
+.subscription-feature-muted .subscription-feature-check {
+  color: #94a3b8;
+}
+
+/* ==========================================================================
+   Orta Kart: Standart Paket (Koyu Kahve #2c1a0e Öne Çıkarılmış Kart)
+   ========================================================================== */
+.subscription-plan-card-featured, .plan.featured {
+  background: #2c1a0e;
+  border: 1.5px solid #3d2514;
+  color: #ffffff;
+  box-shadow: 0 16px 44px rgba(44, 26, 14, 0.24);
+  transform: translateY(-8px);
+}
+
+.subscription-plan-card-featured:hover, .plan.featured:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 20px 50px rgba(44, 26, 14, 0.32);
+}
+
+.subscription-featured-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #c6923b;
+  color: #1a120b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 5px 16px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  box-shadow: 0 4px 14px rgba(198, 146, 59, 0.4);
+  white-space: nowrap;
+}
+
+.subscription-plan-card-featured .subscription-plan-name {
+  color: #ffffff;
+}
+
+.subscription-plan-card-featured .subscription-plan-description {
+  color: #cbd5e1;
+}
+
+.subscription-plan-card-featured .subscription-plan-amount {
+  color: #ffffff;
+}
+
+.subscription-plan-card-featured .subscription-plan-period {
+  color: #94a3b8;
+}
+
+.subscription-plan-card-featured .subscription-plan-tax-note {
+  color: #a39587;
+}
+
+/* Standart Paket Butonu: Yüksek Kontrastlı Altın / Terracotta */
+.subscription-plan-card-featured .subscription-plan-cta, .subscription-plan-cta.featured-cta {
+  background: #c6923b;
+  border: 1.5px solid #c6923b;
+  color: #1a120b;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(198, 146, 59, 0.35);
+}
+
+.subscription-plan-card-featured .subscription-plan-cta:hover, .subscription-plan-cta.featured-cta:hover {
+  background: #d9a54e;
+  border-color: #d9a54e;
+  color: #140d07;
+  transform: translateY(-1px);
+}
+
+.subscription-plan-card-featured .subscription-plan-divider {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+.subscription-plan-card-featured .subscription-plan-features li {
+  color: #e2e8f0;
+}
+
+.subscription-plan-card-featured .subscription-plan-features li strong {
+  color: #ffffff;
+}
+
+.subscription-plan-card-featured .subscription-feature-check {
+  color: #f59e0b;
+}
+
+/* Mobil ve Tablet Duyarlılığı (Responsive) */
+@media (max-width: 960px) {
+  .subscription-pricing-grid, .pricing {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+    gap: 36px;
+  }
+  .subscription-plan-card-featured, .plan.featured {
+    transform: none;
+  }
+  .subscription-plan-card-featured:hover, .plan.featured:hover {
+    transform: translateY(-4px);
+  }
+}
 
 .faq details { border-top: 1px solid var(--color-divider); padding: var(--space-4) 0; }
 .faq details:last-child { border-bottom: 1px solid var(--color-divider); }
