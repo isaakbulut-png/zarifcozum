@@ -948,10 +948,10 @@ body.teacher-menu-open {
       </div>
     </details>
     <details class="teacher-nav-group" open>
-      <summary>İçerik</summary>
+      <summary>İçerik ve Müfredat</summary>
       <div class="teacher-nav-links">
-        <a href="#maarif-tree"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/></svg>Maarif gezgini</a>
-        <a href="#curriculum"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/></svg>Ders ve müfredat</a>
+        <a href="#curriculum"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/></svg>Maarif Müfredat &amp; Dersler</a>
+        <a href="#ai-curriculum-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg>🧠 Maarif Konu Anlatımı Üret</a>
       </div>
     </details>
     <details class="teacher-nav-group" open>
@@ -962,13 +962,12 @@ body.teacher-menu-open {
       </div>
     </details>
     <details class="teacher-nav-group" open>
-      <summary>Ölçme ve analiz</summary>
+      <summary>Ölçme ve Soru Havuzu</summary>
       <div class="teacher-nav-links">
-        <a href="#quiz-builder"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="m8 9 2 2 4-4M8 16h8"/></svg><span class="nav-label">Formüllü soru editörü<small>(Sınav ve testler)</small></span></a>
+        <a href="#quiz-builder"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="m8 9 2 2 4-4M8 16h8"/></svg><span class="nav-label">Soru &amp; Test Hazırlama Merkezi<small>(Formüllü, Resimli ve AI Testleri)</small></span></a>
+        <a href="#image-questions"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h.01M21 15l-5-5L5 21"/></svg>Resimli Soru &amp; Deneme Yükle</a>
+        <a href="#ai-question-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6z"/></svg>✨ Yapay Zekâ İle Soru Üret</a>
         <a href="#analytics"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 20V4M4 20h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>Başarı analizi</a>
-        <a href="#image-questions"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h.01M21 15l-5-5L5 21"/></svg>Soru bankası</a>
-        <a href="#ai-question-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 3 1.5 6.5L20 12l-6.5 1.5L12 20l-1.5-6.5L4 12l6.5-2.5z"/><path d="m19 3 .6 2.4L22 6l-2.4.6L19 9l-.6-2.4L16 6l2.4-.6z"/></svg>Yapay Zeka İle Soru Üret</a>
-        <a href="#ai-curriculum-wizard"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg>Maarif Konu Anlatımı Üret</a>
       </div>
     </details>
     <details class="teacher-nav-group" open>
@@ -1134,7 +1133,19 @@ body.teacher-menu-open {
     </section>
 
     <section class="card module-card" id="curriculum" data-panel-view="curriculum">
-      <div class="section-title"><div><p class="eyebrow">İÇERİK STÜDYOSU</p><h2>Ders ve müfredat yönetimi</h2><p class="hint">Sınıf → ünite → konu → ön koşullar ve ilişkili materyaller</p></div><span class="module-badge">5–12. sınıflar (Maarif Modeli)</span></div>
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">İÇERİK STÜDYOSU</p>
+          <h2>Maarif Müfredat &amp; Ders Yönetimi</h2>
+          <p class="hint">Sınıf → ünite → konu → ön koşullar ve ilişkili materyaller</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <a class="btn primary sm" href="#ai-curriculum-wizard" style="text-decoration:none;background:linear-gradient(135deg,#c2570c 0%,#ea580c 100%);color:#fff;font-weight:700">
+            🧠 AI ile Konu Anlatımı Üret ↗
+          </a>
+          <span class="module-badge">5–12. sınıflar (Maarif Modeli)</span>
+        </div>
+      </div>
       <div class="notice curriculum-notice"><strong>Türkiye Yüzyılı Maarif Modeli:</strong> 5–12. sınıf konu ve kazanımları güncel MEB öğretim programı ve ders kitabı veritabanından başarıyla aktarılmıştır. İhtiyaç halinde yeni özel ünite ve konu ekleyebilirsiniz.</div>
       <div class="curriculum-filters">
         <div class="field"><label for="curriculumGrade">Sınıf seviyesi</label><select id="curriculumGrade"></select></div>
@@ -1305,21 +1316,33 @@ body.teacher-menu-open {
     </section>
 
     <section class="card" id="quiz-builder" data-panel-view="quiz-builder">
-      <div class="section-title"><div><h2>Dinamik test oluşturucu</h2><p class="hint">Testler yayınlandığında öğrencilerin panelinde görünür.</p></div></div>
+      <div class="section-title">
+        <div>
+          <h2>Soru &amp; Test Hazırlama Merkezi</h2>
+          <p class="hint">Formüllü (LaTeX), resimli ve yapay zekâ destekli testler oluşturun. Yayınlanan testler anında öğrencilerin paneline yansır.</p>
+        </div>
+      </div>
       <form id="quizForm">
         <div class="form-grid">
           <div class="field"><label for="quizTitle">Test adı</label><input id="quizTitle" maxlength="150" required placeholder="Örn. Kesirler mini testi"></div>
           <div class="field"><label for="quizDescription">Açıklama</label><input id="quizDescription" maxlength="500" placeholder="Kısa test açıklaması"></div>
         </div>
         <div class="math-editor-section" id="math-question-editor">
-          <h3>Formüllü soru editörü</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+            <h3 style="margin:0">Formüllü ve Çoktan Seçmeli Sorular</h3>
+            <div style="display:flex;gap:8px">
+              <a class="btn sm light" href="#image-questions" style="text-decoration:none">📷 Resimli Soru Yükle</a>
+              <a class="btn sm light" href="#ai-question-wizard" style="text-decoration:none;background:#f3e8ff;color:#7e22ce;border-color:#d8b4fe">✨ AI'dan Soru Üret</a>
+            </div>
+          </div>
           <p class="hint">Soru metnini biçimlendirin, LaTeX formülü ekleyin ve SVG şeklinizi önizleyin. Sorular testi yayınladığınızda öğrencilere açılır.</p>
           <div class="question-list" id="questionList"></div>
         </div>
         <div class="button-row">
           <button class="btn light" id="addQuestion" type="button">+ Soru ekle</button>
           <button class="btn" type="submit">Testi Yayınla</button>
-          <a class="btn light" href="#image-questions" style="text-decoration:none">📷 Resim yükle (resimli soru)</a>
+          <a class="btn light" href="#image-questions" style="text-decoration:none">📷 Resimli Soru Ekle</a>
+          <a class="btn light" href="#ai-question-wizard" style="text-decoration:none;background:#f3e8ff;color:#7e22ce;border-color:#d8b4fe">✨ AI Soru Sihirbazı</a>
         </div>
         <p class="status" id="quizStatus" role="status"></p>
       </form>
