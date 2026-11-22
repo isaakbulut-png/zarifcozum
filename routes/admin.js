@@ -10,6 +10,7 @@ const { normalizeFaqQuestion } = require('../lib/faq-service');
 const { sanitizeFaqHtml } = require('../lib/rich-content');
 const SiteMediaTargets = require('../assets/site-media-targets');
 const {createLocalMediaStorage} = require('../lib/site-media-storage');
+const { sendTeacherStatusEmail } = require('../lib/teacher-mail-notifier');
 
 const PAGE_SIZE = 25;
 const MAX_ANIMATION_BYTES = 5 * 1024 * 1024;
@@ -1900,6 +1901,18 @@ function createAdminRouter({
       }
 
       await user.save();
+
+      // Öğretmene otomatik durum bilgilendirme e-postası gönder
+      if (['onaylandi', 'reddedildi'].includes(yeniDurum)) {
+        sendTeacherStatusEmail({
+          email: user.email,
+          name: user.name,
+          status: yeniDurum,
+          teacherType: user.ogretmenTipi
+        }).catch(err => {
+          console.warn('[Admin] Öğretmen bildirim e-postası gönderilemedi:', err.message);
+        });
+      }
 
       // Admin log kaydı
       try {
