@@ -168,9 +168,10 @@ const adminLoginLimiter = rateLimit({
 });
 
 function redirectForRole(role, adminRole) {
+  if (role === 'admin' || adminRole === 'superadmin') return '/admin-paneli.html';
   if (role === 'teacher') return '/ogretmen-paneli.html';
   if (role === 'parent') return '/veli-panel.html';
-  if (role === 'admin' || adminRole) return '/admin-paneli.html';
+  if (adminRole) return '/admin-paneli.html';
   return '/ogrenci-paneli.html';
 }
 

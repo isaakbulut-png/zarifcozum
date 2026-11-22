@@ -579,13 +579,13 @@ function adminSayfasiGonder(dosya) {
     res.sendFile(path.join(__dirname, dosya));
   };
 }
-app.get(['/yonetim', '/admin-giris.html'], async (req, res, next) => {
+app.get(['/admin', '/yonetim', '/admin-giris.html'], async (req, res, next) => {
   if (req.session.user?.id) {
     try {
-      const user = await User.findById(req.session.user.id).select('name role adminRole');
+      const user = await User.findById(req.session.user.id).select('name email role adminRole');
       const adminRole = adminRoleOf(user);
       if (adminRole || user?.role === 'admin') {
-        req.session.user = { ...req.session.user, name: user.name, role: user.role, adminRole };
+        req.session.user = { ...req.session.user, name: user.name, email: user.email, role: user.role, adminRole: adminRole || 'superadmin' };
         return res.redirect('/admin-paneli.html');
       }
     } catch (e) {
@@ -594,16 +594,13 @@ app.get(['/yonetim', '/admin-giris.html'], async (req, res, next) => {
   }
   next();
 }, adminSayfasiGonder('admin-giris.html'));
-app.get(['/admin-paneli.html', '/admin-maliyet.html'], async (req, res, next) => {
+app.get(['/admin-paneli', '/admin-paneli.html', '/admin-maliyet.html'], async (req, res, next) => {
   if (!req.session.user?.id) return res.redirect('/yonetim');
-  if (!['admin', 'teacher'].includes(req.session.user.role) && !req.session.user.adminRole) {
-    return res.redirect('/yonetim');
-  }
   try {
-    const user = await User.findById(req.session.user.id).select('name role adminRole');
+    const user = await User.findById(req.session.user.id).select('name email role adminRole');
     const adminRole = adminRoleOf(user);
-    if (!adminRole) return res.redirect('/yonetim');
-    req.session.user = { ...req.session.user, name: user.name, role: user.role, adminRole };
+    if (!adminRole && user?.role !== 'admin') return res.redirect('/yonetim');
+    req.session.user = { ...req.session.user, name: user.name, email: user.email, role: user.role, adminRole: adminRole || 'superadmin' };
   } catch (error) {
     console.error('Yönetim paneli rolü doğrulanamadı:', error);
     return res.status(500).send('Yönetim paneli yetkisi doğrulanamadı.');
