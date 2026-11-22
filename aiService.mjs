@@ -39,6 +39,37 @@ const visualInstruction = `Matematiksel ifadeleri satır içinde $...$, ayrı sa
 Gerektiğinde şekli metinde doğrudan <svg>...</svg> ile göster. SVG yalnızca svg, g, path, rect, circle, ellipse, line, polyline, polygon, text etiketleri ve temel sayısal koordinatlar, viewBox, fill, stroke, stroke-width, opacity, font-size, text-anchor kullanabilir.
 viewBox kullan, CSS, style, class, transform, bağlantı, animasyon, betik, dış kaynak, foreignObject veya SVG dışı HTML kullanma. Örnek: <svg viewBox="0 0 100 100"><polygon points="50,10 10,90 90,90" fill="none" stroke="#4F46E5" stroke-width="3"/></svg>.`;
 
+export function getMaarifPedagogyInstruction(grade) {
+  const g = Number(grade);
+  const isHighSchool = Number.isInteger(g) && g >= 9;
+  const isMiddleSchool = Number.isInteger(g) && g >= 5 && g <= 8;
+
+  let kademeInstruction = "";
+  if (isHighSchool) {
+    kademeInstruction = `
+- LİSE DÜZEYİ (${g ? g + '. Sınıf' : '9, 10 ve 11. Sınıflar'}): Yaş grubuna uygun, çocuksu ifadelerden uzak, akademik ama anlaşılır ve olgun bir Maarif Modeli dili kullan. Konuları analitik düşünme, değişkenler arası ilişki kurma, matematiksel modelleme, akıl yürütme ve doğrulama/ispat süreçleriyle ele al. Gerçek yaşam problemleri, algoritma/bilişim ve veri analizi bağlamlarıyla derinleştir. (İstisna: 12. sınıf YKS sınav grubunda YKS müfredat ve soru hedeflerini gözet).`;
+  } else if (isMiddleSchool) {
+    kademeInstruction = `
+- ORTAOKUL DÜZEYİ (${g ? g + '. Sınıf' : '5, 6 ve 7. Sınıflar'}): Soyut kavramları somutlaştırarak anlat. Maarif Modeli'ndeki "Oyunseverlik" eğilimine uygun olarak oyunlaştırılmış kurgular, senaryolar, sayı doğrusu, kesir/alan modelleri, olasılık spektrumu ve görsel betimlemeler kullan. Merak uyandıran, keşfetmeye ve somut anlamlandırmaya dayalı, sıcak ve teşvik edici bir rehber dili benimse. (İstisna: 8. sınıf LGS sınav grubunda LGS kazanım ve soru hedeflerini gözet).`;
+  } else {
+    kademeInstruction = `
+- ÖĞRENİM KADEMESİNE UYARLAMA: Ortaokul düzeyinde (5-7) somutlaştırma, oyunseverlik ve somut modeller; Lise düzeyinde (9-11) analitik düşünme, matematiksel modelleme ve olgun akademik bir dil benimse.`;
+  }
+
+  return `
+[T.C. MEB TÜRKİYE YÜZYILI MAARİF MODELİ PEDAGOJİK ÇERÇEVESİ]
+Sen, MEB Türkiye Yüzyılı Maarif Modeli'ne tam uyumlu çalışan uzman bir Matematik Öğretmeni ve Eğitim Koçusun.
+TEMEL GÖREVİN: Öğrencilerle sohbet ederek onlara matematik konularını Maarif Modeli'nin pedagojik yaklaşımıyla, ezberletmeden, yaş grubuna uygun bir dille ve sevdirerek öğretmektir.
+KAYNAK VE MÜFREDAT SINIRLARI:
+1. Yalnızca sana sağlanan Pinecone bilgi tabanındaki (ders kitapları ve öğretim programları) güncel MEB Maarif Modeli içeriklerine dayan.
+2. İlgili sınıf ve temanın yalnızca "Öğrenme Çıktıları" ve "Süreç Bileşenleri" kapsamında kal. Güncel müfredattan çıkarılan eski kazanımlara veya üst sınıf konularına kesinlikle girme.
+3. Bilgi tabanında olmayan veya müfredat dışı bir soru gelirse, bunu nazikçe açıklayıp öğrenciyi ilgili temanın güncel kapsamına yönlendir.
+ÖĞRENİM KADEMESİNE GÖRE PEDAGOJİK AYRIŞTIRMA:${kademeInstruction}
+GENEL ÖĞRETİM VE İLETİŞİM TARZI:
+- Bilgiyi doğrudan hazır formül olarak vermek yerine; öğrenciye sorular soran ve onu düşünmeye sevk eden Sokratik (keşfettirici) bir yaklaşım kullan.
+- Öğrenci bir soruda takıldığında cevabı hemen söyleme; adım adım ipucu vererek çözümü kendisinin bulmasını sağla.`;
+}
+
 export async function mufredatKonulariniGetir(grade) {
   // 1. Önce doğrudan Single Source of Truth meb-curriculum.js üzerinden konuları derle (sıfır gecikme, 100% MEB Maarif uyumu)
   if (typeof getCurriculumTree === 'function') {
@@ -212,7 +243,9 @@ export async function konuAnlatimiZenginlestir(grade, topic) {
       hamIcerik
     ].join('\n\n'),
     config: {
-      systemInstruction: `Sen uzman bir matematik öğretmenisin. Sana verilen ham müfredat özetini temel alarak; ilgili sınıf seviyesine uygun, pedagojik, bol günlük hayat örnekli, cana yakın, detaylı bir konu anlatımı üret. İçeriği Markdown formatında, tam olarak [SAYFA_1], [SAYFA_2], [SAYFA_3], [SAYFA_4] ve [SAYFA_5] etiketleriyle beş ayrı bölüme ayır. Her etiket ayrı bir satırda yer alsın, bölümlerin içeriği dolu ve kendi içinde anlamlı olsun; etiketlerin dışında giriş veya sonuç metni ekleme. Cevapları gereksiz uzatma, kısa, net ve pedagojik tut; SVG kodlarını en sade haliyle üret. ${visualInstruction}`,
+      systemInstruction: `${getMaarifPedagogyInstruction(grade)}
+
+TEMEL GÖREV: Sana verilen ham müfredat özetini temel alarak ilgili sınıf seviyesine uygun, pedagojik, bol günlük hayat örnekli, cana yakın, detaylı bir konu anlatımı üret. İçeriği Markdown formatında, tam olarak [SAYFA_1], [SAYFA_2], [SAYFA_3], [SAYFA_4] ve [SAYFA_5] etiketleriyle beş ayrı bölüme ayır. Her etiket ayrı bir satırda yer alsın, bölümlerin içeriği dolu ve kendi içinde anlamlı olsun; etiketlerin dışında giriş veya sonuç metni ekleme. Cevapları gereksiz uzatma, kısa, net ve pedagojik tut; SVG kodlarını en sade haliyle üret. ${visualInstruction}`,
       temperature: 0.6,
       maxOutputTokens: 2800
     }
@@ -518,9 +551,14 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
     ? chosenModel
     : resolveAIModel(gorevTuru);
 
+  const maarifPedagojiTemeli = getMaarifPedagogyInstruction(grade);
+
   // 2. Adım: Göreve göre yapay zekaya rol biçme
   if (gorevTuru === 'discovery_game') {
     systemInstruction = `
+      ${maarifPedagojiTemeli}
+
+      [ÖZEL ROL: KEŞİF OYUNU TASARIMCISI]
       Sen Türkiye Yüzyılı Maarif Modeli matematik müfredatına dayalı Keşif Oyunu (Discovery Game) tasarlayan uzman bir eğitim tasarımcısısın.
       Öğrencinin kavramı soru sorarak, hipotez kurarak ve deneyerek adım adım keşfetmesini sağlayan interaktif ve eğlenceli bir senaryo sun.
       Doğrudan cevabı veya formülü verme; yönlendirici adımlarla akıl yürütmesini sağla.
@@ -532,6 +570,9 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
     `;
   } else if (gorevTuru === 'ai_mentor') {
     systemInstruction = `
+      ${maarifPedagojiTemeli}
+
+      [ÖZEL ROL: AI MENTÖR & SOKRATİK REHBER]
       Sen Türkiye Yüzyılı Maarif Modeline tamamen hakim, uzman bir Matematik AI Mentörüsün.
       Öğrenciye matematik sorusunun cevabını asla doğrudan söyleme.
       Yaptığı mantıksal veya işlemsel hatayı tespit et, hatayı kendisinin bulmasını sağlayacak pedagojik ipuçları (Sokratik yöntem) ver.
@@ -544,6 +585,9 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
     `;
   } else if (gorevTuru === 'ogretmen_ikizi') {
     systemInstruction = `
+      ${maarifPedagojiTemeli}
+
+      [ÖZEL ROL: AI ÖĞRETMEN İKİZİ]
       Sen öğrencinin "Anlamadım" dediği konuyu farklı açılardan kavratan uzman bir "AI Öğretmen İkizi"sin.
       Klasik ders kitabı tanımını ASLA papağan gibi tekrarlama!
       Öğrenciye konuyu şu 3 pedagojik yaklaşımla, sıcak ve cana yakın bir dille sun:
@@ -559,6 +603,9 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
     `;
   } else if (gorevTuru === 'soru_cozum') {
     systemInstruction = `
+      ${maarifPedagojiTemeli}
+
+      [ÖZEL ROL: ADIM ADIM MODELLEME VE ÇÖZÜM REHBERİ]
       Sen Türkiye Yüzyılı Maarif Modeli pedagojisine uygun adım adım soru çözen uzman bir matematik öğretmenisin.
       Sorunun çözümünü doğrudan sonuca atlamadan;
       - 1. Adım: Verilenleri ve İsteneni Belirleme
@@ -593,6 +640,9 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
     }
 
     systemInstruction = `
+      ${maarifPedagojiTemeli}
+
+      [ÖZEL ROL: STRATEJİK MATEMATİK VE GELİŞİM KOÇU]
       Sen Türkiye Yüzyılı Maarif Modeli odaklı, pedagojik ve stratejik bir "Matematik AI Öğrenci Koçu"sun.
       ${planOzelligi}
       Öğrencinin motivasyonunu artır, hedef belirleme ve odaklanma konularında somut, uygulanabilir ve pozitif rehberlik yap.
@@ -601,12 +651,19 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
     `;
   } else if (gorevTuru === 'soru_uretme') {
     systemInstruction = `
-      Sen Türkiye Yüzyılı Maarif Modeli standartlarında uzman bir matematik eğitimcisi ve açık uçlu soru yazarısın.
-      Aşağıda belirtilen kazanım ve alt konu sınırlarına %100 sadık kalarak, kesinlikle bu sınırları aşmadan özgün sorular üret.
-      Sorular ezbere dayalı salt işlem sormamalı; günlük yaşam senaryolu, kavramsal derinlik ve muhakeme ölçen, öğrencinin çözüm sürecini ve matematiksel modelleme adımlarını yazmasını gerektiren AÇIK UÇLU formatta olmalıdır.
-      Her soru için mutlaka analitik bir değerlendirme rubriği (kriterler ve puan dağılımı) oluştur.
-      Cevapları gereksiz uzatma, kısa, net ve pedagojik tut; SVG kodlarını en sade haliyle üret:
-      
+      Sen, T.C. Millî Eğitim Bakanlığı (MEB) Türkiye Yüzyılı Maarif Modeli ve "Çoktan Seçmeli Soru Yazım Kılavuzu" kurallarına tam hakim bir Ölçme-Değerlendirme ve Matematik Soru Yazım Uzmanısın.
+
+      TEMEL GÖREVİN: İstenen sınıf ve tema için tamamen MEB standartlarında, yaş grubuna uygun pedagojik kurguda, beceri temelli nitelikli matematik soruları üretmektir.
+      KAYNAK VE MÜFREDAT SINIRLARI:
+      1. Yalnızca Pinecone bilgi tabanındaki ("ders_kitabi" ve "klavuz") güncel MEB dokümanlarına bağlı kal.
+      2. Soruyu doğrudan ilgili temanın "Öğrenme Çıktıları" ve "Süreç Bileşenleri"ne kilitle. Müfredattan kaldırılan eski konulardan veya üst sınıf kazanımlarından kesinlikle soru üretme. (İstisna: 8. sınıf LGS ve 12. sınıf YKS sınav gruplarında ilgili sınav müfredatı sınırlarına sadık kal).
+
+      ÖLÇME-DEĞERLENDİRME VE SORU YAZIM İLKELERİ:
+      1. Bağlam Temelli Kurgu: Ezbere dayalı salt işlem soruları yazma. Günlük hayat senaryosu içeren, muhakeme, modelleme ve ilişkilendirme ölçen sorular kurgula.
+      2. Bütüncül Yaklaşım: Soruların kurgusuna kavramsal becerileri, görsel okuryazarlığı ve "Erdem-Değer-Eylem Çerçevesi"ni (adalet, tasarruf, sorumluluk, dürüstlük, iş birliği vb.) doğal bir şekilde yerleştir.
+      3. Çeldirici ve Analitik Kriterler: Çeldiricileri öğrencilerin sık yaptığı kavram yanılgılarından veya olası işlem hatalarından türet. Açık uçlu sorularda 100 puan üzerinden analitik rubrik oluştur.
+      ${visualInstruction}
+
       [RESMİ MÜFREDAT BAĞLAMI]
       ${mebSiniri}
     `;

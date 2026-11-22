@@ -50,7 +50,15 @@ const eskiKonular = [
 ];
 const konular = new Set([...eskiKonular, ...TUM_KONULAR, ...Object.values(SINIF_KONULARI_V2).flat()]);
 const zorluklar = new Set(['Kolay', 'Orta', 'Zor']);
-const secenekler = ['A', 'B', 'C', 'D'];
+const seceneklerOrtaokul = ['A', 'B', 'C', 'D'];
+const seceneklerLise = ['A', 'B', 'C', 'D', 'E'];
+const secenekler = seceneklerLise;
+
+function getSecenekler(grade) {
+  const g = Number(grade);
+  return g >= 9 ? ['A', 'B', 'C', 'D', 'E'] : ['A', 'B', 'C', 'D'];
+}
+
 const soruUretmeSiniri = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 5,
@@ -59,7 +67,7 @@ const soruUretmeSiniri = rateLimit({
   message: { mesaj: 'Çok fazla soru üretme isteği. 15 dakika sonra tekrar deneyin.' }
 });
 
-function isValidQuestion(question) {
+function isValidQuestion(question, grade) {
   if (!question || typeof question.text !== 'string' || !question.text.trim()) return false;
   if (question.text.length > 3500) return false;
 
@@ -72,12 +80,14 @@ function isValidQuestion(question) {
   }
 
   // Çoktan seçmeli soru kontrolü
+  const targetGrade = grade || question.grade || question.sinif;
+  const activeSecenekler = getSecenekler(targetGrade);
   if (question.options && typeof question.options === 'object') {
-    return secenekler.every(letter =>
+    return activeSecenekler.every(letter =>
       typeof question.options[letter] === 'string' &&
       question.options[letter].trim().length > 0 &&
       question.options[letter].length <= 500
-    ) && secenekler.includes(question.answer);
+    ) && activeSecenekler.includes(question.answer);
   }
 
   return Boolean(hasSolution);
@@ -224,10 +234,13 @@ function prepareAIQuestion(question, context = {}) {
   const rawSolution = question.solution || question.explanation || '';
   const normalizedSolution = normalizeBareMath(rawSolution);
   
+  const activeGrade = context.grade || question.grade || question.sinif;
+  const activeSecenekler = getSecenekler(activeGrade);
+
   let normalizedOptions = null;
   if (question.options && typeof question.options === 'object') {
     normalizedOptions = {};
-    for (const letter of secenekler) {
+    for (const letter of activeSecenekler) {
       if (question.options[letter]) {
         normalizedOptions[letter] = normalizeBareMath(question.options[letter] || '');
       }
@@ -258,7 +271,7 @@ function prepareAIQuestion(question, context = {}) {
     })).filter(r => r.criterion && r.points > 0);
   }
 
-  const isMultipleChoice = normalizedOptions && secenekler.every(l => Boolean(normalizedOptions[l]));
+  const isMultipleChoice = normalizedOptions && activeSecenekler.every(l => Boolean(normalizedOptions[l]));
   const questionType = isMultipleChoice ? 'multiple_choice' : 'open_ended';
 
   return {
@@ -327,14 +340,15 @@ function openEndedSoruSemasi() {
   };
 }
 
-function soruSemasi() {
+function soruSemasi(grade = 5) {
+  const activeSecenekler = getSecenekler(grade);
   const secenekSemasi = {
     type: 'OBJECT',
-    properties: Object.fromEntries(secenekler.map(letter => [letter, {
+    properties: Object.fromEntries(activeSecenekler.map(letter => [letter, {
       type: 'STRING',
       description: `${letter} seçeneği metni. Tüm matematiksel ifadeler tek dolar $ ... $ içinde ve geçerli kaçırılmış LaTeX ile yazılmalıdır (örn: "$3^{x-1}$", "$[AB] \\\\perp [AC]$").`
     }])),
-    required: secenekler
+    required: activeSecenekler
   };
   return {
     type: 'OBJECT',
@@ -353,10 +367,10 @@ function soruSemasi() {
               description: 'Görsel, şema veya tablo gerektiren sorularda geçerli ve renkli <svg viewBox="0 0 W H" xmlns="http://www.w3.org/2000/svg">...</svg> kodu; görsel gerekmiyorsa boş metin. SVG içinde asla $ veya ham LaTeX kullanılmaz.'
             },
             options: secenekSemasi,
-            answer: { type: 'STRING', enum: secenekler },
+            answer: { type: 'STRING', enum: activeSecenekler },
             explanation: {
               type: 'STRING',
-              description: 'Çözüm adımları. Tüm matematiksel ifadeler $ ... $ içine alınmalı ve ters eğik çizgiler çift kaçırılmalıdır.'
+              description: 'Çözüm adımları ve Çeldirici Analizi: Doğru cevabın adım adım çözümü ile yanlış seçeneklerin (çeldiricilerin) öğrencilerin hangi kavram yanılgılarını veya işlem hatalarını ölçtüğü. Tüm matematiksel ifadeler $ ... $ içine alınmalı ve ters eğik çizgiler çift kaçırılmalıdır.'
             }
           },
           required: ['text', 'options', 'answer', 'explanation']
@@ -567,10 +581,30 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       ragContext = `[TÜRKİYE YÜZYILI MAARİF MODELİ RESMÎ MÜFREDAT KAZANIM VE SINIRLARI]\nSınıf: ${grade}. Sınıf\nDers: ${ders}\nTema / Ünite: ${resolvedUnit}\nAlt Konu: ${resolvedSub}\nKazanım: ${outcomeCode}\nResmi Sınırlar: ${officialBoundary}`;
     }
 
-    // 3. TÜRKİYE YÜZYILI MAARİF MODELİ SİSTEM PROMPTU (AÇIK UÇLU & RUBRİKLİ)
+    // 3. TÜRKİYE YÜZYILI MAARİF MODELİ SİSTEM PROMPTU (MOD 2: TEST VE SORU ÜRETİMİ MODU)
+    const isLise = grade >= 9;
+    const secenekSayisiMetni = isLise
+      ? '3. ÇOKTAN SEÇMELİ FORMAT (LİSE): Sorular KESİNLİKLE 5 seçenekli (A, B, C, D, E) ve tek bir doğru cevabı olan sorulardır.'
+      : '3. ÇOKTAN SEÇMELİ FORMAT (ORTAOKUL): Sorular KESİNLİKLE 4 seçenekli (A, B, C, D) ve tek bir doğru cevabı olan sorulardır.';
+
+    const kademePedagojisi = isLise
+      ? [
+          'ÖĞRENİM KADEMESİ: LİSE DÜZEYİ (9, 10, 11. Sınıflar ve 12. Sınıf YKS)',
+          '- Soruları lise öğrencisinin bilişsel düzeyine uygun olgun bir dille; çocuksu ifadelerden uzak kurgula.',
+          '- Çok adımlı akıl yürütme, fonksiyon/grafik yorumlama, matematiksel modelleme, veri analizi ve stratejik problem çözme becerilerini ölç.',
+          '- Çoktan seçmeli sorularda seçenek sayısını KESİNLİKLE 5 şıklı (A, B, C, D, E) oluştur.'
+        ].join('\n')
+      : [
+          'ÖĞRENİM KADEMESİ: ORTAOKUL DÜZEYİ (5, 6, 7. Sınıflar ve 8. Sınıf LGS)',
+          '- Soruları somut düşünme ve keşfetme becerisine hitap edecek şekilde; günlük hayat senaryoları, somut nesne/şekil/alan modelleri ve görsel yorumlama (tablo, grafik, diyagram) destekli senaryolarla kurgula.',
+          '- Çoktan seçmeli sorularda seçenek sayısını KESİNLİKLE 4 şıklı (A, B, C, D) oluştur.'
+        ].join('\n');
+
     const prompt = [
-      'Sen Türkiye Yüzyılı Maarif Modeli standartlarında uzman bir Matematik Eğitim Uzmanı ve Açık Uçlu Soru Yazarısın.',
-      `Sınıf Düzeyi: ${grade}. Sınıf (MEB Türkiye Yüzyılı Maarif Modeli)`,
+      'Sen, T.C. Millî Eğitim Bakanlığı (MEB) Türkiye Yüzyılı Maarif Modeli ve "Çoktan Seçmeli Soru Yazım Kılavuzu" kurallarına tam hakim bir Ölçme-Değerlendirme ve Matematik Soru Yazım Uzmanısın.',
+      '',
+      'TEMEL GÖREVİN:',
+      `İstenen ${grade}. sınıf ve "${resolvedUnit} - ${resolvedSub}" konusu için tamamen MEB standartlarında, yaş grubuna uygun pedagojik kurguda, beceri temelli nitelikli matematik soruları üretmektir.`,
       `Ders: ${ders}`,
       `Tema / Ünite: ${resolvedUnit}`,
       `Alt Konu: ${resolvedSub}`,
@@ -579,19 +613,26 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       `Üretilecek Soru Sayısı: Tam olarak ${neededCount} soru üret.`,
       '',
       'PINECONE DOĞRULANMIŞ RESMÎ KAZANIM SINIRLARI (ZORUNLU - BU SINIRLARIN DIŞINA ÇIKMA):',
+      '1. Yalnızca Pinecone bilgi tabanındaki ("ders_kitabi" ve "klavuz") güncel MEB dokümanlarına ve sana sağlanan RAG bağlamına bağlı kal.',
+      '2. Soruyu doğrudan ilgili temanın "Öğrenme Çıktıları" ve "Süreç Bileşenleri"ne kilitle. Müfredattan kaldırılan eski konulardan veya üst sınıf kazanımlarından kesinlikle soru üretme. (8. sınıf LGS ve 12. sınıf YKS sınav gruplarında ilgili merkezi sınav müfredat sınırlarına uyulur.)',
       ragContext,
       '',
-      'MAARİF MODELİ PEDAGOJİK VE SORU STANDARTLARI (KESİNLİKLE UYULMALIDIR):',
-      '1. EZBERE DEĞİL, SÜRECE ODAKLI: Sorular salt formül uygulatan kuru işlem soruları olamaz. Öğrencinin kavramsal anlama, matematiksel modelleme, akıl yürütme ve muhakeme becerilerini ölçmelidir.',
-      '2. GÜNLÜK YAŞAM SENARYOLU: Soru metni öğrencinin bağ kurabileceği gerçekçi bir yaşam durumunu (mühendislik, zanaat, doğa, bilim, ekonomi, spor, mimari vb.) hikâyeleştirmelidir.',
+      'KADEME VE FORMAT STANDARTLARI:',
+      kademePedagojisi,
       questionType === 'open_ended'
-        ? '3. AÇIK UÇLU FORMAT: Sorular çoktan seçmeli DEĞİLDİR. Öğrencinin çözüm sürecini, adımlarını ve mantığını yazarak sergilemesini gerektiren AÇIK UÇLU sorulardır.'
-        : '3. ÇOKTAN SEÇMELİ FORMAT: Sorular dört seçenekli (A, B, C, D) ve tek bir doğru cevabı olan sorulardır.',
-      '4. ANALİTİK DEĞERLENDİRME RUBRİĞİ (rubric): Her soru için toplam 100 puan üzerinden 2-4 adımlı analitik puanlama kriterleri (criterion ve points) hazırla (Örn: Verilenleri modelleme 25P, Bağıntı kurma ve işlem 50P, Sonucu bağlamda yorumlama 25P).',
-      '5. ADIM ADIM ÇÖZÜM SÜRECİ (solution): Beklenen modelleme, işlem basamakları ve muhakeme açıkça yazılmalıdır.',
+        ? 'AÇIK UÇLU FORMAT: Sorular çoktan seçmeli DEĞİLDİR. Öğrencinin çözüm sürecini, adımlarını ve mantığını yazarak sergilemesini gerektiren AÇIK UÇLU sorulardır.'
+        : secenekSayisiMetni,
+      '',
+      'ÖLÇME-DEĞERLENDİRME VE SORU YAZIM İLKELERİ (KESİNLİKLE UYULMALIDIR):',
+      '1. BAĞLAM TEMELLİ KURGU: Ezbere dayalı salt formül uygulatan kuru işlem soruları yazma. Günlük hayat senaryosu içeren, yorumlama ve ilişkilendirme becerilerini ölçen özgün kurgular oluştur.',
+      '2. BÜTÜNCÜL YAKLAŞIM: Soruların kurgusuna matematiksel işlemin yanı sıra; ilgili temanın kavramsal becerilerini, görsel okuryazarlığı ve "Erdem-Değer-Eylem Çerçevesi"ni (adalet, tasarruf, sorumluluk, dürüstlük, iş birliği vb.) doğal bir şekilde yerleştir.',
+      '3. SORU KÖKÜ VE DİL BİLGİSİ: Soru kökünü yalın, anlaşılır, açık bir Türkçeyle ve tek bir doğru cevaba ulaşılacak kesinlikte yaz. Olumsuz soru köklerini (değildir, olamaz, yanlıştır vb.) vurgulu belirt.',
+      '4. SEÇENEKLER VE ÇELDİRİCİLER: Seçenekleri uzunluk, dil bilgisi ve yapı bakımından birbirine paralel kur. Yanlış seçenekleri (çeldiricileri) rastgele sayılardan değil, öğrencilerin o konuda sık yaptığı kavram yanılgılarından veya olası işlem hatalarından üret. Doğru cevabı tek ve tartışmasız kıl.',
+      '5. ÇÖZÜM VE ÇELDİRİCİ ANALİZİ (explanation / solution): Doğru cevabın adım adım pedagojik çözümünü ve yanlış şıkların (çeldiricilerin) hangi kavram yanılgısını ölçtüğünü açıkça yaz.',
+      questionType === 'open_ended' ? '6. ANALİTİK DEĞERLENDİRME RUBRİĞİ (rubric): Her soru için toplam 100 puan üzerinden 2-4 adımlı analitik puanlama kriterleri (criterion ve points) hazırla.' : '',
       '',
       'MATEMATİK VE GEOMETRİ FORMÜL KURALLARI (ZORUNLU):',
-      '- Soru metnindeki (text) ve çözümdeki (solution) TÜM matematiksel/geometrik ifadeleri, formülleri, değişkenleri ($x$, $y$), geometrik sembolleri ve sayıları tek dolar ($...$) içine alarak yaz.',
+      '- Soru metnindeki (text), seçeneklerdeki (options) ve çözümdeki (explanation/solution) TÜM matematiksel/geometrik ifadeleri, formülleri, değişkenleri ($x$, $y$), geometrik sembolleri ve sayıları tek dolar ($...$) içine alarak yaz.',
       '- JSON içinde geçerli olması için LaTeX komutlarındaki ters eğik çizgileri MUTLAKA çift ters eğik çizgi ile kaçır: "\\\\perp", "\\\\frac", "\\\\sqrt", "\\\\times", "\\\\cdot".',
       '',
       'GÖRSEL VE ŞEMA KURALI (SVG):',
@@ -599,7 +640,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       '- SVG içinde asla $ veya KaTeX kullanma; metinleri düz Unicode ile yaz.',
       '',
       'Yalnızca istenen JSON şemasına uyan JSON döndür; Markdown bloğu veya fazladan açıklama metni ekleme.'
-    ].join('\n');
+    ].filter(Boolean).join('\n');
 
     // Güvenli Ajan/Model Doğrulaması (İzin verilen modeller: flash-lite, flash, pro)
     const ALLOWED_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-pro'];
@@ -635,7 +676,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: {
               responseMimeType: 'application/json',
-              responseSchema: questionType === 'open_ended' ? openEndedSoruSemasi() : soruSemasi(),
+              responseSchema: questionType === 'open_ended' ? openEndedSoruSemasi() : soruSemasi(grade),
               maxOutputTokens: 4096
             }
           }),
@@ -726,7 +767,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
   }
 
   if (!Array.isArray(result.questions) || result.questions.length !== neededCount ||
-      !result.questions.every(isValidQuestion)) {
+      !result.questions.every(q => isValidQuestion(q, grade))) {
     console.error('Gemini yanıtı beklenen soru biçimini karşılamadı.');
     return res.status(502).json({ mesaj: 'Üretilen sorular doğrulanamadı. Lütfen yeniden deneyin.' });
   }
