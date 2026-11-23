@@ -284,34 +284,52 @@
       const [showNotificationsModal, setShowNotificationsModal] = useState(false);
 
       useEffect(() => {
-        // URL query param tab
+        // URL query param tab veya hash
         const urlParams = new URLSearchParams(window.location.search);
         const tab = urlParams.get('tab');
-        if (tab && ['general', 'identity', 'billing', 'integration', 'security', 'support'].includes(tab)) {
+        if (tab === 'messages' || window.location.hash === '#messages') {
+          setMessagesOpen(true);
+        } else if (tab && ['general', 'identity', 'billing', 'integration', 'security', 'support'].includes(tab)) {
           setActiveTab(tab);
         }
 
         // Mesajları API veya yerel depodan senkronize al
-        const localSaved = localStorage.getItem('zarif_direct_messages_v1');
-        if (localSaved) {
+        const syncFromStorage = () => {
           try {
-            const parsed = JSON.parse(localSaved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setConversations(parsed);
-              if (parsed[0]) setSelectedChatId(parsed[0].id);
+            const raw = localStorage.getItem('zarif_conversations_v2') || localStorage.getItem('zarif_direct_messages_v1');
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                setConversations(parsed);
+                if (parsed[0]) setSelectedChatId(parsed[0].id || parsed[0].conversationId);
+              }
             }
           } catch {}
-        }
-        fetch('/api/messages')
+        };
+
+        syncFromStorage();
+
+        fetch('/api/messages?role=teacher')
           .then(r => r.ok ? r.json() : null)
           .then(data => {
             if (data && data.success && Array.isArray(data.conversations) && data.conversations.length > 0) {
               setConversations(data.conversations);
-              if (data.conversations[0]) setSelectedChatId(data.conversations[0].id);
-              try { localStorage.setItem('zarif_direct_messages_v1', JSON.stringify(data.conversations)); } catch {}
+              if (data.conversations[0]) setSelectedChatId(data.conversations[0].id || data.conversations[0].conversationId);
+              try {
+                localStorage.setItem('zarif_conversations_v2', JSON.stringify(data.conversations));
+                localStorage.setItem('zarif_direct_messages_v1', JSON.stringify(data.conversations));
+              } catch {}
             }
           })
           .catch(() => {});
+
+        // Storage Event Dinleyicisi (Sekmeler arası canlı eşitleme)
+        const handleStorage = (e) => {
+          if (e.key === 'zarif_conversations_v2' || e.key === 'zarif_direct_messages_v1' || e.key === 'zarif_msg_sync_ping') {
+            syncFromStorage();
+          }
+        };
+        window.addEventListener('storage', handleStorage);
 
         // BroadcastChannel Dinleyicisi (Sekmeler arası anlık mesajlaşma)
         let bc = null;
@@ -319,8 +337,12 @@
           if (typeof BroadcastChannel !== 'undefined') {
             bc = new BroadcastChannel('zarif_messages_channel');
             bc.onmessage = (e) => {
-              if (e.data?.type === 'SYNC_MESSAGES' && Array.isArray(e.data.data)) {
-                setConversations(e.data.data);
+              const { type, data, payload } = e.data || {};
+              const list = data || payload?.conversations;
+              if (Array.isArray(list)) {
+                setConversations(list);
+              } else {
+                syncFromStorage();
               }
             };
           }
@@ -497,24 +519,34 @@
         if (!replyText.trim()) return;
         const now = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
         const cleanText = replyText.trim();
-        const newMsg = { id: 'msg_' + Date.now(), sender: 'teacher', text: cleanText, time: now };
+        const newMsg = {
+          id: 'msg_' + Date.now(),
+          senderId: 'teacher_1',
+          senderRole: 'teacher',
+          sender: 'teacher',
+          text: cleanText,
+          time: now,
+          isRead: false
+        };
         
         setConversations(prev => {
           const updated = prev.map(chat => {
-            if (chat.id === selectedChatId) {
+            if (chat.id === selectedChatId || chat.conversationId === selectedChatId) {
               return {
                 ...chat,
                 time: now,
                 unread: false,
-                messages: [...chat.messages, newMsg]
+                messages: [...(chat.messages || []), newMsg]
               };
             }
             return chat;
           });
           try {
+            localStorage.setItem('zarif_conversations_v2', JSON.stringify(updated));
             localStorage.setItem('zarif_direct_messages_v1', JSON.stringify(updated));
+            localStorage.setItem('zarif_msg_sync_ping', String(Date.now()));
             if (typeof BroadcastChannel !== 'undefined') {
-              new BroadcastChannel('zarif_messages_channel').postMessage({ type: 'SYNC_MESSAGES', data: updated });
+              new BroadcastChannel('zarif_messages_channel').postMessage({ type: 'NEW_MESSAGE', payload: { conversations: updated }, data: updated });
             }
           } catch {}
           return updated;
@@ -527,7 +559,13 @@
           await fetch('/api/messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ conversationId: selectedChatId, text: cleanText })
+            body: JSON.stringify({
+              conversationId: selectedChatId,
+              senderId: 'teacher_1',
+              senderName: 'Ahmet Yılmaz',
+              senderRole: 'teacher',
+              text: cleanText
+            })
           });
         } catch (e) {
           console.warn('Mesaj sunucuya iletilemedi:', e);
@@ -537,15 +575,29 @@
       const selectChat = (id) => {
         setSelectedChatId(id);
         setConversations(prev => {
-          const updated = prev.map(c => c.id === id ? { ...c, unread: false } : c);
+          const updated = prev.map(c => {
+            if (c.id === id || c.conversationId === id) {
+              const msgs = Array.isArray(c.messages) ? c.messages.map(m => ({ ...m, isRead: true })) : [];
+              return { ...c, unread: false, messages: msgs };
+            }
+            return c;
+          });
           try {
+            localStorage.setItem('zarif_conversations_v2', JSON.stringify(updated));
             localStorage.setItem('zarif_direct_messages_v1', JSON.stringify(updated));
+            localStorage.setItem('zarif_msg_sync_ping', String(Date.now()));
             if (typeof BroadcastChannel !== 'undefined') {
-              new BroadcastChannel('zarif_messages_channel').postMessage({ type: 'SYNC_MESSAGES', data: updated });
+              new BroadcastChannel('zarif_messages_channel').postMessage({ type: 'MARK_READ', data: updated });
             }
           } catch {}
           return updated;
         });
+        fetch('/api/messages/mark-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId: id, readerRole: 'teacher' })
+        }).catch(() => {});
+      };
         fetch('/api/messages/mark-read', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -593,8 +645,10 @@
                 >
                   <Icon name="MessageSquare" className="w-4 h-4" />
                   <span>Mesajlar</span>
-                  {conversations.some(c => c.unread) && (
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                  {conversations.filter(c => c.unread).length > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full bg-[#ef4444] text-white text-[10px] font-bold shadow-sm animate-pulse">
+                      {conversations.filter(c => c.unread).length}
+                    </span>
                   )}
                 </button>
               </nav>
@@ -620,7 +674,7 @@
                 >
                   <Icon name="MessageSquare" className="w-5 h-5" />
                   {conversations.filter(c => c.unread).length > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#C84B31] text-[10px] font-bold text-white flex items-center justify-center border-2 border-white">
+                    <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#ef4444] text-[10px] font-bold text-white flex items-center justify-center border-2 border-white shadow-sm">
                       {conversations.filter(c => c.unread).length}
                     </span>
                   )}
@@ -729,6 +783,29 @@
                   >
                     <Icon name="ShieldCheck" className={`w-5 h-5 ${activeTab === 'security' ? 'text-indigo-600' : 'text-slate-400'}`} />
                     <span>Güvenlik &amp; Bildirimler</span>
+                  </button>
+
+                  {/* Mesajlar & İletişim Sekmesi (Prompt Madde 1 & 3) */}
+                  <button
+                    onClick={() => setMessagesOpen(true)}
+                    type="button"
+                    className={`flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-semibold transition text-left ${
+                      messagesOpen
+                        ? 'bg-[#fff5f2] text-[#C84B31] font-bold border border-orange-200 shadow-sm'
+                        : 'text-slate-600 hover:bg-[#fff5f2] hover:text-[#C84B31]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5">
+                      <Icon name="MessageSquare" className={`w-5 h-5 ${messagesOpen ? 'text-[#C84B31]' : 'text-slate-400'}`} />
+                      <span>Mesajlar</span>
+                    </div>
+                    {conversations.filter(c => c.unread).length > 0 ? (
+                      <span className="bg-[#ef4444] text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
+                        {conversations.filter(c => c.unread).length}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-slate-400 font-normal">Sohbet</span>
+                    )}
                   </button>
 
                   <div className="my-2 border-t border-slate-100"></div>
