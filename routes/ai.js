@@ -391,6 +391,84 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     });
   });
 
+  // Soru için AI Geometrik Şekil ve Çizim Üretici (3'lü Merkez - c maddesi)
+  router.post('/cizim-uret', requireRole('teacher', 'admin'), async (req, res) => {
+    try {
+      const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
+      if (!prompt) {
+        return res.status(400).json({ mesaj: 'Lütfen çizilmesini istediğiniz şekli tarif edin.' });
+      }
+
+      const lower = prompt.toLowerCase();
+      let svg = null;
+
+      // 1. Çember ve İç Üçgen / Teğet
+      if ((lower.includes('çember') || lower.includes('daire')) && (lower.includes('üçgen') || lower.includes('teğet'))) {
+        const rMatch = prompt.match(/(\d+)\s*(?:cm|birim)?/i);
+        const rVal = rMatch ? rMatch[1] + ' cm' : '5 cm';
+        svg = `<svg viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="300" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <circle cx="250" cy="150" r="90" fill="#f8fafc" stroke="#2563eb" stroke-width="2.5"/>
+  <circle cx="250" cy="150" r="4" fill="#1e293b"/>
+  <text x="238" y="145" font-size="14" font-weight="bold" fill="#1e293b">O</text>
+  <line x1="250" y1="150" x2="340" y2="150" stroke="#dc2626" stroke-width="2" stroke-dasharray="4,3"/>
+  <text x="285" y="142" font-size="12" font-weight="bold" fill="#dc2626">r = ${rVal}</text>
+  <polygon points="250,60 172,195 328,195" fill="none" stroke="#16a34a" stroke-width="2.5"/>
+  <circle cx="250" cy="60" r="4" fill="#16a34a"/>
+  <circle cx="172" cy="195" r="4" fill="#16a34a"/>
+  <circle cx="328" cy="195" r="4" fill="#16a34a"/>
+  <text x="250" y="48" font-size="14" font-weight="bold" fill="#16a34a" text-anchor="middle">A</text>
+  <text x="156" y="208" font-size="14" font-weight="bold" fill="#16a34a">B</text>
+  <text x="336" y="208" font-size="14" font-weight="bold" fill="#16a34a">C</text>
+  <text x="250" y="275" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">O Merkezli Çember ve İç Teğet Üçgen (r = ${rVal})</text>
+</svg>`.trim();
+      } else if (lower.includes('koordinat') || lower.includes('kartezyen') || lower.includes('parabol') || lower.includes('grafik') || lower.includes('doğru grafiği')) {
+        svg = `<svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="280" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <line x1="50" y1="140" x2="450" y2="140" stroke="#1e293b" stroke-width="2"/>
+  <polygon points="455,140 445,135 445,145" fill="#1e293b"/>
+  <text x="460" y="145" font-size="14" font-weight="bold" fill="#1e293b">x</text>
+  <line x1="250" y1="260" x2="250" y2="30" stroke="#1e293b" stroke-width="2"/>
+  <polygon points="250,25 245,35 255,35" fill="#1e293b"/>
+  <text x="255" y="32" font-size="14" font-weight="bold" fill="#1e293b">y</text>
+  <circle cx="250" cy="140" r="3" fill="#1e293b"/>
+  <text x="238" y="155" font-size="12" fill="#64748b">O</text>
+  <line x1="120" y1="230" x2="380" y2="50" stroke="#2563eb" stroke-width="3"/>
+  <text x="390" y="65" font-size="13" font-weight="bold" fill="#2563eb">d: y = ax + b</text>
+  <text x="250" y="265" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">Kartezyen Koordinat Sistemi ve Doğru Grafiği</text>
+</svg>`.trim();
+      } else if (lower.includes('dik üçgen') || lower.includes('pisagor') || lower.includes('hipotenüs')) {
+        svg = `<svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+  <rect width="500" height="280" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <polygon points="120,60 120,220 380,220" fill="#eff6ff" stroke="#2563eb" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="120" y="200" width="20" height="20" fill="none" stroke="#dc2626" stroke-width="2"/>
+  <circle cx="130" cy="210" r="2.5" fill="#dc2626"/>
+  <circle cx="120" cy="60" r="5" fill="#1e293b"/>
+  <circle cx="120" cy="220" r="5" fill="#1e293b"/>
+  <circle cx="380" cy="220" r="5" fill="#1e293b"/>
+  <text x="105" y="55" font-size="16" font-weight="bold" fill="#1e293b">A</text>
+  <text x="105" y="235" font-size="16" font-weight="bold" fill="#1e293b">B</text>
+  <text x="395" y="225" font-size="16" font-weight="bold" fill="#1e293b">C</text>
+  <text x="90" y="145" font-size="13" font-weight="bold" fill="#2563eb">c</text>
+  <text x="250" y="240" font-size="13" font-weight="bold" fill="#2563eb">a</text>
+  <text x="260" y="130" font-size="13" font-weight="bold" fill="#dc2626">b (Hipotenüs)</text>
+  <text x="250" y="265" font-size="13" font-weight="bold" fill="#64748b" text-anchor="middle">ABC Dik Üçgeni [m(B) = 90°]</text>
+</svg>`.trim();
+      } else {
+        svg = generatePedagogicalSvg(prompt, prompt, 8);
+      }
+
+      if (!svg) {
+        svg = generatePedagogicalSvg(prompt, 'geometri', 8);
+      }
+
+      res.json({ basarili: true, svg });
+    } catch (err) {
+      console.error('Cizim uretme hatasi:', err);
+      res.status(500).json({ mesaj: 'Şekil üretilemedi: ' + err.message });
+    }
+  });
+
   router.post('/questions', requireRole('teacher'), soruUretmeSiniri, async (req, res) => {
     const grade = Number(req.body?.grade);
     const ders = typeof req.body?.ders === 'string' ? req.body.ders.trim() : 'Matematik';

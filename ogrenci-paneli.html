@@ -1656,6 +1656,18 @@ button,select{font:inherit}
                 console.error('Soru şekli görüntülenemedi:', error);
               }
             }
+            if (question.imageUrl) {
+              const target = fieldset.querySelector('.quiz-svg');
+              if (target) {
+                const img = document.createElement('img');
+                img.src = question.imageUrl;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '300px';
+                img.style.borderRadius = '8px';
+                img.style.margin = '8px 0';
+                target.appendChild(img);
+              }
+            }
             const selected = quizAttempt.questions[index].answer;
             if (selected) {
               const input = fieldset.querySelector(`input[value="${selected}"]`);
