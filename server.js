@@ -33,6 +33,7 @@ const { createDenemelerRouters } = require('./routes/denemeler');
 const { createExamsRouter } = require('./routes/exams');
 const { requireKonuLogin } = require('./lib/konu-erisimi');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
+const { createMessagesRouter } = require('./routes/messages');
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
 const { createPratikRouter } = require('./routes/pratik');
 const { createYaziliRouter } = require('./routes/yazili');
@@ -790,6 +791,7 @@ app.use('/api/parent', createParentRouter({
   service: curriculumService,
   demoMode: parentPanelDemoMode
 }));
+app.use('/api/messages', createMessagesRouter({ getDb: () => mongoClient?.db?.(DB_ADI) }));
 
 // Sunucu ve veritabanı ayakta mı?
 app.get('/api/saglik', (req, res) => res.json({ mesaj: 'Sunucu çalışıyor', db: DB_ADI, koleksiyon: KOLEKSIYON }));

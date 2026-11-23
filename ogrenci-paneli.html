@@ -371,6 +371,9 @@ button,select{font:inherit}
         <li><a href="#basari-raporlarim">
           <svg viewBox="0 0 24 24" style="stroke:#2dd4bf"><path d="M5 21V10M12 21V4M19 21v-8"/></svg>
           <span class="nav-text">Başarı Raporlarım</span></a></li>
+        <li><a href="javascript:void(0)" id="btnStudentOpenTeacherChat">
+          <svg viewBox="0 0 24 24" style="stroke:#fb923c"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-text">Öğretmenime Mesaj</span></a></li>
         <li class="gz-side-label"><span class="gz-label-dot" style="background:#fb923c"></span> Çalışma merkezi</li>
         <li><a href="#konu-anlatimlari">
           <svg viewBox="0 0 24 24" style="stroke:#fb923c"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg>
@@ -1189,6 +1192,28 @@ button,select{font:inherit}
   </form>
 </dialog>
 
+<!-- Öğretmene Mesaj Gönderme Modalı -->
+<dialog id="studentTeacherMsgModal" style="width:min(520px, calc(100% - 32px)); border:1px solid var(--line); border-radius:16px; padding:22px; background:var(--card); color:var(--text); box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+    <h3 style="font-family:var(--head); font-size:1.08rem; color:var(--navy-900); display:flex; align-items:center; gap:8px; margin:0;">
+      <span>✉️ Öğretmenime Mesaj Gönder</span>
+    </h3>
+    <button type="button" id="closeStudentTeacherMsgModal" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--muted); line-height:1;">&times;</button>
+  </div>
+  <p style="font-size:0.86rem; color:var(--muted); margin:0 0 14px 0;">Dersler, ödevler veya aklına takılan sorular hakkında öğretmenine doğrudan mesaj yazabilirsin.</p>
+  <form id="studentTeacherMsgForm">
+    <div style="margin-bottom:12px;">
+      <label for="studentTeacherMsgInput" style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:6px;">Mesajınız</label>
+      <textarea id="studentTeacherMsgInput" required rows="4" maxlength="1000" placeholder="Hocam merhaba, dünkü dersle ilgili..." style="width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:#fff; font-family:var(--body); font-size:0.88rem; box-sizing:border-box; outline:none; resize:vertical;"></textarea>
+    </div>
+    <p id="studentTeacherMsgStatus" style="font-size:0.84rem; margin-bottom:10px; min-height:1.2em;"></p>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button type="button" id="cancelStudentTeacherMsg" class="btn light" style="padding:8px 14px; font-size:0.84rem; border-radius:8px;">Vazgeç</button>
+      <button type="submit" id="btnSubmitStudentTeacherMsg" class="btn" style="background:#ea580c; color:#fff; font-weight:700; padding:8px 18px; font-size:0.84rem; border-radius:8px; border:none; cursor:pointer;">Mesajı İlet</button>
+    </div>
+  </form>
+</dialog>
+
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
 <script src="assets/math-text.js"></script>
 <script src="assets/rich-content.js"></script>
@@ -1589,6 +1614,58 @@ button,select{font:inherit}
     });
     $('changePasswordButton').addEventListener('click', () => $('changePasswordDialog').showModal());
     $('cancelPasswordChange').addEventListener('click', () => $('changePasswordDialog').close());
+
+    // Öğretmene Mesaj Gönderme Modalı İşlemleri
+    const btnStudentChat = $('btnStudentOpenTeacherChat');
+    const modalStudentChat = $('studentTeacherMsgModal');
+    if (btnStudentChat && modalStudentChat) {
+      btnStudentChat.addEventListener('click', (e) => {
+        e.preventDefault();
+        $('studentTeacherMsgStatus').textContent = '';
+        $('studentTeacherMsgInput').value = '';
+        modalStudentChat.showModal();
+        $('studentTeacherMsgInput').focus();
+      });
+      $('closeStudentTeacherMsgModal')?.addEventListener('click', () => modalStudentChat.close());
+      $('cancelStudentTeacherMsg')?.addEventListener('click', () => modalStudentChat.close());
+      $('studentTeacherMsgForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = $('studentTeacherMsgInput').value.trim();
+        if (!text) return;
+        const status = $('studentTeacherMsgStatus');
+        const submitBtn = $('btnSubmitStudentTeacherMsg');
+        submitBtn.disabled = true;
+        status.textContent = 'Mesajınız iletiliyor…';
+        status.style.color = 'var(--muted)';
+        try {
+          const studentName = $('studentName')?.textContent || 'Öğrenci';
+          const res = await fetch('/api/messages/send-from-client', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              roleType: 'student',
+              senderName: studentName,
+              text: text
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mesaj || 'Mesaj iletilemedi');
+          status.textContent = '✅ Mesajınız öğretmeninizin gelen kutusuna iletildi!';
+          status.style.color = '#15803d';
+          try {
+            if (typeof BroadcastChannel !== 'undefined') {
+              new BroadcastChannel('zarif_messages_channel').postMessage({ type: 'SYNC_MESSAGES', data: data.conversation ? [data.conversation] : [] });
+            }
+          } catch {}
+          setTimeout(() => modalStudentChat.close(), 1600);
+        } catch (err) {
+          status.textContent = 'Hata: ' + err.message;
+          status.style.color = '#dc2626';
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    }
     $('changePasswordForm').addEventListener('submit', async event => {
       event.preventDefault();
       const form = event.currentTarget;
