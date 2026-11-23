@@ -477,9 +477,29 @@
       };
 
       // Fotoğraf Yükleme Önizleme
-      const handlePhotoUpload = (e) => {
+      const handlePhotoUpload = async (e) => {
         const file = e.target.files?.[0];
         if (file) {
+          const formData = new FormData();
+          formData.append('avatar', file);
+          try {
+            const res = await fetch('/api/user/upload-avatar', {
+              method: 'POST',
+              body: formData
+            });
+            const data = await res.json();
+            if (data?.avatarUrl) {
+              setGeneral(prev => ({ ...prev, photo: data.avatarUrl }));
+              try {
+                localStorage.setItem('zarif_teacher_avatar', data.avatarUrl);
+                window.dispatchEvent(new Event('teacher-avatar-updated'));
+              } catch (err) {}
+              showToast('Profil fotoğrafı güncellendi.');
+              return;
+            }
+          } catch (err) {
+            console.warn('Sunucuya avatar yüklenemedi, yerel base64 kullanılıyor:', err);
+          }
           const reader = new FileReader();
           reader.onloadend = () => {
             const dataUrl = reader.result;

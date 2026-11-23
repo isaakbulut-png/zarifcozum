@@ -216,6 +216,10 @@ td.net{font-weight:700;color:var(--navy-900)}
 .teacher-content.wrap,.teacher-layout .teacher-content{max-width:100%!important;width:100%!important;margin:0!important;padding:14px 10px 48px!important}
 .teacher-sidebar-logout-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px 16px;border-radius:10px;border:1px solid rgba(239,68,68,0.35);background:linear-gradient(135deg,rgba(185,28,28,0.25),rgba(127,29,29,0.4));color:#fca5a5;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .2s ease;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
 .teacher-sidebar-logout-btn:hover{background:linear-gradient(135deg,rgba(220,38,38,0.45),rgba(153,27,27,0.6))!important;border-color:rgba(239,68,68,0.6)!important;color:#fff!important;transform:translateY(-1px);box-shadow:0 4px 12px rgba(185,28,28,0.3)!important}
+.teacher-avatar-wrapper{position:relative;width:68px;height:68px;border-radius:18px;overflow:hidden;border:2.5px solid #f97316;flex-shrink:0;background:linear-gradient(135deg, #432818 0%, #29160a 100%);display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.35);transition:all .22s cubic-bezier(0.4, 0, 0.2, 1)}
+.teacher-avatar-wrapper:hover{transform:scale(1.03);border-color:#fb923c;box-shadow:0 6px 18px rgba(249,115,22,0.45)}
+.avatar-hover-overlay{position:absolute;inset:0;background:rgba(20,10,5,0.75);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;opacity:0;transition:opacity .2s ease;color:#fff;pointer-events:none}
+.teacher-avatar-wrapper:hover .avatar-hover-overlay{opacity:1}
 .teacher-sidebar{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;margin:14px 0 24px 8px;padding:16px 14px;background:linear-gradient(180deg, #322013 0%, #24150b 100%);border:1px solid rgba(255, 255, 255, 0.08);border-radius:16px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,0.22);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.18) transparent}
 .teacher-sidebar::-webkit-scrollbar{width:5px}
 .teacher-sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.18);border-radius:99px}
@@ -1012,17 +1016,31 @@ body.teacher-menu-open {
     </div>
   </div>
 
-  <div class="sidebar-teacher-profile-card" id="sidebarProfileCard" style="display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:10px 12px;border:1px solid rgba(255,255,255,0.12);border-radius:12px;background:rgba(255,255,255,0.05);transition:all .2s ease">
-    <a href="/ogretmen-profil-ayarlari.html" title="Profil Resmini Değiştir / Hesap Ayarları" style="text-decoration:none;display:flex;align-items:center;gap:12px;min-width:0;flex:1">
-      <div class="teacher-avatar-frame" style="position:relative;width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid #f97316;flex-shrink:0;background:#523520;display:grid;place-items:center;box-shadow:0 3px 10px rgba(0,0,0,0.3)">
-        <img id="sidebarTeacherAvatarImg" src="" alt="Öğretmen Profil Resmi" style="width:100%;height:100%;object-fit:cover;display:none" />
-        <span id="sidebarTeacherAvatarFallback" style="font-weight:700;font-size:1.15rem;color:#fff">Ö</span>
+  <div class="sidebar-teacher-profile-card" id="sidebarProfileCard" style="display:flex;align-items:center;gap:13px;margin:0 0 15px;padding:12px;border:1px solid rgba(255,255,255,0.12);border-radius:16px;background:linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);box-shadow:0 4px 14px rgba(0,0,0,0.25);position:relative">
+    <div class="teacher-avatar-wrapper" id="teacherAvatarUploadTrigger" title="Profil Fotoğrafını Değiştirmek İçin Tıklayın">
+      <img id="sidebarTeacherAvatarImg" src="" alt="Öğretmen Profil Fotoğrafı" style="width:100%;height:100%;object-fit:cover;display:none" />
+      <span id="sidebarTeacherAvatarFallback" style="font-weight:700;font-size:1.45rem;color:#fed7aa;font-family:var(--head);display:flex;align-items:center;justify-content:center;width:100%;height:100%">Ö</span>
+      <div class="avatar-hover-overlay" id="avatarHoverOverlay">
+        <svg style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span style="font-size:9.5px;font-weight:700;letter-spacing:0.3px;color:#fff">Yükle</span>
       </div>
-      <div style="min-width:0;flex:1;overflow:hidden">
-        <div id="sidebarCardTeacherName" style="font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Öğretmen</div>
-        <span style="font-size:.72rem;color:#fdba74;display:inline-flex;align-items:center;gap:3px;margin-top:2px">⚙️ Profil &amp; Ayarlar ↗</span>
+      <input type="file" id="teacherAvatarFileInput" accept="image/*" style="display:none" />
+    </div>
+    <div style="min-width:0;flex:1;overflow:hidden;display:flex;flex-direction:column;gap:3px">
+      <div id="sidebarCardTeacherName" style="font-size:.92rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25">Öğretmen</div>
+      <div style="display:flex;align-items:center;gap:5px;margin-top:1px">
+        <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block"></span>
+        <span style="font-size:.72rem;color:#4ade80;font-weight:600">Öğretmen Hesabı</span>
       </div>
-    </a>
+      <div style="margin-top:4px;display:flex;flex-direction:column;gap:2px">
+        <button type="button" id="triggerAvatarUploadBtn" style="background:none;border:none;padding:0;color:#f97316;font-size:.74rem;font-weight:600;text-align:left;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+          📷 Fotoğrafı Değiştir
+        </button>
+        <a href="/ogretmen-profil-ayarlari.html" style="font-size:.72rem;color:#cbd5e1;text-decoration:none;display:inline-flex;align-items:center;gap:3px;transition:color .15s" onmouseover="this.style.color='#fed7aa'" onmouseout="this.style.color='#cbd5e1'">
+          ⚙️ Profil Ayarları ↗
+        </a>
+      </div>
+    </div>
   </div>
 
   <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
@@ -2355,6 +2373,78 @@ body.teacher-menu-open {
   window.addEventListener('teacher-avatar-updated', () => {
     syncTeacherProfileUI(window.currentTeacherUser || {});
   });
+
+  const avatarTrigger = $('teacherAvatarUploadTrigger');
+  const avatarBtn = $('triggerAvatarUploadBtn');
+  const avatarInput = $('teacherAvatarFileInput');
+
+  function openAvatarPicker(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (avatarInput) avatarInput.click();
+  }
+
+  if (avatarTrigger) avatarTrigger.addEventListener('click', openAvatarPicker);
+  if (avatarBtn) avatarBtn.addEventListener('click', openAvatarPicker);
+
+  if (avatarInput) {
+    avatarInput.addEventListener('change', async () => {
+      const file = avatarInput.files && avatarInput.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        alert('Lütfen geçerli bir resim dosyası seçin (PNG, JPG, WEBP, GIF).');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Profil fotoğrafı boyutu en fazla 5 MB olabilir.');
+        return;
+      }
+
+      const overlay = $('avatarHoverOverlay');
+      if (overlay) {
+        overlay.style.opacity = '1';
+        overlay.innerHTML = '<span style="font-size:9.5px;font-weight:700;color:#fff">Yükleniyor…</span>';
+      }
+
+      try {
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        const res = await api('/api/user/upload-avatar', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (res?.avatarUrl) {
+          try {
+            localStorage.setItem('zarif_teacher_avatar', res.avatarUrl);
+          } catch (e) {}
+
+          if (window.currentTeacherUser) {
+            window.currentTeacherUser.avatarUrl = res.avatarUrl;
+          }
+
+          syncTeacherProfileUI({ ...(window.currentTeacherUser || {}), avatarUrl: res.avatarUrl });
+          window.dispatchEvent(new CustomEvent('teacher-avatar-updated'));
+        }
+      } catch (err) {
+        console.error('Avatar yükleme hatası:', err);
+        alert('Profil fotoğrafı yüklenemedi: ' + err.message);
+      } finally {
+        if (overlay) {
+          overlay.style.opacity = '';
+          overlay.innerHTML = `
+            <svg style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span style="font-size:9.5px;font-weight:700;letter-spacing:0.3px;color:#fff">Yükle</span>
+          `;
+        }
+        avatarInput.value = '';
+      }
+    });
+  }
 
   async function yukle() {
     let oturum;

@@ -122,6 +122,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  photo: {
+    type: String,
+    default: null
+  },
+  profileImage: {
+    type: String,
+    default: null
+  },
   verificationDocumentUrl: {
     type: String,
     trim: true,

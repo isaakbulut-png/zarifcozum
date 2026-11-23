@@ -1468,6 +1468,72 @@ app.post('/api/ogretmen/profil-ayarlari', ogretmenKontrol, async (req, res) => {
   }
 });
 
+// 7. Kullanıcı / Öğretmen Profil Fotoğrafı Yükleme (Avatar Upload)
+const avatarsDir = path.join(__dirname, 'uploads', 'avatars');
+try {
+  if (!fs.existsSync(avatarsDir)) {
+    fs.mkdirSync(avatarsDir, { recursive: true });
+  }
+} catch (e) {
+  console.warn('[Server] avatarsDir oluşturulamadı:', e.message);
+}
+
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, avatarsDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const userId = req.session?.user?._id || req.session?.user?.id || 'user';
+    cb(null, `avatar-${userId}-${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext}`);
+  }
+});
+
+const avatarUpload = multer({
+  storage: avatarStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext)) {
+      return cb(new Error('Yalnızca resim (JPG, PNG, WEBP, GIF) formatında profil fotoğrafı yüklenebilir.'));
+    }
+    cb(null, true);
+  }
+});
+
+app.post(['/api/user/upload-avatar', '/api/ogretmen/upload-avatar'], requireRole('teacher', 'admin', 'student', 'parent'), avatarUpload.single('avatar'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ mesaj: 'Fotoğraf dosyası seçilmedi.' });
+    }
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    const userId = req.session.user._id || req.session.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ mesaj: 'Kullanıcı bulunamadı.' });
+
+    user.avatarUrl = avatarUrl;
+    user.photo = avatarUrl;
+    user.profileImage = avatarUrl;
+    await user.save();
+
+    if (req.session.user) {
+      req.session.user.avatarUrl = avatarUrl;
+      req.session.user.photo = avatarUrl;
+      if (req.session.save) {
+        await new Promise(r => req.session.save(r));
+      }
+    }
+
+    res.json({
+      basarili: true,
+      mesaj: 'Profil fotoğrafı başarıyla yüklendi.',
+      avatarUrl
+    });
+  } catch (err) {
+    console.error('Avatar yükleme hatası:', err);
+    res.status(500).json({ mesaj: 'Profil fotoğrafı yüklenemedi: ' + err.message });
+  }
+});
+
 async function baslat() {
   await mongoose.connect(MONGODB_URI, { dbName: DB_ADI });
   await SystemConfig.initializeVisitorSettings();
