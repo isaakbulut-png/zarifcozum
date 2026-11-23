@@ -4,7 +4,8 @@
  * Veli ve Öğrenci Mesaj Entegrasyonu, 3'lü Hızlı Filtre ve Gerçek Zamanlı Senkronizasyon
  */
 (() => {
-  const STORAGE_KEY = 'zarif_direct_messages_v1';
+  const STORAGE_KEY = 'zarif_conversations_v2';
+  const LEGACY_STORAGE_KEY = 'zarif_direct_messages_v1';
   const CHANNEL_NAME = 'zarif_messages_channel';
 
   let channel = null;
@@ -16,10 +17,11 @@
     console.warn('BroadcastChannel desteklenmiyor:', e);
   }
 
-  // Varsayılan Tohum Verisi (API veya Depo boşsa)
+  // Varsayılan Tohum Verisi
   const defaultConversations = [
     {
       id: 'conv_1',
+      conversationId: 'conv_teacher1_student1',
       name: 'Zeynep Kaya',
       role: '11. Sınıf Öğrencisi',
       roleType: 'student',
@@ -32,21 +34,26 @@
         {
           id: 'msg_1_1',
           sender: 'student',
+          senderRole: 'student',
           senderName: 'Zeynep Kaya',
           text: 'Hocam merhaba, dün paylaştığınız trigonometri kazanım testindeki 4. sorunun çözüm adımında takıldım.',
-          time: '14:20'
+          time: '14:20',
+          isRead: true
         },
         {
           id: 'msg_1_2',
           sender: 'student',
+          senderRole: 'student',
           senderName: 'Zeynep Kaya',
           text: 'Yarınki canlı dersimizde bu soruya birkaç dakika ayırabilir miyiz?',
-          time: '14:22'
+          time: '14:22',
+          isRead: false
         }
       ]
     },
     {
       id: 'conv_2',
+      conversationId: 'conv_teacher1_parent1',
       name: 'Murat Demir',
       role: 'Veli',
       roleType: 'parent',
@@ -60,21 +67,26 @@
         {
           id: 'msg_2_1',
           sender: 'parent',
+          senderRole: 'parent',
           senderName: 'Murat Demir',
           text: "Ahmet Bey iyi günler, Ali'nin son deneme sınavındaki geometri netleri yükselmiş. İlginiz için çok teşekkür ederiz.",
-          time: '11:00'
+          time: '11:00',
+          isRead: true
         },
         {
           id: 'msg_2_2',
           sender: 'teacher',
+          senderRole: 'teacher',
           senderName: 'Öğretmen',
           text: 'Rica ederim Murat Bey, Ali derste çok odaklı çalışıyor. Haftalık ödevlerini de aksatmadan bitiriyor.',
-          time: '11:05'
+          time: '11:05',
+          isRead: true
         }
       ]
     },
     {
       id: 'conv_3',
+      conversationId: 'conv_teacher1_student2',
       name: 'Burak Çelik',
       role: '8. Sınıf Öğrencisi (LGS)',
       roleType: 'student',
@@ -87,21 +99,26 @@
         {
           id: 'msg_3_1',
           sender: 'student',
+          senderRole: 'student',
           senderName: 'Burak Çelik',
           text: 'Hocam LGS deneme sınavı analiz raporu sisteme yüklendi mi?',
-          time: 'Dün 17:40'
+          time: 'Dün 17:40',
+          isRead: true
         },
         {
           id: 'msg_3_2',
           sender: 'teacher',
+          senderRole: 'teacher',
           senderName: 'Öğretmen',
           text: 'Evet Burak, başarı analizi sekmesinden karnene ulaşabilirsin.',
-          time: 'Dün 17:55'
+          time: 'Dün 17:55',
+          isRead: true
         }
       ]
     },
     {
       id: 'conv_4',
+      conversationId: 'conv_teacher1_parent2',
       name: 'Fatma Yılmaz',
       role: 'Veli',
       roleType: 'parent',
@@ -115,9 +132,44 @@
         {
           id: 'msg_4_1',
           sender: 'parent',
+          senderRole: 'parent',
           senderName: 'Fatma Yılmaz',
           text: 'Hocam iyi günler, Elif bu hafta sonu yapılacak olan Türkiye Geneli Online Deneme Sınavına evden katılabilecek mi? Saat ve giriş adımları hakkında bilgi verebilir misiniz?',
-          time: '10:15'
+          time: '10:15',
+          isRead: false
+        }
+      ]
+    },
+    {
+      id: 'conv_5',
+      conversationId: 'conv_teacher1_parent_ayse',
+      name: 'Ayşe Yılmaz',
+      role: 'Veli',
+      roleType: 'parent',
+      studentName: 'Kerem Yılmaz',
+      parentRelation: "Kerem Yılmaz'ın Velisi",
+      avatar: 'AY',
+      avatarBg: '#17805f',
+      time: '14:30',
+      unread: true,
+      messages: [
+        {
+          id: 'msg_5_1',
+          sender: 'teacher',
+          senderRole: 'teacher',
+          senderName: 'Ahmet Yılmaz',
+          text: 'İyi günler Ayşe Hanım, Kerem bu hafta Kesirlerle İşlemler konusunda güzel bir gelişim gösterdi. Pekiştirme testlerini tamamlaması konuları iyice pekiştirecektir.',
+          time: '13:40',
+          isRead: true
+        },
+        {
+          id: 'msg_5_2',
+          sender: 'parent',
+          senderRole: 'parent',
+          senderName: 'Ayşe Yılmaz',
+          text: 'Merhabalar Ahmet Hocam, bilgilendirmeniz için çok teşekkür ederiz. Kerem ile birlikte evde testleri takip ediyoruz.',
+          time: '14:30',
+          isRead: false
         }
       ]
     }
@@ -132,7 +184,7 @@
   // LocalStorage senkronizasyonu
   function loadLocalState() {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -144,6 +196,8 @@
   function saveLocalState(data) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(data));
+      localStorage.setItem('zarif_msg_sync_ping', String(Date.now()));
       if (channel) {
         channel.postMessage({ type: 'SYNC_MESSAGES', data });
       }
@@ -153,7 +207,7 @@
   // API'den mesajları çek
   async function fetchMessagesFromApi() {
     try {
-      const res = await fetch('/api/messages');
+      const res = await fetch('/api/messages?role=teacher');
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.conversations) && data.conversations.length > 0) {
@@ -174,7 +228,13 @@
 
   // Bildirim rozetlerini güncelle
   function updateBadges() {
-    const unreadCount = conversations.filter(c => c.unread).length;
+    // Öğretmen için okunmamış mesaj sayısı
+    let unreadCount = 0;
+    conversations.forEach(c => {
+      const msgs = Array.isArray(c.messages) ? c.messages : [];
+      const hasUnread = msgs.some(m => !m.isRead && m.senderRole !== 'teacher' && m.sender !== 'teacher');
+      if (hasUnread || c.unread) unreadCount++;
+    });
     
     // Üst Bar Mesaj Rozeti
     const topBadge = document.getElementById('topMessageBadge');
@@ -189,12 +249,17 @@
       sideBadge.textContent = String(unreadCount);
       sideBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
     }
+  }
 
-    // Profil Sayfasındaki Rozetler (varsa)
-    document.querySelectorAll('.profile-message-badge').forEach(b => {
-      b.textContent = String(unreadCount);
-      b.style.display = unreadCount > 0 ? 'inline-flex' : 'none';
-    });
+  // HTML Karakter Kaçışı
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   // Drawer HTML şablonunu oluştur ve body'ye ekle
@@ -342,10 +407,10 @@
     // Arama filtreleme
     if (searchQuery) {
       filtered = filtered.filter(c =>
-        c.name.toLowerCase().includes(searchQuery) ||
+        (c.name && c.name.toLowerCase().includes(searchQuery)) ||
         (c.studentName && c.studentName.toLowerCase().includes(searchQuery)) ||
         (c.parentRelation && c.parentRelation.toLowerCase().includes(searchQuery)) ||
-        (c.messages && c.messages.some(m => m.text.toLowerCase().includes(searchQuery)))
+        (c.messages && c.messages.some(m => m.text && m.text.toLowerCase().includes(searchQuery)))
       );
     }
 
@@ -360,21 +425,25 @@
     }
 
     listEl.innerHTML = filtered.map(conv => {
-      const isSelected = conv.id === selectedChatId;
+      const convId = conv.conversationId || conv.id;
+      const isSelected = (convId === selectedChatId) || (conv.id === selectedChatId);
       const lastMsg = conv.messages && conv.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null;
-      const snippet = lastMsg ? (lastMsg.sender === 'teacher' ? 'Siz: ' : '') + lastMsg.text : 'Yeni konuşma';
+      const isTeacherMsg = lastMsg && (lastMsg.senderRole === 'teacher' || lastMsg.sender === 'teacher');
+      const snippet = lastMsg ? (isTeacherMsg ? 'Siz: ' : '') + lastMsg.text : 'Yeni konuşma';
       const isParent = conv.roleType === 'parent';
       const roleBadge = isParent
         ? `<span class="tmd-role-badge tmd-role-parent">👨‍👩‍👧 Veli</span>`
         : `<span class="tmd-role-badge tmd-role-student">🎒 Öğrenci</span>`;
 
-      // Madde 2: Veli mesajlarında öğrencinin adı alt bilgi olarak görünsün
+      // Veli mesajlarında öğrencinin adı alt bilgi olarak görünsün
       const parentSub = isParent && (conv.parentRelation || conv.studentName)
         ? `<span class="tmd-parent-detail">${escapeHtml(conv.parentRelation || `${conv.studentName}'in Velisi`)}</span>`
         : '';
 
+      const hasUnread = conv.unread || (conv.messages && conv.messages.some(m => !m.isRead && m.senderRole !== 'teacher' && m.sender !== 'teacher'));
+
       return `
-        <div class="tmd-conv-card ${isSelected ? 'active' : ''}" data-chat-id="${conv.id}">
+        <div class="tmd-conv-card ${isSelected ? 'active' : ''}" data-chat-id="${convId}">
           <div class="tmd-avatar" style="background:${conv.avatarBg || '#C84B31'};">
             ${escapeHtml(conv.avatar || 'K')}
           </div>
@@ -387,7 +456,7 @@
             ${parentSub}
             <p class="tmd-conv-snippet">${escapeHtml(snippet)}</p>
           </div>
-          ${conv.unread ? '<span class="tmd-unread-dot" title="Okunmamış mesaj"></span>' : ''}
+          ${hasUnread ? '<span class="tmd-unread-dot" title="Okunmamış mesaj"></span>' : ''}
         </div>
       `;
     }).join('');
@@ -406,7 +475,7 @@
     const flowEl = document.getElementById('tmdMessagesFlow');
     if (!headEl || !flowEl) return;
 
-    const currentChat = conversations.find(c => c.id === selectedChatId) || conversations[0];
+    const currentChat = conversations.find(c => (c.conversationId || c.id) === selectedChatId || c.id === selectedChatId) || conversations[0];
     if (!currentChat) {
       headEl.innerHTML = '';
       flowEl.innerHTML = '<div class="tmd-empty-state"><p>Lütfen bir konuşma seçin.</p></div>';
@@ -440,13 +509,15 @@
 
     const messages = currentChat.messages || [];
     flowEl.innerHTML = messages.map(msg => {
-      const isTeacher = msg.sender === 'teacher';
+      const isTeacher = msg.senderRole === 'teacher' || msg.sender === 'teacher';
+      const time = msg.time || (msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '');
+      const readStatus = isTeacher ? (msg.isRead ? '<span style="color:#059669;font-weight:700;margin-left:4px;">✓✓</span>' : '<span style="color:#94a3b8;margin-left:4px;">✓</span>') : '';
       return `
         <div class="tmd-bubble-row ${isTeacher ? 'teacher' : 'other'}">
           <div class="tmd-bubble">
             ${escapeHtml(msg.text)}
           </div>
-          <span class="tmd-bubble-time">${escapeHtml(msg.time || '')}</span>
+          <span class="tmd-bubble-time">${escapeHtml(time)}${readStatus}</span>
         </div>
       `;
     }).join('');
@@ -458,17 +529,30 @@
   // Konuşma Seç ve Okundu Olarak İşaretle
   function selectChat(id) {
     selectedChatId = id;
-    const current = conversations.find(c => c.id === id);
-    if (current && current.unread) {
+    const current = conversations.find(c => (c.conversationId || c.id) === id || c.id === id);
+    if (current) {
       current.unread = false;
+      if (Array.isArray(current.messages)) {
+        current.messages.forEach(m => {
+          if (m.senderRole !== 'teacher' && m.sender !== 'teacher') {
+            m.isRead = true;
+          }
+        });
+      }
       saveLocalState(conversations);
       updateBadges();
-      // Sunucuya bildir
-      fetch('/api/messages/mark-read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversationId: id })
-      }).catch(() => {});
+
+      // Sunucuya ve servise bildir
+      const targetConvId = current.conversationId || current.id;
+      if (window.ZarifMessageService) {
+        window.ZarifMessageService.markAsRead(targetConvId, 'teacher');
+      } else {
+        fetch('/api/messages/mark-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId: targetConvId, readerRole: 'teacher' })
+        }).catch(() => {});
+      }
     }
     renderConversationList();
     renderActiveChat();
@@ -476,21 +560,26 @@
 
   // Öğretmenin Mesaj Göndermesi
   async function sendTeacherReply(text) {
-    const current = conversations.find(c => c.id === selectedChatId);
+    const current = conversations.find(c => (c.conversationId || c.id) === selectedChatId || c.id === selectedChatId);
     if (!current) return;
 
     const now = new Date();
+    const isoTimestamp = now.toISOString();
     const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
     const newMsg = {
       id: 'msg_' + Date.now(),
+      senderId: 'teacher_1',
+      senderRole: 'teacher',
       sender: 'teacher',
-      senderName: 'Öğretmen',
+      senderName: 'Ahmet Yılmaz',
       text: text,
+      timestamp: isoTimestamp,
       time: timeStr,
-      createdAt: now
+      isRead: false
     };
 
+    if (!Array.isArray(current.messages)) current.messages = [];
     current.messages.push(newMsg);
     current.time = timeStr;
     current.unread = false;
@@ -499,18 +588,31 @@
     renderActiveChat();
     renderConversationList();
 
-    // Sunucuya kaydet
-    try {
-      await fetch('/api/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          conversationId: current.id,
-          text: text
-        })
+    const targetConvId = current.conversationId || current.id;
+    if (window.ZarifMessageService) {
+      window.ZarifMessageService.sendMessage({
+        conversationId: targetConvId,
+        text,
+        senderId: 'teacher_1',
+        senderName: 'Ahmet Yılmaz',
+        senderRole: 'teacher'
       });
-    } catch (e) {
-      console.warn('Mesaj sunucuya iletilemedi, yerel depoda korundu:', e);
+    } else {
+      try {
+        await fetch('/api/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversationId: targetConvId,
+            senderId: 'teacher_1',
+            senderName: 'Ahmet Yılmaz',
+            senderRole: 'teacher',
+            text: text
+          })
+        });
+      } catch (e) {
+        console.warn('Mesaj sunucuya iletilemedi, yerel depoda korundu:', e);
+      }
     }
   }
 
@@ -559,12 +661,27 @@
   // BroadcastChannel Dinleyicisi (Sekmeler Arası Eşitleme)
   if (channel) {
     channel.onmessage = (event) => {
-      if (event.data?.type === 'SYNC_MESSAGES' && Array.isArray(event.data.data)) {
-        conversations = event.data.data;
+      const { type, data, payload } = event.data || {};
+      const convList = data || payload?.conversations;
+      if (Array.isArray(convList)) {
+        conversations = convList;
+        renderDrawer();
+        updateBadges();
+      } else {
+        fetchMessagesFromApi();
+      }
+    };
+  }
+
+  // Window Storage Dinleyicisi
+  if (typeof window !== 'undefined') {
+    window.addEventListener('storage', (e) => {
+      if (e.key === STORAGE_KEY || e.key === LEGACY_STORAGE_KEY || e.key === 'zarif_msg_sync_ping') {
+        conversations = loadLocalState();
         renderDrawer();
         updateBadges();
       }
-    };
+    });
   }
 
   // Sayfa yüklendiğinde butonları bağla ve başlangıç verilerini çek
@@ -596,7 +713,7 @@
       if (!drawerElement?.classList?.contains('open')) {
         fetchMessagesFromApi();
       }
-    }, 8000);
+    }, 6000);
   }
 
   if (document.readyState === 'loading') {

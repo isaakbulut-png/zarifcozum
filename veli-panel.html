@@ -2,235 +2,1061 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <title>Veli Paneli | ZarifÇözüm</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Veli Takip Sistemi | ZarifÇözüm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    :root{font-family:Inter,"Segoe UI",sans-serif;color:#35271d;background:#f7f4ef;font-synthesis:none;--ink:#493526;--muted:#796b60;--line:#e4ddd4;--card:#fff;--brand:#6b4a2f;--soft:#efe7de}
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh}
-    button{font:inherit}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px clamp(18px,5vw,64px);background:#fff;border-bottom:1px solid var(--line)}
-    .brand{color:var(--ink);font-weight:800;font-size:1.15rem;letter-spacing:.01em}
-    .topbar p{margin:3px 0 0;color:var(--muted);font-size:.84rem}
-    .logout{padding:9px 14px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-weight:650;cursor:pointer}
-    .logout:hover{border-color:var(--brand);color:var(--brand)}
-    main{width:min(1120px,calc(100% - 36px));margin:34px auto 60px}
-    .welcome{margin-bottom:24px}
-    .eyebrow{color:var(--brand);font-weight:750;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase}
-    h1{margin:7px 0;font-size:clamp(1.7rem,4vw,2.4rem);letter-spacing:-.04em;color:var(--ink)}
-    .welcome p{margin:0;color:var(--muted)}
-    .notice{margin:22px 0;padding:13px 16px;border:1px solid #e6d9c7;border-radius:12px;background:#fbf6ed;color:#665341;font-size:.88rem}
-    .demo-notice{margin:14px 0;padding:13px 16px;border:1px solid #e8b866;border-radius:12px;background:#fff6e5;color:#754b0b;font-size:.88rem;font-weight:650}
-    .stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
-    .stat,.card{border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 6px 20px rgba(58,38,24,.035)}
-    .stat{padding:18px}
-    .stat span{display:block;color:var(--muted);font-size:.82rem}
-    .stat strong{display:block;margin-top:8px;color:var(--ink);font-size:1.75rem;line-height:1.1}
-    .weekly-report{margin-top:18px}
-    .report-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
-    .report-stat{padding:14px;border:1px solid var(--line);border-radius:10px;background:#fff}
-    .report-stat span{display:block;color:var(--muted);font-size:.82rem}
-    .report-stat strong{display:block;margin-top:6px;color:var(--ink);font-size:1.35rem}
-    .gap-list{display:grid;gap:8px;margin:12px 0 0;padding:0;list-style:none}
-    .gap-list li{padding:11px 13px;border:1px solid var(--line);border-radius:9px;color:#51453c;font-size:.88rem}
-    .report-week{margin:8px 0 0;color:var(--muted);font-size:.8rem}
-    .columns{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:18px;margin-top:18px}
-    .card{padding:22px}
-    .card h2{margin:0;color:var(--ink);font-size:1.08rem}
-    .card-intro{margin:5px 0 16px;color:var(--muted);font-size:.83rem}
-    .lesson-list,.message-list{display:grid;gap:10px}
-    .lesson,.message{padding:13px;border:1px solid var(--line);border-radius:10px;background:#fff}
-    .lesson{display:flex;align-items:center;justify-content:space-between;gap:14px}
-    .lesson strong,.message strong{color:var(--ink);font-size:.9rem}
-    .lesson small,.message small{display:block;margin-top:4px;color:var(--muted);font-size:.76rem}
-    .lesson-count{flex:none;padding:5px 9px;border-radius:999px;background:var(--soft);color:var(--brand);font-size:.74rem;font-weight:700}
-    .message{overflow-wrap:anywhere}
-    .message p{margin:7px 0 0;color:#51453c;font-size:.9rem;white-space:pre-wrap}
-    .message.is-ai{border-left:3px solid #8a6a4e}
-    .message.is-user{border-left:3px solid #c9a477}
-    .message-tag{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;background:#f6ead8;color:#785b35;font-size:.68rem;font-weight:700}
-    .empty{padding:18px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:.88rem;text-align:center}
-    .error{padding:14px;border:1px solid #ecc7c4;border-radius:10px;background:#fff3f2;color:#8f2f28}
-    .loading{color:var(--muted)}
-    @media(max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.columns{grid-template-columns:1fr}}
-    @media(max-width:440px){.topbar{align-items:flex-start}.stats{gap:9px}.stat{padding:14px}.stat strong{font-size:1.45rem}.card{padding:17px}.lesson{align-items:flex-start;flex-direction:column}}
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --navy: #0f172a;
+      --forest: #0e563f;
+      --forest-light: #17805f;
+      --forest-subtle: #ecfdf5;
+      --terracotta: #C84B31;
+      --terracotta-light: #fff5f2;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --font-main: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-head: 'Space Grotesk', system-ui, sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 14px rgba(0,0,0,0.07);
+      --shadow-lg: 0 12px 30px rgba(0,0,0,0.09);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-main);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar */
+    .top-header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--forest-light), var(--forest));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 10px rgba(23, 128, 95, 0.25);
+    }
+    .brand-title {
+      font-family: var(--font-head);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--navy);
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+    .brand-title span {
+      font-family: var(--font-main);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--forest);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .student-badge-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--forest-subtle);
+      border: 1px solid #a7f3d0;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--forest);
+      cursor: pointer;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .top-action-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      position: relative;
+    }
+    .top-action-btn:hover {
+      background: #f1f5f9;
+      color: var(--navy);
+    }
+    .top-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      background: var(--terracotta);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      border: 2px solid #fff;
+    }
+    .top-badge.show {
+      display: flex;
+    }
+
+    .user-profile-menu {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 12px;
+      border-left: 1px solid var(--border);
+    }
+    .user-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #17805f, #0e563f);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+    .user-details {
+      display: flex;
+      flex-direction: column;
+    }
+    .user-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.2;
+    }
+    .user-role {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    /* App Layout */
+    .app-container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 68px);
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .app-sidebar {
+      width: 270px;
+      background: #ffffff;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .sidebar-section-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-light);
+      padding: 20px 20px 8px 20px;
+    }
+    .nav-list {
+      list-style: none;
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nav-item-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+    }
+    .nav-item-btn:hover {
+      background: #f8fafc;
+      color: var(--navy);
+    }
+    .nav-item-btn.active {
+      background: var(--forest-subtle);
+      color: var(--forest);
+      font-weight: 700;
+    }
+    .nav-item-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-badge {
+      background: var(--terracotta);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 12px;
+      display: none;
+    }
+    .nav-badge.show {
+      display: inline-block;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .child-summary-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+    }
+    .child-summary-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .child-avatar-sm {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #3b82f6;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    /* Main Content Area */
+    .app-main {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 28px 32px;
+      flex: 1;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Dashboard Styles */
+    .page-header {
+      margin-bottom: 24px;
+    }
+    .page-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--navy);
+      font-family: var(--font-head);
+      margin-bottom: 6px;
+    }
+    .page-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-card-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .stat-card-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--navy);
+      font-family: var(--font-head);
+    }
+    .stat-card-foot {
+      font-size: 0.78rem;
+      color: var(--forest);
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    /* Öğretmen Raporları & Mesajlar Sekmesi */
+    .messages-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      height: calc(100vh - 170px);
+      min-height: 520px;
+    }
+    .messages-sidebar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .messages-sidebar-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      background: #fafafa;
+    }
+    .messages-sidebar-head h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .messages-sidebar-head p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .teachers-list {
+      overflow-y: auto;
+      flex: 1;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .teacher-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    .teacher-item:hover {
+      background: #f8fafc;
+    }
+    .teacher-item.active {
+      background: var(--forest-subtle);
+      border-color: #a7f3d0;
+    }
+    .teacher-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #C84B31;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+    .teacher-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .teacher-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--navy);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .teacher-branch {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+    .teacher-last-msg {
+      font-size: 0.74rem;
+      color: var(--text-light);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    .teacher-unread-badge {
+      width: 10px;
+      height: 10px;
+      background: var(--terracotta);
+      border-radius: 50%;
+      display: none;
+      flex-shrink: 0;
+    }
+    .teacher-unread-badge.show {
+      display: block;
+    }
+
+    /* Chat Area */
+    .chat-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .chat-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+    }
+    .chat-teacher-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .chat-teacher-title h4 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .chat-teacher-title p {
+      font-size: 0.78rem;
+      color: var(--forest);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chat-teacher-title p::before {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: #10b981;
+      border-radius: 50%;
+    }
+
+    .chat-notice-banner {
+      background: #fefce8;
+      border-bottom: 1px solid #fef08a;
+      padding: 8px 22px;
+      font-size: 0.76rem;
+      color: #854d0e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chat-messages-flow {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: #fdfdfd;
+    }
+
+    .msg-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 75%;
+    }
+    .msg-row.parent {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+    .msg-row.teacher {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+
+    .msg-bubble {
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      word-break: break-word;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .msg-row.parent .msg-bubble {
+      background: var(--forest);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-row.teacher .msg-bubble {
+      background: #f1f5f9;
+      color: var(--navy);
+      border-bottom-left-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .msg-meta {
+      font-size: 0.72rem;
+      color: var(--text-light);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .msg-read-check {
+      color: var(--forest-light);
+      font-weight: 700;
+    }
+
+    .chat-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      background: #ffffff;
+    }
+    .chat-form {
+      display: flex;
+      gap: 10px;
+    }
+    .chat-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      font-family: var(--font-main);
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .chat-input:focus {
+      border-color: var(--forest);
+      box-shadow: 0 0 0 3px rgba(14, 86, 63, 0.1);
+    }
+    .chat-send-btn {
+      background: var(--forest);
+      color: #ffffff;
+      border: none;
+      border-radius: 50px;
+      padding: 0 24px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s ease;
+    }
+    .chat-send-btn:hover {
+      background: #0b4532;
+    }
+
+    @media (max-width: 900px) {
+      .app-sidebar { width: 72px; }
+      .brand-title, .user-details, .sidebar-section-title, .child-summary-card, .nav-item-btn span { display: none; }
+      .nav-item-btn { justify-content: center; padding: 12px; }
+      .messages-layout { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div><div class="brand">ZarifÇözüm · Veli Paneli</div><p id="parentEmail"></p></div>
-    <button class="logout" id="logout" type="button">Güvenli çıkış</button>
-  </header>
-  <main>
-    <p id="status" class="loading" role="status">Öğrenci gelişim özeti yükleniyor…</p>
-    <div id="dashboard" hidden>
-      <section class="welcome">
-        <span class="eyebrow">Öğrenci gelişim özeti</span>
-        <h1 id="studentName"></h1>
-        <p id="studentDetails"></p>
-      </section>
-      <p class="notice">Bu özet, öğrencinin AI Mentör ile yaptığı son konuşmalardan hazırlanır. İçerik yalnızca bu veli hesabına ve bağlı öğrenciye özeldir.</p>
-      <p class="demo-notice" id="demoNotice" role="status" hidden>DEMO · Örnek veriler gösteriliyor; gerçek öğrenci performansı değildir.</p>
-      <section class="stats" aria-label="Sohbet özeti">
-        <article class="stat"><span>Görüntülenen mesaj</span><strong id="messageCount">0</strong></article>
-        <article class="stat"><span>Öğrenci sorusu</span><strong id="questionCount">0</strong></article>
-        <article class="stat"><span>AI Mentör yanıtı</span><strong id="responseCount">0</strong></article>
-        <article class="stat"><span>İpucu olabilecek yanıt</span><strong id="hintCount">0</strong></article>
-        <article class="stat"><span>Canlı ders sohbeti</span><strong id="lessonCount">0</strong></article>
-      </section>
-      <section class="card weekly-report" aria-labelledby="weeklyReportTitle">
-        <h2 id="weeklyReportTitle">Haftalık Öğrenme Karnesi</h2>
-        <p class="card-intro" id="reportStatus" role="status">Haftalık karne yükleniyor…</p>
-        <div id="reportContent" hidden>
-          <p class="report-week" id="reportWeek"></p>
-          <div class="report-summary">
-            <div class="report-stat"><span>Tamamlanan ödev</span><strong id="reportAssignments">0</strong></div>
-            <div class="report-stat"><span>Ortalama başarı</span><strong id="reportSuccess">Veri yok</strong></div>
-          </div>
-          <h3>Öncelikli kazanım eksikleri</h3>
-          <ul class="gap-list" id="reportGaps"></ul>
+
+  <!-- Top Header -->
+  <header class="top-header">
+    <div class="header-left">
+      <a href="/veli-panel.html" class="brand-logo">
+        <div class="brand-icon">Z</div>
+        <div class="brand-title">
+          ZarifÇözüm
+          <span>Veli Takip Alanı</span>
         </div>
-      </section>
-      <div class="columns">
-        <section class="card">
-          <h2>Son konuşmalar ve ipuçları</h2>
-          <p class="card-intro">Son 30 mesaj · özet sayıları son 100 kayıttan hesaplanır. AI yanıtlarında ipucu olabilecek bölümler işaretlenir.</p>
-          <div class="message-list" id="messages"></div>
-        </section>
-        <section class="card">
-          <h2>Canlı dersler</h2>
-          <p class="card-intro">Canlı ders Socket.IO odasına bağlanma kayıtları. AI Mentör kullanılan odalarda mesaj sayısı da gösterilir.</p>
-          <div class="lesson-list" id="lessons"></div>
-        </section>
+      </a>
+      <div class="student-badge-pill" title="Kayıtlı Öğrenci">
+        <span>🎒 Kerem Yılmaz</span>
+        <span style="opacity:0.6;">· 6-A Sınıfı</span>
       </div>
     </div>
-  </main>
+
+    <div class="header-right">
+      <button type="button" class="top-action-btn" id="topMessagesBtn" title="Öğretmen Mesajları">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="top-badge" id="topMessagesBadge">0</span>
+      </button>
+
+      <div class="user-profile-menu">
+        <div class="user-avatar" id="parentAvatar">AY</div>
+        <div class="user-details">
+          <span class="user-name" id="parentName">Ayşe Yılmaz</span>
+          <span class="user-role">Öğrenci Velisi</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Layout Container -->
+  <div class="app-container">
+    
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <div class="sidebar-section-title">MENÜ</div>
+      <ul class="nav-list">
+        <li>
+          <button type="button" class="nav-item-btn active" data-tab="tab-dashboard">
+            <div class="nav-item-content">
+              <span class="nav-icon">📊</span>
+              <span>Genel Bakış</span>
+            </div>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="nav-item-btn" data-tab="tab-progress">
+            <div class="nav-item-content">
+              <span class="nav-icon">🎯</span>
+              <span>Maarif Kazanımları</span>
+            </div>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="nav-item-btn" data-tab="tab-exams">
+            <div class="nav-item-content">
+              <span class="nav-icon">📝</span>
+              <span>Deneme Karneleri</span>
+            </div>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="nav-item-btn" data-tab="tab-messages" id="navMessagesBtn">
+            <div class="nav-item-content">
+              <span class="nav-icon">💬</span>
+              <span>Öğretmen Raporları &amp; Mesajlar</span>
+            </div>
+            <span class="nav-badge" id="parentMessagesBadge">0</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="nav-item-btn" data-tab="tab-settings">
+            <div class="nav-item-content">
+              <span class="nav-icon">⚙️</span>
+              <span>Bildirim Tercihleri</span>
+            </div>
+          </button>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="child-summary-card">
+          <div class="child-summary-head">
+            <div class="child-avatar-sm">KY</div>
+            <div>
+              <strong style="font-size:0.82rem;display:block;">Kerem Yılmaz</strong>
+              <span style="font-size:0.72rem;color:var(--text-muted);">Haftalık Hedef: %85</span>
+            </div>
+          </div>
+          <div style="font-size:0.76rem;color:var(--forest);font-weight:600;">
+            ✓ 142 Soru Çözüldü
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <a href="/kayit-giris.html" style="font-size:0.78rem;color:var(--text-light);text-decoration:none;display:flex;align-items:center;gap:6px;">
+            <span>🚪 Çıkış Yap</span>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Tabs -->
+    <main class="app-main">
+      
+      <!-- 1. Genel Bakış -->
+      <section class="tab-content active" id="tab-dashboard">
+        <div class="page-header">
+          <h1 class="page-title">Hoş Geldiniz, Ayşe Hanım</h1>
+          <p class="page-desc">Kerem'in bu haftaki çalışma temposu ve öğretmen raporları aşağıda özetlenmiştir.</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-label">📝 Çözülen Soru</div>
+            <div class="stat-card-value">142 Soru</div>
+            <div class="stat-card-foot">↑ Bu hafta %15 artış</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">⏱️ Aktif Çalışma Süresi</div>
+            <div class="stat-card-value">6 Sa 20 Dk</div>
+            <div class="stat-card-foot">Düzenli çalışma rutini</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">🎯 Tamamlanan Tema</div>
+            <div class="stat-card-value">3 Maarif Teması</div>
+            <div class="stat-card-foot">%86 ortalama net</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">📩 Haftalık Veli Bildirimi</div>
+            <div class="stat-card-value">Hazır</div>
+            <div class="stat-card-foot">Her pazar 18:00'de</div>
+          </div>
+        </div>
+
+        <!-- Akıllı Gelişim Bildirimi -->
+        <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:16px;padding:20px;display:flex;gap:16px;margin-bottom:24px;">
+          <div style="font-size:1.8rem;">💡</div>
+          <div>
+            <h4 style="font-size:0.95rem;font-weight:700;color:#065f46;margin-bottom:4px;">Akıllı Gelişim Bildirimi</h4>
+            <p style="font-size:0.86rem;color:#047857;line-height:1.5;">Kerem, "Kesirlerle İşlemler" konusunda %58 başarı gösterdi. Sistem, eksikleri kapatmak için 12 soruluk pekiştirme testini otomatik oluşturdu ve Kerem'in çalışma planına ekledi.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Maarif Kazanımları -->
+      <section class="tab-content" id="tab-progress">
+        <div class="page-header">
+          <h1 class="page-title">Maarif Müfredat Gelişim Raporu</h1>
+          <p class="page-desc">Öğrencinin Maarif Modeli temalarındaki kavrama ve beceri kazanım oranları.</p>
+        </div>
+        <div class="stat-card">
+          <h3 style="font-size:1rem;margin-bottom:12px;">Matematik 6. Sınıf Maarif Kazanımları</h3>
+          <p style="font-size:0.86rem;color:var(--text-muted);">Kerem bu ay 8 kazanımı %85 ve üzeri yeterlilikle tamamladı.</p>
+        </div>
+      </section>
+
+      <!-- 3. Deneme Karneleri -->
+      <section class="tab-content" id="tab-exams">
+        <div class="page-header">
+          <h1 class="page-title">Sınav &amp; Deneme Karneleri</h1>
+          <p class="page-desc">Türkiye geneli ve kurum içi yapılan online deneme sınavı sonuçları.</p>
+        </div>
+        <div class="stat-card">
+          <h3 style="font-size:1rem;margin-bottom:12px;">Kasım 2026 Türkiye Geneli Kazanım Denemesi</h3>
+          <p style="font-size:0.86rem;color:var(--text-muted);">Toplam Puan: 438.50 · Sınıf Sıralaması: 3 / 28</p>
+        </div>
+      </section>
+
+      <!-- 4. Öğretmen Raporları & Mesajlar (Önemli Entegrasyon) -->
+      <section class="tab-content" id="tab-messages">
+        <div class="page-header" style="margin-bottom:18px;">
+          <h1 class="page-title">Öğretmen Raporları &amp; Mesajlaşma Masası</h1>
+          <p class="page-desc">Kerem'in ders öğretmenleriyle birebir iletişim kurabilir, haftalık değerlendirme raporlarını takip edebilirsiniz.</p>
+        </div>
+
+        <div class="messages-layout">
+          
+          <!-- Sol Sütun: Öğretmen Listesi -->
+          <div class="messages-sidebar">
+            <div class="messages-sidebar-head">
+              <h3>Ders Öğretmenleri</h3>
+              <p>Mesajlaşmak istediğiniz öğretmeni seçin</p>
+            </div>
+            <div class="teachers-list" id="parentTeacherList">
+              <!-- Öğretmen Kartı 1 -->
+              <div class="teacher-item active" data-conv-id="conv_teacher1_parent_ayse" data-teacher-id="teacher_1" data-teacher-name="Ahmet Yılmaz">
+                <div class="teacher-avatar">AY</div>
+                <div class="teacher-info">
+                  <div class="teacher-name">Ahmet Yılmaz</div>
+                  <div class="teacher-branch">Matematik Öğretmeni</div>
+                  <div class="teacher-last-msg" id="lastMsgPreview">İyi günler Ayşe Hanım...</div>
+                </div>
+                <span class="teacher-unread-badge" id="teacherBadge_conv_teacher1_parent_ayse"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sağ Sütun: Canlı Sohbet -->
+          <div class="chat-container">
+            <div class="chat-header">
+              <div class="chat-teacher-profile">
+                <div class="teacher-avatar" id="activeTeacherAvatar">AY</div>
+                <div class="chat-teacher-title">
+                  <h4 id="activeTeacherName">Ahmet Yılmaz</h4>
+                  <p>Çevrim içi · Matematik Öğretmeni</p>
+                </div>
+              </div>
+              <div style="font-size:0.78rem;background:var(--forest-subtle);color:var(--forest);padding:6px 12px;border-radius:20px;font-weight:700;">
+                Öğrenci: Kerem Yılmaz
+              </div>
+            </div>
+
+            <div class="chat-notice-banner">
+              <span>ℹ️</span>
+              <span>Bu görüşme Kerem Yılmaz'ın akademik gelişimi ve ödev takibi amacıyla öğretmen ile veli arasında gerçekleşmektedir.</span>
+            </div>
+
+            <div class="chat-messages-flow" id="parentChatFlow">
+              <!-- Mesaj balonları JavaScript tarafından dinamik oluşturulur -->
+            </div>
+
+            <div class="chat-footer">
+              <form class="chat-form" id="parentMsgForm">
+                <input type="text" class="chat-input" id="parentMsgInput" placeholder="Ahmet Öğretmene mesajınızı yazın (Enter ile gönder)..." autocomplete="off" required>
+                <button type="submit" class="chat-send-btn">
+                  <span>Gönder</span>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 5. Bildirim Tercihleri -->
+      <section class="tab-content" id="tab-settings">
+        <div class="page-header">
+          <h1 class="page-title">Bildirim Tercihleri</h1>
+          <p class="page-desc">SMS, E-posta ve WhatsApp bildirim sıklığını yönetin.</p>
+        </div>
+        <div class="stat-card">
+          <p style="font-size:0.86rem;color:var(--text-muted);">Haftalık gelişim bülteni: <strong>Açık (Her Pazar 18:00)</strong></p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Mesajlaşma Servisi Entegrasyonu -->
+  <script src="assets/messageService.js"></script>
   <script>
-    (() => {
-      const $ = id => document.getElementById(id);
-      if (new URLSearchParams(location.search).has('siteMediaDesigner')) return;
-      const esc = value => String(value ?? '').replace(/[&<>"']/g, character => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-      })[character]);
-      const dateText = value => value ? new Date(value).toLocaleString('tr-TR') : 'Henüz etkinlik yok';
-      const dateOnly = value => new Date(value).toLocaleDateString('tr-TR', {
-        day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Istanbul'
-      });
-      function markDemo() {
-        $('demoNotice').hidden = false;
+    document.addEventListener('DOMContentLoaded', () => {
+      // Veli Bağlamı Tanımlama
+      const parentUser = {
+        role: 'parent',
+        userId: 'parent_ayse',
+        name: 'Ayşe Yılmaz',
+        relatedStudentName: 'Kerem Yılmaz'
+      };
+
+      // MessageService Başlat
+      if (window.ZarifMessageService) {
+        window.ZarifMessageService.init(parentUser);
       }
 
-      async function loadWeeklyReport() {
-        try {
-          const response = await fetch('/api/parent/report', {credentials: 'same-origin'});
-          if (response.status === 401) {
-            location.replace('/kayit-giris.html?role=parent');
-            return;
-          }
-          const report = await response.json();
-          if (!response.ok) throw new Error(report.mesaj || 'Haftalık karne alınamadı.');
+      // Tab Değiştirme Mantığı
+      const navButtons = document.querySelectorAll('.nav-item-btn[data-tab]');
+      const tabContents = document.querySelectorAll('.tab-content');
 
-          $('reportWeek').textContent = `${dateOnly(report.week_start)} – ${dateOnly(new Date(new Date(report.week_end).getTime() - 1))}`;
-          $('reportAssignments').textContent = report.completed_assignments;
-          $('reportSuccess').textContent = report.average_success_percent == null
-            ? 'Veri yok'
-            : `%${report.average_success_percent}`;
-          const gaps = $('reportGaps');
-          gaps.replaceChildren();
-          const criticalGaps = Array.isArray(report.critical_gaps) ? report.critical_gaps : [];
-          if (criticalGaps.length) {
-            criticalGaps.forEach(gap => {
-              const item = document.createElement('li');
-              item.textContent = `${gap.title} · %${gap.success_percent}`;
-              gaps.append(item);
+      function switchTab(tabId) {
+        navButtons.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.tab === tabId);
+        });
+        tabContents.forEach(content => {
+          content.classList.toggle('active', content.id === tabId);
+        });
+
+        // Mesajlar sekmesi açıldıysa okundu işaretle
+        if (tabId === 'tab-messages') {
+          markCurrentChatAsRead();
+        }
+      }
+
+      navButtons.forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+
+      const topMessagesBtn = document.getElementById('topMessagesBtn');
+      if (topMessagesBtn) {
+        topMessagesBtn.addEventListener('click', () => switchTab('tab-messages'));
+      }
+
+      // Aktif Konuşma
+      const activeConvId = 'conv_teacher1_parent_ayse';
+
+      function markCurrentChatAsRead() {
+        if (window.ZarifMessageService) {
+          window.ZarifMessageService.markAsRead(activeConvId, 'parent');
+        }
+      }
+
+      // Sohbet Akışını Render Etme
+      function renderChatMessages() {
+        const flowEl = document.getElementById('parentChatFlow');
+        if (!flowEl) return;
+
+        let conv = null;
+        if (window.ZarifMessageService) {
+          conv = window.ZarifMessageService.getConversationById(activeConvId);
+        }
+
+        if (!conv || !Array.isArray(conv.messages) || conv.messages.length === 0) {
+          flowEl.innerHTML = '<div style="text-align:center;color:var(--text-light);padding:40px 0;font-size:0.86rem;">Henüz mesaj yok. Öğretmene ilk mesajı yazarak iletişime geçebilirsiniz.</div>';
+          return;
+        }
+
+        const previewEl = document.getElementById('lastMsgPreview');
+        if (previewEl && conv.messages.length > 0) {
+          const last = conv.messages[conv.messages.length - 1];
+          previewEl.textContent = (last.senderRole === 'parent' ? 'Siz: ' : '') + last.text;
+        }
+
+        flowEl.innerHTML = conv.messages.map(msg => {
+          const isParent = msg.senderRole === 'parent';
+          const time = msg.time || (msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '');
+          const readReceipt = isParent ? (msg.isRead ? '<span class="msg-read-check">✓✓ Okundu</span>' : '<span>✓ İletildi</span>') : '';
+
+          return `
+            <div class="msg-row ${isParent ? 'parent' : 'teacher'}">
+              <div class="msg-bubble">
+                ${escapeHtml(msg.text)}
+              </div>
+              <div class="msg-meta">
+                <span>${escapeHtml(time)}</span>
+                ${readReceipt}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        flowEl.scrollTop = flowEl.scrollHeight;
+      }
+
+      function updateBadges(convs, unreadCount) {
+        const sidebarBadge = document.getElementById('parentMessagesBadge');
+        const topBadge = document.getElementById('topMessagesBadge');
+        const teacherBadge = document.getElementById(`teacherBadge_${activeConvId}`);
+
+        const count = typeof unreadCount === 'number' ? unreadCount : (window.ZarifMessageService ? window.ZarifMessageService.getUnreadCount('parent') : 0);
+
+        if (sidebarBadge) {
+          sidebarBadge.textContent = count;
+          sidebarBadge.classList.toggle('show', count > 0);
+        }
+        if (topBadge) {
+          topBadge.textContent = count;
+          topBadge.classList.toggle('show', count > 0);
+        }
+        if (teacherBadge) {
+          teacherBadge.classList.toggle('show', count > 0);
+        }
+      }
+
+      // Mesaj Gönderme Formu
+      const form = document.getElementById('parentMsgForm');
+      const input = document.getElementById('parentMsgInput');
+
+      if (form && input) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const text = input.value.trim();
+          if (!text) return;
+
+          input.value = '';
+          input.focus();
+
+          if (window.ZarifMessageService) {
+            await window.ZarifMessageService.sendMessage({
+              conversationId: activeConvId,
+              text,
+              senderId: 'parent_ayse',
+              senderName: 'Ayşe Yılmaz',
+              senderRole: 'parent',
+              targetUserId: 'teacher_1',
+              targetName: 'Ahmet Yılmaz',
+              targetRole: 'teacher',
+              relatedStudentName: 'Kerem Yılmaz'
             });
-          } else {
-            const item = document.createElement('li');
-            item.textContent = report.average_success_percent == null
-              ? 'Bu hafta henüz değerlendirme verisi yok.'
-              : 'Bu hafta kritik kazanım eksiği bulunmuyor.';
-            gaps.append(item);
+            renderChatMessages();
           }
-          if (report.demo) markDemo();
-          $('reportStatus').textContent = report.demo
-            ? 'DEMO · Örnek haftalık öğrenme karnesi (gerçek performans verisi değildir).'
-            : 'Öğrencinizin haftalık performans özeti.';
-          $('reportContent').hidden = false;
-        } catch (error) {
-          $('reportStatus').textContent = error.message || 'Haftalık karne alınamadı.';
-          $('reportStatus').className = 'card-intro error';
-        }
+        });
       }
 
-      async function loadDashboard() {
-        const [meResponse, dashboardResponse] = await Promise.all([
-          fetch('/me', {credentials: 'same-origin'}),
-          fetch('/api/parent/dashboard', {credentials: 'same-origin'})
-        ]);
-        if (meResponse.status === 401 || dashboardResponse.status === 401) {
-          location.replace('/kayit-giris.html?role=parent');
-          return;
-        }
-        const me = await meResponse.json();
-        const result = await dashboardResponse.json();
-        if (!meResponse.ok || !dashboardResponse.ok) {
-          throw new Error(result.mesaj || me.mesaj || 'Veli paneli yüklenemedi.');
-        }
-        if (me.user.role !== 'parent') {
-          location.replace('/kayit-giris.html?role=parent');
-          return;
-        }
-        $('parentEmail').textContent = me.user.email;
-        $('studentName').textContent = result.student.name;
-        $('studentDetails').textContent = result.student.grade
-          ? `${result.student.grade}. sınıf${result.student.section ? ` · ${result.student.section}` : ''}`
-          : 'Bağlı öğrenci hesabı';
-        $('messageCount').textContent = result.summary.messageCount;
-        $('questionCount').textContent = result.summary.questionCount;
-        $('responseCount').textContent = result.summary.aiResponseCount;
-        $('hintCount').textContent = result.summary.hintCount;
-        $('lessonCount').textContent = result.summary.liveLessonCount;
-        if (result.demo) markDemo();
-
-        $('messages').innerHTML = result.recentMessages.length
-          ? result.recentMessages.map(item => `<article class="message is-${item.sender === 'ai' ? 'ai' : 'user'}">
-              <strong>${item.sender === 'ai' ? 'AI Mentör' : 'Öğrenci'}</strong>
-              ${item.isHint ? '<span class="message-tag">İpucu</span>' : ''}
-              <p>${esc(item.message)}</p>
-              <small>${esc(item.roomName === 'assistant' ? 'Asistan sohbeti' : 'Canlı ders')} · ${esc(dateText(item.createdAt))}</small>
-            </article>`).join('')
-          : '<p class="empty">Henüz AI Mentör sohbeti bulunmuyor.</p>';
-
-        $('lessons').innerHTML = result.liveLessons.length
-          ? result.liveLessons.map(lesson => `<article class="lesson">
-              <div><strong>${esc(lesson.title || 'Canlı ders')}</strong><small>İlk bağlantı: ${esc(dateText(lesson.firstJoinedAt))} · Son bağlantı: ${esc(dateText(lesson.lastActivityAt))}</small></div>
-              <span class="lesson-count">${lesson.joinCount || 0} bağlantı · ${lesson.messageCount} mesaj</span>
-            </article>`).join('')
-          : '<p class="empty">AI Mentör kullanılan canlı ders kaydı yok.</p>';
-        $('status').hidden = true;
-        $('dashboard').hidden = false;
-        await loadWeeklyReport();
+      // Servise Abone Ol (Anlık Güncellemeler)
+      if (window.ZarifMessageService) {
+        window.ZarifMessageService.subscribe((convs, unread) => {
+          renderChatMessages();
+          updateBadges(convs, unread);
+        });
       }
 
-      $('logout').addEventListener('click', async () => {
-        try {
-          await fetch('/logout', {method: 'POST', credentials: 'same-origin'});
-          location.replace('/kayit-giris.html?role=parent');
-        } catch {
-          $('status').textContent = 'Çıkış yapılamadı. Lütfen yeniden deneyin.';
-          $('status').className = 'error';
-          $('status').hidden = false;
-        }
-      });
+      // İlk Render
+      renderChatMessages();
+      updateBadges();
 
-      loadDashboard().catch(error => {
-        $('status').textContent = error.message || 'Veli paneli yüklenemedi.';
-        $('status').className = 'error';
-      });
-    })();
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+    });
   </script>
-  <script src="/assets/site-media-targets.js"></script>
-  <script src="/assets/site-media.js"></script>
 </body>
 </html>

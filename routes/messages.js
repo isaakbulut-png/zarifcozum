@@ -1,119 +1,219 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const Conversation = require('../models/Conversation');
+
+function isDbConnected() {
+  return Boolean(mongoose.connection && mongoose.connection.readyState === 1);
+}
 
 function getDefaultConversations() {
   const now = new Date();
-  const formatTime = (d) => d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-  const timeToday = (minsAgo) => formatTime(new Date(now.getTime() - minsAgo * 60 * 1000));
+  const timeOffset = (minsAgo) => new Date(now.getTime() - minsAgo * 60 * 1000).toISOString();
+  const formatTime = (iso) => new Date(iso).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
   return [
     {
-      id: 'conv_1',
-      name: 'Zeynep Kaya',
-      role: '11. Sınıf Öğrencisi',
-      roleType: 'student',
-      studentName: 'Zeynep Kaya',
-      avatar: 'ZK',
-      avatarBg: '#059669', // emerald
-      time: timeToday(18),
-      unread: true,
+      conversationId: 'conv_teacher1_student1',
+      participants: [
+        { userId: 'teacher_1', name: 'Ahmet Yılmaz', role: 'teacher' },
+        { userId: 'student_1', name: 'Zeynep Kaya', role: 'student' }
+      ],
       messages: [
         {
           id: 'msg_1_1',
-          sender: 'student',
-          senderName: 'Zeynep Kaya',
+          senderId: 'student_1',
+          senderRole: 'student',
           text: 'Hocam merhaba, dün paylaştığınız trigonometri kazanım testindeki 4. sorunun çözüm adımında takıldım.',
-          time: timeToday(20)
+          timestamp: timeOffset(20),
+          isRead: true
         },
         {
           id: 'msg_1_2',
-          sender: 'student',
-          senderName: 'Zeynep Kaya',
+          senderId: 'student_1',
+          senderRole: 'student',
           text: 'Yarınki canlı dersimizde bu soruya birkaç dakika ayırabilir miyiz?',
-          time: timeToday(18)
+          timestamp: timeOffset(18),
+          isRead: false
         }
-      ]
+      ],
+      updatedAt: new Date(now.getTime() - 18 * 60 * 1000)
     },
     {
-      id: 'conv_2',
-      name: 'Murat Demir',
-      role: 'Veli',
-      roleType: 'parent',
-      studentName: 'Ali Demir',
-      parentRelation: "Ali Demir'in Velisi",
-      avatar: 'MD',
-      avatarBg: '#d97706', // amber
-      time: timeToday(140),
-      unread: false,
+      conversationId: 'conv_teacher1_parent1',
+      participants: [
+        { userId: 'teacher_1', name: 'Ahmet Yılmaz', role: 'teacher' },
+        { userId: 'parent_1', name: 'Murat Demir', role: 'parent', relatedStudentName: 'Ali Demir' }
+      ],
       messages: [
         {
           id: 'msg_2_1',
-          sender: 'parent',
-          senderName: 'Murat Demir',
+          senderId: 'parent_1',
+          senderRole: 'parent',
           text: "Ahmet Bey iyi günler, Ali'nin son deneme sınavındaki geometri netleri yükselmiş. İlginiz için çok teşekkür ederiz.",
-          time: timeToday(145)
+          timestamp: timeOffset(145),
+          isRead: true
         },
         {
           id: 'msg_2_2',
-          sender: 'teacher',
-          senderName: 'Öğretmen',
+          senderId: 'teacher_1',
+          senderRole: 'teacher',
           text: 'Rica ederim Murat Bey, Ali derste çok odaklı çalışıyor. Haftalık ödevlerini de aksatmadan bitiriyor.',
-          time: timeToday(140)
+          timestamp: timeOffset(140),
+          isRead: true
         }
-      ]
+      ],
+      updatedAt: new Date(now.getTime() - 140 * 60 * 1000)
     },
     {
-      id: 'conv_3',
-      name: 'Burak Çelik',
-      role: '8. Sınıf Öğrencisi (LGS)',
-      roleType: 'student',
-      studentName: 'Burak Çelik',
-      avatar: 'BÇ',
-      avatarBg: '#2563eb', // blue
-      time: 'Dün',
-      unread: false,
+      conversationId: 'conv_teacher1_student2',
+      participants: [
+        { userId: 'teacher_1', name: 'Ahmet Yılmaz', role: 'teacher' },
+        { userId: 'student_2', name: 'Burak Çelik', role: 'student' }
+      ],
       messages: [
         {
           id: 'msg_3_1',
-          sender: 'student',
-          senderName: 'Burak Çelik',
+          senderId: 'student_2',
+          senderRole: 'student',
           text: 'Hocam LGS deneme sınavı analiz raporu sisteme yüklendi mi?',
-          time: 'Dün 17:40'
+          timestamp: timeOffset(24 * 60 + 10),
+          isRead: true
         },
         {
           id: 'msg_3_2',
-          sender: 'teacher',
-          senderName: 'Öğretmen',
+          senderId: 'teacher_1',
+          senderRole: 'teacher',
           text: 'Evet Burak, başarı analizi sekmesinden karnene ulaşabilirsin.',
-          time: 'Dün 17:55'
+          timestamp: timeOffset(24 * 60),
+          isRead: true
         }
-      ]
+      ],
+      updatedAt: new Date(now.getTime() - 24 * 60 * 60 * 1000)
     },
     {
-      id: 'conv_4',
-      name: 'Fatma Yılmaz',
-      role: 'Veli',
-      roleType: 'parent',
-      studentName: 'Elif Yılmaz',
-      parentRelation: "Elif Yılmaz'ın Velisi",
-      avatar: 'FY',
-      avatarBg: '#c026d3', // fuchsia
-      time: timeToday(45),
-      unread: true,
+      conversationId: 'conv_teacher1_parent2',
+      participants: [
+        { userId: 'teacher_1', name: 'Ahmet Yılmaz', role: 'teacher' },
+        { userId: 'parent_2', name: 'Fatma Yılmaz', role: 'parent', relatedStudentName: 'Elif Yılmaz' }
+      ],
       messages: [
         {
           id: 'msg_4_1',
-          sender: 'parent',
-          senderName: 'Fatma Yılmaz',
+          senderId: 'parent_2',
+          senderRole: 'parent',
           text: 'Hocam iyi günler, Elif bu hafta sonu yapılacak olan Türkiye Geneli Online Deneme Sınavına evden katılabilecek mi? Saat ve giriş adımları hakkında bilgi verebilir misiniz?',
-          time: timeToday(45)
+          timestamp: timeOffset(45),
+          isRead: false
         }
-      ]
+      ],
+      updatedAt: new Date(now.getTime() - 45 * 60 * 1000)
+    },
+    {
+      conversationId: 'conv_teacher1_parent_ayse',
+      participants: [
+        { userId: 'teacher_1', name: 'Ahmet Yılmaz', role: 'teacher' },
+        { userId: 'parent_ayse', name: 'Ayşe Yılmaz', role: 'parent', relatedStudentName: 'Kerem Yılmaz' }
+      ],
+      messages: [
+        {
+          id: 'msg_5_1',
+          senderId: 'teacher_1',
+          senderRole: 'teacher',
+          text: 'İyi günler Ayşe Hanım, Kerem bu hafta Kesirlerle İşlemler konusunda güzel bir gelişim gösterdi. Pekiştirme testlerini tamamlaması konuları iyice pekiştirecektir.',
+          timestamp: timeOffset(80),
+          isRead: true
+        },
+        {
+          id: 'msg_5_2',
+          senderId: 'parent_ayse',
+          senderRole: 'parent',
+          text: 'Merhabalar Ahmet Hocam, bilgilendirmeniz için çok teşekkür ederiz. Kerem ile birlikte evde testleri takip ediyoruz.',
+          timestamp: timeOffset(30),
+          isRead: false
+        }
+      ],
+      updatedAt: new Date(now.getTime() - 30 * 60 * 1000)
     }
   ];
 }
 
-// Global in-memory cache for live state across requests
+// In-memory store fallback
 let conversationsStore = getDefaultConversations();
+
+/**
+ * Normalizes conversation data for client usage and ensures both new schema
+ * (conversationId, participants, messages with isRead) and UI helper properties exist.
+ */
+function enrichConversation(conv, viewerRole = 'teacher') {
+  const c = { ...conv };
+  c.id = c.conversationId || c.id;
+  c.conversationId = c.id;
+
+  const participants = Array.isArray(c.participants) ? c.participants : [];
+  const otherParticipant = participants.find(p => p.role !== viewerRole) || participants[0] || {};
+  const parentParticipant = participants.find(p => p.role === 'parent');
+  const studentParticipant = participants.find(p => p.role === 'student');
+
+  c.name = c.name || otherParticipant.name || 'Kullanıcı';
+  c.roleType = c.roleType || (parentParticipant ? 'parent' : studentParticipant ? 'student' : otherParticipant.role || 'student');
+  
+  if (parentParticipant) {
+    c.studentName = parentParticipant.relatedStudentName || c.studentName || '';
+    c.parentRelation = c.studentName ? `${c.studentName}'in Velisi` : 'Öğrenci Velisi';
+    c.role = c.role || 'Veli';
+  } else if (studentParticipant) {
+    c.studentName = studentParticipant.name || c.name;
+    c.role = c.role || 'Öğrenci';
+  } else {
+    c.role = c.role || otherParticipant.role || 'Kullanıcı';
+  }
+
+  // Avatar helper
+  if (!c.avatar) {
+    const initials = (c.name || 'ZK').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    c.avatar = initials || 'ZK';
+  }
+  if (!c.avatarBg) {
+    c.avatarBg = c.roleType === 'parent' ? '#d97706' : '#059669';
+  }
+
+  // Format messages
+  const messages = Array.isArray(c.messages) ? c.messages : [];
+  c.messages = messages.map(m => {
+    const msg = { ...m };
+    if (!msg.timestamp && msg.time) {
+      msg.timestamp = new Date().toISOString();
+    }
+    if (typeof msg.isRead === 'undefined') {
+      msg.isRead = !c.unread;
+    }
+    if (!msg.senderRole) {
+      msg.senderRole = msg.sender === 'teacher' ? 'teacher' : (c.roleType || 'student');
+    }
+    if (!msg.sender) {
+      msg.sender = msg.senderRole;
+    }
+    if (!msg.time && msg.timestamp) {
+      msg.time = new Date(msg.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    }
+    return msg;
+  });
+
+  const lastMsg = c.messages[c.messages.length - 1];
+  if (lastMsg) {
+    c.time = lastMsg.time || new Date(lastMsg.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  } else {
+    c.time = c.time || '12:00';
+  }
+
+  // Unread status relative to viewerRole
+  // If viewer is teacher: any message not sent by teacher that has isRead === false
+  // If viewer is parent: any message not sent by parent that has isRead === false
+  const hasUnread = c.messages.some(m => !m.isRead && m.senderRole !== viewerRole);
+  c.unread = hasUnread;
+
+  return c;
+}
 
 function createMessagesRouter({ getDb } = {}) {
   const router = express.Router();
@@ -121,29 +221,46 @@ function createMessagesRouter({ getDb } = {}) {
   // GET /api/messages - Konuşma listesini ve okunmamış sayısını döndürür
   router.get('/', async (req, res) => {
     try {
-      const db = typeof getDb === 'function' ? getDb() : null;
-      let convs = conversationsStore;
+      const viewerRole = req.query.role || req.session?.user?.role || 'teacher';
+      const viewerUserId = req.query.userId || req.session?.user?.id || '';
 
-      if (db) {
-        try {
-          const col = db.collection('direct_messages');
-          const dbConvs = await col.find({}).sort({ updatedAt: -1 }).toArray();
-          if (dbConvs && dbConvs.length > 0) {
-            convs = dbConvs;
-            conversationsStore = dbConvs;
-          } else {
-            // İlk açılışta seed verisini koleksiyona yaz
-            await col.insertMany(conversationsStore).catch(() => {});
+      let convs = [];
+      let usedDb = false;
+
+      // MongoDB desteği
+      try {
+        if (isDbConnected() && Conversation && Conversation.find) {
+          const filter = {};
+          if (viewerRole === 'parent' && viewerUserId) {
+            filter['participants.userId'] = viewerUserId;
           }
-        } catch (dbErr) {
-          console.warn('MongoDB direct_messages okunamadı, bellek içi depodan dönülüyor:', dbErr.message);
+          const docs = await Conversation.find(filter).sort({ updatedAt: -1 }).lean().exec();
+          if (docs && docs.length > 0) {
+            convs = docs;
+            usedDb = true;
+          }
         }
+      } catch (dbErr) {
+        // Fallback to in-memory store
       }
 
-      const unreadCount = convs.filter(c => c.unread).length;
+      if (!usedDb) {
+        convs = conversationsStore;
+      }
+
+      // Filter by viewer role if specified
+      if (viewerRole === 'parent' && viewerUserId) {
+        convs = convs.filter(c => 
+          Array.isArray(c.participants) && c.participants.some(p => p.userId === viewerUserId)
+        );
+      }
+
+      const enriched = convs.map(c => enrichConversation(c, viewerRole));
+      const unreadCount = enriched.filter(c => c.unread).length;
+
       res.json({
         success: true,
-        conversations: convs,
+        conversations: enriched,
         unreadCount
       });
     } catch (error) {
@@ -152,165 +269,292 @@ function createMessagesRouter({ getDb } = {}) {
     }
   });
 
-  // POST /api/messages - Öğretmenin yanıt göndermesi
-  router.post('/', async (req, res) => {
+  // GET /api/messages/:id - Belirli bir konuşmayı getirir
+  router.get('/:conversationId', async (req, res) => {
     try {
-      const { conversationId, text } = req.body || {};
-      if (!conversationId || !text || !text.trim()) {
-        return res.status(400).json({ success: false, mesaj: 'Konuşma ID ve mesaj metni zorunludur.' });
+      const { conversationId } = req.params;
+      const viewerRole = req.query.role || req.session?.user?.role || 'teacher';
+
+      let target = null;
+      try {
+        if (isDbConnected() && Conversation && Conversation.findOne) {
+          target = await Conversation.findOne({ conversationId }).lean().exec();
+        }
+      } catch (e) {}
+
+      if (!target) {
+        target = conversationsStore.find(c => c.conversationId === conversationId || c.id === conversationId);
       }
 
-      const cleanText = text.trim();
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-
-      let targetConv = conversationsStore.find(c => c.id === conversationId || String(c._id) === conversationId);
-      if (!targetConv) {
+      if (!target) {
         return res.status(404).json({ success: false, mesaj: 'Konuşma bulunamadı.' });
       }
 
-      const newMsg = {
-        id: 'msg_' + Date.now(),
-        sender: 'teacher',
-        senderName: req.session?.user?.name || 'Öğretmen',
-        text: cleanText,
-        time: timeStr,
-        createdAt: now
-      };
-
-      targetConv.messages.push(newMsg);
-      targetConv.time = timeStr;
-      targetConv.unread = false; // Öğretmen yanıt verince okunmuş olur
-      targetConv.updatedAt = now;
-
-      // MongoDB güncellemesi
-      const db = typeof getDb === 'function' ? getDb() : null;
-      if (db) {
-        try {
-          const col = db.collection('direct_messages');
-          await col.updateOne(
-            { id: targetConv.id },
-            { $set: { messages: targetConv.messages, time: timeStr, unread: false, updatedAt: now } },
-            { upsert: true }
-          );
-        } catch (dbErr) {
-          console.warn('MongoDB direct_messages güncellenemedi:', dbErr.message);
-        }
-      }
-
-      const unreadCount = conversationsStore.filter(c => c.unread).length;
       res.json({
         success: true,
-        message: newMsg,
-        conversation: targetConv,
-        unreadCount
+        conversation: enrichConversation(target, viewerRole)
       });
     } catch (error) {
-      console.error('Mesaj gönderilemedi:', error);
-      res.status(500).json({ success: false, mesaj: 'Mesaj iletilemedi.' });
+      res.status(500).json({ success: false, mesaj: 'Konuşma alınırken hata oluştu.' });
     }
   });
 
-  // POST /api/messages/mark-read - Bir konuşmayı okundu olarak işaretler
-  router.post('/mark-read', async (req, res) => {
+  // POST /api/messages - Mesaj gönderme (Öğretmen, Veli veya Öğrenci)
+  router.post('/', async (req, res) => {
     try {
-      const { conversationId } = req.body || {};
-      if (!conversationId) {
-        return res.status(400).json({ success: false, mesaj: 'Konuşma ID zorunludur.' });
-      }
+      const {
+        conversationId,
+        text,
+        senderId,
+        senderName,
+        senderRole = 'teacher',
+        targetUserId,
+        targetName,
+        targetRole,
+        relatedStudentName
+      } = req.body || {};
 
-      const targetConv = conversationsStore.find(c => c.id === conversationId || String(c._id) === conversationId);
-      if (targetConv) {
-        targetConv.unread = false;
-        const db = typeof getDb === 'function' ? getDb() : null;
-        if (db) {
-          try {
-            const col = db.collection('direct_messages');
-            await col.updateOne({ id: targetConv.id }, { $set: { unread: false } });
-          } catch {}
-        }
-      }
-
-      const unreadCount = conversationsStore.filter(c => c.unread).length;
-      res.json({ success: true, unreadCount });
-    } catch (error) {
-      res.status(500).json({ success: false, mesaj: 'İşlem başarısız.' });
-    }
-  });
-
-  // POST /api/messages/send-from-client - Öğrenci veya Veliden Öğretmene Mesaj Gönderme
-  router.post('/send-from-client', async (req, res) => {
-    try {
-      const { roleType, senderName, studentName, text } = req.body || {};
       if (!text || !text.trim()) {
         return res.status(400).json({ success: false, mesaj: 'Mesaj metni zorunludur.' });
       }
 
       const cleanText = text.trim();
-      const actualRoleType = roleType === 'parent' ? 'parent' : 'student';
-      const actualSenderName = (senderName || req.session?.user?.name || (actualRoleType === 'parent' ? 'Veli' : 'Öğrenci')).trim();
       const now = new Date();
+      const isoTimestamp = now.toISOString();
       const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+      const finalSenderRole = senderRole || req.session?.user?.role || 'teacher';
+      const finalSenderId = senderId || req.session?.user?.id || (finalSenderRole + '_1');
+      const finalSenderName = senderName || req.session?.user?.name || (finalSenderRole === 'teacher' ? 'Ahmet Yılmaz' : 'Kullanıcı');
 
-      // İlgili konuşmayı bul ya da yeni oluştur
-      let targetConv = conversationsStore.find(c =>
-        c.roleType === actualRoleType && (c.name.toLowerCase() === actualSenderName.toLowerCase() || (actualRoleType === 'parent' && studentName && c.studentName?.toLowerCase() === studentName.toLowerCase()))
-      );
+      let targetConv = conversationsStore.find(c => c.conversationId === conversationId || c.id === conversationId);
 
-      const newMsg = {
-        id: 'msg_' + Date.now(),
-        sender: actualRoleType,
-        senderName: actualSenderName,
-        text: cleanText,
-        time: timeStr,
-        createdAt: now
-      };
+      // Konuşma henüz yoksa yeni oluştur
+      if (!targetConv) {
+        const participants = [
+          { userId: finalSenderId, name: finalSenderName, role: finalSenderRole, relatedStudentName: relatedStudentName || '' }
+        ];
+        if (targetUserId) {
+          participants.push({
+            userId: targetUserId,
+            name: targetName || 'Kullanıcı',
+            role: targetRole || (finalSenderRole === 'teacher' ? 'student' : 'teacher'),
+            relatedStudentName: relatedStudentName || ''
+          });
+        } else if (finalSenderRole !== 'teacher') {
+          participants.push({
+            userId: 'teacher_1',
+            name: 'Ahmet Yılmaz',
+            role: 'teacher'
+          });
+        }
 
-      if (targetConv) {
-        targetConv.messages.push(newMsg);
-        targetConv.time = timeStr;
-        targetConv.unread = true;
-        targetConv.updatedAt = now;
-      } else {
-        const initials = actualSenderName.split(/\s+/).slice(0, 2).map(p => p[0]?.toUpperCase() || '').join('') || (actualRoleType === 'parent' ? 'VL' : 'ÖG');
         targetConv = {
-          id: 'conv_' + Date.now(),
-          name: actualSenderName,
-          role: actualRoleType === 'parent' ? 'Veli' : 'Öğrenci',
-          roleType: actualRoleType,
-          studentName: studentName || actualSenderName,
-          parentRelation: actualRoleType === 'parent' ? (studentName ? `${studentName}'in Velisi` : 'Öğrenci Velisi') : undefined,
-          avatar: initials,
-          avatarBg: actualRoleType === 'parent' ? '#d97706' : '#059669',
-          time: timeStr,
-          unread: true,
-          messages: [newMsg],
+          conversationId: conversationId || ('conv_' + Date.now()),
+          participants,
+          messages: [],
           updatedAt: now
         };
         conversationsStore.unshift(targetConv);
       }
 
-      const db = typeof getDb === 'function' ? getDb() : null;
-      if (db) {
-        try {
-          const col = db.collection('direct_messages');
-          await col.updateOne(
-            { id: targetConv.id },
-            { $set: targetConv },
-            { upsert: true }
-          );
-        } catch {}
+      const newMsg = {
+        id: 'msg_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        senderId: finalSenderId,
+        senderRole: finalSenderRole,
+        senderName: finalSenderName,
+        sender: finalSenderRole,
+        text: cleanText,
+        timestamp: isoTimestamp,
+        time: timeStr,
+        isRead: false // Alıcı henüz okumadı
+      };
+
+      targetConv.messages.push(newMsg);
+      targetConv.updatedAt = now;
+
+      // Öğretmen yanıt verdiğinde konuşmadaki gelen mesajları da okundu yapar
+      if (finalSenderRole === 'teacher') {
+        targetConv.messages.forEach(m => {
+          if (m.senderRole !== 'teacher' && m.sender !== 'teacher') {
+            m.isRead = true;
+          }
+        });
       }
 
-      const unreadCount = conversationsStore.filter(c => c.unread).length;
+      // MongoDB'ye kaydet
+      try {
+        if (isDbConnected() && Conversation && Conversation.findOneAndUpdate) {
+          await Conversation.findOneAndUpdate(
+            { conversationId: targetConv.conversationId },
+            {
+              $set: {
+                participants: targetConv.participants,
+                messages: targetConv.messages,
+                updatedAt: now
+              }
+            },
+            { upsert: true, returnDocument: 'after' }
+          );
+        }
+      } catch (dbErr) {
+        console.warn('MongoDB kayıt uyarısı:', dbErr.message);
+      }
+
+      const enriched = enrichConversation(targetConv, finalSenderRole);
+
       res.json({
         success: true,
-        mesaj: 'Mesajınız öğretmeninize başarıyla iletildi!',
-        conversation: targetConv,
-        unreadCount
+        message: newMsg,
+        conversation: enriched
       });
     } catch (error) {
-      console.error('Öğrenci/Veli mesajı iletilemedi:', error);
+      console.error('Mesaj gönderilemedi:', error);
+      res.status(500).json({ success: false, mesaj: 'Mesaj gönderilemedi.' });
+    }
+  });
+
+  // POST /api/messages/mark-read - Konuşmayı okundu olarak işaretler
+  router.post('/mark-read', async (req, res) => {
+    try {
+      const { conversationId, readerRole = 'teacher', readerId } = req.body || {};
+      if (!conversationId) {
+        return res.status(400).json({ success: false, mesaj: 'Konuşma ID zorunludur.' });
+      }
+
+      let targetConv = conversationsStore.find(c => c.conversationId === conversationId || c.id === conversationId);
+
+      if (targetConv && Array.isArray(targetConv.messages)) {
+        // Okuyanın rolü dışındakilerin gönderdiği mesajları okundu yap
+        targetConv.messages.forEach(m => {
+          if (m.senderRole !== readerRole && (!readerId || m.senderId !== readerId)) {
+            m.isRead = true;
+          }
+        });
+        targetConv.updatedAt = new Date();
+      }
+
+      try {
+        if (isDbConnected() && Conversation && Conversation.findOne) {
+          const doc = await Conversation.findOne({ conversationId });
+          if (doc && Array.isArray(doc.messages)) {
+            doc.messages.forEach(m => {
+              if (m.senderRole !== readerRole && (!readerId || m.senderId !== readerId)) {
+                m.isRead = true;
+              }
+            });
+            doc.updatedAt = new Date();
+            await doc.save();
+          }
+        }
+      } catch (dbErr) {
+        console.warn('MongoDB okundu güncelleme uyarısı:', dbErr.message);
+      }
+
+      res.json({ success: true, conversationId });
+    } catch (error) {
+      console.error('Okundu işaretleme hatası:', error);
+      res.status(500).json({ success: false, mesaj: 'İşlem başarısız.' });
+    }
+  });
+
+  // POST /api/messages/send-from-client - Veli veya Öğrenci panelinden öğretmene mesaj
+  router.post('/send-from-client', async (req, res) => {
+    try {
+      const {
+        roleType = 'student',
+        senderName,
+        studentName,
+        text,
+        senderId,
+        teacherId = 'teacher_1'
+      } = req.body || {};
+
+      if (!text || !text.trim()) {
+        return res.status(400).json({ success: false, mesaj: 'Mesaj metni zorunludur.' });
+      }
+
+      const cleanText = text.trim();
+      const now = new Date();
+      const isoTimestamp = now.toISOString();
+      const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+      const finalRole = roleType === 'parent' ? 'parent' : 'student';
+      const actualSenderName = senderName || (finalRole === 'parent' ? 'Öğrenci Velisi' : 'Öğrenci');
+      const actualStudentName = studentName || (finalRole === 'parent' ? 'Öğrenci' : actualSenderName);
+      const actualSenderId = senderId || (finalRole + '_' + Date.now());
+
+      // Konuşmayı bul veya oluştur
+      let targetConv = conversationsStore.find(c => {
+        if (c.roleType === finalRole && (c.name === actualSenderName || c.studentName === actualStudentName)) {
+          return true;
+        }
+        if (Array.isArray(c.participants)) {
+          return c.participants.some(p => p.role === finalRole && (p.name === actualSenderName || p.userId === actualSenderId));
+        }
+        return false;
+      });
+
+      if (!targetConv) {
+        const newConvId = `conv_${finalRole}_${Date.now()}`;
+        targetConv = {
+          conversationId: newConvId,
+          participants: [
+            { userId: teacherId, name: 'Ahmet Yılmaz', role: 'teacher' },
+            {
+              userId: actualSenderId,
+              name: actualSenderName,
+              role: finalRole,
+              relatedStudentName: finalRole === 'parent' ? actualStudentName : ''
+            }
+          ],
+          messages: [],
+          updatedAt: now
+        };
+        conversationsStore.unshift(targetConv);
+      }
+
+      const newMsg = {
+        id: 'msg_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        senderId: actualSenderId,
+        senderRole: finalRole,
+        senderName: actualSenderName,
+        sender: finalRole,
+        text: cleanText,
+        timestamp: isoTimestamp,
+        time: timeStr,
+        isRead: false
+      };
+
+      targetConv.messages.push(newMsg);
+      targetConv.updatedAt = now;
+
+      // MongoDB kayıt
+      try {
+        if (isDbConnected() && Conversation && Conversation.findOneAndUpdate) {
+          await Conversation.findOneAndUpdate(
+            { conversationId: targetConv.conversationId },
+            {
+              $set: {
+                participants: targetConv.participants,
+                messages: targetConv.messages,
+                updatedAt: now
+              }
+            },
+            { upsert: true, returnDocument: 'after' }
+          );
+        }
+      } catch (dbErr) {
+        console.warn('MongoDB senkronizasyon uyarısı:', dbErr.message);
+      }
+
+      const enriched = enrichConversation(targetConv, 'teacher');
+
+      res.json({
+        success: true,
+        message: newMsg,
+        conversation: enriched
+      });
+    } catch (error) {
+      console.error('İstemci mesaj gönderimi başarısız:', error);
       res.status(500).json({ success: false, mesaj: 'Mesaj iletilemedi.' });
     }
   });
@@ -320,5 +564,6 @@ function createMessagesRouter({ getDb } = {}) {
 
 module.exports = {
   createMessagesRouter,
-  getDefaultConversations
+  getDefaultConversations,
+  enrichConversation
 };
