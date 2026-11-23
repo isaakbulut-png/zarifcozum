@@ -211,9 +211,9 @@ td.net{font-weight:700;color:var(--navy-900)}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
-.teacher-layout{display:grid;grid-template-columns:285px minmax(0,1fr);align-items:start;gap:24px;max-width:1480px;margin:0 auto}
-.teacher-layout.authenticated{grid-template-columns:285px minmax(0,1fr)}
-.teacher-sidebar{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;margin:14px 0 24px 8px;padding:18px 14px;background:linear-gradient(180deg, #322013 0%, #24150b 100%);border:1px solid rgba(255, 255, 255, 0.08);border-radius:16px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,0.22);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.18) transparent}
+.teacher-layout{display:grid;grid-template-columns:316px minmax(0,1fr);align-items:start;gap:18px;max-width:98%;width:98%;margin:0 auto;padding:0 8px}
+.teacher-layout.authenticated{grid-template-columns:316px minmax(0,1fr)}
+.teacher-sidebar{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;margin:14px 0 24px 8px;padding:16px 14px;background:linear-gradient(180deg, #322013 0%, #24150b 100%);border:1px solid rgba(255, 255, 255, 0.08);border-radius:16px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,0.22);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.18) transparent}
 .teacher-sidebar::-webkit-scrollbar{width:5px}
 .teacher-sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.18);border-radius:99px}
 .teacher-live-cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 8px;padding:10px 12px;border:0;border-radius:10px;background:linear-gradient(135deg, #d6452b 0%, #b73520 100%);color:#fff;text-align:center;text-decoration:none;font-size:.85rem;font-weight:700;box-shadow:0 4px 12px rgba(183,53,32,0.3);transition:all .18s ease}
@@ -996,17 +996,31 @@ body.teacher-menu-open {
 <div class="teacher-layout authenticated">
 <aside class="teacher-sidebar" id="teacherSidebar">
   <div class="teacher-brand" style="display:flex;align-items:center;gap:12px;padding:0 4px 14px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:12px">
-    <span class="teacher-brand-mark" style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg, #d6452b 0%, #b73520 100%);display:grid;place-items:center;font-family:var(--head);font-weight:700;font-size:1.2rem;color:#fff;box-shadow:0 4px 12px rgba(183,53,32,0.35);flex-shrink:0">Z</span>
-    <div>
+    <span class="teacher-brand-mark" style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg, #d6452b 0%, #b73520 100%);display:grid;place-items:center;font-family:var(--head);font-weight:700;font-size:1.25rem;color:#fff;box-shadow:0 4px 12px rgba(183,53,32,0.35);flex-shrink:0">Z</span>
+    <div style="min-width:0;overflow:hidden">
       <div style="font-family:var(--head);font-weight:700;font-size:1.05rem;line-height:1.2;color:#fff">ZarifÇözüm</div>
-      <span style="display:inline-flex;align-items:center;gap:4px;margin-top:3px;padding:2px 8px;border-radius:999px;background:rgba(249,115,22,0.2);border:1px solid rgba(249,115,22,0.35);color:#fb923c;font-size:.72rem;font-weight:600;letter-spacing:.02em">👨‍🏫 Öğretmen Çalışma Alanı</span>
+      <div id="topTeacherGreeting" style="margin-top:2px">
+        <div id="sidebarTeacherName" style="font-size:.86rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Öğretmen</div>
+        <div style="display:flex;align-items:center;gap:4px;margin-top:1px">
+          <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block"></span>
+          <span style="font-size:.72rem;color:#4ade80;font-weight:600">Giriş Yapıldı</span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <a class="home-link" href="index.html" style="display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:8px 12px;border:1px solid rgba(255,255,255,0.12);border-radius:10px;background:rgba(255,255,255,0.04);color:#e5ded8;font-size:.84rem;font-weight:600;text-decoration:none;transition:all .18s ease">
-    <svg viewBox="0 0 24 24" style="width:17px;height:17px;flex-shrink:0;stroke:#fb923c;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-    <span>Ana Sayfaya Dön</span>
-  </a>
+  <div class="sidebar-teacher-profile-card" id="sidebarProfileCard" style="display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:10px 12px;border:1px solid rgba(255,255,255,0.12);border-radius:12px;background:rgba(255,255,255,0.05);transition:all .2s ease">
+    <a href="/ogretmen-profil-ayarlari.html" title="Profil Resmini Değiştir / Hesap Ayarları" style="text-decoration:none;display:flex;align-items:center;gap:12px;min-width:0;flex:1">
+      <div class="teacher-avatar-frame" style="position:relative;width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid #f97316;flex-shrink:0;background:#523520;display:grid;place-items:center;box-shadow:0 3px 10px rgba(0,0,0,0.3)">
+        <img id="sidebarTeacherAvatarImg" src="" alt="Öğretmen Profil Resmi" style="width:100%;height:100%;object-fit:cover;display:none" />
+        <span id="sidebarTeacherAvatarFallback" style="font-weight:700;font-size:1.15rem;color:#fff">Ö</span>
+      </div>
+      <div style="min-width:0;flex:1;overflow:hidden">
+        <div id="sidebarCardTeacherName" style="font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Öğretmen</div>
+        <span style="font-size:.72rem;color:#fdba74;display:inline-flex;align-items:center;gap:3px;margin-top:2px">⚙️ Profil &amp; Ayarlar ↗</span>
+      </div>
+    </a>
+  </div>
 
   <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
     <a class="teacher-live-cta" href="#lessons">
@@ -1068,7 +1082,6 @@ body.teacher-menu-open {
         <a href="#library"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 3h12a2 2 0 0 1 2 2v16H7a2 2 0 0 1-2-2z"/><path d="M5 17a2 2 0 0 1 2-2h12M9 7h6M9 10h6"/></svg><span class="nav-text">PDF Kütüphanesi</span></a>
         <a href="#announcements"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 14V9a2 2 0 0 1 2-2h4l8-4v17l-8-4H6a2 2 0 0 1-2-2z"/><path d="m8 16 1.5 5h4L12 17M21 8v7"/></svg><span class="nav-text">Duyurular</span></a>
         <a href="/ogretmen-profil-ayarlari.html?tab=billing"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="15" r="1"/></svg><span class="nav-text">Maaş &amp; Hakedişler</span></a>
-        <a href="/ogretmen-profil-ayarlari.html"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.1h-2.6v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6.4v-2.6h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.1H15v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1V14h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="nav-text">Profil ve Ayarlar</span></a>
       </div>
     </div>
   </nav>
@@ -2297,6 +2310,46 @@ body.teacher-menu-open {
     }
   });
 
+  function syncTeacherProfileUI(user) {
+    const rawName = user?.name || (typeof localStorage !== 'undefined' && localStorage.getItem('zarif_teacher_name')) || user?.email?.split('@')[0] || 'Öğretmen';
+    const name = rawName.trim();
+    const avatar = (typeof localStorage !== 'undefined' && localStorage.getItem('zarif_teacher_avatar')) || user?.photo || user?.avatar;
+
+    if (typeof localStorage !== 'undefined' && name && name !== 'Öğretmen') {
+      try { localStorage.setItem('zarif_teacher_name', name); } catch (e) {}
+    }
+
+    if ($('sidebarTeacherName')) $('sidebarTeacherName').textContent = name;
+    if ($('sidebarCardTeacherName')) $('sidebarCardTeacherName').textContent = name;
+    if ($('teacherName')) $('teacherName').textContent = name;
+
+    const initial = ((name || 'Ö')[0] || 'Ö').toUpperCase();
+    if ($('sidebarTeacherAvatarFallback')) $('sidebarTeacherAvatarFallback').textContent = initial;
+    if ($('teacherAvatar')) $('teacherAvatar').textContent = initial;
+
+    const imgEl = $('sidebarTeacherAvatarImg');
+    const fbEl = $('sidebarTeacherAvatarFallback');
+    if (imgEl && fbEl) {
+      if (avatar && avatar.length > 5) {
+        imgEl.src = avatar;
+        imgEl.style.display = 'block';
+        fbEl.style.display = 'none';
+      } else {
+        imgEl.style.display = 'none';
+        fbEl.style.display = 'block';
+      }
+    }
+  }
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'zarif_teacher_avatar' || e.key === 'zarif_teacher_name') {
+      syncTeacherProfileUI(window.currentTeacherUser || {});
+    }
+  });
+  window.addEventListener('teacher-avatar-updated', () => {
+    syncTeacherProfileUI(window.currentTeacherUser || {});
+  });
+
   async function yukle() {
     let oturum;
     try {
@@ -2320,9 +2373,9 @@ body.teacher-menu-open {
     window.dispatchEvent(new CustomEvent('curriculum-tree:open'));
     if ($('cikis')) $('cikis').hidden = false;
     if ($('changePasswordButton')) $('changePasswordButton').hidden = false;
-    if ($('teacherName')) $('teacherName').textContent = oturum.user?.name || oturum.user?.email?.split('@')[0] || 'Öğretmen';
+    window.currentTeacherUser = oturum.user || {};
+    syncTeacherProfileUI(oturum.user);
     if ($('teacherEmail')) $('teacherEmail').textContent = oturum.user?.email || 'Öğretmen Hesabı';
-    if ($('teacherAvatar')) $('teacherAvatar').textContent = ((oturum.user?.name || oturum.user?.email || 'Ö')[0] || 'Ö').toUpperCase();
     if (oturum.user?.adminRole || oturum.user?.role === 'admin' || (oturum.user?.email && oturum.user.email.toLowerCase() === 'isa.agbulut@gmail.com')) {
       if ($('topAdminPanelBtn')) $('topAdminPanelBtn').style.display = 'inline-flex';
       if ($('sidebarAdminPanelLink')) $('sidebarAdminPanelLink').style.display = 'flex';
@@ -5301,6 +5354,7 @@ body.teacher-menu-open {
   });
 
   soruEkle();
+  try { syncTeacherProfileUI(); } catch (e) {}
   if (!new URLSearchParams(location.search).has('siteMediaDesigner')) {
     yukle().catch(err => {
       console.error('Öğretmen oturumu doğrulanamadı:', err);

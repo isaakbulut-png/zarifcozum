@@ -143,7 +143,7 @@
         isPhoneVerified: true,
         bio: 'Matematik öğretmeni olarak 15 yıldır tecrübem var. Öğrencilerimin hedeflerine ulaşmalarına yardımcı olmaktan mutluluk duyarım...',
         branches: ['Matematik', 'LGS Hazırlık', 'TYT-AYT'],
-        photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80',
+        photo: (typeof localStorage !== 'undefined' && localStorage.getItem('zarif_teacher_avatar')) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80',
         newBranchInput: '',
         showNewBranchInput: false
       });
@@ -482,7 +482,12 @@
         if (file) {
           const reader = new FileReader();
           reader.onloadend = () => {
-            setGeneral(prev => ({ ...prev, photo: reader.result }));
+            const dataUrl = reader.result;
+            setGeneral(prev => ({ ...prev, photo: dataUrl }));
+            try {
+              localStorage.setItem('zarif_teacher_avatar', dataUrl);
+              window.dispatchEvent(new Event('teacher-avatar-updated'));
+            } catch (err) {}
             showToast('Profil fotoğrafı güncellendi.');
           };
           reader.readAsDataURL(file);
@@ -596,12 +601,6 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ conversationId: id, readerRole: 'teacher' })
-        }).catch(() => {});
-      };
-        fetch('/api/messages/mark-read', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ conversationId: id })
         }).catch(() => {});
       };
 
@@ -875,7 +874,12 @@
                           <button
                             type="button"
                             onClick={() => {
-                              setGeneral(prev => ({ ...prev, photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&h=400&q=80' }));
+                              const defaultPic = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&h=400&q=80';
+                              setGeneral(prev => ({ ...prev, photo: defaultPic }));
+                              try {
+                                localStorage.setItem('zarif_teacher_avatar', defaultPic);
+                                window.dispatchEvent(new Event('teacher-avatar-updated'));
+                              } catch (err) {}
                               showToast('Profil fotoğrafı varsayılana sıfırlandı.');
                             }}
                             className="px-3 py-2 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 text-xs font-semibold rounded-lg transition"
