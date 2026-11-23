@@ -488,6 +488,11 @@
               localStorage.setItem('zarif_teacher_avatar', dataUrl);
               window.dispatchEvent(new Event('teacher-avatar-updated'));
             } catch (err) {}
+            fetch('/api/ogretmen/profil-ayarlari', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ avatarUrl: dataUrl })
+            }).catch(() => {});
             showToast('Profil fotoğrafı güncellendi.');
           };
           reader.readAsDataURL(file);

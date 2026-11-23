@@ -1385,7 +1385,7 @@ app.post('/api/ogretmen/bildirim-okundu', ogretmenKontrol, async (req, res) => {
 app.get('/api/ogretmen/profil-ayarlari', ogretmenKontrol, async (req, res) => {
   try {
     const user = await User.findById(req.session.user._id)
-      .select('name email phone telefon brans branch graduationInfo verificationDocumentUrl basvuruDurumu ogretmenTipi teacherFinance')
+      .select('name email phone telefon brans branch graduationInfo verificationDocumentUrl basvuruDurumu ogretmenTipi teacherFinance avatarUrl photo profileImage')
       .lean();
 
     if (!user) return res.status(404).json({ mesaj: 'Öğretmen profili bulunamadı.' });
@@ -1399,6 +1399,7 @@ app.get('/api/ogretmen/profil-ayarlari', ogretmenKontrol, async (req, res) => {
         phone: user.phone || user.telefon || '',
         brans: user.branch || user.brans || '',
         graduationInfo: user.graduationInfo || '',
+        avatarUrl: user.avatarUrl || user.photo || user.profileImage || null,
         verificationDocumentUrl: user.verificationDocumentUrl || null,
         basvuruDurumu: user.basvuruDurumu || 'inceleme_suruyor',
         ogretmenTipi: user.ogretmenTipi || 'standart_ogretmen',
@@ -1423,12 +1424,15 @@ app.get('/api/ogretmen/profil-ayarlari', ogretmenKontrol, async (req, res) => {
 app.post('/api/ogretmen/profil-ayarlari', ogretmenKontrol, async (req, res) => {
   try {
     const {
-      name, phone, brans, graduationInfo,
+      name, phone, brans, graduationInfo, avatarUrl, photo,
       bankName, iban, accountHolder, taxType, taxOffice, taxNumber, billingAddress
     } = req.body;
 
     const user = await User.findById(req.session.user._id);
     if (!user) return res.status(404).json({ mesaj: 'Kullanıcı bulunamadı.' });
+
+    if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
+    else if (photo !== undefined) user.avatarUrl = photo;
 
     if (name) user.name = name.trim();
     if (phone) {

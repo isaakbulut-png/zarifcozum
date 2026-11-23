@@ -155,7 +155,8 @@ function publicUser(user) {
     name: role === 'parent' ? `${user.name} ${user.surname}`.trim() : user.name,
     email: user.email,
     role,
-    adminRole
+    adminRole,
+    avatarUrl: user.avatarUrl || user.photo || user.profileImage || null
   };
 }
 

@@ -118,6 +118,10 @@ const userSchema = new mongoose.Schema({
     maxlength: 300,
     default: null
   },
+  avatarUrl: {
+    type: String,
+    default: null
+  },
   verificationDocumentUrl: {
     type: String,
     trim: true,
