@@ -175,7 +175,10 @@ function createTeacherStudentHomeworkRouters({
   }
 
   async function teacherHomeworkRows(teacherId, requestedHomeworkId) {
-    const filter = {teacherId};
+    const teacherQuery = objectId(teacherId)
+      ? { $in: [teacherId, objectId(teacherId)] }
+      : teacherId;
+    const filter = {teacherId: teacherQuery};
     if (requestedHomeworkId) filter._id = requestedHomeworkId;
     const homeworkRows = await homeworks().find(filter).sort({createdAt: -1}).limit(300).toArray();
     const homeworkIds = homeworkRows.map(item => item._id);
@@ -239,7 +242,11 @@ function createTeacherStudentHomeworkRouters({
   }
 
   teacher.get('/ogrenciler', asyncRoute(async (req, res) => {
-    const filter = {teacherId: req.session.user.id};
+    const rawTeacherId = req.session.user.id;
+    const teacherQuery = objectId(rawTeacherId)
+      ? { $in: [rawTeacherId, objectId(rawTeacherId)] }
+      : rawTeacherId;
+    const filter = {teacherId: teacherQuery};
     if (req.query.grade !== undefined && req.query.grade !== '') {
       if (!validGrade(req.query.grade)) return res.status(400).json({mesaj: 'Sınıf seviyesi 1–12 arasında olmalıdır.'});
       filter.grade = Number(req.query.grade);
@@ -294,7 +301,10 @@ function createTeacherStudentHomeworkRouters({
       return res.status(400).json({mesaj: 'Ad, soyad, benzersiz öğrenci numarası, 1–12. sınıf ve şube gereklidir; e-posta biçimini de kontrol edin.'});
     }
     const teacherId = req.session.user.id;
-    if (await students().findOne({teacherId, studentNumber})) {
+    const teacherQuery = objectId(teacherId)
+      ? { $in: [teacherId, objectId(teacherId)] }
+      : teacherId;
+    if (await students().findOne({teacherId: teacherQuery, studentNumber})) {
       return res.status(409).json({mesaj: 'Bu öğrenci numarası bu öğretmenin listesinde zaten kayıtlı.'});
     }
 

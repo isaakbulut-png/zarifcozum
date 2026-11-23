@@ -384,7 +384,7 @@ function soruSemasi(grade = 5) {
 function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
   const router = express.Router();
 
-  router.get('/konular', requireRole('teacher', 'student', 'admin'), (req, res) => {
+  router.get('/konular', (req, res) => {
     res.json({
       tree: getCurriculumTree(),
       konular: SINIF_KONULARI_V2

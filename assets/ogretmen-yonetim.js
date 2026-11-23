@@ -67,7 +67,7 @@
     const isFormData = options.body instanceof FormData;
     const response = await fetch(path, {
       ...options,
-      credentials: 'same-origin',
+      credentials: 'include',
       headers: {...(isFormData ? {} : {'Content-Type': 'application/json'}), ...(options.headers || {})}
     });
     const data = await response.json().catch(() => ({}));
@@ -77,16 +77,29 @@
 
   async function loadTeacherWorkspace() {
     try {
-      const [studentResult, homeworkResult] = await Promise.all([
+      const [studentResult, homeworkResult] = await Promise.allSettled([
         teacherApi('/api/ogretmen/ogrenciler'),
         teacherApi('/api/ogretmen/odevler')
       ]);
-      state.students = studentResult.students || [];
-      state.assignments = homeworkResult.homework || [];
-      state.serverSummary = {homework: homeworkResult.summary};
-      studentLoadError = '';
-      homeworkLoadError = '';
-      serverWorkspaceLoaded = true;
+
+      if (studentResult.status === 'fulfilled') {
+        state.students = studentResult.value.students || [];
+        studentLoadError = '';
+        serverWorkspaceLoaded = true;
+      } else {
+        studentLoadError = studentResult.reason?.message || 'Öğrenci verileri alınamadı';
+        console.warn('Öğrenci verileri alınamadı:', studentResult.reason);
+      }
+
+      if (homeworkResult.status === 'fulfilled') {
+        state.assignments = homeworkResult.value.homework || [];
+        state.serverSummary = {homework: homeworkResult.value.summary};
+        homeworkLoadError = '';
+      } else {
+        homeworkLoadError = homeworkResult.reason?.message || 'Ödev verileri alınamadı';
+        console.warn('Ödev verileri alınamadı:', homeworkResult.reason);
+      }
+
       renderStudents();
       renderAssignments();
       renderDashboard();
@@ -95,10 +108,6 @@
       refreshAssignmentStudents();
     } catch (error) {
       console.error('Öğrenci ve ödev verileri yüklenemedi:', error);
-      serverWorkspaceLoaded = false;
-      state.students = [];
-      state.assignments = [];
-      state.serverSummary = null;
       studentLoadError = error.message;
       homeworkLoadError = error.message;
       setStatus('studentStatus', `Öğrenci verileri yüklenemedi: ${error.message}`, 'error');
@@ -107,6 +116,7 @@
       renderAssignments();
     }
   }
+  window.loadTeacherWorkspace = loadTeacherWorkspace;
 
   function persist(statusId, successMessage) {
     try {
@@ -770,6 +780,9 @@
         const statusId = form.id === 'studentForm' ? 'studentStatus' : 'assignmentStatus';
         if (form.id === 'studentEditForm') setStatus('studentEditStatus', `Öğrenci bilgileri kaydedilemedi: ${error.message}`, 'error');
         else setStatus(statusId, `İşlem tamamlanamadı: ${error.message}`, 'error');
+        if (form.id === 'studentForm') {
+          loadTeacherWorkspace().catch(() => {});
+        }
       } finally {
         if (button) button.disabled = false;
       }
@@ -902,6 +915,9 @@
     renderExams();
     loadServerExams().catch(error => {
       setStatus('examScheduleStatus', `Paylaşılan sınavlar yüklenemedi: ${error.message}`, 'error');
+    });
+    loadTeacherWorkspace().catch(error => {
+      console.warn('İlk çalışma alanı yüklemesi tamamlanamadı:', error);
     });
 
     $('curriculumGrade').addEventListener('change', renderCurriculum);

@@ -2399,17 +2399,29 @@ body.teacher-menu-open {
     }
     canliYonetim.yenile();
     canliHedefleriniYukle();
+
+    if (typeof window.loadTeacherWorkspace === 'function') {
+      window.loadTeacherWorkspace().catch(err => console.warn('Öğretmen çalışma alanı yüklenemedi:', err));
+    }
+
     try {
       veri = await api('/api/ogretmen/veri');
-      yonetim = await api('/api/ogretmen/yonetim');
       sinavListesi();
       anahtarCiz();
       ciz();
-      yonetimCiz();
-      await canliPlanlariYukle();
     } catch (error) {
-      console.error('Panel verileri alınamadı:', error);
+      console.warn('Sınav verileri alınamadı:', error);
     }
+
+    try {
+      yonetim = await api('/api/ogretmen/yonetim');
+      yonetimCiz();
+    } catch (error) {
+      console.warn('Yönetim verileri alınamadı:', error);
+      window.dispatchEvent(new CustomEvent('teacher-dashboard:data', {detail: yonetim || {}}));
+    }
+
+    canliPlanlariYukle().catch(error => console.warn('Canlı planlar alınamadı:', error));
     resimliSorulariYukle().catch(error => console.error('Resimli sorular alınamadı:', error));
     denemeleriYukle().catch(error => console.error('Denemeler alınamadı:', error));
   }
@@ -4508,108 +4520,151 @@ body.teacher-menu-open {
   });
 
   // Sınıf → Ders → Tema/Ünite → Alt Konu zincirleme (cascading) menü
-  let aiCurriculumTree = {};
+  function buildTreeFromMatematikMufredati(matMuf) {
+    const tree = {};
+    if (!matMuf) return tree;
+    for (const grade of Object.keys(matMuf)) {
+      tree[grade] = { ders: 'Matematik', temalar: {} };
+      const list = matMuf[grade] || [];
+      list.forEach(item => {
+        const themeName = item.title || item.unit_topic || 'Genel';
+        const altList = (item.topics || []).map(t => typeof t === 'string' ? { name: t } : t);
+        tree[grade].temalar[themeName] = { alt_konular: altList };
+      });
+    }
+    return tree;
+  }
+
+  let aiCurriculumTree = buildTreeFromMatematikMufredati(window.MATEMATIK_MUFREDATI || {});
+
+  function updateCurrTemalar() {
+    const grade = $('currGrade')?.value;
+    const gradeData = aiCurriculumTree[grade];
+    const temaSelect = $('currTema');
+    const altKonuSelect = $('currAltKonu');
+    if (!temaSelect || !altKonuSelect) return;
+
+    if (!grade || !gradeData || !gradeData.temalar || !Object.keys(gradeData.temalar).length) {
+      temaSelect.replaceChildren(new Option('Önce sınıf seçin', ''));
+      temaSelect.disabled = true;
+      altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
+      altKonuSelect.disabled = true;
+      return;
+    }
+
+    const temalar = Object.keys(gradeData.temalar);
+    const prevTema = temaSelect.value;
+    temaSelect.replaceChildren(
+      new Option('Tema / Ünite seçin…', ''),
+      ...temalar.map(t => new Option(t, t))
+    );
+    temaSelect.disabled = false;
+    if (temalar.includes(prevTema)) {
+      temaSelect.value = prevTema;
+      updateCurrAltKonular();
+    } else {
+      altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
+      altKonuSelect.disabled = true;
+    }
+  }
+
+  function updateCurrAltKonular() {
+    const grade = $('currGrade')?.value;
+    const tema = $('currTema')?.value;
+    const altKonuSelect = $('currAltKonu');
+    if (!altKonuSelect) return;
+
+    if (!grade || !tema || !aiCurriculumTree[grade]?.temalar?.[tema]) {
+      altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
+      altKonuSelect.disabled = true;
+      return;
+    }
+
+    const altKonular = aiCurriculumTree[grade].temalar[tema].alt_konular || [];
+    altKonuSelect.replaceChildren(
+      new Option('Alt konu seçin (Müfredat Hedefi)…', ''),
+      ...altKonular.map(sub => new Option(sub.name + (sub.outcome_code ? ` [${sub.outcome_code}]` : ''), sub.name))
+    );
+    altKonuSelect.disabled = !altKonular.length;
+  }
+
+  function updateAiTemalar() {
+    const grade = $('aiGrade')?.value;
+    const gradeData = aiCurriculumTree[grade];
+    const temaSelect = $('aiTema');
+    const altKonuSelect = $('aiAltKonu');
+    if (!temaSelect || !altKonuSelect) return;
+
+    if (!grade || !gradeData || !gradeData.temalar || !Object.keys(gradeData.temalar).length) {
+      temaSelect.replaceChildren(new Option('Önce sınıf seçin', ''));
+      temaSelect.disabled = true;
+      altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
+      altKonuSelect.disabled = true;
+      if ($('aiTopic')) $('aiTopic').value = '';
+      return;
+    }
+
+    const temalar = Object.keys(gradeData.temalar);
+    const prevTema = temaSelect.value;
+    temaSelect.replaceChildren(
+      new Option('Tema / Ünite seçin…', ''),
+      ...temalar.map(t => new Option(t, t))
+    );
+    temaSelect.disabled = !temalar.length;
+    if (temalar.includes(prevTema)) {
+      temaSelect.value = prevTema;
+      updateAiAltKonular();
+    } else {
+      altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
+      altKonuSelect.disabled = true;
+      if ($('aiTopic')) $('aiTopic').value = '';
+    }
+  }
+
+  function updateAiAltKonular() {
+    const grade = $('aiGrade')?.value;
+    const tema = $('aiTema')?.value;
+    const altKonuSelect = $('aiAltKonu');
+    if (!altKonuSelect) return;
+
+    if (!grade || !tema || !aiCurriculumTree[grade]?.temalar?.[tema]) {
+      altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
+      altKonuSelect.disabled = true;
+      if ($('aiTopic')) $('aiTopic').value = '';
+      return;
+    }
+
+    const altKonular = aiCurriculumTree[grade].temalar[tema].alt_konular || [];
+    altKonuSelect.replaceChildren(
+      new Option('Alt konu seçin (Müfredat Hedefi)…', ''),
+      ...altKonular.map(sub => new Option(sub.name + (sub.outcome_code ? ` [${sub.outcome_code}]` : ''), sub.name))
+    );
+    altKonuSelect.disabled = !altKonular.length;
+  }
+
+  // Dinleyicileri hemen bağla
+  $('currGrade')?.addEventListener('change', updateCurrTemalar);
+  $('currTema')?.addEventListener('change', updateCurrAltKonular);
+  $('aiGrade')?.addEventListener('change', updateAiTemalar);
+  $('aiTema')?.addEventListener('change', updateAiAltKonular);
+  $('aiAltKonu')?.addEventListener('change', () => {
+    if ($('aiTopic')) $('aiTopic').value = $('aiAltKonu')?.value || '';
+  });
+
+  // Başlangıçta seçim varsa hemen doldur
+  if ($('currGrade')?.value) updateCurrTemalar();
+  if ($('aiGrade')?.value) updateAiTemalar();
 
   async function aiKonulariYukle() {
     try {
       const res = await api('/api/ai/konular');
-      aiCurriculumTree = res.tree || {};
-
-      $('aiGrade').addEventListener('change', () => {
-        const grade = $('aiGrade').value;
-        const gradeData = aiCurriculumTree[grade];
-        const temaSelect = $('aiTema');
-        const altKonuSelect = $('aiAltKonu');
-
-        if (!grade || !gradeData || !gradeData.temalar) {
-          temaSelect.replaceChildren(new Option('Önce sınıf seçin', ''));
-          temaSelect.disabled = true;
-          altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
-          altKonuSelect.disabled = true;
-          $('aiTopic').value = '';
-          return;
-        }
-
-        const temalar = Object.keys(gradeData.temalar);
-        temaSelect.replaceChildren(
-          new Option('Tema / Ünite seçin…', ''),
-          ...temalar.map(t => new Option(t, t))
-        );
-        temaSelect.disabled = !temalar.length;
-        altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
-        altKonuSelect.disabled = true;
-        $('aiTopic').value = '';
-      });
-
-      $('aiTema').addEventListener('change', () => {
-        const grade = $('aiGrade').value;
-        const tema = $('aiTema').value;
-        const altKonuSelect = $('aiAltKonu');
-
-        if (!grade || !tema || !aiCurriculumTree[grade]?.temalar?.[tema]) {
-          altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
-          altKonuSelect.disabled = true;
-          $('aiTopic').value = '';
-          return;
-        }
-
-        const altKonular = aiCurriculumTree[grade].temalar[tema].alt_konular || [];
-        altKonuSelect.replaceChildren(
-          new Option('Alt konu seçin (Müfredat Hedefi)…', ''),
-          ...altKonular.map(sub => new Option(sub.name + (sub.outcome_code ? ` [${sub.outcome_code}]` : ''), sub.name))
-        );
-        altKonuSelect.disabled = !altKonular.length;
-      });
-
-      $('aiAltKonu').addEventListener('change', () => {
-        $('aiTopic').value = $('aiAltKonu').value;
-      });
-
-      // Maarif Konu Anlatım Üreticisi Cascading Dropdowns
-      $('currGrade').addEventListener('change', () => {
-        const grade = $('currGrade').value;
-        const gradeData = aiCurriculumTree[grade];
-        const temaSelect = $('currTema');
-        const altKonuSelect = $('currAltKonu');
-
-        if (!grade || !gradeData || !gradeData.temalar) {
-          temaSelect.replaceChildren(new Option('Önce sınıf seçin', ''));
-          temaSelect.disabled = true;
-          altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
-          altKonuSelect.disabled = true;
-          return;
-        }
-
-        const temalar = Object.keys(gradeData.temalar);
-        temaSelect.replaceChildren(
-          new Option('Tema / Ünite seçin…', ''),
-          ...temalar.map(t => new Option(t, t))
-        );
-        temaSelect.disabled = !temalar.length;
-        altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
-        altKonuSelect.disabled = true;
-      });
-
-      $('currTema').addEventListener('change', () => {
-        const grade = $('currGrade').value;
-        const tema = $('currTema').value;
-        const altKonuSelect = $('currAltKonu');
-
-        if (!grade || !tema || !aiCurriculumTree[grade]?.temalar?.[tema]) {
-          altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
-          altKonuSelect.disabled = true;
-          return;
-        }
-
-        const altKonular = aiCurriculumTree[grade].temalar[tema].alt_konular || [];
-        altKonuSelect.replaceChildren(
-          new Option('Alt konu seçin (Müfredat Hedefi)…', ''),
-          ...altKonular.map(sub => new Option(sub.name + (sub.outcome_code ? ` [${sub.outcome_code}]` : ''), sub.name))
-        );
-        altKonuSelect.disabled = !altKonular.length;
-      });
+      if (res && res.tree && Object.keys(res.tree).length > 0) {
+        aiCurriculumTree = { ...aiCurriculumTree, ...res.tree };
+        updateCurrTemalar();
+        updateAiTemalar();
+      }
     } catch (error) {
-      durumYaz('aiQuestionStatus', 'Müfredat ağacı yüklenemedi: ' + error.message, 'error');
+      console.warn('Sunucu müfredat ağacı yüklenemedi, yerel müfredat devrede:', error.message);
     }
   }
   aiKonulariYukle();
