@@ -1898,7 +1898,7 @@ body.teacher-menu-open {
         <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
           <div class="field">
             <label for="currGrade">1. Sınıf</label>
-            <select id="currGrade" required>
+            <select id="currGrade" required onchange="if(window.updateCurrTemalar)window.updateCurrTemalar();" onclick="if(this.value&&$('currTema')?.disabled&&window.updateCurrTemalar)window.updateCurrTemalar();">
               <option value="">Sınıf seçin</option>
               <option value="5">5. Sınıf</option>
               <option value="6">6. Sınıf</option>
@@ -1918,13 +1918,13 @@ body.teacher-menu-open {
           </div>
           <div class="field">
             <label for="currTema">3. Tema / Ünite</label>
-            <select id="currTema" required disabled>
+            <select id="currTema" required disabled onchange="if(window.updateCurrAltKonular)window.updateCurrAltKonular();" onfocus="if($('currGrade')?.value&&($('currTema')?.options?.length<=1||$('currTema')?.disabled)&&window.updateCurrTemalar)window.updateCurrTemalar();">
               <option value="">Önce sınıf seçin</option>
             </select>
           </div>
           <div class="field">
             <label for="currAltKonu">4. Alt Konu (Müfredat Hedefi)</label>
-            <select id="currAltKonu" required disabled>
+            <select id="currAltKonu" required disabled onfocus="if($('currGrade')?.value&&$('currTema')?.value&&($('currAltKonu')?.options?.length<=1||$('currAltKonu')?.disabled)&&window.updateCurrAltKonular)window.updateCurrAltKonular();">
               <option value="">Önce tema seçin</option>
             </select>
           </div>
@@ -2259,17 +2259,18 @@ body.teacher-menu-open {
 
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js" integrity="sha384-reiVBUvj2HgLgCZalqLFSMBVD9LdtiwGyybRGCq2AfP8Rgebz5DxEnwKp4FpagKV" crossorigin="anonymous"></script>
-<script src="assets/math-text.js"></script>
-<script src="assets/safe-svg.js"></script>
-<script src="assets/ai-visual.js"></script>
-<script src="assets/matematik-mufredati.js"></script>
-<script src="assets/curriculum-tree-view.js"></script>
-<script src="assets/messageService.js"></script>
-<script src="assets/teacher-messages-drawer.js"></script>
-<script src="assets/ogretmen-gezinme.js"></script>
-<script src="assets/ogretmen-yonetim.js"></script>
-<script src="assets/ogrenci-gelisim.js"></script>
-<script src="assets/ogretmen-canli.js"></script>
+<script src="/assets/math-text.js"></script>
+<script src="/assets/safe-svg.js"></script>
+<script src="/assets/ai-visual.js"></script>
+<script src="/assets/meb-curriculum-tree.js"></script>
+<script src="/assets/matematik-mufredati.js"></script>
+<script src="/assets/curriculum-tree-view.js"></script>
+<script src="/assets/messageService.js"></script>
+<script src="/assets/teacher-messages-drawer.js"></script>
+<script src="/assets/ogretmen-gezinme.js"></script>
+<script src="/assets/ogretmen-yonetim.js"></script>
+<script src="/assets/ogrenci-gelisim.js"></script>
+<script src="/assets/ogretmen-canli.js"></script>
 <script>
 (() => {
   const YANLIS_KATSAYI = 4;       // 4 yanlış 1 doğruyu götürür
@@ -4625,11 +4626,26 @@ body.teacher-menu-open {
     return tree;
   }
 
-  let aiCurriculumTree = buildTreeFromMatematikMufredati(window.MATEMATIK_MUFREDATI || {});
+  let aiCurriculumTree = {};
+
+  function getFullCurriculumTree() {
+    if (window.MEB_CURRICULUM_TREE && Object.keys(window.MEB_CURRICULUM_TREE).length > 0) {
+      return window.MEB_CURRICULUM_TREE;
+    }
+    if (aiCurriculumTree && Object.keys(aiCurriculumTree).length > 0) {
+      return aiCurriculumTree;
+    }
+    if (window.MATEMATIK_MUFREDATI && Object.keys(window.MATEMATIK_MUFREDATI).length > 0) {
+      aiCurriculumTree = buildTreeFromMatematikMufredati(window.MATEMATIK_MUFREDATI);
+      return aiCurriculumTree;
+    }
+    return {};
+  }
 
   function updateCurrTemalar() {
     const grade = $('currGrade')?.value;
-    const gradeData = aiCurriculumTree[grade];
+    const tree = getFullCurriculumTree();
+    const gradeData = tree[grade] || tree[String(grade)];
     const temaSelect = $('currTema');
     const altKonuSelect = $('currAltKonu');
     if (!temaSelect || !altKonuSelect) return;
@@ -4649,7 +4665,7 @@ body.teacher-menu-open {
       ...temalar.map(t => new Option(t, t))
     );
     temaSelect.disabled = false;
-    if (temalar.includes(prevTema)) {
+    if (prevTema && temalar.includes(prevTema)) {
       temaSelect.value = prevTema;
       updateCurrAltKonular();
     } else {
@@ -4657,6 +4673,7 @@ body.teacher-menu-open {
       altKonuSelect.disabled = true;
     }
   }
+  window.updateCurrTemalar = updateCurrTemalar;
 
   function updateCurrAltKonular() {
     const grade = $('currGrade')?.value;
@@ -4664,23 +4681,31 @@ body.teacher-menu-open {
     const altKonuSelect = $('currAltKonu');
     if (!altKonuSelect) return;
 
-    if (!grade || !tema || !aiCurriculumTree[grade]?.temalar?.[tema]) {
+    const tree = getFullCurriculumTree();
+    const gradeData = tree[grade] || tree[String(grade)];
+    if (!grade || !tema || !gradeData?.temalar?.[tema]) {
       altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
       altKonuSelect.disabled = true;
       return;
     }
 
-    const altKonular = aiCurriculumTree[grade].temalar[tema].alt_konular || [];
+    const altKonular = gradeData.temalar[tema].alt_konular || [];
+    const prevAlt = altKonuSelect.value;
     altKonuSelect.replaceChildren(
       new Option('Alt konu seçin (Müfredat Hedefi)…', ''),
       ...altKonular.map(sub => new Option(sub.name + (sub.outcome_code ? ` [${sub.outcome_code}]` : ''), sub.name))
     );
     altKonuSelect.disabled = !altKonular.length;
+    if (prevAlt && altKonular.some(sub => sub.name === prevAlt)) {
+      altKonuSelect.value = prevAlt;
+    }
   }
+  window.updateCurrAltKonular = updateCurrAltKonular;
 
   function updateAiTemalar() {
     const grade = $('aiGrade')?.value;
-    const gradeData = aiCurriculumTree[grade];
+    const tree = getFullCurriculumTree();
+    const gradeData = tree[grade] || tree[String(grade)];
     const temaSelect = $('aiTema');
     const altKonuSelect = $('aiAltKonu');
     if (!temaSelect || !altKonuSelect) return;
@@ -4701,7 +4726,7 @@ body.teacher-menu-open {
       ...temalar.map(t => new Option(t, t))
     );
     temaSelect.disabled = !temalar.length;
-    if (temalar.includes(prevTema)) {
+    if (prevTema && temalar.includes(prevTema)) {
       temaSelect.value = prevTema;
       updateAiAltKonular();
     } else {
@@ -4710,6 +4735,7 @@ body.teacher-menu-open {
       if ($('aiTopic')) $('aiTopic').value = '';
     }
   }
+  window.updateAiTemalar = updateAiTemalar;
 
   function updateAiAltKonular() {
     const grade = $('aiGrade')?.value;
@@ -4717,39 +4743,68 @@ body.teacher-menu-open {
     const altKonuSelect = $('aiAltKonu');
     if (!altKonuSelect) return;
 
-    if (!grade || !tema || !aiCurriculumTree[grade]?.temalar?.[tema]) {
+    const tree = getFullCurriculumTree();
+    const gradeData = tree[grade] || tree[String(grade)];
+    if (!grade || !tema || !gradeData?.temalar?.[tema]) {
       altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
       altKonuSelect.disabled = true;
       if ($('aiTopic')) $('aiTopic').value = '';
       return;
     }
 
-    const altKonular = aiCurriculumTree[grade].temalar[tema].alt_konular || [];
+    const altKonular = gradeData.temalar[tema].alt_konular || [];
+    const prevAlt = altKonuSelect.value;
     altKonuSelect.replaceChildren(
       new Option('Alt konu seçin (Müfredat Hedefi)…', ''),
       ...altKonular.map(sub => new Option(sub.name + (sub.outcome_code ? ` [${sub.outcome_code}]` : ''), sub.name))
     );
     altKonuSelect.disabled = !altKonular.length;
+    if (prevAlt && altKonular.some(sub => sub.name === prevAlt)) {
+      altKonuSelect.value = prevAlt;
+    }
   }
+  window.updateAiAltKonular = updateAiAltKonular;
 
   // Dinleyicileri hemen bağla
   $('currGrade')?.addEventListener('change', updateCurrTemalar);
+  $('currGrade')?.addEventListener('input', updateCurrTemalar);
+  $('currGrade')?.addEventListener('click', () => {
+    if ($('currGrade')?.value && $('currTema')?.disabled) updateCurrTemalar();
+  });
   $('currTema')?.addEventListener('change', updateCurrAltKonular);
+  $('currTema')?.addEventListener('input', updateCurrAltKonular);
+  $('currTema')?.addEventListener('focus', () => {
+    if ($('currGrade')?.value && ($('currTema')?.options?.length <= 1 || $('currTema')?.disabled)) {
+      updateCurrTemalar();
+    }
+  });
+
   $('aiGrade')?.addEventListener('change', updateAiTemalar);
+  $('aiGrade')?.addEventListener('input', updateAiTemalar);
+  $('aiGrade')?.addEventListener('click', () => {
+    if ($('aiGrade')?.value && $('aiTema')?.disabled) updateAiTemalar();
+  });
   $('aiTema')?.addEventListener('change', updateAiAltKonular);
+  $('aiTema')?.addEventListener('input', updateAiAltKonular);
+  $('aiTema')?.addEventListener('focus', () => {
+    if ($('aiGrade')?.value && ($('aiTema')?.options?.length <= 1 || $('aiTema')?.disabled)) {
+      updateAiTemalar();
+    }
+  });
   $('aiAltKonu')?.addEventListener('change', () => {
     if ($('aiTopic')) $('aiTopic').value = $('aiAltKonu')?.value || '';
   });
 
   // Başlangıçta seçim varsa hemen doldur
-  if ($('currGrade')?.value) updateCurrTemalar();
-  if ($('aiGrade')?.value) updateAiTemalar();
+  updateCurrTemalar();
+  updateAiTemalar();
 
   async function aiKonulariYukle() {
     try {
       const res = await api('/api/ai/konular');
       if (res && res.tree && Object.keys(res.tree).length > 0) {
         aiCurriculumTree = { ...aiCurriculumTree, ...res.tree };
+        window.MEB_CURRICULUM_TREE = { ...(window.MEB_CURRICULUM_TREE || {}), ...res.tree };
         updateCurrTemalar();
         updateAiTemalar();
       }
@@ -4758,6 +4813,11 @@ body.teacher-menu-open {
     }
   }
   aiKonulariYukle();
+
+  window.addEventListener('hashchange', () => {
+    if (location.hash === '#ai-curriculum-wizard') updateCurrTemalar();
+    if (location.hash === '#quiz-builder' || location.hash === '#ai-question-wizard') updateAiTemalar();
+  });
 
   $('aiQuestionForm').addEventListener('submit', async event => {
     event.preventDefault();

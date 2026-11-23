@@ -16,6 +16,17 @@
       if (viewForHash(link.hash) === selected.dataset.panelView) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
+
+    if (selected.dataset.panelView === 'ai-curriculum-wizard') {
+      if (typeof window.updateCurrTemalar === 'function') {
+        window.updateCurrTemalar();
+      }
+    }
+    if (selected.dataset.panelView === 'quiz-builder') {
+      if (typeof window.updateAiTemalar === 'function') {
+        window.updateAiTemalar();
+      }
+    }
     if (focus) {
       const heading = selected.querySelector('h1, h2, h3');
       if (heading) {

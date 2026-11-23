@@ -1,0 +1,1285 @@
+window.MEB_CURRICULUM_TREE = {
+  "5": {
+    "ders": "Matematik",
+    "program": "Türkiye Yüzyılı Maarif Modeli",
+    "kitap": "MATEMATİK 5. SINIF MAARİF DERS KİTABI (1 ve 2. Kitap)",
+    "temalar": {
+      "1. Tema: Geometrik Şekiller": {
+        "alt_konular": [
+          {
+            "name": "Temel Geometrik Şekiller ve Özellikleri",
+            "outcome_code": "MAT.5.3.1",
+            "official_boundary": "Temel geometrik çizimler için araç ve teknoloji."
+          },
+          {
+            "name": "Nokta",
+            "outcome_code": "MAT.5.3.1",
+            "official_boundary": "Nokta tanımı, sembolik gösterimi ve düzlemdeki konumu."
+          },
+          {
+            "name": "Çember",
+            "outcome_code": "MAT.5.3.1",
+            "official_boundary": "Pergel ile çember çizimi, merkez ve yarıçap."
+          },
+          {
+            "name": "Dikme",
+            "outcome_code": "MAT.5.3.1",
+            "official_boundary": "Bir doğruya üzerindeki veya dışındaki bir noktadan dikme çizme."
+          },
+          {
+            "name": "Temel Geometrik Çizimlerin Özellikleri",
+            "outcome_code": "MAT.5.3.2",
+            "official_boundary": "Doğru, doğru parçası ve ışın çizimleri."
+          },
+          {
+            "name": "Açıları Ölçme",
+            "outcome_code": "MAT.5.3.3",
+            "official_boundary": "Açı kavramı, dar, dik, geniş ve doğru açılar."
+          },
+          {
+            "name": "Açı Nasıl Ölçülür?",
+            "outcome_code": "MAT.5.3.3",
+            "official_boundary": "Açıölçer (iletki) ile açı ölçümü ve derece birimi."
+          },
+          {
+            "name": "Doğruların Yolculuğu",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Düzlemde doğruların birbirine göre durumları ve oluşan açılar."
+          },
+          {
+            "name": "İki Doğrunun Kesişimi",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Kesişen doğrular ve kesişim noktası."
+          },
+          {
+            "name": "Düzlemde Açı Oluşturmayan Doğrular",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Paralel doğrular ve aralarındaki uzaklık."
+          },
+          {
+            "name": "İki Doğrunun Çakışması",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Bütün noktaları ortak olan çakışık doğrular."
+          },
+          {
+            "name": "Üç Doğrunun Paralelliği",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Birbirine paralel üç doğrunun düzlemdeki durumu."
+          },
+          {
+            "name": "Üç Doğrunun Bir Noktada Kesişimi",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Noktadaş doğrular."
+          },
+          {
+            "name": "Üç Doğrunun İkişer İkişer Kesişimi",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "Üç doğrunun ikişer ikişer kesişmesiyle oluşan üçgen bölge."
+          },
+          {
+            "name": "İki Paralel Doğru ve Bir Kesen",
+            "outcome_code": "MAT.5.3.4",
+            "official_boundary": "İki paralel doğrunun bir kesenle yaptığı açılar."
+          },
+          {
+            "name": "Doğrulardan Çokgenlere",
+            "outcome_code": "MAT.5.3.5",
+            "official_boundary": "Ardışık kesişen doğru parçalarının oluşturduğu kapalı şekiller."
+          },
+          {
+            "name": "Çokgenlerin Temel Elemanları",
+            "outcome_code": "MAT.5.3.6",
+            "official_boundary": "Kenar, köşe, iç açı ve köşegen kavramları."
+          },
+          {
+            "name": "Üçgen",
+            "outcome_code": "MAT.5.3.7",
+            "official_boundary": "Açılarına ve kenarlarına göre üçgen çeşitleri."
+          },
+          {
+            "name": "Üçgen İnşası",
+            "outcome_code": "MAT.5.3.7",
+            "official_boundary": "Cetvel, pergel ve iletki yardımıyla üçgen çizimi ve kenar bağıntıları."
+          }
+        ]
+      },
+      "2. Tema: Sayılar ve Nicelikler (1): Doğal Sayılar ve İşlemler": {
+        "alt_konular": [
+          {
+            "name": "Doğal Sayılar ve İşlemler",
+            "outcome_code": "MAT.5.1.1",
+            "official_boundary": "Çok basamaklı doğal sayılar ve dört işlem süreçleri."
+          },
+          {
+            "name": "Çok Basamaklı Doğal Sayıları Okuma ve Yazma",
+            "outcome_code": "MAT.5.1.1",
+            "official_boundary": "Altı ve daha çok basamaklı sayıların basamak ve bölükleri, okunuşu ve yazılışı."
+          },
+          {
+            "name": "Gerçek Yaşam Problemlerini Çözebilme",
+            "outcome_code": "MAT.5.1.2",
+            "official_boundary": "Doğal sayılarla dört işlem stratejilerini kullanarak günlük yaşam problemlerini çözebilme."
+          }
+        ]
+      },
+      "3. Tema: Geometrik Nicelikler": {
+        "alt_konular": [
+          {
+            "name": "Dikdörtgenin Çevre Uzunluğu",
+            "outcome_code": "MAT.5.4.1",
+            "official_boundary": "Kenar uzunlukları doğal sayı olan dikdörtgenin çevre hesabı."
+          },
+          {
+            "name": "Dikdörtgenin Alanı",
+            "outcome_code": "MAT.5.4.2",
+            "official_boundary": "Birim karelerle alan hesabı ve alan bağıntısı."
+          },
+          {
+            "name": "Dikdörtgende Çevre Uzunluğu ve Alan",
+            "outcome_code": "MAT.5.4.3",
+            "official_boundary": "Çevre ve alan ilişkileri, aynı alana sahip farklı dikdörtgenler."
+          }
+        ]
+      },
+      "4. Tema: Sayılar ve Nicelikler (2): Kesirler": {
+        "alt_konular": [
+          {
+            "name": "Kesirleri Farklı Biçimlerde Temsil Etme",
+            "outcome_code": "MAT.5.1.3",
+            "official_boundary": "Gerçek yaşam durumlarına karşılık gelen kesirlerin model, sayı doğrusu, ondalık ve yüzde temsilleri."
+          },
+          {
+            "name": "Kesirleri Karşılaştırma",
+            "outcome_code": "MAT.5.1.4",
+            "official_boundary": "Birim kesirler, pay ve paydaları eşit kesirler ve referans noktalarıyla sıralama."
+          }
+        ]
+      },
+      "5. Tema: İstatistiksel Araştırma Süreci": {
+        "alt_konular": [
+          {
+            "name": "İstatistiksel Araştırma Süreci",
+            "outcome_code": "MAT.5.5.1",
+            "official_boundary": "İstatistiksel araştırma döngüsü ve temel kavramlar."
+          },
+          {
+            "name": "İstatistik Nedir?",
+            "outcome_code": "MAT.5.5.1",
+            "official_boundary": "İstatistiğin tanımı, günlük yaşamdaki yeri ve önemi."
+          },
+          {
+            "name": "İstatistiksel Araştırma Adımları",
+            "outcome_code": "MAT.5.5.1",
+            "official_boundary": "Soru oluşturma, veri toplama, analiz ve yorumlama basamakları."
+          },
+          {
+            "name": "Araştırma Sorusuna Uygun Anket Sorusu Yazma",
+            "outcome_code": "MAT.5.5.1",
+            "official_boundary": "Araştırma amacına uygun, tarafsız ve net anket soruları hazırlama."
+          },
+          {
+            "name": "Veri Görselleştirme Araçları",
+            "outcome_code": "MAT.5.5.2",
+            "official_boundary": "Toplanan verileri uygun grafik ve tablolara dönüştürme."
+          },
+          {
+            "name": "Sütun Grafiği",
+            "outcome_code": "MAT.5.5.2",
+            "official_boundary": "Kategorik verileri temsil etmek için sütun grafiği oluşturma ve okuma."
+          },
+          {
+            "name": "Daire Grafiği",
+            "outcome_code": "MAT.5.5.2",
+            "official_boundary": "Bütünün parçalarını göstermek için daire grafiği oluşturma ve okuma."
+          },
+          {
+            "name": "İstatistik Okuryazarlığı",
+            "outcome_code": "MAT.5.5.2",
+            "official_boundary": "Medyada ve raporlarda yer alan istatistiki verileri ve grafikleri doğru anlama ve yorumlama."
+          },
+          {
+            "name": "Verilerin Değişebilirliği",
+            "outcome_code": "MAT.5.5.2",
+            "official_boundary": "Verilerdeki değişkenlik ve farklı durumlarda değişebilirlik özellikleri."
+          }
+        ]
+      },
+      "6. Tema: İşlemlerle Cebirsel Düşünme": {
+        "alt_konular": [
+          {
+            "name": "Eşitliğin Korunumu ve İşlem Özellikleri",
+            "outcome_code": "MAT.5.2.1",
+            "official_boundary": "Eşitliğin iki tarafına aynı işlemin uygulanması."
+          },
+          {
+            "name": "İşlem Önceliği",
+            "outcome_code": "MAT.5.2.2",
+            "official_boundary": "Parantezli işlemler ve dört işlemde öncelik sırası."
+          },
+          {
+            "name": "Sayı ve Şekil Örüntüleri",
+            "outcome_code": "MAT.5.2.3",
+            "official_boundary": "Örüntü adımları ve kural belirleme."
+          }
+        ]
+      },
+      "7. Tema: Veriden Olasılığa": {
+        "alt_konular": [
+          {
+            "name": "Olayların Olasılığı",
+            "outcome_code": "MAT.5.6.2",
+            "official_boundary": "Daha fazla, eşit veya daha az olasılıklı olaylar."
+          },
+          {
+            "name": "Olasılık Spektrumu (İmkânsız ve Kesin Olaylar)",
+            "outcome_code": "MAT.5.6.1",
+            "official_boundary": "Olasılığın 0 (imkânsız) ile 1 (kesin) arasında olması."
+          }
+        ]
+      }
+    }
+  },
+  "6": {
+    "ders": "Matematik",
+    "program": "Türkiye Yüzyılı Maarif Modeli",
+    "kitap": "MATEMATİK 6. SINIF MARİF DERS KİTABI (1 ve 2. Kitap)",
+    "temalar": {
+      "1. Tema: Sayılar ve Nicelikler (1)": {
+        "alt_konular": [
+          {
+            "name": "Çarpanlar",
+            "outcome_code": "MAT.6.1.1",
+            "official_boundary": "Doğal sayıların bölenleri ve çarpanları."
+          },
+          {
+            "name": "Katlar",
+            "outcome_code": "MAT.6.1.1",
+            "official_boundary": "Doğal sayıların katları ve modellemeler."
+          },
+          {
+            "name": "Kalansız Bölünebilme",
+            "outcome_code": "MAT.6.1.2",
+            "official_boundary": "2, 3, 4, 5, 6, 9 ve 10 ile kalansız bölünebilme."
+          },
+          {
+            "name": "Asal Sayılar",
+            "outcome_code": "MAT.6.1.3",
+            "official_boundary": "Asal sayılar, çarpan ağacı ve asal çarpanlar."
+          },
+          {
+            "name": "Ortak Kat",
+            "outcome_code": "MAT.6.1.4",
+            "official_boundary": "İki doğal sayının ortak katları."
+          },
+          {
+            "name": "Ortak Bölen",
+            "outcome_code": "MAT.6.1.4",
+            "official_boundary": "İki doğal sayının ortak bölenleri."
+          }
+        ]
+      },
+      "2. Tema: Veriden Olasılığa": {
+        "alt_konular": [
+          {
+            "name": "Bir Olayın Olasılığını Gözleme Dayalı Tahmin Etme",
+            "outcome_code": "MAT.6.6.1",
+            "official_boundary": "Deneysel olasılık ve tahmin yürütme."
+          }
+        ]
+      },
+      "3. Tema: Sayılar ve Nicelikler (2)": {
+        "alt_konular": [
+          {
+            "name": "Ondalık Gösterimlerde Basamak Değeri",
+            "outcome_code": "MAT.6.1.5",
+            "official_boundary": "Ondalık gösterimlerin basamak değerleri ve kesir ilişkisi."
+          },
+          {
+            "name": "Ondalık Gösterimlerde Yuvarlama",
+            "outcome_code": "MAT.6.1.5",
+            "official_boundary": "İstenen basamağa göre yuvarlama kuralları."
+          },
+          {
+            "name": "Kesir ile Bölme İşlemi İlişkisi",
+            "outcome_code": "MAT.6.1.6",
+            "official_boundary": "Bölme işleminin kesir olarak ifadesi ve ters çevir çarp mantığı."
+          },
+          {
+            "name": "Gerçek Yaşam Problemleri",
+            "outcome_code": "MAT.6.1.7",
+            "official_boundary": "Kesir, ondalık ve yüzde içeren dört işlem problemleri."
+          },
+          {
+            "name": "Uzunluk Ölçme Birimleri",
+            "outcome_code": "MAT.6.1.8",
+            "official_boundary": "Standart uzunluk birimleri ve birbirine dönüştürme."
+          }
+        ]
+      },
+      "4. Tema: İstatistiksel Araştırma Süreci": {
+        "alt_konular": [
+          {
+            "name": "Kategorik ve Nicel Veriye Dayanan Araştırma Sorusu Oluşturma",
+            "outcome_code": "MAT.6.5.1",
+            "official_boundary": "İki gruba veya değişkenliğe dayanan araştırma soruları oluşturma."
+          },
+          {
+            "name": "Araştırma Sorularında Sağlanması Gereken Ölçütler",
+            "outcome_code": "MAT.6.5.1",
+            "official_boundary": "Araştırma sorularının açık, amaca uygun ve ölçülebilir olması ölçütleri."
+          },
+          {
+            "name": "İstatistiksel Araştırma Sürecinde Planlama",
+            "outcome_code": "MAT.6.5.1",
+            "official_boundary": "Veri toplama adımları ve çalışma planı oluşturma."
+          },
+          {
+            "name": "Anket Sorusu Hazırlama",
+            "outcome_code": "MAT.6.5.1",
+            "official_boundary": "Amaca uygun ve yönlendirici olmayan anket soruları hazırlama."
+          },
+          {
+            "name": "Verileri Görselleştirme ve Özetleme",
+            "outcome_code": "MAT.6.5.2",
+            "official_boundary": "Toplanan verileri uygun tablo ve grafiklerle gösterme ve özetleme."
+          },
+          {
+            "name": "Verileri Görselleştirme ve Özetleme (Merkezî Eğilim Ölçüleri)",
+            "outcome_code": "MAT.6.5.2",
+            "official_boundary": "Aritmetik ortalama, ortanca (medyan) ve tepe değer (mod) gibi merkezî eğilim ölçüleri."
+          },
+          {
+            "name": "Sonuçları Yorumlama",
+            "outcome_code": "MAT.6.5.2",
+            "official_boundary": "Elde edilen istatistiksel sonuçları ve özetleri doğru yorumlama."
+          },
+          {
+            "name": "Sonuç veya Yorumları Tartışma",
+            "outcome_code": "MAT.6.5.2",
+            "official_boundary": "Çıkarımları tartışma, genellemeleri ve olası yanılgıları değerlendirme."
+          }
+        ]
+      },
+      "5. Tema: Geometrik Şekiller": {
+        "alt_konular": [
+          {
+            "name": "Düzlemde İki Paralel Doğru ve Bir Kesen ile Oluşturulan Açılar",
+            "outcome_code": "MAT.6.3.1",
+            "official_boundary": "Yöndeş, iç ters, dış ters ve komşu tümler-bütünler açılar."
+          },
+          {
+            "name": "Düzlemde İki Paralel Doğrunun İki Kesenle Oluşturduğu Şekiller",
+            "outcome_code": "MAT.6.3.2",
+            "official_boundary": "Paralel iki doğrunun kesenlerle oluşturduğu iç bölgeler."
+          },
+          {
+            "name": "Üçgenin Açıları ve Dörtgenlerin Özellikleri",
+            "outcome_code": "MAT.6.3.4",
+            "official_boundary": "Üçgen, paralelkenar, eşkenar dörtgen ve yamuk açı problemleri."
+          }
+        ]
+      },
+      "6. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler": {
+        "alt_konular": [
+          {
+            "name": "Bilinmeyen Nicelikler",
+            "outcome_code": "MAT.6.2.1",
+            "official_boundary": "Değişken, terim, katsayı ve basit cebirsel ifadelerin anlamı ve temsili."
+          },
+          {
+            "name": "Örüntüler",
+            "outcome_code": "MAT.6.2.2",
+            "official_boundary": "Sayı ve şekil örüntülerinin kuralını belirleme ve genelleme."
+          },
+          {
+            "name": "Algoritma",
+            "outcome_code": "MAT.6.2.2",
+            "official_boundary": "Örüntü ve işlem adımlarını algoritmik yapılarla ifade etme ve akış şemaları."
+          }
+        ]
+      },
+      "7. Tema: Geometrik Nicelikler": {
+        "alt_konular": [
+          {
+            "name": "Alan Ölçme Birimleri",
+            "outcome_code": "MAT.6.4.1",
+            "official_boundary": "Metrekare, desimetrekare, santimetrekare ve milimetrekare dönüşümleri."
+          },
+          {
+            "name": "Paralelkenar ve Üçgenin Alanı",
+            "outcome_code": "MAT.6.4.2",
+            "official_boundary": "Paralelkenar ve üçgende taban-yükseklik bağıntısı ve alan hesabı."
+          },
+          {
+            "name": "Gerçek Yaşam Problemleri",
+            "outcome_code": "MAT.6.4.3",
+            "official_boundary": "Alan ölçme ve geometrik şekillerin alanı ile ilgili gerçek yaşam problemleri."
+          },
+          {
+            "name": "Çemberin ve Çapının Uzunlukları Arasındaki İlişki",
+            "outcome_code": "MAT.6.4.4",
+            "official_boundary": "Çemberin uzunluğu ile çapı arasındaki oran, pi (π) sayısı ve çevre bağıntısı."
+          },
+          {
+            "name": "Gerçek Yaşam Problemleri",
+            "outcome_code": "MAT.6.4.5",
+            "official_boundary": "Çemberin çevresi ve uzunluk bağıntıları içeren gerçek yaşam problemleri."
+          },
+          {
+            "name": "Çemberde Merkez Açı ve Merkez Açının Gördüğü Yayın Uzunluğu",
+            "outcome_code": "MAT.6.4.6",
+            "official_boundary": "Merkez açı, merkez açının gördüğü yay ve bu yayın uzunluğunu hesaplama."
+          }
+        ]
+      }
+    }
+  },
+  "7": {
+    "ders": "Matematik",
+    "program": "Türkiye Yüzyılı Maarif Modeli",
+    "kitap": "MATEMATİK 7. SINIF MARİF DERS KİTABI (1 ve 2. Kitap)",
+    "temalar": {
+      "1. Tema: Sayılar ve Nicelikler (1)": {
+        "alt_konular": [
+          {
+            "name": "Tam Sayılar",
+            "outcome_code": "MAT.7.1.1",
+            "official_boundary": "Tam sayılar kavramı, yönlü sayılar ve sayı doğrusunda gösterimi."
+          },
+          {
+            "name": "Rasyonel Sayılar",
+            "outcome_code": "MAT.7.1.2",
+            "official_boundary": "Rasyonel sayı tanımı, a/b biçiminde ifade etme ve sayı doğrusunda gösterme."
+          },
+          {
+            "name": "Mutlak Değer",
+            "outcome_code": "MAT.7.1.1",
+            "official_boundary": "Tam sayıların başlangıç noktasına olan uzaklığı ve mutlak değer kavramı."
+          },
+          {
+            "name": "Rasyonel Sayıların Farklı Temsilleri",
+            "outcome_code": "MAT.7.1.2",
+            "official_boundary": "Rasyonel sayıların ondalık gösterimi ve devirli ondalık açılımlar."
+          },
+          {
+            "name": "Rasyonel Sayılarda Karşılaştırma ve Sıralama",
+            "outcome_code": "MAT.7.1.3",
+            "official_boundary": "Pozitif ve negatif rasyonel sayıları sıralama ve karşılaştırma stratejileri."
+          },
+          {
+            "name": "Tam Sayılarla İşlemler ve Problem Çözme",
+            "outcome_code": "MAT.7.1.1",
+            "official_boundary": "Tam sayılarla toplama, çıkarma, çarpma ve bölme işlemleri ile günlük hayat problemleri."
+          },
+          {
+            "name": "Rasyonel Sayılarla İşlemler ve Problem Çözme",
+            "outcome_code": "MAT.7.1.4",
+            "official_boundary": "Rasyonel sayılarla dört işlem ve problem çözme süreçleri."
+          },
+          {
+            "name": "Çok Adımlı İşlemler",
+            "outcome_code": "MAT.7.1.4",
+            "official_boundary": "Rasyonel sayılarda birden fazla işlem adımı ve işlem önceliği gerektiren işlemler."
+          }
+        ]
+      },
+      "2. Tema: Geometrik Nicelikler (1)": {
+        "alt_konular": [
+          {
+            "name": "Cisimlerin Farklı Yönlerden Görünümleri",
+            "outcome_code": "MAT.7.4.1",
+            "official_boundary": "Üç boyutlu cisimlerin ve eş küplerle oluşturulan yapıların farklı yönlerden iki boyutlu görünümleri."
+          },
+          {
+            "name": "Dikdörtgenler Prizmasının Açınımı ve Yüzey Alanı",
+            "outcome_code": "MAT.7.4.2",
+            "official_boundary": "Dikdörtgenler prizmasının açınımını çizme ve yüzey alanı bağıntısını oluşturma."
+          },
+          {
+            "name": "Hacmi Eş Nesneler Aracılığıyla Yorumlama",
+            "outcome_code": "MAT.7.4.3",
+            "official_boundary": "Prizmaların hacmini birim küpler ve eş nesneler yardımıyla sayarak yorumlama."
+          },
+          {
+            "name": "Dikdörtgenler Prizmasının Hacim Bağıntısını Elde Etme",
+            "outcome_code": "MAT.7.4.4",
+            "official_boundary": "Taban alanı ile yüksekliğin çarpımı olarak hacim bağıntısını elde etme."
+          },
+          {
+            "name": "Hacim Ölçme Birimleri",
+            "outcome_code": "MAT.7.4.5",
+            "official_boundary": "Standart hacim ölçme birimleri (metreküp, desimetreküp, santimetreküp, milimetreküp) ve dönüşümleri."
+          },
+          {
+            "name": "Dikdörtgenler Prizması ile Modellenen Cisimlerin Yüzey Alanları ve Hacimlerine Yönelik Problemler",
+            "outcome_code": "MAT.7.4.6",
+            "official_boundary": "Gerçek yaşam durumlarında prizmaların yüzey alanı ve hacmini içeren problemler."
+          }
+        ]
+      },
+      "3. Tema: İstatistiksel Araştırma Süreci": {
+        "alt_konular": [
+          {
+            "name": "Kategorik ve Nicel Veri Dağılımları",
+            "outcome_code": "MAT.7.6.1",
+            "official_boundary": "Kategorik ve nicel (kesikli/sürekli) verilerin özellikleri ve dağılım yapıları."
+          },
+          {
+            "name": "İstatistiksel Araştırma Süreci Adımları",
+            "outcome_code": "MAT.7.6.1",
+            "official_boundary": "İstatistiksel problem çözme ve araştırma sürecinin temel aşamaları."
+          },
+          {
+            "name": "Araştırma Sorusunu Belirleme",
+            "outcome_code": "MAT.7.6.1",
+            "official_boundary": "Veri toplamayı gerektiren amaca uygun ve ölçülebilir araştırma soruları oluşturma."
+          },
+          {
+            "name": "Verileri Toplama ve Analize Hazırlama",
+            "outcome_code": "MAT.7.6.1",
+            "official_boundary": "Uygun örneklemden veri toplama, verileri düzenleme ve analize hazır hâle getirme."
+          },
+          {
+            "name": "Veri Analizi (Görselleştirme ve Özetleme)",
+            "outcome_code": "MAT.7.6.1",
+            "official_boundary": "Veri setlerini uygun grafik (çizgi, daire, sütun) ve özet istatistiklerle temsil etme."
+          },
+          {
+            "name": "Veriyi Yorumlama ve Karar Verme",
+            "outcome_code": "MAT.7.6.1",
+            "official_boundary": "Elde edilen analizlere dayalı çıkarım yapma, veriyi yorumlama ve karar alma."
+          },
+          {
+            "name": "İstatistiksel Araştırma Süreçlerinin İncelenmesi",
+            "outcome_code": "MAT.7.6.2",
+            "official_boundary": "Yayınlanan istatistiki rapor ve araştırmaları eleştirel gözle değerlendirme, yanıltıcı gösterimleri fark etme."
+          }
+        ]
+      },
+      "4. Tema: Dönüşüm": {
+        "alt_konular": [
+          {
+            "name": "Yansıma Dönüşümü",
+            "outcome_code": "MAT.7.3.1",
+            "official_boundary": "Bir doğruya göre simetri ve yansıma."
+          },
+          {
+            "name": "Orta Dikme ve Açıortay İnşası",
+            "outcome_code": "MAT.7.3.2",
+            "official_boundary": "Pergel ve cetvelle orta dikme ve açıortay inşası."
+          }
+        ]
+      },
+      "5. Tema: Geometrik Şekiller": {
+        "alt_konular": [
+          {
+            "name": "Üçgende Açıortay, Yükseklik, Kenar Orta Dikme ve Kenarortay",
+            "outcome_code": "MAT.7.5.1",
+            "official_boundary": "Üçgende yardımcı elemanlar ve özellikleri."
+          },
+          {
+            "name": "Üçgende Kenarortay ve İnşası",
+            "outcome_code": "MAT.7.5.2",
+            "official_boundary": "Kenarortay inşası ve ağırlık merkezi sezgisi."
+          }
+        ]
+      },
+      "6. Tema: Sayılar ve Nicelikler (2)": {
+        "alt_konular": [
+          {
+            "name": "Oran",
+            "outcome_code": "MAT.7.1.5",
+            "official_boundary": "İki çokluğun birbirine bölünerek karşılaştırılması ve oran kavramı."
+          },
+          {
+            "name": "Birimli Birimsiz Oran",
+            "outcome_code": "MAT.7.1.5",
+            "official_boundary": "Aynı veya farklı birimlere sahip çoklukların oranı (birimli ve birimsiz oran)."
+          },
+          {
+            "name": "Denk Oran",
+            "outcome_code": "MAT.7.1.5",
+            "official_boundary": "Sadeleştirme ve genişletme yoluyla denk oranlar oluşturma."
+          },
+          {
+            "name": "Birim Oran",
+            "outcome_code": "MAT.7.1.5",
+            "official_boundary": "Paydası 1 birim olan oran ve birim oranla karşılaştırma stratejileri."
+          },
+          {
+            "name": "Orantı",
+            "outcome_code": "MAT.7.1.6",
+            "official_boundary": "İki oranın eşitliği, orantı sabiti ve içler-dışlar çarpımı özelliği."
+          },
+          {
+            "name": "Doğru Orantı Problemleri",
+            "outcome_code": "MAT.7.1.7",
+            "official_boundary": "Doğru orantılı çokluklar ve gerçek yaşam problemleri."
+          }
+        ]
+      },
+      "7. Tema: Veriden Olasılığa": {
+        "alt_konular": [
+          {
+            "name": "Teorik Olasılık",
+            "outcome_code": "MAT.7.7.2",
+            "official_boundary": "Olası durumları belirleme ve teorik olasılık değerini hesaplama."
+          },
+          {
+            "name": "Tümleyen Olay",
+            "outcome_code": "MAT.7.7.1",
+            "official_boundary": "Bir olayın gerçekleşmeme olasılığı ve tümleyen olaylar toplamı (P(A) + P(A') = 1)."
+          },
+          {
+            "name": "Eşit Olasılıklı Olaylar",
+            "outcome_code": "MAT.7.7.1",
+            "official_boundary": "Her bir çıktının eşit şansa sahip olduğu durumlar ve olasılık ilişkisi."
+          },
+          {
+            "name": "Ayrık ve Ayrık Olmayan Olaylar",
+            "outcome_code": "MAT.7.7.3",
+            "official_boundary": "Ortak elemanı olan ve olmayan olayların karşılaştırılması ve olasılıklarının incelenmesi."
+          }
+        ]
+      },
+      "8. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler": {
+        "alt_konular": [
+          {
+            "name": "Cebirsel İfadelerle İşlemler",
+            "outcome_code": "MAT.7.2.1",
+            "official_boundary": "Cebirsel ifadelerle toplama ve çıkarma işlemleri ile bir cebirsel ifadeyi bir rasyonel sayı ile çarpma."
+          },
+          {
+            "name": "Denklemler",
+            "outcome_code": "MAT.7.2.2",
+            "official_boundary": "Birinci dereceden bir bilinmeyenli denklemler ve problem çözme."
+          },
+          {
+            "name": "Eşitsizlikler",
+            "outcome_code": "MAT.7.2.2",
+            "official_boundary": "Birinci dereceden bir bilinmeyenli eşitsizlikler ve sayı doğrusunda gösterimi."
+          },
+          {
+            "name": "İspat",
+            "outcome_code": "MAT.7.2.3",
+            "official_boundary": "Matematiksel iddia ve genellemelerin doğrulama/ispat süreçleri."
+          },
+          {
+            "name": "Algoritmayı Yapılandırma",
+            "outcome_code": "MAT.7.2.3",
+            "official_boundary": "Örüntü ve denklem çözme adımlarının algoritmik yapılar ve akış şemalarıyla yapılandırılması."
+          }
+        ]
+      },
+      "9. Tema: Geometrik Nicelikler (2)": {
+        "alt_konular": [
+          {
+            "name": "Dairenin Alanı",
+            "outcome_code": "MAT.7.4.7",
+            "official_boundary": "Yarıçapı verilen dairenin alan bağıntısını oluşturma ve hesaplama."
+          },
+          {
+            "name": "Daire Diliminin Alanı",
+            "outcome_code": "MAT.7.4.8",
+            "official_boundary": "Merkez açının ölçüsü ile daire diliminin alanı arasındaki orantı ilişkisi ve alan hesabı."
+          },
+          {
+            "name": "Eşkenar Dörtgenin Alanı",
+            "outcome_code": "MAT.7.4.9",
+            "official_boundary": "Eşkenar dörtgenin alan bağıntısını köşegenler ve taban-yükseklik yardımıyla oluşturma."
+          },
+          {
+            "name": "Yamuğun Alanı",
+            "outcome_code": "MAT.7.4.9",
+            "official_boundary": "Yamuğun alan bağıntısını paralelkenar ve üçgene ayırarak oluşturma ve alan hesabı."
+          },
+          {
+            "name": "Daire, Daire Dilimi, Eşkenar Dörtgen ve Yamuğun Alanına İlişkin Problemler",
+            "outcome_code": "MAT.7.4.10",
+            "official_boundary": "Daire, daire dilimi, eşkenar dörtgen ve yamuk içeren çok adımlı gerçek yaşam alan problemleri."
+          }
+        ]
+      }
+    }
+  },
+  "8": {
+    "ders": "Matematik",
+    "program": "Matematik Dersi Öğretim Programı (2018 - Korunan Müfredat)",
+    "kitap": "MATEMATİK 8. SINIF DERS KİTABI",
+    "temalar": {
+      "1. Tema: Sayılar ve İşlemler": {
+        "alt_konular": [
+          {
+            "name": "Çarpanlar ve Katlar (EBOB - EKOK)",
+            "outcome_code": "M.8.1.1.1",
+            "official_boundary": "EBOB, EKOK hesapları ve günlük hayat problemleri."
+          },
+          {
+            "name": "Üslü İfadeler ve Bilimsel Gösterim",
+            "outcome_code": "M.8.1.2.1",
+            "official_boundary": "Tam sayı kuvvetleri, çarpma-bölme ve bilimsel gösterim."
+          },
+          {
+            "name": "Kareköklü İfadeler",
+            "outcome_code": "M.8.1.3.1",
+            "official_boundary": "Tam kare sayılar, karekök dışına çıkarma ve işlemler."
+          },
+          {
+            "name": "Gerçek Sayılar",
+            "outcome_code": "M.8.1.4.1",
+            "official_boundary": "Rasyonel ve irrasyonel sayılar kümesi."
+          }
+        ]
+      },
+      "2. Tema: Veri Analizi": {
+        "alt_konular": [
+          {
+            "name": "Veri Analizi ve Grafikler",
+            "outcome_code": "M.8.4.1.1",
+            "official_boundary": "Çizgi, sütun ve daire grafiklerinin birbirine dönüşümü ve yorumlanması."
+          }
+        ]
+      },
+      "3. Tema: Olasılık": {
+        "alt_konular": [
+          {
+            "name": "Basit Olayların Olma Olasılığı",
+            "outcome_code": "M.8.5.1.1",
+            "official_boundary": "Olası durum sayısı, eşit şansa sahip olaylar ve olasılık değeri."
+          }
+        ]
+      },
+      "4. Tema: Cebir": {
+        "alt_konular": [
+          {
+            "name": "Cebirsel İfadeler ve Özdeşlikler",
+            "outcome_code": "M.8.2.1.1",
+            "official_boundary": "Özdeşlikler, tam kare ifadeler, iki kare farkı ve çarpanlara ayırma."
+          },
+          {
+            "name": "Doğrusal Denklemler ve Eğim",
+            "outcome_code": "M.8.2.2.1",
+            "official_boundary": "Koordinat sistemi, doğru grafikleri ve eğim kavramı."
+          },
+          {
+            "name": "Eşitsizlikler",
+            "outcome_code": "M.8.2.3.1",
+            "official_boundary": "Birinci dereceden bir bilinmeyenli eşitsizlikler ve sayı doğrusu."
+          }
+        ]
+      },
+      "5. Tema: Geometri ve Ölçme": {
+        "alt_konular": [
+          {
+            "name": "Üçgenler ve Pisagor Bağıntısı",
+            "outcome_code": "M.8.3.1.1",
+            "official_boundary": "Üçgen eşitsizliği, açı-kenar bağıntıları, Pisagor teoremi."
+          },
+          {
+            "name": "Eşlik ve Benzerlik",
+            "outcome_code": "M.8.3.3.1",
+            "official_boundary": "Benzerlik oranı, eş üçgenler ve benzer çokgenler."
+          },
+          {
+            "name": "Dönüşüm Geometrisi",
+            "outcome_code": "M.8.3.2.1",
+            "official_boundary": "Öteleme, yansıma ve simetri eksenleri."
+          },
+          {
+            "name": "Geometrik Cisimler",
+            "outcome_code": "M.8.3.4.1",
+            "official_boundary": "Dik prizmalar, silindir, piramit ve koni yüzey alanı ve hacimleri."
+          }
+        ]
+      }
+    }
+  },
+  "9": {
+    "ders": "Matematik",
+    "program": "Türkiye Yüzyılı Maarif Modeli",
+    "kitap": "MATEMATİK 9. SINIF MARİF DERS KİTABI (1 ve 2. Kitap)",
+    "temalar": {
+      "1. Tema: Sayılar": {
+        "alt_konular": [
+          {
+            "name": "Gerçek Sayıların Üslü ve Köklü Gösterimleri ile Yapılan İşlemler",
+            "outcome_code": "MAT.9.1.1",
+            "official_boundary": "Üslü ve köklü gösterimlerin özellikleri ve cebirsel işlemler."
+          },
+          {
+            "name": "Gerçek Sayı Aralıklarının Gösterimi ve Aralıklarla İlgili İşlemlerde Küme Sembollerinin Kullanımı",
+            "outcome_code": "MAT.9.1.2",
+            "official_boundary": "Küme sembolleri, açık-kapalı aralıklar ve aralık kesişim-birleşimi."
+          },
+          {
+            "name": "Sayı Kümeleri ve İşlem Özellikleri",
+            "outcome_code": "MAT.9.1.1",
+            "official_boundary": "Doğal, tam, rasyonel, irrasyonel ve gerçek sayılar hiyerarşisi."
+          },
+          {
+            "name": "Gerçek Sayıların İşlem Özelliklerini Cebirsel Olarak İfade Etme",
+            "outcome_code": "MAT.9.1.2",
+            "official_boundary": "Değişme, birleşme, dağılma özellikleri ve mutlak değer."
+          }
+        ]
+      },
+      "2. Tema: Nicelikler ve Değişimler": {
+        "alt_konular": [
+          {
+            "name": "Doğrusal Fonksiyonlar ve Nitel Özellikleri",
+            "outcome_code": "MAT.9.2.1",
+            "official_boundary": "f(x) = x doğrusal referans fonksiyonu, nitel özellikleri, grafiği ve eğim ilişkisi."
+          },
+          {
+            "name": "Mutlak Değer Fonksiyonu ve Nitel Özellikleri",
+            "outcome_code": "MAT.9.2.2",
+            "official_boundary": "f(x) = |x| referans mutlak değer fonksiyonu, parçalı fonksiyon gösterimi ve nitel özellikleri."
+          },
+          {
+            "name": "Doğrusal Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler İçeren Problemler",
+            "outcome_code": "MAT.9.2.3",
+            "official_boundary": "Birinci dereceden denklem ve eşitsizliklerin grafiksel/fonksiyonel yorumu ve gerçek yaşam problemleri."
+          }
+        ]
+      },
+      "3. Tema: Geometrik Şekiller": {
+        "alt_konular": [
+          {
+            "name": "Üçgende Açı ve Kenarla İlgili Özellikler ve Bu Özellikler Arasındaki İlişkiler",
+            "outcome_code": "MAT.9.3.1",
+            "official_boundary": "Üçgende iç ve dış açılar, açı-kenar bağıntıları, üçgen eşitsizliği ve bu özellikler arasındaki ilişkiler."
+          }
+        ]
+      },
+      "4. Tema: Eşlik ve Benzerlik": {
+        "alt_konular": [
+          {
+            "name": "Geometrik Dönüşümler",
+            "outcome_code": "MAT.9.4.1",
+            "official_boundary": "Düzlemde öteleme, yansıma ve dönme dönüşümleri ile korunan geometrik özellikler."
+          },
+          {
+            "name": "Eşlik ve Benzerlik Koşulları",
+            "outcome_code": "MAT.9.4.2",
+            "official_boundary": "Üçgenlerde eşlik ve benzerlik koşulları (K.A.K., A.K.A., K.K.K. ve A.A. benzerliği)."
+          },
+          {
+            "name": "Benzer Üçgenler Oluşturma",
+            "outcome_code": "MAT.9.4.2",
+            "official_boundary": "Cetvel, pergel ve dinamik geometri yazılımlarıyla benzer üçgenler inşa etme ve benzerlik oranı."
+          },
+          {
+            "name": "Tales, Öklid ve Pisagor Teoremleri",
+            "outcome_code": "MAT.9.4.3",
+            "official_boundary": "Tales teoremi, dik üçgende Öklid bağıntıları ve Pisagor teoremi."
+          },
+          {
+            "name": "Eşlik ve Benzerlik Problemleri",
+            "outcome_code": "MAT.9.4.4",
+            "official_boundary": "Eşlik, benzerlik, Tales, Öklid ve Pisagor teoremlerini içeren gerçek yaşam problemleri."
+          }
+        ]
+      },
+      "5. Tema: Algoritma ve Bilişim": {
+        "alt_konular": [
+          {
+            "name": "Algoritma Temelli Problemler",
+            "outcome_code": "MAT.9.5.1",
+            "official_boundary": "Problem çözümünde algoritma tasarımı ve akış şemaları."
+          },
+          {
+            "name": "Mantık Bağlaçları ve Niceleyiciler",
+            "outcome_code": "MAT.9.5.2",
+            "official_boundary": "Ve, veya, ise, ancak ve ancak bağlaçları ve niceleyiciler."
+          },
+          {
+            "name": "Mantık Bağlaçları ve Niceleyicilerin Algoritmik Problemlerde Kullanımı",
+            "outcome_code": "MAT.9.5.2",
+            "official_boundary": "Koşullu yapılar, döngüler ve matematiksel ispat."
+          }
+        ]
+      },
+      "6. Tema: İstatistiksel Araştırma Süreci": {
+        "alt_konular": [
+          {
+            "name": "Tek Nicel Değişkenli Veri Dağılımları",
+            "outcome_code": "MAT.9.6.1",
+            "official_boundary": "Tek nicel değişkenli verilerin histogram, kutu grafiği, yayılım ve merkezî eğilim ölçüleriyle temsili."
+          },
+          {
+            "name": "Başkaları Tarafından Oluşturulan Tek Nicel Değişkenli Veri Dağılımlarını İnceleme",
+            "outcome_code": "MAT.9.6.2",
+            "official_boundary": "Rapor ve yayınlardaki veri dağılımlarını eleştirel gözle inceleme, yorumlama ve karşılaştırma."
+          }
+        ]
+      },
+      "7. Tema: Veriden Olasılığa": {
+        "alt_konular": [
+          {
+            "name": "7.1. Deneysel Olasılık",
+            "outcome_code": "MAT.9.7.1",
+            "official_boundary": "Olayların gerçekleşme olasılığını deney, simülasyon ve gözleme dayalı olarak tahmin etme."
+          },
+          {
+            "name": "7.2. Teorik Olasılık",
+            "outcome_code": "MAT.9.7.2",
+            "official_boundary": "Olayların teorik olasılığına ilişkin tümevarımsal akıl yürütme ve eş olası durumlar."
+          }
+        ]
+      }
+    }
+  },
+  "10": {
+    "ders": "Matematik",
+    "program": "Türkiye Yüzyılı Maarif Modeli",
+    "kitap": "MATEMATİK 10. SINIF MARİF DERS KİTABI (416 Sayfa)",
+    "temalar": {
+      "1. Tema: Geometrik Şekiller": {
+        "alt_konular": [
+          {
+            "name": "1.1. Dik Üçgende Trigonometrik Oranlar ve Trigonometrik Özdeşlikler",
+            "outcome_code": "MAT.10.1.1",
+            "official_boundary": "Dar açıların trigonometrik oranları ve temel özdeşlikler."
+          },
+          {
+            "name": "1.2. Üçgende Yardımcı Elemanlar",
+            "outcome_code": "MAT.10.1.2",
+            "official_boundary": "İç açıortay, dış açıortay, kenarortay ve yükseklik bağıntıları."
+          },
+          {
+            "name": "1.3. Üçgenin Alanı",
+            "outcome_code": "MAT.10.1.2",
+            "official_boundary": "Trigonometrik alan formülü ve alan özellikleri."
+          },
+          {
+            "name": "1.4. Sinüs ve Kosinüs Teoremleri",
+            "outcome_code": "MAT.10.1.1",
+            "official_boundary": "Sinüs ve kosinüs teoremleri ile üçgen çözümü."
+          }
+        ]
+      },
+      "2. Tema: İstatistiksel Araştırma Süreci": {
+        "alt_konular": [
+          {
+            "name": "2.1. İki Kategorik Değişkenli Veriler",
+            "outcome_code": "MAT.10.2.1",
+            "official_boundary": "İki kategorik değişkenli araştırma sorusu ve veri toplama."
+          },
+          {
+            "name": "2.2. Başkaları Tarafından Oluşturulan İki Kategorik Değişkenli Verileri İnceleme",
+            "outcome_code": "MAT.10.2.2",
+            "official_boundary": "Çapraz tablolar ve kümelendirilmiş sütun grafikleri."
+          }
+        ]
+      },
+      "3. Tema: Sayılar": {
+        "alt_konular": [
+          {
+            "name": "3.1. Bir Doğal Sayının Asal Çarpanları-Bölenleri",
+            "outcome_code": "MAT.10.3.1",
+            "official_boundary": "Asal çarpanlara ayırma, pozitif tam sayı bölenleri ve bölen sayısı."
+          },
+          {
+            "name": "3.2. En Büyük Ortak Bölen-En Küçük Ortak Kat",
+            "outcome_code": "MAT.10.3.2",
+            "official_boundary": "EBOB-EKOK özellikleri, algoritmaları ve periyodik durum problemleri."
+          },
+          {
+            "name": "3.3. Bölünebilme",
+            "outcome_code": "MAT.10.3.3",
+            "official_boundary": "Bölünebilme kuralları, kalan ilişkileri ve bölünebilme temelli gerçek yaşam problemleri."
+          }
+        ]
+      },
+      "4. Tema: Nicelikler ve Değişimler": {
+        "alt_konular": [
+          {
+            "name": "4.1. Gerçek Sayılarda Fonksiyon Olma Şartları",
+            "outcome_code": "MAT.10.4.1",
+            "official_boundary": "Gerçek sayılarda tanımlı bağıntıların fonksiyon olma şartları, tanım, değer ve görüntü kümeleri."
+          },
+          {
+            "name": "4.2. Karesel Fonksiyon ve Nitel Özellikleri",
+            "outcome_code": "MAT.10.4.2",
+            "official_boundary": "f(x) = x² karesel referans fonksiyonu, nitel özellikleri, tepe noktası, artanlık-azalanlık ve grafik gösterimi."
+          },
+          {
+            "name": "4.3. Karekök Fonksiyonu ve Nitel Özellikleri",
+            "outcome_code": "MAT.10.4.3",
+            "official_boundary": "f(x) = √x karekök referans fonksiyonu, tanım ve görüntü kümesi, nitel özellikleri ve grafik gösterimi."
+          },
+          {
+            "name": "4.4. Rasyonel Fonksiyon ve Nitel Özellikleri",
+            "outcome_code": "MAT.10.4.4",
+            "official_boundary": "f(x) = 1/x rasyonel referans fonksiyonu, tanımsızlık durumları, nitel özellikleri ve grafik gösterimi."
+          },
+          {
+            "name": "4.5. Doğrusal, Karesel, Karekök ve Rasyonel Fonksiyonların Ters Fonksiyonları",
+            "outcome_code": "MAT.10.4.5",
+            "official_boundary": "Bire bir ve örtenlik koşulları altında fonksiyonların tersini cebirsel ve grafiksel olarak belirleme."
+          },
+          {
+            "name": "4.6. Gerçek Sayılarda Tanımlı Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler İçeren Problemler",
+            "outcome_code": "MAT.10.4.6",
+            "official_boundary": "Fonksiyon modelleri ile ifade edilen denklem ve eşitsizlikleri çözme ve gerçek yaşam problemleri."
+          }
+        ]
+      },
+      "5. Tema: Sayma, Algoritma ve Bilişim": {
+        "alt_konular": [
+          {
+            "name": "5.1. Sayma Stratejileri",
+            "outcome_code": "MAT.10.5.1",
+            "official_boundary": "Sıralama (Permütasyon), Seçme (Kombinasyon) ve Pascal Üçgeni."
+          },
+          {
+            "name": "5.2. Cebirsel ve Fonksiyonel İşlemlerin Algoritmik Yapısı",
+            "outcome_code": "MAT.10.5.2",
+            "official_boundary": "Cebirsel ve fonksiyonel işlemlerin algoritmik yapısı, akış şemaları ve bilişimsel düşünme."
+          }
+        ]
+      },
+      "6. Tema: Analitik İnceleme": {
+        "alt_konular": [
+          {
+            "name": "6.1. Dik Koordinat Sisteminde Noktanın Analitik İncelenmesi",
+            "outcome_code": "MAT.10.6.1",
+            "official_boundary": "Dik koordinat sisteminde nokta, iki nokta arasındaki uzaklık ve bir doğru parçasını belli bir oranda bölen noktanın koordinatları."
+          },
+          {
+            "name": "6.2. Dik Koordinat Sisteminde Doğrunun Analitik İncelenmesi",
+            "outcome_code": "MAT.10.6.2",
+            "official_boundary": "Doğrunun eğimi, eğim açısı, farklı biçimlerdeki doğru denklemleri, doğruların birbirine göre durumları ve noktanın doğruya uzaklığı."
+          }
+        ]
+      },
+      "7. Tema: Veriden Olasılığa": {
+        "alt_konular": [
+          {
+            "name": "7.1. Koşullu Olasılık",
+            "outcome_code": "MAT.10.7.1",
+            "official_boundary": "Koşullu olasılık, bağımlı ve bağımsız olaylar."
+          },
+          {
+            "name": "7.2. Bayes Teoremi",
+            "outcome_code": "MAT.10.7.2",
+            "official_boundary": "Toplam olasılık ve Bayes teoremi ile çıkarım yapma."
+          }
+        ]
+      }
+    }
+  },
+  "11": {
+    "ders": "Matematik",
+    "program": "Türkiye Yüzyılı Maarif Modeli",
+    "kitap": "MATEMATİK 11. SINIF MARİF DERS KİTABI (377 Sayfa)",
+    "temalar": {
+      "1. Tema: İstatistiksel Araştırma Süreci": {
+        "alt_konular": [
+          {
+            "name": "1.1. İki Nicel Değişkenli Veriler",
+            "outcome_code": "MAT.11.1.1",
+            "official_boundary": "İki nicel değişkenli veri toplama ve saçılım (serpme) grafiği."
+          },
+          {
+            "name": "1.2. Başkaları Tarafından Oluşturulan İki Nicel Değişkenli Verileri İnceleme",
+            "outcome_code": "MAT.11.1.2",
+            "official_boundary": "Korelasyon katsayısı ve ilişkililik yorumlaması."
+          }
+        ]
+      },
+      "2. Tema: Geometrik Şekiller": {
+        "alt_konular": [
+          {
+            "name": "2.1. Dörtgenlerin Özellikleri",
+            "outcome_code": "MAT.11.2.1",
+            "official_boundary": "Dörtgenlerin kenar, açı, köşegen özellikleri."
+          },
+          {
+            "name": "2.2. Özel Dörtgenler Arasındaki İlişkiler",
+            "outcome_code": "MAT.11.2.2",
+            "official_boundary": "Paralelkenar, eşkenar dörtgen, dikdörtgen, kare, yamuk ve deltoid."
+          },
+          {
+            "name": "2.3. Çokgenlerin Sınıflandırılması",
+            "outcome_code": "MAT.11.2.3",
+            "official_boundary": "İçbükey ve dışbükey çokgen özellikleri."
+          },
+          {
+            "name": "2.4. Dışbükey Çokgenlerin Özellikleri",
+            "outcome_code": "MAT.11.2.4",
+            "official_boundary": "İç ve dış açılar toplamı, köşegen sayısı."
+          },
+          {
+            "name": "2.5. Çokgenlerle İlgili Problemler",
+            "outcome_code": "MAT.11.2.5",
+            "official_boundary": "Düzgün çokgenlerde alan ve karma geometri problemleri."
+          }
+        ]
+      },
+      "3. Tema: Nicelikler ve Değişimler (1)": {
+        "alt_konular": [
+          {
+            "name": "3.1. Trigonometrik Fonksiyonlar ve Nitel Özellikleri",
+            "outcome_code": "MAT.11.3.1",
+            "official_boundary": "Yönlü açılar, radyan, sinüs, kosinüs, tanjant fonksiyonları ve grafikleri."
+          },
+          {
+            "name": "3.2. Trigonometrik Fonksiyonlarla İfade Edilebilen Denklemler İçeren Problemler",
+            "outcome_code": "MAT.11.3.2",
+            "official_boundary": "Trigonometrik denklem modelleri."
+          }
+        ]
+      },
+      "4. Tema: Nicelikler ve Değişimler (2)": {
+        "alt_konular": [
+          {
+            "name": "4.1. Üstel Fonksiyonlar ve Nitel Özellikleri",
+            "outcome_code": "MAT.11.3.3",
+            "official_boundary": "f(x) = a^x üstel fonksiyonu ve grafiği."
+          },
+          {
+            "name": "4.2. Üstel Fonksiyonların Ters Fonksiyonları",
+            "outcome_code": "MAT.11.3.3",
+            "official_boundary": "Logaritma tanımı ve üstel-logaritmik dönüşüm."
+          },
+          {
+            "name": "4.3. Logaritmik Fonksiyonlar ve Nitel Özellikleri",
+            "outcome_code": "MAT.11.3.4",
+            "official_boundary": "Logaritma kuralları, 10 ve e tabanında logaritma."
+          },
+          {
+            "name": "4.4. Üstel ve Logaritmik Fonksiyonlarla İfade Edilebilen Denklem ve Eşitsizlikler İçeren Problemler",
+            "outcome_code": "MAT.11.3.5",
+            "official_boundary": "Üstel ve logaritmik denklemlerin çözümü."
+          }
+        ]
+      },
+      "5. Tema: Nicelikler ve Değişimler (3)": {
+        "alt_konular": [
+          {
+            "name": "5.1. Fonksiyonların Bileşkesi",
+            "outcome_code": "MAT.11.3.6",
+            "official_boundary": "(f o g)(x) bileşke fonksiyonu ve ters fonksiyon ilişkisi."
+          },
+          {
+            "name": "5.2. Fonksiyonlarda Dört İşlem",
+            "outcome_code": "MAT.11.3.6",
+            "official_boundary": "Fonksiyonların toplamı, farkı, çarpımı ve bölümü."
+          }
+        ]
+      }
+    }
+  },
+  "12": {
+    "ders": "Matematik",
+    "program": "Matematik Dersi Öğretim Programı (2018 - Korunan Müfredat)",
+    "kitap": "MATEMATİK 12. SINIF DERS KİTABI",
+    "temalar": {
+      "1. Tema: Üstel ve Logaritmik Fonksiyonlar": {
+        "alt_konular": [
+          {
+            "name": "Üstel Fonksiyonlar",
+            "outcome_code": "12.1.1.1",
+            "official_boundary": "Üstel fonksiyonu açıklar ve özelliklerini modeller."
+          },
+          {
+            "name": "Logaritma Fonksiyonu ve Özellikleri",
+            "outcome_code": "12.1.2.1",
+            "official_boundary": "10 ve e tabanında logaritma fonksiyonu ve özellikleri."
+          },
+          {
+            "name": "Üstel ve Logaritmik Denklemler ve Eşitsizlikler",
+            "outcome_code": "12.1.3.1",
+            "official_boundary": "Denklem ve eşitsizliklerin çözüm kümesini bulur."
+          }
+        ]
+      },
+      "2. Tema: Diziler": {
+        "alt_konular": [
+          {
+            "name": "Aritmetik Dizi",
+            "outcome_code": "12.2.1.1",
+            "official_boundary": "Ortak fark, genel terim ve ilk n terim toplamı."
+          },
+          {
+            "name": "Geometrik Dizi",
+            "outcome_code": "12.2.1.2",
+            "official_boundary": "Ortak çarpan, genel terim ve ilk n terim toplamı."
+          }
+        ]
+      },
+      "3. Tema: Trigonometri": {
+        "alt_konular": [
+          {
+            "name": "Toplam ve Fark Formülleri",
+            "outcome_code": "12.3.1.1",
+            "official_boundary": "İki açının toplam ve farkının trigonometrik değerleri."
+          },
+          {
+            "name": "İki Kat Açı Formülleri",
+            "outcome_code": "12.3.1.2",
+            "official_boundary": "Yarım açı ve iki kat açı formülleri."
+          },
+          {
+            "name": "Trigonometrik Denklemler",
+            "outcome_code": "12.3.2.1",
+            "official_boundary": "sin x = a, cos x = a, tan x = a denklemlerinin çözümü."
+          }
+        ]
+      },
+      "4. Tema: Türev ve Limit": {
+        "alt_konular": [
+          {
+            "name": "Limit ve Süreklilik",
+            "outcome_code": "12.5.1.1",
+            "official_boundary": "Sağdan-soldan limit, limit özellikleri ve süreklilik."
+          },
+          {
+            "name": "Türev Alma Kuralları",
+            "outcome_code": "12.5.2.1",
+            "official_boundary": "Çarpımın, bölümün ve bileşke fonksiyonun türevi."
+          },
+          {
+            "name": "Türevin Geometrik Anlamı ve Teğet Denklemi",
+            "outcome_code": "12.5.2.2",
+            "official_boundary": "Teğet ve normal denklemleri, anlık değişim oranı."
+          },
+          {
+            "name": "Maksimum ve Minimum Problemleri",
+            "outcome_code": "12.5.3.1",
+            "official_boundary": "Ekstremum noktaları, artan-azalan aralıklar ve optimizasyon."
+          }
+        ]
+      },
+      "5. Tema: İntegral": {
+        "alt_konular": [
+          {
+            "name": "Belirsiz İntegral ve Değişken Değiştirme",
+            "outcome_code": "12.6.1.1",
+            "official_boundary": "Ters türev ve diferansiyel yardımıyla integral alma."
+          },
+          {
+            "name": "Belirli İntegral",
+            "outcome_code": "12.6.2.1",
+            "official_boundary": "Kalkülüsün temel teoremi ve belirli integral özellikleri."
+          },
+          {
+            "name": "İntegral ile Alan Hesabı",
+            "outcome_code": "12.6.2.4",
+            "official_boundary": "İki fonksiyon grafiği arasında kalan bölgenin alanı."
+          }
+        ]
+      },
+      "6. Tema: Analitik Geometri": {
+        "alt_konular": [
+          {
+            "name": "Çemberin Analitik İncelenmesi",
+            "outcome_code": "12.7.1.1",
+            "official_boundary": "Çemberin standart denklemi, genel denklemi ve doğru-çember durumları."
+          }
+        ]
+      }
+    }
+  }
+};
