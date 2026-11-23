@@ -34,6 +34,7 @@ const { createExamsRouter } = require('./routes/exams');
 const { requireKonuLogin } = require('./lib/konu-erisimi');
 const { createTeacherStudentHomeworkRouters } = require('./routes/ogretmen-ogrenci-odev');
 const { createMessagesRouter } = require('./routes/messages');
+const { createCentralQuestionBankRouter } = require('./routes/centralQuestionBank');
 const { createGelisimRouters } = require('./routes/ogrenci-gelisim');
 const { createPratikRouter } = require('./routes/pratik');
 const { createYaziliRouter } = require('./routes/yazili');
@@ -666,6 +667,7 @@ app.use('/api/sorular', createSorularRouter({
   requireStaff: requireRole('teacher', 'admin'),
   AdminLog
 }));
+app.use('/api/central-question-bank', createCentralQuestionBankRouter({ SoruModel: Soru }));
 const cozumluSorular = createCozumluSorularRouters({
   Model: CozumluSoru, User, AdminLog,
   getTopics: async grade => (await import('./aiService.mjs')).mufredatKonulariniGetir(grade)

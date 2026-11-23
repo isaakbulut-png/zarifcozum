@@ -347,7 +347,7 @@ const userSchema = new mongoose.Schema({
   },
   subscriptionType: {
     type: String,
-    enum: ['monthly', 'yearly', null],
+    enum: ['monthly', 'yearly', 'annual', null],
     default: null
   },
   subscriptionPlan: {

@@ -4094,8 +4094,18 @@ body.teacher-menu-open {
       if (diff) params.set('difficulty', diff);
       if (search) params.set('search', search);
 
-      const res = await api(`/api/central-question-bank?${params.toString()}`);
-      centralBankQuestions = res.questions || [];
+      let res;
+      try {
+        res = await api(`/api/central-question-bank?${params.toString()}`);
+      } catch (e) {
+        try {
+          res = await api(`/api/sorular?${params.toString()}`);
+          if (res && res.sorular) res.questions = res.sorular;
+        } catch (innerErr) {
+          throw e;
+        }
+      }
+      centralBankQuestions = res?.questions || res?.sorular || [];
 
       if (centralBankQuestions.length === 0) {
         container.innerHTML = '<p class="empty" style="text-align:center; padding:24px;">Filtrelere uygun soru bulunamadı.</p>';
