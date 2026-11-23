@@ -573,7 +573,14 @@ sitePages.forEach(page => {
       );
     }
     next();
-  }, (req, res) => res.sendFile(path.join(__dirname, page)));
+  }, (req, res) => {
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    return res.sendFile(path.join(__dirname, page));
+  });
 });
 
 // Yönetici paneli: ana sayfada bağlantısı yoktur; yalnızca /yonetim adresinden ulaşılır.
