@@ -622,6 +622,11 @@
       <svg viewBox="0 0 24 24" style="stroke:#34d399"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="15" r="1"/></svg>
       <span class="nav-text">Ödemeler & Paketler</span>
     </button>
+    <button class="nav-btn" type="button" data-view="teacher-payroll" data-admin-roles="superadmin">
+      <svg viewBox="0 0 24 24" style="stroke:#10b981"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/><rect x="2" y="3" width="20" height="18" rx="2"/></svg>
+      <span class="nav-text">Öğretmen Hakediş Masası</span>
+      <span id="teacherPayrollBadge" style="display:none; background:#f59e0b; color:#fff; font-size:10px; font-weight:700; padding:1px 6px; border-radius:999px; margin-left:auto;">0</span>
+    </button>
     <button class="nav-btn" type="button" data-view="support-tickets" data-admin-roles="superadmin,support">
       <svg viewBox="0 0 24 24" style="stroke:#fb7185"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span class="nav-text">Destek Talepleri</span>
@@ -809,6 +814,269 @@
         </div>
         <p class="msg" id="paymentsMsg" role="alert"></p>
       </div>
+    </section>
+
+    <!-- 4.1 ÖĞRETMEN MAAŞ VE HAKEDİŞ MASASI (YÖNTEM A) -->
+    <section id="view-teacher-payroll" hidden>
+      <div class="panel" style="margin-top:0">
+        <!-- Başlık ve Üst Bilgi -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:14px;">
+          <div>
+            <h2 style="font-size:20px; font-weight:700; color:#0f172a; margin:0 0 4px 0; display:flex; align-items:center; gap:8px;">
+              <span>💼 Öğretmen Maaş ve Hakediş Masası</span>
+              <span id="payrollPeriodBadge" style="background:#e0f2fe; color:#0369a1; font-size:12px; font-weight:600; padding:2px 10px; border-radius:999px;">Cari Dönem</span>
+            </h2>
+            <p style="margin:0; font-size:13px; color:#64748b;">
+              Yöntem A: Toplu Banka Havale/EFT Dosyası Oluşturma, Stopaj & Fatura Yönetimi ve İşlem Onay Takibi
+            </p>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn" type="button" id="btnCalculatePayroll" style="background:#0284c7; color:#fff; font-weight:600; border:none; border-radius:8px; padding:8px 16px; display:inline-flex; align-items:center; gap:6px;">
+              ⚡ Dönem Hakedişlerini Hesapla
+            </button>
+            <button class="btn" type="button" id="btnExportEft" style="background:#059669; color:#fff; font-weight:600; border:none; border-radius:8px; padding:8px 16px; display:inline-flex; align-items:center; gap:6px;">
+              📥 Toplu Banka EFT Dosyası (CSV/Excel)
+            </button>
+            <button class="btn" type="button" id="btnViewPayrollLogs" style="background:#475569; color:#fff; font-weight:600; border:none; border-radius:8px; padding:8px 14px; display:inline-flex; align-items:center; gap:6px;">
+              📋 İşlem Geçmişi (Audit)
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtre ve Arama Araç Çubuğu -->
+        <div class="toolbar" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:space-between; margin-bottom:16px;">
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; flex:1;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <label for="payrollPeriodSelect" style="font-size:12px; font-weight:600; color:#475569;">Dönem:</label>
+              <select id="payrollPeriodSelect" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px; background:#fff; font-weight:600;"></select>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <label for="payrollStatusSelect" style="font-size:12px; font-weight:600; color:#475569;">Durum:</label>
+              <select id="payrollStatusSelect" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px; background:#fff;">
+                <option value="all">Tüm Durumlar</option>
+                <option value="bekliyor">Bekleyenler</option>
+                <option value="onaylandi">Onaylananlar</option>
+                <option value="odendi">Ödenenler & Kilitli</option>
+                <option value="fatura_bekleniyor">Fatura Beklenen Şirketler</option>
+              </select>
+            </div>
+            <div style="flex:1; min-width:200px;">
+              <input type="search" id="payrollSearchInput" placeholder="Öğretmen adı, IBAN veya e-posta ara..." style="width:100%; padding:6px 12px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px;">
+            </div>
+          </div>
+          <!-- Toplu İşlem Butonları -->
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span id="selectedCountText" style="font-size:12px; color:#64748b; font-weight:600;">0 seçildi</span>
+            <button class="btn" type="button" id="btnBatchApprove" style="padding:6px 12px; font-size:12px; font-weight:600; border-radius:6px; background:#f8fafc; border:1px solid #cbd5e1;" disabled>
+              ✅ Seçilenleri Onayla
+            </button>
+            <button class="btn" type="button" id="btnBatchPay" style="padding:6px 12px; font-size:12px; font-weight:600; border-radius:6px; background:#10b981; color:#fff; border:none;" disabled>
+              💰 Seçilenleri Öde & Kilitle
+            </button>
+          </div>
+        </div>
+
+        <!-- Finansal Özet Kartları (KPIs) -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:20px;">
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; font-weight:700;">Toplam Brüt Hakediş</div>
+            <div id="kpiTotalGross" style="font-size:20px; font-weight:800; color:#0f172a; margin-top:4px;">₺0</div>
+            <div id="kpiTotalTeachers" style="font-size:11px; color:#94a3b8; margin-top:2px;">0 öğretmen</div>
+          </div>
+          <div style="background:#fef2f2; border:1px solid #fee2e2; border-radius:10px; padding:12px 14px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#b91c1c; font-weight:700;">Stopaj / Vergi Kesintisi</div>
+            <div id="kpiTotalWithholding" style="font-size:20px; font-weight:800; color:#b91c1c; margin-top:4px;">₺0</div>
+            <div style="font-size:11px; color:#ef4444; margin-top:2px;">Bireysel Stopaj (%20)</div>
+          </div>
+          <div style="background:#ecfdf5; border:1px solid #d1fae5; border-radius:10px; padding:12px 14px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#047857; font-weight:700;">Net Ödenecek Toplam</div>
+            <div id="kpiTotalNet" style="font-size:20px; font-weight:800; color:#047857; margin-top:4px;">₺0</div>
+            <div style="font-size:11px; color:#10b981; margin-top:2px;">Banka Havale Tutarı</div>
+          </div>
+          <div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:10px; padding:12px 14px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#b45309; font-weight:700;">Bekleyen Ödemeler</div>
+            <div id="kpiPendingAmount" style="font-size:20px; font-weight:800; color:#b45309; margin-top:4px;">₺0</div>
+            <div id="kpiPendingCount" style="font-size:11px; color:#d97706; margin-top:2px;">0 kayıt onay bekliyor</div>
+          </div>
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px 14px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#15803d; font-weight:700;">Ödenen & Kilitli 🔒</div>
+            <div id="kpiPaidAmount" style="font-size:20px; font-weight:800; color:#15803d; margin-top:4px;">₺0</div>
+            <div id="kpiPaidCount" style="font-size:11px; color:#16a34a; margin-top:2px;">0 öğretmen ödendi</div>
+          </div>
+          <div style="background:#faf5ff; border:1px solid #f3e8ff; border-radius:10px; padding:12px 14px;">
+            <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#7e22ce; font-weight:700;">Şirket Fatura Durumu</div>
+            <div id="kpiInvoicePending" style="font-size:20px; font-weight:800; color:#7e22ce; margin-top:4px;">0 / 0</div>
+            <div style="font-size:11px; color:#9333ea; margin-top:2px;">Fatura Beklenen Şirket</div>
+          </div>
+        </div>
+
+        <!-- Hakediş Listesi Tablosu -->
+        <div class="table-wrap">
+          <table style="width:100%; border-collapse:collapse;" id="teacherPayrollTable">
+            <thead>
+              <tr style="background:#f8fafc; border-bottom:2px solid #e2e8f0; font-size:12px; color:#475569; text-align:left;">
+                <th style="padding:10px 8px; width:36px; text-align:center;">
+                  <input type="checkbox" id="payrollSelectAll" title="Tümünü Seç">
+                </th>
+                <th style="padding:10px 8px;">Öğretmen</th>
+                <th style="padding:10px 8px;">Vergi Statüsü</th>
+                <th style="padding:10px 8px;">Banka & IBAN</th>
+                <th style="padding:10px 8px; text-align:right;">Ders / Prim</th>
+                <th style="padding:10px 8px; text-align:right;">Brüt Tutar</th>
+                <th style="padding:10px 8px; text-align:right;">Stopaj / Kesinti</th>
+                <th style="padding:10px 8px; text-align:right;">Net Ödenecek</th>
+                <th style="padding:10px 8px; text-align:center;">Fatura</th>
+                <th style="padding:10px 8px; text-align:center;">Durum</th>
+                <th style="padding:10px 8px; text-align:center;">Dekont</th>
+                <th style="padding:10px 8px; text-align:right;">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="teacherPayrollBody">
+              <!-- Satırlar JavaScript ile dinamik render edilecek -->
+            </tbody>
+          </table>
+        </div>
+        <p class="msg" id="payrollMsg" role="alert" style="margin-top:12px;"></p>
+      </div>
+
+      <!-- 1. Hakediş Düzenleme Modalı -->
+      <dialog id="payrollEditDialog" style="border:1px solid #cbd5e1; border-radius:12px; padding:24px; max-width:540px; width:95%; box-shadow:0 16px 40px rgba(0,0,0,0.15); background:#fff; margin:auto;">
+        <form id="payrollEditForm" method="dialog">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+            <h3 style="margin:0; font-size:17px; font-weight:700; color:#0f172a;">✏️ Hakediş Düzenle</h3>
+            <button type="button" class="btn" style="background:transparent; border:none; font-size:18px; cursor:pointer;" onclick="$('payrollEditDialog').close()">✕</button>
+          </div>
+
+          <input type="hidden" id="editPayrollId">
+
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; font-weight:600; color:#475569;">Öğretmen:</label>
+            <input type="text" id="editTeacherName" readonly style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #e2e8f0; background:#f8fafc; font-weight:600; font-size:13px;">
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:12px; font-weight:600; color:#475569;">Vergi Statüsü:</label>
+              <select id="editTaxType" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px; background:#fff;">
+                <option value="bireysel">Bireysel (%20 Stopaj)</option>
+                <option value="sahis_sirketi">Şahıs Şirketi (Faturalı)</option>
+                <option value="limited_sirket">Limited/A.Ş. (Faturalı)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px; font-weight:600; color:#475569;">Stopaj Oranı (%):</label>
+              <input type="number" id="editWithholdingRate" min="0" max="100" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px;">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px;">
+            <div>
+              <label style="font-size:12px; font-weight:600; color:#475569;">Ders Saati:</label>
+              <input type="number" id="editLiveHours" min="0" step="0.5" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px;">
+            </div>
+            <div>
+              <label style="font-size:12px; font-weight:600; color:#475569;">Saat Ücreti (₺):</label>
+              <input type="number" id="editHourlyRate" min="0" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px;">
+            </div>
+            <div>
+              <label style="font-size:12px; font-weight:600; color:#475569;">İçerik Primi (₺):</label>
+              <input type="number" id="editContentBonus" min="0" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px;">
+            </div>
+          </div>
+
+          <!-- Canlı Önizleme Kutusu -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; margin-bottom:12px; font-size:13px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span style="color:#64748b;">Hesaplanan Brüt:</span>
+              <strong id="previewGross" style="color:#0f172a;">₺0</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span style="color:#b91c1c;">Stopaj Kesintisi:</span>
+              <strong id="previewWithholding" style="color:#b91c1c;">₺0</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-top:1px dashed #cbd5e1; padding-top:4px;">
+              <span style="color:#047857; font-weight:700;">Net Ödenecek:</span>
+              <strong id="previewNet" style="color:#047857; font-size:15px;">₺0</strong>
+            </div>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; font-weight:600; color:#475569;">Havale Açıklaması:</label>
+            <input type="text" id="editDescription" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px;">
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:#475569;">Yönetici Notu:</label>
+            <textarea id="editNotes" rows="2" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px;" placeholder="Opsiyonel muhasebe notu..."></textarea>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button type="button" class="btn" onclick="$('payrollEditDialog').close()" style="padding:8px 14px; border-radius:6px;">Vazgeç</button>
+            <button type="button" id="btnSavePayrollEdit" class="btn" style="background:#0284c7; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-weight:600;">Değişiklikleri Kaydet</button>
+          </div>
+        </form>
+      </dialog>
+
+      <!-- 2. Dekont Yükleme Modalı (Kural 4) -->
+      <dialog id="payrollReceiptDialog" style="border:1px solid #cbd5e1; border-radius:12px; padding:24px; max-width:480px; width:95%; box-shadow:0 16px 40px rgba(0,0,0,0.15); background:#fff; margin:auto;">
+        <form id="payrollReceiptForm" method="dialog">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+            <h3 style="margin:0; font-size:17px; font-weight:700; color:#0f172a;">📄 Banka Dekontu Yükle</h3>
+            <button type="button" class="btn" style="background:transparent; border:none; font-size:18px; cursor:pointer;" onclick="$('payrollReceiptDialog').close()">✕</button>
+          </div>
+
+          <input type="hidden" id="receiptPayrollId">
+
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px; margin-bottom:14px;">
+            <div style="font-size:13px; font-weight:700; color:#166534;" id="receiptTeacherInfo">Öğretmen Adı</div>
+            <div style="font-size:12px; color:#15803d; margin-top:2px;" id="receiptBankInfo">IBAN: TR...</div>
+            <div style="font-size:14px; font-weight:800; color:#166534; margin-top:4px;" id="receiptAmountInfo">Ödenen Tutar: ₺0</div>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <label style="font-size:12px; font-weight:600; color:#475569; display:block; margin-bottom:6px;">Dekont Dosyası (PDF veya Resim):</label>
+            <input type="file" id="receiptFileInput" accept=".pdf,.png,.jpg,.jpeg,.webp" style="width:100%; padding:8px; border:1px dashed #0284c7; border-radius:6px; background:#f8fafc; font-size:13px;">
+            <span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">Maksimum dosya boyutu: 10 MB (PDF, PNG, JPG)</span>
+          </div>
+
+          <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px; margin-bottom:16px; font-size:12px; color:#1e40af;">
+            ℹ️ Dekont yüklendiğinde hakediş durumu <strong>"Ödendi" olarak kilitlenir</strong> ve öğretmenin paneline anında bildirim gönderilir.
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:8px;">
+            <button type="button" class="btn" onclick="$('payrollReceiptDialog').close()" style="padding:8px 14px; border-radius:6px;">Vazgeç</button>
+            <button type="button" id="btnUploadReceiptSubmit" class="btn" style="background:#10b981; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-weight:600;">Dekontu Yükle ve Kilitle</button>
+          </div>
+        </form>
+      </dialog>
+
+      <!-- 3. Audit Log Geçmişi Modalı (Kural 3) -->
+      <dialog id="payrollLogsDialog" style="border:1px solid #cbd5e1; border-radius:12px; padding:24px; max-width:700px; width:95%; box-shadow:0 16px 40px rgba(0,0,0,0.15); background:#fff; margin:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+          <h3 style="margin:0; font-size:17px; font-weight:700; color:#0f172a;">📋 Hakediş İşlem Kayıtları (Audit Log)</h3>
+          <button type="button" class="btn" style="background:transparent; border:none; font-size:18px; cursor:pointer;" onclick="$('payrollLogsDialog').close()">✕</button>
+        </div>
+
+        <div style="max-height:400px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;">
+          <table style="width:100%; border-collapse:collapse; font-size:12px;">
+            <thead>
+              <tr style="background:#f8fafc; border-bottom:1px solid #cbd5e1; text-align:left; color:#475569;">
+                <th style="padding:8px 10px;">Tarih</th>
+                <th style="padding:8px 10px;">Yönetici</th>
+                <th style="padding:8px 10px;">İşlem</th>
+                <th style="padding:8px 10px;">Detay</th>
+              </tr>
+            </thead>
+            <tbody id="payrollLogsBody">
+              <!-- Log kayıtları dinamik eklenecek -->
+            </tbody>
+          </table>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+          <button type="button" class="btn" onclick="$('payrollLogsDialog').close()" style="padding:8px 16px; border-radius:6px;">Kapat</button>
+        </div>
+      </dialog>
     </section>
 
     <!-- 5. TESTLER VE QUİZLER -->
@@ -1741,6 +2009,7 @@
         users: loadUsers,
         'teacher-applications': loadTeacherApplications,
         payments: loadPayments,
+        'teacher-payroll': loadTeacherPayroll,
         announcements: loadAnnouncements,
         faqs: loadFaqs,
         settings: loadVisitorSettings,
@@ -3445,6 +3714,619 @@
           alert('Hata: ' + e.message);
         }
       };
+
+      // ==========================================
+      // ÖĞRETMEN MAAŞ VE HAKEDİŞ MASASI (YÖNTEM A)
+      // ==========================================
+
+      let currentPayrollData = [];
+      let currentPayrollPeriods = [];
+      let selectedPayrollIds = new Set();
+      let payrollSearchTimeout = null;
+
+      async function loadTeacherPayroll() {
+        const msg = $('payrollMsg');
+        if (msg) msg.textContent = '';
+        const tbody = $('teacherPayrollBody');
+        if (!tbody) return;
+
+        try {
+          const periodSelect = $('payrollPeriodSelect');
+          const statusSelect = $('payrollStatusSelect');
+          const searchInput = $('payrollSearchInput');
+
+          const period = periodSelect?.value || '';
+          const status = statusSelect?.value || 'all';
+          const search = searchInput?.value || '';
+
+          const params = new URLSearchParams();
+          if (period) params.set('period', period);
+          if (status && status !== 'all') params.set('status', status);
+          if (search) params.set('search', search);
+
+          tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding:24px; color:#64748b;">Hakediş kayıtları alınıyor...</td></tr>';
+
+          const res = await fetch(`/api/admin/teacher-payouts?${params}`, {
+            credentials: 'same-origin',
+            cache: 'no-store'
+          });
+
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.mesaj || 'Hakediş kayıtları alınamadı: ' + res.status);
+          }
+
+          const data = await res.json();
+          currentPayrollData = data.payouts || [];
+          selectedPayrollIds.clear();
+          updatePayrollBatchUI();
+
+          // Dönem seçim listesini ilk seferde doldur
+          if (periodSelect && (!periodSelect.options.length || periodSelect.options.length <= 1)) {
+            currentPayrollPeriods = data.periods || [];
+            periodSelect.innerHTML = currentPayrollPeriods.map(p =>
+              `<option value="${p.period}" ${p.period === data.currentPeriod ? 'selected' : ''}>${p.label} (${p.period})</option>`
+            ).join('');
+          }
+
+          if ($('payrollPeriodBadge')) {
+            $('payrollPeriodBadge').textContent = data.periodLabel || 'Cari Dönem';
+          }
+
+          // Finansal KPI kartlarını güncelle
+          const sum = data.summary || {};
+          if ($('kpiTotalGross')) $('kpiTotalGross').textContent = `₺${Number(sum.totalGross || 0).toLocaleString('tr-TR')}`;
+          if ($('kpiTotalTeachers')) $('kpiTotalTeachers').textContent = `${sum.totalTeachers || 0} öğretmen`;
+          if ($('kpiTotalWithholding')) $('kpiTotalWithholding').textContent = `₺${Number(sum.totalWithholding || 0).toLocaleString('tr-TR')}`;
+          if ($('kpiTotalNet')) $('kpiTotalNet').textContent = `₺${Number(sum.totalNet || 0).toLocaleString('tr-TR')}`;
+          if ($('kpiPendingAmount')) $('kpiPendingAmount').textContent = `₺${Number(sum.pendingAmount || 0).toLocaleString('tr-TR')}`;
+          if ($('kpiPendingCount')) $('kpiPendingCount').textContent = `${sum.pendingCount || 0} kayıt onay bekliyor`;
+          if ($('kpiPaidAmount')) $('kpiPaidAmount').textContent = `₺${Number(sum.paidAmount || 0).toLocaleString('tr-TR')}`;
+          if ($('kpiPaidCount')) $('kpiPaidCount').textContent = `${sum.paidCount || 0} öğretmen ödendi`;
+          if ($('kpiInvoicePending')) $('kpiInvoicePending').textContent = `${sum.invoicePendingCount || 0} / ${sum.corporateCount || 0}`;
+
+          // Rozet güncelle
+          const badge = $('teacherPayrollBadge');
+          if (badge) {
+            if (sum.pendingCount > 0) {
+              badge.textContent = sum.pendingCount;
+              badge.style.display = 'inline-block';
+            } else {
+              badge.style.display = 'none';
+            }
+          }
+
+          // Tabloyu render et
+          renderTeacherPayrollTable(currentPayrollData);
+
+        } catch (err) {
+          console.error('loadTeacherPayroll error:', err);
+          if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:24px; color:#dc2626;">Hata: ${esc(err.message)}</td></tr>`;
+          }
+        }
+      }
+
+      function renderTeacherPayrollTable(items) {
+        const tbody = $('teacherPayrollBody');
+        if (!tbody) return;
+
+        if (!items || items.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="12" style="text-align:center; padding:32px 16px; color:#64748b;">
+                <div style="font-size:24px; margin-bottom:8px;">📭</div>
+                <div style="font-weight:600; font-size:14px; color:#334155;">Bu döneme ait hakediş kaydı bulunamadı.</div>
+                <div style="font-size:12px; color:#94a3b8; margin-top:4px;">Yukarıdaki "⚡ Dönem Hakedişlerini Hesapla" butonuna tıklayarak öğretmenlerin hakedişlerini otomatik oluşturabilirsiniz.</div>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = items.map(p => {
+          const isSelected = selectedPayrollIds.has(p._id);
+          const isPaid = p.status === 'odendi';
+          const isApproved = p.status === 'onaylandi';
+          const isCorporate = p.taxType === 'sahis_sirketi' || p.taxType === 'limited_sirket';
+
+          // Vergi Rozeti
+          let taxBadge = `<span style="background:#e0f2fe; color:#0369a1; font-size:11px; font-weight:600; padding:2px 8px; border-radius:6px;">Bireysel (%${p.withholdingRate || 20} Stopaj)</span>`;
+          if (p.taxType === 'sahis_sirketi') {
+            taxBadge = `<span style="background:#fef3c7; color:#92400e; font-size:11px; font-weight:600; padding:2px 8px; border-radius:6px;">Şahıs Şirketi</span>`;
+          } else if (p.taxType === 'limited_sirket') {
+            taxBadge = `<span style="background:#f3e8ff; color:#7e22ce; font-size:11px; font-weight:600; padding:2px 8px; border-radius:6px;">Limited/A.Ş.</span>`;
+          }
+
+          // Fatura Rozeti (Kural 1)
+          let invoiceHtml = `<span style="color:#94a3b8; font-size:11px;">Muaf</span>`;
+          if (isCorporate) {
+            if (p.invoiceUrl) {
+              invoiceHtml = `
+                <a href="${esc(p.invoiceUrl)}" target="_blank" style="background:#dcfce7; color:#15803d; font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px; text-decoration:none; display:inline-flex; align-items:center; gap:3px;">
+                  📄 Fatura Gör
+                </a>
+              `;
+            } else {
+              invoiceHtml = `<span style="background:#fee2e2; color:#b91c1c; font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px;">⚠️ Bekleniyor</span>`;
+            }
+          }
+
+          // Durum Rozeti (Kural 3)
+          let statusBadge = `<span style="background:#fef3c7; color:#b45309; font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px;">Bekliyor</span>`;
+          if (isPaid) {
+            statusBadge = `<span style="background:#dcfce7; color:#15803d; font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">✓ Ödendi 🔒</span>`;
+          } else if (isApproved) {
+            statusBadge = `<span style="background:#e0f2fe; color:#0284c7; font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px;">Onaylandı</span>`;
+          }
+
+          // Dekont (Kural 4)
+          let receiptHtml = '';
+          if (p.receiptUrl) {
+            receiptHtml = `
+              <a href="${esc(p.receiptUrl)}" target="_blank" class="btn" style="background:#10b981; color:#fff; border:none; padding:3px 8px; font-size:11px; font-weight:600; border-radius:4px; text-decoration:none; display:inline-flex; align-items:center; gap:2px;">
+                📄 Dekont
+              </a>
+            `;
+          } else {
+            receiptHtml = `
+              <button type="button" class="btn" onclick="openPayrollReceiptModal('${p._id}', '${esc(p.teacherName)}', '${esc(p.iban)}', ${p.netAmount})" style="background:#f1f5f9; border:1px solid #cbd5e1; padding:3px 8px; font-size:11px; border-radius:4px; cursor:pointer;">
+                📤 Yükle
+              </button>
+            `;
+          }
+
+          // IBAN formatlama ve tek tık kopyalama
+          const ibanStr = p.iban || 'TR00...';
+          const safeIban = ibanStr.replace(/\s+/g, '');
+
+          return `
+            <tr style="border-bottom:1px solid #f1f5f9; font-size:12px; ${isPaid ? 'background:#fcfdfd;' : ''}">
+              <td style="padding:10px 8px; text-align:center;">
+                <input type="checkbox" class="payroll-row-check" data-id="${p._id}" ${isSelected ? 'checked' : ''} ${isPaid ? 'disabled title=\"Ödenmiş kayıt seçilemez\"' : ''}>
+              </td>
+              <td style="padding:10px 8px;">
+                <div style="font-weight:700; color:#0f172a; font-size:13px;">${esc(p.teacherName)}</div>
+                <div style="color:#64748b; font-size:11px;">${esc(p.teacherEmail)}</div>
+              </td>
+              <td style="padding:10px 8px;">
+                ${taxBadge}
+              </td>
+              <td style="padding:10px 8px;">
+                <div style="font-weight:600; color:#334155; font-size:11px;">${esc(p.bankName || 'Banka')}</div>
+                <div style="font-family:monospace; color:#475569; font-size:11px; display:flex; align-items:center; gap:4px;">
+                  <span>${esc(ibanStr)}</span>
+                  <button type="button" onclick="navigator.clipboard.writeText('${safeIban}'); alert('IBAN kopyalandı: ${safeIban}')" style="background:none; border:none; cursor:pointer; font-size:11px; padding:0;" title="IBAN Kopyala">📋</button>
+                </div>
+              </td>
+              <td style="padding:10px 8px; text-align:right;">
+                <div style="color:#334155; font-weight:600;">${p.liveHours || 0} Saat</div>
+                <div style="color:#64748b; font-size:11px;">${p.hourlyRate || 450}₺/saat ${p.contentBonus ? `+${p.contentBonus}₺` : ''}</div>
+              </td>
+              <td style="padding:10px 8px; text-align:right; font-weight:600; color:#0f172a;">
+                ₺${Number(p.grossAmount || 0).toLocaleString('tr-TR')}
+              </td>
+              <td style="padding:10px 8px; text-align:right; font-weight:600; color:${p.withholdingAmount > 0 ? '#b91c1c' : '#94a3b8'};">
+                ${p.withholdingAmount > 0 ? `-₺${Number(p.withholdingAmount).toLocaleString('tr-TR')}` : '₺0'}
+              </td>
+              <td style="padding:10px 8px; text-align:right;">
+                <strong style="color:#047857; font-size:14px; font-weight:800;">₺${Number(p.netAmount || 0).toLocaleString('tr-TR')}</strong>
+              </td>
+              <td style="padding:10px 8px; text-align:center;">
+                ${invoiceHtml}
+              </td>
+              <td style="padding:10px 8px; text-align:center;">
+                ${statusBadge}
+              </td>
+              <td style="padding:10px 8px; text-align:center;">
+                ${receiptHtml}
+              </td>
+              <td style="padding:10px 8px; text-align:right;">
+                <div style="display:flex; justify-content:flex-end; gap:4px; flex-wrap:wrap;">
+                  ${!isPaid ? `
+                    <button type="button" class="btn" onclick="openPayrollEditModal('${p._id}')" style="padding:4px 8px; font-size:11px; border-radius:4px; background:#f8fafc; border:1px solid #cbd5e1;" title="Hakediş Düzenle">
+                      ✏️
+                    </button>
+                    ${!isApproved ? `
+                      <button type="button" class="btn" onclick="handleApprovePayoutSingle('${p._id}', '${esc(p.teacherName)}', ${p.netAmount})" style="padding:4px 8px; font-size:11px; border-radius:4px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-weight:600;" title="Hakedişi Onayla">
+                        ✓ Onayla
+                      </button>
+                    ` : ''}
+                    <button type="button" class="btn" onclick="handlePayPayoutSingle('${p._id}', '${esc(p.teacherName)}', ${p.netAmount})" style="padding:4px 8px; font-size:11px; border-radius:4px; background:#10b981; color:#fff; border:none; font-weight:600;" title="Ödendi Yap ve Kilitle">
+                      💰 Öde
+                    </button>
+                  ` : `
+                    <span style="font-size:11px; color:#94a3b8; padding:4px 6px;">Kilitli 🔒</span>
+                  `}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        // Checkbox olaylarını bağla
+        tbody.querySelectorAll('.payroll-row-check').forEach(chk => {
+          chk.addEventListener('change', (e) => {
+            const id = e.target.dataset.id;
+            if (e.target.checked) selectedPayrollIds.add(id);
+            else selectedPayrollIds.delete(id);
+            updatePayrollBatchUI();
+          });
+        });
+      }
+
+      function updatePayrollBatchUI() {
+        const count = selectedPayrollIds.size;
+        const textEl = $('selectedCountText');
+        const btnApprove = $('btnBatchApprove');
+        const btnPay = $('btnBatchPay');
+        if (textEl) textEl.textContent = `${count} seçildi`;
+        if (btnApprove) btnApprove.disabled = count === 0;
+        if (btnPay) btnPay.disabled = count === 0;
+
+        const selectAll = $('payrollSelectAll');
+        if (selectAll) {
+          const selectable = currentPayrollData.filter(p => p.status !== 'odendi');
+          selectAll.checked = selectable.length > 0 && selectedPayrollIds.size === selectable.length;
+        }
+      }
+
+      // 1. Düzenleme Modalı Aç
+      window.openPayrollEditModal = function(id) {
+        const item = currentPayrollData.find(p => p._id === id);
+        if (!item) return alert('Kayıt bulunamadı.');
+
+        if (item.isLocked) {
+          return alert('Bu hakediş ödenmiş ve kilitlenmiştir. Düzenlenemez!');
+        }
+
+        $('editPayrollId').value = item._id;
+        $('editTeacherName').value = item.teacherName || '';
+        $('editTaxType').value = item.taxType || 'bireysel';
+        $('editWithholdingRate').value = item.withholdingRate !== undefined ? item.withholdingRate : 20;
+        $('editLiveHours').value = item.liveHours || 0;
+        $('editHourlyRate').value = item.hourlyRate || 450;
+        $('editContentBonus').value = item.contentBonus || 0;
+        $('editDescription').value = item.description || '';
+        $('editNotes').value = item.notes || '';
+
+        updatePayrollEditPreview();
+        $('payrollEditDialog').showModal();
+      };
+
+      function updatePayrollEditPreview() {
+        const hours = parseFloat($('editLiveHours').value) || 0;
+        const rate = parseFloat($('editHourlyRate').value) || 0;
+        const bonus = parseFloat($('editContentBonus').value) || 0;
+        const taxType = $('editTaxType').value;
+        const withRateInput = $('editWithholdingRate');
+
+        const gross = Math.round((hours * rate) + bonus);
+        let withRate = 0;
+        let withAmount = 0;
+        let net = gross;
+
+        if (taxType === 'bireysel') {
+          withRate = parseFloat(withRateInput.value) || 20;
+          withRateInput.disabled = false;
+          withAmount = Math.round((gross * withRate) / 100);
+          net = gross - withAmount;
+        } else {
+          withRate = 0;
+          withRateInput.value = 0;
+          withRateInput.disabled = true;
+          withAmount = 0;
+          net = gross;
+        }
+
+        $('previewGross').textContent = `₺${gross.toLocaleString('tr-TR')}`;
+        $('previewWithholding').textContent = `₺${withAmount.toLocaleString('tr-TR')} (%${withRate})`;
+        $('previewNet').textContent = `₺${net.toLocaleString('tr-TR')}`;
+      }
+
+      // Düzenleme inputlarında canlı önizleme dinleyicileri
+      ['editLiveHours', 'editHourlyRate', 'editContentBonus', 'editWithholdingRate', 'editTaxType'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updatePayrollEditPreview);
+        if (el) el.addEventListener('change', updatePayrollEditPreview);
+      });
+
+      // Düzenleme Kaydet
+      const btnSaveEdit = document.getElementById('btnSavePayrollEdit');
+      if (btnSaveEdit) {
+        btnSaveEdit.addEventListener('click', async () => {
+          const id = $('editPayrollId').value;
+          if (!id) return;
+
+          try {
+            const body = {
+              taxType: $('editTaxType').value,
+              withholdingRate: parseFloat($('editWithholdingRate').value) || 0,
+              liveHours: parseFloat($('editLiveHours').value) || 0,
+              hourlyRate: parseFloat($('editHourlyRate').value) || 0,
+              contentBonus: parseFloat($('editContentBonus').value) || 0,
+              description: $('editDescription').value.trim(),
+              notes: $('editNotes').value.trim()
+            };
+
+            const res = await fetch(`/api/admin/teacher-payouts/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify(body)
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.mesaj || 'Güncellenemedi');
+
+            alert('✅ Hakediş başarıyla güncellendi.');
+            $('payrollEditDialog').close();
+            loadTeacherPayroll();
+          } catch (e) {
+            alert('Hata: ' + e.message);
+          }
+        });
+      }
+
+      // 2. Dekont Yükleme Modalı Aç (Kural 4)
+      window.openPayrollReceiptModal = function(id, teacherName, iban, netAmount) {
+        $('receiptPayrollId').value = id;
+        $('receiptTeacherInfo').textContent = `Öğretmen: ${teacherName}`;
+        $('receiptBankInfo').textContent = `IBAN: ${iban}`;
+        $('receiptAmountInfo').textContent = `Net Havale Tutarı: ₺${Number(netAmount || 0).toLocaleString('tr-TR')}`;
+        $('receiptFileInput').value = '';
+        $('payrollReceiptDialog').showModal();
+      };
+
+      // Dekont Yükle & Kilitle Submit
+      const btnUploadReceipt = document.getElementById('btnUploadReceiptSubmit');
+      if (btnUploadReceipt) {
+        btnUploadReceipt.addEventListener('click', async () => {
+          const id = $('receiptPayrollId').value;
+          const fileInput = $('receiptFileInput');
+          if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+            return alert('Lütfen dekont dosyasını (PDF, PNG veya JPG) seçin.');
+          }
+
+          const file = fileInput.files[0];
+          const formData = new FormData();
+          formData.append('receipt', file);
+
+          try {
+            btnUploadReceipt.disabled = true;
+            btnUploadReceipt.textContent = 'Yükleniyor...';
+
+            const res = await fetch(`/api/admin/teacher-payouts/${id}/receipt`, {
+              method: 'POST',
+              credentials: 'same-origin',
+              body: formData
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.mesaj || 'Dekont yüklenemedi');
+
+            alert('✅ Dekont başarıyla yüklendi, ödeme "Ödendi" olarak kilitlendi ve öğretmene bildirim gönderildi.');
+            $('payrollReceiptDialog').close();
+            loadTeacherPayroll();
+          } catch (e) {
+            alert('Hata: ' + e.message);
+          } finally {
+            btnUploadReceipt.disabled = false;
+            btnUploadReceipt.textContent = 'Dekontu Yükle ve Kilitle';
+          }
+        });
+      }
+
+      // 3. Tekil Onayla
+      window.handleApprovePayoutSingle = async function(id, teacherName, netAmount) {
+        if (!confirm(`"${teacherName}" hakedişini (₺${Number(netAmount).toLocaleString('tr-TR')}) onaylamak istediğinize emin misiniz?`)) return;
+
+        try {
+          const res = await fetch(`/api/admin/teacher-payouts/${id}/approve`, {
+            method: 'POST',
+            credentials: 'same-origin'
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mesaj || 'Onaylanamadı');
+          loadTeacherPayroll();
+        } catch (e) {
+          alert('Hata: ' + e.message);
+        }
+      };
+
+      // 4. Tekil Ödendi Yap & Kilitle (Kural 3)
+      window.handlePayPayoutSingle = async function(id, teacherName, netAmount) {
+        if (!confirm(`"${teacherName}" hakedişini "Ödendi" olarak işaretleyip kilitlemek istiyor musunuz?\n\nTutarlar kilitlenecek ve değiştirilemeyecektir.`)) return;
+
+        try {
+          const res = await fetch(`/api/admin/teacher-payouts/${id}/pay`, {
+            method: 'POST',
+            credentials: 'same-origin'
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mesaj || 'Ödeme kaydedilemedi');
+          alert('✅ Ödeme kaydedildi, kilitlendi ve öğretmene bildirim gönderildi.');
+          loadTeacherPayroll();
+        } catch (e) {
+          alert('Hata: ' + e.message);
+        }
+      };
+
+      // 5. Dönem Hakedişlerini Hesapla Butonu
+      const btnCalculate = document.getElementById('btnCalculatePayroll');
+      if (btnCalculate) {
+        btnCalculate.addEventListener('click', async () => {
+          const periodSelect = $('payrollPeriodSelect');
+          const period = periodSelect?.value || new Date().toISOString().slice(0, 7);
+
+          if (!confirm(`${period} dönemi için sistemdeki öğretmenlerin ders saatlerini ve hakedişlerini otomatik hesaplamak istiyor musunuz?`)) return;
+
+          try {
+            btnCalculate.disabled = true;
+            btnCalculate.textContent = 'Hesaplanıyor...';
+
+            const res = await fetch('/api/admin/teacher-payouts/calculate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ period, forceRecalculate: false })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.mesaj || 'Hesaplama başarısız');
+
+            alert('✅ ' + data.mesaj);
+            loadTeacherPayroll();
+          } catch (e) {
+            alert('Hata: ' + e.message);
+          } finally {
+            btnCalculate.disabled = false;
+            btnCalculate.textContent = '⚡ Dönem Hakedişlerini Hesapla';
+          }
+        });
+      }
+
+      // 6. Toplu Banka Excel/CSV İndir (Kural 2)
+      const btnExport = document.getElementById('btnExportEft');
+      if (btnExport) {
+        btnExport.addEventListener('click', () => {
+          const period = $('payrollPeriodSelect')?.value || '';
+          const ids = Array.from(selectedPayrollIds);
+
+          const params = new URLSearchParams();
+          if (period) params.set('period', period);
+          if (ids.length > 0) params.set('ids', ids.join(','));
+
+          // Doğrudan tarayıcıya dosya indirme tetikle
+          window.location.href = `/api/admin/teacher-payouts/export-eft?${params.toString()}`;
+        });
+      }
+
+      // 7. Toplu Onay ve Toplu Ödeme
+      const btnBatchApproveEl = document.getElementById('btnBatchApprove');
+      if (btnBatchApproveEl) {
+        btnBatchApproveEl.addEventListener('click', async () => {
+          const ids = Array.from(selectedPayrollIds);
+          if (ids.length === 0) return;
+          if (!confirm(`Seçili ${ids.length} öğretmenin hakedişini toplu onaylamak istediğinize emin misiniz?`)) return;
+
+          try {
+            const res = await fetch('/api/admin/teacher-payouts/batch-action', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ action: 'approve', ids })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.mesaj || 'Toplu onaylama başarısız');
+            alert('✅ ' + data.mesaj);
+            loadTeacherPayroll();
+          } catch (e) {
+            alert('Hata: ' + e.message);
+          }
+        });
+      }
+
+      const btnBatchPayEl = document.getElementById('btnBatchPay');
+      if (btnBatchPayEl) {
+        btnBatchPayEl.addEventListener('click', async () => {
+          const ids = Array.from(selectedPayrollIds);
+          if (ids.length === 0) return;
+          if (!confirm(`Seçili ${ids.length} öğretmenin hakedişini "Ödendi" olarak işaretleyip kilitlemek istediğinize emin misiniz?`)) return;
+
+          try {
+            const res = await fetch('/api/admin/teacher-payouts/batch-action', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ action: 'pay', ids })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.mesaj || 'Toplu ödeme başarısız');
+            alert('✅ ' + data.mesaj);
+            loadTeacherPayroll();
+          } catch (e) {
+            alert('Hata: ' + e.message);
+          }
+        });
+      }
+
+      // 8. Audit Log Geçmişi Görüntüleme (Kural 3)
+      const btnViewLogs = document.getElementById('btnViewPayrollLogs');
+      if (btnViewLogs) {
+        btnViewLogs.addEventListener('click', async () => {
+          const tbody = $('payrollLogsBody');
+          if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:16px;">Loglar yükleniyor...</td></tr>';
+          $('payrollLogsDialog').showModal();
+
+          try {
+            const res = await fetch('/api/admin/teacher-payouts/audit-logs', {
+              credentials: 'same-origin',
+              cache: 'no-store'
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.mesaj || 'Loglar alınamadı');
+
+            const logs = data.logs || [];
+            if (logs.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#64748b;">Henüz işlem kaydı bulunmamaktadır.</td></tr>';
+              return;
+            }
+
+            tbody.innerHTML = logs.map(l => {
+              let actionBadge = `<span style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${esc(l.action)}</span>`;
+              if (l.action.includes('approved')) actionBadge = `<span style="background:#e0f2fe; color:#0369a1; font-weight:700; padding:2px 6px; border-radius:4px;">✓ Onay</span>`;
+              if (l.action.includes('paid')) actionBadge = `<span style="background:#dcfce7; color:#15803d; font-weight:700; padding:2px 6px; border-radius:4px;">💰 Ödeme</span>`;
+              if (l.action.includes('receipt')) actionBadge = `<span style="background:#ecfdf5; color:#059669; font-weight:700; padding:2px 6px; border-radius:4px;">📄 Dekont</span>`;
+              if (l.action.includes('calculated')) actionBadge = `<span style="background:#fef3c7; color:#b45309; font-weight:700; padding:2px 6px; border-radius:4px;">⚡ Hesaplama</span>`;
+
+              const det = l.details || {};
+              const detText = `${det.teacherName || ''} ${det.netAmount ? `(₺${Number(det.netAmount).toLocaleString('tr-TR')})` : ''} ${det.period || ''} ${det.count ? `${det.count} öğretmen` : ''}`.trim() || JSON.stringify(det);
+
+              return `
+                <tr style="border-bottom:1px solid #f1f5f9;">
+                  <td style="padding:8px 10px; color:#64748b; white-space:nowrap;">${fmtDate(l.createdAt)}</td>
+                  <td style="padding:8px 10px; font-weight:600; color:#334155;">${esc(l.actorName || 'Admin')}</td>
+                  <td style="padding:8px 10px;">${actionBadge}</td>
+                  <td style="padding:8px 10px; color:#475569;">${esc(detText)}</td>
+                </tr>
+              `;
+            }).join('');
+          } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:16px; color:#dc2626;">Hata: ${esc(e.message)}</td></tr>`;
+          }
+        });
+      }
+
+      // 9. Filtre ve Arama Dinleyicileri
+      const periodSel = document.getElementById('payrollPeriodSelect');
+      if (periodSel) periodSel.addEventListener('change', () => loadTeacherPayroll());
+
+      const statusSel = document.getElementById('payrollStatusSelect');
+      if (statusSel) statusSel.addEventListener('change', () => loadTeacherPayroll());
+
+      const searchInp = document.getElementById('payrollSearchInput');
+      if (searchInp) {
+        searchInp.addEventListener('input', () => {
+          clearTimeout(payrollSearchTimeout);
+          payrollSearchTimeout = setTimeout(() => loadTeacherPayroll(), 300);
+        });
+      }
+
+      const selectAllBox = document.getElementById('payrollSelectAll');
+      if (selectAllBox) {
+        selectAllBox.addEventListener('change', (e) => {
+          const checked = e.target.checked;
+          selectedPayrollIds.clear();
+          if (checked) {
+            currentPayrollData.forEach(p => {
+              if (p.status !== 'odendi') selectedPayrollIds.add(p._id);
+            });
+          }
+          renderTeacherPayrollTable(currentPayrollData);
+          updatePayrollBatchUI();
+        });
+      }
 
       // ==========================================
       // AI DENETİM & KOTA YÖNETİMİ SCRIPTLERİ

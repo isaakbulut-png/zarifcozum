@@ -14,6 +14,7 @@ const cors = require('cors');
 const { rateLimit } = require('express-rate-limit');
 const { createClient } = require('redis');
 const crypto = require('crypto');
+const multer = require('multer');
 const { MongoClient, ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 const session = require('express-session');
@@ -45,6 +46,7 @@ const { adminRoleOf } = require('./lib/admin-rbac');
 const User = require('./models/User');
 const Parent = require('./models/Parent');
 const Payment = require('./models/Payment');
+const TeacherPayout = require('./models/TeacherPayout');
 const SystemConfig = require('./models/SystemConfig');
 const ChatMessage = require('./models/ChatMessage');
 const LessonAttendance = require('./models/LessonAttendance');
@@ -1216,6 +1218,237 @@ app.delete('/api/ogretmen/sonuc/:id', ogretmenKontrol, async (req, res) => {
     res.json({ mesaj: 'Silindi' });
   } catch (err) {
     res.status(500).json({ mesaj: err.message });
+  }
+});
+
+// ---------- Öğretmen Finans, Hakediş ve Profil Ayarları API ----------
+
+const teacherInvoicesDir = path.join(__dirname, 'uploads', 'teacher-invoices');
+try {
+  if (!fs.existsSync(teacherInvoicesDir)) {
+    fs.mkdirSync(teacherInvoicesDir, { recursive: true });
+  }
+} catch (e) {
+  console.warn('[Server] teacherInvoicesDir oluşturulamadı:', e.message);
+}
+
+const teacherInvoiceStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, teacherInvoicesDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `fatura-${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext}`);
+  }
+});
+
+const teacherInvoiceUpload = multer({
+  storage: teacherInvoiceStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!['.pdf', '.png', '.jpg', '.jpeg', '.webp'].includes(ext)) {
+      return cb(new Error('Yalnızca PDF veya resim (PNG, JPG) formatında fatura yüklenebilir.'));
+    }
+    cb(null, true);
+  }
+});
+
+// 1. Öğretmenin Kendi Hakediş & Ödeme Geçmişi (Kural 4)
+app.get('/api/ogretmen/hakedisler', ogretmenKontrol, async (req, res) => {
+  try {
+    const teacherId = req.session.user._id;
+    const payouts = await TeacherPayout.find({ teacherId })
+      .sort({ period: -1 })
+      .lean();
+
+    res.json({
+      basarili: true,
+      payouts: payouts.map(p => ({
+        id: p._id.toString(),
+        period: p.period,
+        periodLabel: p.periodLabel,
+        grossAmount: p.grossAmount,
+        withholdingRate: p.withholdingRate,
+        withholdingAmount: p.withholdingAmount,
+        netAmount: p.netAmount,
+        taxType: p.taxType,
+        bankName: p.bankName,
+        iban: p.iban,
+        status: p.status,
+        receiptUrl: p.receiptUrl,
+        receiptFileName: p.receiptFileName,
+        paidAt: p.paidAt,
+        invoiceStatus: p.invoiceStatus,
+        invoiceUrl: p.invoiceUrl,
+        invoiceNo: p.invoiceNo,
+        description: p.description,
+        notes: p.notes
+      }))
+    });
+  } catch (err) {
+    console.error('Öğretmen hakediş geçmişi hatası:', err);
+    res.status(500).json({ mesaj: 'Hakediş geçmişi alınamadı: ' + err.message });
+  }
+});
+
+// 2. Şirket Öğretmenleri İçin Fatura Yükleme (Kural 1)
+app.post('/api/ogretmen/fatura-yukle', ogretmenKontrol, teacherInvoiceUpload.single('invoice'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ mesaj: 'Fatura dosyası seçilmedi.' });
+    }
+
+    const { payoutId, invoiceNo } = req.body;
+    if (!payoutId) {
+      return res.status(400).json({ mesaj: 'Hakediş dönemi (payoutId) belirtilmedi.' });
+    }
+
+    const payout = await TeacherPayout.findOne({
+      _id: payoutId,
+      teacherId: req.session.user._id
+    });
+
+    if (!payout) {
+      return res.status(404).json({ mesaj: 'İlgili hakediş kaydı bulunamadı.' });
+    }
+
+    payout.invoiceUrl = `/uploads/teacher-invoices/${req.file.filename}`;
+    payout.invoiceStatus = 'yuklendi';
+    if (invoiceNo) payout.invoiceNo = invoiceNo.trim();
+    payout.invoiceDate = new Date();
+
+    await payout.save();
+
+    res.json({
+      basarili: true,
+      mesaj: 'Faturanız başarıyla yüklendi ve onay için muhasebeye iletildi.',
+      invoiceUrl: payout.invoiceUrl,
+      invoiceStatus: payout.invoiceStatus
+    });
+  } catch (err) {
+    console.error('Fatura yükleme hatası:', err);
+    res.status(500).json({ mesaj: 'Fatura yüklenemedi: ' + err.message });
+  }
+});
+
+// 3. Öğretmen Bildirimleri (Kural 4)
+app.get('/api/ogretmen/bildirimler', ogretmenKontrol, async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user._id)
+      .select('teacherNotifications')
+      .lean();
+
+    const notifications = (user?.teacherNotifications || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    res.json({
+      basarili: true,
+      notifications,
+      unreadCount: notifications.filter(n => !n.read).length
+    });
+  } catch (err) {
+    res.status(500).json({ mesaj: 'Bildirimler alınamadı: ' + err.message });
+  }
+});
+
+// 4. Öğretmen Bildirimi Okundu İşaretle
+app.post('/api/ogretmen/bildirim-okundu', ogretmenKontrol, async (req, res) => {
+  try {
+    const { notificationId } = req.body;
+    if (notificationId) {
+      await User.updateOne(
+        { _id: req.session.user._id, 'teacherNotifications._id': notificationId },
+        { $set: { 'teacherNotifications.$.read': true } }
+      );
+    } else {
+      await User.updateOne(
+        { _id: req.session.user._id },
+        { $set: { 'teacherNotifications.$[].read': true } }
+      );
+    }
+    res.json({ basarili: true });
+  } catch (err) {
+    res.status(500).json({ mesaj: err.message });
+  }
+});
+
+// 5. Öğretmen Profil ve Finans Ayarları Getir
+app.get('/api/ogretmen/profil-ayarlari', ogretmenKontrol, async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user._id)
+      .select('name email phone telefon brans branch graduationInfo verificationDocumentUrl basvuruDurumu ogretmenTipi teacherFinance')
+      .lean();
+
+    if (!user) return res.status(404).json({ mesaj: 'Öğretmen profili bulunamadı.' });
+
+    res.json({
+      basarili: true,
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        phone: user.phone || user.telefon || '',
+        brans: user.branch || user.brans || '',
+        graduationInfo: user.graduationInfo || '',
+        verificationDocumentUrl: user.verificationDocumentUrl || null,
+        basvuruDurumu: user.basvuruDurumu || 'inceleme_suruyor',
+        ogretmenTipi: user.ogretmenTipi || 'standart_ogretmen',
+        teacherFinance: user.teacherFinance || {
+          bankName: '',
+          iban: '',
+          accountHolder: user.name || '',
+          taxType: 'bireysel',
+          taxOffice: '',
+          taxNumber: '',
+          billingAddress: '',
+          hourlyRate: 450
+        }
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ mesaj: 'Profil ayarları alınamadı: ' + err.message });
+  }
+});
+
+// 6. Öğretmen Profil ve Finans Ayarları Kaydet
+app.post('/api/ogretmen/profil-ayarlari', ogretmenKontrol, async (req, res) => {
+  try {
+    const {
+      name, phone, brans, graduationInfo,
+      bankName, iban, accountHolder, taxType, taxOffice, taxNumber, billingAddress
+    } = req.body;
+
+    const user = await User.findById(req.session.user._id);
+    if (!user) return res.status(404).json({ mesaj: 'Kullanıcı bulunamadı.' });
+
+    if (name) user.name = name.trim();
+    if (phone) {
+      user.phone = phone.trim();
+      user.telefon = phone.trim();
+    }
+    if (brans) {
+      user.brans = brans.trim();
+      user.branch = brans.trim();
+    }
+    if (graduationInfo !== undefined) user.graduationInfo = graduationInfo.trim();
+
+    user.teacherFinance = user.teacherFinance || {};
+    if (bankName !== undefined) user.teacherFinance.bankName = bankName.trim();
+    if (iban !== undefined) user.teacherFinance.iban = iban.replace(/\s+/g, '').toUpperCase().trim();
+    if (accountHolder !== undefined) user.teacherFinance.accountHolder = accountHolder.trim();
+    if (taxType && ['bireysel', 'sahis_sirketi', 'limited_sirket'].includes(taxType)) {
+      user.teacherFinance.taxType = taxType;
+    }
+    if (taxOffice !== undefined) user.teacherFinance.taxOffice = taxOffice.trim();
+    if (taxNumber !== undefined) user.teacherFinance.taxNumber = taxNumber.trim();
+    if (billingAddress !== undefined) user.teacherFinance.billingAddress = billingAddress.trim();
+
+    await user.save();
+
+    res.json({
+      basarili: true,
+      mesaj: 'Profil ve hesap ayarlarınız başarıyla kaydedildi.',
+      teacherFinance: user.teacherFinance
+    });
+  } catch (err) {
+    res.status(500).json({ mesaj: 'Ayarlar kaydedilemedi: ' + err.message });
   }
 });
 

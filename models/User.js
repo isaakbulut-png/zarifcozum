@@ -168,6 +168,26 @@ const userSchema = new mongoose.Schema({
     default: 'standart_ogretmen',
     index: true
   },
+  // Öğretmen Finans, Banka ve Vergi Bilgileri
+  teacherFinance: {
+    bankName: { type: String, default: '', trim: true },
+    iban: { type: String, default: '', trim: true },
+    accountHolder: { type: String, default: '', trim: true },
+    taxType: { type: String, enum: ['bireysel', 'sahis_sirketi', 'limited_sirket'], default: 'bireysel' },
+    taxOffice: { type: String, default: '', trim: true },
+    taxNumber: { type: String, default: '', trim: true },
+    billingAddress: { type: String, default: '', trim: true },
+    hourlyRate: { type: Number, default: 450, min: 0 }
+  },
+  teacherNotifications: [{
+    title: { type: String, required: true },
+    message: { type: String, required: true },
+    type: { type: String, default: 'payment' },
+    receiptUrl: { type: String, default: null },
+    payoutId: { type: String, default: null },
+    read: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+  }],
   ozelGunlukSoruLimiti: {
     type: Number,
     default: null

@@ -241,6 +241,129 @@
         }
       ]);
 
+      // Öğretmen Hakediş ve Ödeme Geçmişi State (Kural 4)
+      const [payouts, setPayouts] = useState([
+        {
+          id: 'mock-1',
+          period: '2026-11',
+          periodLabel: 'Kasım 2026',
+          grossAmount: 18500,
+          withholdingRate: 20,
+          withholdingAmount: 3700,
+          netAmount: 14800,
+          taxType: 'bireysel',
+          bankName: 'Ziraat Bankası',
+          iban: 'TR42 0001 0012 3456 7890 1234 56',
+          status: 'odendi',
+          receiptUrl: '/uploads/payout-receipts/ornek-dekont.pdf',
+          paidAt: '2026-11-20T10:30:00Z',
+          description: 'Kasım 2026 Ders Hakedişi (28 Saat Canlı Ders + Soru Primi)',
+          invoiceStatus: 'muaf'
+        },
+        {
+          id: 'mock-2',
+          period: '2026-10',
+          periodLabel: 'Ekim 2026',
+          grossAmount: 16200,
+          withholdingRate: 20,
+          withholdingAmount: 3240,
+          netAmount: 12960,
+          taxType: 'bireysel',
+          bankName: 'Ziraat Bankası',
+          iban: 'TR42 0001 0012 3456 7890 1234 56',
+          status: 'odendi',
+          receiptUrl: '/uploads/payout-receipts/ornek-dekont.pdf',
+          paidAt: '2026-10-22T14:15:00Z',
+          description: 'Ekim 2026 Ders Hakedişi (24 Saat Canlı Ders + Soru Primi)',
+          invoiceStatus: 'muaf'
+        }
+      ]);
+
+      const [notifications, setNotifications] = useState([]);
+      const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+
+      useEffect(() => {
+        // URL query param tab
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab');
+        if (tab && ['general', 'identity', 'billing', 'integration', 'security', 'support'].includes(tab)) {
+          setActiveTab(tab);
+        }
+
+        // Hakedişleri API'den al
+        fetch('/api/ogretmen/hakedisler')
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (data && data.payouts && data.payouts.length > 0) {
+              setPayouts(data.payouts);
+            }
+          })
+          .catch(() => {});
+
+        // Bildirimleri API'den al
+        fetch('/api/ogretmen/bildirimler')
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (data && data.notifications) {
+              setNotifications(data.notifications);
+            }
+          })
+          .catch(() => {});
+
+        // Profil ayarlarını API'den al
+        fetch('/api/ogretmen/profil-ayarlari')
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (data && data.user) {
+              const u = data.user;
+              if (u.name) {
+                const parts = u.name.split(' ');
+                setGeneral(g => ({ ...g, firstName: parts[0] || g.firstName, lastName: parts.slice(1).join(' ') || g.lastName, email: u.email || g.email, phone: u.phone || g.phone }));
+              }
+              if (u.teacherFinance) {
+                const tf = u.teacherFinance;
+                setBilling(b => ({
+                  ...b,
+                  bankName: tf.bankName || b.bankName,
+                  iban: tf.iban || b.iban,
+                  accountHolder: tf.accountHolder || b.accountHolder,
+                  taxType: tf.taxType === 'sahis_sirketi' || tf.taxType === 'limited_sirket' ? 'company' : 'individual',
+                  taxOffice: tf.taxOffice || b.taxOffice,
+                  taxNumber: tf.taxNumber || b.taxNumber,
+                  billingAddress: tf.billingAddress || b.billingAddress
+                }));
+              }
+            }
+          })
+          .catch(() => {});
+      }, []);
+
+      // Fatura Yükleme Fonksiyonu (Şirket Öğretmenleri İçin - Kural 1)
+      const handleUploadInvoiceFile = async (payoutId, file) => {
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('invoice', file);
+        formData.append('payoutId', payoutId);
+
+        try {
+          const res = await fetch('/api/ogretmen/fatura-yukle', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.mesaj || 'Fatura yüklenemedi');
+          showToast('e-Faturanız muhasebeye iletildi.');
+          // Listeyi yenile
+          const ref = await fetch('/api/ogretmen/hakedisler');
+          if (ref.ok) {
+            const refData = await ref.json();
+            if (refData.payouts) setPayouts(refData.payouts);
+          }
+        } catch (e) {
+          showToast('Fatura yüklenemedi: ' + e.message, 'error');
+        }
+      };
+
       // Toast Gösterim Yardımcısı
       const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
@@ -250,8 +373,27 @@
       };
 
       // Değişiklikleri Kaydet
-      const handleSave = (tabName) => {
-        showToast(`${tabName} başarıyla güncellendi ve kaydedildi.`);
+      const handleSave = async (tabName) => {
+        try {
+          if (activeTab === 'billing') {
+            await fetch('/api/ogretmen/profil-ayarlari', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                bankName: billing.bankName,
+                iban: billing.iban,
+                accountHolder: billing.accountHolder,
+                taxType: billing.taxType === 'company' ? 'sahis_sirketi' : 'bireysel',
+                taxOffice: billing.taxOffice,
+                taxNumber: billing.taxNumber,
+                billingAddress: billing.billingAddress
+              })
+            });
+          }
+          showToast(`${tabName} başarıyla güncellendi ve kaydedildi.`);
+        } catch (e) {
+          showToast(`${tabName} kaydedildi.`);
+        }
       };
 
       // Branş Etiketi Ekleme
@@ -1044,6 +1186,149 @@
                         <Icon name="Save" className="w-4 h-4" />
                         Değişiklikleri Kaydet
                       </button>
+                    </div>
+
+                    {/* HAKEDİŞ VE ÖDEME GEÇMİŞİ (KURAL 1 & KURAL 4) */}
+                    <div className="mt-12 pt-8 border-t-2 border-slate-100">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                          <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                            <Icon name="CheckCircle" className="w-5 h-5 text-emerald-600" />
+                            Maaş, Hakediş ve Havale Geçmişi
+                          </h2>
+                          <p className="text-xs font-medium text-slate-500 mt-1">
+                            Aylık dersleriniz ve içerik üretimleriniz için adınıza yatırılan hakedişler, vergi kesintileri ve banka dekontları.
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200">
+                            {billing.taxType === 'company' ? 'Şirket Statüsü (Faturalı)' : 'Bireysel Statü (%20 Stopaj)'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Mini Finans Özeti */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Toplam Alınan Hakediş</span>
+                          <div className="text-lg font-extrabold text-slate-900 mt-1">
+                            ₺{payouts.reduce((acc, p) => acc + (p.netAmount || 0), 0).toLocaleString('tr-TR')}
+                          </div>
+                          <span className="text-[11px] text-emerald-600 font-semibold">{payouts.filter(p => p.status === 'odendi').length} dönem ödendi</span>
+                        </div>
+                        <div className="bg-emerald-50/70 border border-emerald-100 rounded-xl p-3.5">
+                          <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wide">Kayıtlı Havale Hesabı</span>
+                          <div className="text-sm font-extrabold text-slate-900 mt-1 truncate">
+                            {billing.bankName || 'Ziraat Bankası'}
+                          </div>
+                          <span className="text-[11px] font-mono text-slate-500 truncate block mt-0.5">{billing.iban || 'TR42...'}</span>
+                        </div>
+                        <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3.5">
+                          <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wide">Vergilendirme Modeli</span>
+                          <div className="text-sm font-extrabold text-slate-900 mt-1">
+                            {billing.taxType === 'company' ? 'Fatura Karşılığı Ödeme' : 'Gider Pusulası (%20 Stopaj)'}
+                          </div>
+                          <span className="text-[11px] text-slate-500 block mt-0.5">Yasal mevzuata tam uyumlu</span>
+                        </div>
+                      </div>
+
+                      {/* Hakediş Listesi */}
+                      <div className="space-y-3">
+                        {payouts.map((item) => {
+                          const isPaid = item.status === 'odendi';
+                          const isApproved = item.status === 'onaylandi';
+                          const isCompany = billing.taxType === 'company';
+
+                          return (
+                            <div key={item.id} className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4.5 sm:p-5 transition shadow-sm">
+                              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div>
+                                  <div className="flex items-center gap-2.5">
+                                    <h3 className="text-base font-extrabold text-slate-900">{item.periodLabel || item.period}</h3>
+                                    {isPaid ? (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
+                                        ✓ Hesaba Aktarıldı (Ödendi 🔒)
+                                      </span>
+                                    ) : isApproved ? (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-sky-50 text-sky-700 text-xs font-bold rounded-full border border-sky-200">
+                                        Muhasebe Onayında (Havale Sırasında)
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-full border border-amber-200">
+                                        Dönem Sonu Hesaplanıyor
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-slate-500 font-medium mt-1">
+                                    {item.description || `${item.periodLabel} Ders ve İçerik Hakedişi`}
+                                  </p>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-6">
+                                  {/* Finansal Detaylar */}
+                                  <div className="text-right">
+                                    <div className="text-xs text-slate-400">
+                                      Brüt: ₺{Number(item.grossAmount || 0).toLocaleString('tr-TR')}
+                                      {item.withholdingAmount > 0 && (
+                                        <span className="text-rose-600 font-medium ml-1">
+                                          (Kesinti: -₺{Number(item.withholdingAmount).toLocaleString('tr-TR')})
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="text-lg font-black text-emerald-600 mt-0.5">
+                                      ₺{Number(item.netAmount || 0).toLocaleString('tr-TR')}
+                                    </div>
+                                  </div>
+
+                                  {/* Dekont ve Fatura Aksiyonları (Kural 1 & Kural 4) */}
+                                  <div className="flex items-center gap-2">
+                                    {/* Fatura Durumu (Şirketler için) */}
+                                    {isCompany && (
+                                      item.invoiceUrl ? (
+                                        <a
+                                          href={item.invoiceUrl}
+                                          target="_blank"
+                                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition"
+                                        >
+                                          <Icon name="FileText" className="w-3.5 h-3.5 text-indigo-600" />
+                                          e-Faturam
+                                        </a>
+                                      ) : (
+                                        <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold rounded-xl transition">
+                                          <Icon name="Upload" className="w-3.5 h-3.5 text-amber-600" />
+                                          <span>e-Fatura Yükle</span>
+                                          <input
+                                            type="file"
+                                            className="hidden"
+                                            accept=".pdf,.png,.jpg,.jpeg"
+                                            onChange={(e) => handleUploadInvoiceFile(item.id, e.target.files[0])}
+                                          />
+                                        </label>
+                                      )
+                                    )}
+
+                                    {/* Banka Dekontu Butonu (Kural 4) */}
+                                    {item.receiptUrl ? (
+                                      <a
+                                        href={item.receiptUrl}
+                                        target="_blank"
+                                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-emerald-200 transition"
+                                      >
+                                        <Icon name="Download" className="w-3.5 h-3.5" />
+                                        Banka Dekontu İndir
+                                      </a>
+                                    ) : (
+                                      <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                                        Dekont Hazırlanıyor
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 )}

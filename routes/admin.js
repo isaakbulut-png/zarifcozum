@@ -1,8 +1,10 @@
 const express = require('express');
 const { ObjectId } = require('mongodb');
 const path = require('node:path');
+const fs = require('node:fs');
 const { randomUUID } = require('node:crypto');
 const multer = require('multer');
+const TeacherPayout = require('../models/TeacherPayout');
 const { adminRoleOf, yetkiKontrolEt, PRIMARY_ADMIN_EMAIL } = require('../lib/admin-rbac');
 const { validateImage } = require('../lib/resim-dogrula');
 const { PLANS } = require('../lib/subscription-plans');
@@ -1945,6 +1947,646 @@ function createAdminRouter({
     } catch (error) {
       console.error('Öğretmen başvuru durum güncelleme hatası:', error);
       res.status(500).json({ mesaj: 'Başvuru güncellenemedi: ' + error.message });
+    }
+  });
+
+  // ==========================================
+  // ÖĞRETMEN MAAŞ VE HAKEDİŞ MASASI (YÖNTEM A)
+  // ==========================================
+
+  const receiptUploadDir = path.join(__dirname, '..', 'uploads', 'payout-receipts');
+  try {
+    if (!fs.existsSync(receiptUploadDir)) {
+      fs.mkdirSync(receiptUploadDir, { recursive: true });
+    }
+  } catch (dirErr) {
+    console.warn('[Admin] receiptUploadDir dizini oluşturulamadı:', dirErr.message);
+  }
+
+  const receiptStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, receiptUploadDir),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      const safeName = `dekont-${Date.now()}-${randomUUID().slice(0, 8)}${ext}`;
+      cb(null, safeName);
+    }
+  });
+
+  const receiptUpload = multer({
+    storage: receiptStorage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+    fileFilter: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (!['.pdf', '.png', '.jpg', '.jpeg', '.webp'].includes(ext)) {
+        return cb(new Error('Yalnızca PDF, PNG veya JPG dekont dosyaları yüklenebilir.'));
+      }
+      cb(null, true);
+    }
+  });
+
+  function getPeriodLabel(periodStr) {
+    if (!periodStr || !periodStr.includes('-')) return periodStr || 'Cari Dönem';
+    const [year, month] = periodStr.split('-');
+    const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    const monthName = months[parseInt(month, 10) - 1] || month;
+    return `${monthName} ${year}`;
+  }
+
+  function generateRecentPeriods(count = 12) {
+    const list = [];
+    const date = new Date();
+    for (let i = 0; i < count; i++) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const p = `${y}-${m}`;
+      list.push({ period: p, label: getPeriodLabel(p) });
+      date.setMonth(date.getMonth() - 1);
+    }
+    return list;
+  }
+
+  // 1. Hakediş Listesi & Finansal Özet
+  router.get('/teacher-payouts', allow('superadmin', 'support'), async (req, res) => {
+    try {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const period = req.query.period || currentMonth;
+      const statusFilter = req.query.status;
+      const search = (req.query.search || '').trim().toLowerCase();
+
+      const filter = { period };
+      if (statusFilter && statusFilter !== 'all') {
+        filter.status = statusFilter;
+      }
+
+      let payouts = await TeacherPayout.find(filter).sort({ teacherName: 1 }).lean();
+
+      if (search) {
+        payouts = payouts.filter(p =>
+          (p.teacherName && p.teacherName.toLowerCase().includes(search)) ||
+          (p.teacherEmail && p.teacherEmail.toLowerCase().includes(search)) ||
+          (p.iban && p.iban.toLowerCase().includes(search))
+        );
+      }
+
+      // İstatistik ve Finansal KPI Hesaplamaları
+      const allPeriodPayouts = await TeacherPayout.find({ period }).lean();
+      const summary = {
+        totalTeachers: allPeriodPayouts.length,
+        totalGross: allPeriodPayouts.reduce((acc, p) => acc + (p.grossAmount || 0), 0),
+        totalWithholding: allPeriodPayouts.reduce((acc, p) => acc + (p.withholdingAmount || 0), 0),
+        totalNet: allPeriodPayouts.reduce((acc, p) => acc + (p.netAmount || 0), 0),
+        pendingCount: allPeriodPayouts.filter(p => p.status === 'bekliyor' || p.status === 'taslak').length,
+        pendingAmount: allPeriodPayouts.filter(p => p.status === 'bekliyor' || p.status === 'taslak').reduce((acc, p) => acc + (p.netAmount || 0), 0),
+        approvedCount: allPeriodPayouts.filter(p => p.status === 'onaylandi').length,
+        approvedAmount: allPeriodPayouts.filter(p => p.status === 'onaylandi').reduce((acc, p) => acc + (p.netAmount || 0), 0),
+        paidCount: allPeriodPayouts.filter(p => p.status === 'odendi').length,
+        paidAmount: allPeriodPayouts.filter(p => p.status === 'odendi').reduce((acc, p) => acc + (p.netAmount || 0), 0),
+        corporateCount: allPeriodPayouts.filter(p => p.taxType !== 'bireysel').length,
+        invoicePendingCount: allPeriodPayouts.filter(p => p.taxType !== 'bireysel' && p.invoiceStatus === 'bekleniyor').length
+      };
+
+      const periods = generateRecentPeriods(12);
+
+      res.json({
+        basarili: true,
+        currentPeriod: period,
+        periodLabel: getPeriodLabel(period),
+        payouts,
+        summary,
+        periods
+      });
+    } catch (err) {
+      console.error('Teacher payouts list error:', err);
+      res.status(500).json({ mesaj: 'Hakediş listesi alınamadı: ' + err.message });
+    }
+  });
+
+  // 2. Dönem Hakedişlerini Hesapla / Oluştur
+  router.post('/teacher-payouts/calculate', allow('superadmin'), async (req, res) => {
+    try {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const period = req.body.period || currentMonth;
+      const periodLabel = getPeriodLabel(period);
+      const forceRecalculate = Boolean(req.body.forceRecalculate);
+
+      // Aktif ve onaylı öğretmenleri bul
+      const teachers = await User.find({
+        role: 'teacher',
+        basvuruDurumu: { $in: ['onaylandi', 'inceleme_suruyor'] }
+      }).lean();
+
+      if (!teachers || teachers.length === 0) {
+        return res.status(404).json({ mesaj: 'Sistemde kayıtlı öğretmen bulunamadı.' });
+      }
+
+      let createdCount = 0;
+      let updatedCount = 0;
+      let skippedLockedCount = 0;
+
+      for (const t of teachers) {
+        const existing = await TeacherPayout.findOne({ period, teacherId: t._id });
+
+        // Kural 3: Kilitli ödemeler ASLA değiştirilemez
+        if (existing && existing.isLocked) {
+          skippedLockedCount++;
+          continue;
+        }
+
+        const finance = t.teacherFinance || {};
+        const taxType = finance.taxType || 'bireysel';
+        const bankName = finance.bankName || 'Ziraat Bankası';
+        const iban = finance.iban || 'TR000000000000000000000000';
+        const accountHolder = finance.accountHolder || t.name;
+        const taxOffice = finance.taxOffice || '';
+        const taxNumber = finance.taxNumber || '';
+        const hourlyRate = finance.hourlyRate || 450;
+
+        // Varsayılan hesaplama (Örnek: 28 ders saati + soru üretim primi)
+        const liveHours = existing ? existing.liveHours : 28;
+        const contentBonus = existing ? existing.contentBonus : 1500;
+        const grossAmount = existing && !forceRecalculate
+          ? existing.grossAmount
+          : Math.round((liveHours * hourlyRate) + contentBonus);
+
+        // Kural 1: Vergi ve Kesinti Hesaplaması
+        let withholdingRate = 0;
+        let withholdingAmount = 0;
+        let netAmount = grossAmount;
+        let invoiceStatus = 'muaf';
+
+        if (taxType === 'sahis_sirketi' || taxType === 'limited_sirket') {
+          // Şirket: Stopaj kesintisi yok, fatura karşılığı ödeme yapılır
+          withholdingRate = 0;
+          withholdingAmount = 0;
+          netAmount = grossAmount;
+          invoiceStatus = existing?.invoiceUrl ? 'yuklendi' : 'bekleniyor';
+        } else {
+          // Bireysel: Gelir Vergisi Stopajı (%20)
+          withholdingRate = 20;
+          withholdingAmount = Math.round((grossAmount * withholdingRate) / 100);
+          netAmount = grossAmount - withholdingAmount;
+          invoiceStatus = 'muaf';
+        }
+
+        const payoutData = {
+          teacherId: t._id,
+          teacherName: t.name,
+          teacherEmail: t.email,
+          period,
+          periodLabel,
+          taxType,
+          bankName,
+          iban,
+          accountHolder,
+          taxOffice,
+          taxNumber,
+          liveHours,
+          hourlyRate,
+          contentCount: 15,
+          contentBonus,
+          grossAmount,
+          withholdingRate,
+          withholdingAmount,
+          netAmount,
+          currency: 'TRY',
+          description: `${periodLabel} Ders Hakedişi`,
+          invoiceStatus,
+          status: existing ? existing.status : 'bekliyor',
+          isLocked: false
+        };
+
+        if (existing) {
+          Object.assign(existing, payoutData);
+          await existing.save();
+          updatedCount++;
+        } else {
+          await TeacherPayout.create(payoutData);
+          createdCount++;
+        }
+      }
+
+      await audit(req, 'teacher_payout.calculated', 'teacher_payout', period, {
+        period,
+        createdCount,
+        updatedCount,
+        skippedLockedCount
+      });
+
+      res.json({
+        basarili: true,
+        mesaj: `${periodLabel} dönemi hakedişleri hesaplandı. (${createdCount} yeni, ${updatedCount} güncellendi${skippedLockedCount > 0 ? `, ${skippedLockedCount} kilitli atlandı` : ''})`,
+        createdCount,
+        updatedCount,
+        skippedLockedCount
+      });
+    } catch (err) {
+      console.error('Teacher payout calculate error:', err);
+      res.status(500).json({ mesaj: 'Hakedişler hesaplanamadı: ' + err.message });
+    }
+  });
+
+  // 3. Tekil Hakediş Güncelleme (Düzenleme)
+  router.put('/teacher-payouts/:id', allow('superadmin'), async (req, res) => {
+    try {
+      const payout = await TeacherPayout.findById(req.params.id);
+      if (!payout) {
+        return res.status(404).json({ mesaj: 'Hakediş kaydı bulunamadı.' });
+      }
+
+      // Kural 3: Kilitli ödemeler değiştirilemez
+      if (payout.isLocked) {
+        return res.status(403).json({
+          mesaj: 'Bu hakediş ödenmiş ve kilitlenmiştir. Tutar ve parametreler değiştirilemez!'
+        });
+      }
+
+      const {
+        grossAmount,
+        liveHours,
+        hourlyRate,
+        contentBonus,
+        withholdingRate,
+        taxType,
+        bankName,
+        iban,
+        accountHolder,
+        invoiceStatus,
+        invoiceNo,
+        description,
+        notes
+      } = req.body;
+
+      if (taxType) payout.taxType = taxType;
+      if (bankName) payout.bankName = bankName;
+      if (iban) payout.iban = iban;
+      if (accountHolder) payout.accountHolder = accountHolder;
+      if (liveHours !== undefined) payout.liveHours = Number(liveHours);
+      if (hourlyRate !== undefined) payout.hourlyRate = Number(hourlyRate);
+      if (contentBonus !== undefined) payout.contentBonus = Number(contentBonus);
+      if (description) payout.description = description;
+      if (notes !== undefined) payout.notes = notes;
+      if (invoiceNo !== undefined) payout.invoiceNo = invoiceNo;
+
+      if (grossAmount !== undefined) {
+        payout.grossAmount = Number(grossAmount);
+      } else if (liveHours !== undefined || hourlyRate !== undefined || contentBonus !== undefined) {
+        payout.grossAmount = Math.round((payout.liveHours * payout.hourlyRate) + payout.contentBonus);
+      }
+
+      // Kural 1: Vergi ve Kesinti Yeniden Hesaplama
+      if (payout.taxType === 'sahis_sirketi' || payout.taxType === 'limited_sirket') {
+        payout.withholdingRate = 0;
+        payout.withholdingAmount = 0;
+        payout.netAmount = payout.grossAmount;
+        payout.invoiceStatus = invoiceStatus || (payout.invoiceUrl ? 'yuklendi' : 'bekleniyor');
+      } else {
+        const rate = withholdingRate !== undefined ? Number(withholdingRate) : (payout.withholdingRate || 20);
+        payout.withholdingRate = rate;
+        payout.withholdingAmount = Math.round((payout.grossAmount * rate) / 100);
+        payout.netAmount = payout.grossAmount - payout.withholdingAmount;
+        payout.invoiceStatus = 'muaf';
+      }
+
+      await payout.save();
+
+      await audit(req, 'teacher_payout.updated', 'teacher_payout', payout._id.toString(), {
+        teacherName: payout.teacherName,
+        grossAmount: payout.grossAmount,
+        netAmount: payout.netAmount,
+        taxType: payout.taxType
+      });
+
+      res.json({
+        basarili: true,
+        mesaj: `"${payout.teacherName}" hakedişi güncellendi.`,
+        payout
+      });
+    } catch (err) {
+      console.error('Teacher payout update error:', err);
+      res.status(500).json({ mesaj: 'Hakediş güncellenemedi: ' + err.message });
+    }
+  });
+
+  // 4. Hakediş Onayla
+  router.post('/teacher-payouts/:id/approve', allow('superadmin'), async (req, res) => {
+    try {
+      const payout = await TeacherPayout.findById(req.params.id);
+      if (!payout) {
+        return res.status(404).json({ mesaj: 'Hakediş kaydı bulunamadı.' });
+      }
+
+      if (payout.isLocked && payout.status === 'odendi') {
+        return res.status(400).json({ mesaj: 'Bu kayıt zaten ödendi ve kilitlendi.' });
+      }
+
+      payout.status = 'onaylandi';
+      payout.approvedBy = {
+        adminId: req.adminUser._id.toString(),
+        adminName: req.adminUser.name,
+        approvedAt: new Date()
+      };
+
+      await payout.save();
+
+      // Kural 3: Audit log kaydı
+      await audit(req, 'teacher_payout.approved', 'teacher_payout', payout._id.toString(), {
+        teacherName: payout.teacherName,
+        netAmount: payout.netAmount,
+        period: payout.period
+      });
+
+      res.json({
+        basarili: true,
+        mesaj: `"${payout.teacherName}" hakedişi onaylandı.`,
+        payout
+      });
+    } catch (err) {
+      console.error('Teacher payout approve error:', err);
+      res.status(500).json({ mesaj: 'Hakediş onaylanamadı: ' + err.message });
+    }
+  });
+
+  // 5. Hakediş Ödendi Olarak İşaretle & Kilitle (Kural 3 ve 4)
+  router.post('/teacher-payouts/:id/pay', allow('superadmin'), async (req, res) => {
+    try {
+      const payout = await TeacherPayout.findById(req.params.id);
+      if (!payout) {
+        return res.status(404).json({ mesaj: 'Hakediş kaydı bulunamadı.' });
+      }
+
+      payout.status = 'odendi';
+      payout.isLocked = true; // Kural 3: Kilitlenir!
+      payout.paidAt = new Date();
+      payout.paidBy = {
+        adminId: req.adminUser._id.toString(),
+        adminName: req.adminUser.name
+      };
+
+      if (!payout.approvedBy?.adminId) {
+        payout.approvedBy = {
+          adminId: req.adminUser._id.toString(),
+          adminName: req.adminUser.name,
+          approvedAt: new Date()
+        };
+      }
+
+      await payout.save();
+
+      // Kural 4: Öğretmene bildirim gönder
+      try {
+        await User.findByIdAndUpdate(payout.teacherId, {
+          $push: {
+            teacherNotifications: {
+              title: '🎉 Hakediş Ödemeniz Onaylandı & Ödendi',
+              message: `${payout.periodLabel} dönemi ${payout.netAmount.toLocaleString('tr-TR')} ₺ tutarındaki hakediş ödemeniz onaylanarak ${payout.iban} nolu banka hesabınıza havale/EFT ile iletilmiştir.`,
+              type: 'payment',
+              payoutId: payout._id.toString(),
+              receiptUrl: payout.receiptUrl || null,
+              read: false,
+              createdAt: new Date()
+            }
+          }
+        });
+      } catch (notifyErr) {
+        console.warn('Teacher notify error:', notifyErr.message);
+      }
+
+      // Kural 3: Audit log kaydı
+      await audit(req, 'teacher_payout.paid', 'teacher_payout', payout._id.toString(), {
+        teacherName: payout.teacherName,
+        netAmount: payout.netAmount,
+        iban: payout.iban,
+        period: payout.period
+      });
+
+      res.json({
+        basarili: true,
+        mesaj: `"${payout.teacherName}" hakedişi "Ödendi" olarak kilitlendi.`,
+        payout
+      });
+    } catch (err) {
+      console.error('Teacher payout pay error:', err);
+      res.status(500).json({ mesaj: 'Ödeme işlemi kaydedilemedi: ' + err.message });
+    }
+  });
+
+  // 6. Dekont Yükleme (Kural 4)
+  router.post('/teacher-payouts/:id/receipt', allow('superadmin'), receiptUpload.single('receipt'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ mesaj: 'Dekont dosyası seçilmedi.' });
+      }
+
+      const payout = await TeacherPayout.findById(req.params.id);
+      if (!payout) {
+        return res.status(404).json({ mesaj: 'Hakediş kaydı bulunamadı.' });
+      }
+
+      const fileUrl = `/uploads/payout-receipts/${req.file.filename}`;
+      payout.receiptUrl = fileUrl;
+      payout.receiptFileName = req.file.originalname;
+      payout.receiptUploadedAt = new Date();
+      payout.receiptUploadedBy = {
+        adminId: req.adminUser._id.toString(),
+        adminName: req.adminUser.name
+      };
+
+      // Dekont yüklenince durum otomatik 'odendi' olur ve kilitlenir
+      payout.status = 'odendi';
+      payout.isLocked = true;
+      payout.paidAt = payout.paidAt || new Date();
+      payout.paidBy = payout.paidBy?.adminId ? payout.paidBy : {
+        adminId: req.adminUser._id.toString(),
+        adminName: req.adminUser.name
+      };
+
+      await payout.save();
+
+      // Kural 4: Öğretmene dekont bildirimi gönder
+      try {
+        await User.findByIdAndUpdate(payout.teacherId, {
+          $push: {
+            teacherNotifications: {
+              title: '📄 Banka Dekontunuz Yüklendi',
+              message: `${payout.periodLabel} dönemi hakediş ödemenize ait banka dekontu sisteme yüklenmiştir. Profilinizdeki Ödeme Geçmişi sekmesinden indirebilirsiniz.`,
+              type: 'payment',
+              receiptUrl: fileUrl,
+              payoutId: payout._id.toString(),
+              read: false,
+              createdAt: new Date()
+            }
+          }
+        });
+      } catch (notifyErr) {
+        console.warn('Teacher receipt notify error:', notifyErr.message);
+      }
+
+      // Kural 3: Audit log kaydı
+      await audit(req, 'teacher_payout.receipt_uploaded', 'teacher_payout', payout._id.toString(), {
+        teacherName: payout.teacherName,
+        file: req.file.filename,
+        netAmount: payout.netAmount
+      });
+
+      res.json({
+        basarili: true,
+        mesaj: `"${payout.teacherName}" dekontu başarıyla yüklendi ve ödeme kilitlendi.`,
+        receiptUrl: fileUrl,
+        payout
+      });
+    } catch (err) {
+      console.error('Teacher receipt upload error:', err);
+      res.status(500).json({ mesaj: 'Dekont yüklenemedi: ' + err.message });
+    }
+  });
+
+  // 7. Toplu Onay ve Toplu Ödeme İşlemleri
+  router.post('/teacher-payouts/batch-action', allow('superadmin'), async (req, res) => {
+    try {
+      const { action, ids } = req.body;
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ mesaj: 'İşlem yapılacak hakedişler seçilmedi.' });
+      }
+
+      if (!['approve', 'pay'].includes(action)) {
+        return res.status(400).json({ mesaj: 'Geçersiz toplu işlem: ' + action });
+      }
+
+      const adminInfo = {
+        adminId: req.adminUser._id.toString(),
+        adminName: req.adminUser.name
+      };
+
+      let successCount = 0;
+      for (const id of ids) {
+        const payout = await TeacherPayout.findById(id);
+        if (!payout) continue;
+
+        if (action === 'approve') {
+          if (!payout.isLocked) {
+            payout.status = 'onaylandi';
+            payout.approvedBy = { ...adminInfo, approvedAt: new Date() };
+            await payout.save();
+            await audit(req, 'teacher_payout.approved', 'teacher_payout', payout._id.toString(), {
+              teacherName: payout.teacherName,
+              netAmount: payout.netAmount
+            });
+            successCount++;
+          }
+        } else if (action === 'pay') {
+          payout.status = 'odendi';
+          payout.isLocked = true;
+          payout.paidAt = new Date();
+          payout.paidBy = adminInfo;
+          if (!payout.approvedBy?.adminId) {
+            payout.approvedBy = { ...adminInfo, approvedAt: new Date() };
+          }
+          await payout.save();
+
+          // Öğretmene bildirim
+          try {
+            await User.findByIdAndUpdate(payout.teacherId, {
+              $push: {
+                teacherNotifications: {
+                  title: '🎉 Hakediş Ödemeniz Yapıldı',
+                  message: `${payout.periodLabel} dönemi ${payout.netAmount.toLocaleString('tr-TR')} ₺ tutarındaki ödemeniz banka hesabınıza havale edilmiştir.`,
+                  type: 'payment',
+                  payoutId: payout._id.toString(),
+                  read: false,
+                  createdAt: new Date()
+                }
+              }
+            });
+          } catch (nErr) {}
+
+          await audit(req, 'teacher_payout.paid', 'teacher_payout', payout._id.toString(), {
+            teacherName: payout.teacherName,
+            netAmount: payout.netAmount,
+            iban: payout.iban
+          });
+          successCount++;
+        }
+      }
+
+      res.json({
+        basarili: true,
+        mesaj: `${successCount} öğretmenin hakedişi başarıyla ${action === 'approve' ? 'onaylandı' : 'ödendi ve kilitlendi'}.`,
+        successCount
+      });
+    } catch (err) {
+      console.error('Batch payout action error:', err);
+      res.status(500).json({ mesaj: 'Toplu işlem başarısız: ' + err.message });
+    }
+  });
+
+  // 8. Toplu Banka Excel/CSV Çıktısı (Kural 2)
+  router.get('/teacher-payouts/export-eft', allow('superadmin'), async (req, res) => {
+    try {
+      const { period, ids } = req.query;
+      const filter = {};
+      if (period) filter.period = period;
+      if (ids) {
+        const idList = ids.split(',').filter(Boolean);
+        if (idList.length > 0) filter._id = { $in: idList };
+      }
+
+      const records = await TeacherPayout.find(filter).sort({ teacherName: 1 }).lean();
+
+      if (records.length === 0) {
+        return res.status(404).json({ mesaj: 'Dışa aktarılacak hakediş kaydı bulunamadı.' });
+      }
+
+      // UTF-8 BOM ile Excel uyumluluğu
+      let csv = '\uFEFF';
+      // Banka Toplu EFT Formatı Başlıkları
+      csv += 'Alıcı Adı Soyadı;IBAN;Ödenecek Net Tutar (TL);Para Birimi;Açıklama;Banka;Vergi Statüsü;Dönem;Durum\r\n';
+
+      for (const p of records) {
+        const name = (p.accountHolder || p.teacherName || '').replace(/;/g, ' ').trim();
+        const iban = (p.iban || '').replace(/;/g, ' ').replace(/\s+/g, '').trim();
+        const amount = Number(p.netAmount || 0).toFixed(2);
+        const desc = (p.description || `${p.periodLabel} Ders Hakedişi`).replace(/;/g, ' ').trim();
+        const bank = (p.bankName || 'Banka').replace(/;/g, ' ').trim();
+        const taxLabel = p.taxType === 'bireysel' ? 'Bireysel (Stopajlı)' : 'Şirket (Faturalı)';
+        const statusLabel = p.status === 'odendi' ? 'Ödendi' : p.status === 'onaylandi' ? 'Onaylandı' : 'Bekliyor';
+
+        csv += `"${name}";"${iban}";${amount};TRY;"${desc}";"${bank}";"${taxLabel}";"${p.period}";"${statusLabel}"\r\n`;
+      }
+
+      const cleanPeriod = (period || 'Tum-Donemler').replace(/[^a-zA-Z0-9_-]/g, '');
+      const filename = `ZarifCozum_Toplu_Banka_EFT_${cleanPeriod}.csv`;
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      return res.status(200).send(csv);
+    } catch (err) {
+      console.error('Export EFT error:', err);
+      res.status(500).json({ mesaj: 'Banka EFT dosyası oluşturulamadı: ' + err.message });
+    }
+  });
+
+  // 9. Hakediş İşlem Geçmişi (Audit Logs) (Kural 3)
+  router.get('/teacher-payouts/audit-logs', allow('superadmin'), async (req, res) => {
+    try {
+      const logs = await AdminLog.find({ entityType: 'teacher_payout' })
+        .sort({ createdAt: -1 })
+        .limit(100)
+        .lean();
+
+      res.json({
+        basarili: true,
+        logs: logs.map(l => ({
+          id: l._id.toString(),
+          actorName: l.actorName,
+          action: l.action,
+          details: l.details,
+          entityId: l.entityId,
+          createdAt: l.createdAt
+        }))
+      });
+    } catch (err) {
+      console.error('Payout audit logs error:', err);
+      res.status(500).json({ mesaj: 'İşlem geçmişi alınamadı: ' + err.message });
     }
   });
 
