@@ -57,6 +57,7 @@ const AdminLog = require('./models/AdminLog');
 const CozumluSoru = require('./models/CozumluSoru');
 const Deneme = require('./models/Deneme');
 const Exam = require('./models/Exam');
+const Soru = require('./models/Soru');
 const { createWebhookRouter } = require('./routes/webhooks');
 const { attachRealtimeChat } = require('./lib/realtime-chat');
 const { normalizeAiChatRequest, createAiChatReply } = require('./lib/ai-chat');
