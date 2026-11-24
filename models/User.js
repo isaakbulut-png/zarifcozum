@@ -257,9 +257,17 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  haftalikSokratikSayisi: {
+    type: Number,
+    default: 0
+  },
   aylikSokratikSayisi: {
     type: Number,
     default: 0
+  },
+  sonHaftalikSifirlamaTarihi: {
+    type: Date,
+    default: Date.now
   },
   aylikOgretmenIkiziSayisi: {
     type: Number,

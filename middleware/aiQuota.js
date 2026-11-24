@@ -4,7 +4,8 @@ const User = require('../models/User');
 const PAKET_LIMITLERI = {
   free: {
     dailySokratik: 3,
-    monthlySokratik: 15,
+    weeklySokratik: 3,
+    monthlySokratik: 12,
     monthlyOgretmenIkizi: 0,
     dailyQuestions: 0,
     monthlyQuestions: 0,
@@ -100,6 +101,27 @@ function resolveUserPlan(user) {
 /**
  * Kullanıcının günlük kotasının sıfırlanma zamanı gelmişse sayaçları sıfırlar.
  */
+function getWeekStartTimestamp(dateInput) {
+  const d = new Date(dateInput || Date.now());
+  d.setHours(0, 0, 0, 0);
+  const day = d.getDay(); // 0=Paz, 1=Pzt
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diffToMonday);
+  return d.getTime();
+}
+
+function resetIfNewWeek(user) {
+  const now = new Date();
+  const lastReset = user.sonHaftalikSifirlamaTarihi ? new Date(user.sonHaftalikSifirlamaTarihi) : new Date(0);
+  const isSameWeek = getWeekStartTimestamp(lastReset) === getWeekStartTimestamp(now);
+  if (!isSameWeek) {
+    user.haftalikSokratikSayisi = 0;
+    user.sonHaftalikSifirlamaTarihi = now;
+    return true;
+  }
+  return false;
+}
+
 function resetIfNewDay(user) {
   const now = new Date();
   const sonTarih = user.sonKotaSifirlamaTarihi ? new Date(user.sonKotaSifirlamaTarihi) : new Date(0);
@@ -292,13 +314,18 @@ async function checkAndConsumeQuota(userDoc, islemTuru = 'message', miktar = 1) 
   // 3. Yeni Gün ve Yeni Ay Kontrolleri ve Sayaç Sıfırlama
   const dayReset = resetIfNewDay(userDoc);
   const monthReset = resetIfNewMonth(userDoc);
-  if ((dayReset || monthReset) && userDoc._id && require('mongoose').connection?.readyState === 1) {
+  const weekReset = resetIfNewWeek(userDoc);
+  if ((dayReset || weekReset || monthReset) && userDoc._id && require('mongoose').connection?.readyState === 1) {
     const updateFields = {};
     if (dayReset) {
       updateFields.gunlukAiMesajSayisi = 0;
       updateFields.gunlukSokratikSayisi = 0;
       updateFields.gunlukSoruUretimSayisi = 0;
       updateFields.sonKotaSifirlamaTarihi = userDoc.sonKotaSifirlamaTarihi;
+    }
+    if (weekReset) {
+      updateFields.haftalikSokratikSayisi = 0;
+      updateFields.sonHaftalikSifirlamaTarihi = userDoc.sonHaftalikSifirlamaTarihi;
     }
     if (monthReset) {
       updateFields.aylikSokratikSayisi = 0;
@@ -311,8 +338,22 @@ async function checkAndConsumeQuota(userDoc, islemTuru = 'message', miktar = 1) 
 
   const consumeCount = Math.max(1, parseInt(miktar, 10) || 1);
   const hasDb = userDoc._id && require('mongoose').connection?.readyState === 1;
+  const effectivePlan = resolveUserPlan(userDoc);
 
   // 4. İŞLEM TÜRÜ DENETİMLERİ
+
+  // 0) Ücretsiz öğrenci için kilitli asistanlar (Adım Adım Soru Çözümü & AI Koç)
+  if (userDoc.role === 'student' && effectivePlan === 'free' && (islemTuru === 'soru_cozum' || islemTuru === 'ai_koc')) {
+    const label = islemTuru === 'ai_koc' ? 'AI Koç (Haftalık Plan)' : 'Adım Adım Soru Çözümü';
+    return {
+      allowed: false,
+      status: 403,
+      error: 'PLAN_UPGRADE_REQUIRED',
+      message: `${label} asistanı ücretsiz planda kilitlidir. Üyeliğini Temel, Standart veya VIP pakete yükselterek hemen kullanmaya başlayabilirsin.`,
+      limit: 0,
+      kullanilan: 0
+    };
+  }
 
   // A) Öğretmen İkizi (Farklı Anlat) Kontrolü
   if (islemTuru === 'ogretmen_ikizi') {
@@ -353,11 +394,13 @@ async function checkAndConsumeQuota(userDoc, islemTuru = 'message', miktar = 1) 
   }
 
   // B) Sokratik Mentör / Genel AI Mesajı Kontrolü
-  if (islemTuru === 'message' || islemTuru === 'sokratik') {
+  if (islemTuru === 'message' || islemTuru === 'sokratik' || islemTuru === 'soru_cozum' || islemTuru === 'ai_koc') {
     const dailyLimit = getEffectiveMessageLimit(userDoc);
+    const weeklyLimit = (userDoc.role === 'student' && effectivePlan === 'free') ? (PAKET_LIMITLERI.free.weeklySokratik || 3) : null;
     const monthlyLimit = getEffectiveMonthlySokratikLimit(userDoc);
 
     const dailyUsed = userDoc.gunlukSokratikSayisi || userDoc.gunlukAiMesajSayisi || 0;
+    const weeklyUsed = userDoc.haftalikSokratikSayisi || 0;
     const monthlyUsed = userDoc.aylikSokratikSayisi || 0;
 
     // 1) Aylık sınır kontrolü
@@ -369,6 +412,7 @@ async function checkAndConsumeQuota(userDoc, islemTuru = 'message', miktar = 1) 
             $inc: {
               gunlukAiMesajSayisi: consumeCount,
               gunlukSokratikSayisi: consumeCount,
+              haftalikSokratikSayisi: consumeCount,
               aylikSokratikSayisi: consumeCount,
               ekstraSokratikKredi: -consumeCount
             }
@@ -376,6 +420,7 @@ async function checkAndConsumeQuota(userDoc, islemTuru = 'message', miktar = 1) 
         }
         userDoc.gunlukAiMesajSayisi = dailyUsed + consumeCount;
         userDoc.gunlukSokratikSayisi = dailyUsed + consumeCount;
+        userDoc.haftalikSokratikSayisi = weeklyUsed + consumeCount;
         userDoc.aylikSokratikSayisi = monthlyUsed + consumeCount;
         userDoc.ekstraSokratikKredi = sokratikBonus - consumeCount;
         return { allowed: true, bonusKullanildi: true, kalanSokratikBonus: sokratikBonus - consumeCount };
@@ -392,6 +437,19 @@ async function checkAndConsumeQuota(userDoc, islemTuru = 'message', miktar = 1) 
       };
     }
 
+    // 1b) Ücretsiz öğrenci haftalık sınır kontrolü (haftada 3 hak)
+    if (weeklyLimit !== null && weeklyUsed + consumeCount > weeklyLimit) {
+      return {
+        allowed: false,
+        status: 429,
+        error: 'QUOTA_EXCEEDED',
+        message: `Ücretsiz planda haftalık Sokratik AI Mentör hakkınız (${weeklyLimit} hak/hafta, ${monthlyLimit} hak/ay) doldu. Yeni haftada yenilenir veya üyeliğini yükselterek hemen devam edebilirsin.`,
+        limit: weeklyLimit,
+        kullanilan: weeklyUsed,
+        periyot: 'haftalik'
+      };
+    }
+
     // 2) Günlük sınır kontrolü
     if (dailyUsed + consumeCount <= dailyLimit) {
       if (hasDb) {
@@ -401,6 +459,7 @@ async function checkAndConsumeQuota(userDoc, islemTuru = 'message', miktar = 1) 
             $inc: {
               gunlukAiMesajSayisi: consumeCount,
               gunlukSokratikSayisi: consumeCount,
+              haftalikSokratikSayisi: consumeCount,
               aylikSokratikSayisi: consumeCount
             }
           }
@@ -408,10 +467,12 @@ async function checkAndConsumeQuota(userDoc, islemTuru = 'message', miktar = 1) 
       }
       userDoc.gunlukAiMesajSayisi = dailyUsed + consumeCount;
       userDoc.gunlukSokratikSayisi = dailyUsed + consumeCount;
+      userDoc.haftalikSokratikSayisi = weeklyUsed + consumeCount;
       userDoc.aylikSokratikSayisi = monthlyUsed + consumeCount;
       return {
         allowed: true,
         kalanGunluk: dailyLimit - (dailyUsed + consumeCount),
+        kalanHaftalik: weeklyLimit !== null ? Math.max(0, weeklyLimit - (weeklyUsed + consumeCount)) : null,
         kalanAylik: monthlyLimit - (monthlyUsed + consumeCount)
       };
     }
@@ -530,6 +591,7 @@ function getQuotaStatus(user) {
   }
 
   resetIfNewDay(user);
+  resetIfNewWeek(user);
   resetIfNewMonth(user);
 
   const planKey = resolveUserPlan(user);
@@ -540,6 +602,13 @@ function getQuotaStatus(user) {
   const etkinAylikSoruLimiti = getEffectiveMonthlyQuestionLimit(user);
 
   const isSinirsiz = user.role === 'admin';
+  const isFreeStudent = user.role === 'student' && planKey === 'free';
+  const haftalikLimit = isFreeStudent ? (PAKET_LIMITLERI.free.weeklySokratik || 3) : null;
+  const haftalikKullanilan = user.haftalikSokratikSayisi || 0;
+  const haftalikKalan = haftalikLimit !== null ? Math.max(0, haftalikLimit - haftalikKullanilan) : null;
+  const gunlukKalan = isSinirsiz ? Infinity : Math.max(0, etkinMesajLimiti - (user.gunlukSokratikSayisi || user.gunlukAiMesajSayisi || 0));
+  const aylikKalan = isSinirsiz ? Infinity : Math.max(0, etkinAylikSokratik - (user.aylikSokratikSayisi || 0));
+  const ikizKalan = isSinirsiz ? Infinity : Math.max(0, etkinOgretmenIkizi - (user.aylikOgretmenIkiziSayisi || 0));
 
   return {
     rol: user.role,
@@ -551,15 +620,33 @@ function getQuotaStatus(user) {
     sokratik: {
       gunlukLimit: etkinMesajLimiti,
       gunlukKullanilan: user.gunlukSokratikSayisi || user.gunlukAiMesajSayisi || 0,
-      gunlukKalan: isSinirsiz ? Infinity : Math.max(0, etkinMesajLimiti - (user.gunlukSokratikSayisi || user.gunlukAiMesajSayisi || 0)),
+      gunlukKalan,
+      haftalikLimit,
+      haftalikKullanilan,
+      haftalikKalan,
       aylikLimit: etkinAylikSokratik,
       aylikKullanilan: user.aylikSokratikSayisi || 0,
-      aylikKalan: isSinirsiz ? Infinity : Math.max(0, etkinAylikSokratik - (user.aylikSokratikSayisi || 0))
+      aylikKalan
     },
     ogretmenIkizi: {
       aylikLimit: etkinOgretmenIkizi,
       aylikKullanilan: user.aylikOgretmenIkiziSayisi || 0,
-      aylikKalan: isSinirsiz ? Infinity : Math.max(0, etkinOgretmenIkizi - (user.aylikOgretmenIkiziSayisi || 0))
+      aylikKalan: ikizKalan
+    },
+    assistants: {
+      ai_mentor: {
+        locked: false,
+        periodMode: isFreeStudent ? 'weekly_monthly' : 'daily_monthly'
+      },
+      ogretmen_ikizi: {
+        locked: isFreeStudent || (!isSinirsiz && etkinOgretmenIkizi <= 0)
+      },
+      soru_cozum: {
+        locked: isFreeStudent
+      },
+      ai_koc: {
+        locked: isFreeStudent
+      }
     },
     mesaj: {
       etkinLimit: etkinMesajLimiti,
@@ -601,10 +688,15 @@ function aiQuotaMiddleware(islemTuru = 'message') {
       const freshUser = await User.findById(user._id || user.id);
       if (!freshUser) return next();
 
-      // İstek gövdesinde aiRole (ör. ogretmen_ikizi) belirtilmişse dinamik işlem türü seç
+      // İstek gövdesinde seçili AI asistan rolüne göre dinamik işlem türü belirle
       let targetIslemTuru = islemTuru;
-      if (req.body?.role === 'ogretmen_ikizi' || req.body?.aiRole === 'ogretmen_ikizi' || req.body?.gorevTuru === 'ogretmen_ikizi') {
+      const reqAiRole = req.body?.gorevTuru || req.body?.aiRole || req.body?.role;
+      if (reqAiRole === 'ogretmen_ikizi') {
         targetIslemTuru = 'ogretmen_ikizi';
+      } else if (reqAiRole === 'soru_cozum') {
+        targetIslemTuru = 'soru_cozum';
+      } else if (reqAiRole === 'ai_koc') {
+        targetIslemTuru = 'ai_koc';
       }
 
       const result = await checkAndConsumeQuota(freshUser, targetIslemTuru, 1);

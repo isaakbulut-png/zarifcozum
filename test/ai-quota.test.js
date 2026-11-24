@@ -65,7 +65,7 @@ test('Öğretmen Rol & Kota - Yalnızca Admin sınırsızdır, öğretmenler kot
 test('Öğrenci 3 Yıllık Paket Limitleri - Temel, Standart, VIP ve Free', () => {
   const freeStudent = { role: 'student', paketTipi: 'free' };
   assert.equal(getEffectiveMessageLimit(freeStudent), 3);
-  assert.equal(getEffectiveMonthlySokratikLimit(freeStudent), 15);
+  assert.equal(getEffectiveMonthlySokratikLimit(freeStudent), 12);
   assert.equal(getEffectiveMonthlyOgretmenIkiziLimit(freeStudent), 0);
   assert.equal(getEffectiveQuestionLimit(freeStudent), 0);
 

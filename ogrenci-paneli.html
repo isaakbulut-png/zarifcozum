@@ -567,6 +567,18 @@ button,select{font:inherit}
           <button type="button" id="studentAiClearBtn" style="font-size:12px;padding:4px 10px;cursor:pointer;color:var(--muted);border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:500">🧹 Sohbeti Temizle</button>
         </div>
 
+        <!-- Kilitli Asistan Uyarı Bandı (Ücretsiz Üyelik) -->
+        <div id="studentAiLockedBanner" hidden style="padding:14px 18px;background:linear-gradient(135deg,#fff8ee 0%,#fdecd6 100%);border-bottom:1.5px solid #e5be8a;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:11px;min-width:220px;flex:1;">
+            <span style="width:36px;height:36px;border-radius:10px;background:#3E2F26;color:#f3d58d;display:grid;place-items:center;font-size:1.05rem;flex-shrink:0;">🔒</span>
+            <div>
+              <strong id="studentAiLockedTitle" style="display:block;color:#2c1a0e;font-size:0.92rem;">Bu Yapay Zekâ Asistanı Kilitli</strong>
+              <span id="studentAiLockedDesc" style="font-size:0.82rem;color:#6a5242;">Ücretsiz planda yalnızca Sokratik Mentör (haftada 3, ayda 12 hak) açıktır. Tüm asistanlara erişmek için üyeliğini yükselt.</span>
+            </div>
+          </div>
+          <button type="button" id="studentAiLockedUpgradeBtn" style="padding:8px 16px;border-radius:9px;border:none;background:#C84B31;color:#fff;font-weight:700;font-size:0.84rem;cursor:pointer;white-space:nowrap;">⭐ Üyeliğini Yükselt →</button>
+        </div>
+
         <!-- Sohbet Akışı Mesaj Alanı -->
         <div id="studentAiChatBody" style="height:440px;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;background:var(--card)" aria-live="polite">
           <!-- Başlangıç Mentör Mesajı -->
@@ -2148,38 +2160,147 @@ button,select{font:inherit}
       }
     });
 
-    // Öğrenci Anlık AI Kota Rozeti
+    // Öğrenci Anlık AI Kota Rozeti (Seçili Asistana Göre Dinamik)
+    let lastStudentQuota = null;
+
+    function isAssistantLockedForStudent(role, q) {
+      if (!q || q.sinirsiz || q.rol === 'admin' || q.rol === 'teacher') return false;
+      if (q.assistants && q.assistants[role]) return Boolean(q.assistants[role].locked);
+      const isFree = (q.paketTipi || 'free') === 'free';
+      if (isFree && role !== 'ai_mentor') return true;
+      if (role === 'ogretmen_ikizi' && q.ogretmenIkizi && Number(q.ogretmenIkizi.aylikLimit) <= 0) return true;
+      return false;
+    }
+
+    function updateAssistantLockUi(q) {
+      const roleTitles = {
+        ai_mentor: 'Sokratik Mentör',
+        ogretmen_ikizi: 'Öğretmen İkizi (Farklı Anlat)',
+        soru_cozum: 'Adım Adım Soru Çözümü',
+        ai_koc: 'AI Koç (Haftalık Plan)'
+      };
+
+      // 1. Kilitli asistan butonlarının üzerine 🔒 simgesi ekle
+      document.querySelectorAll('.student-ai-pill').forEach(pill => {
+        const role = pill.dataset.role || 'ai_mentor';
+        if (!pill.dataset.origLabel) pill.dataset.origLabel = pill.textContent.trim();
+        const locked = isAssistantLockedForStudent(role, q);
+        pill.dataset.locked = locked ? 'true' : 'false';
+        pill.textContent = locked ? `🔒 ${pill.dataset.origLabel}` : pill.dataset.origLabel;
+        pill.style.opacity = locked ? '0.82' : '1';
+      });
+
+      // 2. Seçili asistan kilitliyse şık yükseltme uyarısını göster ve formu kilitle
+      const activeLocked = isAssistantLockedForStudent(studentActiveRole, q);
+      const banner = $('studentAiLockedBanner');
+      const titleEl = $('studentAiLockedTitle');
+      const descEl = $('studentAiLockedDesc');
+      const inp = $('studentAiInput');
+      const submitBtn = $('studentAiSubmit');
+
+      if (banner) {
+        banner.hidden = !activeLocked;
+        banner.style.display = activeLocked ? 'flex' : 'none';
+      }
+      if (activeLocked) {
+        if (titleEl) titleEl.textContent = `🔒 ${roleTitles[studentActiveRole] || 'Bu Asistan'} Kilitli — Üyeliğini Yükselt`;
+        if (descEl) descEl.textContent = 'Ücretsiz üyelikte Sokratik Mentör haftada 3, ayda 12 hakla açıktır. Öğretmen İkizi, Adım Adım Soru Çözümü ve AI Koç için paketini yükseltebilirsin.';
+      }
+      if (inp) {
+        inp.disabled = activeLocked;
+        inp.placeholder = activeLocked
+          ? 'Bu asistan kilitli · Kullanmak için üyeliğini yükselt veya Sokratik Mentör seç…'
+          : 'Matematik sorunu, konuyu veya takıldığın adımı yaz…';
+      }
+      if (submitBtn) {
+        submitBtn.disabled = activeLocked;
+        submitBtn.style.opacity = activeLocked ? '0.5' : '1';
+      }
+    }
+
     function renderStudentAiQuotaBadge(q) {
+      if (q) lastStudentQuota = q;
+      const data = q || lastStudentQuota;
       const badge = $('studentAiQuotaBadge');
       if (!badge) return;
-      if (!q) {
+      badge.onclick = null;
+      badge.style.cursor = 'default';
+
+      if (!data) {
         badge.style.background = '#f3e1cf';
         badge.style.color = '#7a4f2d';
         badge.style.borderColor = '#d9d3c3';
         badge.innerHTML = '⚡ <strong>Sokratik AI Mentör</strong> Aktif';
         return;
       }
-      const bonusText = q.ekstraBonusKredi > 0 ? ` (+${q.ekstraBonusKredi} Bonus)` : '';
-      if (q.aiErisimEngelli) {
+
+      updateAssistantLockUi(data);
+
+      const bonusText = data.ekstraBonusKredi > 0 ? ` (+${data.ekstraBonusKredi} Bonus)` : '';
+      if (data.aiErisimEngelli) {
         badge.style.background = '#fee2e2';
         badge.style.color = '#dc2626';
         badge.style.borderColor = '#fca5a5';
         badge.innerHTML = '🚫 AI Erişimi Askıya Alındı';
-      } else if (q.sinirsiz) {
+        return;
+      }
+      if (data.sinirsiz) {
         badge.style.background = '#dcfce7';
         badge.style.color = '#15803d';
         badge.style.borderColor = '#86efac';
         badge.innerHTML = '⚡ Yapay Zekâ: <strong>SINIRSIZ (Yönetici)</strong>';
+        return;
+      }
+
+      const activeLocked = isAssistantLockedForStudent(studentActiveRole, data);
+      if (activeLocked) {
+        badge.style.background = '#fef2f2';
+        badge.style.color = '#b91c1c';
+        badge.style.borderColor = '#fca5a5';
+        badge.style.cursor = 'pointer';
+        badge.innerHTML = '🔒 <strong>Kilitli</strong> · Üyeliğini Yükselt →';
+        badge.onclick = () => {
+          if (typeof window.openSubscriptionUpgradeModal === 'function') window.openSubscriptionUpgradeModal();
+          else window.location.href = '/Paketler.html?ref=ai-mentor';
+        };
+        return;
+      }
+
+      badge.style.background = '#f3e1cf';
+      badge.style.color = '#7a4f2d';
+      badge.style.borderColor = '#d9d3c3';
+
+      if (studentActiveRole === 'ogretmen_ikizi') {
+        const ikizKalan = data.ogretmenIkizi?.aylikKalan ?? 0;
+        const ikizLimit = data.ogretmenIkizi?.aylikLimit ?? 0;
+        badge.innerHTML = `👨‍🏫 <strong>Öğretmen İkizi:</strong> Aylık Kalan ${ikizKalan}/${ikizLimit}${bonusText}`;
+      } else if (studentActiveRole === 'soru_cozum') {
+        const gKalan = data.sokratik?.gunlukKalan ?? data.mesaj?.kalan ?? 0;
+        const gLimit = data.sokratik?.gunlukLimit ?? data.mesaj?.etkinLimit ?? 0;
+        const aKalan = data.sokratik?.aylikKalan ?? 0;
+        badge.innerHTML = `📝 <strong>Adım Adım Soru Çözümü:</strong> Günlük ${gKalan}/${gLimit} · Aylık ${aKalan}${bonusText}`;
+      } else if (studentActiveRole === 'ai_koc') {
+        const gKalan = data.sokratik?.gunlukKalan ?? data.mesaj?.kalan ?? 0;
+        const gLimit = data.sokratik?.gunlukLimit ?? data.mesaj?.etkinLimit ?? 0;
+        const aKalan = data.sokratik?.aylikKalan ?? 0;
+        badge.innerHTML = `🎯 <strong>AI Koç:</strong> Günlük ${gKalan}/${gLimit} · Aylık ${aKalan}${bonusText}`;
       } else {
-        badge.style.background = '#f3e1cf';
-        badge.style.color = '#7a4f2d';
-        badge.style.borderColor = '#d9d3c3';
-        const sokratikGunluk = q.sokratik ? `${q.sokratik.gunlukKalan}/${q.sokratik.gunlukLimit}` : `${q.mesaj?.kalan || 0}/${q.mesaj?.etkinLimit || 0}`;
-        const sokratikAylik = q.sokratik?.aylikKalan !== undefined ? ` (Aylık: ${q.sokratik.aylikKalan})` : '';
-        const ikizAylik = q.ogretmenIkizi ? ` · 👨‍🏫 İkiz: ${q.ogretmenIkizi.aylikKalan}` : '';
-        badge.innerHTML = `⚡ <strong>Sokratik:</strong> ${sokratikGunluk}${sokratikAylik}${ikizAylik}${bonusText}`;
+        // Sokratik Mentör: Ücretsiz planda Haftalık 3 / Aylık 12, ücretli planda Günlük / Aylık
+        if (data.sokratik && data.sokratik.haftalikLimit != null) {
+          badge.innerHTML = `⚡ <strong>Sokratik Mentör:</strong> Haftalık ${data.sokratik.haftalikKalan}/${data.sokratik.haftalikLimit} · Aylık ${data.sokratik.aylikKalan}/${data.sokratik.aylikLimit}${bonusText}`;
+        } else {
+          const gKalan = data.sokratik?.gunlukKalan ?? data.mesaj?.kalan ?? 0;
+          const gLimit = data.sokratik?.gunlukLimit ?? data.mesaj?.etkinLimit ?? 0;
+          const aKalan = data.sokratik?.aylikKalan ?? 0;
+          badge.innerHTML = `⚡ <strong>Sokratik Mentör:</strong> Günlük ${gKalan}/${gLimit} · Aylık ${aKalan}${bonusText}`;
+        }
       }
     }
+
+    $('studentAiLockedUpgradeBtn')?.addEventListener('click', () => {
+      if (typeof window.openSubscriptionUpgradeModal === 'function') window.openSubscriptionUpgradeModal();
+      else window.location.href = '/Paketler.html?ref=ai-mentor';
+    });
 
     async function updateStudentAiQuotaBadge(preloadedQuota = null) {
       if (preloadedQuota) {
@@ -2413,7 +2534,10 @@ button,select{font:inherit}
         pill.style.fontWeight = '600';
         studentActiveRole = pill.dataset.role || 'ai_mentor';
         if ($('studentAiRoleDesc')) $('studentAiRoleDesc').textContent = studentRoleDescs[studentActiveRole] || '';
-        $('studentAiInput')?.focus();
+        renderStudentAiQuotaBadge(lastStudentQuota);
+        if (!isAssistantLockedForStudent(studentActiveRole, lastStudentQuota)) {
+          $('studentAiInput')?.focus();
+        }
       });
     });
 
