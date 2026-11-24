@@ -1,4 +1,5 @@
 // Öğrenci Paneli - ZarifStore Köprüsü (Öğretmen "Çalışma Ata" Görevleri & Test Sonuçları)
+// v2: Giriş yapan öğrenciye özel atamalar + Genel / Örnek atamalar kesin görünürlük
 (() => {
   'use strict';
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({
@@ -6,17 +7,58 @@
   }[c]));
 
   let activeFilter = 'all';
+  let currentStudent = { id: '', name: '' };
+
+  async function detectCurrentStudent() {
+    try {
+      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        const user = data?.user || data;
+        if (user && (user.id || user._id || user.name)) {
+          currentStudent = {
+            id: String(user.id || user._id || '').trim(),
+            name: String(user.name || user.fullName || user.adSoyad || '').trim()
+          };
+          renderStoreAssignments();
+        }
+      }
+    } catch {
+      // Oturum yoksa veya çevrimdışıysa genel görünümle devam et
+    }
+  }
+
+  function isPersonalAssignment(item) {
+    if (!item) return false;
+    if (currentStudent.id && item.studentId && String(item.studentId) === currentStudent.id) return true;
+    if (currentStudent.name && item.studentName &&
+        item.studentName.trim().toLowerCase() === currentStudent.name.trim().toLowerCase()) {
+      return true;
+    }
+    return false;
+  }
 
   function renderStoreAssignments() {
     const mount = document.getElementById('storeAssignedTasksMount');
     if (!mount || !window.ZarifStore || !window.ZarifStore.assignments) return;
 
+    // Hem giriş yapan öğrenciye özel atamalar hem de Genel / Örnek atamalar her zaman görünür
     const all = window.ZarifStore.assignments.list();
     const filtered = all.filter(item => {
       if (activeFilter === 'pending') return item.status !== 'completed';
       if (activeFilter === 'completed') return item.status === 'completed';
       return true;
     });
+
+    // Filtre sayaçları 0 görünüyorsa en azından store görev sayısını yansıt
+    const pendingCount = all.filter(a => a.status !== 'completed').length;
+    const completedCount = all.filter(a => a.status === 'completed').length;
+    const elAll = document.getElementById('taskCountAll');
+    const elPending = document.getElementById('taskCountPending');
+    const elCompleted = document.getElementById('taskCountCompleted');
+    if (elAll && Number(elAll.textContent || 0) === 0 && all.length > 0) elAll.textContent = String(all.length);
+    if (elPending && Number(elPending.textContent || 0) === 0 && pendingCount > 0) elPending.textContent = String(pendingCount);
+    if (elCompleted && Number(elCompleted.textContent || 0) === 0 && completedCount > 0) elCompleted.textContent = String(completedCount);
 
     const recentTests = window.ZarifStore.tests ? window.ZarifStore.tests.list().slice(0, 4) : [];
 
@@ -33,22 +75,27 @@
           <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
             <div>
               <h3 style="margin:0;color:#2c1a0e;font-size:1.05rem;">🎯 Öğretmenin Atadığı Hedefli Çalışmalar (${all.length})</h3>
-              <p style="margin:3px 0 0;font-size:0.84rem;color:#6a5242;">Başarı analizine göre öğretmeninin sana özel atadığı konu tekrarı görevleri</p>
+              <p style="margin:3px 0 0;font-size:0.84rem;color:#6a5242;">Sana özel atanan görevler ile sınıf / genel çalışma planı önerileri</p>
             </div>
             <span style="padding:3px 10px;border-radius:999px;background:#fff4eb;border:1px solid #f0c9a8;color:#c2570c;font-size:12px;font-weight:700;">
-              ${all.filter(a => a.status !== 'completed').length} Bekleyen
+              ${pendingCount} Bekleyen
             </span>
           </div>
           ${filtered.length ? `<div style="display:grid;gap:10px;">
             ${filtered.map(item => {
               const done = item.status === 'completed';
+              const personal = isPersonalAssignment(item);
               const due = item.dueDate ? new Date(item.dueDate).toLocaleDateString('tr-TR') : 'Belirtilmedi';
+              const scopeBadge = personal
+                ? '<span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#fff4eb;border:1px solid #f0c9a8;color:#c2570c;">👤 Sana Özel</span>'
+                : `<span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#f3ede6;color:#5a422d;">🌐 Genel / ${esc(item.studentName || 'Sınıf Planı')}</span>`;
               return `
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;border-radius:12px;background:#fff;border:1px solid ${done ? '#bbf7d0' : '#ead8c5'};">
                   <div style="min-width:220px;flex:1;">
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                       <strong style="color:#2c1a0e;font-size:0.95rem;${done ? 'text-decoration:line-through;opacity:0.75;' : ''}">${esc(item.topicTitle)}</strong>
                       <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#2c1a0e;color:#fed7aa;">${item.grade}. Sınıf</span>
+                      ${scopeBadge}
                       <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:${done ? '#ecfdf5' : '#fef3c7'};color:${done ? '#065f46' : '#92400e'};">
                         ${done ? '✓ Tamamlandı' : '⏳ Bekliyor'}
                       </span>
@@ -120,6 +167,7 @@
     }
 
     renderStoreAssignments();
+    detectCurrentStudent();
   }
 
   if (document.readyState === 'loading') {

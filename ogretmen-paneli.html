@@ -1379,7 +1379,20 @@ body.teacher-menu-open {
           <p class="hint">Sınıf başarı trendleri, puan dağılımı, en çok zorlanılan konular ve tek tıkla hedefli çalışma atama</p>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <a class="btn light sm" href="#student-results" style="text-decoration:none;font-weight:600">📋 Detaylı Sonuçlar Tablosu →</a>
+          <select id="analyticsStudentSelect" aria-label="Öğrenci Seç" style="padding:8px 12px;border-radius:9px;border:1px solid #dccab8;background:#fffaf5;color:#2c1a0e;font-size:0.86rem;font-weight:600;min-width:190px;cursor:pointer;">
+            <option value="">👥 Tüm Kayıtlı Öğrenciler</option>
+          </select>
+          <select id="analyticsSubjectSelect" aria-label="Ders Seç" style="padding:8px 12px;border-radius:9px;border:1px solid #dccab8;background:#fffaf5;color:#2c1a0e;font-size:0.86rem;font-weight:600;min-width:155px;cursor:pointer;">
+            <option value="all">📘 Tüm Dersler (Matematik)</option>
+            <option value="5">5. Sınıf Matematik</option>
+            <option value="6">6. Sınıf Matematik</option>
+            <option value="7">7. Sınıf Matematik</option>
+            <option value="8">8. Sınıf Matematik</option>
+            <option value="9">9. Sınıf Matematik</option>
+            <option value="10">10. Sınıf Matematik</option>
+            <option value="11">11. Sınıf Matematik</option>
+            <option value="12">12. Sınıf Matematik</option>
+          </select>
           <button class="btn light" id="printAnalytics" type="button">Raporu yazdır / PDF kaydet</button>
         </div>
       </div>
@@ -1408,7 +1421,10 @@ body.teacher-menu-open {
         </article>
         <article style="background:#fffaf5;border:1px solid #ead8c5;border-radius:14px;padding:16px;">
           <h3 style="display:flex;align-items:center;gap:7px;margin-bottom:8px;"><i data-lucide="target" style="width:18px;height:18px;color:#c2570c;"></i> Hedefli Çalışma Önerileri (%60 Altı)</h3>
-          <p class="hint" style="margin-bottom:10px;">Eksik tespit edilen sonuçlar için konu seçip tek tıkla öğrencinin <strong>Ödevler / Çalışma Planım</strong> ekranına gönderin.</p>
+          <p class="hint" style="margin-bottom:8px;">Eksik tespit edilen sonuçlar için konu seçip tek tıkla öğrencinin <strong>Ödevler / Çalışma Planım</strong> ekranına gönderin.</p>
+          <div id="analyticsAssignTargetBanner" style="margin-bottom:10px;padding:7px 11px;border-radius:9px;background:#fbf1e8;border:1px solid #e4cbb2;font-size:12.5px;color:#4a2e1a;">
+            🎯 <strong>Atama Hedefi:</strong> Tüm Kayıtlı Öğrenciler (Genel Çalışma Planı)
+          </div>
           <div id="recommendationList" class="dashboard-list"></div>
           <div id="assignedTasksFeed" style="margin-top:14px;"></div>
         </article>
@@ -2328,8 +2344,8 @@ body.teacher-menu-open {
 <script src="/assets/ogretmen-gezinme.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="/assets/app-store.js"></script>
-<script src="/assets/ogretmen-yonetim.js"></script>
+<script src="/assets/app-store.js?v=2"></script>
+<script src="/assets/ogretmen-yonetim.js?v=2"></script>
 <script src="/assets/ogrenci-gelisim.js"></script>
 <script src="/assets/ogretmen-canli.js"></script>
 <script>

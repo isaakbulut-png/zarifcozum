@@ -451,7 +451,74 @@
     `;
   }
 
+  function getRegisteredAnalyticsStudents() {
+    const map = new Map();
+    const sources = [
+      ...(Array.isArray(state.students) ? state.students.filter(s => s && s.active !== false) : []),
+      ...(Array.isArray(management.ogrenciler) ? management.ogrenciler : [])
+    ];
+    sources.forEach(s => {
+      const id = String(s.id || s._id || s.studentId || s.name || '').trim();
+      const name = String(s.name || s.fullName || s.adSoyad || '').trim();
+      if (!name) return;
+      const key = id || name.toLowerCase();
+      if (!map.has(key)) {
+        map.set(key, {
+          id: id || key,
+          name,
+          grade: Number(s.grade || s.sinif) || 7,
+          section: String(s.section || s.sube || '').trim()
+        });
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+  }
+
+  function populateAnalyticsStudentSelect() {
+    const sel = $('analyticsStudentSelect');
+    if (!sel) return;
+    const prevVal = sel.value;
+    const students = getRegisteredAnalyticsStudents();
+    const opts = ['<option value="">👥 Tüm Kayıtlı Öğrenciler (Genel)</option>'];
+    students.forEach(s => {
+      const gradeTxt = s.grade ? ` (${s.grade}. Sınıf${s.section ? ' ' + s.section : ''})` : '';
+      opts.push(`<option value="${escapeHtml(s.id)}" data-name="${escapeHtml(s.name)}" data-grade="${s.grade}">${escapeHtml(s.name)}${escapeHtml(gradeTxt)}</option>`);
+    });
+    sel.innerHTML = opts.join('');
+    if (prevVal && [...sel.options].some(o => o.value === prevVal)) {
+      sel.value = prevVal;
+    }
+    updateAnalyticsAssignTargetBanner();
+  }
+
+  function getSelectedAnalyticsTarget() {
+    const sel = $('analyticsStudentSelect');
+    if (!sel || !sel.value) return null;
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt || !opt.value) return null;
+    return {
+      id: opt.value,
+      name: opt.dataset.name || opt.textContent.trim(),
+      grade: Number(opt.dataset.grade) || 7
+    };
+  }
+
+  function updateAnalyticsAssignTargetBanner() {
+    const banner = $('analyticsAssignTargetBanner');
+    if (!banner) return;
+    const target = getSelectedAnalyticsTarget();
+    if (target) {
+      banner.innerHTML = `🎯 <strong>Atama Hedefi:</strong> <span style="color:#c2570c;font-weight:700;">${escapeHtml(target.name)}</span> (${target.grade}. Sınıf · Gerçek Öğrenci)`;
+    } else {
+      banner.innerHTML = '🎯 <strong>Atama Hedefi:</strong> Tüm Kayıtlı Öğrenciler (Genel Çalışma Planı)';
+    }
+  }
+
   function renderAnalytics() {
+    populateAnalyticsStudentSelect();
+    const selectedTarget = getSelectedAnalyticsTarget();
+    const selectedGradeFilter = $('analyticsSubjectSelect')?.value || 'all';
+
     const serverResults = [...(management.sonuclar || [])].filter(result =>
       result.score !== null && result.score !== undefined && Number.isFinite(Number(result.score))
     ).map(r => ({
@@ -476,7 +543,17 @@
 
     const combined = [...storeResults, ...serverResults];
     const isMock = combined.length === 0;
-    const results = isMock ? ANALYTICS_MOCK_RESULTS : combined;
+    let results = isMock ? ANALYTICS_MOCK_RESULTS : combined;
+    if (selectedGradeFilter !== 'all') {
+      const gradeFiltered = results.filter(r => Number(r.grade) === Number(selectedGradeFilter));
+      if (gradeFiltered.length) results = gradeFiltered;
+    }
+    if (selectedTarget && !isMock) {
+      const studentFiltered = results.filter(r =>
+        String(r.studentName || '').toLowerCase() === selectedTarget.name.toLowerCase()
+      );
+      if (studentFiltered.length) results = studentFiltered;
+    }
 
     const mockBadge = $('analyticsMockBadge');
     if (mockBadge) mockBadge.hidden = !isMock;
@@ -563,13 +640,20 @@
       btn.addEventListener('click', () => {
         const selectEl = $(btn.dataset.selectId);
         const topicTitle = selectEl ? selectEl.value : 'Matematik Tekrarı';
-        const studentName = btn.dataset.student || 'Öğrenci';
-        const grade = Number(btn.dataset.grade) || 7;
+        const selectedRealStudent = getSelectedAnalyticsTarget();
+        const studentId = selectedRealStudent ? selectedRealStudent.id : '';
+        const studentName = selectedRealStudent
+          ? selectedRealStudent.name
+          : (btn.dataset.student || 'Tüm Kayıtlı Öğrenciler');
+        const grade = selectedRealStudent
+          ? selectedRealStudent.grade
+          : (Number(btn.dataset.grade) || 7);
         const sourceTestTitle = btn.dataset.test || '';
         const scoreAtAssign = Number(btn.dataset.score);
 
         if (window.ZarifStore && window.ZarifStore.assignments) {
           window.ZarifStore.assignments.add({
+            studentId,
             studentName,
             grade,
             topicTitle,
@@ -578,7 +662,9 @@
             note: `${sourceTestTitle} (%${scoreAtAssign}) sonucuna göre öğretmen tarafından hedefli tekrar çalışması atandı.`
           });
         }
-        btn.textContent = '✓ Öğrenci Paneline Atandı';
+        btn.textContent = selectedRealStudent
+          ? `✓ ${selectedRealStudent.name} İçin Atandı`
+          : '✓ Öğrenci Paneline Atandı';
         btn.style.background = '#2f6f4e';
         btn.disabled = true;
         renderAssignedTasksFeed();
@@ -1365,6 +1451,13 @@
       observed.forEach(section => observer.observe(section));
     }
     wireServerWorkspace();
+    $('analyticsStudentSelect')?.addEventListener('change', () => {
+      updateAnalyticsAssignTargetBanner();
+      renderAnalytics();
+    });
+    $('analyticsSubjectSelect')?.addEventListener('change', () => {
+      renderAnalytics();
+    });
     if (window.ZarifStore && window.ZarifStore.events) {
       window.ZarifStore.events.subscribe('tests', renderAnalytics);
       window.ZarifStore.events.subscribe('assignments', renderAssignedTasksFeed);
