@@ -793,7 +793,6 @@ button,select{font:inherit}
         </div>
       </div>
       <div id="stmDashboardMount"></div>
-      <div id="pratik-test"></div>
     </section>
 
     <section class="panel-view" id="kazanim-testi" data-panel-view="kazanim-testi">
@@ -3389,12 +3388,13 @@ button,select{font:inherit}
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/ogrenci-gelisim.js"></script>
 <script src="/assets/pratik.js"></script>
-<script src="/assets/soru-test-merkezi.js?v=2" defer></script>
+<script src="/assets/soru-test-merkezi.js?v=3" defer></script>
 <script src="/assets/ogrenci-konu-calis.js?v=3" defer></script>
 <script>
-  [["test", "test"], ["kazanim", "kazanim"]].forEach(([id, mod]) => {
-    ZarifPratik.mount(document.getElementById("pratik-" + id), {mod});
-  });
+  const pratikKazanimEl = document.getElementById("pratik-kazanim");
+  if (pratikKazanimEl && window.ZarifPratik) {
+    ZarifPratik.mount(pratikKazanimEl, { mod: "kazanim" });
+  }
 </script>
 <script src="/assets/breadcrumb.js"></script>
   <script src="/assets/site-media-targets.js"></script>
