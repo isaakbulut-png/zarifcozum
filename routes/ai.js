@@ -1350,6 +1350,8 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
           lessonPages: generated.lessonPages || [],
           practicalNotes: generated.practicalNotes || [],
           flashcards: generated.flashcards || [],
+          referenceBookPages: generated.referenceBookPages || [],
+          ragSourceCount: generated.ragSourceCount || { books: 0, klavuz: 0 },
           detailed_content: generated.detailed_content,
           illustrations: generated.illustrations || [],
           teacherNotes
@@ -1376,9 +1378,23 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       const lessonPages = Array.isArray(req.body?.lessonPages) ? req.body.lessonPages.map((p, idx) => ({
         pageNumber: Number(p?.pageNumber) || (idx + 1),
         title: String(p?.title || `${idx + 1}. Sayfa`).trim(),
+        storyOrContext: String(p?.storyOrContext || ''),
+        keyRuleBox: String(p?.keyRuleBox || ''),
+        visualSvg: typeof p?.visualSvg === 'string' ? p.visualSvg.trim() : (typeof p?.svgDiagram === 'string' ? p.svgDiagram.trim() : ''),
+        commonMistakeBox: String(p?.commonMistakeBox || ''),
+        miniChallenge: String(p?.miniChallenge || ''),
         content: String(p?.content || ''),
-        svgDiagram: typeof p?.svgDiagram === 'string' ? p.svgDiagram.trim() : ''
+        svgDiagram: typeof p?.svgDiagram === 'string' ? p.svgDiagram.trim() : (typeof p?.visualSvg === 'string' ? p.visualSvg.trim() : '')
       })) : [];
+      const referenceBookPages = Array.isArray(req.body?.referenceBookPages) ? req.body.referenceBookPages.map(rp => ({
+        book: String(rp?.book || '').trim(),
+        theme: String(rp?.theme || '').trim(),
+        page: Number(rp?.page) || 0,
+        r2_key: String(rp?.r2_key || '').trim(),
+        imageUrl: String(rp?.imageUrl || '').trim(),
+        contentType: String(rp?.contentType || '').trim(),
+        score: Number(rp?.score) || 0
+      })).filter(rp => rp.book || rp.imageUrl) : [];
       const practicalNotes = Array.isArray(req.body?.practicalNotes)
         ? req.body.practicalNotes.map(n => String(n || '').trim()).filter(Boolean)
         : [];
@@ -1421,6 +1437,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         lessonPages,
         practicalNotes,
         flashcards,
+        referenceBookPages,
         illustrations,
         teacherNotes,
         status,

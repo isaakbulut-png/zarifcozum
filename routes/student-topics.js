@@ -20,8 +20,13 @@ function normalizeLessonPages(doc) {
     return doc.lessonPages.map((p, i) => ({
       pageNumber: p.pageNumber || (i + 1),
       title: p.title || `${i + 1}. Sayfa`,
+      storyOrContext: p.storyOrContext || '',
+      keyRuleBox: p.keyRuleBox || '',
+      visualSvg: p.visualSvg || p.svgDiagram || '',
+      commonMistakeBox: p.commonMistakeBox || '',
+      miniChallenge: p.miniChallenge || '',
       content: p.content || '',
-      svgDiagram: p.svgDiagram || ''
+      svgDiagram: p.svgDiagram || p.visualSvg || ''
     }));
   }
   const raw = doc.detailed_content || '';
@@ -236,6 +241,7 @@ function createStudentTopicsRouter({ requireAuth }) {
           lessonPages: normalizeLessonPages(topic),
           practicalNotes: Array.isArray(topic.practicalNotes) ? topic.practicalNotes : [],
           flashcards: Array.isArray(topic.flashcards) ? topic.flashcards : [],
+          referenceBookPages: Array.isArray(topic.referenceBookPages) ? topic.referenceBookPages : [],
           detailed_content: topic.detailed_content || ''
         },
         progress: {

@@ -819,6 +819,148 @@ ${soruDetaylari || 'Detay bulunmuyor.'}
   }
 }
 
+function buildR2PublicUrl(r2Key) {
+  const key = String(r2Key || '').trim().replace(/^\/+/, '');
+  if (!key) return '';
+  const base = String(process.env.R2_PUBLIC_URL || process.env.CLOUDFLARE_R2_PUBLIC_URL || '').trim().replace(/\/+$/, '');
+  return base ? `${base}/${key}` : `/uploads/${key}`;
+}
+
+function stripRawMarkdownStars(text) {
+  const raw = String(text || '');
+  if (!raw) return '';
+  // LaTeX ($...$ ve $$...$$) bloklarını koruyarak dışındaki ham ** ve * işaretlerini temizle
+  const parts = raw.split(/(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$)/g);
+  return parts.map((segment, idx) => {
+    if (idx % 2 === 1) return segment; // LaTeX dokunulmaz
+    return segment
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*\n]+)\*/g, '$1')
+      .replace(/(^|\n)\s*\*\s+/g, '$1• ')
+      .replace(/\*\*/g, '');
+  }).join('').trim();
+}
+
+export async function fetchPineconeCurriculumContext({
+  grade,
+  unitTopic = '',
+  subTopic = '',
+  ders = 'Matematik',
+  topKBook = 6,
+  topKKlavuz = 3
+}) {
+  const g = Number(grade);
+  const referenceBookPages = [];
+  const contextParts = [];
+
+  if (!g || g < 5 || g > 12 || !process.env.PINECONE_API_KEY || !process.env.GEMINI_API_KEY) {
+    return { ragText: '', referenceBookPages, bookMatchCount: 0, klavuzMatchCount: 0 };
+  }
+
+  try {
+    const searchText = `${g}. sınıf ${ders} ${unitTopic} ${subTopic}`.trim();
+    const embeddingResponse = await aiClient.models.embedContent({
+      model: 'gemini-embedding-001',
+      contents: searchText,
+      config: { taskType: 'RETRIEVAL_QUERY', outputDimensionality: 768 }
+    });
+    const queryVector = embeddingResponse.embedding?.values || embeddingResponse.embeddings?.[0]?.values;
+    if (!queryVector) {
+      return { ragText: '', referenceBookPages, bookMatchCount: 0, klavuzMatchCount: 0 };
+    }
+
+    const filter = { grade: { $eq: g } };
+    const [kitapRes, klavuzRes] = await Promise.all([
+      pineconeIndex.namespace(DERS_KITABI_NAMESPACE).query({
+        vector: queryVector,
+        topK: topKBook,
+        includeMetadata: true,
+        filter
+      }).catch(() => ({ matches: [] })),
+      pineconeIndex.namespace(KLAVUZ_NAMESPACE).query({
+        vector: queryVector,
+        topK: topKKlavuz,
+        includeMetadata: true,
+        filter
+      }).catch(() => ({ matches: [] }))
+    ]);
+
+    const subWords = `${unitTopic} ${subTopic}`
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 2);
+
+    const scoreMatch = m => {
+      const text = String(m.metadata?.text || '').toLowerCase();
+      const theme = String(m.metadata?.theme || '').toLowerCase();
+      let bonus = 0;
+      for (const w of subWords) {
+        if (theme.includes(w)) bonus += 0.18;
+        if (text.includes(w)) bonus += 0.06;
+      }
+      if (/\[görsel betimleme\]/i.test(text)) bonus += 0.05;
+      return { ...m, finalScore: (m.score || 0) + bonus };
+    };
+
+    const kitapMatches = (kitapRes.matches || [])
+      .filter(m => (m.score || 0) >= 0.40)
+      .map(scoreMatch)
+      .sort((a, b) => b.finalScore - a.finalScore)
+      .slice(0, 5);
+
+    const seenPages = new Set();
+    for (const m of kitapMatches) {
+      const md = m.metadata || {};
+      const r2Key = String(md.r2_key || '').trim();
+      const book = String(md.book || '').trim();
+      const theme = String(md.theme || '').trim();
+      const page = Number(md.page) || 0;
+      const pageKey = r2Key || `${book}::${page}`;
+      if (!seenPages.has(pageKey)) {
+        seenPages.add(pageKey);
+        referenceBookPages.push({
+          book,
+          theme,
+          page,
+          r2_key: r2Key,
+          imageUrl: buildR2PublicUrl(r2Key),
+          contentType: String(md.content_type || ''),
+          score: Number((m.score || 0).toFixed(3))
+        });
+      }
+      const txt = String(md.text || '').trim();
+      if (txt) {
+        contextParts.push(`[MEB DERS KİTABI | ${book} | ${theme} | Sayfa ${page}]\n${txt.slice(0, 2400)}`);
+      }
+    }
+
+    const klavuzMatches = (klavuzRes.matches || [])
+      .filter(m => (m.score || 0) >= 0.40)
+      .map(scoreMatch)
+      .sort((a, b) => b.finalScore - a.finalScore)
+      .slice(0, 2);
+
+    for (const m of klavuzMatches) {
+      const md = m.metadata || {};
+      const txt = String(md.text || '').trim();
+      if (txt) {
+        contextParts.push(`[MEB MAARİF KILAVUZU | ${md.theme || ''} | Sayfa ${md.page || ''}]\n${txt.slice(0, 1800)}`);
+      }
+    }
+
+    return {
+      ragText: contextParts.join('\n\n---\n\n'),
+      referenceBookPages,
+      bookMatchCount: kitapMatches.length,
+      klavuzMatchCount: klavuzMatches.length
+    };
+  } catch (err) {
+    console.warn('[RAG] fetchPineconeCurriculumContext uyarısı:', err.message);
+    return { ragText: '', referenceBookPages, bookMatchCount: 0, klavuzMatchCount: 0 };
+  }
+}
+
 export async function generateMaarifCurriculumContent({
   grade,
   unitTopic,
@@ -834,12 +976,30 @@ export async function generateMaarifCurriculumContent({
   const codeParts = outcomeCode.split('.');
   const themeCode = codeParts.length >= 3 ? codeParts.slice(0, 3).join('.') : `MAT.${g}.1`;
 
-  const pedagogy = getMaarifPedagogyInstruction(g);
+  // 1. Pinecone ders_kitabi + klavuz bağlamını ve R2 sayfa referanslarını çek
+  const ragBundle = await fetchPineconeCurriculumContext({
+    grade: g,
+    unitTopic,
+    subTopic,
+    ders
+  });
+
+  const isMiddleSchool = g >= 5 && g <= 8;
+  const gradeBandRule = isMiddleSchool
+    ? `ORTAOKUL KADEMESİ (${g}. Sınıf, 10–14 yaş):
+- Oyunlaştırılmış, günlük yaşam senaryolu, hikâyeleştirilmiş ve merak uyandıran Türkiye Yüzyılı Maarif Modeli dili kullan.
+- Uzun düz paragraflar KESİNLİKLE YASAKTIR! Her metin bloğu en fazla 2-3 kısa, nefes alan, akıcı cümleden oluşsun.
+- Somut örnekler, oyun/keşif benzetmeleri ve öğrencinin kendi keşfedeceği mini sorularla ilerle.`
+    : `LİSE KADEMESİ (${g}. Sınıf):
+- Olgun, analitik, çocuksu ifadelerden uzak akademik ama anlaşılır bir Maarif Modeli dili kullan.
+- Değişkenler arası ilişkiler, matematiksel modelleme, grafik/tablo yorumlama, ispat/doğrulama ve problem çözme stratejilerine odaklan.
+- Uzun yorucu düz paragraflar yerine net, yapılandırılmış mantıksal adımlar kullan.`;
+
   const primaryModel = sanitizeModelName(activeModel || resolveAIModel('konu_anlatimi'));
   const candidateModels = [...new Set([primaryModel, 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'])];
 
   const prompt = `Sen MEB Türkiye Yüzyılı Maarif Modeli'ne %100 hâkim uzman bir ${g}. Sınıf ${ders} öğretmenisin.
-Aşağıdaki konu için öğrencilerin sıfır ek maliyetle çalışabileceği, 5 sayfalık derin, görsel (SVG) ve KaTeX formül destekli zengin konu anlatımı, pratik hap bilgiler ve etkileşimli bilgi kartları üret.
+Aşağıdaki konu için 5 sayfalık, yapılandırılmış bloklardan oluşan, her sayfası zorunlu renkli <svg> görselli ve KaTeX formüllü zengin konu anlatımı, pratik hap bilgiler ve bilgi kartları üret.
 
 KONU BİLGİLERİ:
 - Sınıf: ${g}. Sınıf
@@ -850,63 +1010,53 @@ KONU BİLGİLERİ:
 ${officialBoundary ? `- Resmi MEB Çerçevesi: ${officialBoundary}` : ''}
 ${teacherNotes ? `- Öğretmen Özel Odak Notu: ${teacherNotes}` : ''}
 
-PEDAGOJİK YÖNERGE:
-${pedagogy}
+${ragBundle.ragText ? `PINECONE MEB DERS KİTABI VE KILAVUZ REFERANS BAĞLAMI (MUTLAKA BU KAYNAKLARA DAYAN):
+${ragBundle.ragText}
+` : ''}
+KADEME PEDAGOJİ KURALI (KESİN UYULACAK):
+${gradeBandRule}
 
-GÖRSEL VE FORMÜL KURALI:
-${visualInstruction}
+ZORUNLU GÖRSEL (<svg>) VE [Görsel Betimleme] DÖNÜŞÜM KURALI:
+- Sana sağlanan MEB ders kitabı bağlamındaki [Görsel Betimleme] açıklamalarını, sayısal verileri, grafikleri ve etkinlik şekillerini incele; her bir sayfa (1'den 5'e kadar TÜM sayfalar) için konuyu somutlaştıran, etiketli, anlaşılır ve taşmayan (viewBox="0 0 420 200" ayarlı) renkli <svg> çizimleri üret.
+- ${visualInstruction}
+- Renk paleti: koyu kahve #2c1a0e, terracotta #c2570c, sıcak krem #fbf1e8, zümrüt #059669, mavi #2563eb. Metinler birbirinin üstüne binmesin, viewBox dışına taşmasın.
+
+TEMİZ METİN KURALI (KRİTİK):
+- Metin alanlarında ASLA ham Markdown yıldızları (**kalın** veya *italik*) kullanma! Düz, temiz Türkçe cümleler ve yalnızca matematik formülleri için $...$ veya $$...$$ (LaTeX) kullan.
 
 ÇIKTI FORMATI (KESİNLİKLE SADECE GEÇERLİ JSON DÖNDÜR):
 {
-  "title": "Konu için öğrenciyi motive eden net başlık",
-  "short_summary": "2-3 cümlelik net konu özeti",
+  "title": "Konu için net, motive edici başlık",
+  "short_summary": "2-3 cümlelik temiz özet (ham ** veya * yok)",
   "lessonPages": [
     {
       "pageNumber": 1,
       "title": "1. Sayfa: Gerçek Hayat Keşfi",
-      "content": "Günlük yaşamdan somut bir senaryo ile merak uyandıran giriş, temel tanımlar ve $LaTeX$ formüller.",
-      "svgDiagram": "<svg viewBox=\"0 0 360 160\">...temiz pedagojik SVG diyagram...</svg>"
-    },
-    {
-      "pageNumber": 2,
-      "title": "2. Sayfa: Kavram İnşası ve Temel Kurallar",
-      "content": "Konunun temel kuralları, formülleri ($$...$$) ve kavram şeması açıklaması.",
-      "svgDiagram": "<svg viewBox=\"0 0 360 160\">...görsel şema veya şekil...</svg>"
-    },
-    {
-      "pageNumber": 3,
-      "title": "3. Sayfa: Adım Adım Çözümlü Örnekler",
-      "content": "En az 2 farklı zorlukta çözümlü örnek (Çözüm 1. Adım, 2. Adım... şeklinde açıkla).",
-      "svgDiagram": ""
-    },
-    {
-      "pageNumber": 4,
-      "title": "4. Sayfa: Sık Yapılan Hatalar ve Kavram Yanılgıları",
-      "content": "Öğrencilerin en çok düştüğü 2-3 tuzak, yanlış ve doğru yaklaşımların karşılaştırması.",
-      "svgDiagram": ""
-    },
-    {
-      "pageNumber": 5,
-      "title": "5. Sayfa: Kendini Dene ve Özet Pekiştirme",
-      "content": "Konuyu pekiştiren 2 mini kontrol sorusu (kısa cevap anahtarıyla) ve kapanış özeti.",
-      "svgDiagram": ""
+      "storyOrContext": "MEB ders kitabındaki günlük hayat bağlamına dayalı kısa hikâye/senaryo (2-3 cümle).",
+      "keyRuleBox": "Bu sayfanın temel tanımı veya ana kuralı ($LaTeX$ formüllü, net ve kısa).",
+      "visualSvg": "<svg viewBox=\"0 0 420 200\">...MEB [Görsel Betimleme] verisinden üretilen renkli, etiketli SVG...</svg>",
+      "commonMistakeBox": "Bu aşamada dikkat edilmesi gereken yaygın bir kavram yanılgısı (1-2 cümle).",
+      "miniChallenge": "Öğrencinin hemen zihninde test edeceği 1 mini soru ve parantez içinde kısa cevabı."
     }
   ],
   "practicalNotes": [
-    "Hap Bilgi 1: Kısa, akılda kalıcı kural veya formül ($...$)",
-    "Hap Bilgi 2: ...",
-    "Hap Bilgi 3: ...",
-    "Hap Bilgi 4: ...",
-    "Hap Bilgi 5: ..."
+    "Hap Bilgi 1 (temiz metin + $LaTeX$, ham yıldız yok)",
+    "Hap Bilgi 2",
+    "Hap Bilgi 3",
+    "Hap Bilgi 4",
+    "Hap Bilgi 5"
   ],
   "flashcards": [
-    { "front": "Kart ön yüzü (soru veya kavram)", "back": "Kart arka yüzü (net cevap veya formül)", "tip": "Kısa hatırlatma ipucu" },
-    { "front": "...", "back": "...", "tip": "..." },
-    { "front": "...", "back": "...", "tip": "..." },
-    { "front": "...", "back": "...", "tip": "..." },
-    { "front": "...", "back": "...", "tip": "..." }
+    { "front": "Ön yüz soru/kavram", "back": "Arka yüz net cevap/formül", "tip": "Kısa ipucu" }
   ]
-}`;
+}
+NOT: lessonPages dizisi TAM OLARAK 5 sayfa içermelidir:
+1. Sayfa: Gerçek Hayat Keşfi
+2. Sayfa: Kavram İnşası ve Temel Kurallar
+3. Sayfa: Adım Adım Çözümlü Örnekler
+4. Sayfa: Sık Yapılan Hatalar ve Stratejiler
+5. Sayfa: Kendini Dene ve Özet Pekiştirme
+Her 5 sayfada da visualSvg dolu ve geçerli <svg viewBox="...">...</svg> olmalıdır. flashcards en az 5 kart içermelidir.`;
 
   let response = null;
   let modelName = primaryModel;
@@ -955,41 +1105,66 @@ ${visualInstruction}
     '1. Sayfa: Gerçek Hayat Keşfi',
     '2. Sayfa: Kavram İnşası ve Temel Kurallar',
     '3. Sayfa: Adım Adım Çözümlü Örnekler',
-    '4. Sayfa: Sık Yapılan Hatalar ve Kavram Yanılgıları',
+    '4. Sayfa: Sık Yapılan Hatalar ve Stratejiler',
     '5. Sayfa: Kendini Dene ve Özet Pekiştirme'
   ];
 
-  const lessonPages = (Array.isArray(parsed.lessonPages) ? parsed.lessonPages : []).slice(0, 5).map((p, idx) => ({
-    pageNumber: Number(p.pageNumber) || (idx + 1),
-    title: String(p.title || defaultTitles[idx] || `${idx + 1}. Sayfa`).trim(),
-    content: String(p.content || '').trim(),
-    svgDiagram: typeof p.svgDiagram === 'string' && p.svgDiagram.includes('<svg') ? p.svgDiagram.trim() : ''
-  }));
+  const composeLegacyContent = p => {
+    const sections = [];
+    if (p.storyOrContext) sections.push(p.storyOrContext);
+    if (p.keyRuleBox) sections.push(`Temel Kural: ${p.keyRuleBox}`);
+    if (p.commonMistakeBox) sections.push(`Dikkat Et: ${p.commonMistakeBox}`);
+    if (p.miniChallenge) sections.push(`Mini Meydan Okuma: ${p.miniChallenge}`);
+    return sections.join('\n\n');
+  };
+
+  const lessonPages = (Array.isArray(parsed.lessonPages) ? parsed.lessonPages : []).slice(0, 5).map((p, idx) => {
+    const rawSvg = typeof p.visualSvg === 'string' && p.visualSvg.includes('<svg')
+      ? p.visualSvg.trim()
+      : (typeof p.svgDiagram === 'string' && p.svgDiagram.includes('<svg') ? p.svgDiagram.trim() : '');
+    const pageObj = {
+      pageNumber: Number(p.pageNumber) || (idx + 1),
+      title: stripRawMarkdownStars(p.title || defaultTitles[idx] || `${idx + 1}. Sayfa`),
+      storyOrContext: stripRawMarkdownStars(p.storyOrContext || p.content || ''),
+      keyRuleBox: stripRawMarkdownStars(p.keyRuleBox || ''),
+      visualSvg: rawSvg,
+      commonMistakeBox: stripRawMarkdownStars(p.commonMistakeBox || ''),
+      miniChallenge: stripRawMarkdownStars(p.miniChallenge || ''),
+      svgDiagram: rawSvg
+    };
+    pageObj.content = composeLegacyContent(pageObj) || stripRawMarkdownStars(p.content || '');
+    return pageObj;
+  });
 
   while (lessonPages.length < 5) {
     const idx = lessonPages.length;
     lessonPages.push({
       pageNumber: idx + 1,
       title: defaultTitles[idx],
-      content: `${subTopic} konusu için ${idx + 1}. sayfa içeriği.`,
+      storyOrContext: `${subTopic} konusu için ${idx + 1}. sayfa özeti.`,
+      keyRuleBox: '',
+      visualSvg: '',
+      commonMistakeBox: '',
+      miniChallenge: '',
+      content: `${subTopic} konusu için ${idx + 1}. sayfa özeti.`,
       svgDiagram: ''
     });
   }
 
   const practicalNotes = (Array.isArray(parsed.practicalNotes) ? parsed.practicalNotes : [])
-    .map(n => String(n || '').trim())
+    .map(n => stripRawMarkdownStars(n))
     .filter(Boolean);
 
   const flashcards = (Array.isArray(parsed.flashcards) ? parsed.flashcards : [])
     .map(fc => ({
-      front: String(fc?.front || '').trim(),
-      back: String(fc?.back || '').trim(),
-      tip: String(fc?.tip || '').trim()
+      front: stripRawMarkdownStars(fc?.front || ''),
+      back: stripRawMarkdownStars(fc?.back || ''),
+      tip: stripRawMarkdownStars(fc?.tip || '')
     }))
     .filter(fc => fc.front && fc.back);
 
   const detailed_content = lessonPages
-    .map(p => `[SAYFA_${p.pageNumber}]\n### ${p.title}\n\n${p.content}${p.svgDiagram ? '\n\n' + p.svgDiagram : ''}`)
+    .map(p => `[SAYFA_${p.pageNumber}]\n${p.title}\n\n${p.content}${p.visualSvg ? '\n\n' + p.visualSvg : ''}`)
     .join('\n\n');
 
   const usageMeta = response.usageMetadata || {};
@@ -1004,11 +1179,16 @@ ${visualInstruction}
     subTopicTitle: subTopic,
     outcome_code: outcomeCode,
     official_boundary: officialBoundary,
-    title: String(parsed.title || `${subTopic} - Konu Anlatımı`).trim(),
-    short_summary: String(parsed.short_summary || '').trim(),
+    title: stripRawMarkdownStars(parsed.title || `${subTopic} - Konu Anlatımı`),
+    short_summary: stripRawMarkdownStars(parsed.short_summary || ''),
     lessonPages,
     practicalNotes,
     flashcards,
+    referenceBookPages: ragBundle.referenceBookPages,
+    ragSourceCount: {
+      books: ragBundle.bookMatchCount,
+      klavuz: ragBundle.klavuzMatchCount
+    },
     detailed_content,
     illustrations: []
   };
