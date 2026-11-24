@@ -22,6 +22,7 @@ const { MongoStore } = require('connect-mongo');
 const { router: authRouter, requireRole, redirectForRole } = require('./routes/auth');
 const { createAIRouter } = require('./routes/ai');
 const { createStudentTopicsRouter } = require('./routes/student-topics');
+const { createTopicsManageRouter } = require('./routes/topics-manage');
 const { createContentLibraryRouter } = require('./routes/content-library');
 const { createPaymentRouter } = require('./routes/payments');
 const { createAdminRouter } = require('./routes/admin');
@@ -727,6 +728,9 @@ app.use('/api/ai', createAIRouter({
 }));
 app.use('/api/student/topics', createStudentTopicsRouter({
   requireAuth: requireRole('student', 'teacher', 'admin')
+}));
+app.use('/api/topics', createTopicsManageRouter({
+  requireRole
 }));
 app.use('/api/content-library', createContentLibraryRouter({
   requireStaff: requireRole('teacher', 'admin'),

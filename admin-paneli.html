@@ -663,6 +663,10 @@
       <svg viewBox="0 0 24 24" style="stroke:#2dd4bf"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
       <span class="nav-text">Maarif Müfredat Gezgini</span>
     </button>
+    <button class="nav-btn" type="button" data-view="published-topics" data-admin-roles="superadmin,editor">
+      <svg viewBox="0 0 24 24" style="stroke:#fb923c"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg>
+      <span class="nav-text">Yayınlanan Konular</span>
+    </button>
 
     <!-- YAPAY ZEKÂ & ASİSTAN -->
     <div class="nav-title" data-admin-roles="superadmin,editor">Yapay Zekâ & Asistan</div>
@@ -1275,6 +1279,55 @@
             <h4>04. Süreç Becerileri</h4>
             <div id="adminTreeSkills" style="color:#7b6250;font-size:0.85rem">Lütfen bir kazanım seçin.</div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9B. YAYINLANAN KONU ANLATIMLARI YÖNETİMİ -->
+    <section id="view-published-topics" hidden>
+      <div class="panel" style="margin-top:0">
+        <div class="toolbar" style="justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h3>📖 Yayınlanan Konu Anlatımları Yönetimi</h3>
+            <p id="adminTopicsSummary" style="margin:2px 0 0;font-size:0.85rem;color:#6a5242">Tüm öğretmenlerin yayınladığı ve taslak konu anlatımları</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input type="search" id="adminTopicsSearch" placeholder="Konu, tema veya öğretmen ara…" style="padding:7px 11px;border:1px solid #dccab8;border-radius:8px;font-size:0.85rem;min-width:200px;">
+            <select id="adminTopicsGrade" style="padding:7px 10px;border:1px solid #dccab8;border-radius:8px;font-size:0.85rem;">
+              <option value="">Tüm Sınıflar</option>
+              <option value="5">5. Sınıf</option>
+              <option value="6">6. Sınıf</option>
+              <option value="7">7. Sınıf</option>
+              <option value="8">8. Sınıf</option>
+              <option value="9">9. Sınıf</option>
+              <option value="10">10. Sınıf</option>
+              <option value="11">11. Sınıf</option>
+              <option value="12">12. Sınıf</option>
+            </select>
+            <select id="adminTopicsStatus" style="padding:7px 10px;border:1px solid #dccab8;border-radius:8px;font-size:0.85rem;">
+              <option value="">Tüm Durumlar</option>
+              <option value="published">Yayında</option>
+              <option value="draft">Taslak</option>
+            </select>
+            <button class="btn sm primary" type="button" id="adminTopicsRefresh">↻ Yenile</button>
+          </div>
+        </div>
+        <div class="table-wrap" style="margin-top:12px;overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th>Sınıf / Kod</th>
+                <th>Tema &amp; Alt Konu</th>
+                <th>Oluşturan Öğretmen</th>
+                <th>Durum</th>
+                <th>Güncelleme</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="adminTopicsTbody">
+              <tr><td colspan="6" style="text-align:center;padding:24px;color:#6a5242;">Yayınlanan konular yükleniyor…</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -4968,6 +5021,7 @@
       initializePanel();
     })();
   </script>
+  <script src="/assets/admin-topics-manage.js" defer></script>
   <script src="/assets/breadcrumb.js"></script>
 </body>
 </html>

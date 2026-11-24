@@ -351,6 +351,23 @@
     currentTopic.title = ($('currEditTitle')?.value || currentTopic.title || '').trim();
     currentTopic.short_summary = ($('currEditSummary')?.value || currentTopic.short_summary || '').trim();
 
+    // Akıllı üzerine yazma kontrolü: Aynı sınıf + kazanım için zaten yayında konu varsa onay iste
+    if (targetStatus === 'published' && !currentTopic.id) {
+      try {
+        const dupParams = new URLSearchParams({
+          grade: String(currentTopic.grade),
+          unit_topic: currentTopic.unit_topic || currentTopic.themeTitle || '',
+          sub_topic: currentTopic.sub_topic || currentTopic.subTopicTitle || '',
+          outcome_code: currentTopic.outcome_code || ''
+        });
+        const dup = await apiJson('/api/topics/check-duplicate?' + dupParams.toString());
+        if (dup?.exists) {
+          const ok = confirm(`Bu kazanım (${dup.existing.sub_topic}) için zaten yayında bir konu var.\nMevcut konunun üzerine yazılsın mı?`);
+          if (!ok) return;
+        }
+      } catch (e) {}
+    }
+
     const pubBtn = $('publishCurriculumBtn');
     const draftBtn = $('saveDraftCurriculumBtn');
     if (pubBtn) pubBtn.disabled = true;
@@ -363,6 +380,7 @@
         body: JSON.stringify({ ...currentTopic, status: targetStatus })
       });
       currentTopic.status = targetStatus;
+      if (res?.data?._id) currentTopic.id = String(res.data._id);
       setStatus('🎉 ' + (res.mesaj || 'Başarıyla kaydedildi!'), 'ok');
       await loadPublishedList();
     } catch (err) {
@@ -377,39 +395,47 @@
     const listEl = $('publishedTopicsList');
     if (!listEl) return;
     const gradeFilter = $('publishedTopicsGradeFilter')?.value || '';
-    const url = '/api/ai/curriculum-content/my-list' + (gradeFilter ? `?grade=${encodeURIComponent(gradeFilter)}` : '');
+    const url = '/api/topics/manage' + (gradeFilter ? `?grade=${encodeURIComponent(gradeFilter)}` : '');
     try {
       const res = await apiJson(url);
       const items = res.items || [];
       if (!items.length) {
-        listEl.innerHTML = '<p style="margin:0;color:#6a5242;font-size:13.5px;padding:16px;text-align:center;background:#fffaf5;border:1px dashed #e2d3c3;border-radius:10px;">Henüz kaydedilmiş konu anlatımı bulunmuyor. Yukarıdaki formdan ilk konunuzu üretip yayınlayabilirsiniz.</p>';
+        listEl.innerHTML = '<p style="margin:0;color:#6a5242;font-size:13.5px;padding:16px;text-align:center;background:#fffaf5;border:1px dashed #e2d3c3;border-radius:10px;">Henüz yayınlanmış konu anlatımı bulunmuyor. Yukarıdaki formdan ilk konunuzu üretip yayınlayabilirsiniz.</p>';
         return;
       }
-      listEl.innerHTML = items.map(it => `
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:12px 14px;background:#fffaf5;border:1px solid #e6d7c8;border-radius:12px;">
+      listEl.innerHTML = items.map(it => {
+        const isPub = it.status === 'published';
+        const dateStr = it.updatedAt ? new Date(it.updatedAt).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+        return `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:13px 15px;background:#fffaf5;border:1px solid #e6d7c8;border-radius:12px;">
           <div style="min-width:0;flex:1;">
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:#2c1a0e;color:#fed7aa;">${it.grade}. Sınıf</span>
               <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:#fdf1e3;color:#9a3412;border:1px solid #e8c9a4;">${esc(it.themeCode)}</span>
-              <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:${it.status === 'published' ? '#ecfdf5' : '#fef3c7'};color:${it.status === 'published' ? '#065f46' : '#92400e'};">
-                ${it.status === 'published' ? '● Yayında' : '○ Taslak'}
+              <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:${isPub ? '#ecfdf5' : '#fef3c7'};color:${isPub ? '#065f46' : '#92400e'};">
+                ${isPub ? '● Yayında' : '○ Taslakta'}
               </span>
+              ${dateStr ? `<span style="font-size:11px;color:#8a7260;">${dateStr}</span>` : ''}
             </div>
             <div style="font-weight:700;color:#2c1a0e;font-size:14.5px;margin-top:5px;">${esc(it.title)}</div>
-            <div style="font-size:12px;color:#6a5242;margin-top:2px;">${esc(it.themeTitle)} › ${esc(it.subTopicTitle)} · ${it.pageCount} Sayfa · ${it.notesCount} Hap Bilgi · ${it.cardsCount} Kart</div>
+            <div style="font-size:12px;color:#6a5242;margin-top:2px;"><strong>${esc(it.themeTitle)}</strong> › ${esc(it.subTopicTitle)} · ${it.pageCount} Sayfa · ${it.notesCount} Hap Bilgi · ${it.cardsCount} Kart</div>
           </div>
-          <div style="display:flex;gap:8px;">
-            <button type="button" data-edit-topic="${esc(it.id)}" style="padding:7px 12px;border-radius:8px;border:1px solid #c2570c;background:#fff;color:#c2570c;font-weight:600;font-size:12.5px;cursor:pointer;">✏️ Düzenle</button>
-            <button type="button" data-del-topic="${esc(it.id)}" style="padding:7px 10px;border-radius:8px;border:1px solid #fecaca;background:#fef2f2;color:#991b1b;font-weight:600;font-size:12.5px;cursor:pointer;">Sil</button>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;">
+            <button type="button" data-preview-topic="${esc(it.id)}" style="padding:7px 11px;border-radius:8px;border:1px solid #2c1a0e;background:#fff;color:#2c1a0e;font-weight:600;font-size:12px;cursor:pointer;">👁️ Önizle</button>
+            <button type="button" data-toggle-topic="${esc(it.id)}" data-next-status="${isPub ? 'draft' : 'published'}" style="padding:7px 11px;border-radius:8px;border:1px solid ${isPub ? '#d97706' : '#059669'};background:${isPub ? '#fffbeb' : '#ecfdf5'};color:${isPub ? '#92400e' : '#065f46'};font-weight:600;font-size:12px;cursor:pointer;">
+              ${isPub ? '⏸️ Yayından Kaldır' : '🚀 Yayınla'}
+            </button>
+            <button type="button" data-del-topic="${esc(it.id)}" style="padding:7px 11px;border-radius:8px;border:1px solid #dc2626;background:#dc2626;color:#fff;font-weight:600;font-size:12px;cursor:pointer;">🗑️ Sil</button>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
 
-      listEl.querySelectorAll('[data-edit-topic]').forEach(btn => {
+      listEl.querySelectorAll('[data-preview-topic]').forEach(btn => {
         btn.addEventListener('click', async () => {
           btn.disabled = true;
           try {
-            const res = await apiJson('/api/ai/curriculum-content/' + encodeURIComponent(btn.dataset.editTopic));
+            const res = await apiJson('/api/topics/' + encodeURIComponent(btn.dataset.previewTopic));
             if (res?.data) {
               currentTopic = normalizeTopicData(res.data);
               activeStudioTab = 'pages';
@@ -417,7 +443,7 @@
               editMode = false;
               renderStudio();
               $('currPreviewWrapper')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              setStatus('Konu düzenleme için yüklendi.', 'ok');
+              setStatus('Konu önizleme & düzenleme stüdyosunda açıldı.', 'ok');
             }
           } catch (err) {
             setStatus('Konu açılamadı: ' + err.message, 'error');
@@ -427,12 +453,31 @@
         });
       });
 
-      listEl.querySelectorAll('[data-del-topic]').forEach(btn => {
+      listEl.querySelectorAll('[data-toggle-topic]').forEach(btn => {
         btn.addEventListener('click', async () => {
-          if (!confirm('Bu konu anlatımı kalıcı olarak silinecek. Emin misiniz?')) return;
+          const nextStatus = btn.dataset.nextStatus;
           btn.disabled = true;
           try {
-            await apiJson('/api/ai/curriculum-content/' + encodeURIComponent(btn.dataset.delTopic), { method: 'DELETE' });
+            const res = await apiJson('/api/topics/' + encodeURIComponent(btn.dataset.toggleTopic) + '/status', {
+              method: 'PATCH',
+              body: JSON.stringify({ status: nextStatus })
+            });
+            setStatus('✅ ' + (res.mesaj || 'Durum güncellendi.'), 'ok');
+            await loadPublishedList();
+          } catch (err) {
+            alert('Durum değiştirilemedi: ' + err.message);
+            btn.disabled = false;
+          }
+        });
+      });
+
+      listEl.querySelectorAll('[data-del-topic]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Bu konu anlatımı veritabanından ve öğrenci panelinden kalıcı olarak silinecek. Emin misiniz?')) return;
+          btn.disabled = true;
+          try {
+            const res = await apiJson('/api/topics/' + encodeURIComponent(btn.dataset.delTopic), { method: 'DELETE' });
+            setStatus('🗑️ ' + (res.mesaj || 'Konu silindi.'), 'ok');
             await loadPublishedList();
           } catch (err) {
             alert('Silinemedi: ' + err.message);
