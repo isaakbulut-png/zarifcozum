@@ -313,6 +313,7 @@ button,select{font:inherit}
 }
 </style>
 <link rel="stylesheet" href="/assets/ogrenci-gelisim.css">
+<link rel="stylesheet" href="/assets/soru-test-merkezi.css?v=1">
 <link rel="stylesheet" href="/assets/pratik.css">
 </head>
 <body>
@@ -775,36 +776,11 @@ button,select{font:inherit}
     <section class="panel-view" id="test-coz" data-panel-view="test-coz">
       <div class="section-head">
         <div>
-          <h2>✏️ Test Çöz &amp; Soru Bankası</h2>
-          <p class="hint">İstediğin çalışma modunu seç; MEB Maarif müfredatına uygun sorularla kendini dene.</p>
+          <h2>✏️ Soru &amp; Test Merkezi</h2>
+          <p class="hint">Çalışma modunu seç, onaylı sorulardan kendini dene ve konu bazlı performansını canlı takip et.</p>
         </div>
       </div>
-      <div class="zp-study-modes">
-        <div class="zp-mode-card mode-fast">
-          <div>
-            <div class="zp-badge zp-badge-purple" style="margin-bottom:10px;">⚡ Hızlı Test Modu</div>
-            <h3 style="margin:0 0 8px;font-size:1.15rem;color:#1c1917;">10 Soruluk Hızlı Pratik</h3>
-            <p style="font-size:0.86rem;color:#78716c;margin:0 0 16px;">Vaktin kısıtlı olduğunda konuyu hızlıca pekiştirmek için 10 soruluk odaklanmış test.</p>
-          </div>
-          <button type="button" class="btn" onclick="showPanel('ogretmen-testleri', true)" style="background:#3b82f6;color:#fff;font-weight:700;padding:10px 18px;border-radius:10px;border:none;cursor:pointer;">Hızlı Teste Başla →</button>
-        </div>
-        <div class="zp-mode-card mode-master">
-          <div>
-            <div class="zp-badge zp-badge-done" style="margin-bottom:10px;">🎯 Kazanım Pekiştirme</div>
-            <h3 style="margin:0 0 8px;font-size:1.15rem;color:#1c1917;">20 Soruluk Kapsamlı Tarama</h3>
-            <p style="font-size:0.86rem;color:#78716c;margin:0 0 16px;">Temanın tüm alt başlıklarını kapsayan, derinlemesine kazanım kavrama ve ölçme testi.</p>
-          </div>
-          <button type="button" class="btn" onclick="showPanel('kazanim-testi', true)" style="background:#10b981;color:#fff;font-weight:700;padding:10px 18px;border-radius:10px;border:none;cursor:pointer;">Kazanım Testine Başla →</button>
-        </div>
-        <div class="zp-mode-card mode-maarif">
-          <div>
-            <div class="zp-badge zp-badge-maarif" style="margin-bottom:10px;">🔥 Maarif Açık Uçlu</div>
-            <h3 style="margin:0 0 8px;font-size:1.15rem;color:#1c1917;">Yeni Nesil &amp; Beceri Temelli</h3>
-            <p style="font-size:0.86rem;color:#78716c;margin:0 0 16px;">Gerçek yaşam senaryoları, adım adım rubrikli açık uçlu sorularla üst düzey düşünme becerileri.</p>
-          </div>
-          <button type="button" class="btn" onclick="showPanel('yaziliya-hazirlik', true)" style="background:#ea580c;color:#fff;font-weight:700;padding:10px 18px;border-radius:10px;border:none;cursor:pointer;">Yazılı Senaryolarına Git →</button>
-        </div>
-      </div>
+      <div id="stmDashboardMount"></div>
       <div id="pratik-test"></div>
     </section>
 
@@ -3289,6 +3265,7 @@ button,select{font:inherit}
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/ogrenci-gelisim.js"></script>
 <script src="/assets/pratik.js"></script>
+<script src="/assets/soru-test-merkezi.js?v=1" defer></script>
 <script src="/assets/ogrenci-konu-calis.js?v=3" defer></script>
 <script>
   [["test", "test"], ["kazanim", "kazanim"]].forEach(([id, mod]) => {
