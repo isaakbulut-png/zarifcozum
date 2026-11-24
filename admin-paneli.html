@@ -2037,6 +2037,7 @@
         users: 'Kullanıcılar & Roller',
         'teacher-applications': 'Öğretmen Başvuruları',
         payments: 'Ödemeler & Abonelikler',
+        'teacher-payroll': 'Öğretmen Hakediş Masası',
         announcements: 'Duyurular',
         faqs: 'Yapay Zekâ FAQ',
         settings: 'Site Ayarları & Freemium',
@@ -2049,6 +2050,8 @@
         'solved-questions': 'Çözümlü Sorular',
         'questions-manage': 'Soru Bankası & Resim Havuzu',
         'maarif-curriculum': 'Maarif Müfredat Gezgini',
+        'published-topics': 'Yayınlanan Konular',
+        'contact-requests': 'İletişim Talepleri',
         'ai-audit': 'AI Denetim & Kota Yönetimi',
         'ai-content': 'AI İçerik Stüdyosu',
         'ai-maliyet': 'AI Maliyet & Token Takip Sistemi',
@@ -2061,6 +2064,7 @@
         users: 'Kayıtlı kullanıcılar, rol ve yetki yönetimi',
         'teacher-applications': 'Eğitimci başvurularını inceleyin, onaylayın ve yetkilendirin',
         payments: 'Abonelik paketleri, gelirler ve ödeme durumları',
+        'teacher-payroll': 'Aylık öğretmen ders hakedişleri, kesintiler, dekontlar ve ödeme takibi',
         announcements: 'Tüm kullanıcılara yönelik sistem duyuruları',
         faqs: 'Asistan bilgi tabanı ve zengin formüllü cevaplar',
         settings: 'Ziyaretçi kısıtlamaları, medya yerleşimleri ve kurallar',
@@ -2073,6 +2077,8 @@
         'solved-questions': 'Video ve çözümlü soru arşivi',
         'questions-manage': 'Soru bankası görselleri ve senkronizasyon',
         'maarif-curriculum': '5–12. sınıf Türkiye Yüzyılı Maarif Modeli ağacı',
+        'published-topics': 'Öğretmenlerin yayınladığı ve taslak konu anlatımlarını yönetin',
+        'contact-requests': 'İletişim formundan gelen ziyaretçi, öğrenci ve veli talepleri',
         'ai-audit': 'Yapay zekâ tüketim analizi, ajan performansı ve kullanıcı bazlı canlı kota kontrolleri',
         'ai-content': 'Yapay zekâ destekli soru ve test üretim stüdyosu',
         'ai-maliyet': 'Gerçek zamanlı token harcamaları, kur/maliyet analizleri ve önbellek tasarruf paneli',
@@ -2118,6 +2124,12 @@
         'solved-questions': () => window.solvedQuestionsAdmin?.load?.(),
         'questions-manage': loadQuestionsManage,
         'maarif-curriculum': loadAdminCurriculumTree,
+        'published-topics': () => {
+          $('adminTopicsRefresh')?.click();
+        },
+        'contact-requests': () => {
+          window.ZarifAdminContacts?.render?.();
+        },
         'ai-audit': loadAiAudit,
         'ai-content': () => {},
         'ai-maliyet': () => {
@@ -2225,16 +2237,22 @@
       }
 
       function showView(name) {
-        if (!titles[name]) return;
-        for (const key of Object.keys(titles)) {
-          const el = $(`view-${key}`);
-          if (el) el.hidden = key !== name;
-        }
-        document.querySelectorAll('[data-view]').forEach(button => {
-          if (button.dataset.view === name) button.setAttribute('aria-current', 'page');
-          else button.removeAttribute('aria-current');
+        const targetEl = $(`view-${name}`);
+        if (!targetEl && !titles[name]) return;
+        document.querySelectorAll('section[id^="view-"]').forEach(section => {
+          section.hidden = section.id !== `view-${name}`;
         });
-        $('viewTitle').textContent = titles[name];
+        let fallbackTitle = name;
+        document.querySelectorAll('[data-view]').forEach(button => {
+          if (button.dataset.view === name) {
+            button.setAttribute('aria-current', 'page');
+            const label = button.querySelector('.nav-text')?.textContent?.trim();
+            if (label) fallbackTitle = label;
+          } else {
+            button.removeAttribute('aria-current');
+          }
+        });
+        $('viewTitle').textContent = titles[name] || fallbackTitle;
         $('viewSubtitle').textContent = subtitles[name] || '';
         loaders[name]?.();
       }
