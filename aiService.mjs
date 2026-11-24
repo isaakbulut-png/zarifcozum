@@ -810,3 +810,177 @@ ${soruDetaylari || 'Detay bulunmuyor.'}
     };
   }
 }
+
+export async function generateMaarifCurriculumContent({
+  grade,
+  unitTopic,
+  subTopic,
+  ders = 'Matematik',
+  teacherNotes = '',
+  activeModel
+}) {
+  const g = Number(grade);
+  const meta = findSubTopicMeta ? findSubTopicMeta(g, unitTopic, subTopic) : null;
+  const outcomeCode = meta?.outcome_code || `MAT.${g}.1.1`;
+  const officialBoundary = meta?.official_boundary || '';
+  const codeParts = outcomeCode.split('.');
+  const themeCode = codeParts.length >= 3 ? codeParts.slice(0, 3).join('.') : `MAT.${g}.1`;
+
+  const pedagogy = getMaarifPedagogyInstruction(g);
+  const modelName = activeModel || resolveAIModel('konu_anlatimi');
+
+  const prompt = `Sen MEB Türkiye Yüzyılı Maarif Modeli'ne %100 hâkim uzman bir ${g}. Sınıf ${ders} öğretmenisin.
+Aşağıdaki konu için öğrencilerin sıfır ek maliyetle çalışabileceği, 5 sayfalık derin, görsel (SVG) ve KaTeX formül destekli zengin konu anlatımı, pratik hap bilgiler ve etkileşimli bilgi kartları üret.
+
+KONU BİLGİLERİ:
+- Sınıf: ${g}. Sınıf
+- Ders: ${ders}
+- Tema / Ünite: ${unitTopic}
+- Alt Konu: ${subTopic}
+- Kazanım Kodu: ${outcomeCode}
+${officialBoundary ? `- Resmi MEB Çerçevesi: ${officialBoundary}` : ''}
+${teacherNotes ? `- Öğretmen Özel Odak Notu: ${teacherNotes}` : ''}
+
+PEDAGOJİK YÖNERGE:
+${pedagogy}
+
+GÖRSEL VE FORMÜL KURALI:
+${visualInstruction}
+
+ÇIKTI FORMATI (KESİNLİKLE SADECE GEÇERLİ JSON DÖNDÜR):
+{
+  "title": "Konu için öğrenciyi motive eden net başlık",
+  "short_summary": "2-3 cümlelik net konu özeti",
+  "lessonPages": [
+    {
+      "pageNumber": 1,
+      "title": "1. Sayfa: Gerçek Hayat Keşfi",
+      "content": "Günlük yaşamdan somut bir senaryo ile merak uyandıran giriş, temel tanımlar ve $LaTeX$ formüller.",
+      "svgDiagram": "<svg viewBox=\"0 0 360 160\">...temiz pedagojik SVG diyagram...</svg>"
+    },
+    {
+      "pageNumber": 2,
+      "title": "2. Sayfa: Kavram İnşası ve Temel Kurallar",
+      "content": "Konunun temel kuralları, formülleri ($$...$$) ve kavram şeması açıklaması.",
+      "svgDiagram": "<svg viewBox=\"0 0 360 160\">...görsel şema veya şekil...</svg>"
+    },
+    {
+      "pageNumber": 3,
+      "title": "3. Sayfa: Adım Adım Çözümlü Örnekler",
+      "content": "En az 2 farklı zorlukta çözümlü örnek (Çözüm 1. Adım, 2. Adım... şeklinde açıkla).",
+      "svgDiagram": ""
+    },
+    {
+      "pageNumber": 4,
+      "title": "4. Sayfa: Sık Yapılan Hatalar ve Kavram Yanılgıları",
+      "content": "Öğrencilerin en çok düştüğü 2-3 tuzak, yanlış ve doğru yaklaşımların karşılaştırması.",
+      "svgDiagram": ""
+    },
+    {
+      "pageNumber": 5,
+      "title": "5. Sayfa: Kendini Dene ve Özet Pekiştirme",
+      "content": "Konuyu pekiştiren 2 mini kontrol sorusu (kısa cevap anahtarıyla) ve kapanış özeti.",
+      "svgDiagram": ""
+    }
+  ],
+  "practicalNotes": [
+    "Hap Bilgi 1: Kısa, akılda kalıcı kural veya formül ($...$)",
+    "Hap Bilgi 2: ...",
+    "Hap Bilgi 3: ...",
+    "Hap Bilgi 4: ...",
+    "Hap Bilgi 5: ..."
+  ],
+  "flashcards": [
+    { "front": "Kart ön yüzü (soru veya kavram)", "back": "Kart arka yüzü (net cevap veya formül)", "tip": "Kısa hatırlatma ipucu" },
+    { "front": "...", "back": "...", "tip": "..." },
+    { "front": "...", "back": "...", "tip": "..." },
+    { "front": "...", "back": "...", "tip": "..." },
+    { "front": "...", "back": "...", "tip": "..." }
+  ]
+}`;
+
+  const response = await aiClient.models.generateContent({
+    model: modelName,
+    contents: prompt,
+    config: {
+      responseMimeType: 'application/json',
+      temperature: 0.35
+    }
+  });
+
+  const rawText = (response.text || '').trim();
+  let parsed = null;
+  try {
+    const cleaned = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim();
+    parsed = JSON.parse(cleaned);
+  } catch (parseErr) {
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      parsed = JSON.parse(jsonMatch[0]);
+    } else {
+      throw new Error('Yapay zekâ yanıtı JSON formatında çözümlenemedi. Lütfen tekrar deneyin.');
+    }
+  }
+
+  const defaultTitles = [
+    '1. Sayfa: Gerçek Hayat Keşfi',
+    '2. Sayfa: Kavram İnşası ve Temel Kurallar',
+    '3. Sayfa: Adım Adım Çözümlü Örnekler',
+    '4. Sayfa: Sık Yapılan Hatalar ve Kavram Yanılgıları',
+    '5. Sayfa: Kendini Dene ve Özet Pekiştirme'
+  ];
+
+  const lessonPages = (Array.isArray(parsed.lessonPages) ? parsed.lessonPages : []).slice(0, 5).map((p, idx) => ({
+    pageNumber: Number(p.pageNumber) || (idx + 1),
+    title: String(p.title || defaultTitles[idx] || `${idx + 1}. Sayfa`).trim(),
+    content: String(p.content || '').trim(),
+    svgDiagram: typeof p.svgDiagram === 'string' && p.svgDiagram.includes('<svg') ? p.svgDiagram.trim() : ''
+  }));
+
+  while (lessonPages.length < 5) {
+    const idx = lessonPages.length;
+    lessonPages.push({
+      pageNumber: idx + 1,
+      title: defaultTitles[idx],
+      content: `${subTopic} konusu için ${idx + 1}. sayfa içeriği.`,
+      svgDiagram: ''
+    });
+  }
+
+  const practicalNotes = (Array.isArray(parsed.practicalNotes) ? parsed.practicalNotes : [])
+    .map(n => String(n || '').trim())
+    .filter(Boolean);
+
+  const flashcards = (Array.isArray(parsed.flashcards) ? parsed.flashcards : [])
+    .map(fc => ({
+      front: String(fc?.front || '').trim(),
+      back: String(fc?.back || '').trim(),
+      tip: String(fc?.tip || '').trim()
+    }))
+    .filter(fc => fc.front && fc.back);
+
+  const detailed_content = lessonPages
+    .map(p => `[SAYFA_${p.pageNumber}]\n### ${p.title}\n\n${p.content}${p.svgDiagram ? '\n\n' + p.svgDiagram : ''}`)
+    .join('\n\n');
+
+  const usageMeta = response.usageMetadata || {};
+  return {
+    model: modelName,
+    usage: {
+      promptTokens: usageMeta.promptTokenCount || 0,
+      candidatesTokens: usageMeta.candidatesTokenCount || 0
+    },
+    themeCode,
+    themeTitle: unitTopic,
+    subTopicTitle: subTopic,
+    outcome_code: outcomeCode,
+    official_boundary: officialBoundary,
+    title: String(parsed.title || `${subTopic} - Konu Anlatımı`).trim(),
+    short_summary: String(parsed.short_summary || '').trim(),
+    lessonPages,
+    practicalNotes,
+    flashcards,
+    detailed_content,
+    illustrations: []
+  };
+}

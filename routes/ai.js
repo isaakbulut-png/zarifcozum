@@ -1334,12 +1334,18 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         data: {
           grade,
           subject: ders,
+          themeCode: generated.themeCode || `MAT.${grade}.1`,
+          themeTitle: generated.themeTitle || unit_topic,
+          subTopicTitle: generated.subTopicTitle || sub_topic,
           unit_topic,
           sub_topic,
           outcome_code: generated.outcome_code,
           official_boundary: generated.official_boundary,
           title: generated.title,
           short_summary: generated.short_summary,
+          lessonPages: generated.lessonPages || [],
+          practicalNotes: generated.practicalNotes || [],
+          flashcards: generated.flashcards || [],
           detailed_content: generated.detailed_content,
           illustrations: generated.illustrations || [],
           teacherNotes
@@ -1356,28 +1362,66 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     try {
       const grade = Number(req.body?.grade);
       const subject = typeof req.body?.subject === 'string' ? req.body.subject.trim() : (req.body?.ders || 'Matematik');
-      const unit_topic = typeof req.body?.unit_topic === 'string' ? req.body.unit_topic.trim() : '';
-      const sub_topic = typeof req.body?.sub_topic === 'string' ? req.body.sub_topic.trim() : '';
+      const unit_topic = typeof req.body?.unit_topic === 'string' ? req.body.unit_topic.trim() : (typeof req.body?.themeTitle === 'string' ? req.body.themeTitle.trim() : '');
+      const sub_topic = typeof req.body?.sub_topic === 'string' ? req.body.sub_topic.trim() : (typeof req.body?.subTopicTitle === 'string' ? req.body.subTopicTitle.trim() : '');
+      const themeCode = typeof req.body?.themeCode === 'string' ? req.body.themeCode.trim() : '';
+      const title = typeof req.body?.title === 'string' ? req.body.title.trim() : sub_topic;
+      const order = Number(req.body?.order) || 0;
       const outcome_code = typeof req.body?.outcome_code === 'string' ? req.body.outcome_code.trim() : '';
       const short_summary = typeof req.body?.short_summary === 'string' ? req.body.short_summary.trim() : '';
-      const detailed_content = typeof req.body?.detailed_content === 'string' ? req.body.detailed_content : '';
+      const lessonPages = Array.isArray(req.body?.lessonPages) ? req.body.lessonPages.map((p, idx) => ({
+        pageNumber: Number(p?.pageNumber) || (idx + 1),
+        title: String(p?.title || `${idx + 1}. Sayfa`).trim(),
+        content: String(p?.content || ''),
+        svgDiagram: typeof p?.svgDiagram === 'string' ? p.svgDiagram.trim() : ''
+      })) : [];
+      const practicalNotes = Array.isArray(req.body?.practicalNotes)
+        ? req.body.practicalNotes.map(n => String(n || '').trim()).filter(Boolean)
+        : [];
+      const flashcards = Array.isArray(req.body?.flashcards)
+        ? req.body.flashcards.map(fc => ({
+            front: String(fc?.front || '').trim(),
+            back: String(fc?.back || '').trim(),
+            tip: String(fc?.tip || '').trim()
+          })).filter(fc => fc.front && fc.back)
+        : [];
+
+      let detailed_content = typeof req.body?.detailed_content === 'string' ? req.body.detailed_content : '';
+      if (!detailed_content && lessonPages.length) {
+        detailed_content = lessonPages
+          .map(p => `[SAYFA_${p.pageNumber}]\n### ${p.title}\n\n${p.content}${p.svgDiagram ? '\n\n' + p.svgDiagram : ''}`)
+          .join('\n\n');
+      }
+
       const illustrations = Array.isArray(req.body?.illustrations) ? req.body.illustrations : [];
       const teacherNotes = typeof req.body?.teacherNotes === 'string' ? req.body.teacherNotes.trim() : '';
       const status = req.body?.status === 'draft' ? 'draft' : 'published';
 
-      if (!grade || !unit_topic || !sub_topic || !detailed_content) {
-        return res.status(400).json({ mesaj: 'Sınıf, ünite, alt konu ve içerik zorunludur.' });
+      if (!grade || !unit_topic || !sub_topic || (!detailed_content && !lessonPages.length)) {
+        return res.status(400).json({ mesaj: 'Sınıf, tema, alt konu ve içerik zorunludur.' });
       }
+
+      const codeParts = outcome_code ? outcome_code.split('.') : [];
+      const resolvedThemeCode = themeCode || (codeParts.length >= 3 ? codeParts.slice(0, 3).join('.') : `MAT.${grade}.1`);
 
       const filter = { grade, subject, unit_topic, sub_topic };
       const updateData = {
+        themeCode: resolvedThemeCode,
+        themeTitle: unit_topic,
+        subTopicTitle: sub_topic,
+        title,
+        order,
         outcome_code,
         short_summary,
         detailed_content,
+        lessonPages,
+        practicalNotes,
+        flashcards,
         illustrations,
         teacherNotes,
         status,
-        createdBy: req.session.user?.id || 'teacher'
+        createdBy: String(req.session.user?._id || req.session.user?.id || 'teacher'),
+        createdByName: req.session.user?.name || 'Öğretmen'
       };
 
       const saved = await CurriculumContent.findOneAndUpdate(
@@ -1388,12 +1432,81 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
 
       res.json({
         success: true,
-        mesaj: status === 'published' ? 'Konu anlatımı öğrenci paneline yayınlandı.' : 'Taslak olarak kaydedildi.',
+        mesaj: status === 'published' ? 'Konu anlatımı onaylandı ve öğrenci paneline yayınlandı.' : 'Taslak olarak kaydedildi.',
         data: saved
       });
     } catch (err) {
       console.error('[AI] Konu anlatımı yayınlama hatası:', err);
-      res.status(500).json({ mesaj: 'Konu anlatımı kaydedilemedi.' });
+      res.status(500).json({ mesaj: 'Konu anlatımı kaydedilemedi: ' + err.message });
+    }
+  });
+
+  // 2b. Öğretmenin Yayınladığı / Taslak Konu İçeriklerini Listele
+  router.get('/curriculum-content/my-list', requireRole('teacher', 'admin'), async (req, res) => {
+    try {
+      const filter = {};
+      if (req.query.grade && Number(req.query.grade) >= 5 && Number(req.query.grade) <= 12) {
+        filter.grade = Number(req.query.grade);
+      }
+      if (req.query.status && ['draft', 'published'].includes(req.query.status)) {
+        filter.status = req.query.status;
+      }
+      const items = await CurriculumContent.find(filter)
+        .sort({ updatedAt: -1 })
+        .limit(200)
+        .select('grade themeCode themeTitle unit_topic subTopicTitle sub_topic title outcome_code status practicalNotes flashcards lessonPages updatedAt createdByName')
+        .lean();
+
+      res.json({
+        success: true,
+        items: items.map(it => ({
+          id: String(it._id),
+          grade: it.grade,
+          themeCode: it.themeCode || `MAT.${it.grade}.1`,
+          themeTitle: it.themeTitle || it.unit_topic,
+          subTopicTitle: it.subTopicTitle || it.sub_topic,
+          title: it.title || it.subTopicTitle || it.sub_topic,
+          outcome_code: it.outcome_code || '',
+          status: it.status || 'published',
+          pageCount: Array.isArray(it.lessonPages) && it.lessonPages.length ? it.lessonPages.length : 5,
+          notesCount: Array.isArray(it.practicalNotes) ? it.practicalNotes.length : 0,
+          cardsCount: Array.isArray(it.flashcards) ? it.flashcards.length : 0,
+          updatedAt: it.updatedAt,
+          createdByName: it.createdByName || ''
+        }))
+      });
+    } catch (err) {
+      console.error('[AI] Konu listesi hatası:', err);
+      res.status(500).json({ mesaj: 'Yayınlanan konular listelenemedi.' });
+    }
+  });
+
+  // 2c. Tek Konu Getir (Düzenleme için)
+  router.get('/curriculum-content/:id', requireRole('teacher', 'admin'), async (req, res) => {
+    try {
+      const mongoose = require('mongoose');
+      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ mesaj: 'Geçersiz konu kimliği.' });
+      }
+      const doc = await CurriculumContent.findById(req.params.id).lean();
+      if (!doc) return res.status(404).json({ mesaj: 'Konu anlatımı bulunamadı.' });
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      res.status(500).json({ mesaj: 'Konu içeriği alınamadı.' });
+    }
+  });
+
+  // 2d. Konu Sil
+  router.delete('/curriculum-content/:id', requireRole('teacher', 'admin'), async (req, res) => {
+    try {
+      const mongoose = require('mongoose');
+      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({ mesaj: 'Geçersiz konu kimliği.' });
+      }
+      await CurriculumContent.findByIdAndDelete(req.params.id);
+      res.json({ success: true, mesaj: 'Konu anlatımı silindi.' });
+    } catch (err) {
+      res.status(500).json({ mesaj: 'Konu anlatımı silinemedi.' });
     }
   });
 

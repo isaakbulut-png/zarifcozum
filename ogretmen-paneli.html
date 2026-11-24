@@ -1924,26 +1924,56 @@ body.teacher-menu-open {
         </div>
       </form>
 
-      <!-- Üretilen İçerik Önizleme & Yayınlama Alanı -->
-      <div id="currPreviewWrapper" style="display:none;margin-top:24px;border-top:2px dashed #e2e8f0;padding-top:20px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+      <!-- Üretilen İçerik İnceleme, Düzenleme & Yayınlama Stüdyosu -->
+      <div id="currPreviewWrapper" style="display:none;margin-top:24px;border-top:2px dashed #e2d3c3;padding-top:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:16px;">
+          <div style="flex:1;min-width:260px;">
+            <p id="currPreviewMeta" style="margin:0 0 6px;font-size:12.5px;font-weight:700;color:#c2570c;"></p>
+            <input type="text" id="currEditTitle" placeholder="Konu Başlığı" style="width:100%;padding:9px 12px;border:1.5px solid #dccab8;border-radius:10px;font-size:17px;font-weight:700;color:#2c1a0e;background:#fff;">
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button class="btn light" id="saveDraftCurriculumBtn" type="button" style="border:1.5px solid #d7c3b0;background:#fffaf5;color:#2c1a0e;font-weight:600;">💾 Taslak Kaydet</button>
+            <button class="btn" id="publishCurriculumBtn" type="button" style="background:linear-gradient(135deg,#c2570c 0%,#9a3412 100%);color:#fff;font-weight:700;">🚀 Onayla ve Öğrenci Paneline Yayınla</button>
+          </div>
+        </div>
+
+        <div style="background:#fbf1e8;border-left:4px solid #c2570c;padding:12px 14px;border-radius:8px;margin-bottom:16px;">
+          <label for="currEditSummary" style="display:block;color:#2c1a0e;font-size:12.5px;font-weight:700;margin-bottom:5px;">📌 Kısa Konu Özeti (Düzenlenebilir)</label>
+          <textarea id="currEditSummary" rows="2" style="width:100%;padding:8px 10px;border:1px solid #dccab8;border-radius:8px;font-size:13.5px;color:#2c1a0e;background:#fff;font-family:inherit;"></textarea>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+          <button type="button" data-studio-tab="pages" style="padding:8px 14px;border-radius:9px;border:1.5px solid #2c1a0e;background:#2c1a0e;color:#fff;font-weight:600;font-size:13px;cursor:pointer;">📖 5 Sayfalık Konu Anlatımı</button>
+          <button type="button" data-studio-tab="notes" style="padding:8px 14px;border-radius:9px;border:1.5px solid #e2d3c3;background:#fbf1e8;color:#2c1a0e;font-weight:600;font-size:13px;cursor:pointer;">💡 Pratik Bilgi / Hap Bilgiler</button>
+          <button type="button" data-studio-tab="cards" style="padding:8px 14px;border-radius:9px;border:1.5px solid #e2d3c3;background:#fbf1e8;color:#2c1a0e;font-weight:600;font-size:13px;cursor:pointer;">🗂️ Bilgi Kartları</button>
+        </div>
+
+        <div id="currStudioBody"></div>
+      </div>
+
+      <!-- Yayınlanan & Taslak Konu İçerikleri Yönetimi -->
+      <div style="margin-top:28px;border-top:1px solid #e6d7c8;padding-top:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
           <div>
-            <h3 id="currPreviewTitle" style="margin:0;font-size:20px;color:#1e293b;"></h3>
-            <p id="currPreviewMeta" style="margin:4px 0 0 0;font-size:13px;color:#64748b;"></p>
+            <h3 style="margin:0;font-size:17px;color:#2c1a0e;">📚 Yayınlanan &amp; Taslak Konu İçerikleri</h3>
+            <p class="hint" style="margin:3px 0 0;">Öğrenci panelinde sıfır AI maliyetiyle yayınlanan hazır konu anlatımlarını yönetin.</p>
           </div>
-          <div style="display:flex;gap:10px;">
-            <button class="btn" id="publishCurriculumBtn" type="button" style="background:#059669;color:#fff;">🚀 Öğrenci Paneline Yayınla</button>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select id="publishedTopicsGradeFilter" style="padding:7px 10px;border:1.5px solid #dccab8;border-radius:8px;font-size:13px;">
+              <option value="">Tüm Sınıflar</option>
+              <option value="5">5. Sınıf</option>
+              <option value="6">6. Sınıf</option>
+              <option value="7">7. Sınıf</option>
+              <option value="8">8. Sınıf</option>
+              <option value="9">9. Sınıf</option>
+              <option value="10">10. Sınıf</option>
+              <option value="11">11. Sınıf</option>
+              <option value="12">12. Sınıf</option>
+            </select>
+            <button type="button" id="refreshPublishedTopicsBtn" class="btn light sm" style="padding:7px 12px;font-size:12.5px;">↻ Yenile</button>
           </div>
         </div>
-
-        <div id="currSummaryBox" style="background:#f8fafc;border-left:4px solid #3b82f6;padding:12px 16px;border-radius:6px;margin-bottom:18px;">
-          <strong style="color:#1e40af;font-size:14px;">📌 Hızlı Bakış / Kısa Özet:</strong>
-          <p id="currSummaryText" style="margin:6px 0 0 0;font-size:14px;color:#334155;line-height:1.5;"></p>
-        </div>
-
-        <!-- 5 Sayfalık Sekmeli / Sayfalı Görünüm -->
-        <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;" id="currPageTabs"></div>
-        <div id="currPageContent" class="zp-anlatim" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;min-height:300px;box-shadow:0 1px 3px rgba(0,0,0,0.05);overflow-x:auto;"></div>
+        <div id="publishedTopicsList" style="display:flex;flex-direction:column;gap:10px;"></div>
       </div>
     </section>
 
@@ -2250,6 +2280,7 @@ body.teacher-menu-open {
 <script src="/assets/meb-curriculum-tree.js"></script>
 <script src="/assets/maarif-konu-formu.js" defer></script>
 <script src="/assets/ogretmen-profil-karti.js" defer></script>
+<script src="/assets/ogretmen-konu-studyosu.js" defer></script>
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/curriculum-tree-view.js"></script>
 <script src="/assets/messageService.js"></script>
@@ -4956,123 +4987,7 @@ body.teacher-menu-open {
     }
   }
 
-  // ==========================================
-  // MAARİF MODELİ KONU ANLATIM ÜRETİCİSİ LOGIC
-  // ==========================================
-  let currentGeneratedCurriculum = null;
-
-  $('aiCurriculumForm')?.addEventListener('submit', async event => {
-    event.preventDefault();
-    const btn = $('generateCurriculumBtn');
-    const grade = $('currGrade').value;
-    const ders = 'Matematik';
-    const unit_topic = $('currTema').value;
-    const sub_topic = $('currAltKonu').value;
-    const teacherNotes = $('currTeacherNotes')?.value || '';
-
-    if (!grade || !unit_topic || !sub_topic) {
-      durumYaz('currStatus', 'Lütfen sınıf, tema ve alt konuyu seçin.', 'error');
-      return;
-    }
-
-    btn.disabled = true;
-    durumYaz('currStatus', 'Türkiye Yüzyılı Maarif Modeli konu anlatımı ve pedagojik görselleri üretiliyor (bu işlem 15-30 sn sürebilir)…');
-    $('currPreviewWrapper').style.display = 'none';
-
-    try {
-      const res = await api('/api/ai/curriculum-content/generate', {
-        method: 'POST',
-        body: JSON.stringify({ grade: Number(grade), ders, unit_topic, sub_topic, teacherNotes })
-      });
-
-      currentGeneratedCurriculum = res.data;
-      renderCurriculumPreview(res.data);
-      durumYaz('currStatus', '✅ Konu anlatımı ve pedagojik görseller başarıyla üretildi.', 'ok');
-    } catch (err) {
-      durumYaz('currStatus', 'Hata: ' + err.message, 'error');
-    } finally {
-      btn.disabled = false;
-    }
-  });
-
-  $('publishCurriculumBtn')?.addEventListener('click', async () => {
-    if (!currentGeneratedCurriculum) return;
-    const pBtn = $('publishCurriculumBtn');
-    pBtn.disabled = true;
-    durumYaz('currStatus', 'Öğrenci paneline yayınlanıyor…');
-
-    try {
-      const res = await api('/api/ai/curriculum-content/publish', {
-        method: 'POST',
-        body: JSON.stringify({
-          ...currentGeneratedCurriculum,
-          status: 'published'
-        })
-      });
-
-      durumYaz('currStatus', '🎉 ' + (res.mesaj || 'Konu anlatımı başarıyla yayınlandı!'), 'ok');
-      pBtn.textContent = '✅ Yayınlandı';
-    } catch (err) {
-      durumYaz('currStatus', 'Yayınlama hatası: ' + err.message, 'error');
-      pBtn.disabled = false;
-    }
-  });
-
-  function renderCurriculumPreview(item) {
-    $('currPreviewTitle').textContent = item.title || `${item.sub_topic} - Maarif Modeli Konu Anlatımı`;
-    $('currPreviewMeta').textContent = `${item.grade}. Sınıf · ${item.unit_topic} · Kazanım: ${item.outcome_code || 'Belirtilmemiş'}`;
-    $('currSummaryText').textContent = item.short_summary || '';
-
-    const content = item.detailed_content || '';
-    const pages = [];
-    const parts = content.split(/\[SAYFA_(\d+)\]/gi);
-    if (parts.length >= 3) {
-      for (let i = 1; i < parts.length; i += 2) {
-        pages.push({ no: parts[i], text: (parts[i+1] || '').trim() });
-      }
-    } else {
-      pages.push({ no: '1', text: content });
-    }
-
-    const tabsContainer = $('currPageTabs');
-    tabsContainer.replaceChildren();
-
-    const pageTitles = [
-      '1. Sayfa: Gerçek Hayat Keşfi',
-      '2. Sayfa: Kavram İnşası & Şemalar',
-      '3. Sayfa: Çözümlü Örnekler',
-      '4. Sayfa: Kavram Yanılgıları',
-      '5. Sayfa: Kendini Dene'
-    ];
-
-    pages.forEach((p, idx) => {
-      const tabBtn = document.createElement('button');
-      tabBtn.type = 'button';
-      tabBtn.className = 'btn ' + (idx === 0 ? '' : 'zp-ikincil');
-      tabBtn.style.padding = '6px 12px';
-      tabBtn.style.fontSize = '12px';
-      tabBtn.textContent = pageTitles[idx] || `${p.no}. Sayfa`;
-      tabBtn.addEventListener('click', () => {
-        Array.from(tabsContainer.children).forEach(c => c.className = 'btn zp-ikincil');
-        tabBtn.className = 'btn';
-        displayCurriculumPage(p.text);
-      });
-      tabsContainer.appendChild(tabBtn);
-    });
-
-    displayCurriculumPage(pages[0]?.text || '');
-    $('currPreviewWrapper').style.display = 'block';
-  }
-
-  function displayCurriculumPage(rawText) {
-    const container = $('currPageContent');
-    container.replaceChildren();
-    if (window.zarifAiVisual) {
-      window.zarifAiVisual.append(container, rawText);
-    } else {
-      container.innerHTML = rawText;
-    }
-  }
+  // MAARİF MODELİ KONU ANLATIM ÜRETİCİSİ LOGIC -> bağımsız /assets/ogretmen-konu-studyosu.js tarafından yönetilir.
 
     $('announcementList')?.addEventListener('click', async event => {
     const btn = event.target.closest('[data-delete-announcement-id]');

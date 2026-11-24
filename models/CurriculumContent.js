@@ -7,6 +7,19 @@ const illustrationSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }, { _id: false });
 
+const lessonPageSchema = new mongoose.Schema({
+  pageNumber: { type: Number, required: true, min: 1, max: 10 },
+  title: { type: String, default: '', trim: true, maxlength: 200 },
+  content: { type: String, default: '' },
+  svgDiagram: { type: String, default: '' }
+}, { _id: false });
+
+const flashcardSchema = new mongoose.Schema({
+  front: { type: String, required: true, trim: true, maxlength: 500 },
+  back: { type: String, required: true, trim: true, maxlength: 1000 },
+  tip: { type: String, default: '', trim: true, maxlength: 300 }
+}, { _id: false });
+
 const curriculumContentSchema = new mongoose.Schema({
   grade: {
     type: Number,
@@ -21,6 +34,34 @@ const curriculumContentSchema = new mongoose.Schema({
     default: 'Matematik',
     trim: true,
     index: true
+  },
+  themeCode: {
+    type: String,
+    trim: true,
+    default: '',
+    index: true
+  },
+  themeTitle: {
+    type: String,
+    trim: true,
+    default: '',
+    index: true
+  },
+  subTopicTitle: {
+    type: String,
+    trim: true,
+    default: '',
+    index: true
+  },
+  order: {
+    type: Number,
+    default: 0,
+    index: true
+  },
+  title: {
+    type: String,
+    trim: true,
+    default: ''
   },
   unit_topic: {
     type: String,
@@ -46,8 +87,19 @@ const curriculumContentSchema = new mongoose.Schema({
   },
   detailed_content: {
     type: String,
-    required: true,
     default: ''
+  },
+  lessonPages: {
+    type: [lessonPageSchema],
+    default: []
+  },
+  practicalNotes: {
+    type: [String],
+    default: []
+  },
+  flashcards: {
+    type: [flashcardSchema],
+    default: []
   },
   illustrations: [illustrationSchema],
   status: {
@@ -65,6 +117,10 @@ const curriculumContentSchema = new mongoose.Schema({
     type: String,
     default: 'teacher',
     index: true
+  },
+  createdByName: {
+    type: String,
+    default: ''
   }
 }, {
   timestamps: true,
@@ -76,5 +132,6 @@ curriculumContentSchema.index(
   { grade: 1, subject: 1, unit_topic: 1, sub_topic: 1 },
   { unique: true }
 );
+curriculumContentSchema.index({ grade: 1, status: 1, order: 1 });
 
 module.exports = mongoose.models.CurriculumContent || mongoose.model('CurriculumContent', curriculumContentSchema);
