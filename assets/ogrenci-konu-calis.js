@@ -101,6 +101,34 @@
     return data;
   }
 
+  function playFeedbackTone(kind) {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+      const notes = kind === 'celebrate'
+        ? [523.25, 659.25, 783.99, 1046.5]
+        : kind === 'master'
+          ? [587.33, 880]
+          : kind === 'repeat'
+            ? [349.23, 293.66]
+            : [440];
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = kind === 'repeat' ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+        gain.gain.setValueAtTime(0.06, now + idx * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.16);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + idx * 0.08);
+        osc.stop(now + idx * 0.08 + 0.17);
+      });
+    } catch {}
+  }
+
   function formatInlineMath(text) {
     const clean = String(text || '')
       .replace(/\*\*([^*]+)\*\*/g, '$1')
@@ -538,15 +566,17 @@
         if (btn) btn.style.display = 'none';
       });
       $('kcChallengeCorrectBtn')?.addEventListener('click', () => {
+        playFeedbackTone('master');
         const badge = $('kcChallengeBadge');
         if (badge) {
-          badge.textContent = '🏆 Harika! Kazanımı kavradın';
+          badge.textContent = '🏆 +20 XP · Kazanım Rozeti Kazandın!';
           badge.style.background = '#ecfdf5';
           badge.style.color = '#065f46';
           badge.style.display = 'inline-block';
         }
       });
       $('kcChallengeRetryBtn')?.addEventListener('click', () => {
+        playFeedbackTone('repeat');
         const badge = $('kcChallengeBadge');
         if (badge) {
           badge.textContent = '💡 Altın Kural kutusuna tekrar göz atabilirsin';
@@ -617,9 +647,11 @@
       const pct = readerState.totalCards > 0 ? Math.round((readerState.masteredCount / readerState.totalCards) * 100) : 0;
 
       if (!readerState.deckQueue.length) {
+        playFeedbackTone('celebrate');
         body.innerHTML = `
           <div style="max-width:520px;margin:20px auto;text-align:center;background:#fff;border:2px solid #059669;border-radius:20px;padding:34px 24px;box-shadow:0 12px 30px rgba(5,150,105,0.12);">
-            <div style="font-size:3rem;margin-bottom:8px;">🎉</div>
+            <div style="font-size:3rem;margin-bottom:8px;">🎉🏆</div>
+            <span style="display:inline-block;padding:4px 12px;border-radius:999px;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;font-size:0.8rem;font-weight:800;margin-bottom:10px;">+50 XP · BİLGİ KARTI USTASI ROZETİ</span>
             <h3 style="margin:0 0 8px;font-family:Georgia,serif;color:#065f46;font-size:1.35rem;">Tebrikler! Tüm Kartları Öğrendin</h3>
             <p style="margin:0 0 18px;color:#6a5242;font-size:0.94rem;"><strong>${readerState.totalCards} / ${readerState.totalCards}</strong> bilgi kartını başarıyla tamamladın. Konu anlatımını pekiştirmek için artık soru çözmeye hazırsın!</p>
             <div style="height:10px;border-radius:999px;background:#d1fae5;overflow:hidden;margin-bottom:20px;">
@@ -663,7 +695,7 @@
 
           <div style="display:flex;justify-content:center;gap:12px;margin-top:20px;min-height:44px;flex-wrap:wrap;">
             ${readerState.cardFlipped ? `
-              <button type="button" id="kcCardRepeatBtn" style="padding:10px 18px;border-radius:10px;border:1.5px solid #c2570c;background:#fffaf5;color:#c2570c;font-weight:700;font-size:0.88rem;cursor:pointer;">🔄 Tekrar Etmeliyim</button>
+              <button type="button" id="kcCardRepeatBtn" style="padding:10px 18px;border-radius:10px;border:1.5px solid #c2570c;background:#fffaf5;color:#c2570c;font-weight:700;font-size:0.88rem;cursor:pointer;">❌ Tekrar Etmeliyim</button>
               <button type="button" id="kcCardMasterBtn" style="padding:10px 22px;border-radius:10px;border:0;background:#059669;color:#fff;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(5,150,105,0.28);">✅ Öğrendim</button>
             ` : `
               <button type="button" id="kcCardFlipBtn" style="padding:10px 24px;border-radius:10px;border:0;background:#2c1a0e;color:#fff;font-weight:700;font-size:0.88rem;cursor:pointer;">🔄 Kartı Çevir</button>
@@ -672,16 +704,18 @@
         </div>
       `;
 
-      const flip = () => { readerState.cardFlipped = !readerState.cardFlipped; renderReader(); };
+      const flip = () => { playFeedbackTone('flip'); readerState.cardFlipped = !readerState.cardFlipped; renderReader(); };
       $('kc3dFlashcard')?.addEventListener('click', flip);
       $('kcCardFlipBtn')?.addEventListener('click', flip);
       $('kcCardRepeatBtn')?.addEventListener('click', () => {
+        playFeedbackTone('repeat');
         const cur = readerState.deckQueue.shift();
         if (cur) readerState.deckQueue.push(cur);
         readerState.cardFlipped = false;
         renderReader();
       });
       $('kcCardMasterBtn')?.addEventListener('click', () => {
+        playFeedbackTone('master');
         readerState.deckQueue.shift();
         readerState.masteredCount += 1;
         readerState.cardFlipped = false;

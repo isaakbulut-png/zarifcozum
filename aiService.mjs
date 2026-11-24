@@ -976,24 +976,39 @@ export async function generateMaarifCurriculumContent({
   const codeParts = outcomeCode.split('.');
   const themeCode = codeParts.length >= 3 ? codeParts.slice(0, 3).join('.') : `MAT.${g}.1`;
 
-  // 1. Pinecone ders_kitabi + klavuz bağlamını ve R2 sayfa referanslarını çek
-  const ragBundle = await fetchPineconeCurriculumContext({
-    grade: g,
-    unitTopic,
-    subTopic,
-    ders
-  });
+  // 1. Cloudflare R2 JSON ders kitapları + Pinecone ders_kitabi/klavuz bağlamını paralel çek
+  let r2BookBundle = { r2BookContext: '', matchedKeys: [], snippetCount: 0 };
+  const [ragBundle, r2Res] = await Promise.all([
+    fetchPineconeCurriculumContext({
+      grade: g,
+      unitTopic,
+      subTopic,
+      ders
+    }),
+    (async () => {
+      try {
+        const mod = await import('./lib/r2-book-context.js');
+        const fn = mod.fetchR2BookContext || mod.default?.fetchR2BookContext;
+        if (typeof fn === 'function') {
+          return await fn({ grade: g, unitTopic, subTopic });
+        }
+      } catch (e) {
+        console.warn('[R2 Books] Modül yüklenemedi:', e.message);
+      }
+      return { r2BookContext: '', matchedKeys: [], snippetCount: 0 };
+    })()
+  ]);
+  if (r2Res) r2BookBundle = r2Res;
 
   const isMiddleSchool = g >= 5 && g <= 8;
   const gradeBandRule = isMiddleSchool
     ? `ORTAOKUL KADEMESİ (${g}. Sınıf, 10–14 yaş):
-- Oyunlaştırılmış, günlük yaşam senaryolu, hikâyeleştirilmiş ve merak uyandıran Türkiye Yüzyılı Maarif Modeli dili kullan.
+- 10–14 yaş grubuna hitap eden sıcak, merak uyandıran, günlük hayat oyunları ve somut hikâyelerle (keşif görevleri) örülü Türkiye Yüzyılı Maarif Modeli dili kullan.${g === 8 ? ' 8. sınıf düzeyinde LGS kazanım derinliğini ve yeni nesil soru mantığını koru.' : ''}
 - Uzun düz paragraflar KESİNLİKLE YASAKTIR! Her metin bloğu en fazla 2-3 kısa, nefes alan, akıcı cümleden oluşsun.
-- Somut örnekler, oyun/keşif benzetmeleri ve öğrencinin kendi keşfedeceği mini sorularla ilerle.`
+- Her sayfada konuyu somutlaştıran renkli, etiketli ve taşmayan (viewBox korumalı) <svg> şemalar üret.`
     : `LİSE KADEMESİ (${g}. Sınıf):
-- Olgun, analitik, çocuksu ifadelerden uzak akademik ama anlaşılır bir Maarif Modeli dili kullan.
-- Değişkenler arası ilişkiler, matematiksel modelleme, grafik/tablo yorumlama, ispat/doğrulama ve problem çözme stratejilerine odaklan.
-- Uzun yorucu düz paragraflar yerine net, yapılandırılmış mantıksal adımlar kullan.`;
+- Çocuksu ifadelerden tamamen uzak; lise öğrencisinin bilişsel seviyesine uygun olgun, analitik, değişkenler arası ilişki kuran, matematiksel modelleme, teorem/doğrulama ve problem çözme stratejileri odaklı bir dil kullan.${g === 12 ? ' 12. sınıf düzeyinde YKS/AYT derinliğini ve analitik yorum gücünü koru.' : ' 9–11. sınıflarda Türkiye Yüzyılı Maarif Modeli analitik derinliğini koru.'}
+- Her sayfada fonksiyon grafikleri, koordinat düzlemi, birim çember, tablo veya analitik ilişki şemalarını temiz <svg> olarak üret.`;
 
   const primaryModel = sanitizeModelName(activeModel || resolveAIModel('konu_anlatimi'));
   const candidateModels = [...new Set([primaryModel, 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'])];
@@ -1010,7 +1025,9 @@ KONU BİLGİLERİ:
 ${officialBoundary ? `- Resmi MEB Çerçevesi: ${officialBoundary}` : ''}
 ${teacherNotes ? `- Öğretmen Özel Odak Notu: ${teacherNotes}` : ''}
 
-${ragBundle.ragText ? `PINECONE MEB DERS KİTABI VE KILAVUZ REFERANS BAĞLAMI (MUTLAKA BU KAYNAKLARA DAYAN):
+${r2BookBundle.r2BookContext ? `CLOUDFLARE R2 MEB JSON DERS KİTABI KAYNAK BAĞLAMI ({r2BookContext} — ANLATIM STİLİ VE ÖRNEKLERDE BU KİTABA SADIK KAL):
+${r2BookBundle.r2BookContext}
+` : ''}${ragBundle.ragText ? `PINECONE MEB DERS KİTABI VE KILAVUZ REFERANS BAĞLAMI (MUTLAKA BU KAYNAKLARA DAYAN):
 ${ragBundle.ragText}
 ` : ''}
 KADEME PEDAGOJİ KURALI (KESİN UYULACAK):
