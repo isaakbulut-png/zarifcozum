@@ -476,7 +476,39 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     const sub_topic = typeof req.body?.sub_topic === 'string' ? req.body.sub_topic.trim() : (req.body?.alt_konu || req.body?.topic || '');
     const difficulty = typeof req.body?.difficulty === 'string' ? req.body.difficulty : 'Orta';
     const count = Number(req.body?.count) || 5;
-    const questionType = req.body?.questionType === 'multiple_choice' ? 'multiple_choice' : 'open_ended';
+    const rawWorkType = typeof req.body?.workType === 'string' ? req.body.workType.trim() : '';
+    const TYMM_WORK_TYPES = {
+      coktan_secmeli: {
+        questionType: 'multiple_choice',
+        label: 'Çoktan Seçmeli Öğrenme Çıktısı Testi',
+        promptRule: 'ÇALIŞMA TÜRÜ — ÇOKTAN SEÇMELİ ÖĞRENME ÇIKTISI TESTİ: Her soru doğrudan seçili öğrenme çıktısını ve kavramsal anlamayı ölçen, çeldiricileri gerçek kavram yanılgılarından üretilmiş nitelikli çoktan seçmeli soru olsun.'
+      },
+      baglam_temelli: {
+        questionType: 'multiple_choice',
+        label: 'Bağlam Temelli Beceri Sorusu (TYMM)',
+        promptRule: 'ÇALIŞMA TÜRÜ — BAĞLAM TEMELLİ BECERİ SORUSU (TYMM): Her soruyu gerçek yaşam bağlamı, tablo/grafik/model yorumlama, matematiksel muhakeme ve üst düzey problem çözme becerisi gerektiren özgün Maarif Modeli beceri sorusu olarak kurgula.'
+      },
+      acik_uclu: {
+        questionType: 'open_ended',
+        label: 'Açık Uçlu & Gerekçelendirme Sorusu (Rubrikli)',
+        promptRule: 'ÇALIŞMA TÜRÜ — AÇIK UÇLU & GEREKÇELENDİRME SORUSU (RUBRİKLİ): Öğrencinin çözüm adımlarını, matematiksel gerekçesini ve karar mantığını açıklayarak yazmasını gerektiren açık uçlu sorular ve 100 puanlık analitik rubrik üret.'
+      },
+      tanilayici_hizli: {
+        questionType: 'multiple_choice',
+        label: 'Tanılayıcı Hızlı Araçlar (Doğru/Yanlış & Yapılandırılmış Grid)',
+        promptRule: 'ÇALIŞMA TÜRÜ — TANILAYICI HIZLI ARAÇLAR (DOĞRU/YANLIŞ & YAPILANDIRILMIŞ GRİD): Kavram yanılgılarını hızla tespit eden, kısa öncüllü (I, II, III doğru/yanlış veya ızgara/kutucuk seçimli) biçimlendirici tanı soruları üret.'
+      },
+      performans_gorevi: {
+        questionType: 'open_ended',
+        label: 'Ünite Performans & Süreç Görevi',
+        promptRule: 'ÇALIŞMA TÜRÜ — ÜNİTE PERFORMANS & SÜREÇ GÖREVİ: Öğrencinin adım adım modelleme, veri toplama, hesaplama ve değerlendirme yapacağı uygulamalı çalışma kâğıdı / performans görevi ve süreç değerlendirme rubriği üret.'
+      }
+    };
+    const workTypeConfig = TYMM_WORK_TYPES[rawWorkType] || null;
+    const workType = workTypeConfig ? rawWorkType : (req.body?.questionType === 'multiple_choice' ? 'coktan_secmeli' : 'acik_uclu');
+    const questionType = workTypeConfig
+      ? workTypeConfig.questionType
+      : (req.body?.questionType === 'multiple_choice' ? 'multiple_choice' : 'open_ended');
 
     // Müfredat ve alt konu çözümlemesi
     const subMeta = findSubTopicMeta(grade, unit_topic, sub_topic);
@@ -697,6 +729,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       '',
       'KADEME VE FORMAT STANDARTLARI:',
       kademePedagojisi,
+      workTypeConfig ? workTypeConfig.promptRule : '',
       questionType === 'open_ended'
         ? 'AÇIK UÇLU FORMAT: Sorular çoktan seçmeli DEĞİLDİR. Öğrencinin çözüm sürecini, adımlarını ve mantığını yazarak sergilemesini gerektiren AÇIK UÇLU sorulardır.'
         : secenekSayisiMetni,

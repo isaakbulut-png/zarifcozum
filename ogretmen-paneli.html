@@ -1772,10 +1772,13 @@ body.teacher-menu-open {
                         <input type="hidden" id="aiTopic" value="">
                       </div>
                       <div class="field">
-                        <label for="aiQuestionType">Soru Formatı</label>
+                        <label for="aiQuestionType">Çalışma Türü (Maarif Modeli — TYMM)</label>
                         <select id="aiQuestionType" required>
-                          <option value="multiple_choice" selected>🔘 Çoktan Seçmeli (4 Seçenekli)</option>
-                          <option value="open_ended">✍️ Açık Uçlu (Maarif Modeli &amp; Rubrikli)</option>
+                          <option value="coktan_secmeli" selected>🔘 Çoktan Seçmeli Öğrenme Çıktısı Testi (5–8: 4 Şık / 9–12: 5 Şık)</option>
+                          <option value="baglam_temelli">🧩 Bağlam Temelli Beceri Sorusu (TYMM)</option>
+                          <option value="acik_uclu">✍️ Açık Uçlu &amp; Gerekçelendirme Sorusu (Rubrikli)</option>
+                          <option value="tanilayici_hizli">⚡ Tanılayıcı Hızlı Araçlar (Doğru/Yanlış &amp; Grid)</option>
+                          <option value="performans_gorevi">📋 Ünite Performans &amp; Süreç Görevi</option>
                         </select>
                       </div>
                       <div class="field">
@@ -1818,6 +1821,17 @@ body.teacher-menu-open {
                     </button>
                   </div>
                   <div class="question-list" id="aiQuestionList" aria-live="polite" style="margin-top:12px;"></div>
+
+                  <!-- Yayınlanan Maarif İçerikleri (ZarifStore Canlı Havuzu) -->
+                  <div id="teacherPublishedMaarifWrap" style="margin-top:22px;padding:16px;border-radius:12px;background:#fffaf5;border:1px solid #ead8c5;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+                      <div>
+                        <strong style="color:#2c1a0e;font-size:0.98rem;">📢 Yayınlanan Maarif İçerikleri (Öğrenci Paneliyle Senkron)</strong>
+                        <p class="hint" style="margin:2px 0 0;font-size:12px;">Onayla ve Yayınla ile öğrenci panelindeki Soru &amp; Test Merkezine aktarılan çalışmalar.</p>
+                      </div>
+                    </div>
+                    <div id="teacherPublishedMaarifList" style="display:grid;gap:8px;"></div>
+                  </div>
                 </div>
               </div>
 
@@ -2344,7 +2358,7 @@ body.teacher-menu-open {
 <script src="/assets/ogretmen-gezinme.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="/assets/app-store.js?v=2"></script>
+<script src="/assets/app-store.js?v=3"></script>
 <script src="/assets/gamification-service.js?v=1"></script>
 <script src="/assets/ogretmen-yonetim.js?v=2"></script>
 <script src="/assets/ogrenci-gelisim.js"></script>
@@ -4781,6 +4795,10 @@ body.teacher-menu-open {
     durumYaz('aiQuestionStatus', 'Maarif Modeli standartlarında Pinecone doğrulamalı sorular hazırlanıyor…');
 
     try {
+      const selectedWorkType = $('aiQuestionType')?.value || 'coktan_secmeli';
+      const mappedQuestionType = (selectedWorkType === 'acik_uclu' || selectedWorkType === 'performans_gorevi')
+        ? 'open_ended'
+        : 'multiple_choice';
       const res = await api('/api/ai/questions', {
         method: 'POST',
         body: JSON.stringify({
@@ -4789,13 +4807,16 @@ body.teacher-menu-open {
           unit_topic,
           sub_topic,
           topic: sub_topic,
-          questionType: $('aiQuestionType')?.value || 'open_ended',
+          workType: selectedWorkType,
+          questionType: mappedQuestionType,
           difficulty: $('aiDifficulty').value,
           count: Number($('aiCount').value),
           selectedModel: $('aiModelSelect')?.value || 'gemini-3.8-flash'
         })
       });
       const quiz = res.quiz;
+      quiz.workType = selectedWorkType;
+      quiz.unit_topic = unit_topic;
       quiz.draftId = res.draftId || (quiz && quiz.draftId);
       if (res.draftId) localStorage.setItem('zarif_last_ai_draft_id', res.draftId);
       aiDraft = quiz;
@@ -4900,9 +4921,23 @@ body.teacher-menu-open {
         })
       });
       aiPublished = true;
-      button.textContent = 'Yayınlandı';
+      button.textContent = '✅ Onaylandı ve Yayınlandı';
       status.textContent = result.mesaj;
       status.className = 'status ai-publish-status ok';
+      if (window.ZarifStore && window.ZarifStore.publishedTests) {
+        const wt = aiDraft.workType || $('aiQuestionType')?.value || 'coktan_secmeli';
+        window.ZarifStore.publishedTests.publish({
+          title,
+          grade: Number(aiDraft.grade) || 7,
+          unitTopic: aiDraft.unit_topic || '',
+          topicTitle: aiDraft.topic || title,
+          workType: wt,
+          difficulty: aiDraft.difficulty || 'Orta',
+          questions,
+          status: 'published'
+        });
+        renderTeacherPublishedMaarifList();
+      }
       try {
         yonetim = await api('/api/ogretmen/yonetim');
         yonetimCiz();
@@ -4920,6 +4955,56 @@ body.teacher-menu-open {
       $('generateAiQuestions').disabled = false;
     }
   });
+
+  // Yayınlanan Maarif İçerikleri Listesi (ZarifStore.publishedTests)
+  function renderTeacherPublishedMaarifList() {
+    const listEl = $('teacherPublishedMaarifList');
+    if (!listEl || !window.ZarifStore || !window.ZarifStore.publishedTests) return;
+    const items = window.ZarifStore.publishedTests.list();
+    if (!items.length) {
+      listEl.innerHTML = '<p class="hint" style="margin:0;font-size:12.5px;">Henüz "Onayla ve Yayınla" ile öğrenci paneline aktarılan çalışma yok.</p>';
+      return;
+    }
+    listEl.innerHTML = items.map(it => {
+      const isPub = it.status === 'published';
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-radius:10px;background:#fff;border:1px solid #ead8c5;">
+          <div style="min-width:200px;flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <strong style="color:#2c1a0e;font-size:0.9rem;">${esc(it.title)}</strong>
+              <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#2c1a0e;color:#f3d58d;">${it.grade}. Sınıf</span>
+              <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#fff4eb;border:1px solid #f0c9a8;color:#c2570c;">${esc(it.workTypeLabel)}</span>
+              <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:${isPub ? '#ecfdf5' : '#fef3c7'};color:${isPub ? '#065f46' : '#92400e'};">${isPub ? '● Yayında' : '○ Taslak'}</span>
+            </div>
+            <div style="font-size:11.5px;color:#6a5242;margin-top:3px;">${it.questionCount || 0} Soru · ${esc(it.topicTitle)}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button type="button" data-pub-toggle="${esc(it.id)}" style="padding:5px 10px;border-radius:7px;border:1px solid ${isPub ? '#d97706' : '#059669'};background:${isPub ? '#fffbeb' : '#ecfdf5'};color:${isPub ? '#92400e' : '#065f46'};font-size:12px;font-weight:700;cursor:pointer;">
+              ${isPub ? '⏸ Yayından Kaldır' : '🚀 Yayınla'}
+            </button>
+            <button type="button" data-pub-del="${esc(it.id)}" style="padding:5px 10px;border-radius:7px;border:1px solid #dc2626;background:#dc2626;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">🗑 Sil</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  $('teacherPublishedMaarifList')?.addEventListener('click', event => {
+    const toggleBtn = event.target.closest('[data-pub-toggle]');
+    if (toggleBtn && window.ZarifStore?.publishedTests) {
+      window.ZarifStore.publishedTests.toggleStatus(toggleBtn.dataset.pubToggle);
+      renderTeacherPublishedMaarifList();
+      return;
+    }
+    const delBtn = event.target.closest('[data-pub-del]');
+    if (delBtn && window.ZarifStore?.publishedTests) {
+      if (!confirm('Bu yayınlanan çalışma kalıcı olarak silinecek. Emin misiniz?')) return;
+      window.ZarifStore.publishedTests.remove(delBtn.dataset.pubDel);
+      renderTeacherPublishedMaarifList();
+    }
+  });
+  renderTeacherPublishedMaarifList();
+  window.ZarifStore?.events?.subscribe?.('publishedTests', renderTeacherPublishedMaarifList);
 
   // Helper to render AI questions list with F5 recovery & action buttons
   function renderAiQuestionCards(quiz, isRestored = false) {

@@ -19,13 +19,15 @@
   var KEYS = {
     contacts: 'zc_contacts_v1',
     tests: 'zc_test_results_v1',
-    assignments: 'zc_assignments_v1'
+    assignments: 'zc_assignments_v1',
+    publishedTests: 'zc_published_tests_v1'
   };
 
   var MAX_ITEMS = {
     contacts: 300,
     tests: 500,
-    assignments: 300
+    assignments: 300,
+    publishedTests: 250
   };
 
   var EVENT_NAME = 'zarif:store-change';
@@ -412,7 +414,97 @@
   };
 
   // =========================================================================
-  // 4. EVENTS (Canlı Sekme & Sayfa İçi Senkronizasyon)
+  // 4. PUBLISHED TESTS (Öğretmen Onayla & Yayınla -> Öğrenci Soru & Test Merkezi)
+  // =========================================================================
+  var WORK_TYPE_LABELS = {
+    coktan_secmeli: 'Çoktan Seçmeli Öğrenme Çıktısı Testi',
+    baglam_temelli: 'Bağlam Temelli Beceri Sorusu (TYMM)',
+    acik_uclu: 'Açık Uçlu & Gerekçelendirme (Rubrikli)',
+    tanilayici_hizli: 'Tanılayıcı Hızlı Araçlar (D/Y & Grid)',
+    performans_gorevi: 'Ünite Performans & Süreç Görevi'
+  };
+
+  var publishedTests = {
+    WORK_TYPE_LABELS: WORK_TYPE_LABELS,
+
+    list: function (filter) {
+      var items = safeRead(KEYS.publishedTests, []);
+      items.sort(function (a, b) {
+        return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+      });
+      if (!filter) return items;
+      return items.filter(function (item) {
+        if (filter.status && filter.status !== 'all' && item.status !== filter.status) return false;
+        if (filter.grade && Number(item.grade) !== Number(filter.grade)) return false;
+        if (filter.workType && filter.workType !== 'all' && item.workType !== filter.workType) return false;
+        return true;
+      });
+    },
+
+    publish: function (data) {
+      var items = safeRead(KEYS.publishedTests, []);
+      var now = new Date().toISOString();
+      var workType = normalizeText(data && data.workType) || 'coktan_secmeli';
+      var topicTitle = normalizeText(data && (data.topicTitle || data.topic)) || 'Genel Matematik';
+      var questions = Array.isArray(data && data.questions) ? data.questions : [];
+      var record = {
+        id: (data && data.id) || uid('pub'),
+        title: normalizeText(data && data.title) || (topicTitle + ' — ' + (WORK_TYPE_LABELS[workType] || 'Test')),
+        grade: Number(data && data.grade) || 7,
+        unitTopic: normalizeText(data && data.unitTopic),
+        topicTitle: topicTitle,
+        topicKey: slugify(topicTitle),
+        workType: workType,
+        workTypeLabel: normalizeText(data && data.workTypeLabel) || WORK_TYPE_LABELS[workType] || 'Öğrenme Çıktısı Testi',
+        difficulty: normalizeText(data && data.difficulty) || 'Orta',
+        questionCount: questions.length || Number(data && data.questionCount) || 0,
+        questions: questions,
+        teacherName: normalizeText(data && data.teacherName) || (global.localStorage && global.localStorage.getItem('zarif_teacher_name')) || 'Matematik Öğretmeni',
+        status: (data && data.status === 'draft') ? 'draft' : 'published',
+        createdAt: now,
+        updatedAt: now
+      };
+      items.unshift(record);
+      if (items.length > MAX_ITEMS.publishedTests) items = items.slice(0, MAX_ITEMS.publishedTests);
+      safeWrite(KEYS.publishedTests, items);
+      emitChange('publishedTests', 'publish', record);
+      return record;
+    },
+
+    toggleStatus: function (id) {
+      var items = safeRead(KEYS.publishedTests, []);
+      var updated = null;
+      items = items.map(function (item) {
+        if (item.id === id) {
+          updated = Object.assign({}, item, {
+            status: item.status === 'published' ? 'draft' : 'published',
+            updatedAt: new Date().toISOString()
+          });
+          return updated;
+        }
+        return item;
+      });
+      if (updated) {
+        safeWrite(KEYS.publishedTests, items);
+        emitChange('publishedTests', 'toggle', updated);
+      }
+      return updated;
+    },
+
+    remove: function (id) {
+      var items = safeRead(KEYS.publishedTests, []);
+      var next = items.filter(function (item) { return item.id !== id; });
+      if (next.length !== items.length) {
+        safeWrite(KEYS.publishedTests, next);
+        emitChange('publishedTests', 'remove', { id: id });
+        return true;
+      }
+      return false;
+    }
+  };
+
+  // =========================================================================
+  // 5. EVENTS (Canlı Sekme & Sayfa İçi Senkronizasyon)
   // =========================================================================
   var events = {
     subscribe: function (channel, callback) {
@@ -432,6 +524,7 @@
         if (e.key === KEYS.contacts) matchedChannel = 'contacts';
         else if (e.key === KEYS.tests) matchedChannel = 'tests';
         else if (e.key === KEYS.assignments) matchedChannel = 'assignments';
+        else if (e.key === KEYS.publishedTests) matchedChannel = 'publishedTests';
         if (matchedChannel && (channel === '*' || channel === matchedChannel)) {
           callback({ channel: matchedChannel, action: 'storage', ts: Date.now() });
         }
@@ -453,6 +546,7 @@
     contacts: contacts,
     tests: tests,
     assignments: assignments,
+    publishedTests: publishedTests,
     events: events
   };
 })(window);

@@ -55,7 +55,25 @@
     if (gradeTopicsCache.has(grade)) return gradeTopicsCache.get(grade);
     const itemsMap = new Map();
 
-    // 1. Pratik API'sinden onaylı soru sayıları
+    // 1. Öğretmenin "Onayla ve Yayınla" ile yayınladığı (yalnızca status === 'published') ZarifStore testleri
+    const publishedStoreItems = (window.ZarifStore && window.ZarifStore.publishedTests)
+      ? window.ZarifStore.publishedTests.list({ grade, status: 'published' })
+      : [];
+    publishedStoreItems.forEach(pub => {
+      const title = String(pub.topicTitle || pub.title || '').trim();
+      if (!title) return;
+      const key = title.toLowerCase();
+      const prev = itemsMap.get(key);
+      itemsMap.set(key, {
+        title,
+        questionCount: (prev ? prev.questionCount : 0) + (Number(pub.questionCount) || (Array.isArray(pub.questions) ? pub.questions.length : 0)),
+        approved: true,
+        workTypeLabel: pub.workTypeLabel || 'Öğrenme Çıktısı Testi',
+        publishedItem: pub
+      });
+    });
+
+    // 2. Pratik API'sinden onaylı soru sayıları
     try {
       const res = await fetch(`/api/pratik/konular?sinif=${encodeURIComponent(grade)}`, { credentials: 'include' });
       if (res.ok) {
@@ -65,11 +83,19 @@
           const title = String(k.konu || k.title || k.name || '').trim();
           if (!title) return;
           const count = Number(k.soruSayisi ?? k.count ?? k.questionCount ?? 0);
-          itemsMap.set(title.toLowerCase(), {
-            title,
-            questionCount: count,
-            approved: count > 0
-          });
+          const key = title.toLowerCase();
+          const prev = itemsMap.get(key);
+          if (prev) {
+            prev.questionCount = Math.max(prev.questionCount, count);
+            prev.approved = prev.approved || count > 0;
+          } else {
+            itemsMap.set(key, {
+              title,
+              questionCount: count,
+              approved: count > 0,
+              workTypeLabel: count > 0 ? 'Öğrenme Çıktısı Testi' : ''
+            });
+          }
         });
       }
     } catch {}
@@ -213,30 +239,150 @@
       return;
     }
 
-    listEl.innerHTML = topics.slice(0, 12).map(topic => {
+    listEl.innerHTML = topics.slice(0, 12).map((topic, idx) => {
       const score = perfMap.has(topic.title.toLowerCase()) ? perfMap.get(topic.title.toLowerCase()) : null;
       const pct = score !== null ? score : 0;
       const barCls = score === null ? 'none' : (pct >= 75 ? 'good' : (pct >= 50 ? 'mid' : 'low'));
       const locked = !topic.approved;
+      const typeTag = topic.workTypeLabel
+        ? `<span style="margin-left:6px;padding:2px 7px;border-radius:999px;background:#fff4eb;border:1px solid #f0c9a8;color:#c2570c;font-size:0.68rem;font-weight:700;">${esc(topic.workTypeLabel)}</span>`
+        : '';
       return `
         <div class="stm-topic-row ${locked ? 'is-locked' : ''}">
           <span class="stm-q-badge">${topic.questionCount} Soru</span>
-          <span class="stm-topic-name" title="${esc(topic.title)}">${esc(topic.title)}</span>
+          <span class="stm-topic-name" title="${esc(topic.title)}">${esc(topic.title)}${typeTag}</span>
           <div class="stm-bar-track"><div class="stm-bar-fill ${barCls}" style="width:${score !== null ? pct : 0}%"></div></div>
           <span class="stm-pct">${score !== null ? `%${pct}` : '—'}</span>
           ${locked
             ? '<span class="stm-lock-pill">🔒 Öğretmen Onayı Bekliyor</span>'
-            : `<button type="button" class="stm-solve-btn" data-stm-solve="${esc(topic.title)}">Çöz →</button>`
+            : `<button type="button" class="stm-solve-btn" data-stm-solve-idx="${idx}">Çöz →</button>`
           }
         </div>
       `;
     }).join('');
 
-    listEl.querySelectorAll('[data-stm-solve]').forEach(btn => {
+    listEl.querySelectorAll('[data-stm-solve-idx]').forEach(btn => {
       btn.addEventListener('click', () => {
-        scrollToPratikWithTopic(selectedGrade, btn.dataset.stmSolve);
+        const chosen = topics[Number(btn.dataset.stmSolveIdx)];
+        if (!chosen) return;
+        if (chosen.publishedItem && Array.isArray(chosen.publishedItem.questions) && chosen.publishedItem.questions.length) {
+          openPublishedQuizModal(chosen.publishedItem);
+        } else {
+          scrollToPratikWithTopic(selectedGrade, chosen.title);
+        }
       });
     });
+  }
+
+  function openPublishedQuizModal(pub) {
+    saveLastSession(pub.topicTitle || pub.title, pub.grade || selectedGrade);
+    renderHero();
+    let modal = document.getElementById('stmTrueFalseModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'stmTrueFalseModal';
+      modal.className = 'stm-tf-modal';
+      document.body.appendChild(modal);
+    }
+    const questions = pub.questions || [];
+    let idx = 0;
+    let correct = 0;
+
+    function fmtMath(txt) {
+      if (window.zarifMathText && typeof window.zarifMathText.format === 'function') {
+        return window.zarifMathText.format(String(txt || ''));
+      }
+      return esc(txt);
+    }
+
+    function renderStep() {
+      if (idx >= questions.length) {
+        const pct = Math.round((correct / Math.max(1, questions.length)) * 100);
+        window.ZarifStore?.tests?.recordResult?.({
+          topicTitle: pub.topicTitle || pub.title,
+          grade: Number(pub.grade) || selectedGrade,
+          source: pub.workType || 'published-test',
+          total: questions.length,
+          correct
+        });
+        renderKpiStrip();
+        renderTopicPerformance();
+        modal.innerHTML = `
+          <div class="stm-tf-card">
+            <div style="padding:16px 20px;background:#3E2F26;color:#fff;display:flex;justify-content:space-between;align-items:center;">
+              <strong>✅ ${esc(pub.title)} — Sonuç</strong>
+              <button type="button" id="stmPubClose" style="background:rgba(255,255,255,0.16);border:none;color:#fff;width:30px;height:30px;border-radius:8px;cursor:pointer;">×</button>
+            </div>
+            <div style="padding:26px 22px;text-align:center;">
+              <div style="font-size:2.4rem;margin-bottom:8px;">${pct >= 75 ? '🏆' : '🎯'}</div>
+              <h3 style="margin:0 0 6px;color:#3E2F26;">${correct} / ${questions.length} Doğru (%${pct})</h3>
+              <p style="margin:0 0 18px;color:#78695e;font-size:0.88rem;">Konu Performansın ve Öğretmen Başarı Analizi otomatik güncellendi!</p>
+              <button type="button" id="stmPubDone" class="stm-hero-btn">Tamamla</button>
+            </div>
+          </div>
+        `;
+        modal.querySelector('#stmPubClose')?.addEventListener('click', () => modal.classList.remove('open'));
+        modal.querySelector('#stmPubDone')?.addEventListener('click', () => modal.classList.remove('open'));
+        return;
+      }
+
+      const q = questions[idx];
+      const opts = q.options && typeof q.options === 'object' ? Object.entries(q.options) : [];
+      modal.innerHTML = `
+        <div class="stm-tf-card" style="max-width:600px;">
+          <div style="padding:14px 20px;background:#3E2F26;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+            <div>
+              <strong style="font-size:0.95rem;">${esc(pub.workTypeLabel || 'Onaylı Çalışma')} (${idx + 1}/${questions.length})</strong>
+            </div>
+            <button type="button" id="stmPubClose" style="background:rgba(255,255,255,0.16);border:none;color:#fff;width:30px;height:30px;border-radius:8px;cursor:pointer;">×</button>
+          </div>
+          <div style="padding:20px;max-height:76vh;overflow-y:auto;">
+            <div style="font-size:0.96rem;font-weight:600;color:#3E2F26;line-height:1.6;margin-bottom:14px;">${fmtMath(q.text || q.question || '')}</div>
+            ${opts.length ? `
+              <div style="display:grid;gap:8px;">
+                ${opts.map(([k, v]) => `
+                  <button type="button" data-pub-opt="${esc(k)}" style="text-align:left;padding:10px 14px;border-radius:10px;border:1px solid #dfd3c5;background:#fff;color:#3E2F26;font-size:0.9rem;cursor:pointer;">
+                    <strong>${esc(k)})</strong> ${fmtMath(v)}
+                  </button>
+                `).join('')}
+              </div>
+            ` : `
+              <textarea id="stmOpenAns" rows="3" placeholder="Çözüm adımlarını ve gerekçeni buraya yaz…" style="width:100%;padding:10px;border-radius:10px;border:1px solid #dfd3c5;font-family:inherit;"></textarea>
+              <button type="button" id="stmOpenNext" class="stm-hero-btn" style="margin-top:10px;">Cevabı Kontrol Et →</button>
+            `}
+            <div id="stmPubFeedback" style="margin-top:12px;font-size:0.86rem;"></div>
+          </div>
+        </div>
+      `;
+      modal.querySelector('#stmPubClose')?.addEventListener('click', () => modal.classList.remove('open'));
+      if (opts.length) {
+        modal.querySelectorAll('[data-pub-opt]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const picked = btn.dataset.pubOpt;
+            const ok = String(picked).toUpperCase() === String(q.answer || '').toUpperCase();
+            if (ok) correct += 1;
+            modal.querySelectorAll('[data-pub-opt]').forEach(b => { b.disabled = true; });
+            btn.style.background = ok ? '#ecfdf5' : '#fef2f2';
+            btn.style.borderColor = ok ? '#059669' : '#dc2626';
+            const fb = modal.querySelector('#stmPubFeedback');
+            if (fb) {
+              fb.innerHTML = `<strong style="color:${ok ? '#059669' : '#dc2626'};">${ok ? '✓ Doğru!' : `✕ Yanlış (Doğru: ${esc(q.answer)})`}</strong> ${fmtMath(q.explanation || q.solution || '')}`;
+            }
+            setTimeout(() => { idx += 1; renderStep(); }, 1300);
+          });
+        });
+      } else {
+        modal.querySelector('#stmOpenNext')?.addEventListener('click', () => {
+          correct += 1;
+          const fb = modal.querySelector('#stmPubFeedback');
+          if (fb) fb.innerHTML = `<strong style="color:#059669;">✓ Kaydedildi!</strong> ${fmtMath(q.solution || q.explanation || 'Çözüm adımın kaydedildi.')}`;
+          setTimeout(() => { idx += 1; renderStep(); }, 1300);
+        });
+      }
+    }
+
+    modal.classList.add('open');
+    renderStep();
   }
 
   function openTrueFalseModal() {
@@ -336,8 +482,8 @@
               <div class="stm-mode-left">
                 <div class="stm-mode-icon blue">📝</div>
                 <div>
-                  <h3>Karışık Soru Çöz</h3>
-                  <p>Ders ve konu seçerek kendi denemeni oluştur</p>
+                  <h3>Öğrenme Çıktısı Testleri</h3>
+                  <p>5–8. sınıf 4 şıklı, 9–12. sınıf 5 şıklı çoktan seçmeli kazanım testleri</p>
                 </div>
               </div>
               <span class="stm-mode-arrow">→</span>
@@ -347,8 +493,8 @@
               <div class="stm-mode-left">
                 <div class="stm-mode-icon green">⚡</div>
                 <div>
-                  <h3>Doğru / Yanlış Hızlı Mod</h3>
-                  <p>Kısa ifadelerde hızlı karar refleksini geliştir</p>
+                  <h3>Tanılayıcı Doğru / Yanlış &amp; Grid</h3>
+                  <p>Kavram yanılgılarını hızla tespit eden biçimlendirici hızlı mod</p>
                 </div>
               </div>
               <span class="stm-mode-arrow">→</span>
@@ -356,10 +502,10 @@
 
             <button type="button" class="stm-mode-card" data-stm-mode="flashcards">
               <div class="stm-mode-left">
-                <div class="stm-mode-icon amber">🃏</div>
+                <div class="stm-mode-icon amber">🧩</div>
                 <div>
-                  <h3>Bilgi Kartları (Flashcards)</h3>
-                  <p>Sık çıkan kural ve formülleri kartlarla tekrar et</p>
+                  <h3>Bağlam Temelli Beceri Soruları</h3>
+                  <p>Günlük yaşam bağlamında muhakeme, problem çözme ve bilgi kartları</p>
                 </div>
               </div>
               <span class="stm-mode-arrow">→</span>
@@ -369,8 +515,8 @@
               <div class="stm-mode-left">
                 <div class="stm-mode-icon purple">🎯</div>
                 <div>
-                  <h3>Yazılı &amp; Beceri Temelli Senaryolar</h3>
-                  <p>Maarif Modeli açık uçlu ve yeni nesil sorular</p>
+                  <h3>Açık Uçlu &amp; Rubrikli Senaryolar</h3>
+                  <p>Maarif Modeli çözüm adımlarını ve gerekçelendirmeyi ölçen sorular</p>
                 </div>
               </div>
               <span class="stm-mode-arrow">→</span>
@@ -439,6 +585,10 @@
 
     window.ZarifStore?.events?.subscribe?.('tests', () => {
       renderKpiStrip();
+      renderTopicPerformance();
+    });
+    window.ZarifStore?.events?.subscribe?.('publishedTests', () => {
+      gradeTopicsCache.clear();
       renderTopicPerformance();
     });
     window.addEventListener('zarif:gamification-change', renderKpiStrip);
