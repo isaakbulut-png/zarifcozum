@@ -66,6 +66,7 @@ const { normalizeAiChatRequest, createAiChatReply } = require('./lib/ai-chat');
 const { aiQuotaMiddleware, getQuotaStatus } = require('./middleware/aiQuota');
 const { createFaqService } = require('./lib/faq-service');
 const { redisOptions } = require('./lib/redis-options');
+const { setRedisClient, createRedisRateLimiter } = require('./lib/redis-cache');
 const { studentQuestion } = require('./lib/quiz-content');
 const { createTeacherQuizHandler, createStudentQuizSubmissionHandler, createLiveQuizHandlers } = require('./routes/quizler');
 const { createPointsService } = require('./lib/leaderboard');
@@ -109,6 +110,12 @@ const redisClient = process.env.REDIS_URL
 if (redisClient) {
   redisClient.on('error', error => console.error('Redis bağlantı hatası:', error));
 }
+setRedisClient(redisClient);
+const aiRedisLimiter = createRedisRateLimiter({
+  prefix: 'rl:ai',
+  windowSec: 60,
+  maxRequests: 15
+});
 const faqService = createFaqService({
   getFaqModel: () => AiFaq,
   redisClient
@@ -299,7 +306,7 @@ app.get('/api/student/ai-quota', requireRole('student', 'teacher', 'admin'), asy
   }
 });
 
-app.post('/api/chat', requireRole('student', 'teacher', 'admin'), chatLimiter, aiQuotaMiddleware('message'), async (req, res) => {
+app.post('/api/chat', requireRole('student', 'teacher', 'admin'), aiRedisLimiter, chatLimiter, aiQuotaMiddleware('message'), async (req, res) => {
   try {
     const request = normalizeAiChatRequest(req.body, req.session?.user?.role, req.session?.user);
 

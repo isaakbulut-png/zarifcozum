@@ -86,6 +86,9 @@ function normalizeLessonPages(doc) {
   return [{ pageNumber: 1, title: doc.title || doc.subTopicTitle || doc.sub_topic || 'Konu Anlatımı', content: raw, svgDiagram: '' }];
 }
 
+const { getCache, setCache } = require('../lib/redis-cache');
+const TOPICS_CACHE_TTL_SEC = 60 * 60; // 1 saat
+
 function createStudentTopicsRouter({ requireAuth }) {
   const router = express.Router();
 
@@ -99,10 +102,19 @@ function createStudentTopicsRouter({ requireAuth }) {
       const gradeLocked = !access.isStaff && !access.allowedGrades.includes(grade);
       const q = typeof req.query.q === 'string' ? req.query.q.trim().toLocaleLowerCase('tr-TR') : '';
 
-      const [topics, gradeProgress, lastProgressDoc] = await Promise.all([
-        TopicContent.find({ grade, status: 'published' })
+      const topicsCacheKey = `topics:published:grade:${grade}`;
+      const loadPublishedTopics = async () => {
+        const cached = await getCache(topicsCacheKey);
+        if (Array.isArray(cached)) return cached;
+        const fresh = await TopicContent.find({ grade, status: 'published' })
           .sort({ order: 1, createdAt: 1 })
-          .lean(),
+          .lean();
+        await setCache(topicsCacheKey, fresh, TOPICS_CACHE_TTL_SEC);
+        return fresh;
+      };
+
+      const [topics, gradeProgress, lastProgressDoc] = await Promise.all([
+        loadPublishedTopics(),
         StudentTopicProgress.find({ studentId, grade }).lean(),
         StudentTopicProgress.findOne({ studentId })
           .sort({ lastAccessedAt: -1 })

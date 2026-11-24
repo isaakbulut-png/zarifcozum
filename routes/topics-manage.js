@@ -158,6 +158,10 @@ function createTopicsManageRouter({ requireRole }) {
 
       topic.status = nextStatus;
       await topic.save();
+      try {
+        const { invalidatePattern } = require('../lib/redis-cache');
+        await invalidatePattern('topics:published:');
+      } catch {}
 
       res.json({
         basarili: true,
@@ -188,6 +192,10 @@ function createTopicsManageRouter({ requireRole }) {
         CurriculumContent.findByIdAndDelete(topic._id),
         StudentTopicProgress.deleteMany({ topicId: topic._id })
       ]);
+      try {
+        const { invalidatePattern } = require('../lib/redis-cache');
+        await invalidatePattern('topics:published:');
+      } catch {}
 
       res.json({
         basarili: true,

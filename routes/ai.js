@@ -1450,6 +1450,10 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         updateData,
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
+      try {
+        const { invalidatePattern } = require('../lib/redis-cache');
+        await invalidatePattern('topics:published:');
+      } catch {}
 
       res.json({
         success: true,
