@@ -2441,15 +2441,97 @@ button,select{font:inherit}
       });
     });
 
-    // Hızlı örnek sorular
-    document.querySelectorAll('.student-quick-prompt').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const inp = $('studentAiInput');
-        if (inp) {
-          inp.value = btn.textContent.replace(/^[^\wüğışöçİĞÜŞÖÇ"]+/, '').replace(/^"/, '').replace(/"$/, '').trim();
-          inp.focus();
+    // 1. Sınıf & Tema Bazlı Dinamik Örnek Konu Çipleri + ZarifStore Akıllı Hafıza
+    const GRADE_FALLBACK_TOPICS = {
+      5: ['Doğal Sayılarla İşlemler', 'Kesirler', 'Geometrik Şekiller'],
+      6: ['Çarpanlar ve Katlar', 'Oran', 'Cebirsel İfadeler'],
+      7: ['Rasyonel Sayılar', 'Oran ve Orantı', 'Doğrular ve Açılar'],
+      8: ['Kareköklü İfadeler', 'Pisagor Bağıntısı', 'Doğrusal Denklemler'],
+      9: ['Gerçek Sayılar ve Üslü İfadeler', 'Üçgenler', 'Fonksiyon Kavramı'],
+      10: ['Fonksiyonlar', 'Polinomlar ve Çarpanlara Ayırma', 'Dörtgenler'],
+      11: ['Trigonometri', 'Analitik Geometri', 'İkinci Dereceden Eşitsizlikler'],
+      12: ['Üstel ve Logaritmik Fonksiyonlar', 'Limit ve Süreklilik', 'Türev ve İntegral']
+    };
+
+    function buildSmartWeaknessPrompt() {
+      const gradeVal = $('studentAiGradeSelect')?.value || (window.ZarifGamification?.getProfile?.().grade || 7);
+      const summary = window.ZarifStore?.tests?.getTopicSummary?.();
+      const pendingAsg = window.ZarifStore?.assignments?.list?.({ status: 'pending' }) || [];
+      const parts = [];
+      if (summary && Array.isArray(summary.topics) && summary.topics.length) {
+        const weakList = summary.topics.slice(0, 3).map(t => `${t.topicTitle} (%${t.avgScore})`).join(', ');
+        parts.push(`Son test sonuçlarıma göre öncelikli konularım: ${weakList}.`);
+      }
+      if (pendingAsg.length) {
+        const asgList = pendingAsg.slice(0, 3).map(a => a.topicTitle).join(', ');
+        parts.push(`Bekleyen öğretmen ödevlerim: ${asgList}.`);
+      }
+      if (!parts.length) {
+        return `${gradeVal}. sınıf matematikte eksiklerimi keşfetmek için bana kısa bir seviye yoklama sorusu sorup haftalık tekrar önerisi verir misin?`;
+      }
+      return `${gradeVal}. sınıf matematik öğrencisiyim. ${parts.join(' ')} Bu gerçek verilerime göre en zayıf olduğum konudan başlayarak kısa bir analiz ve adım adım çalışma önerisi hazırlar mısın?`;
+    }
+
+    function updateDynamicAiPrompts() {
+      const bar = $('studentAiPromptsBar');
+      if (!bar) return;
+      const grade = String($('studentAiGradeSelect')?.value || '');
+      const tema = String($('studentAiTemaSelect')?.value || '');
+      const altKonu = String($('studentAiAltKonuSelect')?.value || '');
+
+      let dynamicTopics = [];
+      if (altKonu) {
+        dynamicTopics = [altKonu];
+      } else if (grade && tema && studentCurriculumTree[grade]?.temalar?.[tema]?.alt_konular) {
+        dynamicTopics = studentCurriculumTree[grade].temalar[tema].alt_konular
+          .map(s => s.name)
+          .filter(Boolean)
+          .slice(0, 2);
+      } else if (grade && studentCurriculumTree[grade]?.temalar) {
+        const temalar = Object.keys(studentCurriculumTree[grade].temalar);
+        for (const tName of temalar) {
+          const subs = studentCurriculumTree[grade].temalar[tName]?.alt_konular || [];
+          if (subs[0]?.name) dynamicTopics.push(subs[0].name);
+          if (dynamicTopics.length >= 2) break;
         }
-      });
+      }
+
+      if (!dynamicTopics.length) {
+        const gNum = Number(grade) || 7;
+        dynamicTopics = (GRADE_FALLBACK_TOPICS[gNum] || GRADE_FALLBACK_TOPICS[7]).slice(0, 2);
+      }
+
+      const gradePrefix = grade ? `${grade}. sınıf ` : '';
+      const chipStyle = 'padding:5px 12px;border-radius:99px;border:1px solid #d9d3c3;background:var(--card);font-size:12px;cursor:pointer;white-space:nowrap;color:var(--text)';
+      const smartStyle = 'padding:5px 12px;border-radius:99px;border:1px solid #C84B31;background:#fff4eb;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;color:#C84B31';
+
+      const chipsHtml = [
+        `<span style="font-size:12px;font-weight:600;color:var(--muted);align-self:center;white-space:nowrap">Örnek Konular:</span>`,
+        `<button type="button" class="student-quick-prompt" data-smart-weakness="true" style="${smartStyle}">🎯 Zayıf Konularımı Analiz Et</button>`,
+        ...dynamicTopics.map((topic, i) => {
+          const qText = i === 0
+            ? `${gradePrefix}${topic} konusunu bir örnekle anlatır mısın?`
+            : `${gradePrefix}${topic} konusunda sık yapılan hatalar nelerdir?`;
+          return `<button type="button" class="student-quick-prompt" data-prompt="${esc(qText)}" style="${chipStyle}">${i === 0 ? '📐' : '🔢'} ${esc(qText)}</button>`;
+        }),
+        `<button type="button" class="student-quick-prompt" data-prompt="${esc(`${gradePrefix}matematik için bu hafta günlük 45 dk çalışma planı yap`)}" style="${chipStyle}">📅 Haftalık 45 dk çalışma planı yap</button>`
+      ];
+      bar.innerHTML = chipsHtml.join('');
+    }
+
+    // Event Delegation ile dinamik hızlı örnek sorular
+    $('studentAiPromptsBar')?.addEventListener('click', event => {
+      const btn = event.target.closest('.student-quick-prompt');
+      if (!btn) return;
+      const inp = $('studentAiInput');
+      if (!inp) return;
+      if (btn.dataset.smartWeakness === 'true') {
+        inp.value = buildSmartWeaknessPrompt();
+        $('studentAiForm')?.requestSubmit?.();
+        return;
+      }
+      inp.value = btn.dataset.prompt || btn.textContent.replace(/^[^\wüğışöçİĞÜŞÖÇ"]+/, '').trim();
+      inp.focus();
     });
 
     // Sınıf → Tema → Alt Konu zincirleme müfredat senkronizasyonu
@@ -2470,6 +2552,7 @@ button,select{font:inherit}
             temaSelect.disabled = true;
             altKonuSelect.replaceChildren(new Option('Tüm Konular', ''));
             altKonuSelect.disabled = true;
+            updateDynamicAiPrompts();
             return;
           }
           const temalar = Object.keys(studentCurriculumTree[grade].temalar);
@@ -2480,6 +2563,7 @@ button,select{font:inherit}
           temaSelect.disabled = !temalar.length;
           altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
           altKonuSelect.disabled = true;
+          updateDynamicAiPrompts();
         }
 
         function updateAltKonuDropdown() {
@@ -2488,6 +2572,7 @@ button,select{font:inherit}
           if (!grade || !tema || !studentCurriculumTree[grade]?.temalar?.[tema]) {
             altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
             altKonuSelect.disabled = true;
+            updateDynamicAiPrompts();
             return;
           }
           const altKonular = studentCurriculumTree[grade].temalar[tema].alt_konular || [];
@@ -2496,16 +2581,21 @@ button,select{font:inherit}
             ...altKonular.map(sub => new Option(sub.name + (sub.outcome_code ? ` [${sub.outcome_code}]` : ''), sub.name))
           );
           altKonuSelect.disabled = !altKonular.length;
+          updateDynamicAiPrompts();
         }
 
         gradeSelect?.addEventListener('change', updateTemaDropdown);
         temaSelect?.addEventListener('change', updateAltKonuDropdown);
+        altKonuSelect?.addEventListener('change', updateDynamicAiPrompts);
 
         if (gradeSelect?.value) {
           updateTemaDropdown();
+        } else {
+          updateDynamicAiPrompts();
         }
       } catch (e) {
         console.warn('Öğrenci müfredat ağacı yüklenemedi:', e.message);
+        updateDynamicAiPrompts();
       }
     }
     loadStudentCurriculumTree();
@@ -2581,18 +2671,56 @@ button,select{font:inherit}
           const content = document.createElement('div');
           content.style.whiteSpace = 'pre-wrap';
           const yanitMetni = res.yanit || res.text || '';
-          
-          if (window.zarifAiVisual) {
+
+          // KaTeX + SVG Görsel Desteği (window.zarifMathText.format düzeltmesi)
+          if (window.zarifAiVisual && /<svg[\s>]/i.test(yanitMetni)) {
             window.zarifAiVisual.append(content, yanitMetni);
+            if (window.zarifMathText && typeof window.zarifMathText.format === 'function') {
+              content.querySelectorAll('p, div, span').forEach(node => {
+                if (!node.querySelector('svg') && node.childNodes.length === 1 && node.firstChild.nodeType === 3) {
+                  node.innerHTML = window.zarifMathText.format(node.textContent || '');
+                }
+              });
+            }
+          } else if (window.zarifMathText && typeof window.zarifMathText.format === 'function') {
+            const formatted = window.zarifMathText.format(yanitMetni)
+              .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            content.innerHTML = formatted;
           } else {
             content.textContent = yanitMetni;
           }
-          
-          if (window.ZarifMathText) {
-            window.ZarifMathText.render(content);
-          }
 
           aiBubble.appendChild(content);
+
+          // 3. AI Koç Planını "Görevlerime Ekle" Entegrasyonu
+          const isCoachPlan = studentActiveRole === 'ai_koc' ||
+            /(çalışma planı|haftalık plan|günlük\s+\d+\s*dk|tekrar programı)/i.test(yanitMetni);
+          if (isCoachPlan && window.ZarifStore && window.ZarifStore.assignments) {
+            const actionRow = document.createElement('div');
+            actionRow.style.cssText = 'margin-top:12px;padding-top:10px;border-top:1px dashed #e4cbb2;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;';
+            const addPlanBtn = document.createElement('button');
+            addPlanBtn.type = 'button';
+            addPlanBtn.textContent = '📌 Bu Planı Görevlerime Ekle';
+            addPlanBtn.style.cssText = 'padding:7px 14px;border-radius:9px;border:none;background:#C84B31;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;';
+            addPlanBtn.addEventListener('click', () => {
+              const cleanSummary = yanitMetni.replace(/\*\*|\*/g, '').replace(/\s+/g, ' ').trim().slice(0, 240);
+              const targetGrade = Number(gradeVal) || window.ZarifGamification?.getProfile?.().grade || 7;
+              const topicLabel = altKonuVal || temaVal || 'AI Koç Haftalık Çalışma Planı';
+              window.ZarifStore.assignments.add({
+                studentName: currentStudentName || 'Öğrenci',
+                grade: targetGrade,
+                topicTitle: topicLabel,
+                teacherName: 'AI Koç (Kişisel Plan)',
+                note: cleanSummary + (yanitMetni.length > 240 ? '…' : '')
+              });
+              addPlanBtn.textContent = '✓ Ödevler / Çalışma Planım\'a Eklendi';
+              addPlanBtn.style.background = '#059669';
+              addPlanBtn.disabled = true;
+            });
+            actionRow.appendChild(addPlanBtn);
+            aiBubble.appendChild(actionRow);
+          }
+
           chatBody.appendChild(aiBubble);
           updateStudentAiQuotaBadge();
         } catch (err) {
