@@ -118,6 +118,12 @@ const userSchema = new mongoose.Schema({
     maxlength: 300,
     default: null
   },
+  bio: {
+    type: String,
+    trim: true,
+    maxlength: 1000,
+    default: ''
+  },
   avatarUrl: {
     type: String,
     default: null

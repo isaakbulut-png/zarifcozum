@@ -3,2073 +3,683 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Öğretmen Paneli - Profil ve Hesap Ayarları | ZarifÇözüm</title>
+  <title>Profil &amp; Ayarlar | ZarifÇözüm Öğretmen Paneli</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              200: '#c7d2fe',
-              300: '#a5b4fc',
-              400: '#818cf8',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              800: '#3730a3',
-              900: '#312e81',
-            }
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- React 18 & ReactDOM & Babel -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --coffee: #2c1a0e;
+      --coffee-mid: #3a2314;
+      --cream: #fbf1e8;
+      --surface: #fffaf5;
+      --terracotta: #c2570c;
+      --terracotta-dark: #9a3412;
+      --ink: #2c1a0e;
+      --muted: #6a5242;
+      --border: #e6d7c8;
+      --ok-bg: #ecfdf5;
+      --ok-border: #a7f3d0;
+      --ok-text: #065f46;
+      --err-bg: #fef2f2;
+      --err-border: #fecaca;
+      --err-text: #991b1b;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      background-color: #f6f8fb;
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
     }
-    input:focus, select:focus, textarea:focus {
+
+    /* Üst Bar */
+    .topbar {
+      background: linear-gradient(180deg, #322114 0%, var(--coffee) 100%);
+      border-bottom: 3px solid var(--terracotta);
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 4px 16px rgba(44, 26, 14, 0.18);
+    }
+    .topbar-inner {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
+      color: #fff;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .topbar h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.18rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .topbar-sub {
+      font-size: 0.78rem;
+      color: #dfd0c2;
+      margin-top: 2px;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 9px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.86rem;
+      font-weight: 600;
+      transition: background 0.18s ease, border-color 0.18s ease;
+    }
+    .back-btn:hover {
+      background: rgba(194, 87, 12, 0.35);
+      border-color: rgba(234, 88, 12, 0.7);
+    }
+
+    /* Ana Alan */
+    .container {
+      max-width: 880px;
+      margin: 28px auto 56px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 26px;
+      box-shadow: 0 4px 18px rgba(44, 26, 14, 0.05);
+    }
+    .card-header {
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-header h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.15rem;
+      color: var(--coffee);
+    }
+    .card-header p {
+      margin: 4px 0 0;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    /* Fotoğraf Alanı */
+    .avatar-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+    .avatar-preview {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      border: 3px solid var(--terracotta);
+      background: linear-gradient(135deg, #432818 0%, var(--coffee) 100%);
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      box-shadow: 0 6px 16px rgba(44, 26, 14, 0.16);
+      cursor: pointer;
+      position: relative;
+    }
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .avatar-initials {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #fed7aa;
+    }
+    .avatar-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .avatar-controls strong {
+      font-size: 0.95rem;
+      color: var(--coffee);
+    }
+    .avatar-controls small {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    /* Form Elemanları */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .field.full {
+      grid-column: 1 / -1;
+    }
+    .field label {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--coffee);
+    }
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 10px 13px;
+      border-radius: 10px;
+      border: 1.5px solid #dccab8;
+      background: #fff;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.92rem;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
       outline: none;
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
-      border-color: #4f46e5 !important;
+      border-color: var(--terracotta);
+      box-shadow: 0 0 0 3px rgba(194, 87, 12, 0.15);
     }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    .field input[readonly] {
+      background: #f5ece2;
+      color: var(--muted);
+      cursor: not-allowed;
     }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #f1f5f9;
+    .field textarea {
+      resize: vertical;
+      min-height: 92px;
+      line-height: 1.5;
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 9999px;
+
+    /* Butonlar */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 0;
+      background: linear-gradient(135deg, var(--terracotta) 0%, var(--terracotta-dark) 100%);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(194, 87, 12, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(194, 87, 12, 0.34);
+    }
+    .btn:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+    .btn.secondary {
+      background: #fff;
+      color: var(--coffee);
+      border: 1.5px solid #d7c3b0;
+      box-shadow: none;
+    }
+    .btn.secondary:hover:not(:disabled) {
+      background: #f7ede2;
+      border-color: var(--terracotta);
+      color: var(--terracotta-dark);
+      box-shadow: none;
+    }
+    .actions-row {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* Durum Mesajları */
+    .status-banner {
+      display: none;
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-top: 14px;
+    }
+    .status-banner.ok {
+      display: block;
+      background: var(--ok-bg);
+      border: 1px solid var(--ok-border);
+      color: var(--ok-text);
+    }
+    .status-banner.err {
+      display: block;
+      background: var(--err-bg);
+      border: 1px solid var(--err-border);
+      color: var(--err-text);
+    }
+
+    @media (max-width: 640px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .card {
+        padding: 18px 16px;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
-  <div id="root"></div>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-brand">
+        <div class="brand-mark">Z</div>
+        <div>
+          <h1>Profil &amp; Ayarlar</h1>
+          <div class="topbar-sub">ZarifÇözüm Öğretmen Hesabı</div>
+        </div>
+      </div>
+      <a class="back-btn" href="/ogretmen-paneli.html">← Öğretmen Paneline Dön</a>
+    </div>
+  </header>
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+  <main class="container">
+    <form id="profileForm" novalidate>
+      <!-- 1. Profil Fotoğrafı ve Kişisel Bilgiler -->
+      <section class="card" style="margin-bottom: 22px;">
+        <div class="card-header">
+          <h2>Profil Fotoğrafı ve Kişisel Bilgiler</h2>
+          <p>Öğretmen panelinde ve öğrencilerinizin gördüğü temel hesap bilgileriniz.</p>
+        </div>
 
-    // --- Lucide React Outline SVG Icon Components ---
-    const Icon = ({ name, className = "w-5 h-5", ...props }) => {
-      const icons = {
-        BookOpen: <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />,
-        User: <><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>,
-        FileText: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></>,
-        CreditCard: <><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /></>,
-        Video: <><polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" ry="2" /></>,
-        ShieldCheck: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 11 14 15 10" /></>,
-        HelpCircle: <><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></>,
-        LogOut: <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></>,
-        Bell: <><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></>,
-        MessageSquare: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
-        Search: <><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></>,
-        Check: <polyline points="20 6 9 17 4 12" />,
-        CheckCircle2: <><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></>,
-        Clock: <><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></>,
-        Upload: <><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></>,
-        Trash2: <><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></>,
-        Plus: <><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></>,
-        X: <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>,
-        Save: <><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></>,
-        ChevronDown: <polyline points="6 9 12 15 18 9" />,
-        ChevronRight: <polyline points="9 18 15 12 9 6" />,
-        Eye: <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></>,
-        EyeOff: <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></>,
-        Send: <><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></>,
-        Building: <><rect x="4" y="2" width="16" height="20" rx="2" ry="2" /><line x1="9" y1="22" x2="9" y2="12" /><line x1="15" y1="22" x2="15" y2="12" /><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="10" x2="20" y2="10" /><line x1="4" y1="14" x2="20" y2="14" /><line x1="4" y1="18" x2="20" y2="18" /></>,
-        Phone: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />,
-        Mail: <><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></>,
-        Calendar: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></>,
-        Sparkles: <><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z" /></>,
-        ExternalLink: <><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></>
-      };
+        <div class="avatar-row">
+          <div class="avatar-preview" id="avatarPreviewTrigger" title="Profil Fotoğrafı Yükle">
+            <img id="avatarImg" src="" alt="Profil Fotoğrafı">
+            <span class="avatar-initials" id="avatarInitials">Ö</span>
+          </div>
+          <div class="avatar-controls">
+            <strong id="avatarHeadingName">Öğretmen</strong>
+            <small>JPG, PNG veya WEBP formatında, en fazla 5 MB.</small>
+            <div style="margin-top: 6px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <button type="button" class="btn secondary" id="uploadAvatarBtn" style="padding: 8px 14px; font-size: 0.84rem;">📷 Fotoğraf Yükle</button>
+              <span id="avatarStatus" style="font-size: 0.82rem; font-weight: 600; color: var(--muted);"></span>
+            </div>
+            <input type="file" id="avatarFileInput" accept="image/*" style="display: none;">
+          </div>
+        </div>
 
-      return (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className={className}
-          {...props}
-        >
-          {icons[name] || icons.User}
-        </svg>
-      );
-    };
+        <div class="form-grid">
+          <div class="field">
+            <label for="profName">Ad Soyad</label>
+            <input type="text" id="profName" maxlength="100" required placeholder="Örn: Ahmet Yılmaz">
+          </div>
+          <div class="field">
+            <label for="profPhone">Telefon Numarası</label>
+            <input type="tel" id="profPhone" maxlength="20" placeholder="05XX XXX XX XX">
+          </div>
+          <div class="field full">
+            <label for="profEmail">E-posta Adresi (Salt Okunur)</label>
+            <input type="email" id="profEmail" readonly>
+          </div>
+        </div>
+      </section>
 
-    // --- Main Application Component ---
-    function TeacherProfileSettingsApp() {
-      const [activeTab, setActiveTab] = useState('general');
-      const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
-      const [messagesOpen, setMessagesOpen] = useState(false);
-      const [messageFilter, setMessageFilter] = useState('all');
-      const [selectedChatId, setSelectedChatId] = useState('conv_1');
-      const [replyText, setReplyText] = useState('');
-      const fileInputRef = useRef(null);
-      const [docModal, setDocModal] = useState({ open: false, title: '', type: '' });
+      <!-- 2. Akademik & Branş Bilgileri -->
+      <section class="card">
+        <div class="card-header">
+          <h2>Akademik &amp; Branş Bilgileri</h2>
+          <p>Uzmanlık alanınız, mezuniyet bilginiz ve kısa tanıtım yazınız.</p>
+        </div>
 
-      // 1. Genel Bilgiler State
-      const [general, setGeneral] = useState({
-        name: 'Ahmet',
-        surname: 'Yılmaz',
-        email: 'ahmet.yilmaz@egitim.com',
-        phone: '+90 555 123 45 67',
-        isPhoneVerified: true,
-        bio: 'Matematik öğretmeni olarak 15 yıldır tecrübem var. Öğrencilerimin hedeflerine ulaşmalarına yardımcı olmaktan mutluluk duyarım...',
-        branches: ['Matematik', 'LGS Hazırlık', 'TYT-AYT'],
-        photo: (typeof localStorage !== 'undefined' && localStorage.getItem('zarif_teacher_avatar')) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80',
-        newBranchInput: '',
-        showNewBranchInput: false
-      });
+        <div class="form-grid">
+          <div class="field">
+            <label for="profBranch">Branş Seçimi</label>
+            <select id="profBranch">
+              <option value="İlköğretim Matematik">İlköğretim Matematik</option>
+              <option value="Lise Matematik">Lise Matematik</option>
+              <option value="Her İkisi">Her İkisi</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="profGraduation">Mezuniyet &amp; Deneyim</label>
+            <input type="text" id="profGraduation" maxlength="300" placeholder="Örn: ODTÜ Matematik Öğretmenliği · 8 Yıl Deneyim">
+          </div>
+          <div class="field full">
+            <label for="profBio">Kısa Biyografi</label>
+            <textarea id="profBio" maxlength="1000" placeholder="Eğitim yaklaşımınız, sınav hazırlık deneyiminiz ve öğrencilerinizle paylaşmak istediğiniz kısa özgeçmişiniz..."></textarea>
+          </div>
+        </div>
 
-      // 2. Kimlik & Belgeler State
-      const [verification, setVerification] = useState({
-        tcKimlik: '28491028472',
-        isTcMasked: true,
-        birthDate: '1984-05-14',
-        documents: {
-          diploma: { name: 'itu_matematik_diploma.pdf', status: 'approved', date: '12.01.2024' },
-          formation: { name: 'pedagojik_formasyon_belgesi.pdf', status: 'pending', date: '04.09.2024' },
-          criminalRecord: { name: '', status: 'unuploaded', date: '' }
+        <div class="actions-row">
+          <button type="submit" class="btn" id="saveProfileBtn">Değişiklikleri Kaydet</button>
+        </div>
+        <div id="profileStatus" class="status-banner" role="status" aria-live="polite"></div>
+      </section>
+    </form>
+
+    <!-- 3. Şifre Değiştirme -->
+    <section class="card">
+      <div class="card-header">
+        <h2>Şifre Değiştirme</h2>
+        <p>Hesabınızın güvenliği için en az 10 karakter uzunluğunda güçlü bir şifre belirleyin.</p>
+      </div>
+
+      <form id="passwordForm" novalidate>
+        <div class="form-grid">
+          <div class="field full">
+            <label for="curPassword">Mevcut Şifre</label>
+            <input type="password" id="curPassword" autocomplete="current-password" required placeholder="Mevcut şifrenizi girin">
+          </div>
+          <div class="field">
+            <label for="newPassword">Yeni Şifre</label>
+            <input type="password" id="newPassword" autocomplete="new-password" minlength="10" required placeholder="En az 10 karakter">
+          </div>
+          <div class="field">
+            <label for="confirmPassword">Yeni Şifre Tekrar</label>
+            <input type="password" id="confirmPassword" autocomplete="new-password" minlength="10" required placeholder="Yeni şifreyi tekrar girin">
+          </div>
+        </div>
+
+        <div class="actions-row">
+          <button type="submit" class="btn secondary" id="savePasswordBtn">Şifreyi Güncelle</button>
+        </div>
+        <div id="passwordStatus" class="status-banner" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+      const $ = id => document.getElementById(id);
+
+      let currentAvatarUrl = '';
+
+      function setBanner(id, message, type) {
+        const el = $(id);
+        if (!el) return;
+        el.textContent = message || '';
+        el.className = 'status-banner' + (message ? (' ' + type) : '');
+      }
+
+      function computeInitials(name) {
+        const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+        if (parts.length >= 2) return ((parts[0][0] || '') + (parts[parts.length - 1][0] || '')).toUpperCase();
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return 'Ö';
+      }
+
+      function renderAvatar(url, name) {
+        const img = $('avatarImg');
+        const init = $('avatarInitials');
+        const heading = $('avatarHeadingName');
+        if (heading) heading.textContent = name || 'Öğretmen';
+        if (init) init.textContent = computeInitials(name);
+        if (url && url.length > 5) {
+          img.src = url;
+          img.style.display = 'block';
+          init.style.display = 'none';
+        } else {
+          img.style.display = 'none';
+          init.style.display = 'block';
         }
-      });
+      }
 
-      // 3. Ödeme & Fatura State
-      const [billing, setBilling] = useState({
-        bankName: 'Ziraat Bankası',
-        iban: 'TR42 0001 0012 3456 7890 1234 56',
-        accountHolder: 'Ahmet Yılmaz',
-        taxType: 'individual', // 'individual' | 'company'
-        taxOffice: 'Kadıköy Vergi Dairesi',
-        taxNumber: '1234567890',
-        billingAddress: 'Fenerbahçe Mah. Bağdat Cad. No:142 D:8 Kadıköy / İstanbul'
-      });
-
-      // 4. Ders & Entegrasyon State
-      const [integration, setIntegration] = useState({
-        timeZone: 'Europe/Istanbul',
-        zoomConnected: true,
-        zoomEmail: 'ahmet.yilmaz@egitim.com',
-        meetConnected: false,
-        isOpenForNewStudents: true,
-        maxWeeklyHours: 25
-      });
-
-      // 5. Güvenlik & Bildirimler State
-      const [security, setSecurity] = useState({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-        showPassword: false,
-        twoFactorAuth: true,
-        notifications: {
-          emailNewMessage: true,
-          smsLessonReminder: true,
-          emailHomeworkSubmitted: true,
-          systemAnnouncements: true
-        }
-      });
-
-      // Mesajlar (Öğrenci & Veli Mesaj Havuzu) Mock Verisi
-      const [conversations, setConversations] = useState([
-        {
-          id: 1,
-          name: 'Zeynep Kaya',
-          role: 'Öğrenci (11. Sınıf)',
-          roleType: 'student',
-          avatar: 'Z',
-          avatarBg: 'bg-emerald-500',
-          unread: true,
-          time: '14:22',
-          messages: [
-            { id: 1, sender: 'student', text: 'Hocam merhaba, dün paylaştığınız trigonometri kazanım testindeki 4. sorunun çözüm adımında takıldım.', time: '14:20' },
-            { id: 2, sender: 'student', text: 'Yarınki canlı dersimizde bu soruya birkaç dakika ayırabilir miyiz?', time: '14:22' }
-          ]
-        },
-        {
-          id: 2,
-          name: 'Murat Demir',
-          role: 'Veli (Ali Demir - 9. Sınıf)',
-          roleType: 'parent',
-          avatar: 'M',
-          avatarBg: 'bg-amber-600',
-          unread: false,
-          time: '11:05',
-          messages: [
-            { id: 1, sender: 'parent', text: 'Ahmet Bey iyi günler, Ali\'nin son deneme sınavındaki geometri netleri yükselmiş. İlginiz için çok teşekkür ederiz.', time: '11:00' },
-            { id: 2, sender: 'teacher', text: 'Rica ederim Murat Bey, Ali derste çok odaklı çalışıyor. Haftalık ödevlerini de aksatmadan bitiriyor.', time: '11:05' }
-          ]
-        },
-        {
-          id: 3,
-          name: 'Burak Aydın',
-          role: 'Öğrenci (8. Sınıf LGS)',
-          roleType: 'student',
-          avatar: 'B',
-          avatarBg: 'bg-blue-500',
-          unread: false,
-          time: 'Dün',
-          messages: [
-            { id: 1, sender: 'student', text: 'Hocam LGS deneme sınavı analiz raporu sisteme yüklendi mi?', time: 'Dün 17:40' },
-            { id: 2, sender: 'teacher', text: 'Evet Burak, başarı analizi sekmesinden karnene ulaşabilirsin.', time: 'Dün 17:55' }
-          ]
-        }
-      ]);
-
-      // Öğretmen Hakediş ve Ödeme Geçmişi State (Kural 4)
-      const [payouts, setPayouts] = useState([
-        {
-          id: 'mock-1',
-          period: '2026-11',
-          periodLabel: 'Kasım 2026',
-          grossAmount: 18500,
-          withholdingRate: 20,
-          withholdingAmount: 3700,
-          netAmount: 14800,
-          taxType: 'bireysel',
-          bankName: 'Ziraat Bankası',
-          iban: 'TR42 0001 0012 3456 7890 1234 56',
-          status: 'odendi',
-          receiptUrl: '/uploads/payout-receipts/ornek-dekont.pdf',
-          paidAt: '2026-11-20T10:30:00Z',
-          description: 'Kasım 2026 Ders Hakedişi (28 Saat Canlı Ders + Soru Primi)',
-          invoiceStatus: 'muaf'
-        },
-        {
-          id: 'mock-2',
-          period: '2026-10',
-          periodLabel: 'Ekim 2026',
-          grossAmount: 16200,
-          withholdingRate: 20,
-          withholdingAmount: 3240,
-          netAmount: 12960,
-          taxType: 'bireysel',
-          bankName: 'Ziraat Bankası',
-          iban: 'TR42 0001 0012 3456 7890 1234 56',
-          status: 'odendi',
-          receiptUrl: '/uploads/payout-receipts/ornek-dekont.pdf',
-          paidAt: '2026-10-22T14:15:00Z',
-          description: 'Ekim 2026 Ders Hakedişi (24 Saat Canlı Ders + Soru Primi)',
-          invoiceStatus: 'muaf'
-        }
-      ]);
-
-      const [notifications, setNotifications] = useState([]);
-      const [showNotificationsModal, setShowNotificationsModal] = useState(false);
-
-      useEffect(() => {
-        // URL query param tab veya hash
-        const urlParams = new URLSearchParams(window.location.search);
-        const tab = urlParams.get('tab');
-        if (tab === 'messages' || window.location.hash === '#messages') {
-          setMessagesOpen(true);
-        } else if (tab && ['general', 'identity', 'billing', 'integration', 'security', 'support'].includes(tab)) {
-          setActiveTab(tab);
-        }
-
-        // Mesajları API veya yerel depodan senkronize al
-        const syncFromStorage = () => {
-          try {
-            const raw = localStorage.getItem('zarif_conversations_v2') || localStorage.getItem('zarif_direct_messages_v1');
-            if (raw) {
-              const parsed = JSON.parse(raw);
-              if (Array.isArray(parsed) && parsed.length > 0) {
-                setConversations(parsed);
-                if (parsed[0]) setSelectedChatId(parsed[0].id || parsed[0].conversationId);
-              }
-            }
-          } catch {}
-        };
-
-        syncFromStorage();
-
-        fetch('/api/messages?role=teacher')
-          .then(r => r.ok ? r.json() : null)
-          .then(data => {
-            if (data && data.success && Array.isArray(data.conversations) && data.conversations.length > 0) {
-              setConversations(data.conversations);
-              if (data.conversations[0]) setSelectedChatId(data.conversations[0].id || data.conversations[0].conversationId);
-              try {
-                localStorage.setItem('zarif_conversations_v2', JSON.stringify(data.conversations));
-                localStorage.setItem('zarif_direct_messages_v1', JSON.stringify(data.conversations));
-              } catch {}
-            }
-          })
-          .catch(() => {});
-
-        // Storage Event Dinleyicisi (Sekmeler arası canlı eşitleme)
-        const handleStorage = (e) => {
-          if (e.key === 'zarif_conversations_v2' || e.key === 'zarif_direct_messages_v1' || e.key === 'zarif_msg_sync_ping') {
-            syncFromStorage();
-          }
-        };
-        window.addEventListener('storage', handleStorage);
-
-        // BroadcastChannel Dinleyicisi (Sekmeler arası anlık mesajlaşma)
-        let bc = null;
+      function syncLocalCache(user) {
         try {
-          if (typeof BroadcastChannel !== 'undefined') {
-            bc = new BroadcastChannel('zarif_messages_channel');
-            bc.onmessage = (e) => {
-              const { type, data, payload } = e.data || {};
-              const list = data || payload?.conversations;
-              if (Array.isArray(list)) {
-                setConversations(list);
-              } else {
-                syncFromStorage();
-              }
-            };
+          if (user?.name) localStorage.setItem('zarif_teacher_name', user.name);
+          if (user?.branch || user?.brans) localStorage.setItem('zarif_teacher_branch', user.branch || user.brans);
+          if (user?.avatarUrl) localStorage.setItem('zarif_teacher_avatar', user.avatarUrl);
+        } catch (e) {}
+      }
+
+      function ensureBranchOption(branchVal) {
+        const sel = $('profBranch');
+        if (!sel || !branchVal) return;
+        const exists = Array.from(sel.options).some(opt => opt.value === branchVal);
+        if (!exists) {
+          sel.add(new Option(branchVal, branchVal));
+        }
+        sel.value = branchVal;
+      }
+
+      async function loadProfile() {
+        try {
+          const res = await fetch('/api/user/profile', { credentials: 'include' });
+          if (res.status === 401 || res.status === 403) {
+            location.replace('/kayit-giris.html?role=teacher&returnTo=ogretmen-profil-ayarlari.html');
+            return;
           }
-        } catch {}
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.user) {
+            setBanner('profileStatus', data.mesaj || 'Profil bilgileri yüklenemedi.', 'err');
+            return;
+          }
+          const u = data.user;
+          $('profName').value = u.name || '';
+          $('profPhone').value = u.phone || '';
+          $('profEmail').value = u.email || '';
+          if (u.branch || u.brans) {
+            ensureBranchOption(u.branch || u.brans);
+          }
+          $('profGraduation').value = u.graduationInfo || '';
+          $('profBio').value = u.bio || '';
+          currentAvatarUrl = u.avatarUrl || '';
+          renderAvatar(currentAvatarUrl, u.name || 'Öğretmen');
+          syncLocalCache(u);
+        } catch (err) {
+          setBanner('profileStatus', 'Sunucuya bağlanılamadı: ' + err.message, 'err');
+        }
+      }
 
-        // Hakedişleri API'den al
-        fetch('/api/ogretmen/hakedisler')
-          .then(r => r.ok ? r.json() : null)
-          .then(data => {
-            if (data && data.payouts && data.payouts.length > 0) {
-              setPayouts(data.payouts);
-            }
-          })
-          .catch(() => {});
+      // Profil fotoğrafı yükleme
+      function openPicker() {
+        $('avatarFileInput')?.click();
+      }
+      $('uploadAvatarBtn')?.addEventListener('click', openPicker);
+      $('avatarPreviewTrigger')?.addEventListener('click', openPicker);
 
-        // Bildirimleri API'den al
-        fetch('/api/ogretmen/bildirimler')
-          .then(r => r.ok ? r.json() : null)
-          .then(data => {
-            if (data && data.notifications) {
-              setNotifications(data.notifications);
-            }
-          })
-          .catch(() => {});
-
-        // Profil ayarlarını API'den al
-        fetch('/api/ogretmen/profil-ayarlari')
-          .then(r => r.ok ? r.json() : null)
-          .then(data => {
-            if (data && data.user) {
-              const u = data.user;
-              if (u.name) {
-                const parts = u.name.split(' ');
-                setGeneral(g => ({ ...g, firstName: parts[0] || g.firstName, lastName: parts.slice(1).join(' ') || g.lastName, email: u.email || g.email, phone: u.phone || g.phone }));
-              }
-              if (u.teacherFinance) {
-                const tf = u.teacherFinance;
-                setBilling(b => ({
-                  ...b,
-                  bankName: tf.bankName || b.bankName,
-                  iban: tf.iban || b.iban,
-                  accountHolder: tf.accountHolder || b.accountHolder,
-                  taxType: tf.taxType === 'sahis_sirketi' || tf.taxType === 'limited_sirket' ? 'company' : 'individual',
-                  taxOffice: tf.taxOffice || b.taxOffice,
-                  taxNumber: tf.taxNumber || b.taxNumber,
-                  billingAddress: tf.billingAddress || b.billingAddress
-                }));
-              }
-            }
-          })
-          .catch(() => {});
-      }, []);
-
-      // Fatura Yükleme Fonksiyonu (Şirket Öğretmenleri İçin - Kural 1)
-      const handleUploadInvoiceFile = async (payoutId, file) => {
+      $('avatarFileInput')?.addEventListener('change', async () => {
+        const input = $('avatarFileInput');
+        const file = input.files && input.files[0];
         if (!file) return;
-        const formData = new FormData();
-        formData.append('invoice', file);
-        formData.append('payoutId', payoutId);
+
+        if (!file.type.startsWith('image/')) {
+          $('avatarStatus').textContent = 'Lütfen geçerli bir resim dosyası seçin.';
+          $('avatarStatus').style.color = '#991b1b';
+          input.value = '';
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          $('avatarStatus').textContent = 'Dosya boyutu en fazla 5 MB olabilir.';
+          $('avatarStatus').style.color = '#991b1b';
+          input.value = '';
+          return;
+        }
+
+        const btn = $('uploadAvatarBtn');
+        btn.disabled = true;
+        $('avatarStatus').textContent = 'Yükleniyor…';
+        $('avatarStatus').style.color = '#6a5242';
 
         try {
-          const res = await fetch('/api/ogretmen/fatura-yukle', {
+          const fd = new FormData();
+          fd.append('avatar', file);
+          const res = await fetch('/api/user/upload-avatar', {
             method: 'POST',
-            body: formData
+            credentials: 'include',
+            body: fd
           });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.mesaj || 'Fatura yüklenemedi');
-          showToast('e-Faturanız muhasebeye iletildi.');
-          // Listeyi yenile
-          const ref = await fetch('/api/ogretmen/hakedisler');
-          if (ref.ok) {
-            const refData = await ref.json();
-            if (refData.payouts) setPayouts(refData.payouts);
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.avatarUrl) {
+            throw new Error(data.mesaj || 'Fotoğraf yüklenemedi.');
           }
-        } catch (e) {
-          showToast('Fatura yüklenemedi: ' + e.message, 'error');
+          currentAvatarUrl = data.avatarUrl;
+          renderAvatar(currentAvatarUrl, $('profName').value || 'Öğretmen');
+          syncLocalCache({ avatarUrl: currentAvatarUrl });
+          $('avatarStatus').textContent = '✓ Fotoğraf güncellendi';
+          $('avatarStatus').style.color = '#065f46';
+        } catch (err) {
+          $('avatarStatus').textContent = err.message;
+          $('avatarStatus').style.color = '#991b1b';
+        } finally {
+          btn.disabled = false;
+          input.value = '';
         }
-      };
+      });
 
-      // Toast Gösterim Yardımcısı
-      const showToast = (message, type = 'success') => {
-        setToast({ show: true, message, type });
-        setTimeout(() => {
-          setToast({ show: false, message: '', type: 'success' });
-        }, 3200);
-      };
+      // Profil kaydetme (PUT /api/user/profile)
+      $('profileForm')?.addEventListener('submit', async e => {
+        e.preventDefault();
+        setBanner('profileStatus', '', '');
 
-      // Değişiklikleri Kaydet
-      const handleSave = async (tabName) => {
-        try {
-          if (activeTab === 'billing') {
-            await fetch('/api/ogretmen/profil-ayarlari', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                bankName: billing.bankName,
-                iban: billing.iban,
-                accountHolder: billing.accountHolder,
-                taxType: billing.taxType === 'company' ? 'sahis_sirketi' : 'bireysel',
-                taxOffice: billing.taxOffice,
-                taxNumber: billing.taxNumber,
-                billingAddress: billing.billingAddress
-              })
-            });
-          }
-          showToast(`${tabName} başarıyla güncellendi ve kaydedildi.`);
-        } catch (e) {
-          showToast(`${tabName} kaydedildi.`);
+        const name = $('profName').value.trim();
+        const phone = $('profPhone').value.trim();
+        const branch = $('profBranch').value;
+        const graduationInfo = $('profGraduation').value.trim();
+        const bio = $('profBio').value.trim();
+
+        if (!name || name.length < 2) {
+          setBanner('profileStatus', 'Lütfen geçerli bir Ad Soyad girin.', 'err');
+          $('profName').focus();
+          return;
         }
-      };
 
-      // Branş Etiketi Ekleme
-      const handleAddBranch = () => {
-        if (!general.newBranchInput.trim()) return;
-        if (!general.branches.includes(general.newBranchInput.trim())) {
-          setGeneral(prev => ({
-            ...prev,
-            branches: [...prev.branches, prev.newBranchInput.trim()],
-            newBranchInput: '',
-            showNewBranchInput: false
-          }));
-          showToast(`"${general.newBranchInput.trim()}" branşı eklendi.`);
-        }
-      };
-
-      // Branş Etiketi Çıkarma
-      const handleRemoveBranch = (branchToRemove) => {
-        setGeneral(prev => ({
-          ...prev,
-          branches: prev.branches.filter(b => b !== branchToRemove)
-        }));
-      };
-
-      // Fotoğraf Yükleme Önizleme
-      const handlePhotoUpload = async (e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-          const formData = new FormData();
-          formData.append('avatar', file);
-          try {
-            const res = await fetch('/api/user/upload-avatar', {
-              method: 'POST',
-              body: formData
-            });
-            const data = await res.json();
-            if (data?.avatarUrl) {
-              setGeneral(prev => ({ ...prev, photo: data.avatarUrl }));
-              try {
-                localStorage.setItem('zarif_teacher_avatar', data.avatarUrl);
-                window.dispatchEvent(new Event('teacher-avatar-updated'));
-              } catch (err) {}
-              showToast('Profil fotoğrafı güncellendi.');
-              return;
-            }
-          } catch (err) {
-            console.warn('Sunucuya avatar yüklenemedi, yerel base64 kullanılıyor:', err);
-          }
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const dataUrl = reader.result;
-            setGeneral(prev => ({ ...prev, photo: dataUrl }));
-            try {
-              localStorage.setItem('zarif_teacher_avatar', dataUrl);
-              window.dispatchEvent(new Event('teacher-avatar-updated'));
-            } catch (err) {}
-            fetch('/api/ogretmen/profil-ayarlari', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ avatarUrl: dataUrl })
-            }).catch(() => {});
-            showToast('Profil fotoğrafı güncellendi.');
-          };
-          reader.readAsDataURL(file);
-        }
-      };
-
-      // Belge Yükleme Mock Simülasyonu
-      const handleDocumentUpload = (docKey) => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.pdf,.png,.jpg,.jpeg';
-        input.onchange = (e) => {
-          const file = e.target.files?.[0];
-          if (file) {
-            setVerification(prev => ({
-              ...prev,
-              documents: {
-                ...prev.documents,
-                [docKey]: {
-                  name: file.name,
-                  status: 'pending',
-                  date: new Date().toLocaleDateString('tr-TR')
-                }
-              }
-            }));
-            showToast(`${file.name} başarıyla yüklendi. İnceleniyor.`);
-          }
-        };
-        input.click();
-      };
-
-      // Mesaj Yanıtlama (Gerçek Veri & API Senkronizasyonu)
-      const handleSendMessage = async () => {
-        if (!replyText.trim()) return;
-        const now = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-        const cleanText = replyText.trim();
-        const newMsg = {
-          id: 'msg_' + Date.now(),
-          senderId: 'teacher_1',
-          senderRole: 'teacher',
-          sender: 'teacher',
-          text: cleanText,
-          time: now,
-          isRead: false
-        };
-        
-        setConversations(prev => {
-          const updated = prev.map(chat => {
-            if (chat.id === selectedChatId || chat.conversationId === selectedChatId) {
-              return {
-                ...chat,
-                time: now,
-                unread: false,
-                messages: [...(chat.messages || []), newMsg]
-              };
-            }
-            return chat;
-          });
-          try {
-            localStorage.setItem('zarif_conversations_v2', JSON.stringify(updated));
-            localStorage.setItem('zarif_direct_messages_v1', JSON.stringify(updated));
-            localStorage.setItem('zarif_msg_sync_ping', String(Date.now()));
-            if (typeof BroadcastChannel !== 'undefined') {
-              new BroadcastChannel('zarif_messages_channel').postMessage({ type: 'NEW_MESSAGE', payload: { conversations: updated }, data: updated });
-            }
-          } catch {}
-          return updated;
-        });
-
-        setReplyText('');
-        showToast('Cevabınız öğrenci/veliye iletildi.');
+        const btn = $('saveProfileBtn');
+        btn.disabled = true;
+        btn.textContent = 'Kaydediliyor…';
 
         try {
-          await fetch('/api/messages', {
-            method: 'POST',
+          const res = await fetch('/api/user/profile', {
+            method: 'PUT',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              conversationId: selectedChatId,
-              senderId: 'teacher_1',
-              senderName: 'Ahmet Yılmaz',
-              senderRole: 'teacher',
-              text: cleanText
+              name,
+              phone,
+              branch,
+              graduationInfo,
+              bio,
+              avatarUrl: currentAvatarUrl || undefined
             })
           });
-        } catch (e) {
-          console.warn('Mesaj sunucuya iletilemedi:', e);
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data.mesaj || 'Değişiklikler kaydedilemedi.');
+          }
+          const updated = data.user || { name, phone, branch, graduationInfo, bio, avatarUrl: currentAvatarUrl };
+          $('profName').value = updated.name || name;
+          $('profPhone').value = updated.phone || '';
+          if (updated.branch) ensureBranchOption(updated.branch);
+          $('profGraduation').value = updated.graduationInfo || '';
+          $('profBio').value = updated.bio || '';
+          renderAvatar(updated.avatarUrl || currentAvatarUrl, updated.name || name);
+          syncLocalCache(updated);
+          setBanner('profileStatus', '✓ ' + (data.mesaj || 'Profil bilgileriniz başarıyla kaydedildi.'), 'ok');
+        } catch (err) {
+          setBanner('profileStatus', err.message, 'err');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Değişiklikleri Kaydet';
         }
-      };
+      });
 
-      const selectChat = (id) => {
-        setSelectedChatId(id);
-        setConversations(prev => {
-          const updated = prev.map(c => {
-            if (c.id === id || c.conversationId === id) {
-              const msgs = Array.isArray(c.messages) ? c.messages.map(m => ({ ...m, isRead: true })) : [];
-              return { ...c, unread: false, messages: msgs };
-            }
-            return c;
+      // Şifre değiştirme (POST /change-password)
+      $('passwordForm')?.addEventListener('submit', async e => {
+        e.preventDefault();
+        setBanner('passwordStatus', '', '');
+
+        const currentPassword = $('curPassword').value;
+        const password = $('newPassword').value;
+        const passwordConfirmation = $('confirmPassword').value;
+
+        if (!currentPassword) {
+          setBanner('passwordStatus', 'Lütfen mevcut şifrenizi girin.', 'err');
+          return;
+        }
+        if (password.length < 10) {
+          setBanner('passwordStatus', 'Yeni şifre en az 10 karakter olmalıdır.', 'err');
+          return;
+        }
+        if (password !== passwordConfirmation) {
+          setBanner('passwordStatus', 'Yeni şifreler birbiriyle eşleşmiyor.', 'err');
+          return;
+        }
+
+        const btn = $('savePasswordBtn');
+        btn.disabled = true;
+        btn.textContent = 'Güncelleniyor…';
+
+        try {
+          const res = await fetch('/change-password', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ currentPassword, password, passwordConfirmation })
           });
-          try {
-            localStorage.setItem('zarif_conversations_v2', JSON.stringify(updated));
-            localStorage.setItem('zarif_direct_messages_v1', JSON.stringify(updated));
-            localStorage.setItem('zarif_msg_sync_ping', String(Date.now()));
-            if (typeof BroadcastChannel !== 'undefined') {
-              new BroadcastChannel('zarif_messages_channel').postMessage({ type: 'MARK_READ', data: updated });
-            }
-          } catch {}
-          return updated;
-        });
-        fetch('/api/messages/mark-read', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ conversationId: id, readerRole: 'teacher' })
-        }).catch(() => {});
-      };
-
-      const currentChat = conversations.find(c => c.id === selectedChatId) || conversations[0];
-
-      return (
-        <div className="min-h-screen flex flex-col bg-[#f6f8fb]">
-          
-          {/* --- TOPBAR HEADER (Görseldeki Header ile Birebir) --- */}
-          <header className="sticky top-0 z-30 bg-white border-b border-slate-200/80 shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-              
-              {/* Sol: Logo */}
-              <div className="flex items-center gap-3">
-                <a href="/ogretmen-paneli.html" className="flex items-center gap-2.5 text-indigo-600 font-bold text-lg tracking-tight hover:opacity-90 transition">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
-                    <Icon name="BookOpen" className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex flex-col leading-tight">
-                    <span className="text-slate-900 font-extrabold text-base">ZarifÇözüm</span>
-                    <span className="text-xs font-semibold text-indigo-600">Eğitim Platformu</span>
-                  </div>
-                </a>
-              </div>
-
-              {/* Orta Menü Bağlantıları */}
-              <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
-                <a href="/ogretmen-paneli.html" className="hover:text-indigo-600 transition flex items-center gap-1.5 py-1">
-                  Dashboard
-                </a>
-                <a href="/ogretmen-paneli.html#lessons" className="hover:text-indigo-600 transition flex items-center gap-1.5 py-1">
-                  Takvimim
-                </a>
-                <a href="/ogretmen-paneli.html#students" className="hover:text-indigo-600 transition flex items-center gap-1.5 py-1">
-                  Öğrencilerim
-                </a>
-                <button
-                  onClick={() => setMessagesOpen(true)}
-                  type="button"
-                  className="hover:text-[#C84B31] transition flex items-center gap-1.5 py-1 relative text-[#C84B31] font-bold"
-                >
-                  <Icon name="MessageSquare" className="w-4 h-4" />
-                  <span>Mesajlar</span>
-                  {conversations.filter(c => c.unread).length > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full bg-[#ef4444] text-white text-[10px] font-bold shadow-sm animate-pulse">
-                      {conversations.filter(c => c.unread).length}
-                    </span>
-                  )}
-                </button>
-              </nav>
-
-              {/* Sağ: Arama, Bildirimler ve Profil */}
-              <div className="flex items-center gap-3 sm:gap-4">
-                {/* Arama Inputu */}
-                <div className="relative hidden lg:block w-48 xl:w-56">
-                  <Icon name="Search" className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-100 hover:bg-slate-200/70 border border-transparent rounded-full focus:bg-white focus:border-indigo-500 transition text-slate-700"
-                  />
-                </div>
-
-                {/* Mesaj Butonu (Badge'li) */}
-                <button
-                  type="button"
-                  onClick={() => setMessagesOpen(true)}
-                  className="relative p-2 text-slate-500 hover:text-[#C84B31] hover:bg-[#fff5f3] rounded-full transition"
-                  title="Gelen Mesajlar (Öğrenci & Veli)"
-                >
-                  <Icon name="MessageSquare" className="w-5 h-5" />
-                  {conversations.filter(c => c.unread).length > 0 && (
-                    <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#ef4444] text-[10px] font-bold text-white flex items-center justify-center border-2 border-white shadow-sm">
-                      {conversations.filter(c => c.unread).length}
-                    </span>
-                  )}
-                </button>
-
-                {/* Bildirim Çanı */}
-                <button
-                  type="button"
-                  onClick={() => showToast('2 yeni bildiriminiz var: Canlı ders saatiniz yaklaşıyor.')}
-                  className="relative p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/70 rounded-full transition"
-                  title="Bildirimler"
-                >
-                  <Icon name="Bell" className="w-5 h-5" />
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500"></span>
-                </button>
-
-                <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
-
-                {/* Öğretmen Profil Rozeti */}
-                <div className="flex items-center gap-2.5 pl-1">
-                  <img
-                    src={general.photo}
-                    alt={general.name}
-                    className="w-9 h-9 rounded-full object-cover ring-2 ring-indigo-500/20"
-                  />
-                  <div className="hidden sm:flex flex-col text-left">
-                    <span className="text-sm font-bold text-slate-800 leading-none">{general.name} {general.surname}</span>
-                    <span className="text-[11px] font-medium text-slate-400 mt-0.5">Matematik Öğretmeni</span>
-                  </div>
-                  <Icon name="ChevronDown" className="w-4 h-4 text-slate-400 hidden sm:block" />
-                </div>
-              </div>
-
-            </div>
-          </header>
-
-          {/* --- ANA GÖVDE (Grid: Sol Dikey Menü + Sağ Form Kartı) --- */}
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            
-            <div className="flex flex-col lg:flex-row gap-6 items-start">
-              
-              {/* SOL SÜTUN: DİKEY SEKME MENÜSÜ (Görseldeki Tasarım) */}
-              <aside className="w-full lg:w-64 bg-white rounded-2xl shadow-sm border border-slate-100 p-3 shrink-0">
-                <nav className="flex flex-col gap-1">
-                  
-                  <button
-                    onClick={() => setActiveTab('general')}
-                    type="button"
-                    className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition text-left ${
-                      activeTab === 'general'
-                        ? 'bg-indigo-50 text-indigo-600 font-bold'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <Icon name="User" className={`w-5 h-5 ${activeTab === 'general' ? 'text-indigo-600' : 'text-slate-400'}`} />
-                    <span>Genel Bilgiler</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab('verification')}
-                    type="button"
-                    className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition text-left ${
-                      activeTab === 'verification'
-                        ? 'bg-indigo-50 text-indigo-600 font-bold'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <Icon name="FileText" className={`w-5 h-5 ${activeTab === 'verification' ? 'text-indigo-600' : 'text-slate-400'}`} />
-                    <span>Kimlik &amp; Belgeler</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab('billing')}
-                    type="button"
-                    className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition text-left ${
-                      activeTab === 'billing'
-                        ? 'bg-indigo-50 text-indigo-600 font-bold'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <Icon name="CreditCard" className={`w-5 h-5 ${activeTab === 'billing' ? 'text-indigo-600' : 'text-slate-400'}`} />
-                    <span>Ödeme &amp; Fatura</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab('integration')}
-                    type="button"
-                    className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition text-left ${
-                      activeTab === 'integration'
-                        ? 'bg-indigo-50 text-indigo-600 font-bold'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <Icon name="Video" className={`w-5 h-5 ${activeTab === 'integration' ? 'text-indigo-600' : 'text-slate-400'}`} />
-                    <span>Ders &amp; Entegrasyon</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab('security')}
-                    type="button"
-                    className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition text-left ${
-                      activeTab === 'security'
-                        ? 'bg-indigo-50 text-indigo-600 font-bold'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <Icon name="ShieldCheck" className={`w-5 h-5 ${activeTab === 'security' ? 'text-indigo-600' : 'text-slate-400'}`} />
-                    <span>Güvenlik &amp; Bildirimler</span>
-                  </button>
-
-                  {/* Mesajlar & İletişim Sekmesi (Prompt Madde 1 & 3) */}
-                  <button
-                    onClick={() => setMessagesOpen(true)}
-                    type="button"
-                    className={`flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-semibold transition text-left ${
-                      messagesOpen
-                        ? 'bg-[#fff5f2] text-[#C84B31] font-bold border border-orange-200 shadow-sm'
-                        : 'text-slate-600 hover:bg-[#fff5f2] hover:text-[#C84B31]'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3.5">
-                      <Icon name="MessageSquare" className={`w-5 h-5 ${messagesOpen ? 'text-[#C84B31]' : 'text-slate-400'}`} />
-                      <span>Mesajlar</span>
-                    </div>
-                    {conversations.filter(c => c.unread).length > 0 ? (
-                      <span className="bg-[#ef4444] text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
-                        {conversations.filter(c => c.unread).length}
-                      </span>
-                    ) : (
-                      <span className="text-[11px] text-slate-400 font-normal">Sohbet</span>
-                    )}
-                  </button>
-
-                  <div className="my-2 border-t border-slate-100"></div>
-
-                  <button
-                    onClick={() => setActiveTab('support')}
-                    type="button"
-                    className={`flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition text-left ${
-                      activeTab === 'support'
-                        ? 'bg-indigo-50 text-indigo-600 font-bold'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <Icon name="HelpCircle" className={`w-5 h-5 ${activeTab === 'support' ? 'text-indigo-600' : 'text-slate-400'}`} />
-                    <span>Destek Merkezi</span>
-                  </button>
-
-                  <a
-                    href="/kayit-giris.html?role=teacher"
-                    className="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition text-left mt-1"
-                  >
-                    <Icon name="LogOut" className="w-5 h-5 text-rose-500" />
-                    <span>Çıkış Yap</span>
-                  </a>
-
-                </nav>
-              </aside>
-
-
-              {/* SAĞ SÜTUN: FORM KARTLARI YAPISI (Tab Göre Değişen İçerik) */}
-              <section className="flex-1 w-full bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8">
-                
-                {/* 1. SEKME: GENEL BİLGİLER (HESAP) */}
-                {activeTab === 'general' && (
-                  <div>
-                    <div className="mb-8">
-                      <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Genel Bilgiler</h1>
-                      <p className="text-sm font-medium text-slate-500 mt-1">Hesap Ayarları ve Platform Profil Bilgileriniz</p>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row gap-8 items-start">
-                      
-                      {/* Sol: Profil Fotoğrafı */}
-                      <div className="flex flex-col items-center gap-4 shrink-0 mx-auto md:mx-0">
-                        <div className="relative">
-                          <img
-                            src={general.photo}
-                            alt="Profil Önizleme"
-                            className="w-40 h-40 rounded-full object-cover shadow-lg ring-4 ring-slate-100 border border-slate-200"
-                          />
-                        </div>
-                        <div className="flex gap-2">
-                          <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handlePhotoUpload}
-                            accept="image/*"
-                            className="hidden"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
-                          >
-                            Fotoğrafı Değiştir
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const defaultPic = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&h=400&q=80';
-                              setGeneral(prev => ({ ...prev, photo: defaultPic }));
-                              try {
-                                localStorage.setItem('zarif_teacher_avatar', defaultPic);
-                                window.dispatchEvent(new Event('teacher-avatar-updated'));
-                              } catch (err) {}
-                              showToast('Profil fotoğrafı varsayılana sıfırlandı.');
-                            }}
-                            className="px-3 py-2 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 text-xs font-semibold rounded-lg transition"
-                          >
-                            Kaldır
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Sağ: Form Alanları */}
-                      <div className="flex-1 w-full space-y-5">
-                        
-                        {/* Ad & Soyad */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Ad</label>
-                            <input
-                              type="text"
-                              value={general.name}
-                              onChange={(e) => setGeneral({ ...general, name: e.target.value })}
-                              className="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 transition"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Soyad</label>
-                            <input
-                              type="text"
-                              value={general.surname}
-                              onChange={(e) => setGeneral({ ...general, surname: e.target.value })}
-                              className="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 transition"
-                            />
-                          </div>
-                        </div>
-
-                        {/* E-posta & Telefon */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">E-posta Adresi</label>
-                            <input
-                              type="email"
-                              value={general.email}
-                              onChange={(e) => setGeneral({ ...general, email: e.target.value })}
-                              className="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 transition"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Telefon Numarası</label>
-                            <div className="relative">
-                              <input
-                                type="text"
-                                value={general.phone}
-                                onChange={(e) => setGeneral({ ...general, phone: e.target.value })}
-                                className="w-full pl-3.5 pr-28 py-2.5 bg-slate-50/70 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 transition"
-                              />
-                              {general.isPhoneVerified && (
-                                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">
-                                  <Icon name="Check" className="w-3 h-3 text-emerald-600" />
-                                  Doğrulandı
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Kısa Biyografi */}
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 mb-1.5">Kısa Biyografi</label>
-                          <textarea
-                            rows={4}
-                            value={general.bio}
-                            onChange={(e) => setGeneral({ ...general, bio: e.target.value })}
-                            className="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 transition leading-relaxed"
-                            placeholder="Kendinizi, uzmanlık alanlarınızı ve eğitim felsefenizi kısaca tanıtın..."
-                          />
-                        </div>
-
-                        {/* Branşlar (Tag Input) */}
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 mb-1.5">Branşlar &amp; Uzmanlıklar</label>
-                          <div className="flex flex-wrap items-center gap-2">
-                            {general.branches.map(branch => (
-                              <span
-                                key={branch}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold shadow-sm"
-                              >
-                                {branch}
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveBranch(branch)}
-                                  className="hover:text-indigo-200 transition"
-                                >
-                                  <Icon name="X" className="w-3.5 h-3.5" />
-                                </button>
-                              </span>
-                            ))}
-
-                            {general.showNewBranchInput ? (
-                              <div className="inline-flex items-center gap-1">
-                                <input
-                                  type="text"
-                                  autoFocus
-                                  value={general.newBranchInput}
-                                  onChange={(e) => setGeneral({ ...general, newBranchInput: e.target.value })}
-                                  onKeyDown={(e) => e.key === 'Enter' && handleAddBranch()}
-                                  placeholder="Yeni branş..."
-                                  className="px-2.5 py-1 text-xs border border-indigo-400 rounded-lg w-32 focus:bg-white"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={handleAddBranch}
-                                  className="p-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-xs"
-                                >
-                                  <Icon name="Check" className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setGeneral({ ...general, showNewBranchInput: false, newBranchInput: '' })}
-                                  className="p-1 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300 text-xs"
-                                >
-                                  <Icon name="X" className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => setGeneral({ ...general, showNewBranchInput: true })}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:border-indigo-400 hover:text-indigo-600 text-xs font-bold transition bg-slate-50"
-                              >
-                                <Icon name="Plus" className="w-3.5 h-3.5" />
-                                Branş Ekle
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                      </div>
-
-                    </div>
-
-                    {/* Kaydet Butonu */}
-                    <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => handleSave('Genel bilgiler')}
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-md shadow-indigo-200 transition"
-                      >
-                        <Icon name="Save" className="w-4 h-4" />
-                        Değişiklikleri Kaydet
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-
-                {/* 2. SEKME: KİMLİK & BELGELER (DOĞRULAMA) */}
-                {activeTab === 'verification' && (
-                  <div>
-                    <div className="mb-8">
-                      <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Kimlik &amp; Belgeler</h1>
-                      <p className="text-sm font-medium text-slate-500 mt-1">Öğretmenlik Doğrulaması ve Resmi Evrak Yönetimi</p>
-                    </div>
-
-                    <div className="space-y-6">
-                      
-                      {/* T.C. Kimlik & Doğum Tarihi Kartı */}
-                      <div className="bg-slate-50/80 p-5 rounded-xl border border-slate-200/80">
-                        <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                          <Icon name="User" className="w-4 h-4 text-indigo-600" />
-                          Kimlik Bilgileri
-                        </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">T.C. Kimlik Numarası</label>
-                            <div className="relative">
-                              <input
-                                type={verification.isTcMasked ? 'password' : 'text'}
-                                value={verification.tcKimlik}
-                                onChange={(e) => setVerification({ ...verification, tcKimlik: e.target.value })}
-                                maxLength={11}
-                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-mono font-medium text-slate-800 tracking-wider"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => setVerification({ ...verification, isTcMasked: !verification.isTcMasked })}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                              >
-                                <Icon name={verification.isTcMasked ? 'Eye' : 'EyeOff'} className="w-4 h-4" />
-                              </button>
-                            </div>
-                            <span className="text-[11px] text-slate-400 mt-1 block">Yalnızca resmi faturalandırma ve onay sürecinde kullanılır.</span>
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Doğum Tarihi</label>
-                            <input
-                              type="date"
-                              value={verification.birthDate}
-                              onChange={(e) => setVerification({ ...verification, birthDate: e.target.value })}
-                              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Belgeler Listesi */}
-                      <div>
-                        <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-                          <Icon name="FileText" className="w-4 h-4 text-indigo-600" />
-                          Yüklü Öğretmenlik Belgeleri
-                        </h3>
-
-                        <div className="space-y-3">
-                          
-                          {/* 1. Diploma */}
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white border border-slate-200 rounded-xl gap-4 hover:border-slate-300 transition">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                                <Icon name="FileText" className="w-5 h-5" />
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-bold text-slate-800">Lisans Diploması</h4>
-                                <p className="text-xs text-slate-400">{verification.documents.diploma.name || 'Yüklü dosya bulunmuyor'}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 self-end sm:self-auto">
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
-                                <Icon name="CheckCircle2" className="w-3.5 h-3.5" />
-                                Onaylandı
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => handleDocumentUpload('diploma')}
-                                className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 border border-slate-200 rounded-lg hover:border-indigo-300 transition"
-                              >
-                                Güncelle
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* 2. Pedagojik Formasyon */}
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white border border-slate-200 rounded-xl gap-4 hover:border-slate-300 transition">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                                <Icon name="FileText" className="w-5 h-5" />
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-bold text-slate-800">Pedagojik Formasyon Belgesi</h4>
-                                <p className="text-xs text-slate-400">{verification.documents.formation.name || 'İnceleme bekliyor'}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 self-end sm:self-auto">
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                                <Icon name="Clock" className="w-3.5 h-3.5" />
-                                İnceleniyor
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => handleDocumentUpload('formation')}
-                                className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 border border-slate-200 rounded-lg hover:border-indigo-300 transition"
-                              >
-                                Dosya Değiştir
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* 3. Adli Sicil Kaydı */}
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white border border-slate-200 rounded-xl gap-4 hover:border-slate-300 transition">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
-                                <Icon name="FileText" className="w-5 h-5" />
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-bold text-slate-800">Adli Sicil Kaydı (e-Devlet)</h4>
-                                <p className="text-xs text-slate-400">Son 6 ay içinde alınmış resmi evrak yükleyin.</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 self-end sm:self-auto">
-                              {verification.documents.criminalRecord.name ? (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                                  <Icon name="Clock" className="w-3.5 h-3.5" />
-                                  İnceleniyor
-                                </span>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => handleDocumentUpload('criminalRecord')}
-                                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm transition"
-                                >
-                                  <Icon name="Upload" className="w-3.5 h-3.5" />
-                                  Belge Yükle
-                                </button>
-                              )}
-                            </div>
-                          </div>
-
-                        </div>
-                      </div>
-
-                    </div>
-
-                    {/* Kaydet Butonu */}
-                    <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => handleSave('Kimlik ve belgeler')}
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-md shadow-indigo-200 transition"
-                      >
-                        <Icon name="Save" className="w-4 h-4" />
-                        Değişiklikleri Kaydet
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-
-                {/* 3. SEKME: ÖDEME & FATURA AYARLARI */}
-                {activeTab === 'billing' && (
-                  <div>
-                    <div className="mb-8">
-                      <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Ödeme &amp; Fatura Ayarları</h1>
-                      <p className="text-sm font-medium text-slate-500 mt-1">Ders Gelirlerinizin Yatırılacağı Hesap ve Vergilendirme Seçenekleri</p>
-                    </div>
-
-                    <div className="space-y-6">
-                      
-                      {/* Banka & IBAN */}
-                      <div className="bg-slate-50/80 p-5 rounded-xl border border-slate-200/80 space-y-4">
-                        <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                          <Icon name="CreditCard" className="w-4 h-4 text-indigo-600" />
-                          Banka Hesap Bilgileri
-                        </h3>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Banka Adı</label>
-                            <select
-                              value={billing.bankName}
-                              onChange={(e) => setBilling({ ...billing, bankName: e.target.value })}
-                              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800"
-                            >
-                              <option value="Ziraat Bankası">T.C. Ziraat Bankası</option>
-                              <option value="Garanti BBVA">Garanti BBVA</option>
-                              <option value="Türkiye İş Bankası">Türkiye İş Bankası</option>
-                              <option value="Yapı Kredi">Yapı Kredi Bankası</option>
-                              <option value="Akbank">Akbank</option>
-                              <option value="QNB Finansbank">QNB Finansbank</option>
-                              <option value="Enpara">Enpara.com</option>
-                            </select>
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Hesap Sahibi Adı Soyadı</label>
-                            <input
-                              type="text"
-                              value={billing.accountHolder}
-                              onChange={(e) => setBilling({ ...billing, accountHolder: e.target.value })}
-                              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 mb-1.5">IBAN Numarası</label>
-                          <div className="relative">
-                            <input
-                              type="text"
-                              value={billing.iban}
-                              onChange={(e) => setBilling({ ...billing, iban: e.target.value })}
-                              placeholder="TR00 0000 0000 0000 0000 0000 00"
-                              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-mono font-medium text-slate-800 tracking-wider"
-                            />
-                            {billing.iban.startsWith('TR') && (
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600 font-bold text-xs flex items-center gap-1">
-                                <Icon name="Check" className="w-3.5 h-3.5" /> Geçerli IBAN
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-[11px] text-slate-400 mt-1 block">Ödemeler her ayın 1'inde bu hesaba otomatik aktarılır.</span>
-                        </div>
-                      </div>
-
-                      {/* Vergi Durumu (Bireysel / Şahıs Şirketi Dinamik Alanı) */}
-                      <div className="bg-slate-50/80 p-5 rounded-xl border border-slate-200/80 space-y-4">
-                        <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                          <Icon name="Building" className="w-4 h-4 text-indigo-600" />
-                          Vergi ve Fatura Tipi
-                        </h3>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <label className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition ${
-                            billing.taxType === 'individual' ? 'bg-indigo-50/60 border-indigo-400' : 'bg-white border-slate-200'
-                          }`}>
-                            <input
-                              type="radio"
-                              name="taxType"
-                              value="individual"
-                              checked={billing.taxType === 'individual'}
-                              onChange={() => setBilling({ ...billing, taxType: 'individual' })}
-                              className="mt-1 text-indigo-600"
-                            />
-                            <div>
-                              <span className="block text-sm font-bold text-slate-800">Bireysel Öğretmen</span>
-                              <span className="block text-xs text-slate-500 mt-0.5">Gider pusulası ile stopaj kesintisi uygulanır, şirket gerekmez.</span>
-                            </div>
-                          </label>
-
-                          <label className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition ${
-                            billing.taxType === 'company' ? 'bg-indigo-50/60 border-indigo-400' : 'bg-white border-slate-200'
-                          }`}>
-                            <input
-                              type="radio"
-                              name="taxType"
-                              value="company"
-                              checked={billing.taxType === 'company'}
-                              onChange={() => setBilling({ ...billing, taxType: 'company' })}
-                              className="mt-1 text-indigo-600"
-                            />
-                            <div>
-                              <span className="block text-sm font-bold text-slate-800">Şahıs Şirketi (Faturalı)</span>
-                              <span className="block text-xs text-slate-500 mt-0.5">Platforma kendi e-Faturanızı düzenleyerek ödeme alırsınız.</span>
-                            </div>
-                          </label>
-                        </div>
-
-                        {/* Şahıs Şirketi Seçildiğinde Dinamik Olarak Açılan Alanlar */}
-                        {billing.taxType === 'company' && (
-                          <div className="pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fadeIn">
-                            <div>
-                              <label className="block text-xs font-bold text-slate-700 mb-1.5">Vergi Dairesi</label>
-                              <input
-                                type="text"
-                                value={billing.taxOffice}
-                                onChange={(e) => setBilling({ ...billing, taxOffice: e.target.value })}
-                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs font-bold text-slate-700 mb-1.5">Vergi Kimlik Numarası (VKN)</label>
-                              <input
-                                type="text"
-                                maxLength={10}
-                                value={billing.taxNumber}
-                                onChange={(e) => setBilling({ ...billing, taxNumber: e.target.value })}
-                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-mono font-medium text-slate-800"
-                              />
-                            </div>
-                            <div className="sm:col-span-2">
-                              <label className="block text-xs font-bold text-slate-700 mb-1.5">Resmi Fatura Adresi</label>
-                              <textarea
-                                rows={2}
-                                value={billing.billingAddress}
-                                onChange={(e) => setBilling({ ...billing, billingAddress: e.target.value })}
-                                className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                    </div>
-
-                    {/* Kaydet Butonu */}
-                    <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => handleSave('Ödeme ve fatura ayarları')}
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-md shadow-indigo-200 transition"
-                      >
-                        <Icon name="Save" className="w-4 h-4" />
-                        Değişiklikleri Kaydet
-                      </button>
-                    </div>
-
-                    {/* HAKEDİŞ VE ÖDEME GEÇMİŞİ (KURAL 1 & KURAL 4) */}
-                    <div className="mt-12 pt-8 border-t-2 border-slate-100">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                        <div>
-                          <h2 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                            <Icon name="CheckCircle" className="w-5 h-5 text-emerald-600" />
-                            Maaş, Hakediş ve Havale Geçmişi
-                          </h2>
-                          <p className="text-xs font-medium text-slate-500 mt-1">
-                            Aylık dersleriniz ve içerik üretimleriniz için adınıza yatırılan hakedişler, vergi kesintileri ve banka dekontları.
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200">
-                            {billing.taxType === 'company' ? 'Şirket Statüsü (Faturalı)' : 'Bireysel Statü (%20 Stopaj)'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Mini Finans Özeti */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
-                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Toplam Alınan Hakediş</span>
-                          <div className="text-lg font-extrabold text-slate-900 mt-1">
-                            ₺{payouts.reduce((acc, p) => acc + (p.netAmount || 0), 0).toLocaleString('tr-TR')}
-                          </div>
-                          <span className="text-[11px] text-emerald-600 font-semibold">{payouts.filter(p => p.status === 'odendi').length} dönem ödendi</span>
-                        </div>
-                        <div className="bg-emerald-50/70 border border-emerald-100 rounded-xl p-3.5">
-                          <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wide">Kayıtlı Havale Hesabı</span>
-                          <div className="text-sm font-extrabold text-slate-900 mt-1 truncate">
-                            {billing.bankName || 'Ziraat Bankası'}
-                          </div>
-                          <span className="text-[11px] font-mono text-slate-500 truncate block mt-0.5">{billing.iban || 'TR42...'}</span>
-                        </div>
-                        <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3.5">
-                          <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-wide">Vergilendirme Modeli</span>
-                          <div className="text-sm font-extrabold text-slate-900 mt-1">
-                            {billing.taxType === 'company' ? 'Fatura Karşılığı Ödeme' : 'Gider Pusulası (%20 Stopaj)'}
-                          </div>
-                          <span className="text-[11px] text-slate-500 block mt-0.5">Yasal mevzuata tam uyumlu</span>
-                        </div>
-                      </div>
-
-                      {/* Hakediş Listesi */}
-                      <div className="space-y-3">
-                        {payouts.map((item) => {
-                          const isPaid = item.status === 'odendi';
-                          const isApproved = item.status === 'onaylandi';
-                          const isCompany = billing.taxType === 'company';
-
-                          return (
-                            <div key={item.id} className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4.5 sm:p-5 transition shadow-sm">
-                              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                                <div>
-                                  <div className="flex items-center gap-2.5">
-                                    <h3 className="text-base font-extrabold text-slate-900">{item.periodLabel || item.period}</h3>
-                                    {isPaid ? (
-                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
-                                        ✓ Hesaba Aktarıldı (Ödendi 🔒)
-                                      </span>
-                                    ) : isApproved ? (
-                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-sky-50 text-sky-700 text-xs font-bold rounded-full border border-sky-200">
-                                        Muhasebe Onayında (Havale Sırasında)
-                                      </span>
-                                    ) : (
-                                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-full border border-amber-200">
-                                        Dönem Sonu Hesaplanıyor
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className="text-xs text-slate-500 font-medium mt-1">
-                                    {item.description || `${item.periodLabel} Ders ve İçerik Hakedişi`}
-                                  </p>
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-6">
-                                  {/* Finansal Detaylar */}
-                                  <div className="text-right">
-                                    <div className="text-xs text-slate-400">
-                                      Brüt: ₺{Number(item.grossAmount || 0).toLocaleString('tr-TR')}
-                                      {item.withholdingAmount > 0 && (
-                                        <span className="text-rose-600 font-medium ml-1">
-                                          (Kesinti: -₺{Number(item.withholdingAmount).toLocaleString('tr-TR')})
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="text-lg font-black text-emerald-600 mt-0.5">
-                                      ₺{Number(item.netAmount || 0).toLocaleString('tr-TR')}
-                                    </div>
-                                  </div>
-
-                                  {/* Dekont ve Fatura Aksiyonları (Kural 1 & Kural 4) */}
-                                  <div className="flex items-center gap-2">
-                                    {/* Fatura Durumu (Şirketler için) */}
-                                    {isCompany && (
-                                      item.invoiceUrl ? (
-                                        <a
-                                          href={item.invoiceUrl}
-                                          target="_blank"
-                                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition"
-                                        >
-                                          <Icon name="FileText" className="w-3.5 h-3.5 text-indigo-600" />
-                                          e-Faturam
-                                        </a>
-                                      ) : (
-                                        <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold rounded-xl transition">
-                                          <Icon name="Upload" className="w-3.5 h-3.5 text-amber-600" />
-                                          <span>e-Fatura Yükle</span>
-                                          <input
-                                            type="file"
-                                            className="hidden"
-                                            accept=".pdf,.png,.jpg,.jpeg"
-                                            onChange={(e) => handleUploadInvoiceFile(item.id, e.target.files[0])}
-                                          />
-                                        </label>
-                                      )
-                                    )}
-
-                                    {/* Banka Dekontu Butonu (Kural 4) */}
-                                    {item.receiptUrl ? (
-                                      <a
-                                        href={item.receiptUrl}
-                                        target="_blank"
-                                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-emerald-200 transition"
-                                      >
-                                        <Icon name="Download" className="w-3.5 h-3.5" />
-                                        Banka Dekontu İndir
-                                      </a>
-                                    ) : (
-                                      <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
-                                        Dekont Hazırlanıyor
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-
-                {/* 4. SEKME: DERS & ENTEGRASYON TERCİHLERİ */}
-                {activeTab === 'integration' && (
-                  <div>
-                    <div className="mb-8">
-                      <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Ders &amp; Entegrasyon Tercihleri</h1>
-                      <p className="text-sm font-medium text-slate-500 mt-1">Canlı Ders Araçları, Zaman Dilimi ve Öğrenci Talebi Ayarları</p>
-                    </div>
-
-                    <div className="space-y-6">
-                      
-                      {/* Zaman Dilimi */}
-                      <div className="bg-slate-50/80 p-5 rounded-xl border border-slate-200/80">
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5">Varsayılan Zaman Dilimi</label>
-                        <select
-                          value={integration.timeZone}
-                          onChange={(e) => setIntegration({ ...integration, timeZone: e.target.value })}
-                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 max-w-md"
-                        >
-                          <option value="Europe/Istanbul">(UTC+03:00) Istanbul - Türkiye Saati (TSİ)</option>
-                          <option value="Europe/Berlin">(UTC+01:00) Berlin, Frankfurt, Paris</option>
-                          <option value="Europe/London">(UTC+00:00) London</option>
-                          <option value="America/New_York">(UTC-05:00) New York, Washington</option>
-                        </select>
-                        <span className="text-[11px] text-slate-400 mt-1 block">Ders takviminiz ve planlanan canlı ders saatleri bu saate göre senkronize edilir.</span>
-                      </div>
-
-                      {/* Online Ders Araçları Entegrasyon Kartları */}
-                      <div>
-                        <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-                          <Icon name="Video" className="w-4 h-4 text-indigo-600" />
-                          Online Video Konferans Entegrasyonları
-                        </h3>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          
-                          {/* Zoom Kartı */}
-                          <div className="p-5 bg-white border border-slate-200 rounded-xl flex flex-col justify-between gap-4 shadow-sm">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg">
-                                Z
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-bold text-slate-900">Zoom Meetings</h4>
-                                <p className="text-xs text-slate-400">Otomatik ders odası ve link açma</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
-                                <Icon name="CheckCircle2" className="w-3.5 h-3.5" />
-                                Bağlı
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => showToast('Zoom hesabı senkronizasyonu güncel.')}
-                                className="text-xs font-bold text-slate-600 hover:text-indigo-600"
-                              >
-                                Yeniden Bağla
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Google Meet Kartı */}
-                          <div className="p-5 bg-white border border-slate-200 rounded-xl flex flex-col justify-between gap-4 shadow-sm">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">
-                                M
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-bold text-slate-900">Google Meet</h4>
-                                <p className="text-xs text-slate-400">Google Calendar ile entegre dersler</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
-                                Bağlı Değil
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setIntegration({ ...integration, meetConnected: true });
-                                  showToast('Google Meet hesabı başarıyla bağlandı.');
-                                }}
-                                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-sm"
-                              >
-                                Hesabı Bağla
-                              </button>
-                            </div>
-                          </div>
-
-                        </div>
-                      </div>
-
-                      {/* Profil Görünürlüğü Toggle Switch */}
-                      <div className="bg-slate-50/80 p-5 rounded-xl border border-slate-200/80 flex items-center justify-between gap-4">
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-900">Yeni Öğrenci Alımı &amp; Profil Görünürlüğü</h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {integration.isOpenForNewStudents
-                              ? 'Profiliniz platformda veli ve öğrencilere açık, yeni özel ders ve grup talepleri alabilirsiniz.'
-                              : 'Profiliniz gizli, sadece mevcut kayıtlı öğrencileriniz derslerinize katılabilir.'}
-                          </p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                          <input
-                            type="checkbox"
-                            checked={integration.isOpenForNewStudents}
-                            onChange={(e) => setIntegration({ ...integration, isOpenForNewStudents: e.target.checked })}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                        </label>
-                      </div>
-
-                    </div>
-
-                    {/* Kaydet Butonu */}
-                    <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => handleSave('Ders ve entegrasyon tercihleri')}
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-md shadow-indigo-200 transition"
-                      >
-                        <Icon name="Save" className="w-4 h-4" />
-                        Değişiklikleri Kaydet
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-
-                {/* 5. SEKME: GÜVENLİK & BİLDİRİMLER */}
-                {activeTab === 'security' && (
-                  <div>
-                    <div className="mb-8">
-                      <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Güvenlik &amp; Bildirimler</h1>
-                      <p className="text-sm font-medium text-slate-500 mt-1">Şifre Değiştirme, İki Faktörlü Doğrulama ve İletişim Tercihleri</p>
-                    </div>
-
-                    <div className="space-y-6">
-                      
-                      {/* Şifre Değiştirme */}
-                      <div className="bg-slate-50/80 p-5 rounded-xl border border-slate-200/80 space-y-4">
-                        <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                          <Icon name="ShieldCheck" className="w-4 h-4 text-indigo-600" />
-                          Şifre Değiştir
-                        </h3>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Mevcut Şifre</label>
-                            <input
-                              type={security.showPassword ? 'text' : 'password'}
-                              value={security.currentPassword}
-                              onChange={(e) => setSecurity({ ...security, currentPassword: e.target.value })}
-                              placeholder="••••••••"
-                              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Yeni Şifre</label>
-                            <input
-                              type={security.showPassword ? 'text' : 'password'}
-                              value={security.newPassword}
-                              onChange={(e) => setSecurity({ ...security, newPassword: e.target.value })}
-                              placeholder="En az 8 karakter"
-                              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1.5">Yeni Şifre Tekrar</label>
-                            <input
-                              type={security.showPassword ? 'text' : 'password'}
-                              value={security.confirmPassword}
-                              onChange={(e) => setSecurity({ ...security, confirmPassword: e.target.value })}
-                              placeholder="••••••••"
-                              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-xs text-slate-500">
-                          <label className="inline-flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={security.showPassword}
-                              onChange={(e) => setSecurity({ ...security, showPassword: e.target.checked })}
-                              className="rounded text-indigo-600 focus:ring-0"
-                            />
-                            Şifreleri göster
-                          </label>
-                          <span className="text-[11px] text-slate-400">Büyük harf, küçük harf ve rakam içermelidir.</span>
-                        </div>
-                      </div>
-
-                      {/* İki Faktörlü Doğrulama (2FA) */}
-                      <div className="bg-slate-50/80 p-5 rounded-xl border border-slate-200/80 flex items-center justify-between gap-4">
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-900">İki Faktörlü Doğrulama (2FA)</h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            Giriş yaparken SMS veya Authenticator uygulaması ile ek güvenlik kodu sorulur.
-                          </p>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                          <input
-                            type="checkbox"
-                            checked={security.twoFactorAuth}
-                            onChange={(e) => setSecurity({ ...security, twoFactorAuth: e.target.checked })}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                        </label>
-                      </div>
-
-                      {/* Bildirim Tercihleri Checkbox Listesi */}
-                      <div className="bg-slate-50/80 p-5 rounded-xl border border-slate-200/80 space-y-3">
-                        <h4 className="text-sm font-bold text-slate-900">İletişim &amp; Bildirim Tercihleri</h4>
-                        
-                        <div className="space-y-2.5">
-                          <label className="flex items-center gap-3 text-sm text-slate-700 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={security.notifications.emailNewMessage}
-                              onChange={(e) => setSecurity({
-                                ...security,
-                                notifications: { ...security.notifications, emailNewMessage: e.target.checked }
-                              })}
-                              className="w-4 h-4 rounded text-indigo-600 border-slate-300"
-                            />
-                            <span>Öğrenci veya veliden yeni mesaj geldiğinde e-posta bildirimi gönder</span>
-                          </label>
-
-                          <label className="flex items-center gap-3 text-sm text-slate-700 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={security.notifications.smsLessonReminder}
-                              onChange={(e) => setSecurity({
-                                ...security,
-                                notifications: { ...security.notifications, smsLessonReminder: e.target.checked }
-                              })}
-                              className="w-4 h-4 rounded text-indigo-600 border-slate-300"
-                            />
-                            <span>Canlı ders başlamadan 15 dakika önce SMS hatırlatması gönder</span>
-                          </label>
-
-                          <label className="flex items-center gap-3 text-sm text-slate-700 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={security.notifications.emailHomeworkSubmitted}
-                              onChange={(e) => setSecurity({
-                                ...security,
-                                notifications: { ...security.notifications, emailHomeworkSubmitted: e.target.checked }
-                              })}
-                              className="w-4 h-4 rounded text-indigo-600 border-slate-300"
-                            />
-                            <span>Öğrenci ödev teslim ettiğinde e-posta ile haber ver</span>
-                          </label>
-
-                          <label className="flex items-center gap-3 text-sm text-slate-700 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={security.notifications.systemAnnouncements}
-                              onChange={(e) => setSecurity({
-                                ...security,
-                                notifications: { ...security.notifications, systemAnnouncements: e.target.checked }
-                              })}
-                              className="w-4 h-4 rounded text-indigo-600 border-slate-300"
-                            />
-                            <span>Müfredat yenilikleri ve platform duyuruları</span>
-                          </label>
-                        </div>
-                      </div>
-
-                    </div>
-
-                    {/* Kaydet Butonu */}
-                    <div className="mt-8 pt-6 border-t border-slate-100 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => handleSave('Güvenlik ve bildirim ayarları')}
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-md shadow-indigo-200 transition"
-                      >
-                        <Icon name="Save" className="w-4 h-4" />
-                        Değişiklikleri Kaydet
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-
-                {/* 6. SEKME: DESTEK MERKEZİ (ALT ENTEGRASYON) */}
-                {activeTab === 'support' && (
-                  <div>
-                    <div className="mb-8">
-                      <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Destek Merkezi</h1>
-                      <p className="text-sm font-medium text-slate-500 mt-1">Öğretmen Destek Ekibi ve Sıkça Sorulan Sorular</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
-                        <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
-                          <Icon name="HelpCircle" className="w-6 h-6" />
-                        </div>
-                        <h3 className="text-base font-bold text-slate-900">Canlı Öğretmen Destek Hattı</h3>
-                        <p className="text-xs text-slate-500 leading-relaxed">
-                          Canlı ders sırasında ses, görüntü veya entegrasyon problemi yaşarsanız 7/24 teknik ekibimize doğrudan bağlanabilirsiniz.
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => showToast('Canlı destek talebiniz oluşturuldu. 1 dakika içinde bağlanılıyor...')}
-                          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm transition"
-                        >
-                          Canlı Desteğe Bağlan
-                        </button>
-                      </div>
-
-                      <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
-                        <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
-                          <Icon name="FileText" className="w-6 h-6" />
-                        </div>
-                        <h3 className="text-base font-bold text-slate-900">Öğretmen Rehberi &amp; SSS</h3>
-                        <p className="text-xs text-slate-500 leading-relaxed">
-                          Maarif Modeli kazanım testleri hazırlama, soru bankasından çekme ve ödev atama kılavuzunu inceleyin.
-                        </p>
-                        <a
-                          href="/hakkimizda.html"
-                          className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl transition"
-                        >
-                          Kılavuzu İncele
-                          <Icon name="ExternalLink" className="w-3.5 h-3.5" />
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-              </section>
-
-            </div>
-
-          </main>
-
-
-          {/* --- MESAJLAR ÇEKMECESİ / MODALI (Öğrenci & Veli Mesaj Havuzu Entegrasyonu) --- */}
-          {messagesOpen && (
-            <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
-              <div className="w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col animate-slideLeft">
-                
-                {/* Mesajlaşma Başlığı */}
-                <div className="p-4 sm:p-5 border-b border-orange-100 flex items-center justify-between bg-gradient-to-b from-[#fffaf7] to-white">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#C84B31] text-white flex items-center justify-center shadow-md shadow-[#C84B31]/30">
-                      <Icon name="MessageSquare" className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-[#2c1a0e]">Mesajlaşma &amp; İletişim Kutusu</h3>
-                      <p className="text-xs text-slate-500">Öğrenci ve velilerinizden gelen anlık mesajlar</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setMessagesOpen(false)}
-                    className="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition"
-                  >
-                    <Icon name="X" className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Mesajlaşma İki Sütunlu Gövde */}
-                <div className="flex-1 flex overflow-hidden">
-                  
-                  {/* Sol: Konuşma Listesi */}
-                  <div className="w-1/3 border-r border-slate-200 flex flex-col bg-white">
-                    
-                    {/* 3'lü Hızlı Filtre Sekmesi (Madde 2) */}
-                    <div className="p-2 border-b border-slate-100 flex gap-1.5 bg-slate-50/70">
-                      <button
-                        type="button"
-                        onClick={() => setMessageFilter('all')}
-                        className={`flex-1 py-1 px-2 rounded-lg text-xs font-bold transition ${
-                          messageFilter === 'all'
-                            ? 'bg-[#C84B31] text-white shadow-sm'
-                            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                        }`}
-                      >
-                        Tümü
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setMessageFilter('student')}
-                        className={`flex-1 py-1 px-2 rounded-lg text-xs font-bold transition ${
-                          messageFilter === 'student'
-                            ? 'bg-[#C84B31] text-white shadow-sm'
-                            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                        }`}
-                      >
-                        Öğrenciler
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setMessageFilter('parent')}
-                        className={`flex-1 py-1 px-2 rounded-lg text-xs font-bold transition ${
-                          messageFilter === 'parent'
-                            ? 'bg-[#C84B31] text-white shadow-sm'
-                            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                        }`}
-                      >
-                        Veliler
-                      </button>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
-                      {conversations
-                        .filter(c => {
-                          if (messageFilter === 'student') return c.roleType === 'student';
-                          if (messageFilter === 'parent') return c.roleType === 'parent';
-                          return true;
-                        })
-                        .map(conv => (
-                          <div
-                            key={conv.id}
-                            onClick={() => selectChat(conv.id)}
-                            className={`p-3 rounded-xl cursor-pointer transition flex items-start gap-2.5 ${
-                              selectedChatId === conv.id ? 'bg-[#fff7f5] border border-[#C84B31] shadow-sm' : 'hover:bg-slate-50'
-                            }`}
-                          >
-                            <div className="w-8 h-8 rounded-full text-white font-bold text-xs flex items-center justify-center shrink-0" style={{ background: conv.avatarBg || '#C84B31' }}>
-                              {conv.avatar}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center justify-between">
-                                <h4 className="text-xs font-bold text-slate-800 truncate">{conv.name}</h4>
-                                <span className="text-[10px] text-slate-400">{conv.time}</span>
-                              </div>
-                              <span className={`text-[10px] font-semibold block ${conv.roleType === 'parent' ? 'text-amber-600' : 'text-emerald-600'}`}>
-                                {conv.roleType === 'parent' ? '👨‍👩‍👧 Veli' : '🎒 Öğrenci'}
-                              </span>
-                              {conv.roleType === 'parent' && (
-                                <span className="text-[10px] text-slate-500 font-semibold block truncate">
-                                  {conv.parentRelation || `${conv.studentName || 'Öğrenci'}'in Velisi`}
-                                </span>
-                              )}
-                              <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                                {conv.messages[conv.messages.length - 1]?.text}
-                              </p>
-                            </div>
-                            {conv.unread && <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0 mt-1"></span>}
-                          </div>
-                        ))}
-                    </div>
-
-                  </div>
-
-                  {/* Sağ: Aktif Sohbet Penceresi */}
-                  <div className="flex-1 flex flex-col bg-slate-50/50 overflow-hidden">
-                    
-                    {/* Sohbet Üst Bilgisi */}
-                    <div className="p-3.5 bg-white border-b border-slate-200 flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full text-white font-bold text-xs flex items-center justify-center" style={{ background: currentChat?.avatarBg || '#C84B31' }}>
-                          {currentChat?.avatar}
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-800">{currentChat?.name}</h4>
-                          <span className="text-[11px] text-slate-500 font-medium">
-                            {currentChat?.roleType === 'parent'
-                              ? `${currentChat?.parentRelation || (currentChat?.studentName ? currentChat?.studentName + '\'in Velisi' : 'Öğrenci Velisi')}`
-                              : (currentChat?.role || 'Öğrenci')}
-                          </span>
-                        </div>
-                      </div>
-                      <a
-                        href="/ogretmen-paneli.html#students"
-                        className="text-xs font-bold text-[#C84B31] hover:underline flex items-center gap-1"
-                      >
-                        Öğrenci Detayı ↗
-                      </a>
-                    </div>
-
-                    {/* Mesaj Balonları */}
-                    <div className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-3">
-                      {currentChat?.messages?.map(msg => (
-                        <div
-                          key={msg.id}
-                          className={`flex flex-col max-w-[80%] ${
-                            msg.sender === 'teacher' ? 'ml-auto items-end' : 'mr-auto items-start'
-                          }`}
-                        >
-                          <div
-                            className={`p-3 rounded-2xl text-xs leading-relaxed shadow-sm ${
-                              msg.sender === 'teacher'
-                                ? 'bg-[#C84B31] text-white rounded-br-none'
-                                : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none'
-                            }`}
-                          >
-                            {msg.text}
-                          </div>
-                          <span className="text-[10px] text-slate-400 mt-1 px-1">{msg.time}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Cevap Yazma Formu */}
-                    <div className="p-3 bg-white border-t border-slate-200 flex gap-2 items-center">
-                      <input
-                        type="text"
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder={`${currentChat?.name || 'Kişiye'} cevap yaz...`}
-                        className="flex-1 px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#C84B31] transition"
-                      />
-                      <button
-                        type="button"
-                        onClick={handleSendMessage}
-                        className="px-4 py-2 bg-[#C84B31] hover:bg-[#a83820] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
-                      >
-                        <span>Gönder</span>
-                        <Icon name="Send" className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-            </div>
-          )}
-
-
-          {/* --- FLOATING TOAST NOTIFICATION --- */}
-          {toast.show && (
-            <div className="fixed bottom-6 right-6 z-50 animate-bounce">
-              <div className="flex items-center gap-2.5 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-2xl border border-slate-800 text-xs font-semibold">
-                <Icon name="CheckCircle2" className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{toast.message}</span>
-              </div>
-            </div>
-          )}
-
-        </div>
-      );
-    }
-
-    // Render the React App
-    ReactDOM.createRoot(document.getElementById('root')).render(<TeacherProfileSettingsApp />);
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data.mesaj || 'Şifre değiştirilemedi.');
+          }
+          $('passwordForm').reset();
+          setBanner('passwordStatus', '✓ ' + (data.mesaj || 'Şifreniz başarıyla güncellendi.'), 'ok');
+        } catch (err) {
+          setBanner('passwordStatus', err.message, 'err');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Şifreyi Güncelle';
+        }
+      });
+
+      loadProfile();
+    })();
   </script>
 </body>
 </html>

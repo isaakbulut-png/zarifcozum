@@ -216,10 +216,12 @@ td.net{font-weight:700;color:var(--navy-900)}
 .teacher-content.wrap,.teacher-layout .teacher-content{max-width:100%!important;width:100%!important;margin:0!important;padding:14px 10px 48px!important}
 .teacher-sidebar-logout-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px 16px;border-radius:10px;border:1px solid rgba(239,68,68,0.35);background:linear-gradient(135deg,rgba(185,28,28,0.25),rgba(127,29,29,0.4));color:#fca5a5;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .2s ease;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
 .teacher-sidebar-logout-btn:hover{background:linear-gradient(135deg,rgba(220,38,38,0.45),rgba(153,27,27,0.6))!important;border-color:rgba(239,68,68,0.6)!important;color:#fff!important;transform:translateY(-1px);box-shadow:0 4px 12px rgba(185,28,28,0.3)!important}
-.teacher-avatar-wrapper{position:relative;width:68px;height:68px;border-radius:18px;overflow:hidden;border:2.5px solid #f97316;flex-shrink:0;background:linear-gradient(135deg, #432818 0%, #29160a 100%);display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.35);transition:all .22s cubic-bezier(0.4, 0, 0.2, 1)}
-.teacher-avatar-wrapper:hover{transform:scale(1.03);border-color:#fb923c;box-shadow:0 6px 18px rgba(249,115,22,0.45)}
-.avatar-hover-overlay{position:absolute;inset:0;background:rgba(20,10,5,0.75);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;opacity:0;transition:opacity .2s ease;color:#fff;pointer-events:none}
+.teacher-avatar-wrapper{position:relative;width:76px;height:76px;border-radius:50%;overflow:hidden;border:2.5px solid #c2570c;flex-shrink:0;background:linear-gradient(135deg, #432818 0%, #29160a 100%);display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.35);transition:all .22s cubic-bezier(0.4, 0, 0.2, 1)}
+.teacher-avatar-wrapper:hover{transform:scale(1.04);border-color:#ea580c;box-shadow:0 6px 18px rgba(194,87,12,0.45)}
+.avatar-hover-overlay{position:absolute;inset:0;background:rgba(20,10,5,0.72);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;opacity:0;transition:opacity .2s ease;color:#fff;pointer-events:none;border-radius:50%}
 .teacher-avatar-wrapper:hover .avatar-hover-overlay{opacity:1}
+.sidebar-profile-settings-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:8px;padding:7px 12px;border-radius:9px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:#f5ebe0!important;font-size:.8rem;font-weight:600;text-decoration:none;transition:all .18s ease}
+.sidebar-profile-settings-btn:hover{background:rgba(194,87,12,0.28);border-color:rgba(234,88,12,0.6);color:#fff!important}
 .teacher-sidebar{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;margin:14px 0 24px 8px;padding:16px 14px;background:linear-gradient(180deg, #322013 0%, #24150b 100%);border:1px solid rgba(255, 255, 255, 0.08);border-radius:16px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,0.22);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.18) transparent}
 .teacher-sidebar::-webkit-scrollbar{width:5px}
 .teacher-sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.18);border-radius:99px}
@@ -994,8 +996,7 @@ body.teacher-menu-open {
         <span>Mesajlar</span>
         <span class="unread-messages-badge" id="topMessageBadge" style="display:none;background:#ef4444;color:#fff;border-radius:999px;font-size:10px;font-weight:700;padding:1px 6px;line-height:1.2">0</span>
       </button>
-      <a class="btn ghost" href="index.html">Ana sayfa</a>
-      <a class="btn sm" id="topSettingsBtn" href="/ogretmen-profil-ayarlari.html" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px;border-radius:8px;padding:6px 12px;font-size:0.84rem;box-shadow:0 2px 6px rgba(124,58,237,0.25)">⚙️ Profil ve Hesap Ayarları ↗</a>
+      <a class="btn ghost" href="index.html">Ana Sayfa</a>
       <select id="sinav" aria-label="Sınav seçin" hidden></select>
     </div>
   </div>
@@ -1003,44 +1004,28 @@ body.teacher-menu-open {
 
 <div class="teacher-layout authenticated">
 <aside class="teacher-sidebar" id="teacherSidebar">
-  <div class="teacher-brand" style="display:flex;align-items:center;gap:12px;padding:0 4px 14px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:12px">
-    <span class="teacher-brand-mark" style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg, #d6452b 0%, #b73520 100%);display:grid;place-items:center;font-family:var(--head);font-weight:700;font-size:1.25rem;color:#fff;box-shadow:0 4px 12px rgba(183,53,32,0.35);flex-shrink:0">Z</span>
+  <div class="teacher-brand" style="display:flex;align-items:center;gap:11px;padding:0 4px 12px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:12px">
+    <span class="teacher-brand-mark" style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg, #c2570c 0%, #9a3412 100%);display:grid;place-items:center;font-family:var(--head);font-weight:700;font-size:1.2rem;color:#fff;box-shadow:0 4px 12px rgba(154,52,18,0.35);flex-shrink:0">Z</span>
     <div style="min-width:0;overflow:hidden">
       <div style="font-family:var(--head);font-weight:700;font-size:1.05rem;line-height:1.2;color:#fff">ZarifÇözüm</div>
-      <div id="topTeacherGreeting" style="margin-top:2px">
-        <div id="sidebarTeacherName" style="font-size:.86rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Öğretmen</div>
-        <div style="display:flex;align-items:center;gap:4px;margin-top:1px">
-          <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block"></span>
-          <span style="font-size:.72rem;color:#4ade80;font-weight:600">Giriş Yapıldı</span>
-        </div>
-      </div>
+      <div id="sidebarTeacherName" style="font-size:.76rem;color:#d6c6b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px">Öğretmen Paneli</div>
     </div>
   </div>
 
-  <div class="sidebar-teacher-profile-card" id="sidebarProfileCard" style="display:flex;align-items:center;gap:13px;margin:0 0 15px;padding:12px;border:1px solid rgba(255,255,255,0.12);border-radius:16px;background:linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);box-shadow:0 4px 14px rgba(0,0,0,0.25);position:relative">
+  <div class="sidebar-teacher-profile-card" id="sidebarProfileCard" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;margin:0 0 15px;padding:16px 12px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);box-shadow:0 4px 14px rgba(0,0,0,0.22);position:relative">
     <div class="teacher-avatar-wrapper" id="teacherAvatarUploadTrigger" title="Profil Fotoğrafını Değiştirmek İçin Tıklayın">
       <img id="sidebarTeacherAvatarImg" src="" alt="Öğretmen Profil Fotoğrafı" style="width:100%;height:100%;object-fit:cover;display:none" />
-      <span id="sidebarTeacherAvatarFallback" style="font-weight:700;font-size:1.45rem;color:#fed7aa;font-family:var(--head);display:flex;align-items:center;justify-content:center;width:100%;height:100%">Ö</span>
+      <span id="sidebarTeacherAvatarFallback" style="font-weight:700;font-size:1.55rem;color:#fed7aa;font-family:var(--head);display:flex;align-items:center;justify-content:center;width:100%;height:100%">Ö</span>
       <div class="avatar-hover-overlay" id="avatarHoverOverlay">
         <svg style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span style="font-size:9.5px;font-weight:700;letter-spacing:0.3px;color:#fff">Yükle</span>
+        <span style="font-size:9px;font-weight:700;letter-spacing:0.3px;color:#fff">Yükle</span>
       </div>
       <input type="file" id="teacherAvatarFileInput" accept="image/*" style="display:none" />
     </div>
-    <div style="min-width:0;flex:1;overflow:hidden;display:flex;flex-direction:column;gap:3px">
-      <div id="sidebarCardTeacherName" style="font-size:.92rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25">Öğretmen</div>
-      <div style="display:flex;align-items:center;gap:5px;margin-top:1px">
-        <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block"></span>
-        <span style="font-size:.72rem;color:#4ade80;font-weight:600">Öğretmen Hesabı</span>
-      </div>
-      <div style="margin-top:4px;display:flex;flex-direction:column;gap:2px">
-        <button type="button" id="triggerAvatarUploadBtn" style="background:none;border:none;padding:0;color:#f97316;font-size:.74rem;font-weight:600;text-align:left;cursor:pointer;display:inline-flex;align-items:center;gap:4px">
-          📷 Fotoğrafı Değiştir
-        </button>
-        <a href="/ogretmen-profil-ayarlari.html" style="font-size:.72rem;color:#cbd5e1;text-decoration:none;display:inline-flex;align-items:center;gap:3px;transition:color .15s" onmouseover="this.style.color='#fed7aa'" onmouseout="this.style.color='#cbd5e1'">
-          ⚙️ Profil Ayarları ↗
-        </a>
-      </div>
+    <div style="width:100%;min-width:0;margin-top:4px">
+      <div id="sidebarCardTeacherName" style="font-size:.95rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3">Öğretmen</div>
+      <div id="sidebarCardTeacherBranch" style="font-size:.76rem;color:#d6c6b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px">Matematik Öğretmeni</div>
+      <a href="/ogretmen-profil-ayarlari.html" class="sidebar-profile-settings-btn">⚙️ Profil &amp; Ayarlar</a>
     </div>
   </div>
 
@@ -1158,7 +1143,7 @@ body.teacher-menu-open {
       </div>
     <div data-panel-view="overview">
     <section class="dashboard-head" id="overview">
-      <div><h2>Merhaba, Öğretmen</h2><p>Derslerinizi, öğrencilerinizi ve içeriklerinizi tek yerden yönetin.</p></div>
+      <div><h2 id="dashboardGreeting">Merhaba, Öğretmen</h2><p>Derslerinizi, öğrencilerinizi ve içeriklerinizi tek yerden yönetin.</p></div>
       <div class="dashboard-date" id="dashboardDate"></div>
     </section>
 
@@ -2333,15 +2318,22 @@ body.teacher-menu-open {
   function syncTeacherProfileUI(user) {
     const rawName = user?.name || (typeof localStorage !== 'undefined' && localStorage.getItem('zarif_teacher_name')) || user?.email?.split('@')[0] || 'Öğretmen';
     const name = rawName.trim();
-    const avatar = (typeof localStorage !== 'undefined' && localStorage.getItem('zarif_teacher_avatar')) || user?.avatarUrl || user?.photo || user?.avatar || user?.profileImage;
+    const rawBranch = user?.branch || user?.brans || (typeof localStorage !== 'undefined' && localStorage.getItem('zarif_teacher_branch')) || 'Matematik Öğretmeni';
+    const branch = rawBranch.trim() || 'Matematik Öğretmeni';
+    const avatar = user?.avatarUrl || user?.photo || user?.avatar || user?.profileImage || (typeof localStorage !== 'undefined' && localStorage.getItem('zarif_teacher_avatar')) || '';
 
-    if (typeof localStorage !== 'undefined' && name && name !== 'Öğretmen') {
-      try { localStorage.setItem('zarif_teacher_name', name); } catch (e) {}
+    if (typeof localStorage !== 'undefined') {
+      try {
+        if (name && name !== 'Öğretmen') localStorage.setItem('zarif_teacher_name', name);
+        if (user?.branch || user?.brans) localStorage.setItem('zarif_teacher_branch', branch);
+        if (user?.avatarUrl || user?.photo || user?.profileImage) localStorage.setItem('zarif_teacher_avatar', avatar);
+      } catch (e) {}
     }
 
-    if ($('sidebarTeacherName')) $('sidebarTeacherName').textContent = name;
     if ($('sidebarCardTeacherName')) $('sidebarCardTeacherName').textContent = name;
+    if ($('sidebarCardTeacherBranch')) $('sidebarCardTeacherBranch').textContent = branch;
     if ($('teacherName')) $('teacherName').textContent = name;
+    if ($('dashboardGreeting')) $('dashboardGreeting').textContent = `Merhaba, ${name}`;
 
     const nameParts = name.split(/\s+/).filter(Boolean);
     let initials = 'Ö';
@@ -2368,8 +2360,8 @@ body.teacher-menu-open {
   }
 
   window.addEventListener('storage', (e) => {
-    if (e.key === 'zarif_teacher_avatar' || e.key === 'zarif_teacher_name') {
-      syncTeacherProfileUI(window.currentTeacherUser || {});
+    if (e.key === 'zarif_teacher_avatar' || e.key === 'zarif_teacher_name' || e.key === 'zarif_teacher_branch') {
+      syncTeacherProfileUI({});
     }
   });
   window.addEventListener('teacher-avatar-updated', () => {
@@ -2476,14 +2468,12 @@ body.teacher-menu-open {
       try { localStorage.setItem('zarif_teacher_avatar', oturum.user.avatarUrl); } catch (e) {}
     }
     syncTeacherProfileUI(oturum.user);
-    if (typeof localStorage !== 'undefined' && !localStorage.getItem('zarif_teacher_avatar')) {
-      api('/api/ogretmen/profil-ayarlari').then(res => {
-        if (res?.data?.avatarUrl) {
-          localStorage.setItem('zarif_teacher_avatar', res.data.avatarUrl);
-          syncTeacherProfileUI({ ...(window.currentTeacherUser || {}), avatarUrl: res.data.avatarUrl });
-        }
-      }).catch(() => {});
-    }
+    api('/api/user/profile').then(res => {
+      if (res?.user) {
+        window.currentTeacherUser = { ...(window.currentTeacherUser || {}), ...res.user };
+        syncTeacherProfileUI(window.currentTeacherUser);
+      }
+    }).catch(() => {});
     if ($('teacherEmail')) $('teacherEmail').textContent = oturum.user?.email || 'Öğretmen Hesabı';
     if (oturum.user?.adminRole || oturum.user?.role === 'admin' || (oturum.user?.email && oturum.user.email.toLowerCase() === 'isa.agbulut@gmail.com')) {
       if ($('topAdminPanelBtn')) $('topAdminPanelBtn').style.display = 'inline-flex';

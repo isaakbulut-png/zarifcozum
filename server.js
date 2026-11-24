@@ -1384,8 +1384,9 @@ app.post('/api/ogretmen/bildirim-okundu', ogretmenKontrol, async (req, res) => {
 // 5. Öğretmen Profil ve Finans Ayarları Getir
 app.get('/api/ogretmen/profil-ayarlari', ogretmenKontrol, async (req, res) => {
   try {
-    const user = await User.findById(req.session.user._id)
-      .select('name email phone telefon brans branch graduationInfo verificationDocumentUrl basvuruDurumu ogretmenTipi teacherFinance avatarUrl photo profileImage')
+    const userId = req.session.user._id || req.session.user.id;
+    const user = await User.findById(userId)
+      .select('name email phone telefon brans branch graduationInfo bio verificationDocumentUrl basvuruDurumu ogretmenTipi teacherFinance avatarUrl photo profileImage')
       .lean();
 
     if (!user) return res.status(404).json({ mesaj: 'Öğretmen profili bulunamadı.' });
@@ -1398,7 +1399,9 @@ app.get('/api/ogretmen/profil-ayarlari', ogretmenKontrol, async (req, res) => {
         email: user.email,
         phone: user.phone || user.telefon || '',
         brans: user.branch || user.brans || '',
+        branch: user.branch || user.brans || '',
         graduationInfo: user.graduationInfo || '',
+        bio: user.bio || '',
         avatarUrl: user.avatarUrl || user.photo || user.profileImage || null,
         verificationDocumentUrl: user.verificationDocumentUrl || null,
         basvuruDurumu: user.basvuruDurumu || 'inceleme_suruyor',
@@ -1420,30 +1423,161 @@ app.get('/api/ogretmen/profil-ayarlari', ogretmenKontrol, async (req, res) => {
   }
 });
 
+// 5b. Genel Kullanıcı Profili Getir & Güncelle (GET / PUT /api/user/profile)
+app.get('/api/user/profile', requireRole('teacher', 'admin', 'student'), async (req, res) => {
+  try {
+    const userId = req.session.user._id || req.session.user.id;
+    const user = await User.findById(userId)
+      .select('name email phone telefon brans branch graduationInfo bio avatarUrl photo profileImage role')
+      .lean();
+
+    if (!user) return res.status(404).json({ mesaj: 'Kullanıcı profili bulunamadı.' });
+
+    res.json({
+      basarili: true,
+      user: {
+        id: user._id.toString(),
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || user.telefon || '',
+        branch: user.branch || user.brans || '',
+        brans: user.branch || user.brans || '',
+        graduationInfo: user.graduationInfo || '',
+        bio: user.bio || '',
+        avatarUrl: user.avatarUrl || user.photo || user.profileImage || null,
+        role: user.role
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ mesaj: 'Profil bilgileri alınamadı: ' + err.message });
+  }
+});
+
+app.put('/api/user/profile', requireRole('teacher', 'admin', 'student'), async (req, res) => {
+  try {
+    const userId = req.session.user._id || req.session.user.id;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ mesaj: 'Kullanıcı bulunamadı.' });
+
+    const { name, phone, branch, brans, graduationInfo, bio, avatarUrl } = req.body || {};
+
+    if (typeof name === 'string') {
+      const cleanName = name.trim();
+      if (!cleanName || cleanName.length < 2) {
+        return res.status(400).json({ mesaj: 'Ad Soyad en az 2 karakter olmalıdır.' });
+      }
+      user.name = cleanName.slice(0, 100);
+    }
+
+    if (typeof phone === 'string') {
+      const rawPhone = phone.trim();
+      const digits = rawPhone.replace(/\D/g, '');
+      let normalized = '';
+      if (digits.length === 10 && digits.startsWith('5')) {
+        normalized = '0' + digits;
+      } else if (digits.length === 11 && digits.startsWith('05')) {
+        normalized = digits;
+      } else if (digits.length === 12 && digits.startsWith('905')) {
+        normalized = '0' + digits.slice(2);
+      }
+      if (rawPhone && !normalized) {
+        return res.status(400).json({ mesaj: 'Telefon numarası geçerli bir Türkiye cep telefonu olmalıdır (05XX XXX XX XX).' });
+      }
+      user.phone = normalized || undefined;
+      user.telefon = normalized || '';
+    }
+
+    const incomingBranch = typeof branch === 'string' ? branch : (typeof brans === 'string' ? brans : undefined);
+    if (incomingBranch !== undefined) {
+      const cleanBranch = incomingBranch.trim().slice(0, 100);
+      user.branch = cleanBranch;
+      user.brans = cleanBranch;
+    }
+
+    if (typeof graduationInfo === 'string') {
+      user.graduationInfo = graduationInfo.trim().slice(0, 300);
+    }
+
+    if (typeof bio === 'string') {
+      user.bio = bio.trim().slice(0, 1000);
+    }
+
+    if (typeof avatarUrl === 'string' && avatarUrl.trim()) {
+      user.avatarUrl = avatarUrl.trim();
+      user.photo = avatarUrl.trim();
+      user.profileImage = avatarUrl.trim();
+    }
+
+    await user.save();
+
+    if (req.session.user) {
+      req.session.user.name = user.name;
+      if (user.avatarUrl) req.session.user.avatarUrl = user.avatarUrl;
+      if (req.session.save) {
+        await new Promise(r => req.session.save(r));
+      }
+    }
+
+    res.json({
+      basarili: true,
+      mesaj: 'Profil bilgileriniz başarıyla kaydedildi.',
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        phone: user.phone || user.telefon || '',
+        branch: user.branch || user.brans || '',
+        brans: user.branch || user.brans || '',
+        graduationInfo: user.graduationInfo || '',
+        bio: user.bio || '',
+        avatarUrl: user.avatarUrl || user.photo || user.profileImage || null,
+        role: user.role
+      }
+    });
+  } catch (err) {
+    console.error('Profil güncelleme hatası:', err);
+    res.status(500).json({ mesaj: 'Profil güncellenemedi: ' + err.message });
+  }
+});
+
 // 6. Öğretmen Profil ve Finans Ayarları Kaydet
 app.post('/api/ogretmen/profil-ayarlari', ogretmenKontrol, async (req, res) => {
   try {
     const {
-      name, phone, brans, graduationInfo, avatarUrl, photo,
+      name, phone, brans, branch, graduationInfo, bio, avatarUrl, photo,
       bankName, iban, accountHolder, taxType, taxOffice, taxNumber, billingAddress
     } = req.body;
 
-    const user = await User.findById(req.session.user._id);
+    const userId = req.session.user._id || req.session.user.id;
+    const user = await User.findById(userId);
     if (!user) return res.status(404).json({ mesaj: 'Kullanıcı bulunamadı.' });
 
-    if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
-    else if (photo !== undefined) user.avatarUrl = photo;
+    if (avatarUrl !== undefined) {
+      user.avatarUrl = avatarUrl;
+      user.photo = avatarUrl;
+      user.profileImage = avatarUrl;
+    } else if (photo !== undefined) {
+      user.avatarUrl = photo;
+      user.photo = photo;
+      user.profileImage = photo;
+    }
 
     if (name) user.name = name.trim();
     if (phone) {
-      user.phone = phone.trim();
-      user.telefon = phone.trim();
+      const digits = phone.trim().replace(/\D/g, '');
+      const normalized = digits.length === 10 && digits.startsWith('5') ? '0' + digits
+        : (digits.length === 11 && digits.startsWith('05') ? digits
+          : (digits.length === 12 && digits.startsWith('905') ? '0' + digits.slice(2) : ''));
+      if (normalized) user.phone = normalized;
+      user.telefon = normalized || phone.trim();
     }
-    if (brans) {
-      user.brans = brans.trim();
-      user.branch = brans.trim();
+    const finalBranch = branch || brans;
+    if (finalBranch) {
+      user.brans = finalBranch.trim();
+      user.branch = finalBranch.trim();
     }
     if (graduationInfo !== undefined) user.graduationInfo = graduationInfo.trim();
+    if (bio !== undefined) user.bio = bio.trim();
 
     user.teacherFinance = user.teacherFinance || {};
     if (bankName !== undefined) user.teacherFinance.bankName = bankName.trim();

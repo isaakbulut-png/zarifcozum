@@ -722,7 +722,7 @@ router.get('/me', async (req, res) => {
     const isParent = req.session.user.role === 'parent';
     const accountModel = isParent ? Parent : User;
     const user = await accountModel.findById(req.session.user.id)
-      .select(isParent ? 'name surname email restricted' : 'name email role adminRole subscriptionStatus subscriptionPlan expiresAt');
+      .select(isParent ? 'name surname email restricted' : 'name email role adminRole subscriptionStatus subscriptionPlan paketTipi expiresAt avatarUrl photo profileImage brans branch phone telefon graduationInfo bio');
     if (!user) {
       req.session.destroy(error => {
         if (error) return res.status(500).json({ mesaj: 'Oturum kapatılamadı.' });
@@ -735,7 +735,7 @@ router.get('/me', async (req, res) => {
     let isPreview = false;
     if (isStaff && req.query.previewUserId) {
       const previewTarget = await User.findById(req.query.previewUserId)
-        .select('name email role adminRole subscriptionStatus subscriptionPlan paketTipi expiresAt');
+        .select('name email role adminRole subscriptionStatus subscriptionPlan paketTipi expiresAt avatarUrl photo profileImage brans branch phone telefon graduationInfo bio');
       if (previewTarget) {
         effectiveUser = previewTarget;
         isPreview = true;
@@ -754,6 +754,12 @@ router.get('/me', async (req, res) => {
         email: effectiveUser.email,
         role: isParent ? 'parent' : effectiveUser.role,
         adminRole: isParent ? null : adminRoleOf(effectiveUser),
+        avatarUrl: isParent ? null : (effectiveUser.avatarUrl || effectiveUser.photo || effectiveUser.profileImage || null),
+        branch: isParent ? null : (effectiveUser.branch || effectiveUser.brans || ''),
+        brans: isParent ? null : (effectiveUser.branch || effectiveUser.brans || ''),
+        phone: isParent ? '' : (effectiveUser.phone || effectiveUser.telefon || ''),
+        graduationInfo: isParent ? '' : (effectiveUser.graduationInfo || ''),
+        bio: isParent ? '' : (effectiveUser.bio || ''),
         subscriptionStatus: effectiveUser.subscriptionStatus || (hasActivePlan ? 'active' : 'free'),
         subscriptionPlan: currentEffectivePlan,
         paketTipi: effectiveUser.paketTipi || currentEffectivePlan || 'free',
