@@ -314,7 +314,10 @@
         <td>${escapeHtml(student.studentNumber)}</td><td>${gradeLabel(student.grade)} / ${escapeHtml(student.section)}</td>
         <td>${homework.completed || 0}/${homework.total || 0} teslim · ${homework.pending || 0} bekliyor</td>
         <td><span class="status-chip ${student.linked ? 'is-linked' : 'is-unlinked'}">${student.linked ? 'Bağlı' : 'Davet bekliyor'}</span></td>
-        <td><button class="btn light student-history" type="button" data-student-detail="${escapeHtml(student.id)}">Detay</button></td></tr>`;
+        <td><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <button class="btn light student-history" type="button" data-student-detail="${escapeHtml(student.id)}">Detay</button>
+          <button type="button" data-send-motivation="${escapeHtml(student.id)}" data-student-name="${escapeHtml(student.name)}" style="padding:5px 10px;border-radius:8px;border:1px solid #d97706;background:#fffbeb;color:#92400e;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⚡ +20 Motivasyon</button>
+        </div></td></tr>`;
     }).join('') : `<tr><td colspan="6" class="empty">${studentLoadError ? `Öğrenciler yüklenemedi: ${escapeHtml(studentLoadError)}` : serverWorkspaceLoaded ? 'Bu ölçütlerde öğrenci bulunamadı.' : 'Öğrenci listesi yükleniyor…'}</td></tr>`;
 
     const gradeCount = state.students.length;
@@ -1457,6 +1460,27 @@
     });
     $('analyticsSubjectSelect')?.addEventListener('change', () => {
       renderAnalytics();
+    });
+    $('studentRows')?.addEventListener('click', event => {
+      const btn = event.target.closest('[data-send-motivation]');
+      if (!btn) return;
+      const studentId = btn.dataset.sendMotivation || '';
+      const studentName = btn.dataset.studentName || 'Öğrenci';
+      if (window.ZarifGamification && typeof window.ZarifGamification.sendMotivationPoints === 'function') {
+        window.ZarifGamification.sendMotivationPoints({ studentId, studentName, points: 20 });
+      }
+      btn.textContent = '✓ +20 XP Gönderildi';
+      btn.style.background = '#ecfdf5';
+      btn.style.borderColor = '#059669';
+      btn.style.color = '#065f46';
+      btn.disabled = true;
+      setTimeout(() => {
+        btn.textContent = '⚡ +20 Motivasyon';
+        btn.style.background = '#fffbeb';
+        btn.style.borderColor = '#d97706';
+        btn.style.color = '#92400e';
+        btn.disabled = false;
+      }, 2800);
     });
     if (window.ZarifStore && window.ZarifStore.events) {
       window.ZarifStore.events.subscribe('tests', renderAnalytics);

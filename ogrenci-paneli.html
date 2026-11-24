@@ -436,6 +436,13 @@ button,select{font:inherit}
 
   <!-- Ana içerik -->
   <main class="main">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 14px;margin-bottom:14px;border-radius:14px;background:linear-gradient(135deg,#FBF9F5,#f5ebe0);border:1px solid #e4cbb2;">
+      <div style="font-size:0.84rem;font-weight:700;color:#2c1a0e;">🎓 Öğrenci Çalışma Alanı</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div id="studentGamifyHeaderBar"></div>
+        <button type="button" onclick="showPanel('liderlik-tablosu', true)" style="padding:6px 12px;border-radius:999px;border:1px solid #C84B31;background:#fff;color:#C84B31;font-size:0.78rem;font-weight:700;cursor:pointer;">🏆 Başarılarım &amp; Lig</button>
+      </div>
+    </div>
     <p class="feed-status error" id="dashboardError" role="alert" hidden></p>
 
     <div id="gzStudentRoot" class="gz">
@@ -1111,9 +1118,12 @@ button,select{font:inherit}
     <!-- OYUNLAŞTIRMA: HAFTALIK LİDERLİK TABLOSU & SERTİFİKA -->
     <section class="panel-view" id="liderlik-tablosu" data-panel-view="liderlik-tablosu" hidden>
       <div class="section-head">
-        <h2>🏆 Haftalık Liderlik Ligi, Rozetler &amp; Başarı Sertifikası</h2>
-        <p class="hint">Çalışma serini koru, haftalık ligde zirveye tırman ve VIP başarı sertifikanı al.</p>
+        <h2>🏆 Başarılarım, Haftalık Liderlik Ligi &amp; Sertifika</h2>
+        <p class="hint">Seviyeni yükselt, rozet koleksiyonunu tamamla ve sınıf liginde zirveye tırman.</p>
       </div>
+
+      <!-- Seviye ve İlerleme Kartı -->
+      <div id="gamifyLevelProgressCard" style="margin-bottom:18px;"></div>
 
       <!-- Seri & Rozet Özeti -->
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:20px;">
@@ -1143,13 +1153,22 @@ button,select{font:inherit}
         </div>
       </div>
 
+      <!-- Rozet Koleksiyonu (Kazanılmış & Kilitli) -->
+      <div class="card" style="margin-bottom:18px;background:#FBF9F5;border:1px solid #e4cbb2;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+          <h3 style="margin:0;color:#2c1a0e;">🏅 Rozet Koleksiyonu</h3>
+          <small style="color:#6a5242;">Kilitli rozetlerin üzerine gelerek nasıl kazanıldığını görebilirsin</small>
+        </div>
+        <div id="gamifyBadgeCollection"></div>
+      </div>
+
       <!-- Liderlik Tablosu ve Sertifika 2'li Grid -->
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px;">
         <!-- Sol: Haftalık Liderlik Tablosu -->
         <div class="card" style="position:relative; overflow:hidden;">
           <h3 style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
             <span>🎖️ Haftalık Liderlik Sıralaması</span>
-            <span class="chip hot" style="font-size:11px;">Canlı Lig</span>
+            <span class="chip hot" id="leaderboardGradeTag" style="font-size:11px;">Canlı Lig</span>
           </h3>
 
           <div id="leaderboardLockOverlay" hidden style="position:absolute; inset:0; background:rgba(255,255,255,0.92); backdrop-filter:blur(3px); z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
@@ -2723,6 +2742,7 @@ button,select{font:inherit}
           renderStudentAiQuotaBadge(quotaData);
           studentUserPlan = quotaData.paketTipi || 'free';
           currentStudentName = quotaData.name || 'Öğrenci';
+          window.ZarifGamification?.syncFromServer(quotaData);
 
           if ($('gamifyStreakCount')) {
             $('gamifyStreakCount').textContent = `${quotaData.seriGunSayisi || 0} Gün`;
@@ -2764,30 +2784,17 @@ button,select{font:inherit}
           adaptAiCoachForPlan(studentUserPlan);
         }
 
-        const lbRes = await fetch('/api/leaderboard', { credentials: 'same-origin' });
+        const studentGrade = window.ZarifGamification?.getProfile?.().grade || '';
+        const lbUrl = studentGrade ? `/api/leaderboard?grade=${encodeURIComponent(studentGrade)}` : '/api/leaderboard';
+        const lbRes = await fetch(lbUrl, { credentials: 'same-origin' });
         if (lbRes.ok) {
           const lbData = await lbRes.json();
           const list = lbData.leaderboard || [];
-          const container = $('leaderboardList');
-          if (container) {
-            if (list.length === 0) {
-              container.innerHTML = '<p class="feed-status">Bu hafta henüz puan toplayan öğrenci yok.</p>';
-            } else {
-              container.innerHTML = list.map((item, idx) => {
-                const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `${item.sira}.`));
-                return `
-                  <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-radius:8px; background:${idx < 3 ? '#fffbeb' : '#f8fafc'}; border:1px solid ${idx < 3 ? '#fde68a' : '#e2e8f0'};">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                      <span style="font-weight:700; width:26px; text-align:center;">${medal}</span>
-                      <strong style="color:var(--text); font-size:0.9rem;">${esc(item.name)}</strong>
-                      <span class="chip" style="font-size:10px; padding:2px 6px;">${esc(item.mevcutLig || 'Bronz')}</span>
-                    </div>
-                    <strong style="color:#d97706; font-size:0.9rem;">${(item.haftalikPuan || 0).toLocaleString('tr-TR')} Puan</strong>
-                  </div>
-                `;
-              }).join('');
-            }
+          if (window.ZarifGamification && typeof window.ZarifGamification.renderLeaderboardRows === 'function') {
+            window.ZarifGamification.renderLeaderboardRows(list);
           }
+        } else if (window.ZarifGamification) {
+          window.ZarifGamification.renderLeaderboardRows([]);
         }
       } catch (err) {
         console.warn('Oyunlaştırma yüklenemedi:', err);
@@ -3149,6 +3156,7 @@ button,select{font:inherit}
     }
   </script>
 <script src="/assets/app-store.js?v=2"></script>
+<script src="/assets/gamification-service.js?v=1"></script>
 <script src="/assets/student-store-bridge.js?v=2"></script>
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/ogrenci-gelisim.js"></script>
