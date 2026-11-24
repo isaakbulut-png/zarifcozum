@@ -720,21 +720,25 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       'Yalnızca istenen JSON şemasına uyan JSON döndür; Markdown bloğu veya fazladan açıklama metni ekleme.'
     ].filter(Boolean).join('\n');
 
-    // Güvenli Ajan/Model Doğrulaması (İzin verilen modeller: flash-lite, flash, pro)
-    const ALLOWED_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-pro'];
-    const requestedModel = typeof req.body?.selectedModel === 'string' ? req.body.selectedModel.trim() : '';
-    let activeModel = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'gemini-2.5-flash';
+    // Güvenli Ajan/Model Doğrulaması (İzin verilen güncel modeller)
+    const ALLOWED_MODELS = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-pro', 'gemini-4-argon'];
+    let requestedModel = typeof req.body?.selectedModel === 'string' ? req.body.selectedModel.trim() : '';
+    if (requestedModel === 'gemini-2.5-flash') requestedModel = 'gemini-3.8-flash';
+    if (requestedModel === 'gemini-2.5-flash-lite') requestedModel = 'gemini-3.1-flash-lite';
+    let activeModel = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'gemini-3.8-flash';
 
-    // Model İzni Denetimi: gemini-2.5-pro sadece Admin ve İçerik Üreticisi öğretmenlere açıktır
-    if (activeModel === 'gemini-2.5-pro' && !canUserUseProModel(req.session.user)) {
-      activeModel = 'gemini-2.5-flash'; // Yetkisiz öğretmen otomatik flash modeline düşürülür
+    // Model İzni Denetimi: Pro modeller sadece Admin ve İçerik Üreticisi öğretmenlere açıktır
+    if ((activeModel === 'gemini-2.5-pro' || activeModel === 'gemini-4-argon') && !canUserUseProModel(req.session.user)) {
+      activeModel = 'gemini-3.8-flash'; // Yetkisiz öğretmen otomatik flash modeline düşürülür
     }
 
-    // Model zinciri: Öğretmenin seçtiği model öncelikli; gerekirse güvenli flash modellerine fallback
-    const candidateModels = [
+    // Model zinciri: Öğretmenin seçtiği model öncelikli; gerekirse güvenli güncel flash modellerine fallback
+    const candidateModels = [...new Set([
       activeModel,
-      ...(activeModel !== 'gemini-2.5-flash' ? ['gemini-2.5-flash'] : ['gemini-2.5-flash-lite', 'gemini-3.1-flash-lite'])
-    ].filter(Boolean);
+      'gemini-3.8-flash',
+      'gemini-flash-latest',
+      'gemini-3.1-flash-lite'
+    ])].filter(Boolean);
 
     let response = null;
     let lastError = null;
@@ -1296,7 +1300,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       const unit_topic = typeof req.body?.unit_topic === 'string' ? req.body.unit_topic.trim() : '';
       const sub_topic = typeof req.body?.sub_topic === 'string' ? req.body.sub_topic.trim() : '';
       const teacherNotes = typeof req.body?.teacherNotes === 'string' ? req.body.teacherNotes.trim() : '';
-      const activeModel = req.body?.model || 'gemini-2.5-flash';
+      const activeModel = req.body?.model || 'gemini-3.8-flash';
 
       if (!grade || grade < 5 || grade > 12 || !unit_topic || !sub_topic) {
         return res.status(400).json({ mesaj: 'Sınıf (5-12), tema ve alt konu seçimi zorunludur.' });

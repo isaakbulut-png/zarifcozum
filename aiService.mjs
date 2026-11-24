@@ -15,9 +15,16 @@ for (const dosya of ['.env', 'baglanti_adresi.env']) {
   if (fs.existsSync(envYolu)) dotenv.config({ path: envYolu, quiet: true });
 }
 
-// Model Router (Yönlendirici): İstek türüne göre uygun modeli seçer (Ekonomik ve hızlı flash modelleri)
-export const DISCOVERY_MODEL = process.env.AI_DISCOVERY_MODEL || 'gemini-2.5-flash';
-export const STANDARD_MODEL = process.env.AI_FLASH_MODEL || 'gemini-2.5-flash';
+// Model Router (Yönlendirici): Kullanımdan kalkan gemini-2.5-flash referanslarını otomatik gemini-3.8-flash'a yükseltir
+function sanitizeModelName(modelName) {
+  const raw = String(modelName || '').trim();
+  if (!raw || raw === 'gemini-2.5-flash') return 'gemini-3.8-flash';
+  if (raw === 'gemini-2.5-flash-lite') return 'gemini-3.1-flash-lite';
+  return raw;
+}
+
+export const DISCOVERY_MODEL = sanitizeModelName(process.env.AI_DISCOVERY_MODEL || 'gemini-3.8-flash');
+export const STANDARD_MODEL = sanitizeModelName(process.env.AI_FLASH_MODEL || 'gemini-3.8-flash');
 
 export function resolveAIModel(gorevTuru) {
   if (gorevTuru === 'discovery_game') {
@@ -545,10 +552,11 @@ export async function zarifCozumAIServisi(ogrenciMesaji, gorevTuru = 'ai_mentor'
     `;
   }
 
-  const ALLOWED_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-pro'];
+  const ALLOWED_MODELS = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-pro', 'gemini-4-argon'];
   let systemInstruction = "";
-  let selectedModel = (chosenModel && ALLOWED_MODELS.includes(chosenModel))
-    ? chosenModel
+  const normalizedChoice = chosenModel ? sanitizeModelName(chosenModel) : '';
+  let selectedModel = (normalizedChoice && ALLOWED_MODELS.includes(normalizedChoice))
+    ? normalizedChoice
     : resolveAIModel(gorevTuru);
 
   const maarifPedagojiTemeli = getMaarifPedagogyInstruction(grade);
@@ -827,7 +835,8 @@ export async function generateMaarifCurriculumContent({
   const themeCode = codeParts.length >= 3 ? codeParts.slice(0, 3).join('.') : `MAT.${g}.1`;
 
   const pedagogy = getMaarifPedagogyInstruction(g);
-  const modelName = activeModel || resolveAIModel('konu_anlatimi');
+  const primaryModel = sanitizeModelName(activeModel || resolveAIModel('konu_anlatimi'));
+  const candidateModels = [...new Set([primaryModel, 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'])];
 
   const prompt = `Sen MEB Türkiye Yüzyılı Maarif Modeli'ne %100 hâkim uzman bir ${g}. Sınıf ${ders} öğretmenisin.
 Aşağıdaki konu için öğrencilerin sıfır ek maliyetle çalışabileceği, 5 sayfalık derin, görsel (SVG) ve KaTeX formül destekli zengin konu anlatımı, pratik hap bilgiler ve etkileşimli bilgi kartları üret.
@@ -899,14 +908,34 @@ ${visualInstruction}
   ]
 }`;
 
-  const response = await aiClient.models.generateContent({
-    model: modelName,
-    contents: prompt,
-    config: {
-      responseMimeType: 'application/json',
-      temperature: 0.35
+  let response = null;
+  let modelName = primaryModel;
+  let lastErr = null;
+  for (const cand of candidateModels) {
+    try {
+      response = await aiClient.models.generateContent({
+        model: cand,
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          temperature: 0.35
+        }
+      });
+      modelName = cand;
+      break;
+    } catch (err) {
+      lastErr = err;
+      const msg = String(err?.message || '');
+      if (msg.includes('404') || msg.includes('NOT_FOUND') || msg.includes('no longer available')) {
+        console.warn(`[AI] Model ${cand} kullanılamıyor, sonraki modele geçiliyor…`);
+        continue;
+      }
+      throw err;
     }
-  });
+  }
+  if (!response) {
+    throw lastErr || new Error('Uygun Gemini modeli bulunamadı.');
+  }
 
   const rawText = (response.text || '').trim();
   let parsed = null;

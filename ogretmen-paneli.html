@@ -1238,9 +1238,9 @@ body.teacher-menu-open {
           </select>
           <label for="teacherAiModelSelect" style="font-weight:600;color:var(--color-text,#374151);margin-left:6px">Yapay Zeka Ajanı:</label>
           <select id="teacherAiModelSelect" style="padding:4px 10px;border-radius:6px;border:1px solid var(--color-border,#d1d5db);font-size:13px;font-weight:500;background:#fff">
-            <option value="gemini-2.5-flash-lite">⚡ Hızlı &amp; Ekonomik Ajan (Günlük Kullanım)</option>
-            <option value="gemini-2.5-flash" selected>🧠 Uzman Maarif Ajanı (Önerilen)</option>
-            <option value="gemini-2.5-pro">🚀 Derin Analiz Ajanı (Zorlu Yeni Nesil Sorular)</option>
+            <option value="gemini-3.1-flash-lite">⚡ Hızlı &amp; Ekonomik Ajan (Günlük Kullanım)</option>
+            <option value="gemini-3.8-flash" selected>🧠 Uzman Maarif Ajanı (Önerilen)</option>
+            <option value="gemini-4-argon">🚀 Derin Analiz Ajanı (Zorlu Yeni Nesil Sorular)</option>
           </select>
           <span style="color:#6b7280;margin-left:auto;font-size:12px" id="teacherAiRoleDesc">Sokratik yöntemle yönlendirici ipuçları ve SVG çizimleri</span>
         </div>
@@ -1733,9 +1733,9 @@ body.teacher-menu-open {
                       <div class="field">
                         <label for="aiModelSelect">Yapay Zeka Ajanı</label>
                         <select id="aiModelSelect" required style="font-weight:500">
-                          <option value="gemini-2.5-flash-lite">⚡ Hızlı &amp; Ekonomik Ajan (Günlük Kullanım)</option>
-                          <option value="gemini-2.5-flash" selected>🧠 Uzman Maarif Ajanı (Önerilen)</option>
-                          <option value="gemini-2.5-pro">🚀 Derin Analiz Ajanı (Zorlu Yeni Nesil Sorular)</option>
+                          <option value="gemini-3.1-flash-lite">⚡ Hızlı &amp; Ekonomik Ajan (Günlük Kullanım)</option>
+                          <option value="gemini-3.8-flash" selected>🧠 Uzman Maarif Ajanı (Önerilen)</option>
+                          <option value="gemini-4-argon">🚀 Derin Analiz Ajanı (Zorlu Yeni Nesil Sorular)</option>
                         </select>
                       </div>
                       <div class="field">
@@ -4732,7 +4732,7 @@ body.teacher-menu-open {
           questionType: $('aiQuestionType')?.value || 'open_ended',
           difficulty: $('aiDifficulty').value,
           count: Number($('aiCount').value),
-          selectedModel: $('aiModelSelect')?.value || 'gemini-2.5-flash'
+          selectedModel: $('aiModelSelect')?.value || 'gemini-3.8-flash'
         })
       });
       const quiz = res.quiz;
@@ -5416,7 +5416,7 @@ body.teacher-menu-open {
             ogrenciMesaji: text,
             gorevTuru: teacherActiveRole,
             grade: gradeVal ? Number(gradeVal) : undefined,
-            selectedModel: $('teacherAiModelSelect')?.value || 'gemini-2.5-flash'
+            selectedModel: $('teacherAiModelSelect')?.value || 'gemini-3.8-flash'
           })
         });
 
