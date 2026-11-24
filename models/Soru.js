@@ -41,7 +41,9 @@ const soruSchema = new mongoose.Schema({
   },
   draftId: { type: mongoose.Schema.Types.ObjectId, ref: 'AiQuestionDraft', default: null },
   pineconeId: { type: String, default: null },
-  createdBy: { type: String, default: 'system', maxlength: 60 }
+  createdBy: { type: String, default: 'system', maxlength: 60 },
+  copyrightOwner: { type: String, default: 'ZarifÇözüm', immutable: true },
+  license: { type: String, default: 'All Rights Reserved', immutable: true }
 }, { timestamps: true, collection: 'sorular' });
 
 // Otomatik seçenek ve zorluk eşleme

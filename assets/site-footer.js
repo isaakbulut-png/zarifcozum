@@ -60,8 +60,8 @@
         </nav>
       </div>
       <div class="site-footer-bottom">
-        <span>© ${new Date().getFullYear()} ZarifÇözüm. Tüm hakları saklıdır.</span>
-        <a href="/yasal.html#kvkk-aydinlatma">Kişisel veriler ve gizlilik</a>
+        <span>© ${new Date().getFullYear()} ZarifÇözüm. Tüm hakları saklıdır. Platformdaki tüm soru, test, görsel ve yapay zekâ destekli özgün eğitim içerikleri 5846 sayılı FSEK kapsamında ZarifÇözüm'e aittir; izinsiz çoğaltılamaz.</span>
+        <a href="/yasal.html#art-07">Telif Hakları (5846 FSEK) &amp; KVKK</a>
       </div>
     </div>`;
 

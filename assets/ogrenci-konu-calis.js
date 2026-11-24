@@ -548,6 +548,7 @@
         </div>
 
         ${renderReferencePagesHtml(t.referenceBookPages)}
+        ${window.ZarifCopyright ? window.ZarifCopyright.stampHtml(`${t.id || 'KC'}_P${readerState.pageIdx + 1}`) : ''}
 
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px;">
           <button type="button" id="kcPrevPageBtn" ${readerState.pageIdx <= 0 ? 'disabled' : ''} style="padding:8px 16px;border-radius:9px;border:1.5px solid #dccab8;background:#fff;color:#2c1a0e;font-weight:600;cursor:pointer;opacity:${readerState.pageIdx <= 0 ? '0.45' : '1'};">← Önceki Sayfa</button>

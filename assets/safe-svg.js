@@ -151,7 +151,31 @@
       node.children.forEach(child => element.append(create(child)));
       return element;
     }
-    target.replaceChildren(create(data));
+    const svgEl = create(data);
+    // ZarifÇözüm SVG Telif Metadata ve Silik Vektörel Filigran Katmanı
+    try {
+      const meta = document.createElementNS(namespace, 'metadata');
+      meta.textContent = '© 2026 ZarifCozum. Tüm hakları saklıdır.';
+      svgEl.prepend(meta);
+
+      const vb = String(data.attrs?.viewBox || '0 0 420 200').trim().split(/[\s,]+/).map(Number);
+      const cx = (vb[0] || 0) + ((vb[2] || 420) / 2);
+      const cy = (vb[1] || 0) + ((vb[3] || 200) / 2);
+      const wm = document.createElementNS(namespace, 'text');
+      wm.setAttribute('x', String(Math.round(cx)));
+      wm.setAttribute('y', String(Math.round(cy)));
+      wm.setAttribute('text-anchor', 'middle');
+      wm.setAttribute('font-family', 'Georgia, serif');
+      wm.setAttribute('font-size', String(Math.max(14, Math.round((vb[2] || 420) / 16))));
+      wm.setAttribute('font-weight', '700');
+      wm.setAttribute('fill', '#3E2F26');
+      wm.setAttribute('opacity', '0.06');
+      wm.setAttribute('pointer-events', 'none');
+      wm.setAttribute('transform', `rotate(-22 ${Math.round(cx)} ${Math.round(cy)})`);
+      wm.textContent = '© ZarifÇözüm';
+      svgEl.append(wm);
+    } catch {}
+    target.replaceChildren(svgEl);
   }
 
   return {validate, parse, render, sanitizeSvgText};

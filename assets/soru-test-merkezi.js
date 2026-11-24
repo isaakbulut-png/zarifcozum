@@ -467,13 +467,17 @@
         { criterion: 'Sonucu doğru birim ve net ifadeyle yazma', points: 20 }
       ];
 
+      const qCodeId = q.id || q._id || `${pub.id || 'OE'}_${idx + 1}`;
+      const wmHtml = window.ZarifCopyright ? window.ZarifCopyright.watermarkHtml() : '';
+      const stampHtml = window.ZarifCopyright ? window.ZarifCopyright.stampHtml(qCodeId) : '';
       modal.innerHTML = `
-        <div class="stm-tf-card" style="max-width:640px;">
-          <div style="padding:14px 20px;background:#3E2F26;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <div class="stm-tf-card zc-protected-surface" style="max-width:640px;">
+          ${wmHtml}
+          <div style="padding:14px 20px;background:#3E2F26;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;position:relative;z-index:3;">
             <strong>✍️ ${esc(pub.workTypeLabel || 'Açık Uçlu & Rubrikli Senaryo')} (${idx + 1}/${questions.length})</strong>
             <button type="button" id="stmOeClose" style="background:rgba(255,255,255,0.16);border:none;color:#fff;width:30px;height:30px;border-radius:8px;cursor:pointer;">×</button>
           </div>
-          <div style="padding:20px;max-height:78vh;overflow-y:auto;">
+          <div style="padding:20px;max-height:78vh;overflow-y:auto;position:relative;z-index:3;">
             <div style="font-size:0.95rem;font-weight:600;color:#3E2F26;line-height:1.65;white-space:pre-wrap;margin-bottom:14px;">${fmtMath(q.text || q.question || '')}</div>
             <label style="display:block;font-size:0.82rem;font-weight:700;color:#3E2F26;margin-bottom:6px;">Çözüm Adımların ve Gerekçen:</label>
             <textarea id="stmOeInput" rows="4" placeholder="Çözüm adımlarını ve matematiksel gerekçeni buraya yaz…" style="width:100%;padding:11px 13px;border-radius:10px;border:1.5px solid #dfd3c5;background:#fff;font-family:inherit;font-size:0.9rem;box-sizing:border-box;"></textarea>
@@ -494,6 +498,7 @@
               </div>
               <button type="button" id="stmOeNext" class="stm-hero-btn">${idx + 1 < questions.length ? 'Sonraki Senaryo →' : 'Değerlendirmeyi Kaydet ✓'}</button>
             </div>
+            ${stampHtml}
           </div>
         </div>
       `;
@@ -561,13 +566,17 @@
 
       const q = questions[idx];
       const opts = q.options && typeof q.options === 'object' ? Object.entries(q.options) : [];
+      const qCodeId = q.id || q._id || `${pub.id || 'QZ'}_${idx + 1}`;
+      const wmHtml = window.ZarifCopyright ? window.ZarifCopyright.watermarkHtml() : '';
+      const stampHtml = window.ZarifCopyright ? window.ZarifCopyright.stampHtml(qCodeId) : '';
       modal.innerHTML = `
-        <div class="stm-tf-card" style="max-width:620px;">
-          <div style="padding:14px 20px;background:#3E2F26;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <div class="stm-tf-card zc-protected-surface" style="max-width:620px;">
+          ${wmHtml}
+          <div style="padding:14px 20px;background:#3E2F26;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;position:relative;z-index:3;">
             <strong style="font-size:0.95rem;">${esc(pub.workTypeLabel || 'Onaylı Çalışma')} (${idx + 1}/${questions.length})</strong>
             <button type="button" id="stmPubClose" style="background:rgba(255,255,255,0.16);border:none;color:#fff;width:30px;height:30px;border-radius:8px;cursor:pointer;">×</button>
           </div>
-          <div style="padding:20px;max-height:78vh;overflow-y:auto;">
+          <div style="padding:20px;max-height:78vh;overflow-y:auto;position:relative;z-index:3;">
             <div style="font-size:0.96rem;font-weight:600;color:#3E2F26;line-height:1.6;margin-bottom:14px;">${fmtMath(q.text || q.question || '')}</div>
             <div style="display:grid;gap:8px;">
               ${opts.map(([k, v]) => `
@@ -577,6 +586,7 @@
               `).join('')}
             </div>
             <div id="stmPubFeedback" style="margin-top:12px;font-size:0.86rem;"></div>
+            ${stampHtml}
           </div>
         </div>
       `;
