@@ -453,7 +453,9 @@ app.get('/api/health', (req, res) => {
     uptime: Math.round(process.uptime()),
     timestamp: Date.now(),
     nodeVersion: process.version,
-    memoryUsage: Math.round(process.memoryUsage().rss / (1024 * 1024))
+    memoryUsage: Math.round(process.memoryUsage().rss / (1024 * 1024)),
+    redis: redisClient ? (redisClient.isReady ? 'connected' : 'connecting') : 'not_configured',
+    redisReady: Boolean(redisClient?.isReady)
   });
 });
 app.get('/api/announcement-banner', async (req, res) => {
