@@ -667,6 +667,11 @@
       <svg viewBox="0 0 24 24" style="stroke:#fb923c"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg>
       <span class="nav-text">Yayınlanan Konular</span>
     </button>
+    <button class="nav-btn" type="button" data-view="contact-requests" data-admin-roles="superadmin,support,editor">
+      <svg viewBox="0 0 24 24" style="stroke:#f59e0b"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span class="nav-text">İletişim Talepleri</span>
+      <span class="nav-badge" id="contactRequestsBadge" style="display:none;background:#dc2626;color:#fff;font-weight:700;">0</span>
+    </button>
 
     <!-- YAPAY ZEKÂ & ASİSTAN -->
     <div class="nav-title" data-admin-roles="superadmin,editor">Yapay Zekâ & Asistan</div>
@@ -1326,6 +1331,44 @@
             </thead>
             <tbody id="adminTopicsTbody">
               <tr><td colspan="6" style="text-align:center;padding:24px;color:#6a5242;">Yayınlanan konular yükleniyor…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9C. İLETİŞİM & DESTEK TALEPLERİ (ZarifStore.contacts) -->
+    <section id="view-contact-requests" hidden>
+      <div class="panel" style="margin-top:0">
+        <div class="toolbar" style="justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h3>✉️ İletişim &amp; Destek Talepleri</h3>
+            <p id="adminContactsSummary" style="margin:2px 0 0;font-size:0.85rem;color:#6a5242">İletişim formundan gelen ziyaretçi, öğrenci ve veli mesajları</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input type="search" id="adminContactsSearch" placeholder="Ad, e-posta, konu veya mesaj ara…" style="padding:7px 11px;border:1px solid #dccab8;border-radius:8px;font-size:0.85rem;min-width:220px;">
+            <select id="adminContactsStatus" style="padding:7px 10px;border:1px solid #dccab8;border-radius:8px;font-size:0.85rem;">
+              <option value="all">Tüm Durumlar</option>
+              <option value="new">Okunmamış</option>
+              <option value="read">Okundu</option>
+              <option value="replied">Dönüş Yapıldı</option>
+            </select>
+            <button class="btn sm primary" type="button" id="adminContactsRefresh">↻ Yenile</button>
+          </div>
+        </div>
+        <div class="table-wrap" style="margin-top:12px;overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th>Gönderen</th>
+                <th>Konu &amp; Mesaj</th>
+                <th>Durum</th>
+                <th>Tarih</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="adminContactsTbody">
+              <tr><td colspan="5" style="text-align:center;padding:24px;color:#6a5242;">Talepler yükleniyor…</td></tr>
             </tbody>
           </table>
         </div>
@@ -5021,7 +5064,9 @@
       initializePanel();
     })();
   </script>
+  <script src="/assets/app-store.js"></script>
   <script src="/assets/admin-topics-manage.js" defer></script>
+  <script src="/assets/admin-contacts.js" defer></script>
   <script src="/assets/breadcrumb.js"></script>
 </body>
 </html>

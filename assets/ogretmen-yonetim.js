@@ -396,30 +396,275 @@
     </article>`).join('') : '<p class="dashboard-empty">Henüz doküman bağlantısı eklenmedi.</p>';
   }
 
+  let analyticsTrendChart = null;
+  let analyticsDistChart = null;
+
+  const ANALYTICS_TOPIC_OPTIONS = [
+    'Oran ve Orantı',
+    'Cebirsel İfadeler',
+    'Doğrusal Denklemler',
+    'Rasyonel Sayılar',
+    'Kesirlerle İşlemler',
+    'Doğrular ve Açılar',
+    'Üslü İfadeler',
+    'Kareköklü İfadeler',
+    'Yüzdeler ve Problemler',
+    'Veri Analizi'
+  ];
+
+  const ANALYTICS_MOCK_RESULTS = [
+    { studentName: 'Zeynep Kaya', grade: 7, testTitle: 'Oran ve Orantı Mini Test', topicTitle: 'Oran ve Orantı', score: 48, weekIndex: 0 },
+    { studentName: 'Kerem Yılmaz', grade: 7, testTitle: 'Cebirsel İfadeler Kazanım Testi', topicTitle: 'Cebirsel İfadeler', score: 54, weekIndex: 1 },
+    { studentName: 'Elif Demir', grade: 8, testTitle: 'Doğrusal Denklemler Tarama', topicTitle: 'Doğrusal Denklemler', score: 56, weekIndex: 2 },
+    { studentName: 'Mert Arslan', grade: 7, testTitle: 'Rasyonel Sayılar Pratik', topicTitle: 'Rasyonel Sayılar', score: 68, weekIndex: 2 },
+    { studentName: 'Defne Aydın', grade: 7, testTitle: 'Doğrular ve Açılar Değerlendirme', topicTitle: 'Doğrular ve Açılar', score: 88, weekIndex: 3 },
+    { studentName: 'Emir Şahin', grade: 8, testTitle: 'Üslü İfadeler Deneme', topicTitle: 'Üslü İfadeler', score: 76, weekIndex: 4 },
+    { studentName: 'Azra Çelik', grade: 7, testTitle: 'Oran ve Orantı Tekrar Testi', topicTitle: 'Oran ve Orantı', score: 62, weekIndex: 4 },
+    { studentName: 'Yusuf Koç', grade: 8, testTitle: 'Veri Analizi & Grafikler', topicTitle: 'Veri Analizi', score: 92, weekIndex: 5 }
+  ];
+
+  function renderAssignedTasksFeed() {
+    const feed = $('assignedTasksFeed');
+    if (!feed || !window.ZarifStore || !window.ZarifStore.assignments) return;
+    const assigned = window.ZarifStore.assignments.list().slice(0, 5);
+    if (!assigned.length) {
+      feed.innerHTML = '';
+      return;
+    }
+    feed.innerHTML = `
+      <div style="border-top:1px dashed #e2cdb8;padding-top:10px;">
+        <div style="font-size:12px;font-weight:700;color:#6a5242;margin-bottom:6px;">📌 Öğrenci Paneline Gönderilen Son Çalışmalar (${assigned.length})</div>
+        <div style="display:grid;gap:6px;">
+          ${assigned.map(a => `
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:9px;background:#fff;border:1px solid #ead8c5;font-size:12.5px;">
+              <div>
+                <strong style="color:#2c1a0e;">${escapeHtml(a.studentName)}</strong>
+                <span style="color:#c2570c;font-weight:600;"> · ${escapeHtml(a.topicTitle)}</span>
+              </div>
+              <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:${a.status === 'completed' ? '#ecfdf5' : '#fef3c7'};color:${a.status === 'completed' ? '#065f46' : '#92400e'};">
+                ${a.status === 'completed' ? '✓ Tamamlandı' : '⏳ Bekliyor'}
+              </span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
   function renderAnalytics() {
-    const results = [...(management.sonuclar || [])].filter(result =>
+    const serverResults = [...(management.sonuclar || [])].filter(result =>
       result.score !== null && result.score !== undefined && Number.isFinite(Number(result.score))
-    );
+    ).map(r => ({
+      studentName: r.studentName || 'Öğrenci',
+      grade: Number(r.grade) || 7,
+      testTitle: r.testTitle || 'Matematik Testi',
+      topicTitle: r.topicTitle || r.topic || r.testTitle || 'Genel Matematik',
+      score: Math.max(0, Math.min(100, Number(r.score))),
+      createdAt: r.submittedAt || r.createdAt || new Date().toISOString()
+    }));
+
+    const storeResults = (window.ZarifStore && window.ZarifStore.tests)
+      ? window.ZarifStore.tests.list().map(r => ({
+          studentName: r.studentName || 'Öğrenci',
+          grade: Number(r.grade) || 7,
+          testTitle: r.topicTitle || 'Mini Test',
+          topicTitle: r.topicTitle || 'Genel Matematik',
+          score: Math.max(0, Math.min(100, Number(r.score))),
+          createdAt: r.createdAt
+        }))
+      : [];
+
+    const combined = [...storeResults, ...serverResults];
+    const isMock = combined.length === 0;
+    const results = isMock ? ANALYTICS_MOCK_RESULTS : combined;
+
+    const mockBadge = $('analyticsMockBadge');
+    if (mockBadge) mockBadge.hidden = !isMock;
+
     const scores = results.map(result => Number(result.score));
-    const average = scores.length ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : null;
+    const average = scores.length ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : 0;
     const passed = scores.filter(score => score >= 60).length;
+    const passRate = scores.length ? Math.round(passed * 100 / scores.length) : 0;
+    const needSupport = scores.filter(score => score < 60).length;
+
+    // 4'lü Özet Kartları (Lucide ikonlarıyla)
     $('analyticsSummary').innerHTML = [
-      [average === null ? '—' : `%${average}`, 'Test puanı ortalaması'],
-      [results.length, 'Puanlanan test sonucu'],
-      [scores.length ? `%${Math.round(passed * 100 / scores.length)}` : '—', 'Başarı oranı (%60 ve üzeri)']
-    ].map(([value, label]) => `<div><strong>${escapeHtml(value)}</strong><span>${escapeHtml(label)}</span></div>`).join('');
+      { value: `%${average}`, label: 'Genel Başarı Ortalaması', icon: 'trending-up', accent: '#c2570c', bg: '#fff4eb' },
+      { value: String(results.length), label: 'Değerlendirilen Test', icon: 'clipboard-check', accent: '#2c1a0e', bg: '#f5ebe0' },
+      { value: `%${passRate}`, label: 'Başarı Oranı (%60+)', icon: 'award', accent: '#2f6f4e', bg: '#ecf7f0' },
+      { value: String(needSupport), label: 'Destek Gereken (%60 Altı)', icon: 'alert-triangle', accent: '#b91c1c', bg: '#fef2f2' }
+    ].map(card => `
+      <div style="background:#fffaf5;border:1px solid #ead8c5;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:11px;background:${card.bg};color:${card.accent};display:grid;place-items:center;flex-shrink:0;">
+          <i data-lucide="${card.icon}" style="width:20px;height:20px;"></i>
+        </div>
+        <div>
+          <strong style="display:block;font-size:1.35rem;line-height:1.15;color:#2c1a0e;">${escapeHtml(card.value)}</strong>
+          <span style="font-size:0.78rem;color:#6a5242;">${escapeHtml(card.label)}</span>
+        </div>
+      </div>
+    `).join('');
 
-    $('scoreChart').innerHTML = results.length ? results.slice(0, 8).map(result => {
-      const score = Math.max(0, Math.min(100, Number(result.score)));
-      return `<div class="score-row"><span title="${escapeHtml(result.testTitle)}">${escapeHtml(result.studentName || 'Öğrenci')}</span>
-        <div class="score-track"><div class="score-fill" style="width:${score}%"></div></div><strong>%${score}</strong></div>`;
-    }).join('') : '<p class="dashboard-empty">Henüz puanlanmış test sonucu yok.</p>';
+    // En Çok Zorlanılan Konular (konu bazlı gruplama)
+    const topicMap = {};
+    results.forEach(r => {
+      const key = r.topicTitle || r.testTitle || 'Genel Matematik';
+      if (!topicMap[key]) topicMap[key] = { title: key, sum: 0, count: 0 };
+      topicMap[key].sum += Number(r.score) || 0;
+      topicMap[key].count += 1;
+    });
+    const topicList = Object.values(topicMap)
+      .map(t => ({ title: t.title, avg: Math.round(t.sum / t.count), count: t.count }))
+      .sort((a, b) => a.avg - b.avg)
+      .slice(0, 6);
 
+    $('scoreChart').innerHTML = topicList.map(topic => {
+      const barColor = topic.avg < 60 ? '#c2570c' : (topic.avg < 80 ? '#b88a28' : '#587760');
+      return `<div class="score-row">
+        <span title="${escapeHtml(topic.title)} (${topic.count} test)">${escapeHtml(topic.title)}</span>
+        <div class="score-track"><div class="score-fill" style="width:${topic.avg}%;background:${barColor};"></div></div>
+        <strong>%${topic.avg}</strong>
+      </div>`;
+    }).join('');
+
+    // %60 Altı Hedefli Çalışma Önerileri (Konu Seç + Çalışma Ata)
     const recommendations = results.filter(result => Number(result.score) < 60).slice(0, 8);
-    $('recommendationList').innerHTML = recommendations.length ? recommendations.map(result => `<div class="dashboard-item">
-      <div><strong>${escapeHtml(result.studentName || 'Öğrenci')} · %${Number(result.score)}</strong><small>${escapeHtml(result.testTitle || 'Test')}</small></div>
-      <button type="button" class="recommendation-action" data-recommend="${escapeHtml(result.studentName || '')}">Çalışma ata</button>
-    </div>`).join('') : '<p class="dashboard-empty">Şu an %60 altında puanlanan test sonucu yok.</p>';
+    $('recommendationList').innerHTML = recommendations.length ? recommendations.map((result, idx) => {
+      const currentTopic = result.topicTitle || 'Oran ve Orantı';
+      const options = Array.from(new Set([currentTopic, ...ANALYTICS_TOPIC_OPTIONS]));
+      return `<div class="dashboard-item" style="flex-direction:column;align-items:stretch;gap:8px;padding:12px;border-radius:12px;background:#fff;border:1px solid #ead8c5;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div>
+            <strong style="color:#2c1a0e;">${escapeHtml(result.studentName || 'Öğrenci')}</strong>
+            <span style="margin-left:6px;padding:2px 7px;border-radius:999px;background:#fef2f2;color:#b91c1c;font-size:11.5px;font-weight:700;">%${Number(result.score)}</span>
+            <small style="display:block;color:#6a5242;margin-top:2px;">${escapeHtml(result.testTitle || 'Matematik Testi')}</small>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <select id="recTopic_${idx}" aria-label="Konu seç" style="flex:1;min-width:165px;padding:6px 9px;border-radius:8px;border:1px solid #dccab8;background:#fffaf5;font-size:12.5px;color:#2c1a0e;">
+            ${options.map(opt => `<option value="${escapeHtml(opt)}" ${opt === currentTopic ? 'selected' : ''}>${escapeHtml(opt)}</option>`).join('')}
+          </select>
+          <button type="button" class="recommendation-action"
+            data-quick-assign="true"
+            data-select-id="recTopic_${idx}"
+            data-student="${escapeHtml(result.studentName || 'Öğrenci')}"
+            data-grade="${Number(result.grade) || 7}"
+            data-test="${escapeHtml(result.testTitle || 'Matematik Testi')}"
+            data-score="${Number(result.score)}"
+            style="padding:7px 12px;border-radius:8px;border:none;background:#c2570c;color:#fff;font-weight:700;font-size:12.5px;white-space:nowrap;">
+            📌 Çalışma Ata
+          </button>
+        </div>
+      </div>`;
+    }).join('') : '<p class="dashboard-empty">Harika! Şu an %60 altında puanlanan test sonucu yok.</p>';
+
+    // Quick-assign click handlers
+    $('recommendationList').querySelectorAll('[data-quick-assign]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const selectEl = $(btn.dataset.selectId);
+        const topicTitle = selectEl ? selectEl.value : 'Matematik Tekrarı';
+        const studentName = btn.dataset.student || 'Öğrenci';
+        const grade = Number(btn.dataset.grade) || 7;
+        const sourceTestTitle = btn.dataset.test || '';
+        const scoreAtAssign = Number(btn.dataset.score);
+
+        if (window.ZarifStore && window.ZarifStore.assignments) {
+          window.ZarifStore.assignments.add({
+            studentName,
+            grade,
+            topicTitle,
+            sourceTestTitle,
+            scoreAtAssign: Number.isFinite(scoreAtAssign) ? scoreAtAssign : null,
+            note: `${sourceTestTitle} (%${scoreAtAssign}) sonucuna göre öğretmen tarafından hedefli tekrar çalışması atandı.`
+          });
+        }
+        btn.textContent = '✓ Öğrenci Paneline Atandı';
+        btn.style.background = '#2f6f4e';
+        btn.disabled = true;
+        renderAssignedTasksFeed();
+      });
+    });
+
+    renderAssignedTasksFeed();
+
+    // Chart.js: Trend Çizgi Grafiği & Puan Dağılımı Grafiği
+    if (typeof window.Chart === 'function') {
+      const trendCanvas = $('analyticsTrendCanvas');
+      const distCanvas = $('analyticsDistCanvas');
+
+      if (trendCanvas) {
+        if (analyticsTrendChart) analyticsTrendChart.destroy();
+        let trendLabels = ['Hafta 1', 'Hafta 2', 'Hafta 3', 'Hafta 4', 'Hafta 5', 'Hafta 6'];
+        let trendValues = [54, 60, 65, 71, 76, 82];
+        if (!isMock && window.ZarifStore && window.ZarifStore.tests) {
+          const weekly = window.ZarifStore.tests.getWeeklyTrend(6);
+          const hasWeekly = weekly.some(w => w.count > 0);
+          if (hasWeekly) {
+            trendLabels = weekly.map(w => w.label);
+            trendValues = weekly.map(w => w.avgScore);
+          }
+        }
+        analyticsTrendChart = new window.Chart(trendCanvas.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: trendLabels,
+            datasets: [{
+              label: 'Ortalama Puan (%)',
+              data: trendValues,
+              borderColor: '#c2570c',
+              backgroundColor: 'rgba(194, 87, 12, 0.14)',
+              fill: true,
+              tension: 0.35,
+              pointBackgroundColor: '#2c1a0e',
+              pointRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { min: 0, max: 100, ticks: { callback: v => `%${v}` } }
+            }
+          }
+        });
+      }
+
+      if (distCanvas) {
+        if (analyticsDistChart) analyticsDistChart.destroy();
+        const buckets = [0, 0, 0, 0]; // 0-59, 60-74, 75-89, 90-100
+        scores.forEach(s => {
+          if (s < 60) buckets[0] += 1;
+          else if (s < 75) buckets[1] += 1;
+          else if (s < 90) buckets[2] += 1;
+          else buckets[3] += 1;
+        });
+        analyticsDistChart = new window.Chart(distCanvas.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: ['0–59 (Destek)', '60–74 (Gelişiyor)', '75–89 (İyi)', '90–100 (Mükemmel)'],
+            datasets: [{
+              label: 'Test Sayısı',
+              data: buckets,
+              backgroundColor: ['#c2570c', '#d99b26', '#7a987f', '#2f6f4e'],
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
+          }
+        });
+      }
+    }
+
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
   }
 
   function withinCurrentWeek(value) {
@@ -1120,6 +1365,10 @@
       observed.forEach(section => observer.observe(section));
     }
     wireServerWorkspace();
+    if (window.ZarifStore && window.ZarifStore.events) {
+      window.ZarifStore.events.subscribe('tests', renderAnalytics);
+      window.ZarifStore.events.subscribe('assignments', renderAssignedTasksFeed);
+    }
   }
 
   window.addEventListener('teacher-dashboard:data', event => {

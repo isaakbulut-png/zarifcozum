@@ -78,6 +78,7 @@ h2{font:600 24px Georgia,serif;margin:0 0 10px}
 <footer class="wrap footer">Zarif Çözüm · Her adımda daha güçlü öğrenme. Bu mini test örnek çalışma içeriğidir.</footer>
 
 <script src="../assets/breadcrumb.js"></script>
+<script src="/assets/app-store.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/assets/ai-chat.js"></script>
 <script>
@@ -213,10 +214,21 @@ h2{font:600 24px Georgia,serif;margin:0 0 10px}
   function showResult() {
     document.getElementById('scoreText').textContent = `${correct} / ${questions.length} doğru`;
     document.getElementById('scoreMsg').textContent = correct === questions.length
-      ? 'Harika! Oran ve orantı konusunu çok iyi kavramışsın.'
+      ? 'Harika! Oran ve orantı konusunu çok iyi kavramışsın. Sonucun Başarı Analizine kaydedildi.'
       : correct >= 3
-        ? 'Güzel gidiyorsun. Yanlış yaptığın soruların çözümünü tekrar oku.'
-        : 'Anlatımı bir kez daha oku ve testi yeniden çözmeyi dene.';
+        ? 'Güzel gidiyorsun. Yanlış yaptığın soruların çözümünü tekrar oku. Sonucun Başarı Analizine kaydedildi.'
+        : 'Anlatımı bir kez daha oku ve testi yeniden çözmeyi dene. Sonucun Başarı Analizine kaydedildi.';
+    if (window.ZarifStore && window.ZarifStore.tests) {
+      window.ZarifStore.tests.recordResult({
+        topicKey: 'oran-ve-oranti',
+        topicTitle: 'Oran ve orantı',
+        grade: 7,
+        source: 'mini-test',
+        total: questions.length,
+        correct: correct,
+        wrong: questions.length - correct
+      });
+    }
     result.hidden = false;
     result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }

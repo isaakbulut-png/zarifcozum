@@ -131,9 +131,9 @@ h1 em{color:var(--gold);font-style:normal}
 <section class="section">
   <div class="grid grid-2">
     <article class="card">
-      <div class="row"><h3 style="margin:0">Konu bazlı başarı</h3><span class="tag">ÖRNEK GÖSTERİM</span></div>
-      <p style="margin-top:6px">Matematik · 7. sınıf</p>
-      <div class="topics">
+      <div class="row"><h3 style="margin:0">Konu bazlı başarı</h3><span class="tag" id="bosDataTag">ÖRNEK GÖSTERİM</span></div>
+      <p style="margin-top:6px" id="bosSubtitle">Matematik · 7. sınıf</p>
+      <div class="topics" id="bosTopicsList">
         <div><div class="row"><small>Doğrular ve açılar</small><small>90%</small></div><div class="bar"><i class="ok" style="width:90%"></i></div></div>
         <div><div class="row"><small>Rasyonel sayılar</small><small>68%</small></div><div class="bar"><i style="width:68%"></i></div></div>
         <div><div class="row"><small>Oran ve orantı</small><small>54%</small></div><div class="bar"><i class="low" style="width:54%"></i></div></div>
@@ -145,7 +145,7 @@ h1 em{color:var(--gold);font-style:normal}
       <span class="tag">SONRAKİ ADIM</span>
       <h3 style="margin-top:11px">Sadece puan değil, yol haritası</h3>
       <p>Sistem, hangi konuda ne kadar ilerlediğini gösterir ve bir sonraki çalışma adımını önerir. Böylece zamanını en çok ihtiyaç duyduğun konuya ayırırsın.</p>
-      <div class="callout"><b>Öneri:</b> Oran ve orantı konusunu gözden geçir, ardından 5 soruluk mini testi çöz.</div>
+      <div class="callout" id="bosCallout"><b>Öneri:</b> Oran ve orantı konusunu gözden geçir, ardından 5 soruluk mini testi çöz.</div>
       <p style="margin-top:14px"><a class="btn secondary" href="/pages/ilerlemeni-takip-et-tanitim.html">İlerleme tanıtımını gör →</a></p>
     </article>
   </div>
@@ -178,6 +178,43 @@ h1 em{color:var(--gold);font-style:normal}
 
 </main>
 <footer class="wrap footer"><div><strong>Zarif Çözüm</strong><br>Matematiği anla, başarıyla çöz.</div><a href="#top">Başa dön ↑</a></footer>
+<script src="/assets/app-store.js"></script>
+<script>
+(() => {
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function renderLiveProgress() {
+    if (!window.ZarifStore || !window.ZarifStore.tests) return;
+    const summary = window.ZarifStore.tests.getTopicSummary();
+    if (!summary.topics.length) return;
+
+    const tag = document.getElementById('bosDataTag');
+    const sub = document.getElementById('bosSubtitle');
+    const list = document.getElementById('bosTopicsList');
+    const callout = document.getElementById('bosCallout');
+
+    if (tag) {
+      tag.textContent = 'CANLI VERİN';
+      tag.style.background = '#e8f1ea';
+      tag.style.color = '#2f6f4e';
+    }
+    const stats = window.ZarifStore.tests.getStats();
+    if (sub) {
+      sub.textContent = `Matematik · ${stats.totalTests} tamamlanan test · Ortalama %${stats.avgScore}`;
+    }
+    if (list) {
+      list.innerHTML = summary.topics.slice(0, 6).map(t => {
+        const cls = t.status === 'strong' ? 'ok' : (t.status === 'review' ? 'low' : '');
+        return `<div><div class="row"><small>${esc(t.topicTitle)} (${t.attempts} test)</small><small>${t.avgScore}%</small></div><div class="bar"><i class="${cls}" style="width:${t.avgScore}%"></i></div></div>`;
+      }).join('');
+    }
+    if (callout) {
+      callout.innerHTML = `<b>Kişisel Öneri:</b> ${esc(summary.recommendation)}`;
+    }
+  }
+  renderLiveProgress();
+  window.ZarifStore?.events.subscribe('tests', renderLiveProgress);
+})();
+</script>
 <script src="/assets/breadcrumb.js"></script>
   <script src="/assets/site-media-targets.js"></script>
   <script src="/assets/site-media.js"></script>

@@ -503,11 +503,32 @@
   </div>
 </footer>
 
+<script src="/assets/app-store.js"></script>
 <script>
   document.getElementById('contactForm')?.addEventListener('submit', function (e) {
     e.preventDefault();
     const alertBox = document.getElementById('contactSuccessAlert');
     const submitBtn = document.getElementById('btnSubmitContact');
+    const nameEl = document.getElementById('contactFullName');
+    const emailEl = document.getElementById('contactEmail');
+    const phoneEl = document.getElementById('contactPhone');
+    const subjectEl = document.getElementById('contactSubject');
+    const messageEl = document.getElementById('contactMessage');
+
+    const subjectText = subjectEl && subjectEl.selectedIndex >= 0
+      ? subjectEl.options[subjectEl.selectedIndex].text
+      : (subjectEl ? subjectEl.value : 'Genel Destek');
+
+    if (window.ZarifStore && window.ZarifStore.contacts) {
+      window.ZarifStore.contacts.add({
+        name: nameEl ? nameEl.value : '',
+        email: emailEl ? emailEl.value : '',
+        phone: phoneEl ? phoneEl.value : '',
+        subject: subjectText,
+        message: messageEl ? messageEl.value : ''
+      });
+    }
+
     if (submitBtn) submitBtn.disabled = true;
     if (alertBox) alertBox.style.display = 'block';
     this.reset();

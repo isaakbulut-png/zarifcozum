@@ -902,6 +902,7 @@ button,select{font:inherit}
         <p class="feed-status" id="studentLinkStatus" role="status" aria-live="polite"></p>
         <div id="linkedStudentProfiles" class="linked-student-profiles"></div>
       </article>
+      <section id="storeAssignedTasksMount" aria-live="polite" style="margin-bottom:16px;"></section>
       <section class="teacher-feed" id="taskFeed" aria-live="polite"><p class="feed-status">Görevler yükleniyor…</p></section>
     </section>
 
@@ -3147,6 +3148,8 @@ button,select{font:inherit}
       window.location.href = `/Paketler.html?plan=${tier}&ref=panel`;
     }
   </script>
+<script src="/assets/app-store.js"></script>
+<script src="/assets/student-store-bridge.js" defer></script>
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/ogrenci-gelisim.js"></script>
 <script src="/assets/pratik.js"></script>
