@@ -103,9 +103,11 @@ async function updatePayment({ gateway, orderReference, paymentId, amountMinor, 
       user.subscriptionType = payment.subscriptionType;
       if (payment.plan) {
         user.subscriptionPlan = payment.plan;
+        user.subscriptionTier = payment.plan; // Hibrit abonelik alanı tam senkronizasyon
         user.paketTipi = payment.plan; // Kota middleware ile tam senkronizasyon
       }
       user.expiresAt = addSubscriptionPeriod(base, payment.subscriptionType);
+      user.subscriptionEndDate = user.expiresAt; // Hibrit bitiş tarihi senkronizasyonu
       user.paymentGateway = gateway;
       if (payment.providerCustomerId) {
         user.paymentGatewayCustomerId = payment.providerCustomerId;

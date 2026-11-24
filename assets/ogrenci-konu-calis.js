@@ -59,11 +59,22 @@
   let state = {
     grade: 6,
     search: '',
+    access: { plan: 'free', isStaff: false, registeredGrade: 8, allowedGrades: [8], gradeLocked: false },
     overall: { completed: 0, total: 0, percent: 0 },
     lastAccessed: null,
     themes: [],
     loading: false
   };
+
+  function openUpgradePrompt(reasonMsg) {
+    if (typeof window.openSubscriptionUpgradeModal === 'function') {
+      window.openSubscriptionUpgradeModal();
+      return;
+    }
+    if (confirm((reasonMsg || 'Bu konu anlatımına erişmek için paketinizi yükseltmeniz gerekiyor.') + '\n\nPaketleri incelemek ister misiniz?')) {
+      window.location.href = '/Paketler.html?ref=konu-calis';
+    }
+  }
 
   let readerState = {
     open: false,
@@ -213,15 +224,29 @@
       const params = new URLSearchParams({ grade: String(state.grade) });
       if (state.search.trim()) params.set('q', state.search.trim());
       const res = await apiJson('/api/student/topics?' + params.toString());
+      state.access = res.access || state.access;
       state.overall = res.overall || { completed: 0, total: 0, percent: 0 };
       state.lastAccessed = res.lastAccessed || null;
       state.themes = res.themes || [];
+      syncGradeSelectLocks();
       renderDashboard();
     } catch (err) {
       grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:28px;color:#991b1b;background:#fef2f2;border:1px solid #fecaca;border-radius:16px;">Konular yüklenemedi: ${esc(err.message)}</div>`;
     } finally {
       state.loading = false;
     }
+  }
+
+  function syncGradeSelectLocks() {
+    const sel = $('kcGradeSelect');
+    if (!sel || !state.access) return;
+    const allowed = state.access.allowedGrades || [];
+    const isStaff = Boolean(state.access.isStaff);
+    Array.from(sel.options).forEach(opt => {
+      const g = Number(opt.value);
+      const locked = !isStaff && allowed.length > 0 && !allowed.includes(g);
+      opt.textContent = `${g}. Sınıf${locked ? ' 🔒' : ''}`;
+    });
   }
 
   function renderDashboard() {
@@ -256,21 +281,36 @@
       return;
     }
 
-    grid.innerHTML = state.themes.map((theme, idx) => {
+    const gradeLockedBannerHtml = state.access?.gradeLocked ? `
+      <div style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:16px 20px;border-radius:16px;background:linear-gradient(135deg,#fffaf5 0%,#fdf1e3 100%);border:1.5px solid #c2570c;color:#2c1a0e;">
+        <div>
+          <strong style="font-size:0.96rem;color:#9a3412;">🔒 ${state.grade}. Sınıf Konuları Paketinizin Dışında</strong>
+          <p style="margin:4px 0 0;font-size:0.86rem;color:#6a5242;">Mevcut paketinizle (${esc((state.access.plan || 'free').toUpperCase())}) yalnızca izinli sınıf düzeylerinizi (${(state.access.allowedGrades || []).map(g => g + '. Sınıf').join(', ')}) çalışabilirsiniz.</p>
+        </div>
+        <button type="button" id="kcGradeUpgradeBtn" style="padding:9px 18px;border-radius:10px;border:0;background:linear-gradient(135deg,#c2570c 0%,#9a3412 100%);color:#fff;font-weight:700;font-size:0.86rem;cursor:pointer;">🚀 Paketi Yükselt</button>
+      </div>
+    ` : '';
+
+    grid.innerHTML = gradeLockedBannerHtml + state.themes.map((theme, idx) => {
       const pct = theme.percent || 0;
-      const pctBg = pct === 100 ? '#ecfdf5' : pct > 0 ? '#fdf1e3' : '#f5ece2';
-      const pctColor = pct === 100 ? '#065f46' : pct > 0 ? '#c2570c' : '#6a5242';
+      const isLocked = Boolean(theme.locked);
+      const isTrial = Boolean(theme.isFreeTrial);
+      const pctBg = isLocked ? '#fef2f2' : (pct === 100 ? '#ecfdf5' : pct > 0 ? '#fdf1e3' : '#f5ece2');
+      const pctColor = isLocked ? '#991b1b' : (pct === 100 ? '#065f46' : pct > 0 ? '#c2570c' : '#6a5242');
       const barColor = pct === 100 ? '#16a34a' : '#c2570c';
       const firstId = theme.topics[0]?.id || '';
 
       return `
-        <article class="kc-theme-card" data-theme-idx="${idx}">
+        <article class="kc-theme-card" data-theme-idx="${idx}" style="${isLocked ? 'opacity:0.84;border-style:dashed;border-color:#d8c3ae;' : ''}">
           <div class="kc-card-top">
             <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
               <span class="kc-code-badge">${esc(theme.themeCode)}</span>
               <h3 class="kc-theme-title" title="${esc(theme.themeTitle)}">${esc(theme.themeTitle)}</h3>
             </div>
-            <span class="kc-pct-badge" style="background:${pctBg};color:${pctColor};">%${pct}</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+              ${isTrial ? '<span style="padding:3px 8px;border-radius:999px;background:#ecfdf5;color:#065f46;font-size:0.72rem;font-weight:800;">🎁 Ücretsiz Deneme</span>' : ''}
+              <span class="kc-pct-badge" style="background:${pctBg};color:${pctColor};">${isLocked ? '🔒 Kilitli' : '%' + pct}</span>
+            </div>
           </div>
           <div class="kc-progress-wrap">
             <div class="kc-progress-labels">
@@ -287,17 +327,23 @@
             <div class="kc-stat-col"><strong>${theme.totalCount}</strong><span>Toplam Konu</span></div>
           </div>
           <div class="kc-actions-grid">
-            <button type="button" class="kc-act-btn kc-act-primary" data-open-theme="${idx}" data-topic-id="${esc(firstId)}" data-mode="lesson">📖 Konu Anlatımı</button>
-            <button type="button" class="kc-act-btn kc-act-warm" data-open-theme="${idx}" data-topic-id="${esc(firstId)}" data-mode="notes">💡 Pratik Bilgi</button>
-            <button type="button" class="kc-act-btn kc-act-sand" data-open-theme="${idx}" data-topic-id="${esc(firstId)}" data-mode="cards">🗂️ Bilgi Kartları</button>
+            <button type="button" class="kc-act-btn kc-act-primary" data-open-theme="${idx}" data-topic-id="${esc(firstId)}" data-locked="${isLocked ? '1' : '0'}" data-mode="lesson">${isLocked ? '🔒' : '📖'} Konu Anlatımı</button>
+            <button type="button" class="kc-act-btn kc-act-warm" data-open-theme="${idx}" data-topic-id="${esc(firstId)}" data-locked="${isLocked ? '1' : '0'}" data-mode="notes">${isLocked ? '🔒' : '💡'} Pratik Bilgi</button>
+            <button type="button" class="kc-act-btn kc-act-sand" data-open-theme="${idx}" data-topic-id="${esc(firstId)}" data-locked="${isLocked ? '1' : '0'}" data-mode="cards">${isLocked ? '🔒' : '🗂️'} Bilgi Kartları</button>
             <button type="button" class="kc-act-btn kc-act-quiz" data-go-quiz="${idx}">✏️ Soru Çöz</button>
           </div>
         </article>
       `;
     }).join('');
 
+    $('kcGradeUpgradeBtn')?.addEventListener('click', () => openUpgradePrompt());
+
     grid.querySelectorAll('[data-open-theme]').forEach(btn => {
       btn.addEventListener('click', () => {
+        if (btn.dataset.locked === '1') {
+          openUpgradePrompt('Bu konu anlatımı ücretli abonelik paketleri kapsamında açıktır.');
+          return;
+        }
         const theme = state.themes[Number(btn.dataset.openTheme)];
         if (btn.dataset.topicId) openTopicById(btn.dataset.topicId, btn.dataset.mode || 'lesson', theme);
       });
@@ -332,6 +378,11 @@
       initFlashcardDeck(res.topic.flashcards || []);
       renderReader();
     } catch (err) {
+      if (String(err.message || '').includes('paket') || String(err.message || '').includes('yükselt')) {
+        closeReader();
+        openUpgradePrompt(err.message);
+        return;
+      }
       body.innerHTML = `<div style="text-align:center;padding:36px;color:#991b1b;">Konu açılamadı: ${esc(err.message)}</div>`;
     }
   }
@@ -360,10 +411,18 @@
         subNav.innerHTML = siblings.map(st => {
           const isCur = st.id === t.id;
           const isDone = st.progressStatus === 'completed';
-          return `<button type="button" data-switch-topic="${esc(st.id)}" style="padding:5px 11px;border-radius:999px;border:1.5px solid ${isCur ? '#c2570c' : '#e2d3c3'};background:${isCur ? '#c2570c' : '#fff'};color:${isCur ? '#fff' : '#2c1a0e'};font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">${isDone ? '✓ ' : ''}${esc(st.subTopicTitle)}</button>`;
+          const stLocked = Boolean(st.locked);
+          return `<button type="button" data-switch-topic="${esc(st.id)}" data-switch-locked="${stLocked ? '1' : '0'}" style="padding:5px 11px;border-radius:999px;border:1.5px solid ${isCur ? '#c2570c' : '#e2d3c3'};background:${isCur ? '#c2570c' : (stLocked ? '#f5ece2' : '#fff')};color:${isCur ? '#fff' : (stLocked ? '#8a7260' : '#2c1a0e')};font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">${stLocked ? '🔒 ' : (isDone ? '✓ ' : '')}${esc(st.subTopicTitle)}</button>`;
         }).join('');
         subNav.querySelectorAll('[data-switch-topic]').forEach(btn => {
-          btn.addEventListener('click', () => openTopicById(btn.dataset.switchTopic, readerState.mode, readerState.theme));
+          btn.addEventListener('click', () => {
+            if (btn.dataset.switchLocked === '1') {
+              closeReader();
+              openUpgradePrompt('Bu alt konuya erişmek için paketinizi yükseltebilirsiniz.');
+              return;
+            }
+            openTopicById(btn.dataset.switchTopic, readerState.mode, readerState.theme);
+          });
         });
       } else {
         subNav.style.display = 'none';

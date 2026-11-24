@@ -2,7 +2,38 @@ const express = require('express');
 const mongoose = require('mongoose');
 const TopicContent = require('../models/TopicContent');
 const StudentTopicProgress = require('../models/StudentTopicProgress');
+const User = require('../models/User');
 const { getCurriculumTree } = require('../lib/meb-curriculum');
+const { getAllowedGradesForStudent, canStudentAccessGrade } = require('../lib/konu-erisimi');
+const { resolveUserPlan } = require('../middleware/aiQuota');
+
+async function resolveStudentAccess(sessionUser) {
+  const isStaff = Boolean(sessionUser && (sessionUser.role === 'admin' || sessionUser.role === 'teacher' || sessionUser.adminRole));
+  if (isStaff) {
+    return {
+      isStaff: true,
+      plan: 'vip',
+      registeredGrade: 8,
+      allowedGrades: [5, 6, 7, 8, 9, 10, 11, 12],
+      userDoc: sessionUser
+    };
+  }
+  const uid = String(sessionUser?._id || sessionUser?.id || '');
+  const userDoc = uid
+    ? await User.findById(uid).select('role subscriptionStatus subscriptionPlan subscriptionTier paketTipi expiresAt subscriptionEndDate grade kayitliSinif seciliTelafiSinif').lean()
+    : null;
+  const effectiveUser = userDoc || sessionUser || { role: 'student' };
+  const plan = resolveUserPlan(effectiveUser);
+  const registeredGrade = Number(effectiveUser.kayitliSinif || effectiveUser.grade) || 8;
+  const allowedGrades = getAllowedGradesForStudent({ ...effectiveUser, role: 'student', kayitliSinif: registeredGrade });
+  return {
+    isStaff: false,
+    plan,
+    registeredGrade,
+    allowedGrades,
+    userDoc: { ...effectiveUser, role: 'student', kayitliSinif: registeredGrade }
+  };
+}
 
 function deriveThemeCode(grade, themeTitle, outcomeCode, themeIndex) {
   if (outcomeCode && typeof outcomeCode === 'string') {
@@ -58,12 +89,14 @@ function normalizeLessonPages(doc) {
 function createStudentTopicsRouter({ requireAuth }) {
   const router = express.Router();
 
-  // 1. Yayınlanmış konuları tema kartları halinde ve öğrenci ilerlemesiyle getir (0 AI Maliyeti)
+  // 1. Yayınlanmış konuları tema kartları halinde, paket kilidi ve öğrenci ilerlemesiyle getir (0 AI Maliyeti)
   router.get('/', requireAuth, async (req, res) => {
     try {
       const studentId = String(req.session.user._id || req.session.user.id);
+      const access = await resolveStudentAccess(req.session.user);
       const requestedGrade = Number(req.query.grade);
-      const grade = (requestedGrade >= 5 && requestedGrade <= 12) ? requestedGrade : 6;
+      const grade = (requestedGrade >= 5 && requestedGrade <= 12) ? requestedGrade : access.registeredGrade;
+      const gradeLocked = !access.isStaff && !access.allowedGrades.includes(grade);
       const q = typeof req.query.q === 'string' ? req.query.q.trim().toLocaleLowerCase('tr-TR') : '';
 
       const [topics, gradeProgress, lastProgressDoc] = await Promise.all([
@@ -140,15 +173,31 @@ function createStudentTopicsRouter({ requireAuth }) {
 
       const themes = Array.from(themesMap.values())
         .sort((a, b) => a.sortOrder - b.sortOrder || a.themeTitle.localeCompare(b.themeTitle, 'tr'))
-        .map(th => ({
-          themeCode: th.themeCode,
-          themeTitle: th.themeTitle,
-          completedCount: th.completedCount,
-          inProgressCount: th.inProgressCount,
-          totalCount: th.totalCount,
-          percent: th.totalCount > 0 ? Math.round((th.completedCount / th.totalCount) * 100) : 0,
-          topics: th.topics
-        }));
+        .map((th, themeIdx) => {
+          const isFreePlan = !access.isStaff && access.plan === 'free';
+          const themeLocked = gradeLocked || (isFreePlan && themeIdx > 0);
+          const mappedTopics = th.topics.map((tp, topicIdx) => {
+            const topicLocked = gradeLocked || (isFreePlan && (themeIdx > 0 || topicIdx > 0));
+            return {
+              ...tp,
+              locked: topicLocked,
+              isFreeTrial: isFreePlan && !gradeLocked && themeIdx === 0 && topicIdx === 0,
+              lockReason: gradeLocked ? 'GRADE_LOCKED' : (topicLocked ? 'PLAN_UPGRADE_REQUIRED' : null)
+            };
+          });
+          return {
+            themeCode: th.themeCode,
+            themeTitle: th.themeTitle,
+            completedCount: th.completedCount,
+            inProgressCount: th.inProgressCount,
+            totalCount: th.totalCount,
+            percent: th.totalCount > 0 ? Math.round((th.completedCount / th.totalCount) * 100) : 0,
+            locked: themeLocked,
+            isFreeTrial: isFreePlan && !gradeLocked && themeIdx === 0,
+            lockReason: gradeLocked ? 'GRADE_LOCKED' : (themeLocked ? 'PLAN_UPGRADE_REQUIRED' : null),
+            topics: mappedTopics
+          };
+        });
 
       const overallTotal = topics.length;
       const overallCompleted = topics.filter(t => progressByTopicId.get(String(t._id))?.status === 'completed').length;
@@ -174,6 +223,13 @@ function createStudentTopicsRouter({ requireAuth }) {
       res.json({
         basarili: true,
         grade,
+        access: {
+          plan: access.plan,
+          isStaff: access.isStaff,
+          registeredGrade: access.registeredGrade,
+          allowedGrades: access.allowedGrades,
+          gradeLocked
+        },
         overall: {
           completed: overallCompleted,
           total: overallTotal,
@@ -198,6 +254,45 @@ function createStudentTopicsRouter({ requireAuth }) {
       const topic = await TopicContent.findOne({ _id: id, status: 'published' }).lean();
       if (!topic) {
         return res.status(404).json({ mesaj: 'Yayınlanmış konu anlatımı bulunamadı.' });
+      }
+
+      // Paket & Sınıf Erişim Kilidi Denetimi (lib/konu-erisimi.js kuralları)
+      const access = await resolveStudentAccess(req.session.user);
+      if (!access.isStaff) {
+        if (!canStudentAccessGrade(access.userDoc, topic.grade)) {
+          return res.status(403).json({
+            kod: 'GRADE_ACCESS_DENIED',
+            mesaj: `${topic.grade}. sınıf konu anlatımları mevcut paketinizin (${access.plan.toUpperCase()}) kapsamı dışındadır. Tüm sınıflara erişmek için paketinizi yükseltebilirsiniz.`,
+            plan: access.plan,
+            allowedGrades: access.allowedGrades
+          });
+        }
+        if (access.plan === 'free') {
+          // Ücretsiz planda yalnızca kayıtlı sınıfın ilk temasındaki ilk konu deneme olarak açıktır
+          const gradeTopics = await TopicContent.find({ grade: topic.grade, status: 'published' })
+            .sort({ order: 1, createdAt: 1 })
+            .select('_id themeTitle unit_topic')
+            .lean();
+          const tree = getCurriculumTree();
+          const gradeTreeTemalar = tree[String(topic.grade)]?.temalar ? Object.keys(tree[String(topic.grade)].temalar) : [];
+          const sortedTopics = gradeTopics.sort((a, b) => {
+            const ta = a.themeTitle || a.unit_topic || '';
+            const tb = b.themeTitle || b.unit_topic || '';
+            const ia = gradeTreeTemalar.indexOf(ta);
+            const ib = gradeTreeTemalar.indexOf(tb);
+            const sa = ia >= 0 ? ia : 999;
+            const sb = ib >= 0 ? ib : 999;
+            return sa - sb || ta.localeCompare(tb, 'tr');
+          });
+          const firstTrialId = sortedTopics[0] ? String(sortedTopics[0]._id) : null;
+          if (firstTrialId && String(topic._id) !== firstTrialId) {
+            return res.status(403).json({
+              kod: 'PLAN_UPGRADE_REQUIRED',
+              mesaj: 'Ücretsiz hesap ile yalnızca ilk deneme konusunu inceleyebilirsiniz. Tüm konu anlatımları, hap bilgiler ve bilgi kartları için paketinizi yükseltin.',
+              plan: access.plan
+            });
+          }
+        }
       }
 
       const studentId = String(req.session.user._id || req.session.user.id);

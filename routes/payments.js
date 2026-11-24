@@ -113,6 +113,8 @@ function createPaymentRouter({
         });
       }
 
+      const testMode = String(process.env.PAYTR_TEST_MODE ?? '1').trim() === '0' ? '0' : '1';
+      const debugOn = String(process.env.PAYTR_DEBUG_ON ?? testMode).trim() === '0' ? '0' : '1';
       const orderReference = `ZC${crypto.randomBytes(16).toString('hex')}`;
       const amount = (plan.amountMinor / 100).toFixed(2);
       const userBasket = Buffer.from(JSON.stringify([[plan.label, amount, 1]]))
@@ -127,8 +129,8 @@ function createPaymentRouter({
         user_basket: userBasket,
         no_installment: '1',
         max_installment: '0',
-        test_mode: '1',
-        debug_on: '1',
+        test_mode: testMode,
+        debug_on: debugOn,
         timeout_limit: '30',
         lang: 'tr',
         user_name: String(user.name || 'Öğrenci').slice(0, 60),

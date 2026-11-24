@@ -443,22 +443,31 @@ userSchema.pre('validate', async function () {
   if (this.grade && !this.kayitliSinif) this.kayitliSinif = this.grade;
   if (this.kayitliSinif && !this.grade) this.grade = this.kayitliSinif;
 
-  // Paket / Tier senkronizasyonu
-  if (this.subscriptionTier) {
-    if (this.subscriptionTier !== 'free' && !this.subscriptionPlan) {
-      this.subscriptionPlan = this.subscriptionTier;
-    }
-    if (!this.paketTipi || this.paketTipi === 'free') {
-      this.paketTipi = this.subscriptionTier;
-    }
-  } else if (this.subscriptionPlan) {
+  // Paket / Tier senkronizasyonu (yükseltme ve tüm alanların çift yönlü eşleşmesi)
+  const validTiers = ['temel', 'standart', 'vip'];
+  if (this.isModified('subscriptionPlan') && validTiers.includes(this.subscriptionPlan)) {
     this.subscriptionTier = this.subscriptionPlan;
-  } else if (this.paketTipi && ['free', 'temel', 'standart', 'vip'].includes(this.paketTipi)) {
+    this.paketTipi = this.subscriptionPlan;
+  } else if (this.isModified('subscriptionTier') && ['free', ...validTiers].includes(this.subscriptionTier)) {
+    if (this.subscriptionTier !== 'free') this.subscriptionPlan = this.subscriptionTier;
+    this.paketTipi = this.subscriptionTier;
+  } else if (this.isModified('paketTipi') && ['free', ...validTiers].includes(this.paketTipi)) {
     this.subscriptionTier = this.paketTipi;
+    if (this.paketTipi !== 'free') this.subscriptionPlan = this.paketTipi;
+  } else if (this.subscriptionPlan && validTiers.includes(this.subscriptionPlan) && (!this.subscriptionTier || this.subscriptionTier === 'free')) {
+    this.subscriptionTier = this.subscriptionPlan;
+    this.paketTipi = this.subscriptionPlan;
+  } else if (this.subscriptionTier && this.subscriptionTier !== 'free') {
+    if (!this.subscriptionPlan) this.subscriptionPlan = this.subscriptionTier;
+    if (!this.paketTipi || this.paketTipi === 'free') this.paketTipi = this.subscriptionTier;
   }
 
   // Bitiş tarihi (subscriptionEndDate <-> expiresAt) senkronizasyonu
-  if (this.subscriptionEndDate && !this.expiresAt) {
+  if (this.isModified('expiresAt') && this.expiresAt) {
+    this.subscriptionEndDate = this.expiresAt;
+  } else if (this.isModified('subscriptionEndDate') && this.subscriptionEndDate) {
+    this.expiresAt = this.subscriptionEndDate;
+  } else if (this.subscriptionEndDate && !this.expiresAt) {
     this.expiresAt = this.subscriptionEndDate;
   } else if (this.expiresAt && !this.subscriptionEndDate) {
     this.subscriptionEndDate = this.expiresAt;
