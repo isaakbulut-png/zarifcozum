@@ -981,6 +981,7 @@ body.teacher-menu-open {
   }
 }
 </style>
+<style>#currProgramBadge{display:inline-block}#currProgramBadge[hidden]{display:none}@media(max-width:760px){#aiCurriculumForm .form-grid{grid-template-columns:1fr!important}}</style>
 </head>
 <body data-accent="coral">
 
@@ -1895,11 +1896,11 @@ body.teacher-menu-open {
         </div>
       </div>
       <form id="aiCurriculumForm">
-        <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 14px;">
           <div class="field">
-            <label for="currGrade">1. Sınıf</label>
-            <select id="currGrade" required onchange="if(window.updateCurrTemalar)window.updateCurrTemalar();" onclick="if(this.value&&$('currTema')?.disabled&&window.updateCurrTemalar)window.updateCurrTemalar();">
-              <option value="">Sınıf seçin</option>
+            <label for="currGrade">1. Sınıf Seçimi</label>
+            <select id="currGrade" required autocomplete="off">
+              <option value="" selected>Sınıf seçin...</option>
               <option value="5">5. Sınıf</option>
               <option value="6">6. Sınıf</option>
               <option value="7">7. Sınıf</option>
@@ -1911,25 +1912,24 @@ body.teacher-menu-open {
             </select>
           </div>
           <div class="field">
-            <label for="currDers">2. Ders</label>
-            <select id="currDers" required>
-              <option value="Matematik" selected>Matematik (MEB Maarif)</option>
+            <label for="currTema">2. Tema / Ünite</label>
+            <select id="currTema" required disabled autocomplete="off">
+              <option value="">Önce sınıf seçin...</option>
             </select>
           </div>
           <div class="field">
-            <label for="currTema">3. Tema / Ünite</label>
-            <select id="currTema" required disabled onchange="if(window.updateCurrAltKonular)window.updateCurrAltKonular();" onfocus="if($('currGrade')?.value&&($('currTema')?.options?.length<=1||$('currTema')?.disabled)&&window.updateCurrTemalar)window.updateCurrTemalar();">
-              <option value="">Önce sınıf seçin</option>
+            <label for="currAltKonu">3. Alt Konu (Kazanım)</label>
+            <select id="currAltKonu" required disabled autocomplete="off">
+              <option value="">Önce tema seçin...</option>
             </select>
           </div>
+        </div>
+        <div style="margin-top:10px;min-height:26px;">
+          <span id="currProgramBadge" hidden class="curr-badge" style="padding:4px 12px;border-radius:999px;background:#fdf1e3;border:1px solid #e8c9a4;color:#7a3a0a;font-size:12px;font-weight:600;"></span>
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr; margin-top:6px;">
           <div class="field">
-            <label for="currAltKonu">4. Alt Konu (Müfredat Hedefi)</label>
-            <select id="currAltKonu" required disabled onfocus="if($('currGrade')?.value&&$('currTema')?.value&&($('currAltKonu')?.options?.length<=1||$('currAltKonu')?.disabled)&&window.updateCurrAltKonular)window.updateCurrAltKonular();">
-              <option value="">Önce tema seçin</option>
-            </select>
-          </div>
-          <div class="field" style="grid-column: 1 / -1;">
-            <label for="currTeacherNotes">5. Öğretmen Özel Odak Notu / Ek Talimat (İsteğe bağlı)</label>
+            <label for="currTeacherNotes">4. Öğretmen Özel Odak Notu / Ek Talimat (İsteğe Bağlı)</label>
             <input type="text" id="currTeacherNotes" placeholder="Örn: Kesir modelleri ve pasta dilimi benzetmelerine ağırlık ver, günlük hayat senaryosu ekle" maxlength="500" style="width:100%;padding:10px 12px;border:1px solid #dcd2c4;border-radius:8px;">
           </div>
         </div>
@@ -2263,6 +2263,7 @@ body.teacher-menu-open {
 <script src="/assets/safe-svg.js"></script>
 <script src="/assets/ai-visual.js"></script>
 <script src="/assets/meb-curriculum-tree.js"></script>
+<script src="/assets/maarif-konu-formu.js" defer></script>
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/curriculum-tree-view.js"></script>
 <script src="/assets/messageService.js"></script>
@@ -4642,66 +4643,6 @@ body.teacher-menu-open {
     return {};
   }
 
-  function updateCurrTemalar() {
-    const grade = $('currGrade')?.value;
-    const tree = getFullCurriculumTree();
-    const gradeData = tree[grade] || tree[String(grade)];
-    const temaSelect = $('currTema');
-    const altKonuSelect = $('currAltKonu');
-    if (!temaSelect || !altKonuSelect) return;
-
-    if (!grade || !gradeData || !gradeData.temalar || !Object.keys(gradeData.temalar).length) {
-      temaSelect.replaceChildren(new Option('Önce sınıf seçin', ''));
-      temaSelect.disabled = true;
-      altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
-      altKonuSelect.disabled = true;
-      return;
-    }
-
-    const temalar = Object.keys(gradeData.temalar);
-    const prevTema = temaSelect.value;
-    temaSelect.replaceChildren(
-      new Option('Tema / Ünite seçin…', ''),
-      ...temalar.map(t => new Option(t, t))
-    );
-    temaSelect.disabled = false;
-    if (prevTema && temalar.includes(prevTema)) {
-      temaSelect.value = prevTema;
-      updateCurrAltKonular();
-    } else {
-      altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
-      altKonuSelect.disabled = true;
-    }
-  }
-  window.updateCurrTemalar = updateCurrTemalar;
-
-  function updateCurrAltKonular() {
-    const grade = $('currGrade')?.value;
-    const tema = $('currTema')?.value;
-    const altKonuSelect = $('currAltKonu');
-    if (!altKonuSelect) return;
-
-    const tree = getFullCurriculumTree();
-    const gradeData = tree[grade] || tree[String(grade)];
-    if (!grade || !tema || !gradeData?.temalar?.[tema]) {
-      altKonuSelect.replaceChildren(new Option('Önce tema seçin', ''));
-      altKonuSelect.disabled = true;
-      return;
-    }
-
-    const altKonular = gradeData.temalar[tema].alt_konular || [];
-    const prevAlt = altKonuSelect.value;
-    altKonuSelect.replaceChildren(
-      new Option('Alt konu seçin (Müfredat Hedefi)…', ''),
-      ...altKonular.map(sub => new Option(sub.name + (sub.outcome_code ? ` [${sub.outcome_code}]` : ''), sub.name))
-    );
-    altKonuSelect.disabled = !altKonular.length;
-    if (prevAlt && altKonular.some(sub => sub.name === prevAlt)) {
-      altKonuSelect.value = prevAlt;
-    }
-  }
-  window.updateCurrAltKonular = updateCurrAltKonular;
-
   function updateAiTemalar() {
     const grade = $('aiGrade')?.value;
     const tree = getFullCurriculumTree();
@@ -4766,18 +4707,6 @@ body.teacher-menu-open {
   window.updateAiAltKonular = updateAiAltKonular;
 
   // Dinleyicileri hemen bağla
-  $('currGrade')?.addEventListener('change', updateCurrTemalar);
-  $('currGrade')?.addEventListener('input', updateCurrTemalar);
-  $('currGrade')?.addEventListener('click', () => {
-    if ($('currGrade')?.value && $('currTema')?.disabled) updateCurrTemalar();
-  });
-  $('currTema')?.addEventListener('change', updateCurrAltKonular);
-  $('currTema')?.addEventListener('input', updateCurrAltKonular);
-  $('currTema')?.addEventListener('focus', () => {
-    if ($('currGrade')?.value && ($('currTema')?.options?.length <= 1 || $('currTema')?.disabled)) {
-      updateCurrTemalar();
-    }
-  });
 
   $('aiGrade')?.addEventListener('change', updateAiTemalar);
   $('aiGrade')?.addEventListener('input', updateAiTemalar);
@@ -4796,7 +4725,6 @@ body.teacher-menu-open {
   });
 
   // Başlangıçta seçim varsa hemen doldur
-  updateCurrTemalar();
   updateAiTemalar();
 
   async function aiKonulariYukle() {
@@ -4805,8 +4733,7 @@ body.teacher-menu-open {
       if (res && res.tree && Object.keys(res.tree).length > 0) {
         aiCurriculumTree = { ...aiCurriculumTree, ...res.tree };
         window.MEB_CURRICULUM_TREE = { ...(window.MEB_CURRICULUM_TREE || {}), ...res.tree };
-        updateCurrTemalar();
-        updateAiTemalar();
+              updateAiTemalar();
       }
     } catch (error) {
       console.warn('Sunucu müfredat ağacı yüklenemedi, yerel müfredat devrede:', error.message);
@@ -4815,7 +4742,7 @@ body.teacher-menu-open {
   aiKonulariYukle();
 
   window.addEventListener('hashchange', () => {
-    if (location.hash === '#ai-curriculum-wizard') updateCurrTemalar();
+    if (location.hash === '#ai-curriculum-wizard' && window.updateCurrTemalar) window.updateCurrTemalar();
     if (location.hash === '#quiz-builder' || location.hash === '#ai-question-wizard') updateAiTemalar();
   });
 
@@ -5116,7 +5043,7 @@ body.teacher-menu-open {
     event.preventDefault();
     const btn = $('generateCurriculumBtn');
     const grade = $('currGrade').value;
-    const ders = $('currDers')?.value || 'Matematik';
+    const ders = 'Matematik';
     const unit_topic = $('currTema').value;
     const sub_topic = $('currAltKonu').value;
     const teacherNotes = $('currTeacherNotes')?.value || '';
