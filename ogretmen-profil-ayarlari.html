@@ -519,7 +519,32 @@
         }
       }
 
-      // Profil fotoğrafı yükleme
+      function resizeImageToBase64(file, maxSize = 400, quality = 0.85) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(new Error('Görsel dosyası okunamadı.'));
+          reader.onload = () => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Görsel işlenemedi.'));
+            img.onload = () => {
+              let w = img.width, h = img.height;
+              if (w > maxSize || h > maxSize) {
+                if (w >= h) { h = Math.round((h * maxSize) / w); w = maxSize; }
+                else { w = Math.round((w * maxSize) / h); h = maxSize; }
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+              resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.src = reader.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      // Profil fotoğrafı yükleme (400x400 Base64 -> PUT /api/user/avatar)
       function openPicker() {
         $('avatarFileInput')?.click();
       }
@@ -537,8 +562,8 @@
           input.value = '';
           return;
         }
-        if (file.size > 5 * 1024 * 1024) {
-          $('avatarStatus').textContent = 'Dosya boyutu en fazla 5 MB olabilir.';
+        if (file.size > 10 * 1024 * 1024) {
+          $('avatarStatus').textContent = 'Dosya boyutu en fazla 10 MB olabilir.';
           $('avatarStatus').style.color = '#991b1b';
           input.value = '';
           return;
@@ -550,12 +575,12 @@
         $('avatarStatus').style.color = '#6a5242';
 
         try {
-          const fd = new FormData();
-          fd.append('avatar', file);
-          const res = await fetch('/api/user/upload-avatar', {
-            method: 'POST',
+          const base64Url = await resizeImageToBase64(file, 400, 0.85);
+          const res = await fetch('/api/user/avatar', {
+            method: 'PUT',
             credentials: 'include',
-            body: fd
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ avatarUrl: base64Url })
           });
           const data = await res.json().catch(() => ({}));
           if (!res.ok || !data.avatarUrl) {

@@ -1013,15 +1013,15 @@ body.teacher-menu-open {
   </div>
 
   <div class="sidebar-teacher-profile-card" id="sidebarProfileCard" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;margin:0 0 15px;padding:16px 12px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);box-shadow:0 4px 14px rgba(0,0,0,0.22);position:relative">
-    <div class="teacher-avatar-wrapper" id="teacherAvatarUploadTrigger" title="Profil Fotoğrafını Değiştirmek İçin Tıklayın">
+    <label for="teacherAvatarFileInput" class="teacher-avatar-wrapper" id="teacherAvatarUploadTrigger" title="Profil Fotoğrafını Değiştirmek İçin Tıklayın">
       <img id="sidebarTeacherAvatarImg" src="" alt="Öğretmen Profil Fotoğrafı" style="width:100%;height:100%;object-fit:cover;display:none" />
       <span id="sidebarTeacherAvatarFallback" style="font-weight:700;font-size:1.55rem;color:#fed7aa;font-family:var(--head);display:flex;align-items:center;justify-content:center;width:100%;height:100%">Ö</span>
       <div class="avatar-hover-overlay" id="avatarHoverOverlay">
         <svg style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         <span style="font-size:9px;font-weight:700;letter-spacing:0.3px;color:#fff">Yükle</span>
       </div>
-      <input type="file" id="teacherAvatarFileInput" accept="image/*" style="display:none" />
-    </div>
+    </label>
+    <input type="file" id="teacherAvatarFileInput" accept="image/*" style="display:none" />
     <div style="width:100%;min-width:0;margin-top:4px">
       <div id="sidebarCardTeacherName" style="font-size:.95rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3">Öğretmen</div>
       <div id="sidebarCardTeacherBranch" style="font-size:.76rem;color:#d6c6b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px">Matematik Öğretmeni</div>
@@ -2249,6 +2249,7 @@ body.teacher-menu-open {
 <script src="/assets/ai-visual.js"></script>
 <script src="/assets/meb-curriculum-tree.js"></script>
 <script src="/assets/maarif-konu-formu.js" defer></script>
+<script src="/assets/ogretmen-profil-karti.js" defer></script>
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/curriculum-tree-view.js"></script>
 <script src="/assets/messageService.js"></script>
@@ -2282,6 +2283,7 @@ body.teacher-menu-open {
     const isFormData = typeof FormData !== 'undefined' && ayar.body instanceof FormData;
     const defaultHeaders = isFormData ? {} : {'Content-Type': 'application/json'};
     const r = await fetch(API + yol, {
+      credentials: 'include',
       ...ayar,
       headers: {...defaultHeaders, ...(ayar.headers || {})}
     });
@@ -2368,77 +2370,7 @@ body.teacher-menu-open {
     syncTeacherProfileUI(window.currentTeacherUser || {});
   });
 
-  const avatarTrigger = $('teacherAvatarUploadTrigger');
-  const avatarBtn = $('triggerAvatarUploadBtn');
-  const avatarInput = $('teacherAvatarFileInput');
-
-  function openAvatarPicker(e) {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    if (avatarInput) avatarInput.click();
-  }
-
-  if (avatarTrigger) avatarTrigger.addEventListener('click', openAvatarPicker);
-  if (avatarBtn) avatarBtn.addEventListener('click', openAvatarPicker);
-
-  if (avatarInput) {
-    avatarInput.addEventListener('change', async () => {
-      const file = avatarInput.files && avatarInput.files[0];
-      if (!file) return;
-
-      if (!file.type.startsWith('image/')) {
-        alert('Lütfen geçerli bir resim dosyası seçin (PNG, JPG, WEBP, GIF).');
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Profil fotoğrafı boyutu en fazla 5 MB olabilir.');
-        return;
-      }
-
-      const overlay = $('avatarHoverOverlay');
-      if (overlay) {
-        overlay.style.opacity = '1';
-        overlay.innerHTML = '<span style="font-size:9.5px;font-weight:700;color:#fff">Yükleniyor…</span>';
-      }
-
-      try {
-        const formData = new FormData();
-        formData.append('avatar', file);
-
-        const res = await api('/api/user/upload-avatar', {
-          method: 'POST',
-          body: formData
-        });
-
-        if (res?.avatarUrl) {
-          try {
-            localStorage.setItem('zarif_teacher_avatar', res.avatarUrl);
-          } catch (e) {}
-
-          if (window.currentTeacherUser) {
-            window.currentTeacherUser.avatarUrl = res.avatarUrl;
-          }
-
-          syncTeacherProfileUI({ ...(window.currentTeacherUser || {}), avatarUrl: res.avatarUrl });
-          window.dispatchEvent(new CustomEvent('teacher-avatar-updated'));
-        }
-      } catch (err) {
-        console.error('Avatar yükleme hatası:', err);
-        alert('Profil fotoğrafı yüklenemedi: ' + err.message);
-      } finally {
-        if (overlay) {
-          overlay.style.opacity = '';
-          overlay.innerHTML = `
-            <svg style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            <span style="font-size:9.5px;font-weight:700;letter-spacing:0.3px;color:#fff">Yükle</span>
-          `;
-        }
-        avatarInput.value = '';
-      }
-    });
-  }
+  // Avatar tıklama ve yükleme bağımsız /assets/ogretmen-profil-karti.js tarafından yönetilir.
 
   async function yukle() {
     let oturum;

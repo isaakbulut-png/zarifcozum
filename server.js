@@ -1540,6 +1540,53 @@ app.put('/api/user/profile', requireRole('teacher', 'admin', 'student'), async (
   }
 });
 
+// 5c. Profil Fotoğrafı Kalıcı Kayıt (Base64 Data URL -> MongoDB)
+app.put('/api/user/avatar', requireRole('teacher', 'admin', 'student', 'parent'), async (req, res) => {
+  try {
+    const rawAvatar = typeof req.body?.avatarUrl === 'string'
+      ? req.body.avatarUrl.trim()
+      : (typeof req.body?.avatar === 'string' ? req.body.avatar.trim() : '');
+
+    if (!rawAvatar) {
+      return res.status(400).json({ mesaj: 'Geçerli bir fotoğraf verisi gönderilmedi.' });
+    }
+    const isDataUrl = /^data:image\/(jpeg|jpg|png|webp|gif);base64,[A-Za-z0-9+/=\s]+$/i.test(rawAvatar);
+    const isSafeUrl = rawAvatar.startsWith('/uploads/') || /^https?:\/\//i.test(rawAvatar);
+    if (!isDataUrl && !isSafeUrl) {
+      return res.status(400).json({ mesaj: 'Desteklenmeyen fotoğraf formatı. Lütfen JPG, PNG veya WEBP seçin.' });
+    }
+    if (rawAvatar.length > 750 * 1024) {
+      return res.status(400).json({ mesaj: 'Fotoğraf boyutu çok büyük. Lütfen daha küçük bir görsel seçin.' });
+    }
+
+    const userId = req.session.user._id || req.session.user.id;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ mesaj: 'Kullanıcı bulunamadı.' });
+
+    user.avatarUrl = rawAvatar;
+    user.photo = rawAvatar;
+    user.profileImage = rawAvatar;
+    await user.save();
+
+    if (req.session.user) {
+      req.session.user.avatarUrl = rawAvatar;
+      req.session.user.photo = rawAvatar;
+      if (req.session.save) {
+        await new Promise(r => req.session.save(r));
+      }
+    }
+
+    res.json({
+      basarili: true,
+      mesaj: 'Profil fotoğrafınız başarıyla güncellendi.',
+      avatarUrl: rawAvatar
+    });
+  } catch (err) {
+    console.error('Avatar kaydetme hatası:', err);
+    res.status(500).json({ mesaj: 'Profil fotoğrafı kaydedilemedi: ' + err.message });
+  }
+});
+
 // 6. Öğretmen Profil ve Finans Ayarları Kaydet
 app.post('/api/ogretmen/profil-ayarlari', ogretmenKontrol, async (req, res) => {
   try {
