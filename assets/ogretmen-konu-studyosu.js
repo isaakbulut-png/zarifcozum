@@ -1,11 +1,42 @@
-// Öğretmen Paneli "Konu Anlatımı Üret" Stüdyosu (İnceleme, Düzenleme, Yayınlama & Yayınlananlar Listesi)
+// Öğretmen Paneli "Konu Anlatımı Üret" Stüdyosu (2. Aşama: Yapısal Blok Kartları, R2 MEB Kitap Referansları, Düzenleme & Yayınlama)
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+  function injectStudioStyles() {
+    if (document.getElementById('currStudioPhase2Css')) return;
+    const style = document.createElement('style');
+    style.id = 'currStudioPhase2Css';
+    style.textContent = `
+      .cs-blocks{display:flex;flex-direction:column;gap:12px}
+      .cs-card{border-radius:13px;padding:15px 17px;border:1px solid #e6d7c8;background:#fff}
+      .cs-head{font-weight:800;font-size:0.82rem;text-transform:uppercase;letter-spacing:0.25px;margin-bottom:7px}
+      .cs-body{font-size:0.94rem;line-height:1.68;color:#2c1a0e}
+      .cs-story{background:linear-gradient(135deg,#fffcf5 0%,#fdf4e3 100%);border-color:#efd6a8;border-left:4px solid #d97706}
+      .cs-story .cs-head{color:#92400e}
+      .cs-svg{background:#fff;border:1.5px solid #e6d7c8;text-align:center}
+      .cs-svg-box{width:100%;max-width:520px;margin:0 auto;padding:10px;border-radius:10px;background:#fffaf5;border:1px solid #f0e4d6;overflow:hidden}
+      .cs-svg-box svg{width:100%;max-width:520px;height:auto;display:block;margin:0 auto}
+      .cs-rule{background:linear-gradient(135deg,#fffaf5 0%,#fdf1e3 100%);border-color:#e8c4a0;border-left:4px solid #c2570c}
+      .cs-rule .cs-head{color:#9a3412}
+      .cs-mistake{background:linear-gradient(135deg,#fff8f6 0%,#fef2f2 100%);border-color:#fecaca;border-left:4px solid #dc2626}
+      .cs-mistake .cs-head{color:#991b1b}
+      .cs-challenge{background:linear-gradient(135deg,#f8f5f0 0%,#fbf1e8 100%);border:1.5px solid #2c1a0e;border-left:5px solid #2c1a0e}
+      .cs-challenge .cs-head{color:#2c1a0e}
+      .cs-ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:10px}
+      .cs-ref-card{background:#fff;border:1px solid #e6d7c8;border-radius:10px;overflow:hidden;cursor:pointer;padding:0;text-align:left;transition:transform .15s ease}
+      .cs-ref-card:hover{transform:translateY(-2px);border-color:#c2570c}
+      .cs-ref-thumb{height:96px;background:#f5ece2;display:grid;place-items:center;position:relative;overflow:hidden}
+      .cs-ref-thumb img{width:100%;height:100%;object-fit:cover}
+      .cs-ref-pill{position:absolute;top:5px;right:5px;background:rgba(44,26,14,0.88);color:#fed7aa;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px}
+      .cs-lightbox{display:none;position:fixed;inset:0;z-index:10060;background:rgba(20,10,4,0.82);align-items:center;justify-content:center;padding:20px}
+    `;
+    document.head.appendChild(style);
+  }
+
   let currentTopic = null;
-  let activeStudioTab = 'pages'; // 'pages' | 'notes' | 'cards'
+  let activeStudioTab = 'pages';
   let activePageIdx = 0;
   let editMode = false;
 
@@ -25,25 +56,83 @@
     if (!el) return;
     el.textContent = msg || '';
     el.className = 'status' + (type ? ' ' + type : '');
-    if (type === 'ok') el.style.color = '#065f46';
-    else if (type === 'error') el.style.color = '#991b1b';
-    else el.style.color = '#6a5242';
+    el.style.color = type === 'ok' ? '#065f46' : type === 'error' ? '#991b1b' : '#6a5242';
+  }
+
+  function formatInlineMath(text) {
+    const clean = String(text || '').replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*\*/g, '');
+    if (window.zarifMathText && typeof window.zarifMathText.format === 'function') {
+      return window.zarifMathText.format(clean);
+    }
+    return esc(clean);
+  }
+
+  function mountSvg(container, rawSvg) {
+    if (!container || !rawSvg || !String(rawSvg).includes('<svg')) return;
+    if (window.zarifSafeSvg && typeof window.zarifSafeSvg.parse === 'function') {
+      try {
+        const parsed = window.zarifSafeSvg.parse(String(rawSvg).trim());
+        window.zarifSafeSvg.render(container, parsed);
+        return;
+      } catch (e) {}
+    }
+    try {
+      const doc = new DOMParser().parseFromString(String(rawSvg).trim(), 'image/svg+xml');
+      const svgEl = doc.querySelector('svg');
+      if (svgEl) {
+        svgEl.removeAttribute('width');
+        svgEl.removeAttribute('height');
+        container.replaceChildren(svgEl);
+      }
+    } catch (e) {}
+  }
+
+  function openBookLightbox(rp) {
+    let lb = document.getElementById('currBookLightbox');
+    if (!lb) {
+      lb = document.createElement('div');
+      lb.id = 'currBookLightbox';
+      lb.className = 'cs-lightbox';
+      lb.innerHTML = `
+        <div style="background:#fffaf5;border:2px solid #c2570c;border-radius:16px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;">
+          <div style="background:#2c1a0e;color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;">
+            <div><strong id="csLbTitle" style="font-family:Georgia,serif;"></strong><div id="csLbSub" style="font-size:12px;color:#fed7aa;"></div></div>
+            <button type="button" id="csLbClose" style="background:rgba(255,255,255,0.16);border:0;color:#fff;width:32px;height:32px;border-radius:8px;font-size:17px;cursor:pointer;">✕</button>
+          </div>
+          <div id="csLbBody" style="padding:16px;overflow:auto;text-align:center;background:#fbf1e8;"></div>
+        </div>
+      `;
+      document.body.appendChild(lb);
+      lb.addEventListener('click', e => { if (e.target === lb) lb.style.display = 'none'; });
+      lb.querySelector('#csLbClose').addEventListener('click', () => { lb.style.display = 'none'; });
+    }
+    lb.querySelector('#csLbTitle').textContent = rp.book || 'MEB Ders Kitabı';
+    lb.querySelector('#csLbSub').textContent = `${rp.theme || ''} · Sayfa ${rp.page || '?'}`;
+    lb.querySelector('#csLbBody').innerHTML = rp.imageUrl
+      ? `<img src="${esc(rp.imageUrl)}" style="max-width:100%;height:auto;border-radius:10px;border:1px solid #dccab8;" onerror="this.outerHTML='<div style=\\'padding:30px;color:#6a5242;\\'>📖 Sayfa görseli yüklenemedi (${esc(rp.r2_key || rp.imageUrl)})</div>'">`
+      : `<div style="padding:30px;color:#6a5242;">📖 ${esc(rp.book)} · Sayfa ${esc(rp.page)}</div>`;
+    lb.style.display = 'flex';
   }
 
   function normalizeTopicData(raw) {
     const defaultTitles = [
       '1. Sayfa: Gerçek Hayat Keşfi',
-      '2. Sayfa: Kavram İnşası & Şemalar',
+      '2. Sayfa: Kavram İnşası ve Temel Kurallar',
       '3. Sayfa: Adım Adım Çözümlü Örnekler',
-      '4. Sayfa: Sık Yapılan Hatalar',
-      '5. Sayfa: Kendini Dene & Pekiştirme'
+      '4. Sayfa: Sık Yapılan Hatalar ve Stratejiler',
+      '5. Sayfa: Kendini Dene ve Özet Pekiştirme'
     ];
     let pages = Array.isArray(raw.lessonPages) && raw.lessonPages.length
       ? raw.lessonPages.map((p, i) => ({
           pageNumber: Number(p.pageNumber) || (i + 1),
           title: p.title || defaultTitles[i] || `${i + 1}. Sayfa`,
+          storyOrContext: p.storyOrContext || '',
+          keyRuleBox: p.keyRuleBox || '',
+          visualSvg: p.visualSvg || p.svgDiagram || '',
+          commonMistakeBox: p.commonMistakeBox || '',
+          miniChallenge: p.miniChallenge || '',
           content: p.content || '',
-          svgDiagram: p.svgDiagram || ''
+          svgDiagram: p.svgDiagram || p.visualSvg || ''
         }))
       : [];
 
@@ -52,15 +141,15 @@
       if (parts.length >= 3) {
         for (let i = 1; i < parts.length; i += 2) {
           const no = Number(parts[i]) || (pages.length + 1);
-          pages.push({ pageNumber: no, title: defaultTitles[no - 1] || `${no}. Sayfa`, content: (parts[i + 1] || '').trim(), svgDiagram: '' });
+          pages.push({ pageNumber: no, title: defaultTitles[no - 1] || `${no}. Sayfa`, storyOrContext: (parts[i + 1] || '').trim(), keyRuleBox: '', visualSvg: '', commonMistakeBox: '', miniChallenge: '', content: (parts[i + 1] || '').trim(), svgDiagram: '' });
         }
       } else {
-        pages.push({ pageNumber: 1, title: defaultTitles[0], content: raw.detailed_content, svgDiagram: '' });
+        pages.push({ pageNumber: 1, title: defaultTitles[0], storyOrContext: raw.detailed_content, keyRuleBox: '', visualSvg: '', commonMistakeBox: '', miniChallenge: '', content: raw.detailed_content, svgDiagram: '' });
       }
     }
     while (pages.length < 5) {
       const i = pages.length;
-      pages.push({ pageNumber: i + 1, title: defaultTitles[i], content: '', svgDiagram: '' });
+      pages.push({ pageNumber: i + 1, title: defaultTitles[i], storyOrContext: '', keyRuleBox: '', visualSvg: '', commonMistakeBox: '', miniChallenge: '', content: '', svgDiagram: '' });
     }
 
     return {
@@ -78,27 +167,10 @@
       lessonPages: pages,
       practicalNotes: Array.isArray(raw.practicalNotes) ? [...raw.practicalNotes] : [],
       flashcards: Array.isArray(raw.flashcards) ? raw.flashcards.map(c => ({ front: c.front || '', back: c.back || '', tip: c.tip || '' })) : [],
+      referenceBookPages: Array.isArray(raw.referenceBookPages) ? [...raw.referenceBookPages] : [],
       teacherNotes: raw.teacherNotes || '',
       status: raw.status || 'draft'
     };
-  }
-
-  function renderRichContent(container, text, svgDiagram) {
-    container.replaceChildren();
-    const full = text + (svgDiagram && svgDiagram.includes('<svg') ? '\n\n' + svgDiagram : '');
-    if (window.zarifAiVisual && typeof window.zarifAiVisual.append === 'function') {
-      window.zarifAiVisual.append(container, full);
-    } else if (window.zarifMathText && typeof window.zarifMathText.format === 'function') {
-      container.innerHTML = window.zarifMathText.format(text);
-      if (svgDiagram && svgDiagram.includes('<svg')) {
-        const div = document.createElement('div');
-        div.style.cssText = 'margin:14px 0;text-align:center;';
-        div.innerHTML = svgDiagram;
-        container.appendChild(div);
-      }
-    } else {
-      container.textContent = text;
-    }
   }
 
   function renderStudio() {
@@ -110,10 +182,10 @@
     if ($('currEditTitle')) $('currEditTitle').value = currentTopic.title || '';
     if ($('currEditSummary')) $('currEditSummary').value = currentTopic.short_summary || '';
     if ($('currPreviewMeta')) {
-      $('currPreviewMeta').textContent = `${currentTopic.grade}. Sınıf · ${currentTopic.themeCode} · ${currentTopic.themeTitle} › ${currentTopic.subTopicTitle}${currentTopic.outcome_code ? ' [' + currentTopic.outcome_code + ']' : ''}`;
+      const refInfo = currentTopic.referenceBookPages?.length ? ` · 📖 ${currentTopic.referenceBookPages.length} MEB Kitap Sayfası Bağlı` : '';
+      $('currPreviewMeta').textContent = `${currentTopic.grade}. Sınıf · ${currentTopic.themeCode} · ${currentTopic.themeTitle} › ${currentTopic.subTopicTitle}${currentTopic.outcome_code ? ' [' + currentTopic.outcome_code + ']' : ''}${refInfo}`;
     }
 
-    // Ana sekme butonları aktiflik
     document.querySelectorAll('[data-studio-tab]').forEach(btn => {
       const isAct = btn.dataset.studioTab === activeStudioTab;
       btn.style.background = isAct ? '#2c1a0e' : '#fbf1e8';
@@ -126,68 +198,115 @@
 
     if (activeStudioTab === 'pages') {
       const page = currentTopic.lessonPages[activePageIdx] || currentTopic.lessonPages[0];
+      const svgCode = page.visualSvg || page.svgDiagram || '';
+      const hasBlocks = Boolean(page.storyOrContext || page.keyRuleBox || page.commonMistakeBox || page.miniChallenge);
+
       body.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="currStudioPagePills">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
             ${currentTopic.lessonPages.map((p, i) => `
-              <button type="button" data-page-idx="${i}" style="padding:6px 12px;border-radius:8px;border:1.5px solid ${i === activePageIdx ? '#c2570c' : '#e2d3c3'};background:${i === activePageIdx ? '#c2570c' : '#fff'};color:${i === activePageIdx ? '#fff' : '#2c1a0e'};font-size:12.5px;font-weight:600;cursor:pointer;">
+              <button type="button" data-page-idx="${i}" style="padding:6px 12px;border-radius:8px;border:1.5px solid ${i === activePageIdx ? '#c2570c' : '#e2d3c3'};background:${i === activePageIdx ? '#c2570c' : '#fff'};color:${i === activePageIdx ? '#fff' : '#2c1a0e'};font-size:12.5px;font-weight:700;cursor:pointer;">
                 ${i + 1}. Sayfa
               </button>
             `).join('')}
           </div>
           <button type="button" id="togglePageEditMode" style="padding:6px 12px;border-radius:8px;border:1.5px solid #c2570c;background:${editMode ? '#c2570c' : '#fffaf5'};color:${editMode ? '#fff' : '#c2570c'};font-size:12.5px;font-weight:600;cursor:pointer;">
-            ${editMode ? '👁️ Önizlemeye Dön' : '✏️ Bu Sayfayı Düzenle'}
+            ${editMode ? '👁️ Kart Önizlemeye Dön' : '✏️ Bu Sayfayı Düzenle'}
           </button>
         </div>
+
         ${editMode ? `
-          <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;flex-direction:column;gap:12px;background:#fffaf5;border:1px solid #e6d7c8;border-radius:12px;padding:16px;">
             <div>
-              <label style="display:block;font-size:12.5px;font-weight:600;color:#2c1a0e;margin-bottom:4px;">Sayfa Başlığı</label>
-              <input type="text" id="pageEditTitle" value="${esc(page.title)}" style="width:100%;padding:9px 12px;border:1.5px solid #dccab8;border-radius:8px;font-size:14px;">
+              <label style="display:block;font-size:12px;font-weight:700;color:#2c1a0e;margin-bottom:4px;">Sayfa Başlığı</label>
+              <input type="text" id="peTitle" value="${esc(page.title)}" style="width:100%;padding:8px 11px;border:1.5px solid #dccab8;border-radius:8px;font-size:14px;">
             </div>
             <div>
-              <label style="display:block;font-size:12.5px;font-weight:600;color:#2c1a0e;margin-bottom:4px;">Konu Anlatım Metni (KaTeX $...$ ve $$...$$ destekli)</label>
-              <textarea id="pageEditContent" rows="10" style="width:100%;padding:10px 12px;border:1.5px solid #dccab8;border-radius:8px;font-size:13.5px;line-height:1.6;font-family:inherit;">${esc(page.content)}</textarea>
+              <label style="display:block;font-size:12px;font-weight:700;color:#92400e;margin-bottom:4px;">🎯 Keşif / Bağlam Kutusu (storyOrContext)</label>
+              <textarea id="peStory" rows="3" style="width:100%;padding:8px 11px;border:1.5px solid #dccab8;border-radius:8px;font-size:13.5px;font-family:inherit;">${esc(page.storyOrContext || page.content)}</textarea>
             </div>
             <div>
-              <label style="display:block;font-size:12.5px;font-weight:600;color:#2c1a0e;margin-bottom:4px;">SVG Şema Kodu (İsteğe bağlı)</label>
-              <textarea id="pageEditSvg" rows="3" style="width:100%;padding:8px 10px;border:1.5px solid #dccab8;border-radius:8px;font-size:12px;font-family:monospace;">${esc(page.svgDiagram || '')}</textarea>
+              <label style="display:block;font-size:12px;font-weight:700;color:#9a3412;margin-bottom:4px;">💡 Altın Kural / Formül Kutusu (keyRuleBox)</label>
+              <textarea id="peRule" rows="3" style="width:100%;padding:8px 11px;border:1.5px solid #dccab8;border-radius:8px;font-size:13.5px;font-family:inherit;">${esc(page.keyRuleBox)}</textarea>
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:700;color:#991b1b;margin-bottom:4px;">⚠️ Kavram Yanılgısı / Tuzak Uyarısı (commonMistakeBox)</label>
+              <textarea id="peMistake" rows="2" style="width:100%;padding:8px 11px;border:1.5px solid #dccab8;border-radius:8px;font-size:13.5px;font-family:inherit;">${esc(page.commonMistakeBox)}</textarea>
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:700;color:#2c1a0e;margin-bottom:4px;">🎮 Etkileşimli Mini Meydan Okuma (miniChallenge — cevabı parantez içinde yazın)</label>
+              <textarea id="peChallenge" rows="2" style="width:100%;padding:8px 11px;border:1.5px solid #dccab8;border-radius:8px;font-size:13.5px;font-family:inherit;">${esc(page.miniChallenge)}</textarea>
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:700;color:#2c1a0e;margin-bottom:4px;">📐 SVG Şema Kodu (visualSvg)</label>
+              <textarea id="peSvg" rows="4" style="width:100%;padding:8px 10px;border:1.5px solid #dccab8;border-radius:8px;font-size:12px;font-family:monospace;">${esc(svgCode)}</textarea>
             </div>
           </div>
         ` : `
-          <div style="background:#fff;border:1px solid #e6d7c8;border-radius:12px;padding:22px;">
-            <h4 style="margin:0 0 12px;color:#2c1a0e;font-size:17px;border-bottom:1px solid #f0e4d6;padding-bottom:8px;">${esc(page.title)}</h4>
-            <div id="currStudioRichMount" class="zp-anlatim" style="line-height:1.75;color:#2c1a0e;"></div>
+          <h4 style="margin:0 0 12px;color:#2c1a0e;font-family:Georgia,serif;font-size:1.12rem;">${esc(page.title)}</h4>
+          <div class="cs-blocks">
+            ${hasBlocks ? `
+              ${page.storyOrContext ? `<div class="cs-card cs-story"><div class="cs-head">🎯 Keşif &amp; Bağlam</div><div class="cs-body">${formatInlineMath(page.storyOrContext)}</div></div>` : ''}
+              ${svgCode && svgCode.includes('<svg') ? `<div class="cs-card cs-svg"><div class="cs-head">📐 Görsel Şema</div><div class="cs-svg-box" id="csPageSvgMount"></div></div>` : ''}
+              ${page.keyRuleBox ? `<div class="cs-card cs-rule"><div class="cs-head">💡 Altın Kural &amp; Formül</div><div class="cs-body">${formatInlineMath(page.keyRuleBox)}</div></div>` : ''}
+              ${page.commonMistakeBox ? `<div class="cs-card cs-mistake"><div class="cs-head">⚠️ Kavram Yanılgısı / Tuzak Uyarısı</div><div class="cs-body">${formatInlineMath(page.commonMistakeBox)}</div></div>` : ''}
+              ${page.miniChallenge ? `<div class="cs-card cs-challenge"><div class="cs-head">🎮 Etkileşimli Mini Meydan Okuma</div><div class="cs-body">${formatInlineMath(page.miniChallenge)}</div></div>` : ''}
+            ` : `
+              <div class="cs-card"><div class="cs-body">${formatInlineMath(page.content)}</div>${svgCode && svgCode.includes('<svg') ? '<div class="cs-svg-box" id="csPageSvgMount" style="margin-top:12px;"></div>' : ''}</div>
+            `}
           </div>
+
+          ${currentTopic.referenceBookPages?.length ? `
+            <div style="margin-top:16px;padding-top:14px;border-top:1.5px dashed #e2d3c3;">
+              <strong style="color:#2c1a0e;font-size:0.9rem;">📖 Kaynak MEB Ders Kitabı Sayfaları (${currentTopic.referenceBookPages.length})</strong>
+              <div class="cs-ref-grid">
+                ${currentTopic.referenceBookPages.map((rp, i) => `
+                  <button type="button" class="cs-ref-card" data-cs-ref="${i}">
+                    <div class="cs-ref-thumb">
+                      ${rp.imageUrl ? `<img src="${esc(rp.imageUrl)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block';"><span style="display:none;font-size:1.6rem;">📄</span>` : '<span style="font-size:1.6rem;">📄</span>'}
+                      <span class="cs-ref-pill">Sayfa ${esc(rp.page || '?')}</span>
+                    </div>
+                    <div style="padding:7px 9px;font-size:11.5px;color:#2c1a0e;">
+                      <strong style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(rp.book || 'MEB Kitabı')}</strong>
+                      <span style="color:#6a5242;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(rp.theme || '')}</span>
+                    </div>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
         `}
       `;
 
-      body.querySelectorAll('[data-page-idx]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          activePageIdx = Number(btn.dataset.pageIdx);
-          renderStudio();
-        });
-      });
-
-      $('togglePageEditMode')?.addEventListener('click', () => {
-        editMode = !editMode;
-        renderStudio();
-      });
+      body.querySelectorAll('[data-page-idx]').forEach(btn => btn.addEventListener('click', () => { activePageIdx = Number(btn.dataset.pageIdx); renderStudio(); }));
+      $('togglePageEditMode')?.addEventListener('click', () => { editMode = !editMode; renderStudio(); });
 
       if (editMode) {
-        $('pageEditTitle')?.addEventListener('input', e => { currentTopic.lessonPages[activePageIdx].title = e.target.value; });
-        $('pageEditContent')?.addEventListener('input', e => { currentTopic.lessonPages[activePageIdx].content = e.target.value; });
-        $('pageEditSvg')?.addEventListener('input', e => { currentTopic.lessonPages[activePageIdx].svgDiagram = e.target.value; });
+        $('peTitle')?.addEventListener('input', e => { currentTopic.lessonPages[activePageIdx].title = e.target.value; });
+        $('peStory')?.addEventListener('input', e => { currentTopic.lessonPages[activePageIdx].storyOrContext = e.target.value; });
+        $('peRule')?.addEventListener('input', e => { currentTopic.lessonPages[activePageIdx].keyRuleBox = e.target.value; });
+        $('peMistake')?.addEventListener('input', e => { currentTopic.lessonPages[activePageIdx].commonMistakeBox = e.target.value; });
+        $('peChallenge')?.addEventListener('input', e => { currentTopic.lessonPages[activePageIdx].miniChallenge = e.target.value; });
+        $('peSvg')?.addEventListener('input', e => {
+          currentTopic.lessonPages[activePageIdx].visualSvg = e.target.value;
+          currentTopic.lessonPages[activePageIdx].svgDiagram = e.target.value;
+        });
       } else {
-        const mount = $('currStudioRichMount');
-        if (mount) renderRichContent(mount, page.content, page.svgDiagram);
+        if (svgCode && svgCode.includes('<svg')) mountSvg($('csPageSvgMount'), svgCode);
+        body.querySelectorAll('[data-cs-ref]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const rp = currentTopic.referenceBookPages[Number(btn.dataset.csRef)];
+            if (rp) openBookLightbox(rp);
+          });
+        });
       }
+
     } else if (activeStudioTab === 'notes') {
       body.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:10px;">
           ${currentTopic.practicalNotes.map((note, idx) => `
-            <div style="display:flex;gap:8px;align-items:flex-start;background:#fffaf5;border:1px solid #e6d7c8;border-radius:10px;padding:10px 12px;">
-              <span style="font-weight:700;color:#c2570c;font-size:13px;padding-top:6px;">${idx + 1}.</span>
+            <div style="display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid #e6d7c8;border-left:4px solid #c2570c;border-radius:10px;padding:10px 12px;">
+              <span style="background:#c2570c;color:#fff;font-weight:800;font-size:12px;padding:3px 8px;border-radius:7px;">${String(idx + 1).padStart(2, '0')}</span>
               <textarea data-note-idx="${idx}" rows="2" style="flex:1;padding:7px 10px;border:1px solid #dccab8;border-radius:8px;font-size:13.5px;font-family:inherit;">${esc(note)}</textarea>
               <button type="button" data-del-note="${idx}" style="background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:7px;padding:6px 10px;cursor:pointer;font-size:12px;font-weight:600;">Sil</button>
             </div>
@@ -195,19 +314,10 @@
           <button type="button" id="addPracticalNoteBtn" style="align-self:flex-start;padding:8px 14px;border-radius:8px;border:1.5px dashed #c2570c;background:#fffaf5;color:#c2570c;font-weight:600;font-size:13px;cursor:pointer;">+ Yeni Hap Bilgi Ekle</button>
         </div>
       `;
-      body.querySelectorAll('[data-note-idx]').forEach(ta => {
-        ta.addEventListener('input', e => { currentTopic.practicalNotes[Number(ta.dataset.noteIdx)] = e.target.value; });
-      });
-      body.querySelectorAll('[data-del-note]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          currentTopic.practicalNotes.splice(Number(btn.dataset.delNote), 1);
-          renderStudio();
-        });
-      });
-      $('addPracticalNoteBtn')?.addEventListener('click', () => {
-        currentTopic.practicalNotes.push('');
-        renderStudio();
-      });
+      body.querySelectorAll('[data-note-idx]').forEach(ta => ta.addEventListener('input', e => { currentTopic.practicalNotes[Number(ta.dataset.noteIdx)] = e.target.value; }));
+      body.querySelectorAll('[data-del-note]').forEach(btn => btn.addEventListener('click', () => { currentTopic.practicalNotes.splice(Number(btn.dataset.delNote), 1); renderStudio(); }));
+      $('addPracticalNoteBtn')?.addEventListener('click', () => { currentTopic.practicalNotes.push(''); renderStudio(); });
+
     } else if (activeStudioTab === 'cards') {
       body.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:12px;">
@@ -231,14 +341,8 @@
       body.querySelectorAll('[data-card-front]').forEach(el => el.addEventListener('input', e => { currentTopic.flashcards[Number(el.dataset.cardFront)].front = e.target.value; }));
       body.querySelectorAll('[data-card-back]').forEach(el => el.addEventListener('input', e => { currentTopic.flashcards[Number(el.dataset.cardBack)].back = e.target.value; }));
       body.querySelectorAll('[data-card-tip]').forEach(el => el.addEventListener('input', e => { currentTopic.flashcards[Number(el.dataset.cardTip)].tip = e.target.value; }));
-      body.querySelectorAll('[data-del-card]').forEach(btn => btn.addEventListener('click', () => {
-        currentTopic.flashcards.splice(Number(btn.dataset.delCard), 1);
-        renderStudio();
-      }));
-      $('addFlashcardBtn')?.addEventListener('click', () => {
-        currentTopic.flashcards.push({ front: '', back: '', tip: '' });
-        renderStudio();
-      });
+      body.querySelectorAll('[data-del-card]').forEach(btn => btn.addEventListener('click', () => { currentTopic.flashcards.splice(Number(btn.dataset.delCard), 1); renderStudio(); }));
+      $('addFlashcardBtn')?.addEventListener('click', () => { currentTopic.flashcards.push({ front: '', back: '', tip: '' }); renderStudio(); });
     }
   }
 
@@ -254,13 +358,9 @@
     setStatus(targetStatus === 'published' ? 'Onaylanıyor ve öğrenci paneline yayınlanıyor…' : 'Taslak olarak kaydediliyor…');
 
     try {
-      const payload = {
-        ...currentTopic,
-        status: targetStatus
-      };
       const res = await apiJson('/api/ai/curriculum-content/publish', {
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ ...currentTopic, status: targetStatus })
       });
       currentTopic.status = targetStatus;
       setStatus('🎉 ' + (res.mesaj || 'Başarıyla kaydedildi!'), 'ok');
@@ -346,6 +446,7 @@
   }
 
   function init() {
+    injectStudioStyles();
     const form = $('aiCurriculumForm');
     if (form) {
       form.addEventListener('submit', async e => {
@@ -362,7 +463,7 @@
         }
 
         if (btn) btn.disabled = true;
-        setStatus('5 sayfalık konu anlatımı, pratik hap bilgiler ve bilgi kartları üretiliyor (15-30 sn sürebilir)…');
+        setStatus('MEB ders kitabı sayfaları taranıyor, 5 sayfalık yapısal anlatım + zorunlu SVG + bilgi kartları üretiliyor (15-30 sn)…');
         if ($('currPreviewWrapper')) $('currPreviewWrapper').style.display = 'none';
 
         try {
@@ -375,7 +476,8 @@
           activePageIdx = 0;
           editMode = false;
           renderStudio();
-          setStatus('✅ İçerik üretildi! Aşağıda inceleyip düzenleyebilir, ardından öğrenci paneline yayınlayabilirsiniz.', 'ok');
+          const ragBooks = res.data?.ragSourceCount?.books || currentTopic.referenceBookPages.length;
+          setStatus(`✅ İçerik üretildi (${ragBooks} MEB ders kitabı sayfası referans alındı)! İnceleyip yayınlayabilirsiniz.`, 'ok');
         } catch (err) {
           setStatus('Üretim hatası: ' + err.message, 'error');
         } finally {
@@ -385,10 +487,7 @@
     }
 
     document.querySelectorAll('[data-studio-tab]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        activeStudioTab = btn.dataset.studioTab;
-        renderStudio();
-      });
+      btn.addEventListener('click', () => { activeStudioTab = btn.dataset.studioTab; renderStudio(); });
     });
 
     $('publishCurriculumBtn')?.addEventListener('click', () => saveTopic('published'));
