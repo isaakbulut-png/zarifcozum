@@ -10,18 +10,13 @@
   var PLAN_EVENT = 'zarif:plan-change';
 
   // Paket bazlı özellik yetki matrisi (Paketler.html + lib/konu-erisimi.js ile birebir uyumlu)
+  // Not: Deneme Sınavları modülü kendi içinde en az 1 Ücretsiz Tanıtım Denemesini açık tutar.
   var FEATURE_RULES = {
     'asistanla-soru-coz': {
       plans: ['temel', 'standart', 'vip'],
       requiredLabel: 'Temel, Standart veya VIP Paket',
       title: 'Asistanla Görsel Soru Çözümü Kilitli',
       desc: 'Soru fotoğrafı yükleyerek adım adım yapay zekâ çözümü almak için Temel, Standart veya VIP pakete yükseltebilirsiniz.'
-    },
-    'denemeler': {
-      plans: ['temel', 'standart', 'vip'],
-      requiredLabel: 'Temel, Standart veya VIP Paket',
-      title: 'Türkiye Geneli & Kurumsal Denemeler Kilitli',
-      desc: 'Aylık Türkiye Geneli deneme sınavları ve detaylı net karnesi için Temel, Standart veya VIP pakete yükseltebilirsiniz.'
     },
     'yaziliya-hazirlik': {
       plans: ['temel', 'standart', 'vip'],

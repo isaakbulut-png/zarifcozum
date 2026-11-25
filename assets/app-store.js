@@ -12,7 +12,7 @@
 (function (global) {
   'use strict';
 
-  if (global.ZarifStore && global.ZarifStore.VERSION === '1.1.0') {
+  if (global.ZarifStore && global.ZarifStore.VERSION === '1.2.0') {
     return;
   }
 
@@ -22,7 +22,9 @@
     assignments: 'zc_assignments_v1',
     publishedTests: 'zc_published_tests_v1',
     liveClasses: 'zc_live_classes_v1',
-    notifications: 'zc_notifications_v1'
+    notifications: 'zc_notifications_v1',
+    mockExams: 'zc_mock_exams_v1',
+    mockAttempts: 'zc_mock_attempts_v1'
   };
 
   var MAX_ITEMS = {
@@ -31,7 +33,9 @@
     assignments: 300,
     publishedTests: 250,
     liveClasses: 150,
-    notifications: 200
+    notifications: 200,
+    mockExams: 120,
+    mockAttempts: 200
   };
 
   var EVENT_NAME = 'zarif:store-change';
@@ -726,7 +730,97 @@
   };
 
   // =========================================================================
-  // 7. EVENTS (Canlı Sekme & Sayfa İçi Senkronizasyon)
+  // 7. MOCK EXAMS (İl Geneli & Türkiye Geneli Deneme Sınavları + Optik Karneler)
+  // =========================================================================
+  var mockExams = {
+    list: function (filter) {
+      var items = safeRead(KEYS.mockExams, []);
+      items.sort(function (a, b) {
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+      if (!filter) return items;
+      return items.filter(function (item) {
+        if (filter.scope && filter.scope !== 'all' && item.scope !== filter.scope) return false;
+        if (filter.grade && Number(item.grade) !== Number(filter.grade)) return false;
+        return true;
+      });
+    },
+
+    publish: function (data) {
+      var items = safeRead(KEYS.mockExams, []);
+      var now = new Date().toISOString();
+      var scope = (data && data.scope === 'il') ? 'il' : 'turkiye';
+      var province = normalizeText(data && data.province) || 'Samsun';
+      var questions = Array.isArray(data && data.questions) ? data.questions : [];
+      var record = {
+        id: (data && data.id) || uid('deneme'),
+        title: normalizeText(data && data.title) || (scope === 'il' ? (province + ' İl Geneli Matematik Denemesi') : 'Türkiye Geneli Matematik Denemesi'),
+        grade: Number(data && data.grade) || 5,
+        scope: scope, // 'turkiye' | 'il'
+        province: scope === 'il' ? province : 'Türkiye Geneli',
+        durationMin: Number(data && data.durationMin) || Math.max(15, questions.length * 2),
+        startsAt: normalizeText(data && data.startsAt) || now,
+        isFreeIntro: Boolean(data && data.isFreeIntro),
+        teacherName: normalizeText(data && data.teacherName) || (global.localStorage && global.localStorage.getItem('zarif_teacher_name')) || 'ZarifÇözüm Ölçme Kurulu',
+        questions: questions,
+        status: 'published',
+        createdAt: now
+      };
+      items.unshift(record);
+      if (items.length > MAX_ITEMS.mockExams) items = items.slice(0, MAX_ITEMS.mockExams);
+      safeWrite(KEYS.mockExams, items);
+      emitChange('mockExams', 'publish', record);
+      return record;
+    },
+
+    remove: function (id) {
+      var items = safeRead(KEYS.mockExams, []);
+      var next = items.filter(function (item) { return item.id !== id; });
+      if (next.length !== items.length) {
+        safeWrite(KEYS.mockExams, next);
+        emitChange('mockExams', 'remove', { id: id });
+        return true;
+      }
+      return false;
+    },
+
+    listAttempts: function () {
+      var items = safeRead(KEYS.mockAttempts, []);
+      items.sort(function (a, b) {
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+      return items;
+    },
+
+    recordAttempt: function (data) {
+      var items = safeRead(KEYS.mockAttempts, []);
+      var record = Object.assign({
+        id: uid('att'),
+        createdAt: new Date().toISOString()
+      }, data || {});
+      items.unshift(record);
+      if (items.length > MAX_ITEMS.mockAttempts) items = items.slice(0, MAX_ITEMS.mockAttempts);
+      safeWrite(KEYS.mockAttempts, items);
+      emitChange('mockExams', 'attempt', record);
+      if (record.total > 0) {
+        tests.recordResult({
+          grade: record.grade || 5,
+          topicTitle: record.title || 'Deneme Sınavı',
+          source: 'optik',
+          total: record.total,
+          correct: record.correct,
+          wrong: record.wrong,
+          blank: record.blank,
+          score: record.score,
+          durationSec: record.durationSec || 0
+        });
+      }
+      return record;
+    }
+  };
+
+  // =========================================================================
+  // 8. EVENTS (Canlı Sekme & Sayfa İçi Senkronizasyon)
   // =========================================================================
   var events = {
     subscribe: function (channel, callback) {
@@ -749,6 +843,7 @@
         else if (e.key === KEYS.publishedTests) matchedChannel = 'publishedTests';
         else if (e.key === KEYS.liveClasses) matchedChannel = 'liveClasses';
         else if (e.key === KEYS.notifications) matchedChannel = 'notifications';
+        else if (e.key === KEYS.mockExams || e.key === KEYS.mockAttempts) matchedChannel = 'mockExams';
         if (matchedChannel && (channel === '*' || channel === matchedChannel)) {
           callback({ channel: matchedChannel, action: 'storage', ts: Date.now() });
         }
@@ -765,7 +860,7 @@
   };
 
   global.ZarifStore = {
-    VERSION: '1.1.0',
+    VERSION: '1.2.0',
     KEYS: KEYS,
     contacts: contacts,
     tests: tests,
@@ -773,6 +868,7 @@
     publishedTests: publishedTests,
     liveClasses: liveClasses,
     notifications: notifications,
+    mockExams: mockExams,
     events: events
   };
 })(window);

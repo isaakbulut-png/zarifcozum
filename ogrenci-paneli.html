@@ -1166,47 +1166,107 @@ button,select{font:inherit}
     </section>
 
     <section class="panel-view" id="denemeler" data-panel-view="denemeler">
-    
-    <!-- CANLI TÜRKİYE GENELİ DENEME GERİ SAYIM KARTI -->
-    <div id="tgCountdownCard" class="card" style="display:none; margin-bottom:20px; background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color:#fff; border:1px solid #334155; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+      <style>
+        .dm-wrap{display:flex;flex-direction:column;gap:18px;font-family:'Inter',system-ui,sans-serif;}
+        .dm-hero{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:26px 28px;border-radius:20px;background:linear-gradient(135deg,#3E2F26 0%,#2c2019 100%);border:1.5px solid #C59B47;color:#FAF6F0;box-shadow:0 16px 36px rgba(62,47,38,0.18);}
+        .dm-hero-left{flex:1;min-width:260px;}
+        .dm-hero-badges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+        .dm-hero h3{margin:0 0 6px;font-family:Georgia,serif;font-size:1.42rem;color:#fff;}
+        .dm-hero p{margin:0;font-size:0.88rem;color:#E8DFD5;}
+        .dm-hero-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+        .dm-cd-box{padding:9px 14px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(197,155,71,0.4);text-align:right;}
+        .dm-cd-box span{display:block;font-size:0.68rem;font-weight:800;letter-spacing:0.6px;color:#f3d285;}
+        .dm-cd-box strong{font-family:monospace;font-size:1.22rem;color:#fff;}
+        .dm-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:0.72rem;font-weight:800;}
+        .dm-badge.gold{background:rgba(197,155,71,0.2);color:#f3d285;border:1px solid rgba(197,155,71,0.45);}
+        .dm-badge.il{background:#FAF6F0;color:#8c6821;border:1px solid #C59B47;}
+        .dm-badge.free{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;}
+        .dm-badge.ok{background:#ecfdf5;color:#065f46;}
+        .dm-badge.lock{background:#fef3c7;color:#92400e;}
+        .dm-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+        .dm-tab{padding:9px 16px;border-radius:11px;border:1.5px solid #e6d7c8;background:#fff;color:#3E2F26;font-size:0.85rem;font-weight:700;cursor:pointer;transition:all .15s ease;}
+        .dm-tab:hover{border-color:#C59B47;}
+        .dm-tab.active{background:#3E2F26;color:#f3d285;border-color:#C59B47;}
+        .dm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+        .dm-card{background:#fff;border:1px solid #ead8c5;border-radius:16px;padding:18px;box-shadow:0 6px 20px rgba(62,47,38,0.06);display:flex;flex-direction:column;gap:10px;transition:border-color .15s ease;}
+        .dm-card:hover{border-color:#C59B47;}
+        .dm-card.is-locked{background:#fffdf9;}
+        .dm-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+        .dm-card h4{margin:0;font-family:Georgia,serif;font-size:1.02rem;color:#3E2F26;}
+        .dm-card-meta{margin:0;font-size:0.8rem;color:#786557;}
+        .dm-card-stats{display:flex;gap:10px;flex-wrap:wrap;padding:9px 11px;border-radius:10px;background:#FAF6F0;font-size:0.8rem;color:#3E2F26;}
+        .dm-card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:10px;border-top:1px solid #f4ece3;}
+        .dm-date{font-size:0.75rem;color:#786557;font-weight:600;}
+        .dm-empty-note{padding:26px;border-radius:16px;background:#fff;border:1.5px dashed #d8c3ae;text-align:center;color:#6e5c50;font-size:0.9rem;}
+        .dm-btn-gold,.dm-btn-dark,.dm-btn-light{padding:9px 16px;border-radius:10px;font-size:0.83rem;font-weight:800;cursor:pointer;border:none;transition:transform .14s ease;}
+        .dm-btn-gold{background:linear-gradient(135deg,#C59B47,#b08635);color:#2c2019;box-shadow:0 4px 12px rgba(197,155,71,0.3);}
+        .dm-btn-dark{background:#3E2F26;color:#FAF6F0;}
+        .dm-btn-light{background:#fff;color:#3E2F26;border:1px solid #d8c3ae;}
+        .dm-btn-gold:hover,.dm-btn-dark:hover{transform:translateY(-1px);}
+        .dm-btn-light:disabled,.dm-btn-dark:disabled{opacity:0.45;cursor:default;}
+        /* Tam Ekran Dijital Sınav Salonu & Canlı Optik Form */
+        .dm-modal-backdrop{position:fixed;inset:0;z-index:10080;background:rgba(30,20,14,0.82);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto;}
+        .dm-hall{width:100%;max-width:1180px;max-height:94vh;background:#FAF6F0;border:1.5px solid #C59B47;border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.4);}
+        .dm-hall-top{background:#3E2F26;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid rgba(197,155,71,0.35);}
+        .dm-hall-top strong{margin-left:8px;font-family:Georgia,serif;font-size:1rem;}
+        .dm-hall-meta{display:flex;align-items:center;gap:10px;}
+        .dm-timer-chip{padding:6px 12px;border-radius:999px;background:rgba(255,255,255,0.1);border:1px solid #C59B47;color:#f3d285;font-size:0.84rem;}
+        .dm-hall-body{display:grid;grid-template-columns:1.5fr 340px;gap:18px;padding:20px;overflow:auto;flex:1;}
+        .dm-q-pane{background:#fff;border:1px solid #ead8c5;border-radius:16px;padding:22px;display:flex;flex-direction:column;}
+        .dm-q-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+        .dm-q-num{padding:4px 11px;border-radius:999px;background:#3E2F26;color:#f3d285;font-size:0.76rem;font-weight:800;}
+        .dm-q-topic{font-size:0.78rem;font-weight:700;color:#786557;}
+        .dm-q-stem{font-size:1rem;line-height:1.72;color:#2c1a0e;margin-bottom:18px;}
+        .dm-q-opts{display:flex;flex-direction:column;gap:9px;margin-bottom:18px;}
+        .dm-q-opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 14px;border-radius:11px;border:1.5px solid #e8dfd5;background:#FAF6F0;color:#3E2F26;font-size:0.9rem;cursor:pointer;}
+        .dm-q-opt.selected{background:#3E2F26;color:#fff;border-color:#C59B47;}
+        .dm-q-let{width:28px;height:28px;border-radius:50%;background:#fff;color:#3E2F26;border:1px solid #d8c3ae;display:grid;place-items:center;font-weight:800;font-size:0.8rem;flex-shrink:0;}
+        .dm-q-opt.selected .dm-q-let{background:#C59B47;color:#2c2019;border-color:#C59B47;}
+        .dm-q-nav{display:flex;justify-content:space-between;gap:8px;margin-top:auto;padding-top:14px;border-top:1px solid #f2eae0;}
+        .dm-opt-pane{background:#fff;border:1.5px solid #C59B47;border-radius:16px;padding:16px;display:flex;flex-direction:column;}
+        .dm-opt-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f2eae0;}
+        .dm-opt-head h4{margin:0;font-family:Georgia,serif;color:#3E2F26;font-size:0.98rem;}
+        .dm-opt-head span{font-size:0.76rem;font-weight:700;color:#8c6821;}
+        .dm-opt-rows{display:flex;flex-direction:column;gap:6px;overflow:auto;max-height:52vh;padding-right:4px;}
+        .dm-opt-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:9px;background:#FAF6F0;cursor:pointer;border:1px solid transparent;}
+        .dm-opt-row.active{border-color:#C59B47;background:#fff9eb;}
+        .dm-opt-num{width:24px;font-size:0.78rem;font-weight:800;color:#3E2F26;}
+        .dm-opt-bubbles{display:flex;gap:6px;flex:1;}
+        .dm-bubble{width:28px;height:28px;border-radius:50%;border:1.5px solid #b59a7d;background:#fff;color:#3E2F26;font-size:0.74rem;font-weight:800;cursor:pointer;transition:all .12s ease;}
+        .dm-bubble.filled{background:#3E2F26;border-color:#3E2F26;color:#f3d285;transform:scale(1.06);}
+        /* Karne Modalı */
+        .dm-report-shell{width:100%;max-width:860px;background:#FAF6F0;border:2px solid #C59B47;border-radius:20px;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,0.4);}
+        .dm-report-hero{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px 22px;border-radius:16px;background:linear-gradient(135deg,#3E2F26,#2c2019);color:#fff;margin-bottom:16px;}
+        .dm-report-hero h2{margin:8px 0 4px;font-family:Georgia,serif;font-size:1.3rem;color:#fff;}
+        .dm-report-hero p{margin:0;font-size:0.84rem;color:#E8DFD5;}
+        .dm-net-orb{width:86px;height:86px;border-radius:50%;background:linear-gradient(135deg,#C59B47,#e4c475);color:#2c2019;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+        .dm-net-orb strong{font-family:Georgia,serif;font-size:1.45rem;line-height:1;}
+        .dm-net-orb span{font-size:0.7rem;font-weight:800;letter-spacing:1px;}
+        .dm-report-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:16px;}
+        .dm-rk{padding:12px;border-radius:12px;background:#fff;border:1px solid #ead8c5;text-align:center;}
+        .dm-rk strong{display:block;font-family:Georgia,serif;font-size:1.25rem;}
+        .dm-rk span{font-size:0.72rem;color:#786557;}
+        .dm-rk.ok strong{color:#059669;}.dm-rk.err strong{color:#dc2626;}.dm-rk.gold strong{color:#8c6821;}.dm-rk.espresso strong{color:#3E2F26;}
+        .dm-topic-box{background:#fff;border:1px solid #ead8c5;border-radius:14px;padding:16px;}
+        .dm-topic-box h4{margin:0 0 12px;font-family:Georgia,serif;color:#3E2F26;}
+        .dm-topic-bars{display:flex;flex-direction:column;gap:10px;}
+        .dm-tbar-top{display:flex;justify-content:space-between;font-size:0.82rem;color:#3E2F26;margin-bottom:4px;}
+        .dm-tbar-track{height:8px;border-radius:999px;background:#efe6dc;overflow:hidden;}
+        .dm-tbar-fill{height:100%;background:linear-gradient(90deg,#3E2F26,#C59B47);border-radius:999px;}
+        @media (max-width:900px){.dm-hall-body{grid-template-columns:1fr;}.dm-report-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}.dm-hero-right{align-items:flex-start;}}
+      </style>
+      <div class="section-head">
         <div>
-          <span class="chip hot" style="background:#ea580c; color:#fff; font-size:11px; font-weight:700;">🇹🇷 TÜRKİYE GENELİ DİJİTAL OPTİK DENEME</span>
-          <h2 id="tgExamTitle" style="color:#fff; margin:8px 0 4px; font-size:1.3rem;">2026 Türkiye Geneli Deneme</h2>
-          <p id="tgExamDesc" style="color:#94a3b8; font-size:0.88rem; margin:0;">Tüm Türkiye ile aynı anda sıralama ve net karnesi.</p>
-        </div>
-        <div style="text-align:right;">
-          <div id="tgStatusLabel" style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#f59e0b; font-weight:700;">SINAVA KALAN SÜRE</div>
-          <div id="tgTimerNumbers" style="font-family:monospace; font-size:1.7rem; font-weight:700; color:#38bdf8; margin-top:2px;">
-            00g 00s 00d 00s
-          </div>
+          <h2>🏆 Deneme Sınavları Merkezi</h2>
+          <p class="hint">Türkiye Geneli ve İl Geneli dijital optik deneme sınavlarına katıl, netlerini ve sıralamanı anında gör.</p>
         </div>
       </div>
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.1);">
-        <div style="font-size:0.84rem; color:#cbd5e1;" id="tgExamMeta">
-          👥 <strong id="tgParticipantCount">0</strong> Katılımcı · ⏱️ <strong id="tgDuration">80</strong> Dakika
-        </div>
-        <a href="deneme-sinavi-optik.html" id="tgActionBtn" class="btn-join" style="margin:0; background:#0284c7; color:#fff;">Optik Sınav Salonuna Git →</a>
-      </div>
-    </div>
+      <div id="denemeMerkeziRoot"></div>
 
-    <div class="section-head"><h2>Resimli deneme sınavları</h2></div>
-    <section class="teacher-feed" id="imageExamFeed" aria-live="polite"><p class="feed-status">Denemeler yükleniyor…</p></section>
-    <section class="card" id="imageExamRunner" hidden>
-      <h2 id="imageExamTitle"></h2>
-      <p class="hint" id="imageExamDescription"></p>
-      <form id="imageExamForm"></form>
-      <p class="feed-status" id="imageExamStatus" role="status"></p>
-      <div id="imageExamAiCard" style="display:none;margin-top:var(--space-4);padding:var(--space-4);background:var(--color-surface-subtle,#f8fafc);border:1px solid var(--color-border);border-radius:12px"></div>
-      <div id="imageExamReview"></div>
-    </section>
-
-    <div class="section-head">
-      <h2>Konu pratiği</h2>
-      <a href="deneme-sinavi-optik.html">Konu pratiğine git</a>
-    </div>
-
-    <p class="feed-status">Öğretmeninin planladığı sınav tarihleri <a href="#ders-takvimim" style="text-decoration:underline">Ders Takvimim</a> bölümünde görünür. Çözdüğün denemeler <a href="#test-sonuclarim" style="text-decoration:underline">Test Sonuçlarım</a> bölümünde listelenir.</p>
+      <!-- Geriye dönük uyumluluk için gizli eski kapsayıcılar -->
+      <div id="tgCountdownCard" hidden style="display:none;"><span id="tgExamTitle"></span><span id="tgExamDesc"></span><span id="tgStatusLabel"></span><span id="tgTimerNumbers"></span><span id="tgParticipantCount"></span><span id="tgDuration"></span><a id="tgActionBtn" href="deneme-sinavi-optik.html"></a></div>
+      <section id="imageExamFeed" hidden></section>
+      <section id="imageExamRunner" hidden><h2 id="imageExamTitle"></h2><p id="imageExamDescription"></p><form id="imageExamForm"></form><p id="imageExamStatus"></p><div id="imageExamAiCard"></div><div id="imageExamReview"></div></section>
     </section>
 
     <!-- YAZILIYA HAZIRLIK (MEB SENARYO AÇIK UÇLU PROVALAR) -->
@@ -3601,11 +3661,12 @@ button,select{font:inherit}
       window.location.href = `/Paketler.html?plan=${tier}&ref=panel`;
     }
   </script>
-<script src="/assets/app-store.js?v=4"></script>
+<script src="/assets/app-store.js?v=5"></script>
 <script src="/assets/canli-ders.js?v=1"></script>
 <script src="/assets/gamification-service.js?v=1"></script>
-<script src="/assets/student-plan-guard.js?v=2"></script>
+<script src="/assets/student-plan-guard.js?v=3"></script>
 <script src="/assets/student-profile-modal.js?v=1"></script>
+<script src="/assets/deneme-merkezi.js?v=1"></script>
 <script src="/assets/liderlik-sertifika.js?v=2"></script>
 <script src="/assets/student-store-bridge.js?v=2"></script>
 <script src="/assets/matematik-mufredati.js"></script>
