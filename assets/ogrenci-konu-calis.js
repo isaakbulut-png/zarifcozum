@@ -548,6 +548,33 @@
         </div>
 
         ${renderReferencePagesHtml(t.referenceBookPages)}
+        ${(() => {
+          const topicLabel = t.subTopicTitle || t.title || 'Seçili Konu';
+          let solvedBadgeHtml = '';
+          if (window.ZarifStore && window.ZarifStore.tests) {
+            const norm = s => String(s || '').toLowerCase().replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u').replace(/[^a-z0-9]+/g,' ').trim();
+            const tk = norm(topicLabel);
+            const past = window.ZarifStore.tests.list({ grade: Number(t.grade) }).find(r => {
+              const rk = norm(r.topicTitle);
+              return rk && (rk === tk || rk.includes(tk) || tk.includes(rk));
+            });
+            if (past) {
+              solvedBadgeHtml = `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;font-size:0.76rem;font-weight:800;">✓ Kazanım Testi Çözüldü (%${esc(past.score)})</span>`;
+            }
+          }
+          return `
+            <div style="margin-top:20px;padding:18px 20px;border-radius:16px;background:linear-gradient(135deg,#FAF6F0 0%,#f6ecdf 100%);border:1.5px solid #C59B47;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;box-shadow:0 6px 18px rgba(62,47,38,0.08);">
+              <div style="flex:1;min-width:220px;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+                  <strong style="font-family:Georgia,serif;font-size:1.02rem;color:#3E2F26;">🎯 Konuyu Pekiştir: ${esc(topicLabel)} Kazanım Testi</strong>
+                  ${solvedBadgeHtml}
+                </div>
+                <p style="margin:0;font-size:0.84rem;color:#6e5c50;">Öğrendiklerini öğretmen onaylı sorularla hemen test et ve başarı puanını gelişim grafiğine kaydet.</p>
+              </div>
+              <button type="button" id="kcGoKazanimTestBtn" style="padding:11px 18px;border-radius:12px;border:0;background:linear-gradient(135deg,#3E2F26 0%,#2c2019 100%);color:#f3d285;font-size:0.86rem;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 4px 12px rgba(62,47,38,0.2);">🎯 Bu Konunun Kazanım Testini Çöz →</button>
+            </div>
+          `;
+        })()}
         ${window.ZarifCopyright ? window.ZarifCopyright.stampHtml(`${t.id || 'KC'}_P${readerState.pageIdx + 1}`) : ''}
 
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px;">
@@ -606,6 +633,16 @@
       body.querySelectorAll('[data-reader-page]').forEach(btn => btn.addEventListener('click', () => goPage(Number(btn.dataset.readerPage))));
       $('kcPrevPageBtn')?.addEventListener('click', () => { if (readerState.pageIdx > 0) goPage(readerState.pageIdx - 1); });
       $('kcNextPageBtn')?.addEventListener('click', () => { if (readerState.pageIdx < pages.length - 1) goPage(readerState.pageIdx + 1); });
+      $('kcGoKazanimTestBtn')?.addEventListener('click', () => {
+        const targetGrade = t.grade || state.grade;
+        const targetTopic = t.subTopicTitle || t.title || '';
+        closeReader();
+        if (window.ZarifKazanimTesti && typeof window.ZarifKazanimTesti.openForTopic === 'function') {
+          window.ZarifKazanimTesti.openForTopic(targetGrade, targetTopic);
+        } else if (typeof window.showPanel === 'function') {
+          window.showPanel('kazanim-testi', true);
+        }
+      });
 
     } else if (readerState.mode === 'notes') {
       const notes = t.practicalNotes || [];

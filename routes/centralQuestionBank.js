@@ -182,7 +182,9 @@ function createCentralQuestionBankRouter({ SoruModel } = {}) {
 
   router.get('/', async (req, res) => {
     try {
-      const { grade, difficulty, search, limit = 50 } = req.query;
+      const { grade, difficulty, search, topic, approvedOnly, limit = 50 } = req.query;
+      const isApprovedOnly = approvedOnly === '1' || approvedOnly === 'true';
+      const maxLimit = Math.min(500, Math.max(1, Number(limit) || 50));
       const filter = {};
 
       if (grade && grade !== 'all') {
@@ -195,6 +197,9 @@ function createCentralQuestionBankRouter({ SoruModel } = {}) {
       if (search && search.trim()) {
         filter.search = search.trim();
       }
+      if (topic && topic.trim()) {
+        filter.topic = topic.trim();
+      }
 
       let questions = [];
 
@@ -204,11 +209,14 @@ function createCentralQuestionBankRouter({ SoruModel } = {}) {
           const mongoQuery = {};
           if (filter.grade) mongoQuery.grade = filter.grade;
           if (filter.difficulty) mongoQuery.difficulty = filter.difficulty;
+          if (filter.topic) {
+            mongoQuery.topic = new RegExp(filter.topic.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+          }
           if (filter.search) {
             const reg = new RegExp(filter.search, 'i');
             mongoQuery.$or = [{ topic: reg }, { text: reg }, { outcomeCode: reg }];
           }
-          const docs = await Model.find(mongoQuery).sort({ createdAt: -1 }).limit(Number(limit)).lean().exec();
+          const docs = await Model.find(mongoQuery).sort({ createdAt: -1 }).limit(maxLimit).lean().exec();
           if (Array.isArray(docs) && docs.length > 0) {
             questions = docs.map(q => ({
               id: (q._id || q.id).toString(),
@@ -219,6 +227,7 @@ function createCentralQuestionBankRouter({ SoruModel } = {}) {
               difficulty: q.difficulty,
               options: q.options,
               answer: q.answer,
+              explanation: q.explanation || q.solution || '',
               svg: q.svg,
               imageUrl: q.imageUrl,
               outcomeCode: q.outcomeCode,
@@ -230,13 +239,14 @@ function createCentralQuestionBankRouter({ SoruModel } = {}) {
         }
       }
 
-      // Veritabanı boşsa veya filtreye uygun DB sorusu yoksa zengin örnek soruları sun
-      if (questions.length === 0) {
+      // Yalnızca öğretmen onaylı havuz istenmiyorsa örnek soruları sun
+      if (questions.length === 0 && !isApprovedOnly) {
         questions = getSampleQuestions(filter);
       }
 
       res.json({
         success: true,
+        approvedOnly: isApprovedOnly,
         count: questions.length,
         questions
       });
