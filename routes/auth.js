@@ -722,7 +722,7 @@ router.get('/me', async (req, res) => {
     const isParent = req.session.user.role === 'parent';
     const accountModel = isParent ? Parent : User;
     const user = await accountModel.findById(req.session.user.id)
-      .select(isParent ? 'name surname email restricted' : 'name email role adminRole subscriptionStatus subscriptionPlan paketTipi expiresAt avatarUrl photo profileImage brans branch phone telefon graduationInfo bio');
+      .select(isParent ? 'name surname email restricted' : 'name email role adminRole subscriptionStatus subscriptionPlan paketTipi expiresAt avatarUrl photo profileImage brans branch phone telefon graduationInfo bio kayitliSinif grade parentConnectionCode');
     if (!user) {
       req.session.destroy(error => {
         if (error) return res.status(500).json({ mesaj: 'Oturum kapatılamadı.' });
@@ -760,6 +760,8 @@ router.get('/me', async (req, res) => {
         phone: isParent ? '' : (effectiveUser.phone || effectiveUser.telefon || ''),
         graduationInfo: isParent ? '' : (effectiveUser.graduationInfo || ''),
         bio: isParent ? '' : (effectiveUser.bio || ''),
+        kayitliSinif: isParent ? null : (Number(effectiveUser.kayitliSinif || effectiveUser.grade) || 5),
+        parentConnectionCode: isParent ? '' : (effectiveUser.parentConnectionCode || ''),
         subscriptionStatus: effectiveUser.subscriptionStatus || (hasActivePlan ? 'active' : 'free'),
         subscriptionPlan: currentEffectivePlan,
         paketTipi: effectiveUser.paketTipi || currentEffectivePlan || 'free',
@@ -770,6 +772,47 @@ router.get('/me', async (req, res) => {
   } catch (error) {
     console.error('Oturum kullanıcısı alınamadı:', error);
     res.status(500).json({ mesaj: 'Kullanıcı bilgileri alınamadı.' });
+  }
+});
+
+router.patch('/student-profile', async (req, res) => {
+  if (!req.session.user?.id) return res.status(401).json({ mesaj: 'Oturum açılmamış.' });
+  try {
+    const user = await User.findById(req.session.user.id);
+    if (!user) return res.status(404).json({ mesaj: 'Kullanıcı bulunamadı.' });
+
+    const nextName = typeof req.body?.name === 'string' ? req.body.name.trim().slice(0, 100) : '';
+    const nextGrade = Number(req.body?.grade || req.body?.kayitliSinif);
+    const nextGoal = typeof req.body?.goalNote === 'string' ? req.body.goalNote.trim().slice(0, 240) : null;
+
+    if (nextName.length >= 2) {
+      user.name = nextName;
+      req.session.user.name = nextName;
+    }
+    if (Number.isFinite(nextGrade) && nextGrade >= 5 && nextGrade <= 12) {
+      user.kayitliSinif = nextGrade;
+      user.grade = nextGrade;
+      req.session.user.kayitliSinif = nextGrade;
+    }
+    if (nextGoal !== null) {
+      user.bio = nextGoal;
+    }
+
+    await user.save();
+    res.json({
+      success: true,
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        kayitliSinif: Number(user.kayitliSinif || user.grade) || 5,
+        goalNote: user.bio || '',
+        parentConnectionCode: user.parentConnectionCode || ''
+      }
+    });
+  } catch (error) {
+    console.error('Öğrenci profili güncellenemedi:', error);
+    res.status(500).json({ mesaj: 'Profil güncellenemedi.' });
   }
 });
 

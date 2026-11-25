@@ -330,11 +330,34 @@ button,select{font:inherit}
 
   <!-- Sol menü -->
   <aside class="sidebar">
-    <div class="brand">
-      <img class="brand-logo" src="assets/brand-mark.png" alt="ZarifÇözüm">
-      <div>
-        <div class="brand-name">ZarifÇözüm</div>
-        <span class="student-badge">✨ Öğrenci Başarı Alanı</span>
+    <style>
+      .zc-side-brand{display:flex;align-items:center;gap:12px;padding:6px 4px 16px;margin-bottom:8px;border-bottom:1px solid rgba(197,155,71,0.18);}
+      .zc-side-logo-box{width:38px;height:38px;border-radius:10px;border:1.5px solid #C59B47;background:rgba(197,155,71,0.1);display:grid;place-items:center;flex-shrink:0;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.22);}
+      .zc-side-logo-box img{width:28px;height:28px;object-fit:contain;display:block;}
+      .zc-side-brand-copy{display:flex;flex-direction:column;align-items:flex-start;min-width:0;}
+      .zc-side-brand-title{font-family:Georgia,serif;font-size:1.08rem;font-weight:700;color:#ffffff;line-height:1.15;letter-spacing:0.01em;}
+      .zc-side-brand-sub{font-size:0.66rem;font-weight:700;color:#D4AF37;letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;margin-top:3px;}
+      .zc-profile-card{background:rgba(255,255,255,0.04);border:1px solid rgba(197,155,71,0.25);border-radius:12px;padding:12px;margin:10px 0;cursor:pointer;transition:background .16s ease,border-color .16s ease;}
+      .zc-profile-card:hover{background:rgba(255,255,255,0.08);border-color:rgba(197,155,71,0.55);}
+      .zc-profile-top{display:flex;align-items:center;gap:10px;}
+      .zc-profile-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#C59B47,#e4c475);color:#2c2019;font-weight:800;font-size:0.84rem;display:grid;place-items:center;flex-shrink:0;box-shadow:0 3px 10px rgba(197,155,71,0.3);}
+      .zc-profile-info{flex:1;min-width:0;}
+      .zc-profile-name{display:block;font-size:0.86rem;font-weight:700;color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25;}
+      .zc-profile-email{display:block;font-size:11px;color:#d6c7b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+      .zc-profile-gear{font-size:0.95rem;opacity:0.75;flex-shrink:0;transition:transform .2s ease;}
+      .zc-profile-card:hover .zc-profile-gear{opacity:1;transform:rotate(30deg);}
+      .zc-plan-full-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;padding:7px 10px;border-radius:9px;font-size:0.74rem;font-weight:800;white-space:nowrap;text-decoration:none;cursor:pointer;box-sizing:border-box;transition:transform .14s ease,filter .14s ease;}
+      .zc-plan-full-btn:hover{transform:translateY(-1px);filter:brightness(1.06);}
+      .zc-plan-full-btn.free{background:rgba(197,155,71,0.12);border:1px solid #C59B47;color:#f3d285;}
+      .zc-plan-full-btn.active{background:linear-gradient(135deg,#C59B47,#d4af37);border:1px solid #f3d285;color:#2c2019;}
+    </style>
+    <div class="zc-side-brand">
+      <div class="zc-side-logo-box">
+        <img src="assets/brand-mark.png" alt="ZarifÇözüm">
+      </div>
+      <div class="zc-side-brand-copy">
+        <span class="zc-side-brand-title">ZarifÇözüm</span>
+        <span class="zc-side-brand-sub">ÖĞRENCİ PANELİ</span>
       </div>
     </div>
     <a class="home-link" href="index.html">
@@ -411,9 +434,16 @@ button,select{font:inherit}
       </ul>
     </nav>
 
-    <div class="side-footer">
-      <div class="avatar" id="studentAvatar">Ö</div>
-      <p><span id="studentName">Öğrenci</span><span id="studentPlanBadge" class="user-plan-badge" style="display:none"></span><br><small id="studentEmail">Hesap bilgileri yükleniyor…</small></p>
+    <div class="zc-profile-card" id="studentProfileCard" title="Öğrenci Profilini &amp; Veli Eşleştirme Kodunu Aç">
+      <div class="zc-profile-top">
+        <div class="zc-profile-avatar" id="studentAvatar">Ö</div>
+        <div class="zc-profile-info">
+          <span class="zc-profile-name" id="studentName">Öğrenci</span>
+          <small class="zc-profile-email" id="studentEmail">Hesap bilgileri yükleniyor…</small>
+        </div>
+        <span class="zc-profile-gear" aria-hidden="true">⚙️</span>
+      </div>
+      <button type="button" id="studentPlanBadge" class="zc-plan-full-btn free" style="display:none;">✨ Ücretsiz Plan • Yükselt →</button>
     </div>
     <button class="logout-button" id="changePasswordButton" type="button">
       <svg viewBox="0 0 24 24" style="stroke:#cbd5e1"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -1846,20 +1876,25 @@ button,select{font:inherit}
         const planBadge = $('studentPlanBadge');
         if (planBadge) {
           const currentPlanKey = user.subscriptionTier || user.subscriptionPlan || user.paketTipi || 'free';
-          const planLabels = { free: 'Ücretsiz Üye', temel: 'Temel Üye', standart: 'Standart Üye', vip: 'VIP Üye' };
-          const badgeText = planLabels[currentPlanKey] || 'Ücretsiz Üye';
+          const planLabels = { free: 'Ücretsiz Plan', temel: 'Temel Üye', standart: 'Standart Üye', vip: 'VIP Üye' };
+          const badgeText = planLabels[currentPlanKey] || 'Ücretsiz Plan';
           if (user.hasActivePlan && currentPlanKey && currentPlanKey !== 'free') {
-            planBadge.innerHTML = `👑 ${badgeText} · <a href="javascript:void(0)" id="upgradeBadgeLink" style="color:#fde047;text-decoration:underline;font-weight:700">Paket Detayı ↗</a>`;
-            planBadge.className = 'user-plan-badge active';
+            const icon = currentPlanKey === 'vip' ? '👑' : (currentPlanKey === 'standart' ? '⭐' : '📘');
+            planBadge.textContent = `${icon} ${badgeText} • Paket Detayı`;
+            planBadge.className = 'zc-plan-full-btn active';
           } else {
-            planBadge.innerHTML = `⭐ ${badgeText} · <a href="javascript:void(0)" id="upgradeBadgeLink" style="color:#fde047;text-decoration:underline;font-weight:700">Paketi Yükselt ↗</a>`;
-            planBadge.className = 'user-plan-badge free';
+            planBadge.textContent = '✨ Ücretsiz Plan • Yükselt →';
+            planBadge.className = 'zc-plan-full-btn free';
           }
-          planBadge.style.display = 'inline-block';
-          $('upgradeBadgeLink')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            openSubscriptionUpgradeModal();
-          });
+          planBadge.style.display = 'flex';
+          if (!planBadge.dataset.upgradeBound) {
+            planBadge.dataset.upgradeBound = '1';
+            planBadge.addEventListener('click', (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              openSubscriptionUpgradeModal();
+            });
+          }
         }
         $('studentAvatar').textContent = user.name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toLocaleUpperCase('tr-TR');
         $('welcomeTitle').textContent = `Hoş geldin, ${user.name}`;
@@ -3570,6 +3605,7 @@ button,select{font:inherit}
 <script src="/assets/canli-ders.js?v=1"></script>
 <script src="/assets/gamification-service.js?v=1"></script>
 <script src="/assets/student-plan-guard.js?v=1"></script>
+<script src="/assets/student-profile-modal.js?v=1"></script>
 <script src="/assets/liderlik-sertifika.js?v=2"></script>
 <script src="/assets/student-store-bridge.js?v=2"></script>
 <script src="/assets/matematik-mufredati.js"></script>
