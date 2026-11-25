@@ -58,10 +58,16 @@
     return 'free';
   }
 
-  function isPremiumUnlocked() {
+  function isLeaderboardUnlocked() {
     var p = normalizePlan(state.plan);
     var r = String(state.role || '').toLowerCase();
     return p === 'vip' || p === 'standart' || r === 'admin' || r === 'teacher' || r === 'superadmin';
+  }
+
+  function isCertificateUnlocked() {
+    var p = normalizePlan(state.plan);
+    var r = String(state.role || '').toLowerCase();
+    return p === 'vip' || r === 'admin' || r === 'teacher' || r === 'superadmin';
   }
 
   function computeLevel(xp) {
@@ -250,8 +256,7 @@
   }
 
   function openCertificatePrint() {
-    var unlocked = isPremiumUnlocked();
-    if (!unlocked) {
+    if (!isCertificateUnlocked()) {
       if (typeof global.openSubscriptionUpgradeModal === 'function') global.openSubscriptionUpgradeModal();
       return;
     }
@@ -327,9 +332,10 @@
     if (!mount) return;
     detectFromDomAndServices();
 
-    var unlocked = isPremiumUnlocked();
+    var lbUnlocked = isLeaderboardUnlocked();
+    var certUnlocked = isCertificateUnlocked();
     var planNorm = normalizePlan(state.plan);
-    var planBadgeText = planNorm === 'vip' ? '👑 VIP Üye' : (planNorm === 'standart' ? '⭐ Standart Üye' : 'Ücretsiz Plan');
+    var planBadgeText = planNorm === 'vip' ? '👑 VIP Üye' : (planNorm === 'standart' ? '⭐ Standart Üye' : (planNorm === 'temel' ? '📘 Temel Paket' : 'Ücretsiz Plan'));
     var lvl = computeLevel(state.xp);
     var metrics = collectLiveMetrics();
     var badges = buildBadges(metrics);
@@ -339,7 +345,7 @@
     var p2 = top10[1] || { name: '—', weeklyXp: 0 };
     var p3 = top10[2] || { name: '—', weeklyXp: 0 };
     var monthYear = new Date().toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
-    var hasShield = unlocked || state.hasShield;
+    var hasShield = lbUnlocked || state.hasShield;
 
     mount.innerHTML =
       '<div class="lsc-wrap">' +
@@ -417,7 +423,7 @@
               '<h3>🎖️ Haftalık Liderlik Ligi</h3>' +
               '<span class="lsc-chip gold">' + state.grade + '. Sınıf · İlk 10</span>' +
             '</div>' +
-            (!unlocked ? renderFreeLockOverlay('Haftalık Lig Önizlemesi', 'Haftalık liderlik podyumunda yarışmak ve seri kalkanını açmak için Standart veya VIP pakete geçebilirsin.') : '') +
+            (!lbUnlocked ? renderFreeLockOverlay('Haftalık Lig Önizlemesi', 'Haftalık liderlik podyumunda yarışmak ve seri kalkanını açmak için Standart veya VIP pakete yükseltebilirsin.') : '') +
             '<div class="lsc-podium">' +
               '<div class="lsc-pod silver">' +
                 '<span class="lsc-pod-rank">🥈 2.</span>' +
@@ -453,7 +459,7 @@
               '<h3>📜 Dijital Başarı Sertifikası</h3>' +
               '<span class="lsc-chip gold">' + esc(monthYear) + '</span>' +
             '</div>' +
-            (!unlocked ? renderFreeLockOverlay('Dijital Başarı Sertifikası', 'İmzalı ve PDF indirilebilir aylık başarı sertifikanı açmak için Standart veya VIP pakete yükseltebilirsin.') : '') +
+            (!certUnlocked ? renderFreeLockOverlay('Dijital Başarı Sertifikası (VIP Özelliği)', 'İmzalı ve PDF indirilebilir aylık başarı sertifikanı açmak için VIP pakete yükseltebilirsin.') : '') +
             '<div class="lsc-cert-frame">' +
               '<div class="lsc-cert-kicker">ZARİFÇÖZÜM MATEMATİK AKADEMİSİ</div>' +
               '<div class="lsc-cert-title">AYLIK BAŞARI SERTİFİKASI</div>' +
@@ -529,6 +535,14 @@
       global.ZarifStore.events.subscribe('assignments', render);
     }
     global.addEventListener('zarif:gamification-change', render);
+    global.addEventListener('zarif:plan-change', function (e) {
+      var d = e && e.detail;
+      if (!d) return;
+      state.plan = normalizePlan(d.plan);
+      if (d.isStaff) state.role = 'admin';
+      if (d.registeredGrade >= 5) state.grade = Number(d.registeredGrade);
+      render();
+    });
   }
 
   if (document.readyState === 'loading') {

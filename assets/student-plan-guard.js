@@ -1,0 +1,272 @@
+/**
+ * ZarifÇözüm Merkezi Paket Yetkilendirme & Dinamik Kilit Motoru (Student Plan Guard)
+ * Admin panelinden öğrencinin paketi (free / temel / standart / vip) değiştirildiğinde
+ * tüm sınıf seçicilerdeki ve özellik sekmelerindeki kilitleri otomatik olarak uygular veya kaldırır.
+ */
+(function (global) {
+  'use strict';
+
+  var ALL_GRADES = [5, 6, 7, 8, 9, 10, 11, 12];
+  var PLAN_EVENT = 'zarif:plan-change';
+
+  // Paket bazlı özellik yetki matrisi (Paketler.html + lib/konu-erisimi.js ile birebir uyumlu)
+  var FEATURE_RULES = {
+    'asistanla-soru-coz': {
+      plans: ['temel', 'standart', 'vip'],
+      requiredLabel: 'Temel, Standart veya VIP Paket',
+      title: 'Asistanla Görsel Soru Çözümü Kilitli',
+      desc: 'Soru fotoğrafı yükleyerek adım adım yapay zekâ çözümü almak için Temel, Standart veya VIP pakete yükseltebilirsiniz.'
+    },
+    'denemeler': {
+      plans: ['temel', 'standart', 'vip'],
+      requiredLabel: 'Temel, Standart veya VIP Paket',
+      title: 'Türkiye Geneli & Kurumsal Denemeler Kilitli',
+      desc: 'Aylık Türkiye Geneli deneme sınavları ve detaylı net karnesi için Temel, Standart veya VIP pakete yükseltebilirsiniz.'
+    },
+    'yaziliya-hazirlik': {
+      plans: ['temel', 'standart', 'vip'],
+      requiredLabel: 'Temel, Standart veya VIP Paket',
+      title: 'Yazılıya Hazırlık Modülü Kilitli',
+      desc: 'Dönem yazılılarına özel hazırlık senaryoları ve çalışma kağıtları için Temel, Standart veya VIP pakete yükseltebilirsiniz.'
+    },
+    'live-lessons': {
+      plans: ['standart', 'vip'],
+      requiredLabel: 'Standart veya VIP Paket',
+      title: 'Zoom Canlı Dersler Paketinizin Dışında',
+      desc: 'Canlı Zoom matematik dersleri Temel ve Ücretsiz paketlere dahil değildir. Katılmak için Standart veya VIP pakete yükseltebilirsiniz.'
+    },
+    'video-dersler': {
+      plans: ['standart', 'vip'],
+      requiredLabel: 'Standart veya VIP Paket',
+      title: 'Video Ders Arşivi Paketinizin Dışında',
+      desc: 'Konu anlatım ve canlı ders video arşivi Standart (30 gün) ve VIP (tüm yıl) paketlerine özeldir. Üyeliğinizi yükselterek erişebilirsiniz.'
+    }
+  };
+
+  var planState = {
+    plan: 'free',
+    isStaff: false,
+    registeredGrade: 5,
+    allowedGrades: [5],
+    loaded: false
+  };
+
+  function normalizePlan(raw) {
+    var s = String(raw || '').toLowerCase().trim();
+    if (s.indexOf('vip') !== -1) return 'vip';
+    if (s.indexOf('standart') !== -1 || s.indexOf('standard') !== -1 || s.indexOf('pro') !== -1) return 'standart';
+    if (s.indexOf('temel') !== -1 || s.indexOf('baslangic') !== -1) return 'temel';
+    return 'free';
+  }
+
+  function isGradeAllowed(grade) {
+    if (planState.isStaff || planState.plan === 'vip') return true;
+    return planState.allowedGrades.indexOf(Number(grade)) !== -1;
+  }
+
+  function isFeatureAllowed(sectionId) {
+    if (planState.isStaff || planState.plan === 'vip') return true;
+    var rule = FEATURE_RULES[sectionId];
+    if (!rule) return true;
+    return rule.plans.indexOf(planState.plan) !== -1;
+  }
+
+  function openUpgrade() {
+    if (typeof global.openSubscriptionUpgradeModal === 'function') {
+      global.openSubscriptionUpgradeModal();
+    } else {
+      global.location.href = '/Paketler.html?ref=plan-guard';
+    }
+  }
+
+  function syncSidebarLocks() {
+    Object.keys(FEATURE_RULES).forEach(function (secId) {
+      var link = document.querySelector('.nav a[href="#' + secId + '"]');
+      if (!link) return;
+      var allowed = isFeatureAllowed(secId);
+      var lockTag = link.querySelector('.zpg-nav-lock');
+      if (!allowed) {
+        if (!lockTag) {
+          lockTag = document.createElement('span');
+          lockTag.className = 'zpg-nav-lock';
+          lockTag.textContent = '🔒';
+          lockTag.style.cssText = 'margin-left:auto;font-size:0.78rem;opacity:0.9;';
+          link.appendChild(lockTag);
+        }
+      } else if (lockTag) {
+        lockTag.remove();
+      }
+    });
+  }
+
+  function syncSectionLockOverlays() {
+    Object.keys(FEATURE_RULES).forEach(function (secId) {
+      var sec = document.getElementById(secId);
+      if (!sec) return;
+      var rule = FEATURE_RULES[secId];
+      var allowed = isFeatureAllowed(secId);
+      var overlay = sec.querySelector('.zpg-section-lock');
+
+      if (!allowed) {
+        if (!sec.style.position) sec.style.position = 'relative';
+        if (!overlay) {
+          overlay = document.createElement('div');
+          overlay.className = 'zpg-section-lock';
+          overlay.style.cssText = [
+            'margin:0 0 18px',
+            'padding:20px 22px',
+            'border-radius:16px',
+            'background:linear-gradient(135deg,#3E2F26 0%,#2c2019 100%)',
+            'border:1.5px solid #C59B47',
+            'color:#FAF6F0',
+            'display:flex',
+            'align-items:center',
+            'justify-content:space-between',
+            'gap:16px',
+            'flex-wrap:wrap',
+            'box-shadow:0 12px 28px rgba(62,47,38,0.18)'
+          ].join(';');
+          sec.insertBefore(overlay, sec.firstChild);
+        }
+        overlay.innerHTML =
+          '<div style="display:flex;align-items:center;gap:14px;flex:1;min-width:240px;">' +
+            '<div style="width:46px;height:46px;border-radius:14px;background:rgba(197,155,71,0.2);border:1px solid #C59B47;display:grid;place-items:center;font-size:1.4rem;flex-shrink:0;">🔒</div>' +
+            '<div>' +
+              '<div style="font-size:0.74rem;font-weight:800;letter-spacing:0.4px;color:#f3d285;text-transform:uppercase;">' + rule.requiredLabel + '</div>' +
+              '<strong style="display:block;font-family:Georgia,serif;font-size:1.05rem;color:#fff;margin:2px 0;">' + rule.title + '</strong>' +
+              '<span style="font-size:0.84rem;color:#E8DFD5;">' + rule.desc + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<button type="button" data-zpg-upgrade style="padding:10px 18px;border-radius:11px;border:0;background:linear-gradient(135deg,#C59B47,#b08635);color:#2c2019;font-size:0.86rem;font-weight:800;cursor:pointer;white-space:nowrap;">🚀 Üyeliğini Yükselt →</button>';
+
+        // Alt içerikleri kilitli modda pasifleştir
+        Array.from(sec.children).forEach(function (child) {
+          if (child === overlay || child.tagName === 'STYLE') return;
+          child.style.opacity = '0.35';
+          child.style.pointerEvents = 'none';
+          child.style.userSelect = 'none';
+        });
+      } else {
+        if (overlay) overlay.remove();
+        Array.from(sec.children).forEach(function (child) {
+          if (child.tagName === 'STYLE') return;
+          child.style.opacity = '';
+          child.style.pointerEvents = '';
+          child.style.userSelect = '';
+        });
+      }
+    });
+  }
+
+  function syncAllGradeSelectors() {
+    var selectorIds = ['kcGradeSelect', 'studentAiGradeSelect', 'stmGradeSelect', 'gzGrade'];
+    selectorIds.forEach(function (id) {
+      var sel = document.getElementById(id);
+      if (!sel || sel.tagName !== 'SELECT') return;
+
+      Array.from(sel.options).forEach(function (opt) {
+        var g = parseInt(opt.value, 10);
+        if (!g || g < 5 || g > 12) return;
+        var allowed = isGradeAllowed(g);
+        var baseText = opt.textContent.replace(/\s*🔒\s*/g, '').trim();
+        opt.textContent = allowed ? baseText : (baseText + ' 🔒');
+      });
+
+      // Eğer mevcut seçili sınıf kilitliyse öğrencinin kayıtlı sınıfına çek
+      var curVal = parseInt(sel.value, 10);
+      if (curVal >= 5 && curVal <= 12 && !isGradeAllowed(curVal)) {
+        sel.value = String(planState.registeredGrade);
+      }
+
+      if (!sel.dataset.zpgBound) {
+        sel.dataset.zpgBound = '1';
+        sel.addEventListener('change', function (e) {
+          var chosen = parseInt(sel.value, 10);
+          if (chosen >= 5 && chosen <= 12 && !isGradeAllowed(chosen)) {
+            e.stopImmediatePropagation();
+            sel.value = String(planState.registeredGrade);
+            openUpgrade();
+          }
+        }, true);
+      }
+    });
+  }
+
+  function applyAllLocks() {
+    syncSidebarLocks();
+    syncSectionLockOverlays();
+    syncAllGradeSelectors();
+    try {
+      if (global.localStorage && planState.registeredGrade >= 5) {
+        global.localStorage.setItem('zarif_student_grade', String(planState.registeredGrade));
+      }
+    } catch (e) {}
+    global.dispatchEvent(new CustomEvent(PLAN_EVENT, { detail: Object.assign({}, planState) }));
+  }
+
+  async function refreshFromServer() {
+    try {
+      var res = await fetch('/api/student/topics', { credentials: 'include', cache: 'no-store' });
+      if (!res.ok) return planState;
+      var data = await res.json();
+      if (data && data.access) {
+        var acc = data.access;
+        var nextPlan = normalizePlan(acc.plan);
+        var nextStaff = Boolean(acc.isStaff);
+        var nextReg = (Number(acc.registeredGrade) >= 5 && Number(acc.registeredGrade) <= 12)
+          ? Number(acc.registeredGrade)
+          : planState.registeredGrade;
+        var nextAllowed = nextStaff || nextPlan === 'vip'
+          ? ALL_GRADES.slice()
+          : (Array.isArray(acc.allowedGrades) && acc.allowedGrades.length
+              ? acc.allowedGrades.map(Number)
+              : [nextReg]);
+
+        var changed = !planState.loaded ||
+          planState.plan !== nextPlan ||
+          planState.isStaff !== nextStaff ||
+          planState.registeredGrade !== nextReg ||
+          planState.allowedGrades.join(',') !== nextAllowed.join(',');
+
+        planState.plan = nextPlan;
+        planState.isStaff = nextStaff;
+        planState.registeredGrade = nextReg;
+        planState.allowedGrades = nextAllowed;
+        planState.loaded = true;
+
+        if (changed) applyAllLocks();
+      }
+    } catch (e) {}
+    return planState;
+  }
+
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.closest('[data-zpg-upgrade]')) {
+      openUpgrade();
+    }
+  });
+
+  function init() {
+    refreshFromServer();
+    global.addEventListener('focus', refreshFromServer);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) refreshFromServer();
+    });
+    // Admin paket değiştirdiğinde en geç 25 sn içinde otomatik senkronize et
+    setInterval(refreshFromServer, 25000);
+  }
+
+  global.ZarifPlanGuard = {
+    getState: function () { return Object.assign({}, planState); },
+    isGradeAllowed: isGradeAllowed,
+    isFeatureAllowed: isFeatureAllowed,
+    refresh: refreshFromServer,
+    applyAllLocks: applyAllLocks
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})(window);

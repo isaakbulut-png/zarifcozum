@@ -156,13 +156,18 @@
             state.registeredGrade = Number(acc.registeredGrade);
             state.grade = state.registeredGrade;
           }
-          if (state.isStaff || state.plan === 'vip' || state.plan === 'standart') {
+          if (state.isStaff || state.plan === 'vip') {
             state.allowedGrades = ALL_GRADES.slice();
           } else if (Array.isArray(acc.allowedGrades) && acc.allowedGrades.length) {
             state.allowedGrades = acc.allowedGrades.map(Number);
           } else {
             state.allowedGrades = [state.registeredGrade];
           }
+          try {
+            if (global.localStorage && state.registeredGrade >= 5) {
+              global.localStorage.setItem('zarif_student_grade', String(state.registeredGrade));
+            }
+          } catch (e) {}
         }
       }
     } catch (e) {}
@@ -656,6 +661,21 @@
         if (!state.exam) loadApprovedPoolForGrade(state.grade);
       });
     }
+    global.addEventListener('zarif:plan-change', function (e) {
+      var d = e && e.detail;
+      if (!d) return;
+      state.plan = d.plan || state.plan;
+      state.isStaff = Boolean(d.isStaff);
+      if (d.registeredGrade >= 5) state.registeredGrade = Number(d.registeredGrade);
+      if (Array.isArray(d.allowedGrades) && d.allowedGrades.length) state.allowedGrades = d.allowedGrades.map(Number);
+      if (isGradeLocked(state.grade)) {
+        state.grade = state.registeredGrade;
+        state.selectedTopic = '';
+        if (!state.exam) loadApprovedPoolForGrade(state.grade);
+      } else if (!state.exam) {
+        renderBuilder();
+      }
+    });
   }
 
   global.ZarifKazanimTesti = {
