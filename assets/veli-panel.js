@@ -503,6 +503,26 @@
 
     $('vpPrintReportBtn')?.addEventListener('click', () => window.print());
 
+    $('vpLogoutBtn')?.addEventListener('click', async e => {
+      e.preventDefault();
+      const btn = $('vpLogoutBtn');
+      if (btn) {
+        btn.textContent = 'Çıkış yapılıyor…';
+        btn.style.pointerEvents = 'none';
+      }
+      try {
+        const res = await fetch('/logout', { method: 'POST', credentials: 'include' });
+        if (!res.ok) {
+          await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
+        }
+      } catch {}
+      try {
+        localStorage.removeItem('zarif_user');
+        sessionStorage.clear();
+      } catch {}
+      window.location.replace('/kayit-giris.html?role=parent');
+    });
+
     $('vpQuickMsgForm')?.addEventListener('submit', async e => {
       e.preventDefault();
       const inp = $('vpQuickMsgInput');
