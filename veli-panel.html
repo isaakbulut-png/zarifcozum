@@ -468,7 +468,8 @@
           <li>
             <button type="button" class="vp-nav-btn" data-tab="tab-notifications">
               <i data-lucide="bell-ring" style="width:18px;height:18px;"></i>
-              <span>Bildirim Tercihleri</span>
+              <span>Bildirimler &amp; Tercihler</span>
+              <span class="vp-nav-badge" id="vpNotifyBadge">0</span>
             </button>
           </li>
         </ul>
@@ -511,6 +512,9 @@
           </button>
         </div>
       </header>
+
+      <!-- Canlı Ders 15 Dk Veli Uyarı Banner'ı -->
+      <div id="vpLiveClassAlertBanner" style="display:none;margin-bottom:18px;padding:15px 18px;border-radius:16px;background:linear-gradient(135deg,#3E2F26 0%,#2d211a 70%,#1e3a5f 100%);border:1px solid #C59B47;color:#FAF6F0;box-shadow:0 10px 26px rgba(62,47,38,0.16);"></div>
 
       <!-- 1. GENEL BAKIŞ -->
       <section class="vp-tab active" id="tab-dashboard">
@@ -641,7 +645,15 @@
 
       <!-- 5. BİLDİRİM TERCİHLERİ -->
       <section class="vp-tab" id="tab-notifications">
-        <div class="vp-card" style="max-width:720px;">
+        <div class="vp-card" style="max-width:760px;margin-bottom:18px;">
+          <div class="vp-card-head">
+            <h3><i data-lucide="bell-ring" style="width:18px;height:18px;color:#2D8CFF;"></i> Canlı Ders &amp; Platform Bildirimleri</h3>
+            <button type="button" class="vp-btn light" id="vpMarkAllNotifyReadBtn" style="padding:5px 11px;font-size:0.76rem;">Tümünü Okundu İşaretle</button>
+          </div>
+          <div class="vp-list" id="vpNotificationsFeed"></div>
+        </div>
+
+        <div class="vp-card" style="max-width:760px;">
           <div class="vp-card-head">
             <h3><i data-lucide="sliders-horizontal" style="width:18px;height:18px;color:#C59B47;"></i> Veli Bildirim Tercihleri</h3>
             <span id="vpPrefsSavedBadge" class="vp-badge ok" style="display:none;">✓ Kaydedildi</span>
@@ -676,9 +688,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="/assets/app-store.js?v=3"></script>
+  <script src="/assets/app-store.js?v=4"></script>
   <script src="/assets/gamification-service.js?v=1"></script>
   <script src="/assets/messageService.js"></script>
-  <script src="/assets/veli-panel.js?v=1"></script>
+  <script src="/assets/veli-panel.js?v=2"></script>
 </body>
 </html>

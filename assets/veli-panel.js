@@ -390,6 +390,65 @@
     [elEmail, elAsg, elExam].forEach(el => el?.addEventListener('change', savePrefs));
   }
 
+  function renderParentNotifications() {
+    const store = window.ZarifStore;
+    if (store?.liveClasses?.checkAndTrigger15MinParentAlerts) {
+      store.liveClasses.checkAndTrigger15MinParentAlerts();
+    }
+    const items = store?.notifications?.list ? store.notifications.list({ audience: 'parent' }) : [];
+    const unread = items.filter(n => !n.read);
+
+    const badge = $('vpNotifyBadge');
+    if (badge) {
+      badge.textContent = String(unread.length);
+      badge.classList.toggle('show', unread.length > 0);
+    }
+
+    const banner = $('vpLiveClassAlertBanner');
+    if (banner) {
+      const activeAlert = unread.find(n => n.type === 'live_class_15m') || unread[0];
+      if (activeAlert) {
+        const timeStr = activeAlert.startsAt
+          ? new Date(activeAlert.startsAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+          : '';
+        banner.style.display = 'block';
+        banner.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:240px;">
+              <div style="width:42px;height:42px;border-radius:12px;background:#2D8CFF;color:#fff;display:grid;place-items:center;font-size:1.2rem;flex-shrink:0;box-shadow:0 4px 14px rgba(45,140,255,0.4);">🎥</div>
+              <div>
+                <div style="font-size:0.74rem;font-weight:800;letter-spacing:0.4px;color:#f3d285;text-transform:uppercase;">${esc(activeAlert.title || 'CANLI DERS HATIRLATMASI')}${timeStr ? ' · ' + esc(timeStr) : ''}</div>
+                <div style="font-size:0.9rem;color:#fff;margin-top:2px;font-weight:600;">${esc(activeAlert.message)}</div>
+              </div>
+            </div>
+            <button type="button" class="vp-btn gold" data-dismiss-ntf="${esc(activeAlert.id)}" style="padding:7px 14px;font-size:0.78rem;">✓ Okundu</button>
+          </div>
+        `;
+      } else {
+        banner.style.display = 'none';
+        banner.innerHTML = '';
+      }
+    }
+
+    const feed = $('vpNotificationsFeed');
+    if (feed) {
+      if (!items.length) {
+        feed.innerHTML = '<div style="padding:14px;border-radius:12px;background:#FAF6F0;border:1px dashed #e2d1be;color:#786557;font-size:0.84rem;">Henüz yeni bir canlı ders veya platform bildirimi bulunmuyor. Planlanan Zoom derslerine 15 dakika kala burada otomatik uyarı görünür.</div>';
+      } else {
+        feed.innerHTML = items.slice(0, 12).map(n => `
+          <div class="vp-row-item" style="${n.read ? 'opacity:0.75;' : 'border-left:4px solid #2D8CFF;background:#fff;'}">
+            <div style="flex:1;min-width:0;">
+              <strong style="display:block;font-size:0.88rem;color:#3E2F26;">${esc(n.title)}${!n.read ? ' <span class="vp-badge warn" style="margin-left:6px;">Yeni</span>' : ''}</strong>
+              <span style="display:block;font-size:0.82rem;color:#4a392e;margin-top:3px;">${esc(n.message)}</span>
+              <span style="display:block;font-size:0.73rem;color:#8c7969;margin-top:4px;">${esc(formatDate(n.createdAt))}${n.lessonTitle ? ' · ' + esc(n.lessonTitle) : ''}</span>
+            </div>
+            ${!n.read ? `<button type="button" class="vp-btn light" data-dismiss-ntf="${esc(n.id)}" style="padding:5px 10px;font-size:0.74rem;">Okundu</button>` : '<span class="vp-badge ok">Okundu</span>'}
+          </div>
+        `).join('');
+      }
+    }
+  }
+
   function switchTab(tabId) {
     document.querySelectorAll('.vp-nav-btn[data-tab]').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tabId);
@@ -400,6 +459,9 @@
     if (tabId === 'tab-messages' && window.ZarifMessageService) {
       window.ZarifMessageService.markAsRead(ACTIVE_CONV_ID, 'parent');
     }
+    if (tabId === 'tab-notifications') {
+      renderParentNotifications();
+    }
   }
 
   function renderAll() {
@@ -409,6 +471,7 @@
     renderAssignments(data);
     renderTopicPerformance(data);
     renderExamsAndReports(data);
+    renderParentNotifications();
     if (window.ZarifGamification) window.ZarifGamification.renderAllMounts();
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
       window.lucide.createIcons();
@@ -470,7 +533,26 @@
 
     window.ZarifStore?.events?.subscribe?.('tests', renderAll);
     window.ZarifStore?.events?.subscribe?.('assignments', renderAll);
+    window.ZarifStore?.events?.subscribe?.('notifications', renderParentNotifications);
+    window.ZarifStore?.events?.subscribe?.('liveClasses', renderParentNotifications);
     window.addEventListener('zarif:gamification-change', renderAll);
+
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('[data-dismiss-ntf]');
+      if (btn && window.ZarifStore?.notifications) {
+        window.ZarifStore.notifications.markRead(btn.dataset.dismissNtf);
+        renderParentNotifications();
+      }
+    });
+
+    $('vpMarkAllNotifyReadBtn')?.addEventListener('click', () => {
+      if (window.ZarifStore?.notifications) {
+        window.ZarifStore.notifications.markAllRead('parent');
+        renderParentNotifications();
+      }
+    });
+
+    setInterval(renderParentNotifications, 15000);
   }
 
   if (document.readyState === 'loading') {

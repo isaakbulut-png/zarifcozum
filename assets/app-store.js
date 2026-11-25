@@ -12,7 +12,7 @@
 (function (global) {
   'use strict';
 
-  if (global.ZarifStore && global.ZarifStore.VERSION === '1.0.0') {
+  if (global.ZarifStore && global.ZarifStore.VERSION === '1.1.0') {
     return;
   }
 
@@ -20,14 +20,18 @@
     contacts: 'zc_contacts_v1',
     tests: 'zc_test_results_v1',
     assignments: 'zc_assignments_v1',
-    publishedTests: 'zc_published_tests_v1'
+    publishedTests: 'zc_published_tests_v1',
+    liveClasses: 'zc_live_classes_v1',
+    notifications: 'zc_notifications_v1'
   };
 
   var MAX_ITEMS = {
     contacts: 300,
     tests: 500,
     assignments: 300,
-    publishedTests: 250
+    publishedTests: 250,
+    liveClasses: 150,
+    notifications: 200
   };
 
   var EVENT_NAME = 'zarif:store-change';
@@ -504,7 +508,225 @@
   };
 
   // =========================================================================
-  // 5. EVENTS (Canlı Sekme & Sayfa İçi Senkronizasyon)
+  // 5. NOTIFICATIONS (Veli / Öğrenci / Öğretmen Canlı Bildirim Merkezi)
+  // =========================================================================
+  var notifications = {
+    list: function (filter) {
+      var items = safeRead(KEYS.notifications, []);
+      items.sort(function (a, b) {
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+      if (!filter) return items;
+      return items.filter(function (item) {
+        if (filter.audience && filter.audience !== 'all' && item.audience !== 'all' && item.audience !== filter.audience) return false;
+        if (filter.unreadOnly && item.read) return false;
+        if (filter.type && item.type !== filter.type) return false;
+        return true;
+      });
+    },
+
+    add: function (data) {
+      var items = safeRead(KEYS.notifications, []);
+      var now = new Date().toISOString();
+      var record = {
+        id: (data && data.id) || uid('ntf'),
+        audience: normalizeText(data && data.audience) || 'parent', // 'parent' | 'student' | 'teacher' | 'all'
+        type: normalizeText(data && data.type) || 'general', // 'live_class_15m' | 'assignment' | 'exam' | 'general'
+        title: normalizeText(data && data.title) || 'ZarifÇözüm Bildirimi',
+        message: normalizeText(data && data.message) || '',
+        lessonId: normalizeText(data && data.lessonId),
+        lessonTitle: normalizeText(data && data.lessonTitle),
+        startsAt: normalizeText(data && data.startsAt),
+        zoomUrl: normalizeText(data && data.zoomUrl),
+        read: false,
+        createdAt: now
+      };
+      items.unshift(record);
+      if (items.length > MAX_ITEMS.notifications) items = items.slice(0, MAX_ITEMS.notifications);
+      safeWrite(KEYS.notifications, items);
+      emitChange('notifications', 'add', record);
+      return record;
+    },
+
+    markRead: function (id) {
+      var items = safeRead(KEYS.notifications, []);
+      var updated = null;
+      items = items.map(function (item) {
+        if (item.id === id) {
+          updated = Object.assign({}, item, { read: true });
+          return updated;
+        }
+        return item;
+      });
+      if (updated) {
+        safeWrite(KEYS.notifications, items);
+        emitChange('notifications', 'read', updated);
+      }
+      return updated;
+    },
+
+    markAllRead: function (audience) {
+      var items = safeRead(KEYS.notifications, []);
+      var changed = false;
+      items = items.map(function (item) {
+        var matches = !audience || audience === 'all' || item.audience === audience || item.audience === 'all';
+        if (matches && !item.read) {
+          changed = true;
+          return Object.assign({}, item, { read: true });
+        }
+        return item;
+      });
+      if (changed) {
+        safeWrite(KEYS.notifications, items);
+        emitChange('notifications', 'readAll', { audience: audience || 'all' });
+      }
+      return changed;
+    },
+
+    unreadCount: function (audience) {
+      return notifications.list({ audience: audience || 'all', unreadOnly: true }).length;
+    },
+
+    remove: function (id) {
+      var items = safeRead(KEYS.notifications, []);
+      var next = items.filter(function (item) { return item.id !== id; });
+      if (next.length !== items.length) {
+        safeWrite(KEYS.notifications, next);
+        emitChange('notifications', 'remove', { id: id });
+        return true;
+      }
+      return false;
+    }
+  };
+
+  // =========================================================================
+  // 6. LIVE CLASSES (Öğretmen Zoom Planlama -> Öğrenci Canlı Ders & Veli 15 Dk Uyarısı)
+  // =========================================================================
+  var liveClasses = {
+    list: function (filter) {
+      var items = safeRead(KEYS.liveClasses, []);
+      items.sort(function (a, b) {
+        return new Date(a.startsAt || 0) - new Date(b.startsAt || 0);
+      });
+      if (!filter) return items;
+      return items.filter(function (item) {
+        if (filter.status && filter.status !== 'all' && item.status !== filter.status) return false;
+        if (filter.grade && Number(item.grade) !== Number(filter.grade)) return false;
+        return true;
+      });
+    },
+
+    upsert: function (data) {
+      var items = safeRead(KEYS.liveClasses, []);
+      var now = new Date().toISOString();
+      var id = (data && data.id) || uid('live');
+      var existingIdx = -1;
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].id === id) { existingIdx = i; break; }
+      }
+      var existing = existingIdx >= 0 ? items[existingIdx] : {};
+      var record = Object.assign({}, existing, {
+        id: id,
+        title: normalizeText((data && data.title) || existing.title) || 'Matematik Canlı Dersi',
+        teacherName: normalizeText((data && data.teacherName) || existing.teacherName) || (global.localStorage && global.localStorage.getItem('zarif_teacher_name')) || 'Matematik Öğretmeni',
+        grade: Number((data && data.grade) || existing.grade) || 7,
+        startsAt: normalizeText((data && data.startsAt) || existing.startsAt) || now,
+        duration: Number((data && data.duration) || existing.duration) || 45,
+        zoomUrl: normalizeText((data && (data.zoomUrl || data.link)) || existing.zoomUrl) || '/canli.html',
+        meetingId: normalizeText((data && data.meetingId) || existing.meetingId),
+        status: normalizeText((data && data.status) || existing.status) || 'scheduled', // 'scheduled' | 'active' | 'completed'
+        recordingUrl: normalizeText((data && data.recordingUrl) || existing.recordingUrl),
+        notified15m: Boolean(data && typeof data.notified15m === 'boolean' ? data.notified15m : existing.notified15m),
+        updatedAt: now,
+        createdAt: existing.createdAt || now
+      });
+
+      if (existingIdx >= 0) items[existingIdx] = record;
+      else items.unshift(record);
+      if (items.length > MAX_ITEMS.liveClasses) items = items.slice(0, MAX_ITEMS.liveClasses);
+      safeWrite(KEYS.liveClasses, items);
+      emitChange('liveClasses', existingIdx >= 0 ? 'update' : 'add', record);
+      liveClasses.checkAndTrigger15MinParentAlerts();
+      return record;
+    },
+
+    markActive: function (id, zoomUrl) {
+      var items = safeRead(KEYS.liveClasses, []);
+      var updated = null;
+      items = items.map(function (item) {
+        if (item.id === id) {
+          updated = Object.assign({}, item, {
+            status: 'active',
+            zoomUrl: zoomUrl || item.zoomUrl || '/canli.html',
+            updatedAt: new Date().toISOString()
+          });
+          return updated;
+        }
+        return item;
+      });
+      if (updated) {
+        safeWrite(KEYS.liveClasses, items);
+        emitChange('liveClasses', 'active', updated);
+      }
+      return updated;
+    },
+
+    sendParent15MinAlert: function (lesson) {
+      var cls = lesson || {};
+      var titleText = normalizeText(cls.title) || 'Matematik Canlı Dersi';
+      return notifications.add({
+        audience: 'parent',
+        type: 'live_class_15m',
+        title: '🎥 Canlı Ders 15 Dakika İçinde Başlıyor',
+        message: 'Sayın Veli, öğrencinizin Matematik Canlı Dersi 15 dakika içinde Zoom üzerinden başlayacaktır.',
+        lessonId: cls.id || '',
+        lessonTitle: titleText,
+        startsAt: cls.startsAt || new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+        zoomUrl: cls.zoomUrl || '/canli.html'
+      });
+    },
+
+    checkAndTrigger15MinParentAlerts: function () {
+      var items = safeRead(KEYS.liveClasses, []);
+      var nowMs = Date.now();
+      var triggered = [];
+      var changed = false;
+
+      items = items.map(function (item) {
+        if (item.status !== 'scheduled' || item.notified15m) return item;
+        var startMs = new Date(item.startsAt || 0).getTime();
+        if (!Number.isFinite(startMs)) return item;
+        var diffMs = startMs - nowMs;
+        if (diffMs > 0 && diffMs <= 15 * 60 * 1000) {
+          changed = true;
+          var ntf = liveClasses.sendParent15MinAlert(item);
+          triggered.push(ntf);
+          return Object.assign({}, item, { notified15m: true, updatedAt: new Date().toISOString() });
+        }
+        return item;
+      });
+
+      if (changed) {
+        safeWrite(KEYS.liveClasses, items);
+        emitChange('liveClasses', 'notified15m', { count: triggered.length });
+      }
+      return triggered;
+    },
+
+    remove: function (id) {
+      var items = safeRead(KEYS.liveClasses, []);
+      var next = items.filter(function (item) { return item.id !== id; });
+      if (next.length !== items.length) {
+        safeWrite(KEYS.liveClasses, next);
+        emitChange('liveClasses', 'remove', { id: id });
+        return true;
+      }
+      return false;
+    }
+  };
+
+  // =========================================================================
+  // 7. EVENTS (Canlı Sekme & Sayfa İçi Senkronizasyon)
   // =========================================================================
   var events = {
     subscribe: function (channel, callback) {
@@ -525,6 +747,8 @@
         else if (e.key === KEYS.tests) matchedChannel = 'tests';
         else if (e.key === KEYS.assignments) matchedChannel = 'assignments';
         else if (e.key === KEYS.publishedTests) matchedChannel = 'publishedTests';
+        else if (e.key === KEYS.liveClasses) matchedChannel = 'liveClasses';
+        else if (e.key === KEYS.notifications) matchedChannel = 'notifications';
         if (matchedChannel && (channel === '*' || channel === matchedChannel)) {
           callback({ channel: matchedChannel, action: 'storage', ts: Date.now() });
         }
@@ -541,12 +765,14 @@
   };
 
   global.ZarifStore = {
-    VERSION: '1.0.0',
+    VERSION: '1.1.0',
     KEYS: KEYS,
     contacts: contacts,
     tests: tests,
     assignments: assignments,
     publishedTests: publishedTests,
+    liveClasses: liveClasses,
+    notifications: notifications,
     events: events
   };
 })(window);

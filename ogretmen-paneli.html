@@ -1499,7 +1499,11 @@ body.teacher-menu-open {
           <div class="field"><label for="lessonTime">Saat</label><input id="lessonTime" name="time" type="time" required></div>
           <div class="field"><label for="lessonDuration">Ders süresi</label><select id="lessonDuration" name="duration"><option value="30">30 dakika</option><option value="45">45 dakika</option><option value="60" selected>60 dakika</option><option value="90">90 dakika</option><option value="120">120 dakika</option></select></div>
         </div>
-        <div class="button-row"><button class="btn" type="submit">Canlı dersi planla</button><span class="muted" id="lessonStatus" role="status" aria-live="polite"></span></div>
+        <div class="button-row" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <button class="btn" type="submit">Canlı dersi planla</button>
+          <button class="btn light" type="button" id="btnSendParent15mReminder" style="border-color:#C59B47;color:#3E2F26;background:#FAF6F0;">🔔 Veliye 15 Dk Hatırlatma Gönder</button>
+          <span class="muted" id="lessonStatus" role="status" aria-live="polite"></span>
+        </div>
       </form>
       <div class="data-list" id="lessonList" aria-live="polite"></div>
       <div class="exam-create">
@@ -2370,7 +2374,7 @@ body.teacher-menu-open {
 <script src="/assets/ogretmen-gezinme.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="/assets/app-store.js?v=3"></script>
+<script src="/assets/app-store.js?v=4"></script>
 <script src="/assets/gamification-service.js?v=1"></script>
 <script src="/assets/ogretmen-yonetim.js?v=2"></script>
 <script src="/assets/ogrenci-gelisim.js"></script>
@@ -2701,6 +2705,9 @@ body.teacher-menu-open {
     button.textContent = 'Ders başlatılıyor…';
     try {
       const result = await api(`/api/ogretmen/canli/planlar/${encodeURIComponent(button.dataset.startLiveLesson)}/baslat`, {method: 'POST'});
+      if (window.ZarifStore && window.ZarifStore.liveClasses) {
+        window.ZarifStore.liveClasses.markActive(button.dataset.startLiveLesson, result.joinUrl || result.startUrl || '/canli.html');
+      }
       zoomBaslat(result.startUrl, zoomWindow);
       canliYonetim.yenile();
       canliPlanlariYukle().catch(error => {
@@ -2753,15 +2760,29 @@ body.teacher-menu-open {
       if (!Number.isFinite(startsAt.getTime()) || startsAt <= new Date()) {
         throw new Error('Gelecekte bir tarih ve saat seçin.');
       }
-      await api('/api/ogretmen/canli/planla', {
+      const planTitle = $('lessonTitle').value;
+      const planDuration = Number($('lessonDuration').value);
+      const planAudience = canliHedefi();
+      const created = await api('/api/ogretmen/canli/planla', {
         method: 'POST',
         body: JSON.stringify({
-          title: $('lessonTitle').value,
+          title: planTitle,
           startsAt: startsAt.toISOString(),
-          duration: Number($('lessonDuration').value),
-          audience: canliHedefi()
+          duration: planDuration,
+          audience: planAudience
         })
       });
+      if (window.ZarifStore && window.ZarifStore.liveClasses) {
+        window.ZarifStore.liveClasses.upsert({
+          id: (created && (created.id || (created.lesson && created.lesson.id))) || undefined,
+          title: planTitle,
+          grade: (planAudience && planAudience.grade) || 7,
+          startsAt: startsAt.toISOString(),
+          duration: planDuration,
+          zoomUrl: (created && (created.joinUrl || created.link)) || '/canli.html',
+          status: 'scheduled'
+        });
+      }
       form.reset();
       $('lessonDuration').value = '60';
       await canliPlanlariYukle();
@@ -2772,6 +2793,29 @@ body.teacher-menu-open {
       button.disabled = false;
     }
   });
+
+  if ($('btnSendParent15mReminder')) {
+    $('btnSendParent15mReminder').addEventListener('click', () => {
+      if (!window.ZarifStore || !window.ZarifStore.liveClasses) {
+        $('lessonStatus').textContent = 'Bildirim servisi henüz yüklenmedi.';
+        return;
+      }
+      const titleVal = ($('lessonTitle')?.value || '').trim() || 'Matematik Canlı Dersi';
+      const in15m = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+      window.ZarifStore.liveClasses.sendParent15MinAlert({
+        id: 'test_15m_' + Date.now(),
+        title: titleVal,
+        startsAt: in15m,
+        zoomUrl: '/canli.html'
+      });
+      $('lessonStatus').textContent = '✓ Veli paneline 15 dakika hatırlatma bildirimi gönderildi.';
+    });
+  }
+  setInterval(() => {
+    if (window.ZarifStore && window.ZarifStore.liveClasses) {
+      window.ZarifStore.liveClasses.checkAndTrigger15MinParentAlerts();
+    }
+  }, 15000);
 
   let soruSayaci = 0;
   const questionEditors = new WeakMap();
@@ -5377,6 +5421,17 @@ body.teacher-menu-open {
         method: 'POST',
         body: JSON.stringify({topic: $('canliKonu').value, audience})
       });
+      if (window.ZarifStore && window.ZarifStore.liveClasses) {
+        window.ZarifStore.liveClasses.upsert({
+          id: result.id || ('live_instant_' + Date.now()),
+          title: $('canliKonu').value || 'ZarifÇözüm Canlı Ders',
+          grade: (audience && audience.grade) || 7,
+          startsAt: new Date().toISOString(),
+          duration: 45,
+          zoomUrl: result.joinUrl || result.startUrl || '/canli.html',
+          status: 'active'
+        });
+      }
       zoomBaslat(result.startUrl, pencere);
       durum.textContent = 'Canlı ders oluşturuldu.';
       canliYonetim.yenile();
