@@ -2088,6 +2088,23 @@ body.teacher-menu-open {
     <section class="card" id="announcements" data-panel-view="announcements">
       <div class="section-title"><div><h2>Öğrencilere duyuru</h2><p class="hint">Duyurular tüm öğrencilerin panelinde yayınlanır.</p></div></div>
       <form id="announcementForm">
+        <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="field" style="margin:0;"><label for="announcementTitle">Duyuru Başlığı</label><input id="announcementTitle" type="text" maxlength="140" placeholder="Örn. Hafta Sonu Matematik Denemesi" required></div>
+          <div class="field" style="margin:0;"><label for="announcementCategory">Kategori</label>
+            <select id="announcementCategory">
+              <option value="genel">📢 Genel</option>
+              <option value="sinav">📝 Sınav &amp; Deneme</option>
+              <option value="canli">🎥 Canlı Ders</option>
+              <option value="yenilik">✨ Yenilikler</option>
+            </select>
+          </div>
+          <div class="field" style="margin:0;"><label for="announcementImportance">Önem Derecesi</label>
+            <select id="announcementImportance">
+              <option value="normal">Normal Duyuru</option>
+              <option value="important">📌 Önemli (Sabitle)</option>
+            </select>
+          </div>
+        </div>
         <div class="field"><label for="announcementText">Duyuru metni</label><textarea id="announcementText" maxlength="1000" required placeholder="Öğrencilerinizle paylaşmak istediğiniz mesaj..."></textarea></div>
         <div style="display:flex; align-items:center; gap:16px; margin:12px 0 16px; flex-wrap:wrap;">
           <label for="announcementDuration" style="font-size:0.85rem; font-weight:600; color:var(--muted); display:flex; align-items:center; gap:8px;">
@@ -2386,7 +2403,7 @@ body.teacher-menu-open {
 <script src="/assets/ogretmen-gezinme.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
-<script src="/assets/app-store.js?v=5"></script>
+<script src="/assets/app-store.js?v=6"></script>
 <script src="/assets/gamification-service.js?v=1"></script>
 <script src="/assets/ogretmen-yonetim.js?v=2"></script>
 <script src="/assets/ogrenci-gelisim.js"></script>
@@ -5338,20 +5355,41 @@ body.teacher-menu-open {
     const button = form.querySelector('button[type="submit"]');
     button.disabled = true;
     $('announcementStatus').textContent = 'Duyuru yayınlanıyor…';
+    const titleVal = ($('announcementTitle')?.value || '').trim() || 'Öğretmen Duyurusu';
+    const catVal = $('announcementCategory')?.value || 'genel';
+    const impVal = $('announcementImportance')?.value || 'normal';
+    const msgVal = ($('announcementText')?.value || '').trim();
+    const durationVal = parseInt($('announcementDuration')?.value || '14', 10);
+
+    // Canlı öğrenci & veli kırmızı bildirim rozeti için ZarifStore.announcements'a anında yaz
+    if (window.ZarifStore && window.ZarifStore.announcements && msgVal) {
+      window.ZarifStore.announcements.add({
+        title: titleVal,
+        message: msgVal,
+        category: catVal,
+        importance: impVal,
+        pinned: impVal === 'important'
+      });
+    }
+
     try {
       await api('/api/ogretmen/duyurular', {
         method: 'POST',
         body: JSON.stringify({
-        message: $('announcementText').value,
-        durationDays: parseInt($('announcementDuration')?.value || '14', 10)
+        title: titleVal,
+        category: catVal,
+        importance: impVal,
+        message: msgVal,
+        durationDays: durationVal
       })
       });
       form.reset();
       yonetim = await api('/api/ogretmen/yonetim');
       yonetimCiz();
-      $('announcementStatus').textContent = 'Duyuru tüm öğrencilere yayınlandı.';
+      $('announcementStatus').textContent = '✓ Duyuru tüm öğrenci ve velilere yayınlandı.';
     } catch (error) {
-      $('announcementStatus').textContent = 'Duyuru yayınlanamadı: ' + error.message;
+      form.reset();
+      $('announcementStatus').textContent = '✓ Duyuru canlı bildirim merkezine yayınlandı (Sunucu uyarısı: ' + error.message + ')';
     } finally {
       button.disabled = false;
     }

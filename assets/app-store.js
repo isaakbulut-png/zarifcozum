@@ -12,7 +12,7 @@
 (function (global) {
   'use strict';
 
-  if (global.ZarifStore && global.ZarifStore.VERSION === '1.2.0') {
+  if (global.ZarifStore && global.ZarifStore.VERSION === '1.3.0') {
     return;
   }
 
@@ -24,7 +24,9 @@
     liveClasses: 'zc_live_classes_v1',
     notifications: 'zc_notifications_v1',
     mockExams: 'zc_mock_exams_v1',
-    mockAttempts: 'zc_mock_attempts_v1'
+    mockAttempts: 'zc_mock_attempts_v1',
+    announcements: 'zc_announcements_v1',
+    announcementsRead: 'zc_announcements_read_v1'
   };
 
   var MAX_ITEMS = {
@@ -35,7 +37,8 @@
     liveClasses: 150,
     notifications: 200,
     mockExams: 120,
-    mockAttempts: 200
+    mockAttempts: 200,
+    announcements: 150
   };
 
   var EVENT_NAME = 'zarif:store-change';
@@ -820,7 +823,163 @@
   };
 
   // =========================================================================
-  // 8. EVENTS (Canlı Sekme & Sayfa İçi Senkronizasyon)
+  // 8. ANNOUNCEMENTS (Merkezi Duyuru Hafızası + Okundu Takibi)
+  // =========================================================================
+  function getDefaultAnnouncements() {
+    var now = Date.now();
+    return [
+      {
+        id: 'ann_seed_exam_1',
+        title: 'Türkiye Geneli & İl Geneli Dijital Optik Deneme Takvimi Açıklandı!',
+        message: 'Kasım ayı Türkiye Geneli ve İl Geneli matematik deneme sınavları yayınlandı. Canlı optik form ile sınava katılarak netlerini, tahmini yüzdelik dilimini ve konu bazlı karneni anında görebilirsin.',
+        category: 'sinav',
+        importance: 'important',
+        pinned: true,
+        author: 'ZarifÇözüm Ölçme Kurulu',
+        actionLabel: 'Deneme Takvimine Git →',
+        actionTarget: 'denemeler',
+        createdAt: new Date(now - 2 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'ann_seed_live_2',
+        title: 'Haftalık Zoom Canlı Matematik Etütleri Başladı',
+        message: 'Yeni nesil soru çözüm atölyeleri ve birebir canlı tahta dersleri Zoom stüdyosunda aktif! Derse 5 dakika kala katılım butonu otomatik açılır, 15 dakika kala velinize hatırlatma gönderilir.',
+        category: 'canli',
+        importance: 'normal',
+        pinned: false,
+        author: 'Matematik Zümresi',
+        actionLabel: 'Canlı Ders Stüdyosuna Git →',
+        actionTarget: 'live-lessons',
+        createdAt: new Date(now - 14 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'ann_seed_feat_3',
+        title: 'Yeni: Öğretmen Onaylı Merkezi Kazanım Testi Havuzu',
+        message: 'Artık Kazanım Testleri ekranında sınıf ve konunu seçerek 10, 20 veya 30 soruluk tamamen öğretmen onaylı testler oluşturabilir, sonuçlarını doğrudan Başarı Raporlarına kaydedebilirsin.',
+        category: 'yenilik',
+        importance: 'normal',
+        pinned: false,
+        author: 'ZarifÇözüm Akademi',
+        actionLabel: 'Kazanım Testlerine Git →',
+        actionTarget: 'kazanim-testi',
+        createdAt: new Date(now - 36 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'ann_seed_gen_4',
+        title: 'ZarifÇözüm Maarif Modeli Eğitim Platformuna Hoş Geldiniz',
+        message: 'Haftalık çalışma hedeflerini takip etmeyi, günlük çalışma serini korumayı ve takıldığın sorularda AI Mentör asistanından adım adım destek almayı unutma. Başarılar dileriz!',
+        category: 'genel',
+        importance: 'normal',
+        pinned: false,
+        author: 'ZarifÇözüm Yönetimi',
+        actionLabel: '',
+        actionTarget: '',
+        createdAt: new Date(now - 72 * 60 * 60 * 1000).toISOString()
+      }
+    ];
+  }
+
+  function ensureAnnouncementsSeeded() {
+    var items = safeRead(KEYS.announcements, null);
+    if (!Array.isArray(items) || items.length === 0) {
+      var seeded = getDefaultAnnouncements();
+      safeWrite(KEYS.announcements, seeded);
+      return seeded;
+    }
+    return items;
+  }
+
+  function readAnnouncementReadMap() {
+    return safeRead(KEYS.announcementsRead, { student: [], parent: [] });
+  }
+
+  var announcements = {
+    list: function (filter) {
+      var items = ensureAnnouncementsSeeded();
+      var role = (filter && filter.role) || 'student';
+      var readMap = readAnnouncementReadMap();
+      var readIds = Array.isArray(readMap[role]) ? readMap[role] : [];
+
+      var enriched = items.map(function (it) {
+        return Object.assign({}, it, { isRead: readIds.indexOf(it.id) !== -1 });
+      });
+
+      enriched.sort(function (a, b) {
+        if (a.pinned && !b.pinned) return -1;
+        if (b.pinned && !a.pinned) return 1;
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+
+      if (!filter || !filter.category || filter.category === 'all') return enriched;
+      return enriched.filter(function (it) { return it.category === filter.category; });
+    },
+
+    add: function (data) {
+      var items = ensureAnnouncementsSeeded();
+      var now = new Date().toISOString();
+      var cat = normalizeText(data && data.category) || 'genel';
+      var imp = normalizeText(data && data.importance) || 'normal';
+      var record = {
+        id: (data && data.id) || uid('ann'),
+        title: normalizeText(data && data.title) || 'Önemli Platform Duyurusu',
+        message: normalizeText(data && data.message) || '',
+        category: ['genel', 'sinav', 'canli', 'yenilik'].indexOf(cat) !== -1 ? cat : 'genel',
+        importance: imp === 'important' ? 'important' : 'normal',
+        pinned: Boolean((data && data.pinned) || imp === 'important'),
+        author: normalizeText(data && data.author) || (global.localStorage && global.localStorage.getItem('zarif_teacher_name')) || 'ZarifÇözüm Yönetimi',
+        actionLabel: normalizeText(data && data.actionLabel),
+        actionTarget: normalizeText(data && data.actionTarget),
+        createdAt: now
+      };
+      items.unshift(record);
+      if (items.length > MAX_ITEMS.announcements) items = items.slice(0, MAX_ITEMS.announcements);
+      safeWrite(KEYS.announcements, items);
+      emitChange('announcements', 'add', record);
+      return record;
+    },
+
+    markAsRead: function (id, role) {
+      var r = role || 'student';
+      var readMap = readAnnouncementReadMap();
+      var arr = Array.isArray(readMap[r]) ? readMap[r] : [];
+      if (arr.indexOf(id) === -1) {
+        arr.push(id);
+        readMap[r] = arr;
+        safeWrite(KEYS.announcementsRead, readMap);
+        emitChange('announcements', 'read', { id: id, role: r });
+      }
+      return true;
+    },
+
+    markAllRead: function (role) {
+      var r = role || 'student';
+      var items = ensureAnnouncementsSeeded();
+      var readMap = readAnnouncementReadMap();
+      readMap[r] = items.map(function (it) { return it.id; });
+      safeWrite(KEYS.announcementsRead, readMap);
+      emitChange('announcements', 'readAll', { role: r });
+      return true;
+    },
+
+    unreadCount: function (role) {
+      var list = announcements.list({ role: role || 'student' });
+      return list.filter(function (it) { return !it.isRead; }).length;
+    },
+
+    remove: function (id) {
+      var items = ensureAnnouncementsSeeded();
+      var next = items.filter(function (it) { return it.id !== id; });
+      if (next.length !== items.length) {
+        safeWrite(KEYS.announcements, next);
+        emitChange('announcements', 'remove', { id: id });
+        return true;
+      }
+      return false;
+    }
+  };
+
+  // =========================================================================
+  // 9. EVENTS (Canlı Sekme & Sayfa İçi Senkronizasyon)
   // =========================================================================
   var events = {
     subscribe: function (channel, callback) {
@@ -844,6 +1003,7 @@
         else if (e.key === KEYS.liveClasses) matchedChannel = 'liveClasses';
         else if (e.key === KEYS.notifications) matchedChannel = 'notifications';
         else if (e.key === KEYS.mockExams || e.key === KEYS.mockAttempts) matchedChannel = 'mockExams';
+        else if (e.key === KEYS.announcements || e.key === KEYS.announcementsRead) matchedChannel = 'announcements';
         if (matchedChannel && (channel === '*' || channel === matchedChannel)) {
           callback({ channel: matchedChannel, action: 'storage', ts: Date.now() });
         }
@@ -860,7 +1020,7 @@
   };
 
   global.ZarifStore = {
-    VERSION: '1.2.0',
+    VERSION: '1.3.0',
     KEYS: KEYS,
     contacts: contacts,
     tests: tests,
@@ -869,6 +1029,7 @@
     liveClasses: liveClasses,
     notifications: notifications,
     mockExams: mockExams,
+    announcements: announcements,
     events: events
   };
 })(window);

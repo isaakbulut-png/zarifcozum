@@ -466,6 +466,13 @@
             </button>
           </li>
           <li>
+            <button type="button" class="vp-nav-btn" data-tab="tab-announcements">
+              <i data-lucide="megaphone" style="width:18px;height:18px;"></i>
+              <span>Duyurular</span>
+              <span class="vp-red-badge" id="parentAnnouncementsBadge" hidden>0</span>
+            </button>
+          </li>
+          <li>
             <button type="button" class="vp-nav-btn" data-tab="tab-notifications">
               <i data-lucide="bell-ring" style="width:18px;height:18px;"></i>
               <span>Bildirimler &amp; Tercihler</span>
@@ -643,6 +650,16 @@
         </div>
       </section>
 
+      <!-- 4.5. DUYURULAR -->
+      <section class="vp-tab" id="tab-announcements">
+        <div class="vp-card">
+          <div class="vp-card-head">
+            <h3><i data-lucide="megaphone" style="width:18px;height:18px;color:#C59B47;"></i> Platform &amp; Öğretmen Duyuruları</h3>
+          </div>
+          <div id="parentDuyuruMerkeziRoot"></div>
+        </div>
+      </section>
+
       <!-- 5. BİLDİRİM TERCİHLERİ -->
       <section class="vp-tab" id="tab-notifications">
         <div class="vp-card" style="max-width:760px;margin-bottom:18px;">
@@ -688,7 +705,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="/assets/app-store.js?v=4"></script>
+  <script src="/assets/app-store.js?v=6"></script>
+  <script src="/assets/duyuru-merkezi.js?v=1"></script>
   <script src="/assets/gamification-service.js?v=1"></script>
   <script src="/assets/messageService.js"></script>
   <script src="/assets/veli-panel.js?v=2"></script>

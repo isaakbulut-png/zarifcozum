@@ -427,7 +427,8 @@ button,select{font:inherit}
           <span class="nav-text">Yazılıya Hazırlık</span></a></li>
         <li><a href="#duyurular">
           <svg viewBox="0 0 24 24" style="stroke:#f97316"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span class="nav-text">Duyurular</span></a></li>
+          <span class="nav-text">Duyurular</span>
+          <span class="zc-red-badge" id="studentAnnouncementsBadge" hidden>0</span></a></li>
         <li><a href="#liderlik-tablosu">
           <svg viewBox="0 0 24 24" style="stroke:#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           <span class="nav-text">Liderlik &amp; Sertifika</span></a></li>
@@ -1161,8 +1162,14 @@ button,select{font:inherit}
     </section>
 
     <section class="panel-view" id="duyurular" data-panel-view="duyurular">
-      <div class="section-head"><h2>Öğretmen duyuruları</h2></div>
-      <section class="teacher-feed" id="announcementFeed" aria-live="polite"><p class="feed-status">Duyurular yükleniyor…</p></section>
+      <div class="section-head">
+        <div>
+          <h2>📢 Duyurular &amp; Eğitim Takvimi</h2>
+          <p class="hint">Sınav takvimi, canlı ders duyuruları ve platform yenilikleri anlık olarak burada yayınlanır.</p>
+        </div>
+      </div>
+      <div id="duyuruMerkeziRoot"></div>
+      <section class="teacher-feed" id="announcementFeed" aria-live="polite" hidden></section>
     </section>
 
     <section class="panel-view" id="denemeler" data-panel-view="denemeler">
@@ -3661,7 +3668,8 @@ button,select{font:inherit}
       window.location.href = `/Paketler.html?plan=${tier}&ref=panel`;
     }
   </script>
-<script src="/assets/app-store.js?v=5"></script>
+<script src="/assets/app-store.js?v=6"></script>
+<script src="/assets/duyuru-merkezi.js?v=1"></script>
 <script src="/assets/canli-ders.js?v=1"></script>
 <script src="/assets/gamification-service.js?v=1"></script>
 <script src="/assets/student-plan-guard.js?v=3"></script>
