@@ -5501,32 +5501,94 @@ body.teacher-menu-open {
     });
   }
 
-  // ---- Öğretmen AI Mentör Çalışma Alanı ----
-  let teacherActiveRole = 'ai_mentor';
-  const roleDescs = {
-    ai_mentor: 'Sokratik yöntemle yönlendirici ipuçları ve SVG çizimleri',
-    ogretmen_ikizi: 'Farklı açılardan (günlük hayat, somut örnek, mikro soru) anlatım',
-    soru_cozum: 'Adım adım pedagojik soru çözümü ve doğrulama',
-    ai_koc: 'Öğrenci çalışma planı, motivasyon ve rehberlik desteği'
+  // Öğretmen AI Mentör Çalışma Alanı aşağıdaki izole script bloğunda yönetilir.
+})();
+</script>
+<script>
+// İzole Öğretmen AI Mentör Asistanı (Event Delegation + 4 Mod Dinamik Arayüz + Backend Mode Bağlantısı)
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+
+  const MODES = {
+    ai_mentor: {
+      label: '🤖 Sokratik Mentör',
+      desc: 'Sokratik yöntemle yönlendirici ipuçları ve SVG çizimleri',
+      welcome: 'Merhaba Öğretmenim! Sokratik Mentör modundasınız. Öğrencilerinize cevabı doğrudan vermeden adım adım bulduracak yönlendirici sorular, ipuçları ve SVG çizimleri tasarlayabilirim.',
+      placeholder: 'Öğrencinin takıldığı adımı veya Sokratik ipucu hazırlamak istediğiniz soruyu yazın…'
+    },
+    ogretmen_ikizi: {
+      label: '👨‍🏫 Öğretmen İkizi (Farklı Anlat)',
+      desc: 'Konuyu farklı metaforlar, günlük hayat örnekleri ve basitleştirilmiş dille anlatır',
+      welcome: 'Öğretmen İkizi aktif! Bir matematik konusunu öğrencilerinize farklı metaforlar, somut günlük hayat örnekleri ve basitleştirilmiş dille anlatacak alternatif ders anlatımları hazırlayabilirim.',
+      placeholder: 'Farklı metafor ve günlük hayat örneğiyle anlatılacak konuyu yazın…'
+    },
+    soru_cozum: {
+      label: '📝 Adım Adım Soru Çözümü',
+      desc: 'Soruları Maarif Modeli kazanımlarına göre basamak basamak ve gerekçeli çözer',
+      welcome: 'Adım Adım Soru Çözümü aktif! Herhangi bir matematik sorusunu yazın; Türkiye Yüzyılı Maarif Modeli kazanımlarına göre basamak basamak ve gerekçeli çözümünü hazırlayayım.',
+      placeholder: 'Basamak basamak çözülmesini istediğiniz soruyu buraya yazın…'
+    },
+    ai_koc: {
+      label: '🎯 AI Koç (Çalışma & Rehberlik)',
+      desc: 'Sınıf veya öğrenci bazlı haftalık ders çalışma planı ve kazanım takibi oluşturur',
+      welcome: 'AI Koç aktif! Sınıfınız veya bireysel bir öğrenciniz için haftalık ders çalışma planı, tekrar takvimi ve kazanım takip stratejisi oluşturabilirim.',
+      placeholder: 'Sınıf düzeyi, hedef kazanım veya haftalık çalışma planı ihtiyacınızı yazın…'
+    }
   };
 
-  document.querySelectorAll('.teacher-ai-pill').forEach(pill => {
-    pill.addEventListener('click', () => {
-      document.querySelectorAll('.teacher-ai-pill').forEach(p => {
-        p.style.background = '#fff';
-        p.style.color = 'var(--color-text,#374151)';
-        p.style.borderColor = 'var(--color-border,#d1d5db)';
-        p.style.fontWeight = '500';
+  let teacherActiveRole = 'ai_mentor';
+
+  function applyTeacherAiMode(roleKey, updateWelcome = true) {
+    const key = MODES[roleKey] ? roleKey : 'ai_mentor';
+    teacherActiveRole = key;
+    const cfg = MODES[key];
+
+    const bar = $('teacherAiRolesBar');
+    if (bar) {
+      bar.querySelectorAll('.teacher-ai-pill').forEach(p => {
+        const isActive = (p.dataset.role || 'ai_mentor') === key;
+        p.classList.toggle('active', isActive);
+        p.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        p.style.background = isActive ? '#d6452b' : '#fff';
+        p.style.color = isActive ? '#fff' : 'var(--color-text,#374151)';
+        p.style.borderColor = isActive ? '#d6452b' : 'var(--color-border,#d1d5db)';
+        p.style.fontWeight = isActive ? '600' : '500';
       });
-      pill.style.background = '#d6452b';
-      pill.style.color = '#fff';
-      pill.style.borderColor = '#d6452b';
-      pill.style.fontWeight = '600';
-      teacherActiveRole = pill.dataset.role || 'ai_mentor';
-      $('teacherAiRoleDesc').textContent = roleDescs[teacherActiveRole] || '';
-      $('teacherAiInput').focus();
-    });
-  });
+    }
+
+    const descEl = $('teacherAiRoleDesc');
+    if (descEl) descEl.textContent = cfg.desc;
+
+    const inputEl = $('teacherAiInput');
+    if (inputEl) inputEl.placeholder = cfg.placeholder;
+
+    // Karşılama balonunu güncelle (eğer kullanıcı henüz mesaj göndermediyse)
+    const chatBody = $('teacherAiChatBody');
+    if (updateWelcome && chatBody) {
+      const hasUserMsg = chatBody.querySelector('[data-teacher-user-msg="true"]');
+      if (!hasUserMsg) {
+        chatBody.innerHTML = `
+          <div style="align-self:flex-start;max-width:85%;padding:12px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;font-size:14px;line-height:1.6;box-shadow:0 1px 3px rgba(0,0,0,.05);color:#1f2937">
+            <div style="font-weight:700;color:#d6452b;font-size:12px;margin-bottom:4px">${cfg.label}</div>
+            <div>${cfg.welcome}</div>
+          </div>
+        `;
+      }
+    }
+  }
+
+  // Event Delegation (capture fazında — başka hiçbir katman tıklamayı yutamaz)
+  document.addEventListener('click', event => {
+    const raw = event.target;
+    const target = raw && raw.nodeType === 3 ? raw.parentElement : raw;
+    if (!target || typeof target.closest !== 'function') return;
+    const pill = target.closest('#teacherAiRolesBar .teacher-ai-pill');
+    if (!pill) return;
+    event.preventDefault();
+    applyTeacherAiMode(pill.dataset.role || 'ai_mentor', true);
+    $('teacherAiInput')?.focus();
+  }, true);
 
   const teacherAiForm = $('teacherAiForm');
   if (teacherAiForm) {
@@ -5534,18 +5596,19 @@ body.teacher-menu-open {
       event.preventDefault();
       const input = $('teacherAiInput');
       const submitBtn = $('teacherAiSubmit');
-      const text = input.value.trim();
+      const text = (input?.value || '').trim();
       if (!text) return;
 
       const chatBody = $('teacherAiChatBody');
       const userBubble = document.createElement('div');
-      userBubble.style.cssText = 'align-self:flex-end;max-width:80%;padding:10px 14px;background:#d6452b;color:#fff;border-radius:12px;font-size:14px;line-height:1.5;box-shadow:0 1px 3px rgba(0,0,0,.08)';
+      userBubble.setAttribute('data-teacher-user-msg', 'true');
+      userBubble.style.cssText = 'align-self:flex-end;max-width:80%;padding:10px 14px;background:#d6452b;color:#fff;border-radius:12px;font-size:14px;line-height:1.5;box-shadow:0 1px 3px rgba(0,0,0,.08);word-break:break-word';
       userBubble.textContent = text;
       chatBody.appendChild(userBubble);
 
       const loadingBubble = document.createElement('div');
       loadingBubble.style.cssText = 'align-self:flex-start;max-width:85%;padding:10px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;font-size:13px;color:#6b7280';
-      loadingBubble.textContent = 'AI Mentör yanıt hazırlıyor…';
+      loadingBubble.textContent = `${MODES[teacherActiveRole]?.label || 'AI Mentör'} yanıt hazırlıyor…`;
       chatBody.appendChild(loadingBubble);
       chatBody.scrollTop = chatBody.scrollHeight;
 
@@ -5554,38 +5617,43 @@ body.teacher-menu-open {
       submitBtn.disabled = true;
 
       try {
-        const gradeVal = $('teacherAiGradeSelect').value;
-        const res = await api('/api/chat', {
+        const gradeVal = $('teacherAiGradeSelect')?.value || '';
+        const selectedModel = $('teacherAiModelSelect')?.value || 'gemini-3.8-flash';
+        const response = await fetch('/api/chat', {
           method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             ogrenciMesaji: text,
+            mode: teacherActiveRole,
             gorevTuru: teacherActiveRole,
             grade: gradeVal ? Number(gradeVal) : undefined,
-            selectedModel: $('teacherAiModelSelect')?.value || 'gemini-3.8-flash'
+            selectedModel
           })
         });
+        const res = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(res.mesaj || res.error || `Sunucu hatası (${response.status})`);
+        }
 
         loadingBubble.remove();
         const aiBubble = document.createElement('div');
-        aiBubble.style.cssText = 'align-self:flex-start;max-width:85%;padding:12px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;font-size:14px;line-height:1.6;box-shadow:0 1px 3px rgba(0,0,0,.05);color:#1f2937';
-        
+        aiBubble.style.cssText = 'align-self:flex-start;max-width:85%;padding:12px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;font-size:14px;line-height:1.6;box-shadow:0 1px 3px rgba(0,0,0,.05);color:#1f2937;word-break:break-word';
+
         const header = document.createElement('div');
         header.style.cssText = 'font-weight:700;color:#d6452b;font-size:12px;margin-bottom:6px';
-        const roleLabels = {
-          ai_mentor: '🤖 AI Mentör',
-          ogretmen_ikizi: '👨‍🏫 Öğretmen İkizi',
-          soru_cozum: '📝 Soru Çözümü',
-          ai_koc: '🎯 AI Koç'
-        };
-        header.textContent = roleLabels[teacherActiveRole] || '🤖 AI Mentör';
+        header.textContent = MODES[teacherActiveRole]?.label || '🤖 AI Mentör';
         aiBubble.appendChild(header);
 
         const content = document.createElement('div');
         content.style.whiteSpace = 'pre-wrap';
-        if (window.zarifAiVisual) {
-          window.zarifAiVisual.append(content, res.yanit);
+        const replyText = res.yanit || res.text || '';
+        if (window.zarifAiVisual && /<svg[\s>]/i.test(replyText)) {
+          window.zarifAiVisual.append(content, replyText);
+        } else if (window.zarifMathText && typeof window.zarifMathText.format === 'function') {
+          content.innerHTML = window.zarifMathText.format(replyText).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
         } else {
-          content.textContent = res.yanit;
+          content.textContent = replyText;
         }
         aiBubble.appendChild(content);
         chatBody.appendChild(aiBubble);
@@ -5600,6 +5668,8 @@ body.teacher-menu-open {
       }
     });
   }
+
+  applyTeacherAiMode('ai_mentor', false);
 })();
 </script>
 <script>
