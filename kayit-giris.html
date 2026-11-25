@@ -961,6 +961,10 @@
           ? 'Hesap oluştur'
           : parentMode
           ? 'Veli Girişi'
+          : params.get('role') === 'teacher'
+          ? 'Öğretmen Girişi'
+          : params.get('role') === 'student'
+          ? 'Öğrenci Girişi'
           : 'Giriş yap';
 
         $('submitButton').textContent = parentRegistration

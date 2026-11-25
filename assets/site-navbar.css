@@ -1,0 +1,355 @@
+/* ZarifÇözüm Modern Yapışkan Cam Efektli (Sticky Glassmorphism) Ortak Üst Menü */
+.zc-navbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  background: rgba(250, 246, 240, 0.90) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-bottom: 1px solid rgba(197, 155, 71, 0.25) !important;
+  box-shadow: 0 4px 24px rgba(62, 47, 38, 0.05) !important;
+  padding: 0 !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.zc-nav-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Sol Marka & Logo Alanı */
+.zc-nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.zc-nav-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
+  border-radius: 10px;
+}
+
+.zc-nav-brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+
+.zc-nav-brand-name {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.24rem;
+  font-weight: 700;
+  color: #3E2F26;
+  letter-spacing: -0.01em;
+}
+
+.zc-nav-brand-sub {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9a7736;
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+/* Orta Navigasyon Linkleri */
+.zc-nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  flex: 1;
+  min-width: 0;
+}
+
+.zc-nav-link {
+  position: relative;
+  text-decoration: none;
+  color: #3E2F26;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 6px 2px;
+  white-space: nowrap;
+  transition: color 0.18s ease;
+}
+
+.zc-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #C59B47, #B48A3E);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.22s ease;
+}
+
+.zc-nav-link:hover,
+.zc-nav-link.is-active {
+  color: #B48A3E;
+}
+
+.zc-nav-link:hover::after,
+.zc-nav-link.is-active::after {
+  transform: scaleX(1);
+}
+
+/* Sağ Aksiyon Grubu */
+.zc-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Akıllı Rol Seçici Dropdown */
+.zc-login-dropdown {
+  position: relative;
+}
+
+.zc-login-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 15px;
+  border-radius: 11px;
+  border: 1.5px solid rgba(197, 155, 71, 0.55);
+  background: rgba(255, 255, 255, 0.72);
+  color: #3E2F26;
+  font-size: 0.87rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.zc-login-trigger:hover,
+.zc-login-dropdown.is-open .zc-login-trigger {
+  border-color: #C59B47;
+  background: #ffffff;
+  color: #2C211B;
+  box-shadow: 0 6px 16px rgba(197, 155, 71, 0.18);
+}
+
+.zc-login-trigger svg {
+  width: 16px;
+  height: 16px;
+  stroke: #B48A3E;
+  fill: none;
+  stroke-width: 2;
+}
+
+.zc-login-caret {
+  font-size: 0.72rem;
+  color: #9a7736;
+  transition: transform 0.2s ease;
+}
+
+.zc-login-dropdown.is-open .zc-login-caret {
+  transform: rotate(180deg);
+}
+
+.zc-login-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 288px;
+  padding: 8px;
+  border-radius: 16px;
+  background: #FAF6F0;
+  border: 1px solid rgba(197, 155, 71, 0.45);
+  box-shadow: 0 20px 44px rgba(62, 47, 38, 0.16);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  z-index: 1020;
+}
+
+.zc-login-dropdown.is-open .zc-login-menu,
+.zc-login-dropdown:hover .zc-login-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.zc-role-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #3E2F26;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.zc-role-item:hover {
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(62, 47, 38, 0.06);
+  transform: translateX(2px);
+}
+
+.zc-role-ico {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(197, 155, 71, 0.14);
+  border: 1px solid rgba(197, 155, 71, 0.3);
+  display: grid;
+  place-items: center;
+  font-size: 1.18rem;
+  flex-shrink: 0;
+}
+
+.zc-role-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.zc-role-copy strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #3E2F26;
+}
+
+.zc-role-copy small {
+  font-size: 0.74rem;
+  color: #786557;
+  margin-top: 2px;
+}
+
+/* Ana CTA Buton: Ücretsiz Kayıt Ol */
+.zc-cta-register {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 11px;
+  border: 1px solid #C59B47;
+  background: linear-gradient(135deg, #4A3B32 0%, #2C211B 100%);
+  color: #ffffff !important;
+  font-size: 0.87rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(44, 33, 27, 0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.zc-cta-register:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(44, 33, 27, 0.24);
+  border-color: #e4c475;
+}
+
+/* Mobil Hamburger & Drawer */
+.zc-mobile-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  border: 1.5px solid rgba(197, 155, 71, 0.45);
+  background: rgba(255, 255, 255, 0.75);
+  color: #3E2F26;
+  cursor: pointer;
+}
+
+.zc-mobile-toggle svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+.zc-mobile-drawer {
+  display: none;
+  border-top: 1px solid rgba(197, 155, 71, 0.22);
+  background: #FAF6F0;
+  padding: 16px 20px 22px;
+  box-shadow: 0 16px 36px rgba(62, 47, 38, 0.12);
+}
+
+.zc-mobile-drawer.is-open {
+  display: block;
+}
+
+.zc-mob-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.zc-mob-links a {
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #3E2F26;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.zc-mob-links a:hover {
+  background: rgba(197, 155, 71, 0.12);
+  color: #B48A3E;
+}
+
+.zc-mob-roles-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9a7736;
+  margin: 10px 0 8px 4px;
+}
+
+.zc-mob-roles {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.zc-mob-roles .zc-role-item {
+  background: #ffffff;
+  border: 1px solid #ead8c5;
+}
+
+.zc-mob-cta {
+  width: 100%;
+  justify-content: center;
+  padding: 12px 18px;
+}
+
+@media (max-width: 1080px) {
+  .zc-nav-links,
+  .zc-nav-actions {
+    display: none !important;
+  }
+  .zc-mobile-toggle {
+    display: inline-flex;
+  }
+  .zc-nav-inner {
+    padding: 10px 16px;
+  }
+}

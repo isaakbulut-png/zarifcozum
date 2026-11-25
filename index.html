@@ -496,6 +496,8 @@
   }
 }
 </style>
+<link rel="stylesheet" href="assets/site-navbar.css?v=1">
+<script src="assets/site-navbar.js?v=1" defer></script>
 </head>
 <body class="homepage">
 <!-- TOP ANNOUNCEMENT BANNER -->
@@ -516,37 +518,41 @@
   </div>
 </div>
 
-<header class="site-header site-header-expanded">
-  <div class="wrap">
-    <a class="brand" href="index.html"><img class="brand-logo" src="assets/brand-mark.png" alt="">ZarifÇözüm</a>
-    <button
-      class="menu-toggle"
-      type="button"
-      aria-controls="site-navigation"
-      aria-expanded="false"
-      aria-label="Menüyü aç">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 7h16M4 12h16M4 17h16"
-              fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round"/>
-      </svg>
-      <span>Menü</span>
-    </button>
-    <nav class="site-nav" id="site-navigation" aria-label="Site">
-      <a href="#nasil">Nasıl çalışır</a>
-      <a href="#sss">SSS</a>
-      <a href="hakkimizda.html">Hakkımızda</a>
-      <a href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html">Platform Ayrıcalıkları</a>
-      <a href="#paketler">Paketler</a>
-      <a href="iletisim.html">İletişim</a>
+<header class="site-header zc-navbar">
+  <div class="zc-nav-inner">
+    <a class="zc-nav-brand" href="index.html" aria-label="ZarifÇözüm Ana Sayfa">
+      <img class="zc-nav-logo" src="assets/brand-mark.png" alt="ZarifÇözüm Logo">
+      <span class="zc-nav-brand-text">
+        <span class="zc-nav-brand-name">ZarifÇözüm</span>
+        <span class="zc-nav-brand-sub">Yapay Zekâ Destekli Matematik</span>
+      </span>
+    </a>
+    <nav class="zc-nav-links" aria-label="Ana Navigasyon">
+      <a class="zc-nav-link" href="#nasil">Nasıl Çalışır</a>
+      <a class="zc-nav-link" href="#sss">SSS</a>
+      <a class="zc-nav-link" href="hakkimizda.html">Hakkımızda</a>
+      <a class="zc-nav-link" href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html">Platform Ayrıcalıkları</a>
+      <a class="zc-nav-link" href="#paketler">Paketler</a>
+      <a class="zc-nav-link" href="iletisim.html">İletişim</a>
     </nav>
-    <div class="row">
-  <a class="btn btn-ghost btn-sm" href="kayit-giris.html?role=student">Öğrenci Girişi</a>
-  <a class="btn btn-ghost btn-sm" href="kayit-giris.html?role=teacher">Öğretmen Girişi</a>
-  <a class="btn btn-ghost btn-sm" href="kayit-giris.html?role=parent">Veli Girişi</a>
-  <a class="btn btn-primary btn-sm" href="kayit-giris.html?mode=register">Kayıt Ol</a>
-</div>
-
+    <div class="zc-nav-actions">
+      <div class="zc-login-dropdown" id="zcLoginDropdown">
+        <button type="button" class="zc-login-trigger" id="zcLoginTrigger" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Giriş Yap</span>
+          <span class="zc-login-caret">▾</span>
+        </button>
+        <div class="zc-login-menu" role="menu" aria-label="Rol Seçimli Giriş">
+          <a class="zc-role-item" href="kayit-giris.html?role=student"><span class="zc-role-ico">🎓</span><span class="zc-role-copy"><strong>Öğrenci Girişi</strong><small>Dersler, testler ve AI Mentör</small></span></a>
+          <a class="zc-role-item" href="kayit-giris.html?role=teacher"><span class="zc-role-ico">👨‍🏫</span><span class="zc-role-copy"><strong>Öğretmen Girişi</strong><small>Soru üretimi ve sınıf yönetimi</small></span></a>
+          <a class="zc-role-item" href="kayit-giris.html?role=parent"><span class="zc-role-ico">👨‍👩‍👧</span><span class="zc-role-copy"><strong>Veli Girişi</strong><small>Gelişim takibi ve karne raporları</small></span></a>
+        </div>
+      </div>
+      <a class="zc-cta-register" href="kayit-giris.html?mode=register">Ücretsiz Kayıt Ol →</a>
+    </div>
+    <button type="button" class="zc-mobile-toggle" id="zcMobileToggle" aria-expanded="false" aria-label="Menüyü Aç/Kapat">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
   </div>
 </header>
 
