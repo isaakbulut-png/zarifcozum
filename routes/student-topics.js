@@ -7,8 +7,26 @@ const { getCurriculumTree } = require('../lib/meb-curriculum');
 const { getAllowedGradesForStudent, canStudentAccessGrade } = require('../lib/konu-erisimi');
 const { resolveUserPlan } = require('../middleware/aiQuota');
 
-async function resolveStudentAccess(sessionUser) {
+async function resolveStudentAccess(sessionUser, previewUserId = null) {
   const isStaff = Boolean(sessionUser && (sessionUser.role === 'admin' || sessionUser.role === 'teacher' || sessionUser.adminRole));
+  if (isStaff && previewUserId && mongoose.Types.ObjectId.isValid(previewUserId)) {
+    const previewDoc = await User.findById(previewUserId)
+      .select('role subscriptionStatus subscriptionPlan subscriptionTier paketTipi expiresAt subscriptionEndDate grade kayitliSinif seciliTelafiSinif')
+      .lean();
+    if (previewDoc) {
+      const pPlan = resolveUserPlan(previewDoc);
+      const pGrade = Number(previewDoc.kayitliSinif || previewDoc.grade) || 5;
+      const pAllowed = getAllowedGradesForStudent({ ...previewDoc, role: 'student', kayitliSinif: pGrade });
+      return {
+        isStaff: false,
+        isPreview: true,
+        plan: pPlan,
+        registeredGrade: pGrade,
+        allowedGrades: pAllowed,
+        userDoc: { ...previewDoc, role: 'student', kayitliSinif: pGrade }
+      };
+    }
+  }
   if (isStaff) {
     return {
       isStaff: true,
@@ -95,8 +113,9 @@ function createStudentTopicsRouter({ requireAuth }) {
   // 1. Yayınlanmış konuları tema kartları halinde, paket kilidi ve öğrenci ilerlemesiyle getir (0 AI Maliyeti)
   router.get('/', requireAuth, async (req, res) => {
     try {
-      const studentId = String(req.session.user._id || req.session.user.id);
-      const access = await resolveStudentAccess(req.session.user);
+      const previewUserId = typeof req.query.previewUserId === 'string' ? req.query.previewUserId.trim() : null;
+      const studentId = previewUserId || String(req.session.user._id || req.session.user.id);
+      const access = await resolveStudentAccess(req.session.user, previewUserId);
       const requestedGrade = Number(req.query.grade);
       const grade = (requestedGrade >= 5 && requestedGrade <= 12) ? requestedGrade : access.registeredGrade;
       const gradeLocked = !access.isStaff && !access.allowedGrades.includes(grade);

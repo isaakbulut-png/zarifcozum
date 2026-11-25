@@ -108,13 +108,14 @@
       var overlay = sec.querySelector('.zpg-section-lock');
 
       if (!allowed) {
+        sec.dataset.zpgLocked = '1';
         if (!sec.style.position) sec.style.position = 'relative';
         if (!overlay) {
           overlay = document.createElement('div');
           overlay.className = 'zpg-section-lock';
           overlay.style.cssText = [
             'margin:0 0 18px',
-            'padding:20px 22px',
+            'padding:18px 22px',
             'border-radius:16px',
             'background:linear-gradient(135deg,#3E2F26 0%,#2c2019 100%)',
             'border:1.5px solid #C59B47',
@@ -130,23 +131,43 @@
         }
         overlay.innerHTML =
           '<div style="display:flex;align-items:center;gap:14px;flex:1;min-width:240px;">' +
-            '<div style="width:46px;height:46px;border-radius:14px;background:rgba(197,155,71,0.2);border:1px solid #C59B47;display:grid;place-items:center;font-size:1.4rem;flex-shrink:0;">🔒</div>' +
+            '<div style="width:44px;height:44px;border-radius:12px;background:rgba(197,155,71,0.2);border:1px solid #C59B47;display:grid;place-items:center;font-size:1.3rem;flex-shrink:0;">🔒</div>' +
             '<div>' +
               '<div style="font-size:0.74rem;font-weight:800;letter-spacing:0.4px;color:#f3d285;text-transform:uppercase;">' + rule.requiredLabel + '</div>' +
-              '<strong style="display:block;font-family:Georgia,serif;font-size:1.05rem;color:#fff;margin:2px 0;">' + rule.title + '</strong>' +
-              '<span style="font-size:0.84rem;color:#E8DFD5;">' + rule.desc + '</span>' +
+              '<strong style="display:block;font-family:Georgia,serif;font-size:1.02rem;color:#fff;margin:2px 0;">' + rule.title + '</strong>' +
+              '<span style="font-size:0.83rem;color:#E8DFD5;">' + rule.desc + '</span>' +
             '</div>' +
           '</div>' +
-          '<button type="button" data-zpg-upgrade style="padding:10px 18px;border-radius:11px;border:0;background:linear-gradient(135deg,#C59B47,#b08635);color:#2c2019;font-size:0.86rem;font-weight:800;cursor:pointer;white-space:nowrap;">🚀 Üyeliğini Yükselt →</button>';
+          '<button type="button" data-zpg-upgrade style="padding:10px 18px;border-radius:11px;border:0;background:linear-gradient(135deg,#C59B47,#b08635);color:#2c2019;font-size:0.85rem;font-weight:800;cursor:pointer;white-space:nowrap;">🚀 Üyeliğini Yükselt →</button>';
 
-        // Alt içerikleri kilitli modda pasifleştir
+        // İçeriği okunabilir tut (donuk/ölü bırakma); etkileşimde yükseltme penceresini aç
         Array.from(sec.children).forEach(function (child) {
           if (child === overlay || child.tagName === 'STYLE') return;
-          child.style.opacity = '0.35';
-          child.style.pointerEvents = 'none';
-          child.style.userSelect = 'none';
+          child.style.opacity = '0.78';
+          child.style.pointerEvents = '';
+          child.style.userSelect = '';
         });
+
+        if (!sec.dataset.zpgInterceptBound) {
+          sec.dataset.zpgInterceptBound = '1';
+          sec.addEventListener('click', function (e) {
+            if (sec.dataset.zpgLocked !== '1') return;
+            if (e.target.closest('.zpg-section-lock')) return;
+            if (e.target.closest('button, a, input, select, textarea, label, [onclick]')) {
+              e.preventDefault();
+              e.stopPropagation();
+              openUpgrade();
+            }
+          }, true);
+          sec.addEventListener('submit', function (e) {
+            if (sec.dataset.zpgLocked !== '1') return;
+            e.preventDefault();
+            e.stopPropagation();
+            openUpgrade();
+          }, true);
+        }
       } else {
+        delete sec.dataset.zpgLocked;
         if (overlay) overlay.remove();
         Array.from(sec.children).forEach(function (child) {
           if (child.tagName === 'STYLE') return;
@@ -159,7 +180,7 @@
   }
 
   function syncAllGradeSelectors() {
-    var selectorIds = ['kcGradeSelect', 'studentAiGradeSelect', 'stmGradeSelect', 'gzGrade'];
+    var selectorIds = ['kcGradeSelect', 'studentAiGradeSelect', 'stmGradeSelect', 'gzGrade', 'videoGradeFilter'];
     selectorIds.forEach(function (id) {
       var sel = document.getElementById(id);
       if (!sel || sel.tagName !== 'SELECT') return;
@@ -206,7 +227,10 @@
 
   async function refreshFromServer() {
     try {
-      var res = await fetch('/api/student/topics', { credentials: 'include', cache: 'no-store' });
+      var params = new URLSearchParams(global.location.search || '');
+      var previewId = params.get('previewUserId');
+      var url = '/api/student/topics' + (previewId ? ('?previewUserId=' + encodeURIComponent(previewId)) : '');
+      var res = await fetch(url, { credentials: 'include', cache: 'no-store' });
       if (!res.ok) return planState;
       var data = await res.json();
       if (data && data.access) {
