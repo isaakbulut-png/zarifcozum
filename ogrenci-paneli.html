@@ -1274,99 +1274,96 @@ button,select{font:inherit}
       </section>
     </section>
 
-    <!-- OYUNLAŞTIRMA: HAFTALIK LİDERLİK TABLOSU & SERTİFİKA -->
+    <!-- OYUNLAŞTIRMA: BAŞARI, HAFTALIK LİG & DİJİTAL SERTİFİKA MERKEZİ -->
     <section class="panel-view" id="liderlik-tablosu" data-panel-view="liderlik-tablosu" hidden>
+      <style>
+        .lsc-wrap{display:flex;flex-direction:column;gap:18px;font-family:'Inter',system-ui,sans-serif;}
+        .lsc-prestige{padding:24px 26px;border-radius:18px;background:linear-gradient(135deg,#3E2F26 0%,#2c2019 100%);border:1px solid #C59B47;color:#FAF6F0;box-shadow:0 14px 32px rgba(62,47,38,0.18);}
+        .lsc-prestige-top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px;}
+        .lsc-lvl-head{display:flex;align-items:center;gap:14px;}
+        .lsc-lvl-orb{width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,#C59B47,#e4c475);display:grid;place-items:center;font-size:1.65rem;box-shadow:0 6px 18px rgba(197,155,71,0.38);}
+        .lsc-plan-tag{font-size:0.74rem;font-weight:800;letter-spacing:0.4px;color:#f3d285;text-transform:uppercase;}
+        .lsc-lvl-head h3{margin:3px 0 2px;font-family:Georgia,serif;font-size:1.3rem;color:#fff;}
+        .lsc-lvl-head p{margin:0;font-size:0.84rem;color:#E8DFD5;}
+        .lsc-xp-pill{padding:10px 16px;border-radius:14px;background:rgba(255,255,255,0.08);border:1px solid rgba(197,155,71,0.4);text-align:right;}
+        .lsc-xp-pill strong{display:block;font-family:Georgia,serif;font-size:1.35rem;color:#f3d285;}
+        .lsc-xp-pill span{font-size:0.75rem;color:#E8DFD5;}
+        .lsc-xp-track{height:10px;border-radius:999px;background:rgba(255,255,255,0.12);overflow:hidden;}
+        .lsc-xp-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#C59B47,#f3d285);transition:width .4s ease;}
+        .lsc-kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+        .lsc-kpi-card{display:flex;align-items:center;gap:14px;padding:18px;border-radius:16px;background:#fff;border:1px solid #ead8c5;box-shadow:0 6px 18px rgba(62,47,38,0.05);}
+        .lsc-kpi-ico{width:48px;height:48px;border-radius:14px;background:#FAF6F0;border:1px solid #ead8c5;display:grid;place-items:center;font-size:1.5rem;flex-shrink:0;}
+        .lsc-kpi-ico.flame{animation:lscFlamePulse 1.8s ease-in-out infinite;box-shadow:0 0 0 0 rgba(234,88,12,0.35);}
+        @keyframes lscFlamePulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(234,88,12,0.35);}50%{transform:scale(1.07);box-shadow:0 0 14px 3px rgba(234,88,12,0.22);}}
+        .lsc-kpi-lbl{display:block;font-size:0.75rem;font-weight:700;color:#786557;text-transform:uppercase;}
+        .lsc-kpi-val{display:block;font-family:Georgia,serif;font-size:1.25rem;color:#3E2F26;margin:2px 0;}
+        .lsc-kpi-card small{font-size:0.76rem;color:#786557;}
+        .lsc-panel{background:#fff;border:1px solid #ead8c5;border-radius:18px;padding:20px;box-shadow:0 8px 24px rgba(62,47,38,0.06);}
+        .lsc-rel{position:relative;overflow:hidden;}
+        .lsc-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #f4ece3;}
+        .lsc-panel-head h3{margin:0;font-family:Georgia,serif;font-size:1.06rem;color:#3E2F26;}
+        .lsc-chip{padding:4px 10px;border-radius:999px;font-size:0.74rem;font-weight:700;background:#FAF6F0;color:#3E2F26;border:1px solid #ead8c5;}
+        .lsc-chip.gold{background:rgba(197,155,71,0.16);color:#8c6821;border-color:#C59B47;}
+        .lsc-badges-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+        .lsc-badge-card{display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:14px;border:1.5px solid #efe4d8;background:#FAF6F0;position:relative;overflow:hidden;}
+        .lsc-badge-card.earned{background:linear-gradient(135deg,#fffdf8 0%,#FAF6F0 100%);border-color:#C59B47;box-shadow:0 6px 16px rgba(197,155,71,0.15);}
+        .lsc-badge-card.earned::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.55),transparent);animation:lscShimmer 3.6s infinite;}
+        @keyframes lscShimmer{0%{left:-100%;}45%,100%{left:140%;}}
+        .lsc-badge-card.locked{opacity:0.78;}
+        .lsc-badge-ico{width:42px;height:42px;border-radius:12px;background:#fff;border:1px solid #ead8c5;display:grid;place-items:center;font-size:1.35rem;flex-shrink:0;}
+        .lsc-badge-body{flex:1;min-width:0;}
+        .lsc-badge-body strong{display:block;font-size:0.88rem;color:#3E2F26;}
+        .lsc-badge-body p{margin:3px 0 8px;font-size:0.76rem;color:#6e5c50;line-height:1.35;}
+        .lsc-earned-date{display:inline-block;font-size:0.72rem;font-weight:800;color:#065f46;background:#ecfdf5;padding:2px 8px;border-radius:999px;}
+        .lsc-mini-prog{display:flex;align-items:center;gap:8px;}
+        .lsc-mini-track{flex:1;height:6px;border-radius:999px;background:#e8dfd5;overflow:hidden;}
+        .lsc-mini-fill{height:100%;background:#C59B47;border-radius:999px;}
+        .lsc-mini-prog span{font-size:0.71rem;font-weight:700;color:#786557;white-space:nowrap;}
+        .lsc-two-col{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;align-items:start;}
+        .lsc-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:end;margin-bottom:16px;}
+        .lsc-pod{padding:14px 10px;border-radius:14px;text-align:center;border:1.5px solid #ead8c5;background:#FAF6F0;}
+        .lsc-pod.gold{background:linear-gradient(180deg,#fff9e6 0%,#FAF6F0 100%);border-color:#C59B47;padding-top:18px;box-shadow:0 8px 20px rgba(197,155,71,0.2);}
+        .lsc-pod.silver{border-color:#cbd5e1;}
+        .lsc-pod.bronze{border-color:#d6b28f;}
+        .lsc-pod-crown{display:block;font-size:1.35rem;margin-bottom:2px;}
+        .lsc-pod-rank{display:block;font-size:0.76rem;font-weight:800;color:#786557;}
+        .lsc-pod strong{display:block;font-size:0.86rem;color:#3E2F26;margin:4px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .lsc-pod small{font-size:0.76rem;font-weight:800;color:#8c6821;}
+        .lsc-lb-list{display:flex;flex-direction:column;gap:6px;}
+        .lsc-lb-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;background:#FAF6F0;border:1px solid #f0e6da;font-size:0.86rem;}
+        .lsc-lb-row.is-self{background:linear-gradient(135deg,#fff9ea,#FAF6F0);border:2px solid #C59B47;box-shadow:0 4px 12px rgba(197,155,71,0.18);}
+        .lsc-lb-pos{width:28px;font-weight:800;color:#786557;text-align:center;}
+        .lsc-lb-name{flex:1;font-weight:600;color:#3E2F26;}
+        .lsc-self-tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:#3E2F26;color:#f3d285;font-size:0.68rem;font-weight:800;}
+        .lsc-lb-xp{color:#8c6821;font-weight:800;}
+        .lsc-cert-frame{padding:24px 20px;border-radius:14px;background:#fffdf9;border:6px double #C59B47;outline:1px solid #3E2F26;outline-offset:-10px;text-align:center;color:#3E2F26;}
+        .lsc-cert-kicker{font-size:0.7rem;font-weight:800;letter-spacing:2px;color:#C59B47;}
+        .lsc-cert-title{font-family:Georgia,serif;font-size:1.18rem;font-weight:700;color:#3E2F26;margin:6px 0 8px;}
+        .lsc-cert-text{margin:0 auto 10px;font-size:0.8rem;color:#6e5c50;max-width:340px;line-height:1.45;}
+        .lsc-cert-name{display:inline-block;font-family:Georgia,serif;font-size:1.38rem;font-weight:700;color:#2c2019;border-bottom:2px solid #C59B47;padding:0 18px 4px;margin:4px 0 10px;}
+        .lsc-cert-degree{display:inline-block;padding:4px 12px;border-radius:999px;background:#FAF6F0;border:1px solid #ead8c5;font-size:0.75rem;font-weight:700;color:#3E2F26;margin-bottom:14px;}
+        .lsc-cert-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:10px;border-top:1px dashed #e6d7c8;}
+        .lsc-cert-date span{display:block;font-size:0.68rem;color:#8a7667;text-transform:uppercase;}
+        .lsc-cert-date strong{font-size:0.8rem;color:#3E2F26;}
+        .lsc-cert-seal{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:0.62rem;font-weight:800;color:#8c6821;letter-spacing:0.6px;}
+        .lsc-cert-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+        .lsc-btn-gold,.lsc-btn-dark{flex:1;min-width:160px;padding:11px 14px;border-radius:11px;border:0;font-size:0.84rem;font-weight:800;cursor:pointer;transition:transform .14s ease;}
+        .lsc-btn-gold{background:linear-gradient(135deg,#C59B47,#b08635);color:#2c2019;box-shadow:0 4px 12px rgba(197,155,71,0.3);}
+        .lsc-btn-dark{background:#3E2F26;color:#FAF6F0;}
+        .lsc-btn-gold:hover,.lsc-btn-dark:hover{transform:translateY(-1px);}
+        .lsc-free-lock{position:absolute;inset:0;z-index:12;background:rgba(250,246,240,0.92);backdrop-filter:blur(4px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;}
+        .lsc-free-lock strong{font-family:Georgia,serif;font-size:1.05rem;color:#3E2F26;margin-bottom:6px;}
+        .lsc-free-lock p{font-size:0.84rem;color:#6e5c50;max-width:300px;margin:0 0 14px;}
+        @media (max-width:960px){.lsc-kpi-grid,.lsc-badges-grid,.lsc-two-col{grid-template-columns:1fr;}}
+      </style>
       <div class="section-head">
-        <h2>🏆 Başarılarım, Haftalık Liderlik Ligi &amp; Sertifika</h2>
-        <p class="hint">Seviyeni yükselt, rozet koleksiyonunu tamamla ve sınıf liginde zirveye tırman.</p>
+        <h2>🏆 Başarı, Haftalık Lig &amp; Sertifika Merkezi</h2>
+        <p class="hint">Seviyeni yükselt, pedagojik rozetleri topla, sınıf podyumunda yerini al ve dijital sertifikanı indir.</p>
       </div>
-
-      <!-- Seviye ve İlerleme Kartı -->
-      <div id="gamifyLevelProgressCard" style="margin-bottom:18px;"></div>
-
-      <!-- Seri & Rozet Özeti -->
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:20px;">
-        <div class="card" style="padding:16px; border-left:4px solid #f97316;">
-          <div style="font-size:0.8rem; color:var(--muted); font-weight:600;">GÜNLÜK ÇALIŞMA SERİSİ</div>
-          <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-            <span style="font-size:1.8rem;">🔥</span>
-            <span style="font-size:1.6rem; font-weight:700; color:#ea580c;" id="gamifyStreakCount">0 Gün</span>
-          </div>
-          <small style="color:var(--muted);">Her gün soru çözerek serini devam ettir!</small>
-        </div>
-
-        <div class="card" style="padding:16px; border-left:4px solid #3b82f6;">
-          <div style="font-size:0.8rem; color:var(--muted); font-weight:600;">SERİ KORUMA KALKANI</div>
-          <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-            <span style="font-size:1.8rem;" id="gamifyShieldIcon">🛡️</span>
-            <span style="font-size:1.3rem; font-weight:700;" id="gamifyShieldStatus">Yükleniyor...</span>
-          </div>
-          <small id="gamifyShieldDesc" style="color:var(--muted);">Standart ve VIP paketlerde 1 gün çalışma kaçırsan bile serin sıfırlanmaz.</small>
-        </div>
-
-        <div class="card" style="padding:16px; border-left:4px solid #8b5cf6;">
-          <div style="font-size:0.8rem; color:var(--muted); font-weight:600;">KAZANILAN ROZETLER</div>
-          <div style="display:flex; align-items:center; gap:6px; margin-top:8px; flex-wrap:wrap;" id="gamifyBadgesList">
-            <span class="chip">Yükleniyor...</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Rozet Koleksiyonu (Kazanılmış & Kilitli) -->
-      <div class="card" style="margin-bottom:18px;background:#FBF9F5;border:1px solid #e4cbb2;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-          <h3 style="margin:0;color:#2c1a0e;">🏅 Rozet Koleksiyonu</h3>
-          <small style="color:#6a5242;">Kilitli rozetlerin üzerine gelerek nasıl kazanıldığını görebilirsin</small>
-        </div>
-        <div id="gamifyBadgeCollection"></div>
-      </div>
-
-      <!-- Liderlik Tablosu ve Sertifika 2'li Grid -->
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px;">
-        <!-- Sol: Haftalık Liderlik Tablosu -->
-        <div class="card" style="position:relative; overflow:hidden;">
-          <h3 style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-            <span>🎖️ Haftalık Liderlik Sıralaması</span>
-            <span class="chip hot" id="leaderboardGradeTag" style="font-size:11px;">Canlı Lig</span>
-          </h3>
-
-          <div id="leaderboardLockOverlay" hidden style="position:absolute; inset:0; background:rgba(255,255,255,0.92); backdrop-filter:blur(3px); z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
-            <span style="font-size:2.5rem; margin-bottom:8px;">🔒</span>
-            <strong style="color:var(--navy-900); font-size:1.05rem;">Haftalık Lig Sıralaması Kilitli</strong>
-            <p style="font-size:0.88rem; color:var(--muted); margin:8px 0 16px; max-width:280px;">Haftalık liderlik yarışına katılmak, puan toplamak ve seri kalkanını aktifleştirmek için <strong>Standart</strong> veya <strong>VIP</strong> pakete geçin.</p>
-            <a href="Paketler.html" class="btn-join" style="margin:0;">Paketleri İncele →</a>
-          </div>
-
-          <div id="leaderboardList" style="display:flex; flex-direction:column; gap:8px;">
-            <p class="feed-status">Liderlik tablosu yükleniyor…</p>
-          </div>
-        </div>
-
-        <!-- Sağ: Aylık Başarı Sertifikası -->
-        <div class="card" style="position:relative; overflow:hidden; border:2px solid #e0c3fc; background:linear-gradient(180deg, #faf5ff 0%, #fff 100%);">
-          <h3 style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; color:#6b21a8;">
-            <span>📜 Aylık Başarı Sertifikası</span>
-            <span style="padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; background:#f3e8ff; color:#7e22ce; border:1px solid #d8b4fe;">👑 VIP Paket</span>
-          </h3>
-
-          <div id="certificateLockOverlay" hidden style="position:absolute; inset:0; background:rgba(255,255,255,0.92); backdrop-filter:blur(3px); z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
-            <span style="font-size:2.5rem; margin-bottom:8px;">👑</span>
-            <strong style="color:#581c87; font-size:1.05rem;">Aylık Başarı Sertifikası VIP Özelliğidir</strong>
-            <p style="font-size:0.88rem; color:var(--muted); margin:8px 0 16px; max-width:280px;">Her ay düzenli çalışan ve gelişim gösteren VIP öğrencilerimize özel hazırlanan imzalı başarı sertifikasını indirmek için VIP Pakete geçin.</p>
-            <a href="Paketler.html" class="btn-join" style="margin:0; background:#7e22ce;">👑 VIP Pakete Yükselt →</a>
-          </div>
-
-          <div style="padding:14px; border:1px dashed #c084fc; border-radius:12px; background:#fff; text-align:center;">
-            <div style="font-family:Georgia, serif; font-size:1.1rem; font-weight:700; color:#581c87; margin-bottom:4px;">ZARİFÇÖZÜM MATEMATİK AKADEMİSİ</div>
-            <div style="font-size:0.85rem; color:#7e22ce; font-weight:600; margin-bottom:12px;">ÜSTÜN BAŞARI &amp; DÜZENLİ ÇALIŞMA BELGESİ</div>
-            <p style="font-size:0.85rem; color:var(--text); line-height:1.5;">Bu belge, platformumuzda gösterdiği istikrarlı matematik çalışması, tamamladığı kazanımlar ve deneme sınavı başarıları vesilesiyle sayın öğrencimiz adına tanzim edilmiştir.</p>
-            <div style="margin:16px 0; font-weight:700; font-size:1.1rem; color:#1e1b4b;" id="certStudentName">Öğrenci Adı</div>
-            <button type="button" class="btn-join" id="btnDownloadCert" style="background:#7e22ce; margin:8px auto 0; display:inline-flex; align-items:center; gap:6px;">
-              <span>📥</span><span>Sertifikayı İndir / Yazdır</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <div id="liderlikSertifikaRoot"></div>
+      <div id="gamifyLevelProgressCard" hidden></div>
+      <div id="gamifyBadgeCollection" hidden></div>
+      <div id="leaderboardList" hidden></div>
     </section>
     <!-- VİDEO DERSLER (PANEL İÇİ 3 SÜTUNLU GRID) -->
     <section class="panel-view" id="video-dersler" data-panel-view="video-dersler" hidden>
@@ -1581,6 +1578,9 @@ button,select{font:inherit}
       if ($('menu-toggle')) $('menu-toggle').checked = false;
       if (selectedView.dataset.panelView === 'ai-mentor') {
         updateStudentAiQuotaBadge();
+      }
+      if (selectedView.dataset.panelView === 'liderlik-tablosu' && window.ZarifLeaderboardCenter) {
+        window.ZarifLeaderboardCenter.refresh();
       }
     }
     window.showPanel = showPanel;
@@ -3151,6 +3151,7 @@ button,select{font:inherit}
           studentUserPlan = quotaData.paketTipi || 'free';
           currentStudentName = quotaData.name || 'Öğrenci';
           window.ZarifGamification?.syncFromServer(quotaData);
+          window.ZarifLeaderboardCenter?.syncFromQuota(quotaData);
 
           if ($('gamifyStreakCount')) {
             $('gamifyStreakCount').textContent = `${quotaData.seriGunSayisi || 0} Gün`;
@@ -3201,8 +3202,10 @@ button,select{font:inherit}
           if (window.ZarifGamification && typeof window.ZarifGamification.renderLeaderboardRows === 'function') {
             window.ZarifGamification.renderLeaderboardRows(list);
           }
-        } else if (window.ZarifGamification) {
-          window.ZarifGamification.renderLeaderboardRows([]);
+          window.ZarifLeaderboardCenter?.setLeaderboard(list);
+        } else {
+          window.ZarifGamification?.renderLeaderboardRows([]);
+          window.ZarifLeaderboardCenter?.setLeaderboard([]);
         }
       } catch (err) {
         console.warn('Oyunlaştırma yüklenemedi:', err);
@@ -3566,6 +3569,7 @@ button,select{font:inherit}
 <script src="/assets/app-store.js?v=4"></script>
 <script src="/assets/canli-ders.js?v=1"></script>
 <script src="/assets/gamification-service.js?v=1"></script>
+<script src="/assets/liderlik-sertifika.js?v=1"></script>
 <script src="/assets/student-store-bridge.js?v=2"></script>
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/ogrenci-gelisim.js"></script>
