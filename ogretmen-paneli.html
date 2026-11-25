@@ -115,8 +115,14 @@ td.net{font-weight:700;color:var(--navy-900)}
 .ai-question-svg-mount{display:flex;justify-content:center;align-items:center;margin:12px 0;padding:12px;background:#ffffff;border:1px solid var(--line);border-radius:10px;overflow:auto}
 .ai-question-svg-mount:empty{display:none}
 .ai-question-svg-mount svg{max-width:100%;max-height:320px;height:auto;display:block}
-#quizFormulaDialog{width:min(560px,calc(100% - 32px));padding:22px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text)}
+#quizFormulaDialog{width:min(560px,calc(100% - 32px));padding:22px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);margin:auto}
 #quizFormulaDialog::backdrop{background:rgba(35,24,16,.55)}
+#centralBankDialog[open]{position:fixed;inset:0;margin:auto;width:min(860px,calc(100vw - 32px));max-height:88vh;display:flex;flex-direction:column;z-index:99999;padding:22px;border:1.5px solid #e4cbb2;border-radius:16px;background:#fffaf5;color:var(--text);box-shadow:0 24px 64px rgba(44,26,14,.32);overflow:hidden}
+#centralBankDialog::backdrop{background:rgba(44,26,14,.55);backdrop-filter:blur(3px)}
+#centralBankDialog .central-question-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:11px;border:1px solid #e4d4c3;background:#fff;cursor:pointer;transition:border-color .15s,background .15s}
+#centralBankDialog .central-question-item:hover{border-color:#c2570c;background:#fffdf9}
+#centralBankDialog .central-question-item.selected{border-color:#c2570c;background:#fff7ed;box-shadow:0 0 0 2px rgba(194,87,12,.14)}
+dialog[open]{margin:auto}
 .formula-templates{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
 .formula-templates .btn{padding:8px 12px}
 #quizFormulaInput{width:100%;min-height:90px}
@@ -2287,8 +2293,14 @@ body.teacher-menu-open {
     <p class="hint" style="text-align:center;padding:24px">Sorular aranıyor…</p>
   </div>
 
-  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
-    <span style="font-size:13px;color:var(--muted)">Seçilen: <strong id="centralSelectedCount" style="color:var(--text)">0</strong> soru</span>
+  <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:14px;margin-top:14px;gap:10px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-size:13px;color:var(--muted)">Seçilen: <strong id="centralSelectedCount" style="color:var(--text)">0</strong> soru</span>
+      <label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#5a422d;cursor:pointer">
+        <input type="checkbox" id="chkSaveTransferredToPool" checked style="accent-color:#c2570c">
+        <span>Bu soruları havuza da kaydet</span>
+      </label>
+    </div>
     <div style="display:flex;gap:8px">
       <button class="btn light" type="button" id="cancelCentralBank">Kapat</button>
       <button class="btn" type="button" id="btnTransferQuestions" disabled style="background:var(--orange,#c2570c);color:#fff;font-weight:600">Seçilen Soruları Teste Ekle</button>
@@ -3595,6 +3607,86 @@ body.teacher-menu-open {
     return article;
   }
 
+  // 5–12. Sınıf Maarif Modeli Örnek Havuz Soruları (MongoDB henüz boşsa öğretmenin test edebilmesi için)
+  const MAARIF_SAMPLE_POOL = [
+    { id: 'pool_m5_1', grade: 5, difficulty: 'kolay', topic: 'Doğal Sayılar ve İşlemler', outcomeCode: 'MAT.5.1.1', text: 'Bir kütüphanede her rafta 24 kitap vardır. 15 raf tamamen dolduğunda ve masada 18 kitap kaldığında toplam kaç kitap olur?', options: { A: '360', B: '378', C: '384', D: '396' }, answer: 'B', explanation: '15 × 24 = 360; 360 + 18 = 378 kitap.' },
+    { id: 'pool_m6_1', grade: 6, difficulty: 'orta', topic: 'Çarpanlar ve Katlar', outcomeCode: 'MAT.6.1.2', text: 'İki zilden biri 12 dakikada, diğeri 18 dakikada bir çalmaktadır. İkisi birlikte saat 09.00’da çaldıktan sonra tekrar birlikte saat kaçta çalarlar?', options: { A: '09.24', B: '09.30', C: '09.36', D: '09.48' }, answer: 'C', explanation: 'EKOK(12, 18) = 36 dakika olduğundan 09.36.' },
+    { id: 'pool_m7_1', grade: 7, difficulty: 'orta', topic: 'Oran ve Orantı', outcomeCode: 'MAT.7.1.4', text: 'Sabit hızla hareket eden bir araç 3 saatte 240 km yol alıyor. Aynı hızla 5 saatte kaç km yol alır?', options: { A: '320 km', B: '360 km', C: '400 km', D: '450 km' }, answer: 'C', explanation: 'Saatte 80 km gider; 5 × 80 = 400 km.' },
+    { id: 'pool_m8_1', grade: 8, difficulty: 'zor', topic: 'Kareköklü İfadeler (LGS)', outcomeCode: 'MAT.8.1.3', text: 'Alanı 72 cm² olan kare şeklindeki bir kartonun çevresi kaç santimetredir?', options: { A: '12√2', B: '18√2', C: '24√2', D: '36√2' }, answer: 'C', explanation: 'Bir kenar √72 = 6√2 cm; çevre = 4 × 6√2 = 24√2 cm.' },
+    { id: 'pool_m9_1', grade: 9, difficulty: 'orta', topic: 'Gerçek Sayılar ve Fonksiyonlar', outcomeCode: 'MAT.9.1.2', text: 'f(x) = 3x - 7 fonksiyonu için f(5) + f(2) toplamı kaçtır?', options: { A: '5', B: '7', C: '8', D: '9', E: '11' }, answer: 'B', explanation: 'f(5) = 8, f(2) = -1; toplam 8 + (-1) = 7.' },
+    { id: 'pool_m10_1', grade: 10, difficulty: 'orta', topic: 'Polinomlar ve Çarpanlara Ayırma', outcomeCode: 'MAT.10.2.1', text: 'P(x) = x² - 5x + 6 polinomunun (x - 4) ile bölümünden kalan kaçtır?', options: { A: '0', B: '1', C: '2', D: '4', E: '6' }, answer: 'C', explanation: 'P(4) = 16 - 20 + 6 = 2.' },
+    { id: 'pool_m11_1', grade: 11, difficulty: 'zor', topic: 'Trigonometri', outcomeCode: 'MAT.11.1.1', text: 'Dar açılı bir dik üçgende sin(α) = 3/5 olduğuna göre tan(α) değeri kaçtır?', options: { A: '3/4', B: '4/3', C: '4/5', D: '5/4', E: '5/3' }, answer: 'A', explanation: '3-4-5 üçgeninde cos(α) = 4/5 ve tan(α) = 3/4.' },
+    { id: 'pool_m12_1', grade: 12, difficulty: 'zor', topic: 'Logaritma ve Limit (YKS)', outcomeCode: 'MAT.12.1.2', text: 'log₂(8) + log₃(27) toplamının değeri kaçtır?', options: { A: '4', B: '5', C: '6', D: '7', E: '8' }, answer: 'C', explanation: 'log₂(8) = 3 ve log₃(27) = 3; toplam 6.' }
+  ];
+
+  // Ortak Havuz Yükleyici: MongoDB API (/api/central-question-bank & /api/sorular) + ZarifStore + Maarif Örnekleri
+  async function fetchUnifiedQuestionPool({ grade = '', diff = '', search = '' } = {}) {
+    const params = new URLSearchParams();
+    params.set('limit', '60');
+    if (grade) params.set('grade', grade);
+    if (diff) params.set('difficulty', diff);
+    if (search) params.set('search', search);
+
+    const merged = [];
+    const seen = new Set();
+    const pushUnique = (q, sourceTag) => {
+      if (!q) return;
+      const id = String(q.id || q._id || `${sourceTag}_${merged.length}`);
+      if (seen.has(id)) return;
+      seen.add(id);
+      merged.push({ ...q, id, _sourceTag: sourceTag });
+    };
+
+    // 1. Backend MongoDB rotalarını dene (/api/central-question-bank ve /api/sorular)
+    try {
+      const r1 = await api('/api/central-question-bank?' + params.toString());
+      const arr1 = Array.isArray(r1?.questions) ? r1.questions : (Array.isArray(r1?.sorular) ? r1.sorular : []);
+      arr1.forEach(q => pushUnique(q, 'db'));
+    } catch {}
+    try {
+      const r2 = await api('/api/sorular?' + params.toString());
+      const arr2 = Array.isArray(r2?.sorular) ? r2.sorular : (Array.isArray(r2?.questions) ? r2.questions : []);
+      arr2.forEach(q => pushUnique(q, 'db'));
+    } catch {}
+
+    // 2. ZarifStore.publishedTests içinde kayıtlı öğretmen sorularını birleştir
+    try {
+      const storePubs = window.ZarifStore?.publishedTests?.list?.() || [];
+      storePubs.forEach(pub => {
+        (pub.questions || []).forEach((q, qi) => {
+          pushUnique({
+            id: q.id || `store_${pub.id}_${qi}`,
+            grade: Number(pub.grade) || 7,
+            difficulty: String(pub.difficulty || 'orta').toLowerCase(),
+            topic: pub.topicTitle || pub.title || 'Matematik',
+            outcomeCode: q.outcomeCode || '',
+            text: q.text || q.question || '',
+            options: q.options || {},
+            answer: q.answer || 'A',
+            explanation: q.explanation || q.solution || ''
+          }, 'store');
+        });
+      });
+    } catch {}
+
+    // 3. Veritabanı/Store henüz boşsa Maarif Modeli örnek havuz sorularını da ekle
+    if (merged.length === 0) {
+      MAARIF_SAMPLE_POOL.forEach(q => pushUnique(q, 'maarif_sample'));
+    }
+
+    // Ortak istemci filtresi (Sınıf, Zorluk, Arama)
+    const qLower = String(search || '').trim().toLowerCase();
+    return merged.filter(q => {
+      if (grade && Number(q.grade) !== Number(grade)) return false;
+      if (diff && String(q.difficulty || '').toLowerCase() !== String(diff).toLowerCase()) return false;
+      if (qLower) {
+        const hay = `${q.text || ''} ${q.topic || ''} ${q.outcomeCode || ''}`.toLowerCase();
+        if (!hay.includes(qLower)) return false;
+      }
+      return true;
+    });
+  }
+
   async function loadCentralBankQuestions() {
     const listEl = $('centralBankList');
     listEl.innerHTML = '<p class="hint" style="text-align:center;padding:24px">Sorular taranıyor ve yükleniyor…</p>';
@@ -3606,14 +3698,7 @@ body.teacher-menu-open {
     const search = $('centralSearchFilter').value.trim();
 
     try {
-      const params = new URLSearchParams();
-      params.set('limit', '50');
-      if (grade) params.set('grade', grade);
-      if (diff) params.set('difficulty', diff);
-      if (search) params.set('search', search);
-
-      const res = await api('/api/sorular?' + params.toString());
-      centralBankQuestions = Array.isArray(res.sorular) ? res.sorular : [];
+      centralBankQuestions = await fetchUnifiedQuestionPool({ grade, diff, search });
 
       if (!centralBankQuestions.length) {
         listEl.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--muted)">
@@ -3632,7 +3717,7 @@ body.teacher-menu-open {
         let optionsPreview = '';
         if (q.options) {
           const opts = Array.isArray(q.options) ? q.options : Object.entries(q.options).map(([label, text]) => ({ label, text }));
-          optionsPreview = opts.slice(0, 4).map(o => {
+          optionsPreview = opts.slice(0, 5).map(o => {
             const lbl = o.label || o[0];
             const val = (o.text || o[1] || '').toString().slice(0, 40);
             const isCorrect = (q.answer && q.answer === lbl) || (q.cevap && q.cevap === lbl);
@@ -3640,12 +3725,19 @@ body.teacher-menu-open {
           }).join(' ');
         }
 
+        const sourceBadge = q._sourceTag === 'store'
+          ? '<span style="font-size:11px;background:#ecfdf5;color:#065f46;padding:1px 6px;border-radius:4px">★ Yayınlanan Havuz</span>'
+          : (q._sourceTag === 'maarif_sample'
+            ? '<span style="font-size:11px;background:#fffbeb;color:#92400e;padding:1px 6px;border-radius:4px">📘 Maarif Örnek Havuz</span>'
+            : '<span style="font-size:11px;background:#eff6ff;color:#1d4ed8;padding:1px 6px;border-radius:4px">🗄️ Veritabanı</span>');
+
         return `<article class="central-question-item" data-id="${esc(q.id || q._id)}">
           <input type="checkbox" class="central-q-checkbox" data-id="${esc(q.id || q._id)}">
           <div style="flex:1;min-width:0">
             <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
               <span class="badge-grade">${esc(gradeLabel)}</span>
               <span class="badge-diff ${diffClass}">${esc(diffLabel)}</span>
+              ${sourceBadge}
               ${q.outcomeCode ? `<code style="font-size:11px;background:#f1f5f9;padding:2px 6px;border-radius:4px">${esc(q.outcomeCode)}</code>` : ''}
               ${q.topic ? `<span style="font-size:11px;color:var(--muted)">🏷️ ${esc(q.topic)}</span>` : ''}
               ${q.format === 'image' || q.imageUrl ? '<span style="font-size:11px;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px">📷 Resimli</span>' : ''}
@@ -3701,17 +3793,37 @@ body.teacher-menu-open {
     }
 
     let addedCount = 0;
+    const transferredList = [];
     selectedCentralQuestionIds.forEach(id => {
       const q = centralBankQuestions.find(item => String(item.id || item._id) === String(id));
       if (q) {
-        soruEkleWithData(q);
+        const added = soruEkleWithData(q);
+        if (added) added.dataset.source = 'bank';
+        transferredList.push(q);
         addedCount++;
       }
     });
 
+    if (typeof updateQuizBasketUI === 'function') {
+      updateQuizBasketUI();
+    }
+
+    if ($('chkSaveTransferredToPool')?.checked && transferredList.length && window.ZarifStore?.publishedTests) {
+      const firstQ = transferredList[0];
+      window.ZarifStore.publishedTests.publish({
+        title: `${firstQ.grade || 7}. Sınıf Havuz Seçkisi (${transferredList.length} Soru)`,
+        grade: Number(firstQ.grade) || 7,
+        topicTitle: firstQ.topic || 'Matematik Havuzu',
+        workType: 'coktan_secmeli',
+        difficulty: firstQ.difficulty || 'Orta',
+        questions: transferredList,
+        status: 'published'
+      });
+    }
+
     closeCentralBankModal();
-    durumYaz('quizStatus', `${addedCount} adet soru merkezi havuzdan teste başarıyla eklendi! Şıkları inceleyip Testi Yayınla butonuna basabilirsiniz.`, 'ok');
-    $('math-question-editor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    durumYaz('quizStatus', `${addedCount} adet soru merkezi havuzdan sağdaki test sepetine başarıyla eklendi!`, 'ok');
+    $('math-question-editor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   // Havuz Buton ve Dinleyicileri
@@ -4286,24 +4398,7 @@ body.teacher-menu-open {
     const search = $('bankSearchFilter')?.value?.trim() || '';
 
     try {
-      const params = new URLSearchParams();
-      params.set('limit', '50');
-      if (grade) params.set('grade', grade);
-      if (diff) params.set('difficulty', diff);
-      if (search) params.set('search', search);
-
-      let res;
-      try {
-        res = await api(`/api/central-question-bank?${params.toString()}`);
-      } catch (e) {
-        try {
-          res = await api(`/api/sorular?${params.toString()}`);
-          if (res && res.sorular) res.questions = res.sorular;
-        } catch (innerErr) {
-          throw e;
-        }
-      }
-      centralBankQuestions = res?.questions || res?.sorular || [];
+      centralBankQuestions = await fetchUnifiedQuestionPool({ grade, diff, search });
 
       if (centralBankQuestions.length === 0) {
         container.innerHTML = '<p class="empty" style="text-align:center; padding:24px;">Filtrelere uygun soru bulunamadı.</p>';
