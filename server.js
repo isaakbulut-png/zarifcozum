@@ -495,7 +495,7 @@ app.get('/api/site-media', async (req, res) => {
 const sitePages = [
   'index.html', 'dene.html', 'asistan.html', 'asistanla-soru-coz.html', 'canli.html', 'zoom-room.html', 'konu.html', 'mimari.html', 'panel.html', 'test.html', 'pratik.html', 'yasal.html',
   'ogrenci-paneli.html', 'ogretmen-paneli.html', 'ogretmen-profil-ayarlari.html', 'veli-panel.html', 'kayit-giris.html', 'hakkimizda.html', 'iletisim.html',
-  'Platform Ayrıcalıkları.html',   'Paketler.html', 'deneme-sinavi-optik.html'
+  'Platform Ayrıcalıkları.html', 'Paketler.html', 'deneme-sinavi-optik.html', 'kesif-modu.html'
 ];
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 sitePages.forEach(page => {
