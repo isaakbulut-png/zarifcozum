@@ -5,7 +5,8 @@
 (function (global) {
   "use strict";
 
-  var TEACHER_LS_KEY = "zc_teacher_yazili_v1";
+  var TEACHER_LS_KEY = "zc_ogretmen_yazili_provalari";
+  var LEGACY_TEACHER_KEY = "zc_teacher_yazili_v1";
   var RESULTS_LS_KEY = "zc_yazili_sonuclar_v1";
 
   function esc(str) {
@@ -44,14 +45,30 @@
     return "5";
   }
 
-  function readLocalTeacherExams(grade) {
+  function readLocalTeacherExams(grade, donem) {
+    var out = [];
+    [TEACHER_LS_KEY, LEGACY_TEACHER_KEY].forEach(function (key) {
+      try {
+        var list = JSON.parse(localStorage.getItem(key) || "[]");
+        if (!Array.isArray(list)) return;
+        list.forEach(function (x) {
+          if (String(x.grade) === String(grade) && (!donem || !x.donem || x.donem === donem)) {
+            if (!out.some(function (o) { return o.id === x.id; })) out.push(x);
+          }
+        });
+      } catch (e) {}
+    });
+    return out;
+  }
+
+  function detectStudentName() {
+    if (global.__currentStudent && global.__currentStudent.name) return global.__currentStudent.name;
     try {
-      var list = JSON.parse(localStorage.getItem(TEACHER_LS_KEY) || "[]");
-      if (!Array.isArray(list)) return [];
-      return list.filter(function (x) { return String(x.grade) === String(grade); });
-    } catch (e) {
-      return [];
-    }
+      var u = JSON.parse(localStorage.getItem("zarif_active_user") || localStorage.getItem("currentUser") || "null");
+      if (u && u.name) return u.name;
+    } catch (e) {}
+    var el = document.querySelector("#studentProfileName, .student-name");
+    return (el && el.textContent.trim()) || "Öğrenci";
   }
 
   function saveResultRecord(rec) {
@@ -124,9 +141,9 @@
     }
 
     async function fetchTeacherExams() {
-      var combined = readLocalTeacherExams(state.grade);
+      var combined = readLocalTeacherExams(state.grade, state.donem);
       try {
-        var res = await fetch("/api/yazili?grade=" + encodeURIComponent(state.grade), { credentials: "same-origin" });
+        var res = await fetch("/api/yazili?grade=" + encodeURIComponent(state.grade) + "&donem=" + encodeURIComponent(state.donem), { credentials: "same-origin" });
         if (res.ok) {
           var data = await res.json();
           if (data && Array.isArray(data.provalar)) {
@@ -181,6 +198,7 @@
               (q.kazanimKodu ? '<span style="font-weight:400;font-size:9.5pt;">[' + esc(q.kazanimKodu) + ']</span>' : '') +
             '</div>' +
             '<div style="margin-bottom:10px;line-height:1.5;">' + esc(q.metin) + '</div>' +
+            (q.resimUrl ? '<div style="margin-bottom:10px;"><img src="' + esc(q.resimUrl) + '" style="max-width:260px;max-height:160px;border:1px solid #ccc;"></div>' : '') +
             '<div style="height:68px;border:1px dashed #999;border-radius:6px;"></div>' +
           '</div>'
         );
@@ -296,6 +314,7 @@
 
       saveResultRecord({
         date: new Date().toISOString(),
+        studentName: detectStudentName(),
         title: exam.title,
         grade: exam.grade,
         score: normalized100,
@@ -375,6 +394,7 @@
             '<span class="zy-q-pts">' + (q.puan || 15) + ' Puan</span>' +
           '</div>' +
           '<p class="zy-q-text">' + esc(q.metin) + '</p>' +
+          (q.resimUrl ? '<div style="margin-bottom:16px;"><img src="' + esc(q.resimUrl) + '" alt="Soru Görseli" style="max-width:100%;max-height:260px;border-radius:12px;border:1px solid #E6DCD2;"></div>' : '') +
           '<div class="zy-work-area">' +
             '<label style="display:block;font-weight:700;font-size:0.9rem;margin-bottom:6px;">✍️ Adım Adım İşlem Kutusu</label>' +
             '<textarea id="zyStepsInput" placeholder="Çözüm adımlarını buraya yaz (doğru yöntem kısmi puan kazandırır)...">' + esc(curAns.steps) + '</textarea>' +
@@ -449,11 +469,11 @@
               return (
                 '<div class="zy-teacher-card">' +
                   '<div>' +
-                    '<span class="zy-gold-badge">⭐ Öğretmeninin Özel Provası</span>' +
+                    '<span class="zy-gold-badge">👩‍🏫 Öğretmeninin Yayınladığı Özel Yazılı Provası</span>' +
                     '<h3 style="margin:0 0 4px;font-size:1.1rem;">' + esc(t.title) + '</h3>' +
                     '<p style="margin:0;font-size:0.88rem;color:#6E5A4F;">' + esc(t.aciklama || '') + ' • ' + (t.sorular ? t.sorular.length : (t.soruSayisi || 6)) + ' Soru</p>' +
                   '</div>' +
-                  '<button type="button" class="zy-btn-primary" data-open-teacher-exam="' + idx + '">Özel Provayı Başlat →</button>' +
+                  '<button type="button" class="zy-btn-primary" data-open-teacher-exam="' + idx + '">Provayı Başlat →</button>' +
                 '</div>'
               );
             }).join("") +
@@ -518,6 +538,7 @@
       appEl.querySelectorAll("[data-donem]").forEach(function (b) {
         b.addEventListener("click", function () {
           state.donem = b.getAttribute("data-donem");
+          fetchTeacherExams();
           renderLobby();
         });
       });

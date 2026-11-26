@@ -1924,11 +1924,36 @@ body.teacher-menu-open {
                       <option value="standard">Standart Test / Çalışma</option>
                       <option value="turkiye">🇹🇷 Türkiye Geneli Deneme</option>
                       <option value="il">📍 İl Geneli Deneme</option>
+                      <option value="yazili">📝 Yazılıya Hazırlık Provası (MEB Senaryolu)</option>
                     </select>
                   </label>
                   <label id="basketExamProvinceWrap" style="font-size:11.5px;font-weight:700;color:#3E2F26;display:none;flex-direction:column;gap:4px;">İl Adı
                     <input id="basketExamProvince" type="text" value="Samsun" maxlength="40" placeholder="Örn. Samsun" style="padding:6px 8px;border-radius:7px;border:1px solid #d8c3ae;background:#fff;font-size:12px;font-weight:600;color:#3E2F26;">
                   </label>
+                </div>
+                <div id="basketYaziliOptionsWrap" style="display:none;flex-direction:column;gap:8px;padding:12px;border-radius:10px;background:linear-gradient(135deg,#FFFDF9,#FDF5E6);border:1.5px solid #D4A359;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+                    <span style="font-size:11.5px;font-weight:800;color:#3B281E;">📝 MEB Yazılı Provası Ayarları</span>
+                    <span id="basketYaziliTotalBadge" style="font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:#dcfce7;color:#15803d;">Toplam: 0 / 100 Puan</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                    <label style="font-size:11px;font-weight:700;color:#3B281E;display:flex;flex-direction:column;gap:4px;">Yazılı Dönemi
+                      <select id="basketYaziliDonem" style="padding:6px 8px;border-radius:7px;border:1px solid #D4A359;background:#fff;font-size:12px;font-weight:600;color:#3B281E;">
+                        <option value="1_donem_1_yazili">1. Dönem 1. Yazılı</option>
+                        <option value="1_donem_2_yazili">1. Dönem 2. Yazılı</option>
+                        <option value="2_donem_1_yazili">2. Dönem 1. Yazılı</option>
+                        <option value="2_donem_2_yazili">2. Dönem 2. Yazılı</option>
+                      </select>
+                    </label>
+                    <label style="font-size:11px;font-weight:700;color:#3B281E;display:flex;flex-direction:column;gap:4px;">Senaryo / Prova Etiketi
+                      <select id="basketYaziliSenaryo" style="padding:6px 8px;border-radius:7px;border:1px solid #D4A359;background:#fff;font-size:12px;font-weight:600;color:#3B281E;">
+                        <option value="Öğretmen Özel Provası">Öğretmen Özel Provası</option>
+                        <option value="Senaryo 1">Senaryo 1</option>
+                        <option value="Senaryo 2">Senaryo 2</option>
+                        <option value="Karma Prova">Karma Prova</option>
+                      </select>
+                    </label>
+                  </div>
                 </div>
                 <button type="button" class="btn" id="btnPublishBasketQuiz" style="width:100%; padding:12px; font-size:14px; font-weight:700; background:linear-gradient(135deg, #2c1a0e 0%, #432818 100%); color:#ffffff; border:none; border-radius:8px; box-shadow:0 4px 14px rgba(44,26,14,0.3); cursor:pointer; display:flex; justify-content:center; align-items:center; gap:8px; transition:transform 0.1s ease;">
                   <span>🚀</span> <span id="publishBtnText">Testi Yayınla</span>
@@ -4121,6 +4146,13 @@ body.teacher-menu-open {
       }
 
       const hasThumb = Boolean(imgVal);
+      const isYaziliScope = $('basketExamScope')?.value === 'yazili';
+      if (!card.dataset.yaziliPuanManual) {
+        const basePt = Math.floor(100 / Math.max(1, count));
+        const remPt = 100 - basePt * count;
+        card.dataset.yaziliPuan = String(basePt + (idx < remPt ? 1 : 0));
+      }
+      const qPuan = Number(card.dataset.yaziliPuan || Math.round(100 / Math.max(1, count)));
 
       return `
         <div class="basket-item-card" data-basket-idx="${idx}">
@@ -4130,6 +4162,7 @@ body.teacher-menu-open {
               ${sourceBadge}
             </div>
             <div style="display:flex; align-items:center; gap:3px;">
+              ${isYaziliScope ? `<label style="display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:#7D5618;background:#FEF3C7;padding:2px 6px;border-radius:6px;margin-right:4px;">Puan:<input type="number" class="basket-score-input" data-idx="${idx}" value="${qPuan}" min="1" max="100" style="width:42px;padding:1px 4px;border:1px solid #D4A359;border-radius:4px;font-size:11px;font-weight:800;text-align:center;background:#fff;"></label>` : ''}
               <button type="button" class="btn light sm btn-basket-up" data-idx="${idx}" ${idx === 0 ? 'disabled style="opacity:0.4;cursor:default;"' : ''} title="Yukarı taşı" style="padding:2px 6px; font-size:10px; border-radius:4px;">▲</button>
               <button type="button" class="btn light sm btn-basket-down" data-idx="${idx}" ${idx === count - 1 ? 'disabled style="opacity:0.4;cursor:default;"' : ''} title="Aşağı taşı" style="padding:2px 6px; font-size:10px; border-radius:4px;">▼</button>
               <button type="button" class="btn light sm btn-basket-view" data-idx="${idx}" title="Soruyu incele" style="padding:2px 6px; font-size:11px; border-radius:4px;">👁️</button>
@@ -4146,6 +4179,8 @@ body.teacher-menu-open {
         </div>
       `;
     }).join('');
+
+    if (typeof updateBasketYaziliTotal === 'function') updateBasketYaziliTotal();
   }
 
   // Sepet Buton Delegasyonu (Yukarı, Aşağı, Önizle, Sil)
@@ -4263,19 +4298,121 @@ body.teacher-menu-open {
     durumYaz('quizStatus', 'Sepet temizlendi.', 'ok');
   });
 
-  // Deneme Kapsamı (İl / Türkiye Geneli) seçici görünürlüğü
+  function updateBasketYaziliTotal() {
+    const badge = $('basketYaziliTotalBadge');
+    if (!badge) return;
+    const cards = [...$('questionList').children];
+    const sum = cards.reduce((acc, c) => acc + Number(c.dataset.yaziliPuan || 0), 0);
+    badge.textContent = `Toplam: ${sum} / 100 Puan`;
+    badge.style.background = sum === 100 ? '#dcfce7' : '#fef3c7';
+    badge.style.color = sum === 100 ? '#15803d' : '#b45309';
+  }
+
+  $('basketItemsList')?.addEventListener('input', event => {
+    const inp = event.target.closest('.basket-score-input');
+    if (!inp) return;
+    const idx = Number(inp.dataset.idx);
+    const cards = [...$('questionList').children];
+    if (cards[idx]) {
+      cards[idx].dataset.yaziliPuan = String(Math.max(1, Math.min(100, Number(inp.value) || 1)));
+      cards[idx].dataset.yaziliPuanManual = '1';
+      updateBasketYaziliTotal();
+    }
+  });
+
+  // Deneme & Yazılı Kapsamı seçici görünürlüğü
   $('basketExamScope')?.addEventListener('change', () => {
+    const val = $('basketExamScope').value;
     const wrap = $('basketExamProvinceWrap');
-    if (wrap) wrap.style.display = $('basketExamScope').value === 'il' ? 'flex' : 'none';
+    const yaziliWrap = $('basketYaziliOptionsWrap');
+    if (wrap) wrap.style.display = val === 'il' ? 'flex' : 'none';
+    if (yaziliWrap) yaziliWrap.style.display = val === 'yazili' ? 'flex' : 'none';
+    if ($('publishBtnText')) {
+      $('publishBtnText').textContent = val === 'yazili' ? 'Yazılı Provasını Yayınla' : 'Testi Yayınla';
+    }
+    updateQuizBasketUI();
   });
 
   // Sepetten Yayınla Butonu
-  $('btnPublishBasketQuiz')?.addEventListener('click', () => {
+  $('btnPublishBasketQuiz')?.addEventListener('click', async () => {
     if ($('questionList').children.length === 0) {
       durumYaz('quizStatus', 'Lütfen yayınlamadan önce en az bir soru ekleyin.', 'error');
       return;
     }
     const scope = $('basketExamScope')?.value || 'standard';
+
+    if (scope === 'yazili') {
+      const qEls = [...$('questionList').children];
+      const grade = Number($('quizGrade')?.value || $('bankGradeFilter')?.value || 5);
+      const donem = $('basketYaziliDonem')?.value || '1_donem_1_yazili';
+      const senaryoLabel = $('basketYaziliSenaryo')?.value || 'Öğretmen Özel Provası';
+      const senaryoNo = senaryoLabel === 'Senaryo 2' ? 2 : senaryoLabel === 'Karma Prova' ? 3 : 1;
+      const title = ($('quizTitle')?.value || '').trim() || `${grade}. Sınıf ${senaryoLabel}`;
+      const durationMin = Math.max(20, qEls.length * 5);
+
+      const sorular = qEls.map((card, i) => {
+        const editor = questionEditors.get(card);
+        let metin = '';
+        if (editor) {
+          try { metin = (typeof editor.getText === 'function' ? editor.getText() : (editor.root?.textContent || '')).trim(); } catch {}
+        }
+        if (!metin) metin = card.querySelector('.question-editor')?.textContent?.trim() || `Soru ${i + 1}`;
+        const ansLetter = (card.querySelector('.correct-answer')?.value || 'A').trim().toUpperCase();
+        const correctOptText = card.querySelector(`.option-${ansLetter}`)?.value?.trim() || ansLetter;
+        const imgUrl = card.querySelector('.question-image-url')?.value?.trim() || '';
+        const svgCode = card.querySelector('.question-svg-code')?.value?.trim() || '';
+        const outcomeCode = card.querySelector('.question-outcome')?.value?.trim() || `MAT.${grade}`;
+        const puan = Number(card.dataset.yaziliPuan || Math.round(100 / Math.max(1, qEls.length)));
+        return {
+          soruNo: i + 1,
+          kazanimKodu: outcomeCode,
+          konu: title,
+          puan,
+          metin,
+          resimUrl: imgUrl || null,
+          svg: svgCode || null,
+          beklenenSonuc: [correctOptText, ansLetter],
+          yontemAnahtar: [correctOptText],
+          cozumAdimlari: `Doğru Sonuç: ${correctOptText}`
+        };
+      });
+
+      const toplamPuan = sorular.reduce((a, b) => a + b.puan, 0);
+      const payload = {
+        id: 'ozel_' + Date.now(),
+        title,
+        grade,
+        donem,
+        senaryoNo,
+        senaryoEtiketi: senaryoLabel,
+        sureDk: durationMin,
+        aciklama: `${senaryoLabel} • ${sorular.length} Soru • ${toplamPuan} Puan`,
+        toplamPuan,
+        sorular,
+        published: true,
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        const existing = JSON.parse(localStorage.getItem('zc_ogretmen_yazili_provalari') || '[]');
+        const nextList = Array.isArray(existing) ? existing : [];
+        nextList.unshift(payload);
+        localStorage.setItem('zc_ogretmen_yazili_provalari', JSON.stringify(nextList.slice(0, 40)));
+      } catch (e) {}
+
+      try {
+        await fetch('/api/yazili', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {}
+
+      durumYaz('quizStatus', "✅ Yazılı Provası Yayınlandı! Seçili sınıftaki öğrencilerin 'Yazılıya Hazırlık' ekranına aktarıldı.", 'ok');
+      return;
+    }
+
     if ((scope === 'turkiye' || scope === 'il') && window.ZarifStore && window.ZarifStore.mockExams) {
       const qEls = [...$('questionList').children];
       const extracted = qEls.map((el, i) => {
@@ -6101,7 +6238,27 @@ body.teacher-menu-open {
   checkAndRestoreLastAiDraft();
 
 </script>
-<script src="/assets/yazili-senaryo-havuzu.js?v=1"></script>
-<script src="/assets/ogretmen-yazili-yayin.js?v=1"></script>
+<script>
+  (function syncTeacherYaziliResults() {
+    try {
+      const tbody = document.getElementById('managementResults');
+      if (!tbody) return;
+      const list = JSON.parse(localStorage.getItem('zc_yazili_sonuclar_v1') || '[]');
+      if (!Array.isArray(list) || !list.length) return;
+      const rowsHtml = list.slice(0, 15).map(r => {
+        const dt = r.date ? new Date(r.date).toLocaleDateString('tr-TR') : 'Bugün';
+        return `<tr>
+          <td><strong>${(r.studentName || 'Öğrenci')}</strong> <small style="color:#64748b;">(${r.grade || 5}. Sınıf)</small></td>
+          <td><span style="padding:2px 7px;border-radius:6px;background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;margin-right:6px;">Yazılı</span>${r.title || 'MEB Yazılı Provası'}</td>
+          <td><strong style="color:${Number(r.score) >= 70 ? '#15803d' : '#c2410c'};">${r.score} / 100</strong></td>
+          <td>${dt}</td>
+        </tr>`;
+      }).join('');
+      const hasOnlyEmpty = tbody.querySelector('.empty');
+      if (hasOnlyEmpty) tbody.innerHTML = rowsHtml;
+      else tbody.insertAdjacentHTML('afterbegin', rowsHtml);
+    } catch (e) {}
+  })();
+</script>
 </body>
 </html>
