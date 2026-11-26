@@ -1,0 +1,461 @@
+/* ZarifÇözüm — "Sınıfını seç" Pastel-Butik İnteraktif Vitrin Bileşeni */
+.gs-section {
+  background: #FAF6F0;
+  padding: 68px 0 72px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #2C221E;
+}
+
+.gs-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* 1. Üst Başlık (Zarif Yatay Çizgilerle Ortalanmış) */
+.gs-heading-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.gs-heading-line {
+  flex: 1;
+  max-width: 180px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 163, 89, 0.7), transparent);
+}
+
+.gs-heading {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', Georgia, serif;
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  font-weight: 800;
+  color: #2C221E;
+  letter-spacing: -0.02em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 2. Sınıf Geçiş Çubuğu (Tab Bar) */
+.gs-tabbar-shell {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.gs-tabbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  border: 1px solid rgba(212, 163, 89, 0.32);
+  box-shadow: 0 8px 28px rgba(59, 40, 30, 0.06);
+  max-width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.gs-tabbar::-webkit-scrollbar {
+  display: none;
+}
+
+.gs-tab {
+  position: relative;
+  border: none;
+  background: transparent;
+  color: #6B5E57;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  scroll-snap-align: center;
+  transition: background-color 0.22s ease, color 0.22s ease, transform 0.18s ease, box-shadow 0.22s ease;
+}
+
+.gs-tab:hover:not(.is-active) {
+  color: #2C221E;
+  background: #FAF6F0;
+}
+
+.gs-tab.is-active {
+  background: var(--tab-accent, #C85A17);
+  color: #FFFFFF;
+  box-shadow: 0 6px 16px rgba(44, 34, 30, 0.16);
+}
+
+.gs-tab:focus-visible {
+  outline: 2px solid #D4A359;
+  outline-offset: 2px;
+}
+
+/* 3. Ana Vitrin Kartı (Sol %55 Metin, Sağ %45 Görsel) */
+.gs-showcase {
+  --gs-bg: #FDF3EB;
+  --gs-accent: #C85A17;
+  background: var(--gs-bg);
+  border: 1px solid rgba(59, 40, 30, 0.08);
+  border-radius: 28px;
+  padding: 40px 42px;
+  box-shadow: 0 20px 50px rgba(59, 40, 30, 0.07);
+  transition: background-color 0.35s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.gs-showcase-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.22fr) minmax(0, 1fr);
+  gap: 38px;
+  align-items: center;
+}
+
+.gs-showcase-grid.is-animating {
+  animation: gsSlideFadeIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes gsSlideFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Sol Kolon: Pedagojik İçerik */
+.gs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(59, 40, 30, 0.1);
+  color: var(--gs-accent);
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.gs-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gs-accent);
+  display: inline-block;
+}
+
+.gs-title {
+  margin: 0 0 14px;
+  font-family: 'Plus Jakarta Sans', Georgia, serif;
+  font-size: clamp(1.5rem, 2.5vw, 2.1rem);
+  font-weight: 800;
+  line-height: 1.22;
+  color: #2C221E;
+  letter-spacing: -0.02em;
+}
+
+.gs-desc {
+  margin: 0 0 22px;
+  font-size: 0.98rem;
+  line-height: 1.68;
+  color: #6B5E57;
+}
+
+.gs-features {
+  list-style: none;
+  margin: 0 0 28px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.gs-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #2C221E;
+}
+
+.gs-feature-ico {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #FFFFFF;
+  color: var(--gs-accent);
+  border: 1px solid rgba(59, 40, 30, 0.08);
+  box-shadow: 0 4px 10px rgba(59, 40, 30, 0.05);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.gs-feature-ico svg {
+  width: 17px;
+  height: 17px;
+}
+
+.gs-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.gs-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border-radius: 13px;
+  background: var(--gs-accent);
+  color: #FFFFFF !important;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 10px 22px rgba(44, 34, 30, 0.14);
+  transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
+}
+
+.gs-btn-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 14px 28px rgba(44, 34, 30, 0.18);
+}
+
+.gs-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 20px;
+  border-radius: 13px;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(59, 40, 30, 0.16);
+  color: #3B281E !important;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+}
+
+.gs-btn-secondary:hover {
+  border-color: #D4A359;
+  background: #FAF6F0;
+  transform: translateY(-1px);
+}
+
+/* Sağ Kolon: Katmanlı 3D Görsel & Yüzen Cam Kartlar */
+.gs-visual-stage {
+  position: relative;
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 12px;
+}
+
+.gs-visual-frame {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 4 / 3.4;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #FFFFFF 0%, rgba(255, 255, 255, 0.65) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 22px 44px rgba(59, 40, 30, 0.1);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gs-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gs-svg-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  position: relative;
+}
+
+.gs-svg-orb {
+  width: 112px;
+  height: 112px;
+  border-radius: 28px;
+  background: var(--gs-accent);
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 18px 34px rgba(44, 34, 30, 0.18);
+  margin-bottom: 14px;
+  transform: rotate(-4deg);
+}
+
+.gs-svg-orb strong {
+  font-family: 'Plus Jakarta Sans', Georgia, serif;
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.gs-svg-orb span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+
+.gs-svg-caption {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #3B281E;
+}
+
+.gs-svg-sub {
+  font-size: 0.78rem;
+  color: #6B5E57;
+  margin-top: 4px;
+}
+
+/* Yüzen Glassmorphism Mini Bilgi Kartları */
+.gs-float-card {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 15px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 163, 89, 0.4);
+  box-shadow: 0 12px 28px rgba(59, 40, 30, 0.12);
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #2C221E;
+  z-index: 3;
+  animation: gsFloatBob 4.2s ease-in-out infinite;
+}
+
+.gs-float-card.pos-top {
+  top: 8px;
+  right: 0;
+}
+
+.gs-float-card.pos-bottom {
+  bottom: 10px;
+  left: -4px;
+  animation-delay: 1.6s;
+}
+
+.gs-float-card.pos-mid {
+  top: 52%;
+  right: -6px;
+  background: rgba(59, 40, 30, 0.92);
+  color: #FAF6F0;
+  border-color: rgba(212, 163, 89, 0.65);
+  animation-delay: 0.8s;
+}
+
+.gs-float-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--gs-accent);
+  flex-shrink: 0;
+}
+
+@keyframes gsFloatBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Alt Müfredat Notu */
+.gs-footnote {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 0.84rem;
+  color: #6B5E57;
+}
+
+.gs-footnote strong {
+  color: #3B281E;
+}
+
+@media (max-width: 960px) {
+  .gs-showcase {
+    padding: 28px 24px;
+    border-radius: 22px;
+  }
+  .gs-showcase-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .gs-visual-stage {
+    min-height: 290px;
+    order: -1;
+  }
+  .gs-float-card.pos-mid {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .gs-section {
+    padding: 46px 0 52px;
+  }
+  .gs-container {
+    padding: 0 16px;
+  }
+  .gs-tab {
+    padding: 9px 14px;
+    font-size: 0.82rem;
+  }
+  .gs-showcase {
+    padding: 22px 18px;
+  }
+  .gs-btn-primary,
+  .gs-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+  .gs-float-card {
+    font-size: 0.74rem;
+    padding: 8px 12px;
+  }
+}
