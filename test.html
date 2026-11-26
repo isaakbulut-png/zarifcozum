@@ -3,126 +3,256 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#fbf1e7">
-  <title>Kazanım Testi | ZarifÇözüm</title>
+  <meta name="theme-color" content="#FAF6F0">
+  <title>Kendini Dene: 5 Soruluk Mini Kontrol | ZarifÇözüm</title>
+  <meta name="description" content="Kayıt olmadan 5–12. sınıf açık matematik konularında 5 soruluk hızlı mini kontrol ile seviyeni anında ölç.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/style.css">
-  <link rel="stylesheet" href="/assets/pratik.css">
-  <style>
-    .grade-quick-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 16px 0 24px;
-    }
-    .grade-quick-pill {
-      padding: 7px 14px;
-      background: #fffaf5;
-      border: 1.5px solid var(--line, #ead8c5);
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #6a5342;
-      text-decoration: none;
-      transition: all .2s ease;
-    }
-    .grade-quick-pill:hover {
-      border-color: #b88a28;
-      color: #493020;
-      transform: translateY(-1px);
-    }
-    .grade-quick-pill.active {
-      background: #fff8ec;
-      border-color: #b88a28;
-      color: #8c6a23;
-      box-shadow: 0 0 0 2px rgba(184,138,40,.2);
-    }
-    .test-info-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-top: 36px;
-      padding-top: 24px;
-      border-top: 1px dashed #ead8c5;
-    }
-    .test-info-card {
-      background: #fffaf5;
-      border: 1px solid #ead8c5;
-      border-radius: 16px;
-      padding: 18px;
-      text-align: center;
-    }
-    .test-info-card h4 {
-      margin: 0 0 6px;
-      font: 600 16px Georgia, serif;
-      color: #493020;
-    }
-    .test-info-card p {
-      font-size: 12px;
-      color: #806b5c;
-      margin: 0;
-      line-height: 1.4;
-    }
-    @media (max-width: 768px) {
-      .test-info-grid { grid-template-columns: 1fr; }
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/site-navbar.css?v=1">
+  <link rel="stylesheet" href="assets/freemium-studio.css?v=1">
+  <script src="assets/site-navbar.js?v=1" defer></script>
 </head>
-<body data-home="index.html" data-breadcrumb="Kazanım Testi">
-  <main class="wrap">
-    <section class="block">
-      <h1 class="section-title">Kazanım testi</h1>
-      <p class="muted" style="margin-top:var(--space-2)">Sınıfını ve konunu seç; testi kesintisiz tamamladıktan sonra karne analizi ve detaylı çözümleri incele.</p>
+<body class="zfs-body">
+  <header class="site-header"></header>
 
-      <!-- Fast Grade Switcher Bar -->
-      <nav class="grade-quick-bar" aria-label="Sınıf Seçimi">
-        <a class="grade-quick-pill" href="/test.html?sinif=5" data-grade="5">5. Sınıf</a>
-        <a class="grade-quick-pill" href="/test.html?sinif=6" data-grade="6">6. Sınıf</a>
-        <a class="grade-quick-pill" href="/test.html?sinif=7" data-grade="7">7. Sınıf</a>
-        <a class="grade-quick-pill" href="/test.html?sinif=8" data-grade="8">8. Sınıf (LGS)</a>
-        <a class="grade-quick-pill" href="/test.html?sinif=9" data-grade="9">9. Sınıf</a>
-        <a class="grade-quick-pill" href="/test.html?sinif=10" data-grade="10">10. Sınıf</a>
-        <a class="grade-quick-pill" href="/test.html?sinif=11" data-grade="11">11. Sınıf</a>
-        <a class="grade-quick-pill" href="/test.html?sinif=12" data-grade="12">12. Sınıf (YKS)</a>
+  <main class="zfs-container">
+    <!-- Üst Başlık & Sınıf Seçici -->
+    <section class="zfs-hero-bar" aria-label="Kendini Dene Sınıf Seçimi">
+      <div class="zfs-eyebrow">🎯 KAYIT OLMADAN HIZLI SEVİYE ÖLÇÜMÜ</div>
+      <h1 class="zfs-page-title">Kendini Dene: 5 Soruluk Mini Kontrol</h1>
+      <p class="zfs-page-desc">
+        Sınıfını ve açık konulardan birini seç, 5 soruluk hızlı mini testi hemen çöz. Test sonunda puanını ve her sorunun kısa açıklamasını anında gör.
+      </p>
+      <nav class="zfs-grade-bar" id="zfsTestGradeBar" aria-label="Sınıf Seçimi">
+        <button type="button" class="zfs-grade-btn" data-grade="5">5. Sınıf</button>
+        <button type="button" class="zfs-grade-btn" data-grade="6">6. Sınıf</button>
+        <button type="button" class="zfs-grade-btn" data-grade="7">7. Sınıf</button>
+        <button type="button" class="zfs-grade-btn" data-grade="8">8. Sınıf (LGS)</button>
+        <button type="button" class="zfs-grade-btn" data-grade="9">9. Sınıf</button>
+        <button type="button" class="zfs-grade-btn" data-grade="10">10. Sınıf</button>
+        <button type="button" class="zfs-grade-btn" data-grade="11">11. Sınıf</button>
+        <button type="button" class="zfs-grade-btn" data-grade="12">12. Sınıf (YKS)</button>
       </nav>
-
-      <div id="pratik-mount"></div>
-
-      <!-- Feature Guide -->
-      <section class="test-info-grid" aria-label="Kazanım Testi Özellikleri">
-        <div class="test-info-card">
-          <h4>📊 Toplu Değerlendirme</h4>
-          <p>Her sorudan sonra cevap verilmez; gerçek sınav disipliniyle tüm soruları tamamlayıp karnenizi alırsınız.</p>
-        </div>
-        <div class="test-info-card">
-          <h4>🔍 Ayrıntılı Çözümler</h4>
-          <p>Test sonunda doğru ve yanlış yaptığınız tüm soruların adım adım formüllü çözümlerini inceleyebilirsiniz.</p>
-        </div>
-        <div class="test-info-card">
-          <h4>📖 Konuyu Tekrar Et</h4>
-          <p>Eksik hissettiğiniz konunun özetini okumak için <a href="/konu.html" style="color:#b88a28;font-weight:700">Konu Anlatımları</a> bölümüne dönebilirsiniz.</p>
-        </div>
-      </section>
     </section>
+
+    <!-- İnteraktif 5 Soruluk Mini Kontrol Alanı -->
+    <section class="zfs-quiz-shell" id="zfsQuizShell" aria-live="polite"></section>
   </main>
 
-  <script src="/assets/matematik-mufredati.js"></script>
-  <script src="/assets/math-text.js"></script>
-  <script src="/assets/pratik.js"></script>
+  <script src="assets/matematik-mufredati.js"></script>
+  <script src="assets/freemium-studio-data.js?v=1"></script>
   <script>
     (function () {
-      const activeGrade = new URLSearchParams(location.search).get("sinif");
-      if (activeGrade) {
-        document.querySelectorAll('.grade-quick-pill').forEach(pill => {
-          if (pill.dataset.grade === activeGrade) pill.classList.add('active');
+      "use strict";
+
+      var params = new URLSearchParams(window.location.search);
+      var rawGrade = params.get("sinif");
+      var rawKonu = Number(params.get("konu") || 0);
+
+      var activeGrade = (rawGrade && window.ZarifFreemiumData.GRADE_META[rawGrade]) ? rawGrade : "5";
+      var selectedTopicIdx = (rawKonu === 1) ? 1 : 0;
+
+      var mode = "setup"; // setup | quiz | result
+      var qIndex = 0;
+      var answers = [];
+
+      var shellEl = document.getElementById("zfsQuizShell");
+      var gradeButtons = Array.prototype.slice.call(document.querySelectorAll("#zfsTestGradeBar .zfs-grade-btn"));
+
+      function esc(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function getOpenUnits() {
+        return window.ZarifFreemiumData.getGradeUnits(activeGrade).filter(function (u) { return u.isOpen; });
+      }
+
+      function updateUrl() {
+        try {
+          var url = new URL(window.location.href);
+          url.searchParams.set("sinif", activeGrade);
+          url.searchParams.set("konu", String(selectedTopicIdx));
+          window.history.replaceState({}, "", url.toString());
+        } catch (e) {}
+      }
+
+      function syncGradeBar() {
+        gradeButtons.forEach(function (btn) {
+          btn.classList.toggle("is-active", btn.dataset.grade === activeGrade);
         });
       }
+
+      function renderSetup() {
+        mode = "setup";
+        syncGradeBar();
+        updateUrl();
+
+        var openUnits = getOpenUnits();
+        if (!openUnits[selectedTopicIdx]) selectedTopicIdx = 0;
+
+        var cardsHtml = openUnits.map(function (u, idx) {
+          var isSel = idx === selectedTopicIdx;
+          return (
+            '<button type="button" class="zfs-pick-card' + (isSel ? ' is-selected' : '') + '" data-pick-topic="' + idx + '">' +
+              '<span class="zfs-badge-free">✓ Açık Konu • 5 Soru</span>' +
+              '<h4>' + esc(u.unitTopic) + '</h4>' +
+              '<p>' + esc(u.title) + '</p>' +
+            '</button>'
+          );
+        }).join("");
+
+        shellEl.innerHTML =
+          '<h2 style="margin:0 0 6px;font-size:1.45rem;font-weight:800;">' + activeGrade + '. Sınıf — Açık Konunu Seç</h2>' +
+          '<p style="margin:0;color:#6E5A4F;">Aşağıdaki ücretsiz açık konulardan birini seçip 5 soruluk hızlı kontrolü başlatabilirsin.</p>' +
+          '<div class="zfs-topic-picker">' + cardsHtml + '</div>' +
+          '<div class="zfs-btn-row" style="justify-content:flex-start;">' +
+            '<button type="button" class="zfs-btn-emerald" id="zfsStartQuizBtn">🎯 5 Soruluk Testi Başlat →</button>' +
+            '<a class="zfs-btn-outline" href="konu.html?sinif=' + encodeURIComponent(activeGrade) + '">← Konu Stüdyosuna Dön</a>' +
+          '</div>';
+
+        shellEl.querySelectorAll("[data-pick-topic]").forEach(function (card) {
+          card.addEventListener("click", function () {
+            selectedTopicIdx = Number(card.getAttribute("data-pick-topic"));
+            renderSetup();
+          });
+        });
+
+        document.getElementById("zfsStartQuizBtn").addEventListener("click", function () {
+          var unit = getOpenUnits()[selectedTopicIdx];
+          if (!unit || !unit.quiz || !unit.quiz.length) return;
+          qIndex = 0;
+          answers = new Array(unit.quiz.length).fill(null);
+          renderQuiz();
+        });
+      }
+
+      function renderQuiz() {
+        mode = "quiz";
+        var unit = getOpenUnits()[selectedTopicIdx];
+        var total = unit.quiz.length;
+        var item = unit.quiz[qIndex];
+        var pct = Math.round(((qIndex + 1) / total) * 100);
+        var letters = ["A", "B", "C", "D"];
+
+        var optsHtml = item.opts.map(function (opt, oIdx) {
+          var isSel = answers[qIndex] === oIdx;
+          return (
+            '<button type="button" class="zfs-opt-btn' + (isSel ? ' is-selected' : '') + '" data-opt="' + oIdx + '">' +
+              '<span class="zfs-opt-letter">' + letters[oIdx] + '</span>' +
+              '<span>' + esc(opt) + '</span>' +
+            '</button>'
+          );
+        }).join("");
+
+        var isLast = qIndex === total - 1;
+        shellEl.innerHTML =
+          '<div class="zfs-quiz-progress-wrap">' +
+            '<span class="zfs-badge-free">' + esc(unit.unitTopic) + '</span>' +
+            '<div class="zfs-quiz-track"><div class="zfs-quiz-fill" style="width:' + pct + '%;"></div></div>' +
+            '<strong style="white-space:nowrap;">Soru ' + (qIndex + 1) + ' / ' + total + '</strong>' +
+          '</div>' +
+          '<p class="zfs-quiz-question">' + (qIndex + 1) + '. ' + esc(item.q) + '</p>' +
+          '<div class="zfs-quiz-options">' + optsHtml + '</div>' +
+          '<div class="zfs-btn-row" style="justify-content:space-between;">' +
+            '<button type="button" class="zfs-btn-outline" id="zfsPrevQBtn"' + (qIndex === 0 ? ' disabled style="opacity:.45;cursor:not-allowed;"' : '') + '>← Önceki</button>' +
+            '<button type="button" class="' + (isLast ? 'zfs-btn-emerald' : 'zfs-btn-primary') + '" id="zfsNextQBtn">' +
+              (isLast ? 'Testi Bitir ve Sonucu Gör ✓' : 'Sonraki Soru →') +
+            '</button>' +
+          '</div>';
+
+        shellEl.querySelectorAll("[data-opt]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            answers[qIndex] = Number(btn.getAttribute("data-opt"));
+            renderQuiz();
+          });
+        });
+
+        document.getElementById("zfsPrevQBtn").addEventListener("click", function () {
+          if (qIndex > 0) {
+            qIndex--;
+            renderQuiz();
+          }
+        });
+
+        document.getElementById("zfsNextQBtn").addEventListener("click", function () {
+          if (isLast) {
+            renderResult();
+          } else {
+            qIndex++;
+            renderQuiz();
+          }
+        });
+      }
+
+      function renderResult() {
+        mode = "result";
+        var unit = getOpenUnits()[selectedTopicIdx];
+        var total = unit.quiz.length;
+        var correctCount = 0;
+        var letters = ["A", "B", "C", "D"];
+
+        var reviewHtml = unit.quiz.map(function (item, idx) {
+          var chosen = answers[idx];
+          var ok = chosen === item.ans;
+          if (ok) correctCount++;
+          return (
+            '<div class="zfs-review-item ' + (ok ? 'is-correct' : 'is-wrong') + '">' +
+              '<div style="font-weight:800;margin-bottom:4px;">' +
+                (ok ? '✅' : '❌') + ' Soru ' + (idx + 1) + ': ' + esc(item.q) +
+              '</div>' +
+              '<div style="font-size:0.92rem;color:#6E5A4F;">' +
+                'Senin cevabın: <strong>' + (chosen === null ? 'Boş' : letters[chosen] + ') ' + esc(item.opts[chosen])) + '</strong>' +
+                ' • Doğru cevap: <strong style="color:#1E7550;">' + letters[item.ans] + ') ' + esc(item.opts[item.ans]) + '</strong>' +
+              '</div>' +
+              '<div style="font-size:0.9rem;color:#3B281E;margin-top:4px;">💡 ' + esc(item.exp) + '</div>' +
+            '</div>'
+          );
+        }).join("");
+
+        var score = Math.round((correctCount / total) * 100);
+        var wrongCount = total - correctCount;
+
+        shellEl.innerHTML =
+          '<div class="zfs-score-hero">' +
+            '<span class="zfs-badge-free" style="margin-bottom:10px;">' + activeGrade + '. Sınıf • ' + esc(unit.unitTopic) + '</span>' +
+            '<div class="zfs-score-big">' + score + ' Puan</div>' +
+            '<p style="margin:8px 0 0;font-size:1.05rem;font-weight:700;color:#3B281E;">' +
+              correctCount + ' Doğru • ' + wrongCount + ' Yanlış / Boş (5 Soru)' +
+            '</p>' +
+          '</div>' +
+          '<h3 class="zfs-section-label">📋 Soru Bazlı Özet</h3>' +
+          reviewHtml +
+          '<div class="zfs-convert-banner">' +
+            '<h3>🚀 Tüm Kazanımlarda Tam Performansını Ölç</h3>' +
+            '<p>20 soruluk tam kazanım testlerine, detaylı gelişim karnene ve yanlış soru tekrarına erişmek için ücretsiz üye ol.</p>' +
+            '<div class="zfs-btn-row">' +
+              '<a class="zfs-btn-emerald" href="kayit-giris.html?mode=register">Ücretsiz Üye Ol →</a>' +
+              '<button type="button" class="zfs-btn-outline" id="zfsRetryQuizBtn">Başka Konuyla Tekrar Dene</button>' +
+              '<a class="zfs-btn-outline" href="konu.html?sinif=' + encodeURIComponent(activeGrade) + '">Konu Stüdyosuna Dön</a>' +
+            '</div>' +
+          '</div>';
+
+        document.getElementById("zfsRetryQuizBtn").addEventListener("click", function () {
+          renderSetup();
+        });
+      }
+
+      gradeButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          activeGrade = btn.dataset.grade;
+          selectedTopicIdx = 0;
+          renderSetup();
+        });
+      });
+
+      renderSetup();
     })();
   </script>
-  <script>ZarifPratik.mount(document.getElementById("pratik-mount"), {mod: "kazanim", sinif: new URLSearchParams(location.search).get("sinif")});</script>
-  <script src="/assets/site-footer.js"></script>
-  <script src="/assets/breadcrumb.js"></script>
-  <script src="/assets/site-media-targets.js"></script>
-  <script src="/assets/site-media.js"></script>
 </body>
 </html>

@@ -3,167 +3,425 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#fbf1e7">
-  <title>Konu Anlatımları | ZarifÇözüm</title>
+  <meta name="theme-color" content="#FAF6F0">
+  <title>Konu ve Öğrenme Stüdyosu | ZarifÇözüm</title>
+  <meta name="description" content="5–12. sınıf MEB Maarif Modeli matematik konu özetleri, formül kartları ve adım adım çözümlü örneklerle ücretsiz keşfet.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/style.css">
-  <link rel="stylesheet" href="/assets/pratik.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
-  <style>
-    .grade-quick-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 16px 0 24px;
-    }
-    .grade-quick-pill {
-      padding: 7px 14px;
-      background: #fffaf5;
-      border: 1.5px solid var(--line, #ead8c5);
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #6a5342;
-      text-decoration: none;
-      transition: all .2s ease;
-    }
-    .grade-quick-pill:hover {
-      border-color: #b88a28;
-      color: #493020;
-      transform: translateY(-1px);
-    }
-    .grade-quick-pill.active {
-      background: #fff8ec;
-      border-color: #b88a28;
-      color: #8c6a23;
-      box-shadow: 0 0 0 2px rgba(184,138,40,.2);
-    }
-    .konu-cta-bridge {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-top: 36px;
-      padding-top: 24px;
-      border-top: 1px dashed #ead8c5;
-    }
-    .konu-cta-card {
-      background: #fffaf5;
-      border: 1px solid #ead8c5;
-      border-radius: 16px;
-      padding: 18px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .konu-cta-card h4 {
-      margin: 0 0 6px;
-      font: 600 16px Georgia, serif;
-      color: #493020;
-    }
-    .konu-cta-card p {
-      font-size: 12px;
-      color: #806b5c;
-      margin: 0 0 14px;
-      line-height: 1.4;
-    }
-    .konu-cta-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 9px 14px;
-      border-radius: 10px;
-      background: #493020;
-      color: #fffaf5;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 700;
-      transition: background .2s;
-    }
-    .konu-cta-btn:hover {
-      background: #67472f;
-    }
-    .konu-cta-btn.gold {
-      background: linear-gradient(135deg, #c59734, #9f731c);
-      color: #fff;
-    }
-    @media (max-width: 768px) {
-      .konu-cta-bridge { grid-template-columns: 1fr; }
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/site-navbar.css?v=1">
+  <link rel="stylesheet" href="assets/freemium-studio.css?v=1">
+  <script src="assets/site-navbar.js?v=1" defer></script>
 </head>
-<body data-home="index.html" data-breadcrumb="Konu Anlatımları">
-  <main class="wrap">
-    <section class="block">
-      <h1 class="section-title">Konu anlatımları</h1>
-      <p class="muted" style="margin-top:var(--space-2)">MEB Türkiye Yüzyılı Maarif Modeli ve resmî müfredatla uyumlu ders özetleri. Sınıfınızı seçin ve konunun mantığını formüllerle keşfedin.</p>
+<body class="zfs-body">
+  <header class="site-header"></header>
 
-      <!-- Fast Grade Switcher Bar -->
-      <nav class="grade-quick-bar" aria-label="Sınıf Seçimi">
-        <a class="grade-quick-pill" href="/konu.html?sinif=5" data-grade="5">5. Sınıf</a>
-        <a class="grade-quick-pill" href="/konu.html?sinif=6" data-grade="6">6. Sınıf</a>
-        <a class="grade-quick-pill" href="/konu.html?sinif=7" data-grade="7">7. Sınıf</a>
-        <a class="grade-quick-pill" href="/konu.html?sinif=8" data-grade="8">8. Sınıf</a>
-        <a class="grade-quick-pill" href="/konu.html?sinif=9" data-grade="9">9. Sınıf</a>
-        <a class="grade-quick-pill" href="/konu.html?sinif=10" data-grade="10">10. Sınıf</a>
-        <a class="grade-quick-pill" href="/konu.html?sinif=11" data-grade="11">11. Sınıf</a>
-        <a class="grade-quick-pill" href="/konu.html?sinif=12" data-grade="12">12. Sınıf</a>
+  <main class="zfs-container">
+    <!-- Üst Alan: Sınıf Geçiş Çubuğu & Müfredat Etiketi -->
+    <section class="zfs-hero-bar" aria-label="Sınıf ve Müfredat Seçimi">
+      <div class="zfs-eyebrow" id="zfsCurriculumBadge">MEB Türkiye Yüzyılı Maarif Modeli</div>
+      <h1 class="zfs-page-title" id="zfsPageTitle">5. Sınıf Matematik Konu Stüdyosu</h1>
+      <p class="zfs-page-desc">
+        Her sınıfın ilk 2 ünitesi tüm ziyaretçilere ücretsiz açıktır. Görsel özetleri incele, formül kartlarına göz at ve adım adım çözümlü örnekleri kendin açarak öğren.
+      </p>
+      <nav class="zfs-grade-bar" id="zfsGradeBar" aria-label="Sınıf Seçimi">
+        <button type="button" class="zfs-grade-btn" data-grade="5">5. Sınıf</button>
+        <button type="button" class="zfs-grade-btn" data-grade="6">6. Sınıf</button>
+        <button type="button" class="zfs-grade-btn" data-grade="7">7. Sınıf</button>
+        <button type="button" class="zfs-grade-btn" data-grade="8">8. Sınıf (LGS)</button>
+        <button type="button" class="zfs-grade-btn" data-grade="9">9. Sınıf</button>
+        <button type="button" class="zfs-grade-btn" data-grade="10">10. Sınıf</button>
+        <button type="button" class="zfs-grade-btn" data-grade="11">11. Sınıf</button>
+        <button type="button" class="zfs-grade-btn" data-grade="12">12. Sınıf (YKS)</button>
       </nav>
+    </section>
 
-      <div id="pratik-mount"></div>
+    <!-- 2 Sütunlu Freemium Konu Kataloğu & Okuma Stüdyosu -->
+    <section class="zfs-studio-grid" aria-label="Konu Kataloğu ve Ders İçeriği">
+      <aside class="zfs-catalog" aria-label="Konu Listesi">
+        <div class="zfs-catalog-head">
+          <h2 class="zfs-catalog-title" id="zfsCatalogTitle">5. Sınıf Üniteleri</h2>
+          <span class="zfs-catalog-count">2 Ücretsiz</span>
+        </div>
+        <div class="zfs-topic-list" id="zfsTopicList"></div>
+      </aside>
 
-      <!-- Reinforcement Bridge -->
-      <section class="konu-cta-bridge" aria-label="Öğrenme Döngüsü">
-        <div class="konu-cta-card">
+      <article class="zfs-reader" id="zfsReader" aria-live="polite"></article>
+    </section>
+
+    <!-- Sayfa Altı 3 Net Huni Aksiyon Kartı -->
+    <section class="zfs-funnel-section" aria-label="Sonraki Öğrenme Adımları">
+      <h2 class="zfs-funnel-heading">Öğrendiklerini Şimdi Pekiştir</h2>
+      <div class="zfs-funnel-grid">
+        <!-- Kart 1: Ana Aksiyon -->
+        <div class="zfs-funnel-card is-featured">
           <div>
-            <h4>🎯 Konu Pratiği Yap</h4>
-            <p>Konuyu okuduktan sonra hemen her soruda anında çözüm gösteren pratikle pekiştirin.</p>
+            <span class="zfs-funnel-tag">ANA AKSİYON • KAYITSIZ DENE</span>
+            <h3>🎯 Kendini Dene (5 Soruluk Hızlı Kontrol)</h3>
+            <p>Seçili sınıfın açık konularından hemen 5 soruluk mini kontrole gir; puanını ve açıklamalı özetini anında gör.</p>
           </div>
-          <a class="konu-cta-btn gold" id="linkPratik" href="/pratik.html">Pratik Soruları Çöz →</a>
+          <a class="zfs-btn-primary" id="zfsFunnelTestLink" href="test.html?sinif=5">5 Soruluk Teste Başla →</a>
         </div>
-        <div class="konu-cta-card">
+
+        <!-- Kart 2: Fark Yaratan Özellik -->
+        <div class="zfs-funnel-card">
           <div>
-            <h4>📝 Kazanım Testine Gir</h4>
-            <p>Konu bittiğinde kendini test et; test sonunda karneni ve başarı grafiğini gör.</p>
+            <span class="zfs-funnel-tag">YAPAY ZEKA MENTÖR</span>
+            <h3>✨ AI Mentör ile Takıldığın Soruyu Çöz</h3>
+            <p>Cevabı doğrudan vermek yerine adım adım ipucu veren Sokratik AI Mentör'ü kayıt olmadan 1 örnek soruda hemen deneyimle.</p>
           </div>
-          <a class="konu-cta-btn" id="linkTest" href="/test.html">Kazanım Testini Başlat →</a>
+          <button type="button" class="zfs-btn-primary" id="zfsOpenAiDemoBtn">Örnek Soruda Dene →</button>
         </div>
-        <div class="konu-cta-card">
+
+        <!-- Kart 3: Planlama -->
+        <div class="zfs-funnel-card">
           <div>
-            <h4>📅 Çalışma Planına Ekle</h4>
-            <p>Haftalık matematik çalışma takvimini oluşturarak eksiklerini planlı olarak kapat.</p>
+            <span class="zfs-funnel-tag">DÜZENLİ GELİŞİM</span>
+            <h3>📅 Kişisel Haftalık Çalışma Planı</h3>
+            <p>Sınıfına ve hedeflerine uygun örnek haftalık çalışma takvimini incele; ücretsiz hesabınla kendi planını başlat.</p>
           </div>
-          <a class="konu-cta-btn" href="/pages/kisisel-calisma-plani.html">Planımı Oluştur →</a>
+          <button type="button" class="zfs-btn-outline" id="zfsOpenPlanDemoBtn">Örnek Takvimi İncele →</button>
         </div>
-      </section>
+      </div>
     </section>
   </main>
 
-  <script src="/assets/matematik-mufredati.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
-  <script src="/assets/safe-svg.js"></script>
-  <script src="/assets/ai-visual.js"></script>
-  <script src="/assets/math-text.js"></script>
-  <script src="/assets/pratik.js"></script>
+  <!-- Modal: AI Mentör Tek Soruluk Demo -->
+  <div class="zfs-modal-backdrop" id="zfsAiModal" role="dialog" aria-modal="true" aria-labelledby="zfsAiModalTitle">
+    <div class="zfs-modal">
+      <div class="zfs-modal-head">
+        <h3 id="zfsAiModalTitle">✨ AI Mentör — Canlı Adım Adım Deneyim</h3>
+        <button type="button" class="zfs-modal-close" data-close-modal="zfsAiModal" aria-label="Kapat">×</button>
+      </div>
+      <div id="zfsAiModalBody"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Haftalık Çalışma Planı Önizleme -->
+  <div class="zfs-modal-backdrop" id="zfsPlanModal" role="dialog" aria-modal="true" aria-labelledby="zfsPlanModalTitle">
+    <div class="zfs-modal">
+      <div class="zfs-modal-head">
+        <h3 id="zfsPlanModalTitle">📅 Örnek Haftalık Çalışma Planı</h3>
+        <button type="button" class="zfs-modal-close" data-close-modal="zfsPlanModal" aria-label="Kapat">×</button>
+      </div>
+      <div id="zfsPlanModalBody"></div>
+    </div>
+  </div>
+
+  <script src="assets/matematik-mufredati.js"></script>
+  <script src="assets/freemium-studio-data.js?v=1"></script>
   <script>
     (function () {
-      const activeGrade = new URLSearchParams(location.search).get("sinif");
-      if (activeGrade) {
-        document.querySelectorAll('.grade-quick-pill').forEach(pill => {
-          if (pill.dataset.grade === activeGrade) pill.classList.add('active');
-        });
-        const linkPratik = document.getElementById('linkPratik');
-        const linkTest = document.getElementById('linkTest');
-        if (linkPratik) linkPratik.href = `/pratik.html?sinif=${encodeURIComponent(activeGrade)}`;
-        if (linkTest) linkTest.href = `/test.html?sinif=${encodeURIComponent(activeGrade)}`;
+      "use strict";
+
+      var params = new URLSearchParams(window.location.search);
+      var rawGrade = params.get("sinif");
+      var activeGrade = (rawGrade && window.ZarifFreemiumData.GRADE_META[rawGrade]) ? rawGrade : "5";
+      var activeTopicIndex = 0;
+
+      var badgeEl = document.getElementById("zfsCurriculumBadge");
+      var titleEl = document.getElementById("zfsPageTitle");
+      var catalogTitleEl = document.getElementById("zfsCatalogTitle");
+      var topicListEl = document.getElementById("zfsTopicList");
+      var readerEl = document.getElementById("zfsReader");
+      var funnelTestLink = document.getElementById("zfsFunnelTestLink");
+      var gradeButtons = Array.prototype.slice.call(document.querySelectorAll(".zfs-grade-btn"));
+
+      function esc(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
       }
+
+      function updateUrl(grade) {
+        try {
+          var url = new URL(window.location.href);
+          url.searchParams.set("sinif", grade);
+          window.history.replaceState({}, "", url.toString());
+        } catch (e) {}
+      }
+
+      function renderGrade(grade, topicIdx) {
+        activeGrade = String(grade);
+        var meta = window.ZarifFreemiumData.GRADE_META[activeGrade] || window.ZarifFreemiumData.GRADE_META["5"];
+        var units = window.ZarifFreemiumData.getGradeUnits(activeGrade);
+        activeTopicIndex = Math.max(0, Math.min(topicIdx || 0, Math.max(0, units.length - 1)));
+
+        updateUrl(activeGrade);
+
+        badgeEl.textContent = meta.badge;
+        titleEl.textContent = meta.label + " Konu Stüdyosu";
+        catalogTitleEl.textContent = activeGrade + ". Sınıf Üniteleri";
+        document.title = meta.label + " Konu Stüdyosu | ZarifÇözüm";
+
+        gradeButtons.forEach(function (btn) {
+          btn.classList.toggle("is-active", btn.dataset.grade === activeGrade);
+        });
+
+        var testTopicIdx = activeTopicIndex < 2 ? activeTopicIndex : 0;
+        funnelTestLink.href = "test.html?sinif=" + encodeURIComponent(activeGrade) + "&konu=" + testTopicIdx;
+
+        topicListEl.innerHTML = units.map(function (u, idx) {
+          var isSelected = idx === activeTopicIndex;
+          return (
+            '<button type="button" class="zfs-topic-item' +
+              (isSelected ? ' is-active' : '') +
+              (u.isOpen ? '' : ' is-locked') +
+            '" data-topic-idx="' + idx + '">' +
+              '<div class="zfs-topic-top">' +
+                '<span class="zfs-topic-num">Ünite ' + (idx + 1) + '</span>' +
+                (u.isOpen
+                  ? '<span class="zfs-badge-free">✓ Ücretsiz Önizleme</span>'
+                  : '<span class="zfs-badge-lock">🔒 Üyelere Özel</span>') +
+              '</div>' +
+              '<span class="zfs-topic-name">' + esc(u.unitTopic) + '</span>' +
+            '</button>'
+          );
+        }).join("");
+
+        renderReader(units[activeTopicIndex]);
+      }
+
+      function renderReader(unit) {
+        if (!unit) {
+          readerEl.innerHTML = "<p>Bu sınıf için ünite bulunamadı.</p>";
+          return;
+        }
+
+        if (!unit.isOpen) {
+          var subPills = unit.subtopics.slice(0, 8).map(function (s) {
+            return '<span class="zfs-subtopic-pill">' + esc(s) + '</span>';
+          }).join("");
+
+          readerEl.innerHTML =
+            '<div class="zfs-reader-head">' +
+              '<div>' +
+                '<span class="zfs-badge-lock">🔒 Üyelere Özel İçerik</span>' +
+                '<h2 class="zfs-reader-title">' + esc(unit.title) + '</h2>' +
+                '<p class="zfs-reader-sub">' + activeGrade + '. Sınıf MEB Müfredatı • ' + unit.subtopics.length + ' Alt Kazanım</p>' +
+              '</div>' +
+            '</div>' +
+            '<h3 class="zfs-section-label">📌 Bu Ünitede Neler Öğreneceksin?</h3>' +
+            '<div class="zfs-subtopic-pills">' + (subPills || '<span class="zfs-subtopic-pill">' + esc(unit.unitTopic) + '</span>') + '</div>' +
+            '<div class="zfs-lock-stage">' +
+              '<div class="zfs-lock-blurred" aria-hidden="true">' +
+                '<h3>Görsel Konu Özeti ve Formül Kartları</h3>' +
+                '<p>Bu ünitede temel kavramlar görsel modeller, adım adım çözümlü yeni nesil örnekler ve video derslerle pekiştirilir.</p>' +
+                '<p>Örnek 1: Verilen ifadeyi en sade biçimde yazarak adım adım sonuca ulaşalım...</p>' +
+                '<p>Örnek 2: Gerçek yaşam probleminde kurulan matematiksel modelin çözüm adımları...</p>' +
+              '</div>' +
+              '<div class="zfs-lock-overlay">' +
+                '<div class="zfs-lock-icon" aria-hidden="true">🔒</div>' +
+                '<h3>Ücretsiz Hesabınla Hemen Aç</h3>' +
+                '<p>Bu konunun detaylı anlatımını, video dersini ve AI Mentör desteğini açmak için ücretsiz öğrenci hesabı oluştur.</p>' +
+                '<div class="zfs-btn-row">' +
+                  '<a class="zfs-btn-primary" href="kayit-giris.html?mode=register">Ücretsiz Kayıt Ol →</a>' +
+                  '<a class="zfs-btn-outline" href="kayit-giris.html">Giriş Yap</a>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+          return;
+        }
+
+        var highlightsHtml = unit.highlights.map(function (h) {
+          return '<li>' + esc(h) + '</li>';
+        }).join("");
+
+        var formulasHtml = unit.formulas.map(function (f) {
+          return (
+            '<div class="zfs-formula-card">' +
+              '<span class="zfs-formula-title">' + esc(f.title) + '</span>' +
+              '<div class="zfs-formula-expr">' + esc(f.expr) + '</div>' +
+              '<span class="zfs-formula-note">' + esc(f.note) + '</span>' +
+            '</div>'
+          );
+        }).join("");
+
+        var examplesHtml = unit.examples.map(function (ex, eIdx) {
+          return (
+            '<div class="zfs-example-card" data-ex-idx="' + eIdx + '" data-revealed="0">' +
+              '<span class="zfs-example-badge">Çözümlü Örnek ' + (eIdx + 1) + '</span>' +
+              '<p class="zfs-example-q">' + esc(ex.question) + '</p>' +
+              '<div class="zfs-steps-box" id="zfsExSteps-' + eIdx + '"></div>' +
+              '<div class="zfs-example-controls">' +
+                '<button type="button" class="zfs-btn-step" data-action="next-step" data-ex="' + eIdx + '">1. Adımı Göster →</button>' +
+                '<button type="button" class="zfs-btn-step-ghost" data-action="all-steps" data-ex="' + eIdx + '">Tüm Çözümü Aç</button>' +
+              '</div>' +
+            '</div>'
+          );
+        }).join("");
+
+        readerEl.innerHTML =
+          '<div class="zfs-reader-head">' +
+            '<div>' +
+              '<span class="zfs-badge-free">✓ Ücretsiz Önizleme Açık</span>' +
+              '<h2 class="zfs-reader-title">' + esc(unit.title) + '</h2>' +
+              '<p class="zfs-reader-sub">' + activeGrade + '. Sınıf • Görsel Özet, Formüller ve 2 İnteraktif Örnek</p>' +
+            '</div>' +
+            '<a class="zfs-btn-emerald" href="test.html?sinif=' + encodeURIComponent(activeGrade) + '&konu=' + unit.index + '">🎯 5 Soruluk Mini Kontrol →</a>' +
+          '</div>' +
+          '<div class="zfs-summary-box">' +
+            '<h3>📖 Konunun Görsel Özeti</h3>' +
+            '<p>' + esc(unit.summary) + '</p>' +
+            '<ul class="zfs-highlights">' + highlightsHtml + '</ul>' +
+          '</div>' +
+          '<h3 class="zfs-section-label">🧩 Formül & Kural Kartları</h3>' +
+          '<div class="zfs-formulas-grid">' + formulasHtml + '</div>' +
+          '<h3 class="zfs-section-label">✍️ Adım Adım İnteraktif Çözümlü Örnekler</h3>' +
+          '<div class="zfs-examples-list">' + examplesHtml + '</div>';
+
+        bindExampleButtons(unit);
+      }
+
+      function bindExampleButtons(unit) {
+        readerEl.querySelectorAll("[data-action]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var eIdx = Number(btn.getAttribute("data-ex"));
+            var action = btn.getAttribute("data-action");
+            var card = readerEl.querySelector('.zfs-example-card[data-ex-idx="' + eIdx + '"]');
+            var box = document.getElementById("zfsExSteps-" + eIdx);
+            var ex = unit.examples[eIdx];
+            if (!card || !box || !ex) return;
+
+            var totalSteps = ex.steps.length;
+            var current = Number(card.getAttribute("data-revealed") || 0);
+            var nextCount = action === "all-steps" ? (totalSteps + 1) : Math.min(totalSteps + 1, current + 1);
+            card.setAttribute("data-revealed", String(nextCount));
+
+            var html = "";
+            for (var i = 0; i < Math.min(nextCount, totalSteps); i++) {
+              html += '<div class="zfs-step-row"><strong>Adım ' + (i + 1) + ':</strong> ' + esc(ex.steps[i]) + '</div>';
+            }
+            if (nextCount > totalSteps) {
+              html += '<div class="zfs-answer-pill">✅ Sonuç: ' + esc(ex.answer) + '</div>';
+            }
+            box.innerHTML = html;
+
+            var nextBtn = card.querySelector('[data-action="next-step"]');
+            if (nextBtn) {
+              if (nextCount > totalSteps) {
+                nextBtn.textContent = "✓ Çözüm Tamamlandı";
+                nextBtn.disabled = true;
+                nextBtn.style.opacity = "0.7";
+              } else if (nextCount === totalSteps) {
+                nextBtn.textContent = "Sonucu Göster ✓";
+              } else {
+                nextBtn.textContent = (nextCount + 1) + ". Adımı Göster →";
+              }
+            }
+          });
+        });
+      }
+
+      /* Sınıf ve Konu Tıklama */
+      gradeButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          renderGrade(btn.dataset.grade, 0);
+        });
+      });
+
+      topicListEl.addEventListener("click", function (e) {
+        var item = e.target.closest(".zfs-topic-item");
+        if (!item) return;
+        var idx = Number(item.getAttribute("data-topic-idx"));
+        renderGrade(activeGrade, idx);
+        if (window.innerWidth <= 1024) {
+          readerEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+
+      /* AI Mentör Demo Modal */
+      var aiModal = document.getElementById("zfsAiModal");
+      var aiModalBody = document.getElementById("zfsAiModalBody");
+      var aiStepIdx = 0;
+
+      function renderAiDemo() {
+        var demo = window.ZarifFreemiumData.getAiDemo(activeGrade);
+        var shownHtml = "";
+        for (var i = 0; i <= aiStepIdx && i < demo.steps.length; i++) {
+          var st = demo.steps[i];
+          shownHtml +=
+            '<div class="zfs-step-row" style="margin-bottom:10px;">' +
+              '<strong>' + esc(st.role) + ':</strong> ' + esc(st.text) +
+              (i < aiStepIdx || i === demo.steps.length - 1
+                ? '<div style="margin-top:6px;color:#1E7550;font-weight:700;">→ ' + esc(st.reveal) + '</div>'
+                : '') +
+            '</div>';
+        }
+        var isDone = aiStepIdx >= demo.steps.length - 1;
+        aiModalBody.innerHTML =
+          '<div class="zfs-summary-box" style="margin-bottom:16px;">' +
+            '<h3>Örnek Soru (' + activeGrade + '. Sınıf)</h3>' +
+            '<p style="margin-bottom:0;font-weight:700;">' + esc(demo.question) + '</p>' +
+          '</div>' +
+          shownHtml +
+          '<div class="zfs-btn-row" style="justify-content:flex-start;margin-top:16px;">' +
+            (!isDone
+              ? '<button type="button" class="zfs-btn-step" id="zfsAiNextBtn">Sonraki İpucunu Gör →</button>'
+              : '<a class="zfs-btn-primary" href="kayit-giris.html?mode=register">Kendi Sorularınla AI Mentör\'ü Kullan →</a>') +
+          '</div>';
+
+        var nextBtn = document.getElementById("zfsAiNextBtn");
+        if (nextBtn) {
+          nextBtn.addEventListener("click", function () {
+            aiStepIdx++;
+            renderAiDemo();
+          });
+        }
+      }
+
+      document.getElementById("zfsOpenAiDemoBtn").addEventListener("click", function () {
+        aiStepIdx = 0;
+        renderAiDemo();
+        aiModal.classList.add("is-open");
+      });
+
+      /* Haftalık Plan Önizleme Modal */
+      var planModal = document.getElementById("zfsPlanModal");
+      var planModalBody = document.getElementById("zfsPlanModalBody");
+
+      document.getElementById("zfsOpenPlanDemoBtn").addEventListener("click", function () {
+        var rowsHtml = window.ZarifFreemiumData.WEEKLY_PREVIEW.map(function (row) {
+          return (
+            '<div class="zfs-plan-row">' +
+              '<span class="zfs-plan-day">' + esc(row.day) + '</span>' +
+              '<span class="zfs-plan-task">' + esc(row.task) + '</span>' +
+              '<span class="zfs-plan-mins">' + esc(row.mins) + '</span>' +
+            '</div>'
+          );
+        }).join("");
+
+        planModalBody.innerHTML =
+          '<p style="margin-top:0;color:#6E5A4F;">' + activeGrade + '. sınıf öğrencileri için önerilen dengeli haftalık çalışma akışı örneği:</p>' +
+          rowsHtml +
+          '<div class="zfs-btn-row" style="margin-top:20px;">' +
+            '<a class="zfs-btn-primary" href="kayit-giris.html?mode=register">Ücretsiz Hesapla Kendi Planını Oluştur →</a>' +
+            '<a class="zfs-btn-outline" href="kayit-giris.html">Giriş Yap</a>' +
+          '</div>';
+
+        planModal.classList.add("is-open");
+      });
+
+      /* Modal Kapatma */
+      document.querySelectorAll("[data-close-modal]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-close-modal");
+          var el = document.getElementById(id);
+          if (el) el.classList.remove("is-open");
+        });
+      });
+
+      [aiModal, planModal].forEach(function (m) {
+        m.addEventListener("click", function (e) {
+          if (e.target === m) m.classList.remove("is-open");
+        });
+      });
+
+      renderGrade(activeGrade, 0);
     })();
   </script>
-  <script>ZarifPratik.mount(document.getElementById("pratik-mount"), {mod: "konu", sinif: new URLSearchParams(location.search).get("sinif")});</script>
-  <script src="/assets/site-footer.js"></script>
-  <script src="/assets/breadcrumb.js"></script>
-  <script src="/assets/site-media-targets.js"></script>
-  <script src="/assets/site-media.js"></script>
 </body>
 </html>

@@ -1,0 +1,1015 @@
+/* ==========================================================================
+   ZarifÇözüm — Freemium Konu Stüdyosu & Kendini Dene (Ortak Modern Stil)
+   Palet: #FAF6F0 (Krem), #FFFDF9 (Kart), #3B281E (Koyu Kahve),
+          #C85A17 (Kiremit), #D4A359 (Altın), #1E7550 (Zümrüt), #E6DCD2 (Çizgi)
+   ========================================================================== */
+
+:root {
+  --zfs-bg: #FAF6F0;
+  --zfs-card: #FFFDF9;
+  --zfs-ink: #3B281E;
+  --zfs-muted: #6E5A4F;
+  --zfs-terracotta: #C85A17;
+  --zfs-gold: #D4A359;
+  --zfs-emerald: #1E7550;
+  --zfs-line: #E6DCD2;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body.zfs-body {
+  margin: 0;
+  background: var(--zfs-bg);
+  color: var(--zfs-ink);
+  font-family: "Inter", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+}
+
+.zfs-container {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 36px 48px 80px;
+}
+
+/* Üst Başlık & Sınıf Geçiş Çubuğu */
+.zfs-hero-bar {
+  background: var(--zfs-card);
+  border: 1px solid var(--zfs-line);
+  border-radius: 24px;
+  padding: 32px 36px;
+  margin-bottom: 28px;
+  box-shadow: 0 12px 32px rgba(59, 40, 30, 0.05);
+}
+
+.zfs-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(212, 163, 89, 0.16);
+  border: 1px solid rgba(212, 163, 89, 0.45);
+  color: #7D5618;
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.zfs-page-title {
+  margin: 0 0 10px;
+  font-size: clamp(1.9rem, 3.2vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: var(--zfs-ink);
+}
+
+.zfs-page-desc {
+  margin: 0 0 22px;
+  font-size: 1.05rem;
+  color: var(--zfs-muted);
+  max-width: 780px;
+}
+
+.zfs-grade-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.zfs-grade-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1.5px solid var(--zfs-line);
+  background: #FAF6F0;
+  color: var(--zfs-ink);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.zfs-grade-btn:hover {
+  border-color: var(--zfs-gold);
+  background: #FFF9EE;
+  transform: translateY(-1px);
+}
+
+.zfs-grade-btn.is-active {
+  background: var(--zfs-ink);
+  border-color: var(--zfs-ink);
+  color: #FFFDF9;
+  box-shadow: 0 8px 20px rgba(59, 40, 30, 0.18);
+}
+
+/* ==========================================================================
+   2 Sütunlu Freemium Konu Stüdyosu (Sol Katalog + Sağ Okuma Alanı)
+   ========================================================================== */
+.zfs-studio-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.zfs-catalog {
+  background: var(--zfs-card);
+  border: 1px solid var(--zfs-line);
+  border-radius: 22px;
+  padding: 20px;
+  position: sticky;
+  top: 92px;
+  box-shadow: 0 10px 28px rgba(59, 40, 30, 0.04);
+}
+
+.zfs-catalog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--zfs-line);
+}
+
+.zfs-catalog-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--zfs-ink);
+}
+
+.zfs-catalog-count {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--zfs-emerald);
+  background: rgba(30, 117, 80, 0.1);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.zfs-topic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zfs-topic-item {
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1.5px solid var(--zfs-line);
+  background: #FAF6F0;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.18s ease;
+}
+
+.zfs-topic-item:hover {
+  border-color: var(--zfs-gold);
+  background: #FFFDF9;
+}
+
+.zfs-topic-item.is-active {
+  background: #FFFDF9;
+  border-color: var(--zfs-terracotta);
+  box-shadow: 0 0 0 3px rgba(200, 90, 23, 0.12);
+}
+
+.zfs-topic-item.is-locked {
+  opacity: 0.9;
+}
+
+.zfs-topic-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.zfs-topic-num {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--zfs-muted);
+}
+
+.zfs-badge-free {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  background: rgba(30, 117, 80, 0.12);
+  color: var(--zfs-emerald);
+}
+
+.zfs-badge-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  background: rgba(59, 40, 30, 0.08);
+  color: var(--zfs-ink);
+}
+
+.zfs-topic-name {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--zfs-ink);
+  line-height: 1.35;
+}
+
+/* Sağ İçerik Stüdyosu */
+.zfs-reader {
+  background: var(--zfs-card);
+  border: 1px solid var(--zfs-line);
+  border-radius: 24px;
+  padding: 32px 36px;
+  box-shadow: 0 12px 34px rgba(59, 40, 30, 0.05);
+}
+
+.zfs-reader-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 22px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--zfs-line);
+}
+
+.zfs-reader-title {
+  margin: 8px 0 6px;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--zfs-ink);
+}
+
+.zfs-reader-sub {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--zfs-muted);
+}
+
+.zfs-summary-box {
+  background: #FAF6F0;
+  border: 1px solid var(--zfs-line);
+  border-left: 4px solid var(--zfs-terracotta);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.zfs-summary-box h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--zfs-ink);
+}
+
+.zfs-summary-box p {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: #4D3B31;
+}
+
+.zfs-highlights {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.95rem;
+  color: var(--zfs-ink);
+}
+
+/* Formül Kartları */
+.zfs-section-label {
+  margin: 0 0 14px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--zfs-ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zfs-formulas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.zfs-formula-card {
+  background: linear-gradient(180deg, #FFFDF9 0%, #FAF3E8 100%);
+  border: 1px solid rgba(212, 163, 89, 0.55);
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zfs-formula-title {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #8C621B;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.zfs-formula-expr {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--zfs-ink);
+  background: #FFFDF9;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed rgba(59, 40, 30, 0.18);
+}
+
+.zfs-formula-note {
+  font-size: 0.875rem;
+  color: var(--zfs-muted);
+}
+
+/* İnteraktif Adım Adım Çözümlü Örnekler */
+.zfs-examples-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 26px;
+}
+
+.zfs-example-card {
+  border: 1px solid var(--zfs-line);
+  border-radius: 18px;
+  padding: 20px 22px;
+  background: #FFFDF9;
+}
+
+.zfs-example-badge {
+  display: inline-block;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: rgba(200, 90, 23, 0.12);
+  color: var(--zfs-terracotta);
+  font-size: 0.875rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.zfs-example-q {
+  margin: 0 0 14px;
+  font-size: 1.03rem;
+  font-weight: 700;
+  color: var(--zfs-ink);
+}
+
+.zfs-steps-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.zfs-step-row {
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: #FAF6F0;
+  border: 1px solid var(--zfs-line);
+  font-size: 0.95rem;
+  color: var(--zfs-ink);
+  animation: zfsFadeIn 0.25s ease;
+}
+
+.zfs-step-row strong {
+  color: var(--zfs-terracotta);
+  margin-right: 6px;
+}
+
+.zfs-answer-pill {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(30, 117, 80, 0.12);
+  border: 1px solid rgba(30, 117, 80, 0.35);
+  color: var(--zfs-emerald);
+  font-weight: 800;
+  font-size: 0.98rem;
+}
+
+.zfs-example-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.zfs-btn-step {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: 1.5px solid var(--zfs-ink);
+  background: var(--zfs-ink);
+  color: #FFFDF9;
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.zfs-btn-step:hover {
+  background: var(--zfs-terracotta);
+  border-color: var(--zfs-terracotta);
+}
+
+.zfs-btn-step-ghost {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--zfs-line);
+  background: #FAF6F0;
+  color: var(--zfs-ink);
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.zfs-btn-step-ghost:hover {
+  border-color: var(--zfs-ink);
+}
+
+/* Kilitli Konu (Blur + Dönüşüm Kartı) */
+.zfs-subtopic-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.zfs-subtopic-pill {
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: #FAF6F0;
+  border: 1px solid var(--zfs-line);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--zfs-ink);
+}
+
+.zfs-lock-stage {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--zfs-line);
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+}
+
+.zfs-lock-blurred {
+  position: absolute;
+  inset: 0;
+  padding: 28px;
+  filter: blur(6px);
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+  background: #FAF6F0;
+}
+
+.zfs-lock-overlay {
+  position: relative;
+  z-index: 2;
+  max-width: 520px;
+  width: 100%;
+  background: rgba(255, 253, 249, 0.96);
+  border: 1.5px solid var(--zfs-gold);
+  border-radius: 20px;
+  padding: 28px 30px;
+  text-align: center;
+  box-shadow: 0 18px 46px rgba(59, 40, 30, 0.16);
+}
+
+.zfs-lock-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  border-radius: 16px;
+  background: rgba(212, 163, 89, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+.zfs-lock-overlay h3 {
+  margin: 0 0 10px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--zfs-ink);
+}
+
+.zfs-lock-overlay p {
+  margin: 0 0 20px;
+  font-size: 1rem;
+  color: var(--zfs-muted);
+}
+
+/* Ortak Butonlar */
+.zfs-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.zfs-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 12px;
+  background: var(--zfs-ink);
+  color: #FFFDF9;
+  font-size: 0.98rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s ease;
+}
+
+.zfs-btn-primary:hover {
+  background: var(--zfs-terracotta);
+  transform: translateY(-1px);
+}
+
+.zfs-btn-emerald {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 12px;
+  background: var(--zfs-emerald);
+  color: #FFFDF9;
+  font-size: 0.98rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s ease;
+}
+
+.zfs-btn-emerald:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.zfs-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 12px;
+  background: #FFFDF9;
+  color: var(--zfs-ink);
+  font-size: 0.98rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1.5px solid var(--zfs-line);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s ease;
+}
+
+.zfs-btn-outline:hover {
+  border-color: var(--zfs-ink);
+  background: #FAF6F0;
+}
+
+/* ==========================================================================
+   Sayfa Altı 3 Net Huni Aksiyon Kartı
+   ========================================================================== */
+.zfs-funnel-section {
+  margin-top: 56px;
+}
+
+.zfs-funnel-heading {
+  margin: 0 0 20px;
+  font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+  font-weight: 800;
+  color: var(--zfs-ink);
+}
+
+.zfs-funnel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.zfs-funnel-card {
+  background: var(--zfs-card);
+  border: 1px solid var(--zfs-line);
+  border-radius: 22px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  box-shadow: 0 10px 28px rgba(59, 40, 30, 0.05);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.zfs-funnel-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--zfs-gold);
+}
+
+.zfs-funnel-card.is-featured {
+  background: linear-gradient(160deg, #3B281E 0%, #52382A 100%);
+  color: #FFFDF9;
+  border-color: #3B281E;
+}
+
+.zfs-funnel-card.is-featured p {
+  color: rgba(255, 253, 249, 0.84);
+}
+
+.zfs-funnel-tag {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  background: rgba(212, 163, 89, 0.2);
+  color: #8C621B;
+}
+
+.zfs-funnel-card.is-featured .zfs-funnel-tag {
+  background: rgba(212, 163, 89, 0.25);
+  color: #F4D28D;
+}
+
+.zfs-funnel-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.zfs-funnel-card p {
+  margin: 0;
+  font-size: 0.96rem;
+  color: var(--zfs-muted);
+}
+
+.zfs-funnel-card.is-featured .zfs-btn-primary {
+  background: var(--zfs-gold);
+  color: #2A1C15;
+}
+
+.zfs-funnel-card.is-featured .zfs-btn-primary:hover {
+  background: #E2B66A;
+}
+
+/* ==========================================================================
+   Modal (AI Mentör Demo & Haftalık Plan Önizleme)
+   ========================================================================== */
+.zfs-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(44, 30, 22, 0.62);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.zfs-modal-backdrop.is-open {
+  display: flex;
+}
+
+.zfs-modal {
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #FFFDF9;
+  border: 1px solid var(--zfs-line);
+  border-radius: 24px;
+  padding: 28px 30px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+}
+
+.zfs-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--zfs-line);
+}
+
+.zfs-modal-head h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--zfs-ink);
+}
+
+.zfs-modal-close {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--zfs-line);
+  background: #FAF6F0;
+  color: var(--zfs-ink);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.zfs-plan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 13px 16px;
+  border-radius: 14px;
+  background: #FAF6F0;
+  border: 1px solid var(--zfs-line);
+  margin-bottom: 10px;
+}
+
+.zfs-plan-day {
+  font-weight: 800;
+  color: var(--zfs-terracotta);
+  min-width: 96px;
+  font-size: 0.92rem;
+}
+
+.zfs-plan-task {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--zfs-ink);
+}
+
+.zfs-plan-mins {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--zfs-emerald);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Kendini Dene (test.html) — 5 Soruluk Mini Kontrol Stilleri
+   ========================================================================== */
+.zfs-quiz-shell {
+  background: var(--zfs-card);
+  border: 1px solid var(--zfs-line);
+  border-radius: 24px;
+  padding: 32px 36px;
+  box-shadow: 0 14px 36px rgba(59, 40, 30, 0.06);
+}
+
+.zfs-topic-picker {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 20px 0 26px;
+}
+
+.zfs-pick-card {
+  text-align: left;
+  padding: 20px;
+  border-radius: 18px;
+  border: 2px solid var(--zfs-line);
+  background: #FAF6F0;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s ease;
+}
+
+.zfs-pick-card:hover {
+  border-color: var(--zfs-gold);
+  background: #FFFDF9;
+}
+
+.zfs-pick-card.is-selected {
+  background: #FFFDF9;
+  border-color: var(--zfs-emerald);
+  box-shadow: 0 0 0 3px rgba(30, 117, 80, 0.14);
+}
+
+.zfs-pick-card h4 {
+  margin: 8px 0 6px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--zfs-ink);
+}
+
+.zfs-pick-card p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--zfs-muted);
+}
+
+.zfs-quiz-progress-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.zfs-quiz-track {
+  flex: 1;
+  height: 10px;
+  border-radius: 99px;
+  background: #EFE6DB;
+  overflow: hidden;
+}
+
+.zfs-quiz-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--zfs-terracotta), var(--zfs-gold));
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+.zfs-quiz-question {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--zfs-ink);
+  margin: 0 0 20px;
+  line-height: 1.4;
+}
+
+.zfs-quiz-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.zfs-opt-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 2px solid var(--zfs-line);
+  background: #FAF6F0;
+  color: var(--zfs-ink);
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.zfs-opt-btn:hover {
+  border-color: var(--zfs-gold);
+  background: #FFFDF9;
+}
+
+.zfs-opt-btn.is-selected {
+  border-color: var(--zfs-ink);
+  background: #3B281E;
+  color: #FFFDF9;
+}
+
+.zfs-opt-letter {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(59, 40, 30, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.zfs-opt-btn.is-selected .zfs-opt-letter {
+  background: var(--zfs-gold);
+  color: #2A1C15;
+}
+
+/* Sonuç & Dönüşüm Kartı */
+.zfs-score-hero {
+  text-align: center;
+  padding: 24px;
+  border-radius: 20px;
+  background: #FAF6F0;
+  border: 1px solid var(--zfs-line);
+  margin-bottom: 24px;
+}
+
+.zfs-score-big {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--zfs-emerald);
+  line-height: 1.1;
+}
+
+.zfs-review-item {
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--zfs-line);
+  margin-bottom: 10px;
+  background: #FFFDF9;
+}
+
+.zfs-review-item.is-correct {
+  border-left: 4px solid var(--zfs-emerald);
+}
+
+.zfs-review-item.is-wrong {
+  border-left: 4px solid var(--zfs-terracotta);
+}
+
+.zfs-convert-banner {
+  margin-top: 26px;
+  padding: 28px 30px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #3B281E 0%, #5B3C2B 100%);
+  color: #FFFDF9;
+  text-align: center;
+}
+
+.zfs-convert-banner h3 {
+  margin: 0 0 10px;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.zfs-convert-banner p {
+  margin: 0 0 20px;
+  font-size: 1rem;
+  color: rgba(255, 253, 249, 0.88);
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+@keyframes zfsFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .zfs-container { padding: 28px 32px 64px; }
+  .zfs-studio-grid { grid-template-columns: 1fr; }
+  .zfs-catalog { position: static; }
+  .zfs-funnel-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .zfs-container { padding: 20px 20px 56px; }
+  .zfs-hero-bar, .zfs-reader, .zfs-quiz-shell { padding: 22px 20px; }
+  .zfs-topic-picker, .zfs-quiz-options { grid-template-columns: 1fr; }
+  .zfs-plan-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
