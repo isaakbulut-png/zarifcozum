@@ -1,0 +1,482 @@
+/* ==========================================================================
+   ZarifÇözüm — MEB Senaryolu İnteraktif Yazılı Stüdyosu
+   Palet: #FAF6F0 (Krem), #FFFDF9 (Kağıt), #3B281E (Koyu Kahve),
+          #D4A359 (Altın), #1E7550 (Zümrüt), #C85A17 (Kiremit)
+   ========================================================================== */
+
+.zy-studio {
+  background: #FAF6F0;
+  border: 1px solid #E6DCD2;
+  border-radius: 22px;
+  padding: 26px;
+  color: #3B281E;
+}
+
+.zy-top-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 18px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #E6DCD2;
+}
+
+.zy-top-header h2 {
+  margin: 0 0 4px;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #3B281E;
+}
+
+.zy-top-header p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #6E5A4F;
+}
+
+.zy-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(30, 117, 80, 0.12);
+  border: 1px solid rgba(30, 117, 80, 0.35);
+  color: #1E7550;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+/* Öğretmen Özel Provaları (En Üstte Altın Rozet) */
+.zy-teacher-section {
+  margin-bottom: 22px;
+}
+
+.zy-teacher-card {
+  background: linear-gradient(135deg, #FFFDF9 0%, #FDF5E6 100%);
+  border: 1.5px solid #D4A359;
+  border-radius: 18px;
+  padding: 18px 22px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  box-shadow: 0 8px 22px rgba(212, 163, 89, 0.14);
+}
+
+.zy-gold-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #3B281E;
+  color: #F4D28D;
+  font-size: 0.8rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+/* Dönem Kartları */
+.zy-period-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.zy-period-btn {
+  text-align: left;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1.5px solid #E6DCD2;
+  background: #FFFDF9;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s ease;
+}
+
+.zy-period-btn:hover {
+  border-color: #D4A359;
+  transform: translateY(-2px);
+}
+
+.zy-period-btn.is-active {
+  background: #3B281E;
+  border-color: #3B281E;
+  color: #FFFDF9;
+  box-shadow: 0 10px 24px rgba(59, 40, 30, 0.18);
+}
+
+.zy-period-btn small {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #D4A359;
+  margin-bottom: 4px;
+}
+
+.zy-period-btn strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+/* Senaryo Seçici + Dağılım Tablosu */
+.zy-scenario-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.zy-scenario-btn {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1.5px solid #E6DCD2;
+  background: #FFFDF9;
+  color: #3B281E;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s ease;
+}
+
+.zy-scenario-btn.is-active {
+  border-color: #1E7550;
+  background: rgba(30, 117, 80, 0.08);
+  box-shadow: 0 0 0 2px rgba(30, 117, 80, 0.16);
+}
+
+.zy-scenario-btn strong {
+  display: block;
+  font-size: 0.96rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.zy-scenario-btn span {
+  display: block;
+  font-size: 0.84rem;
+  color: #6E5A4F;
+}
+
+.zy-dist-card {
+  background: #FFFDF9;
+  border: 1px solid #E6DCD2;
+  border-radius: 18px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+}
+
+.zy-dist-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  margin-top: 10px;
+}
+
+.zy-dist-table th,
+.zy-dist-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #EFE6DB;
+  text-align: left;
+}
+
+.zy-dist-table th {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #6E5A4F;
+  text-transform: uppercase;
+}
+
+.zy-dist-table tfoot td {
+  font-weight: 800;
+  color: #1E7550;
+  border-bottom: none;
+}
+
+/* Butonlar */
+.zy-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 22px;
+  border-radius: 12px;
+  border: none;
+  background: #3B281E;
+  color: #FFFDF9;
+  font-family: inherit;
+  font-size: 0.96rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.zy-btn-primary:hover { background: #C85A17; transform: translateY(-1px); }
+
+.zy-btn-emerald {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 22px;
+  border-radius: 12px;
+  border: none;
+  background: #1E7550;
+  color: #FFFDF9;
+  font-family: inherit;
+  font-size: 0.96rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.zy-btn-emerald:hover { filter: brightness(1.08); }
+
+.zy-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1.5px solid #D4C5B6;
+  background: #FFFDF9;
+  color: #3B281E;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.zy-btn-outline:hover { border-color: #3B281E; }
+
+/* Adım 3: İnteraktif Açık Uçlu Sınav Sahnesi */
+.zy-exam-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: #3B281E;
+  color: #FFFDF9;
+  margin-bottom: 18px;
+}
+
+.zy-timer {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.2rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 10px;
+  background: rgba(212, 163, 89, 0.25);
+  color: #F4D28D;
+}
+
+.zy-q-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.zy-q-pill {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 253, 249, 0.3);
+  background: rgba(255, 253, 249, 0.08);
+  color: #FFFDF9;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.zy-q-pill.is-active { background: #D4A359; color: #2A1C15; border-color: #D4A359; }
+.zy-q-pill.is-answered { background: #1E7550; border-color: #1E7550; color: #FFF; }
+
+.zy-paper-card {
+  background: #FFFDF9;
+  border: 1.5px solid #E6DCD2;
+  border-radius: 20px;
+  padding: 26px 28px;
+  box-shadow: 0 12px 30px rgba(59, 40, 30, 0.06);
+}
+
+.zy-q-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.zy-q-pts {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(212, 163, 89, 0.22);
+  color: #7D5618;
+  font-weight: 800;
+  font-size: 0.88rem;
+}
+
+.zy-q-text {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.6;
+  color: #3B281E;
+  margin: 0 0 18px;
+}
+
+.zy-work-area textarea,
+.zy-work-area input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #D9CBBF;
+  background: #FAF6F0;
+  color: #3B281E;
+  font-family: inherit;
+  font-size: 0.98rem;
+  box-sizing: border-box;
+}
+
+.zy-work-area textarea {
+  min-height: 110px;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+
+.zy-hint-box {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #FEF3C7;
+  border: 1px solid #F59E0B;
+  color: #78350F;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+/* Modal (Çözüm Modu Seçimi) */
+.zy-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(59, 40, 30, 0.65);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.zy-modal-backdrop.is-open { display: flex; }
+
+.zy-modal {
+  width: 100%;
+  max-width: 560px;
+  background: #FFFDF9;
+  border: 1.5px solid #D4A359;
+  border-radius: 22px;
+  padding: 26px 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+}
+
+.zy-mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.zy-mode-card {
+  padding: 20px;
+  border-radius: 16px;
+  border: 1.5px solid #E6DCD2;
+  background: #FAF6F0;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.18s ease;
+}
+
+.zy-mode-card:hover {
+  border-color: #3B281E;
+  background: #FFFDF9;
+  transform: translateY(-2px);
+}
+
+/* Yazılı Karnesi */
+.zy-report-hero {
+  text-align: center;
+  padding: 24px;
+  border-radius: 18px;
+  background: #3B281E;
+  color: #FFFDF9;
+  margin-bottom: 20px;
+}
+
+.zy-report-score {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: #D4A359;
+  line-height: 1.1;
+}
+
+.zy-report-item {
+  background: #FFFDF9;
+  border: 1px solid #E6DCD2;
+  border-left: 4px solid #1E7550;
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+
+.zy-report-item.is-low { border-left-color: #C85A17; }
+
+/* MEB Yazdırılabilir Sınav Kağıdı (@media print) */
+.zy-print-sheet {
+  display: none;
+}
+
+@media print {
+  body.zy-printing-exam * {
+    visibility: hidden !important;
+  }
+  body.zy-printing-exam .zy-print-sheet,
+  body.zy-printing-exam .zy-print-sheet * {
+    visibility: visible !important;
+  }
+  body.zy-printing-exam .zy-print-sheet {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: #FFFFFF;
+    color: #000000;
+    padding: 10mm;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 11pt;
+  }
+  .zy-print-key {
+    page-break-before: always;
+  }
+}
+
+@media (max-width: 900px) {
+  .zy-period-grid { grid-template-columns: repeat(2, 1fr); }
+  .zy-scenario-tabs, .zy-mode-grid { grid-template-columns: 1fr; }
+}

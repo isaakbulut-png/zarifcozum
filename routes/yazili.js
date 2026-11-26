@@ -28,8 +28,11 @@ function createYaziliRouter({ requireRole } = {}) {
     try {
       let user = req.session.user;
       if (user.role === 'admin' && req.query.previewUserId) {
-        const previewTarget = await User.findById(req.query.previewUserId);
-        if (previewTarget) user = previewTarget;
+        const previewTarget = await User.findById(req.query.previewUserId).lean();
+        if (previewTarget) user = { ...previewTarget, id: previewTarget._id.toString() };
+      } else if (user.role === 'student' && user.id) {
+        const freshStudent = await User.findById(user.id).lean();
+        if (freshStudent) user = { ...user, ...freshStudent, id: freshStudent._id.toString() };
       }
       const { grade, donem } = req.query;
       const plan = resolveUserPlan(user);
@@ -146,12 +149,13 @@ function createYaziliRouter({ requireRole } = {}) {
           });
         }
 
-        const plan = resolveUserPlan(user);
-        if (plan === 'free') {
+        const freshUser = await User.findById(user.id).lean();
+        const plan = resolveUserPlan(freshUser || user);
+        if (plan === 'free' && (prova.senaryoNo || 1) > 1) {
           return res.status(403).json({
             success: false,
             kod: 'YAZILI_UPGRADE_REQUIRED',
-            mesaj: 'MEB açık uçlu yazılı provaları Temel, Standart ve VIP paketlerimize özeldir. Lütfen paketinizi yükseltin.'
+            mesaj: 'Senaryo 1 tüm öğrencilere açıktır. Senaryo 2 ve 3 yazılı provaları Temel, Standart ve VIP paketlerimize özeldir.'
           });
         }
 
