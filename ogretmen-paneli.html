@@ -1555,7 +1555,7 @@ body.teacher-menu-open {
         </div>
 
         <!-- Üst Bilgi Form Alanları (Test/Deneme Başlığı, Sınıf, Süre, Açıklama) -->
-        <form id="quizForm" style="margin:0;">
+        <div id="quizForm" style="margin:0;">
           <div class="form-grid" style="grid-template-columns: minmax(220px, 2fr) minmax(130px, 1fr) minmax(110px, 1fr) minmax(200px, 2fr); gap:12px; margin-top:18px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.12);">
             <div class="field" style="margin:0;">
               <label for="quizTitle" style="display:block; font-size:11px; font-weight:700; color:#fed7aa; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">Başlık *</label>
@@ -1964,7 +1964,7 @@ body.teacher-menu-open {
             </div>
 
           </div>
-        </form>
+        </div>
 
       </div>
 
@@ -2659,7 +2659,7 @@ body.teacher-menu-open {
     } catch (error) {
       status.textContent = error.message;
     } finally {
-      button.disabled = false;
+      if (button) button.disabled = false;
     }
   });
 
@@ -2844,7 +2844,7 @@ body.teacher-menu-open {
     } catch (error) {
       $('lessonStatus').textContent = 'Ders oluşturulamadı: ' + error.message;
     } finally {
-      button.disabled = false;
+      if (button) button.disabled = false;
     }
   });
 
@@ -3575,8 +3575,8 @@ body.teacher-menu-open {
   $('quizForm').addEventListener('submit', async event => {
     event.preventDefault();
     const form = event.currentTarget;
-    const button = form.querySelector('button[type="submit"]');
-    button.disabled = true;
+    const button = $('btnPublishBasketQuiz') || form.querySelector('button[type="submit"]');
+    if (button) button.disabled = true;
     durumYaz('quizStatus', 'Test yayınlanıyor…');
     try {
       const questions = [...$('questionList').children].map(item => {
@@ -3614,7 +3614,11 @@ body.teacher-menu-open {
       });
       const publishedQuizId = createdQuizRes?.quiz?.id;
       const publishedQuizTitle = createdQuizRes?.quiz?.title || $('quizTitle').value;
-      form.reset();
+      if (typeof form.reset === 'function') form.reset();
+      else {
+        if ($('quizTitle')) $('quizTitle').value = '';
+        if ($('quizDescription')) $('quizDescription').value = '';
+      }
       $('questionList').replaceChildren();
       soruEkle();
       try {
@@ -3631,7 +3635,7 @@ body.teacher-menu-open {
     } catch (error) {
       durumYaz('quizStatus', 'Test yayınlanamadı: ' + error.message, 'error');
     } finally {
-      button.disabled = false;
+      if (button) button.disabled = false;
     }
   });
 
@@ -4436,7 +4440,11 @@ body.teacher-menu-open {
         questions: extracted
       });
     }
-    $('quizForm')?.requestSubmit();
+    const qForm = $('quizForm');
+    if (qForm) {
+      if (typeof qForm.requestSubmit === 'function') qForm.requestSubmit();
+      else qForm.dispatchEvent(new Event('submit', { cancelable: true }));
+    }
   });
 
   // 4. Tab 2: Resimli Soru & PDF Kırpma Entegrasyonu
@@ -4874,7 +4882,7 @@ body.teacher-menu-open {
     } catch (error) {
       durumYaz('examStatus', 'Deneme oluşturulamadı: ' + error.message, 'error');
     } finally {
-      button.disabled = false;
+      if (button) button.disabled = false;
     }
   });
 
@@ -4917,12 +4925,12 @@ body.teacher-menu-open {
     return {status: response.status, mesaj: data.mesaj};
   }
 
-  $('imageFiles').addEventListener('change', () => {
+  $('imageFiles')?.addEventListener('change', () => {
     resimListesiCiz();
     durumYaz('imageUploadStatus', '');
   });
 
-  $('imageQuestionForm').addEventListener('submit', async event => {
+  $('imageQuestionForm')?.addEventListener('submit', async event => {
     event.preventDefault();
     const button = event.currentTarget.querySelector('button[type="submit"]');
     const dosyalar = seciliResimler();
@@ -4969,7 +4977,7 @@ body.teacher-menu-open {
     } catch (error) {
       durumYaz('imageUploadStatus', 'Yükleme durdu: ' + error.message, 'error');
     } finally {
-      button.disabled = false;
+      if (button) button.disabled = false;
     }
   });
 
@@ -5086,7 +5094,10 @@ body.teacher-menu-open {
     if ($('aiTopic')) $('aiTopic').value = $('aiAltKonu')?.value || '';
   });
 
-  // Başlangıçta seçim varsa hemen doldur
+  // Başlangıçta sınıf seçili değilse 5. Sınıfı varsayılan yap ve temaları hemen aktif et
+  if ($('aiGrade') && !$('aiGrade').value) {
+    $('aiGrade').value = '5';
+  }
   updateAiTemalar();
 
   async function aiKonulariYukle() {
@@ -5160,7 +5171,7 @@ body.teacher-menu-open {
     } catch (error) {
       durumYaz('aiQuestionStatus', 'Sorular üretilemedi: ' + error.message, 'error');
     } finally {
-      button.disabled = false;
+      if (button) button.disabled = false;
     }
   });
 
@@ -5528,7 +5539,7 @@ body.teacher-menu-open {
       form.reset();
       $('announcementStatus').textContent = '✓ Duyuru canlı bildirim merkezine yayınlandı (Sunucu uyarısı: ' + error.message + ')';
     } finally {
-      button.disabled = false;
+      if (button) button.disabled = false;
     }
   });
 
@@ -5625,7 +5636,7 @@ body.teacher-menu-open {
       window.teacherPanelNavigation.open('lessons');
       $('zoomOpenStatus').textContent = `Zoom açılamadı: ${error.message}`;
     } finally {
-      button.disabled = false;
+      if (button) button.disabled = false;
     }
   });
 
