@@ -3,7 +3,7 @@ const { rateLimit } = require('express-rate-limit');
 const { ObjectId } = require('mongodb');
 const { prepareQuestion } = require('../lib/quiz-content');
 const safeSvg = require('../assets/safe-svg');
-const visualRenderer = require('../assets/maarif-visual-renderer');
+const VisualMathEngine = require('../assets/VisualMathEngine');
 const { normalizeBareMath } = require('../assets/math-text');
 const Soru = require('../models/Soru');
 const { canUserUseProModel, checkAndConsumeQuota } = require('../middleware/aiQuota');
@@ -256,34 +256,52 @@ function prepareAIQuestion(question, context = {}) {
     }
   }
 
-  // 1. Önce yapısal visualSpec'ten deterministik, hatasız SVG üret
+  // 1. Evrensel VisualMathEngine ile deterministik, sıfır hatalı görsel (SVG veya temiz HTML tablo) üret
   let cleanSvg = '';
-  let resolvedVisualSpec = (question.visualSpec && typeof question.visualSpec === 'object' && question.visualSpec.type && question.visualSpec.type !== 'none')
-    ? question.visualSpec
-    : null;
+  let visualHtml = '';
+  const rawGorselTipi = String(question.gorsel_tipi || question.visualSpec?.type || '').toLowerCase().trim();
+  const rawGorselBaslik = String(question.gorsel_baslik || question.visualSpec?.title || '').trim();
+  let parsedGorselParams = null;
+  const rawParamsSource = question.gorsel_parametreleri !== undefined
+    ? question.gorsel_parametreleri
+    : (question.visualSpec?.data || question.visualSpec?.dataJson || null);
 
-  if (resolvedVisualSpec) {
-    cleanSvg = visualRenderer.renderToSvg(resolvedVisualSpec) || '';
+  if (typeof rawParamsSource === 'string' && rawParamsSource.trim()) {
+    try { parsedGorselParams = JSON.parse(rawParamsSource); } catch (_) { parsedGorselParams = null; }
+  } else if (rawParamsSource && typeof rawParamsSource === 'object') {
+    parsedGorselParams = rawParamsSource;
   }
 
-  // 2. Ham SVG geldiyse kullan
-  if (!cleanSvg && typeof question.svg === 'string' && question.svg.trim().startsWith('<svg')) {
+  let resolvedGorselTipi = rawGorselTipi || 'yok';
+  let resolvedGorselBaslik = rawGorselBaslik;
+  let resolvedGorselParams = parsedGorselParams;
+
+  if (resolvedGorselTipi && resolvedGorselTipi !== 'yok' && resolvedGorselTipi !== 'none') {
+    const rendered = VisualMathEngine.render(resolvedGorselTipi, resolvedGorselParams, resolvedGorselBaslik) || '';
+    if (rendered.trim().startsWith('<svg')) {
+      cleanSvg = rendered.trim();
+    } else if (rendered.trim().startsWith('<div')) {
+      visualHtml = rendered.trim();
+    }
+  }
+
+  // 2. Ham SVG geldiyse (ve VisualMathEngine üretmediyse) kullan
+  if (!cleanSvg && !visualHtml && typeof question.svg === 'string' && question.svg.trim().startsWith('<svg')) {
     cleanSvg = question.svg.trim();
-  } else if (!cleanSvg && question.svg && typeof question.svg === 'object') {
+  } else if (!cleanSvg && !visualHtml && question.svg && typeof question.svg === 'object') {
     cleanSvg = safeSvg.validate(question.svg);
   }
 
-  // 3. Hâlâ görsel yoksa (özellikle 5-6. sınıf ve görsel konular) metinden akıllı deterministik görsel üret
-  if (!cleanSvg) {
-    const inferredSpec = visualRenderer.inferVisualSpecFromText(normalizedText, context.subTopic || context.unitTopic || context.topic, activeGrade);
-    if (inferredSpec) {
-      resolvedVisualSpec = inferredSpec;
-      cleanSvg = visualRenderer.renderToSvg(inferredSpec) || '';
+  // 3. Eğer model görsel tipini boş bıraktıysa (ama 'yok' demediyse), metindeki somut açı/kesir/şekil verisinden dürüst çizim yap
+  if (!cleanSvg && !visualHtml && rawGorselTipi !== 'yok' && rawGorselTipi !== 'none') {
+    const inferred = VisualMathEngine.inferVisualSpecFromText(normalizedText, context.subTopic || context.unitTopic || context.topic, activeGrade);
+    if (inferred) {
+      resolvedGorselTipi = inferred.gorsel_tipi;
+      resolvedGorselBaslik = inferred.gorsel_baslik || '';
+      resolvedGorselParams = inferred.gorsel_parametreleri || {};
+      const inferredOut = VisualMathEngine.render(resolvedGorselTipi, resolvedGorselParams, resolvedGorselBaslik) || '';
+      if (inferredOut.trim().startsWith('<svg')) cleanSvg = inferredOut.trim();
     }
-  }
-  if (!cleanSvg) {
-    const fallbackSvg = generatePedagogicalSvg(normalizedText, context.subTopic || context.unitTopic || context.topic, activeGrade);
-    if (fallbackSvg) cleanSvg = fallbackSvg;
   }
 
   // Analitik Değerlendirme Rubriği normalizasyonu
@@ -312,8 +330,11 @@ function prepareAIQuestion(question, context = {}) {
     unitTopic: context.unitTopic || '',
     subTopic: context.subTopic || context.topic || '',
     questionType,
+    gorsel_tipi: resolvedGorselTipi,
+    ...(resolvedGorselBaslik ? { gorsel_baslik: resolvedGorselBaslik } : {}),
+    ...(resolvedGorselParams ? { gorsel_parametreleri: resolvedGorselParams } : {}),
     ...(normalizedOptions ? { options: normalizedOptions, answer: question.answer || 'A' } : { options: {} }),
-    ...(resolvedVisualSpec ? { visualSpec: resolvedVisualSpec } : {}),
+    ...(visualHtml ? { visualHtml } : {}),
     ...(cleanSvg ? { svg: cleanSvg } : {})
   };
 }
@@ -408,22 +429,22 @@ function soruSemasi(grade = 5) {
               type: 'STRING',
               description: 'Senaryo ve soru kökünün tam birleşik metni. Tüm matematiksel ifadeler tek dolar $ ... $ içine alınmalı ve ters eğik çizgiler çift kaçırılmalıdır (\\\\frac, \\\\perp).'
             },
-            visualSpec: {
-              type: 'OBJECT',
-              description: 'Deterministik SVG görsel motoru için yapısal görsel tarifi (5-6. sınıfta neredeyse her soruda doldurulmalıdır!).',
-              properties: {
-                type: {
-                  type: 'STRING',
-                  enum: ['none', 'place_value_table', 'fraction_model', 'number_line', 'grid_geometry', 'bar_chart', 'data_table']
-                },
-                title: { type: 'STRING', description: 'Görsel başlığı (örn: "Şekil 1: Bahçe Krokisi" veya "Tablo 1: Kitap Sayıları").' },
-                dataJson: { type: 'STRING', description: 'Görsel türüne uygun JSON stringi. Örn fraction_model: {"numerator":3,"denominator":4,"style":"bar"}; place_value_table: {"number":"42307085"}; grid_geometry: {"shape":"rectangle","widthLabel":"12 cm","heightLabel":"8 cm"}; bar_chart: {"items":[{"label":"Pzt","value":12},{"label":"Sal","value":18}]}; data_table: {"headers":["Ürün","Fiyat"],"rows":[["Defter","25 TL"],["Kalem","12 TL"]]}; number_line: {"min":0,"max":4,"steps":8,"markers":[{"label":"A","value":1.5}]}' }
-              },
-              required: ['type', 'title', 'dataJson']
+            gorsel_tipi: {
+              type: 'STRING',
+              enum: ['geometri', 'sayi_dogrusu_kesir', 'fonksiyon_grafik', 'veri_grafigi', 'cebir_model', 'tablo', 'yok'],
+              description: 'Konunun doğasına en uygun görsel motoru türü. Geometri, açı, açıölçer, kesir, fonksiyon ve grafik konularında ASLA "tablo" seçme!'
+            },
+            gorsel_baslik: {
+              type: 'STRING',
+              description: 'Görsel başlığı (örn: "Şekil 1: Açıölçer Ölçümü"). gorsel_tipi "yok" ise boş bırak.'
+            },
+            gorsel_parametreleri: {
+              type: 'STRING',
+              description: 'VisualMathEngine için geçerli JSON stringi. Soru metnindeki tüm sayılar, açılar ve harflerle %100 birebir tutarlı olmalıdır. Örnekler — geometri(aciolcer): {"alt_tip":"aciolcer","aci_derece":65,"kose":"L","kol1":"K","kol2":"M","olcu_goster":false}; geometri(aci): {"alt_tip":"aci","aci_derece":120,"kose":"B","kol1":"A","kol2":"C","etiket":"120°"}; geometri(ucgen): {"alt_tip":"ucgen","koseler":["A","B","C"],"kenarlar":{"taban":"12 cm","sol":"8 cm"},"acilar":{"A":"50°","B":"60°"}}; geometri(dortgen): {"alt_tip":"dortgen","sekil":"dikdortgen","uzun_kenar":"14 cm","kisa_kenar":"8 cm"}; geometri(cember): {"alt_tip":"cember","merkez":"O","yaricap":"6 cm","merkez_aci":90}; sayi_dogrusu_kesir(kesir): {"alt_tip":"kesir_daire","pay":3,"payda":8}; sayi_dogrusu_kesir(sayi_dogrusu): {"alt_tip":"sayi_dogrusu","min":0,"max":4,"adim":8,"noktalar":[{"etiket":"A","deger":1.5}]}; fonksiyon_grafik: {"alt_tip":"parabol","a":1,"b":-2,"c":-3,"etiket":"y = x² - 2x - 3"}; veri_grafigi: {"alt_tip":"sutun","veriler":[{"etiket":"Pzt","deger":14},{"etiket":"Sal","deger":22}]}; cebir_model: {"alt_tip":"terazi","sol_kefe":["x","x","3"],"sag_kefe":["11"]}; tablo: {"basliklar":["Ürün","Fiyat"],"satirlar":[["Defter","25 TL"],["Kalem","12 TL"]]}. gorsel_tipi "yok" ise "{}" yaz.'
             },
             svg: {
               type: 'STRING',
-              description: 'visualSpec none ise ve özel geometri çizimi gerekiyorsa geçerli <svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">...</svg> kodu; aksi halde boş metin.'
+              description: 'Yalnızca yukarıdaki 7 parametrik türle çizilemeyen çok özel bir şekil gerekirse geçerli <svg viewBox="0 0 460 240" xmlns="http://www.w3.org/2000/svg">...</svg>; aksi halde boş metin bırak.'
             },
             options: secenekSemasi,
             answer: { type: 'STRING', enum: activeSecenekler },
@@ -760,32 +781,32 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       ? '3. ÇOKTAN SEÇMELİ FORMAT (LİSE): Sorular KESİNLİKLE 5 seçenekli (A, B, C, D, E) ve tek bir doğru cevabı olan sorulardır.'
       : '3. ÇOKTAN SEÇMELİ FORMAT (ORTAOKUL): Sorular KESİNLİKLE 4 seçenekli (A, B, C, D) ve tek bir doğru cevabı olan sorulardır.';
 
-    const kademePedagojisi = Number(grade) === 5
+    const kademePedagojisi = Number(grade) <= 6
       ? [
-          'ÖĞRENİM KADEMESİ: 5. SINIF ÖZEL PEDAGOJİ PROFİLİ (10–11 YAŞ — SOMUT İŞLEMLER DÖNEMİ)',
-          '- KESİN YASAK BARİYERİ: Negatif tam sayılar, cebirsel bilinmeyenler ($x$, $y$ ile denklem kurma), oran-orantı formülleri, üslü/köklü ifadeler ve soyut sembolik gösterimler KESİNLİKLE YASAKTIR!',
-          '- DİL VE UZUNLUK: En fazla 2–3 kısa, akıcı, 5. sınıf çocuğunun tek okuyuşta kavrayacağı günlük yaşam cümlesi kullan (kırtasiye, pastane, okul bahçesi, harçlık, kareli kağıt, park, kütüphane).',
-          '- GÖRSEL ZORUNLULUĞU: 5. sınıf sorularının neredeyse TAMAMINDA "visualSpec" alanını gerçek soru verileriyle doldur (kesir için fraction_model, milyonlu sayılar için place_value_table, çevre/alan/şekil için grid_geometry, veri için bar_chart veya data_table, sıralama için number_line).',
-          '- Çoktan seçmeli sorularda seçenek sayısını KESİNLİKLE 4 şıklı (A, B, C, D) oluştur.'
+          `ÖĞRENİM KADEMESİ: ${grade}. SINIF PEDAGOJİ PROFİLİ (10–12 YAŞ — SOMUT İŞLEMLER VE GEÇİŞ DÖNEMİ)`,
+          Number(grade) === 5
+            ? '- KESİN YASAK BARİYERİ: 5. sınıfta negatif tam sayılar, $x, y$ bilinmeyenleriyle denklem kurma, oran-orantı formülleri, üslü/köklü ifadeler ve soyut sembolik gösterimler KESİNLİKLE YASAKTIR!'
+            : '- 6. sınıf düzeyinde kal; 7–8. sınıf denklem sistemleri, köklü ifadeler veya üst sınıf kazanımlarına girme.',
+          '- DİL VE HİKAYE: 10–12 yaş seviyesine uygun sade, akıcı Türkçe kullan; somut günlük hayat hikayesi kur (saat, makas, açıölçer, yol, bahçe, pizza, pasta, kitaplık, harçlık). En fazla 2–3 kısa cümle.',
+          '- Çoktan seçmeli sorularda KESİNLİKLE 4 seçenek (A, B, C, D) oluştur.'
         ].join('\n')
-      : Number(grade) === 6
+      : Number(grade) <= 8
       ? [
-          'ÖĞRENİM KADEMESİ: 6. SINIF PEDAGOJİ PROFİLİ (11–12 YAŞ)',
-          '- Çarpanlar-katlar, bölünebilme, tam sayılar, kesirler, oran ve temel cebirsel ifadeler düzeyinde kal; 7–8. sınıf denklem sistemleri veya köklü ifadelere girme.',
-          '- Görsel destekli (visualSpec: fraction_model, number_line, data_table, bar_chart, grid_geometry) somut günlük hayat problemleri kurgula.',
-          '- Çoktan seçmeli sorularda seçenek sayısını KESİNLİKLE 4 şıklı (A, B, C, D) oluştur.'
+          `ÖĞRENİM KADEMESİ: ${grade}. SINIF ORTAOKUL / LGS BECERİ TEMELLİ YENİ NESİL DÜZEYİ`,
+          '- Beceri temelli yeni nesil problem kurgusu, görsel okuma, grafik/şekil yorumlama ve çok adımlı mantık yürütme ölç.',
+          '- Gerektiğinde kısa bilgi kutusu (bilgiKutusu) ve gerçekçi günlük yaşam senaryosu kullan.',
+          '- Çoktan seçmeli sorularda KESİNLİKLE 4 seçenek (A, B, C, D) oluştur.'
         ].join('\n')
-      : !isLise
+      : Number(grade) <= 11
       ? [
-          `ÖĞRENİM KADEMESİ: ${grade}. SINIF ORTAOKUL / ${Number(grade) === 8 ? 'LGS YENİ NESİL' : 'GEÇİŞ'} DÜZEYİ`,
-          '- Günlük hayat bağlamı, bilgi kutusu (bilgiKutusu), tablo/grafik/geometri modeli (visualSpec) ve çok adımlı akıl yürütme ile beceri temelli sorular kurgula.',
-          '- Çoktan seçmeli sorularda seçenek sayısını KESİNLİKLE 4 şıklı (A, B, C, D) oluştur.'
+          `ÖĞRENİM KADEMESİ: ${grade}. SINIF LİSE — TÜRKİYE YÜZYILI MAARİF MODELİ (TYMM)`,
+          '- Matematiksel modelleme, teorem, kanıtlama, fonksiyon/grafik analizi ve süreç becerileri odaklı, olgun lise diliyle kurgula.',
+          '- Çoktan seçmeli sorularda KESİNLİKLE 5 seçenek (A, B, C, D, E) oluştur.'
         ].join('\n')
       : [
-          'ÖĞRENİM KADEMESİ: LİSE DÜZEYİ (9, 10, 11. Sınıflar ve 12. Sınıf YKS)',
-          '- Soruları lise öğrencisinin bilişsel düzeyine uygun olgun bir dille; çocuksu ifadelerden uzak kurgula.',
-          '- Çok adımlı akıl yürütme, fonksiyon/grafik yorumlama, matematiksel modelleme, veri analizi ve stratejik problem çözme becerilerini ölç.',
-          '- Çoktan seçmeli sorularda seçenek sayısını KESİNLİKLE 5 şıklı (A, B, C, D, E) oluştur.'
+          'ÖĞRENİM KADEMESİ: 12. SINIF — YKS (TYT-AYT) ÖSYM STANDARDI',
+          '- ÖSYM TYT-AYT standardında analitik, seçici, çok adımlı problem çözme ve üst düzey muhakeme dili kullan.',
+          '- Çoktan seçmeli sorularda KESİNLİKLE 5 seçenek (A, B, C, D, E) oluştur.'
         ].join('\n');
 
     const prompt = [
@@ -826,10 +847,11 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         : '- Soru metnindeki (text), seçeneklerdeki (options) ve çözümdeki (explanation/solution) TÜM matematiksel/geometrik ifadeleri, formülleri, değişkenleri ($x$, $y$), geometrik sembolleri ve sayıları tek dolar ($...$) içine alarak yaz.',
       '- JSON içinde geçerli olması için LaTeX komutlarındaki ters eğik çizgileri MUTLAKA çift ters eğik çizgi ile kaçır: "\\\\perp", "\\\\frac", "\\\\sqrt", "\\\\times", "\\\\cdot".',
       '',
-      'YAPISAL GÖRSEL VE ŞEMA KURALI (visualSpec — YÜKSEK ÖNCELİK):',
-      '- Görselleştirilebilecek HER soruda (özellikle 5, 6 ve 7. sınıflarda %80+ soruda) mutlaka "visualSpec" nesnesini gerçek soru sayılarıyla doldur!',
-      '- Kullanılabilir türler: "place_value_table", "fraction_model", "number_line", "grid_geometry", "bar_chart", "data_table".',
-      '- "bilgiKutusu" (varsa kısa kural/ön bilgi), "senaryo" (kısa olay metni), "soruKoku" (net soru cümlesi) ve "celdiriciAnalizi" alanlarını profesyonel yayınevi standardında doldur.',
+      'EVRENSEL GÖRSEL MOTORU (VisualMathEngine) VE TUTARLILIK KURALLARI (KESİN ZORUNLU):',
+      '- Konunun doğasına en uygun "gorsel_tipi"ni seç: "geometri" | "sayi_dogrusu_kesir" | "fonksiyon_grafik" | "veri_grafigi" | "cebir_model" | "tablo" | "yok".',
+      '- KRİTİK YASAK: Geometri, açı, açıölçer/iletki, üçgen, dörtgen, çember, fonksiyon, kesir ve grafik konularında ASLA "tablo" kullanma! İlgili parametrik görsel tipini seç (ör. Açıları Ölçme konusunda mutlaka gorsel_tipi: "geometri" ve gorsel_parametreleri içinde {"alt_tip":"aciolcer","aci_derece":65,"kose":"L","kol1":"K","kol2":"M","olcu_goster":false} kullan!).',
+      '- %100 BİREBİR TUTARLILIK: Soru metninde geçen tüm sayılar, açılar, kenar uzunlukları, noktalar ve harfler "gorsel_parametreleri" ile %100 birebir aynı olmak zorundadır. Metinde olmayan uydurma veri ("Veri 1: 12" vb.) ASLA üretme!',
+      '- "bilgiKutusu" (varsa kısa 1 cümle ön bilgi), "senaryo" (somut olay), "soruKoku" (tek net soru), "celdiriciAnalizi" (her yanlış şıkkın hangi öğrenci hatasını ölçtüğü) ve "explanation" (adım adım pedagojik çözüm) alanlarını eksiksiz doldur.',
       '',
       'Yalnızca istenen JSON şemasına uyan JSON döndür; Markdown bloğu veya fazladan açıklama metni ekleme.'
     ].filter(Boolean).join('\n');

@@ -2140,13 +2140,27 @@ button,select{font:inherit}
                 target.innerHTML = window.zarifMathText.format(question.text);
               }
             }
-            if (question.svg) {
-              const target = fieldset.querySelector('.quiz-svg');
-              try {
-                window.zarifSafeSvg.render(target, question.svg);
-              } catch (error) {
-                target.textContent = 'Soru şekli görüntülenemedi.';
-                console.error('Soru şekli görüntülenemedi:', error);
+            const vmeTarget = fieldset.querySelector('.quiz-svg');
+            if (vmeTarget) {
+              const vmeMarkup = window.VisualMathEngine ? window.VisualMathEngine.renderFromQuestion(question) : '';
+              if (vmeMarkup && vmeMarkup.trim().startsWith('<div')) {
+                vmeTarget.innerHTML = vmeMarkup;
+              } else if (vmeMarkup && vmeMarkup.trim().startsWith('<svg')) {
+                try {
+                  const doc = new DOMParser().parseFromString(vmeMarkup, 'image/svg+xml');
+                  const svgEl = doc.querySelector('svg');
+                  if (svgEl) vmeTarget.replaceChildren(svgEl);
+                  else vmeTarget.innerHTML = vmeMarkup;
+                } catch (error) {
+                  vmeTarget.innerHTML = vmeMarkup;
+                }
+              } else if (question.svg) {
+                try {
+                  window.zarifSafeSvg.render(vmeTarget, question.svg);
+                } catch (error) {
+                  vmeTarget.textContent = 'Soru şekli görüntülenemedi.';
+                  console.error('Soru şekli görüntülenemedi:', error);
+                }
               }
             }
             if (question.imageUrl) {
@@ -2410,9 +2424,10 @@ button,select{font:inherit}
         $('quizResultStatus').textContent = `Test tamamlandı: %${result.score} (${result.correctCount}/${result.totalCount} doğru). Kazanılan puan: ${result.kazanilanPuan}.`;
         $('quizResultStatus').className = 'feed-status ok';
         $('quizReview').innerHTML = result.review.map((item, index) => `
-          <article class="feed-card">
-            <h3>${index + 1}. soru · Doğru cevap: ${esc(item.answer)}</h3>
-            <p>${window.zarifMathText.format(item.explanation || 'Açıklama bulunmuyor.')}</p>
+          <article class="feed-card" style="background:#FAF8F5;border:1.5px solid #E2DDD5;border-left:4px solid #D97706;">
+            <h3 style="color:#0F172A;">${index + 1}. soru · Doğru cevap: <span style="color:#D97706;">${esc(item.answer)}</span></h3>
+            <p style="color:#1E293B;line-height:1.65;">${window.zarifMathText.format(item.explanation || 'Açıklama bulunmuyor.')}</p>
+            ${item.celdiriciAnalizi ? `<div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:#FFFBEB;border:1px solid #FDE68A;color:#78350F;font-size:13px;"><strong>🔍 Çeldirici Analizi:</strong> ${window.zarifMathText.format(item.celdiriciAnalizi)}</div>` : ''}
             ${item.ipucuVar ? `<button class="btn-join" type="button" data-mentor-result="${esc(result.id)}" data-mentor-index="${index}">AI ipucu iste</button><div class="mentor-hint" role="status" aria-live="polite"></div>` : ''}
           </article>`).join('');
         $('quizRunner').hidden = true;
@@ -3702,6 +3717,7 @@ button,select{font:inherit}
 <script src="/assets/matematik-mufredati.js"></script>
 <script src="/assets/ogrenci-gelisim.js"></script>
 <script src="/assets/pratik.js"></script>
+<script src="/assets/VisualMathEngine.js?v=1"></script>
 <script src="/assets/copyright-shield.js?v=1"></script>
 <script src="/assets/soru-test-merkezi.js?v=5" defer></script>
 <script src="/assets/kazanim-testi.js?v=2" defer></script>

@@ -2436,7 +2436,7 @@ body.teacher-menu-open {
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js" integrity="sha384-reiVBUvj2HgLgCZalqLFSMBVD9LdtiwGyybRGCq2AfP8Rgebz5DxEnwKp4FpagKV" crossorigin="anonymous"></script>
 <script src="/assets/math-text.js"></script>
 <script src="/assets/safe-svg.js"></script>
-<script src="/assets/maarif-visual-renderer.js?v=1"></script>
+<script src="/assets/VisualMathEngine.js?v=1"></script>
 <script src="/assets/ai-visual.js"></script>
 <script src="/assets/meb-curriculum-tree.js"></script>
 <script src="/assets/maarif-konu-formu.js" defer></script>
@@ -5494,38 +5494,31 @@ body.teacher-menu-open {
 
     if (typeof window !== 'undefined') {
       quiz.questions.forEach((question, index) => {
-        let svgMarkup = (question.svg && typeof question.svg === 'string') ? question.svg.trim() : '';
-        if (!svgMarkup && question.visualSpec && window.ZarifVisualRenderer) {
-          svgMarkup = window.ZarifVisualRenderer.renderToSvg(question.visualSpec) || '';
+        const mount = container.querySelector(`[data-ai-svg="${index}"]`);
+        if (!mount) return;
+        let visualMarkup = window.VisualMathEngine ? window.VisualMathEngine.renderFromQuestion(question) : '';
+        if (!visualMarkup && question.svg && typeof question.svg === 'string') {
+          visualMarkup = question.svg.trim();
         }
-        if (svgMarkup) {
-          const mount = container.querySelector(`[data-ai-svg="${index}"]`);
-          if (mount) {
-            let rendered = false;
-            if (window.zarifSafeSvg) {
-              try {
-                const parsed = window.zarifSafeSvg.parse(svgMarkup);
-                window.zarifSafeSvg.render(mount, parsed);
-                rendered = true;
-              } catch (err) {
-                console.warn('Soru SVG render uyarısı, DOMParser deneniyor:', err);
-              }
-            }
-            if (!rendered) {
-              try {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(svgMarkup, 'image/svg+xml');
-                const svgEl = doc.querySelector('svg');
-                if (svgEl) {
-                  mount.replaceChildren(svgEl);
-                } else {
-                  mount.innerHTML = svgMarkup;
-                }
-              } catch (e2) {
-                console.error('SVG mount hatası:', e2);
-              }
-            }
+        if (!visualMarkup) {
+          mount.style.display = 'none';
+          return;
+        }
+        if (visualMarkup.trim().startsWith('<div')) {
+          mount.innerHTML = visualMarkup;
+          return;
+        }
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(visualMarkup, 'image/svg+xml');
+          const svgEl = doc.querySelector('svg');
+          if (svgEl) {
+            mount.replaceChildren(svgEl);
+          } else {
+            mount.innerHTML = visualMarkup;
           }
+        } catch (e2) {
+          mount.innerHTML = visualMarkup;
         }
       });
     }

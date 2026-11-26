@@ -1147,10 +1147,10 @@ Her 5 sayfada da svg_kodu geçerli ve gerçek geometrik çizim elemanları (<lin
     return s.includes('<svg') && s.includes('</svg>') && /<(?:line|path|rect|circle|polygon|polyline|ellipse)\b/i.test(s);
   };
 
-  let visualRenderer = null;
+  let visualEngine = null;
   try {
-    const vrMod = await import('./assets/maarif-visual-renderer.js');
-    visualRenderer = vrMod.default || vrMod;
+    const vrMod = await import('./assets/VisualMathEngine.js');
+    visualEngine = vrMod.default || vrMod;
   } catch (_) {}
 
   const topSurec = Array.isArray(parsed.surec_becerileri) && parsed.surec_becerileri.length
@@ -1173,9 +1173,16 @@ Her 5 sayfada da svg_kodu geçerli ve gerçek geometrik çizim elemanları (<lin
       ? p.surec_becerileri.map(s => stripRawMarkdownStars(s)).filter(Boolean)
       : topSurec;
 
-    if (!cleanSvg && visualRenderer && typeof visualRenderer.inferVisualSpecFromText === 'function') {
-      const spec = visualRenderer.inferVisualSpecFromText(`${baslik} ${kesif} ${altin}`, subTopic || unitTopic, g);
-      if (spec) cleanSvg = visualRenderer.renderToSvg(spec) || '';
+    if (!cleanSvg && visualEngine && p.gorsel_tipi && p.gorsel_tipi !== 'yok') {
+      const rendered = visualEngine.render(p.gorsel_tipi, p.gorsel_parametreleri, p.gorsel_baslik || baslik) || '';
+      if (rendered.trim().startsWith('<svg')) cleanSvg = rendered.trim();
+    }
+    if (!cleanSvg && visualEngine && typeof visualEngine.inferVisualSpecFromText === 'function') {
+      const spec = visualEngine.inferVisualSpecFromText(`${baslik} ${kesif} ${altin}`, subTopic || unitTopic, g);
+      if (spec) {
+        const rendered = visualEngine.renderToSvg(spec) || '';
+        if (rendered.trim().startsWith('<svg')) cleanSvg = rendered.trim();
+      }
     }
 
     const pageObj = {
