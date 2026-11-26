@@ -323,7 +323,8 @@
                   { name: 'Google AI Studio', st: scan.checks.gemini?.status || 'unconfigured' },
                   { name: 'Cloudflare Edge', st: scan.checks.cloudflare?.status || 'unconfigured' },
                   { name: 'Google Cloud', st: scan.checks.googleCloud?.status || 'unconfigured' },
-                  { name: 'İçerik Havuzu', st: scan.checks.contentLibrary?.status || 'healthy' }
+                  { name: 'İçerik Havuzu', st: scan.checks.contentLibrary?.status || 'healthy' },
+                  { name: 'Redis Önbellek', st: scan.checks.redis?.status || 'unconfigured' }
                 ].map((item, idx) => e('div', { key: idx, className: 'flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100' },
                   e('span', null, (item.st === 'healthy' || item.st === 'ok') ? '✅' : (item.st === 'warning' ? '⚠️' : '❌')),
                   e('span', { className: 'truncate text-[11px] text-slate-700' }, item.name)
@@ -667,6 +668,26 @@
               e('span', { className: 'text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded' }, `${scan.checks.cloudflare?.durationMs || 0} ms`)
             ),
             e(ServiceMeta, { item: scan.checks.cloudflare })
+          ),
+
+          // 11b. Redis Önbellek & Hız Sınırlayıcı
+          e('div', { className: 'bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 hover:shadow-md transition' },
+            e('div', { className: 'flex items-center justify-between mb-3' },
+              e('div', { className: 'flex items-center gap-2' },
+                e('span', { className: 'text-xl' }, '⚡'),
+                e('div', null,
+                  e('h4', { className: 'font-bold text-slate-900 text-sm' }, 'Redis Önbellek'),
+                  e('span', { className: 'text-[11px] text-slate-400' }, 'FAQ Cache & AI Rate Limit')
+                )
+              ),
+              e(StatusBadge, { status: scan.checks.redis?.status || 'unconfigured' })
+            ),
+            e('p', { className: 'text-xs text-slate-600 mb-3' }, scan.checks.redis?.details || 'Redis taraması henüz çalıştırılmadı. Taramayı başlatın.'),
+            e('div', { className: 'flex items-center justify-between text-xs font-semibold text-slate-500 pt-3 border-t border-slate-100' },
+              e('span', null, 'PING Yanıt Süresi:'),
+              e('span', { className: 'text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded' }, `${scan.checks.redis?.durationMs || 0} ms`)
+            ),
+            e(ServiceMeta, { item: scan.checks.redis })
           ),
 
           // 12. Google Cloud
