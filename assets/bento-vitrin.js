@@ -52,7 +52,7 @@
           tag: '8 CANLI SİMÜLASYON',
           title: 'Keşif Laboratuvarı',
           desc: 'Kesirler, asal sayılar, denklem terazisi ve rampa eğimini dokunarak görselleştir.',
-          ctaUrl: 'pages/matematigi-kesfet.html',
+          ctaUrl: 'pages/kesif-modu.html',
           ctaLabel: 'Keşif Laboratuvarına Gir →',
           bullets: [
             '5, 6, 7 ve 8. sınıfa özel 8 etkileşimli matematik deneyi',

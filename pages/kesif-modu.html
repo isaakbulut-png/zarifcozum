@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FAF8F5">
+  <title>İnteraktif Keşif Modu: 8 Matematik Laboratuvarı | ZarifÇözüm</title>
+  <meta name="description" content="5–8. sınıf Türkiye Yüzyılı Maarif Modeli uyumlu 8 etkileşimli matematik deneyi: Cebir Terazisi, Gökdelen Asansörü, Kesirler, Eratosthenes Kalburu, Rampa Eğimi, 3D Cisimler, Koordinat Hedefi ve Olasılık Çarkı.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ivory: #FAF8F5;
+      --surface: #FFFFFF;
+      --navy: #0F172A;
+      --navy-soft: #1E293B;
+      --amber: #D97706;
+      --amber-hover: #B45309;
+      --amber-soft: #FEF3C7;
+      --emerald: #059669;
+      --emerald-soft: #ECFDF5;
+      --slate: #475569;
+      --muted: #64748B;
+      --line: #E2E8F0;
+      --danger: #DC2626;
+      --shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--ivory);
+      color: var(--navy);
+      font-family: "Inter", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    /* Üst Menü (Navbar) */
+    .km-navbar {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background: rgba(250, 248, 245, 0.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    .km-nav-inner {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 14px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .km-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--navy);
+    }
+    .km-brand img { width: 42px; height: 42px; object-fit: contain; }
+    .km-brand strong { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; }
+    .km-brand strong span { color: var(--amber); }
+    .km-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .km-nav-links a {
+      text-decoration: none;
+      color: var(--slate);
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: color 0.18s ease;
+    }
+    .km-nav-links a:hover { color: var(--navy); }
+    .km-nav-cta {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      padding: 0 18px;
+      border-radius: 10px;
+      background: var(--amber);
+      color: #FFFFFF !important;
+      font-weight: 800;
+    }
+    .km-nav-cta:hover { background: var(--amber-hover); }
+
+    /* Ana Konteyner */
+    .km-container {
+      width: 100%;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 36px 48px 72px;
+      flex: 1 0 auto;
+    }
+
+    /* Üst Başlık ve XP Çubuğu */
+    .km-hero {
+      background: linear-gradient(145deg, #0F172A 0%, #1E293B 100%);
+      color: #F8FAFC;
+      border-radius: 26px;
+      padding: 34px 40px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow);
+    }
+    .km-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      background: rgba(217, 119, 6, 0.22);
+      border: 1px solid rgba(217, 119, 6, 0.48);
+      color: #FCD34D;
+      font-size: 0.875rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .km-hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.85rem, 3.2vw, 2.7rem);
+      font-weight: 800;
+      line-height: 1.18;
+      color: #FFFFFF;
+    }
+    .km-hero p {
+      margin: 0;
+      font-size: 1.02rem;
+      color: #CBD5E1;
+      max-width: 680px;
+    }
+    .km-xp-panel {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 18px;
+      padding: 18px 24px;
+      min-width: 240px;
+      text-align: center;
+    }
+    .km-xp-val {
+      display: block;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #F59E0B;
+      line-height: 1.1;
+    }
+    .km-xp-sub {
+      display: block;
+      font-size: 0.9rem;
+      color: #CBD5E1;
+      margin-top: 4px;
+    }
+
+    /* 8 Deney Sekme Izgarası */
+    .km-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+    .km-tab-btn {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1.5px solid var(--line);
+      background: var(--surface);
+      color: var(--navy);
+      font-family: inherit;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.18s ease;
+    }
+    .km-tab-btn:hover {
+      border-color: var(--amber);
+      transform: translateY(-2px);
+    }
+    .km-tab-btn.is-active {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #FFFFFF;
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.18);
+    }
+    .km-tab-ico {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--amber-soft);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .km-tab-btn.is-active .km-tab-ico {
+      background: rgba(217, 119, 6, 0.25);
+    }
+    .km-tab-meta strong {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+    .km-tab-meta span {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .km-tab-btn.is-active .km-tab-meta span {
+      color: #FCD34D;
+    }
+
+    /* Aktif Deney Sahnesi */
+    .km-stage {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      padding: 32px 36px;
+      box-shadow: var(--shadow);
+    }
+    .km-stage-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+    .km-stage-title {
+      margin: 0 0 4px;
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--navy);
+    }
+    .km-stage-desc {
+      margin: 0;
+      font-size: 0.98rem;
+      color: var(--slate);
+    }
+    .km-stage-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .km-exp-xp {
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: var(--amber-soft);
+      color: var(--amber-hover);
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+
+    /* Ortak Butonlar ve İnteraktif Bileşenler */
+    .km-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 12px;
+      border: 1.5px solid var(--line);
+      background: var(--ivory);
+      color: var(--navy);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+    .km-btn:hover { border-color: var(--navy); background: #FFFFFF; }
+    .km-btn-amber {
+      background: var(--amber);
+      border-color: var(--amber);
+      color: #FFFFFF;
+    }
+    .km-btn-amber:hover { background: var(--amber-hover); border-color: var(--amber-hover); }
+    .km-btn-navy {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #FFFFFF;
+    }
+    .km-btn-navy:hover { background: var(--navy-soft); }
+
+    .km-lab-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 28px;
+      align-items: center;
+    }
+    .km-visual-box {
+      background: var(--ivory);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 24px;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .km-control-box {
+      background: #F8FAFC;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .km-mission {
+      padding: 14px 18px;
+      border-radius: 14px;
+      background: var(--amber-soft);
+      border-left: 4px solid var(--amber);
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 0.98rem;
+    }
+    .km-feedback {
+      min-height: 28px;
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--slate);
+    }
+    .km-feedback.ok { color: var(--emerald); }
+    .km-feedback.err { color: var(--danger); }
+
+    .km-slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .km-slider-row label {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .km-slider-row input[type="range"] {
+      width: 100%;
+      accent-color: var(--amber);
+      height: 8px;
+    }
+
+    /* Deney 2: Asansör Şaftı */
+    .km-shaft {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 100%;
+      max-width: 240px;
+    }
+    .km-floor {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 12px;
+      border-radius: 8px;
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+    .km-floor.is-zero { border-color: var(--navy); background: #E2E8F0; }
+    .km-floor.is-here { background: var(--amber); color: #FFFFFF; border-color: var(--amber); }
+
+    /* Deney 4: Eratosthenes 1-100 Grid */
+    .km-sieve-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 5px;
+      width: 100%;
+      max-width: 480px;
+    }
+    .km-sieve-cell {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #FFFFFF;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .km-sieve-cell.is-crossed {
+      background: #E2E8F0;
+      color: #94A3B8;
+      text-decoration: line-through;
+    }
+    .km-sieve-cell.is-prime {
+      background: var(--emerald);
+      color: #FFFFFF;
+      border-color: var(--emerald);
+    }
+
+    /* Deney 6: 3D Cisimler */
+    .km-solid-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+    .km-solid-stat {
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+    }
+    .km-solid-stat strong { display: block; font-size: 1.6rem; color: var(--amber-hover); }
+    .km-solid-stat span { font-size: 0.88rem; font-weight: 700; color: var(--slate); }
+
+    /* Deney 8: Olasılık Çarkı */
+    .km-wheel-wrap {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .km-wheel-pointer {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 20px solid var(--navy);
+      z-index: 5;
+    }
+    .km-wheel-disc {
+      width: 210px;
+      height: 210px;
+      border-radius: 50%;
+      border: 5px solid var(--navy);
+      transition: transform 0.9s cubic-bezier(0.2, 0.85, 0.25, 1);
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.16);
+    }
+
+    /* Alt Bilgi (Footer) */
+    .km-footer {
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+      padding: 28px 48px;
+      text-align: center;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 1080px) {
+      .km-nav-inner, .km-container { padding-inline: 32px; }
+      .km-tabs { grid-template-columns: repeat(2, 1fr); }
+      .km-lab-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .km-nav-inner, .km-container { padding-inline: 20px; }
+      .km-hero, .km-stage { padding: 22px 20px; }
+      .km-tabs { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Mevcut Site Üst Menüsü (Navbar) -->
+  <header class="km-navbar">
+    <div class="km-nav-inner">
+      <a class="km-brand" href="../index.html">
+        <img src="../assets/brand-mark.png" alt="ZarifÇözüm">
+        <strong>Zarif<span>Çözüm</span></strong>
+      </a>
+      <nav class="km-nav-links" aria-label="Ana Menü">
+        <a href="../index.html">Ana Sayfa</a>
+        <a href="../konu.html?sinif=5">Konu Stüdyosu</a>
+        <a href="../test.html?sinif=5">Kendini Dene</a>
+        <a href="../iletisim.html">İletişim</a>
+        <a class="km-nav-cta" href="../kayit-giris.html?mode=register">Ücretsiz Kayıt Ol →</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="km-container">
+    <!-- Üst Başlık & Toplam XP -->
+    <section class="km-hero">
+      <div>
+        <span class="km-eyebrow">🧭 5–8. SINIF TÜRKİYE YÜZYILI MAARİF MODELİ</span>
+        <h1>İnteraktif Keşif Modu: 8 Matematik Laboratuvarı</h1>
+        <p>Formülleri ezberlemek yerine dokun, çevir, ölç ve kendin keşfet. Her deneyde görevi tamamlayarak Keşif XP kazan!</p>
+      </div>
+      <div class="km-xp-panel">
+        <span class="km-xp-val" id="kmTotalXp">0 XP</span>
+        <span class="km-xp-sub" id="kmDoneCount">0 / 8 Deney Tamamlandı</span>
+      </div>
+    </section>
+
+    <!-- 8 Deney Sekmesi -->
+    <nav class="km-tabs" id="kmTabs" aria-label="Matematik Deneyleri"></nav>
+
+    <!-- Aktif Deney Sahnesi -->
+    <section class="km-stage" id="kmStage" aria-live="polite"></section>
+  </main>
+
+  <!-- Alt Bilgi (Footer) -->
+  <footer class="km-footer">
+    © 2026 ZarifÇözüm · 5–12. Sınıf Türkiye Yüzyılı Maarif Modeli Matematik Platformu
+  </footer>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STORAGE_KEY = "zc_kesif_modu_pages_v1";
+      var xpMap = {};
+      try {
+        xpMap = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {};
+      } catch (e) { xpMap = {}; }
+
+      function saveXp() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(xpMap)); } catch (e) {}
+        renderXpHeader();
+        renderTabs();
+      }
+
+      function addXp(id, amount) {
+        xpMap[id] = (xpMap[id] || 0) + amount;
+        saveXp();
+        var badge = document.getElementById("kmCurrentExpXp");
+        if (badge) badge.textContent = "⭐ " + xpMap[id] + " XP";
+      }
+
+      function resetExpXp(id) {
+        xpMap[id] = 0;
+        saveXp();
+      }
+
+      var EXPERIMENTS = [
+        { id: "terazi",    ico: "⚖️", title: "1. İnteraktif Cebir Terazisi",    sub: "7–8. Sınıf • Denklemler",     desc: "x değerini değiştirerek terazinin iki kefesini tam dengeye getir." },
+        { id: "asansor",   ico: "🏢", title: "2. Gökdelen Asansörü",            sub: "6–7. Sınıf • Tam Sayılar",    desc: "Pozitif ve negatif kat hareketleriyle hedef kata tam isabet et." },
+        { id: "kesir",     ico: "🍕", title: "3. Kesir Dilimleri Atölyesi",     sub: "5. Sınıf • Denk Kesirler",    desc: "Pay ve paydayı kaydırıcılarla değiştirerek görsel alanı ve denk kesirleri keşfet." },
+        { id: "kalbur",    ico: "🔢", title: "4. Eratosthenes Kalburu",         sub: "6. Sınıf • Asal Sayılar",     desc: "1–100 tablosunda 2, 3, 5 ve 7'nin katlarını eleyerek 25 asal sayıyı ortaya çıkar." },
+        { id: "rampa",     ico: "📐", title: "5. Rampa Eğimi Laboratuvarı",     sub: "8. Sınıf • Eğim & Yüzde",     desc: "Dikey ve yatay uzunluğu değiştirerek eğim oranını ve yüzdesini canlı hesapla." },
+        { id: "cisimler",  ico: "🧊", title: "6. 3D Geometrik Cisimler",        sub: "5–8. Sınıf • Yüz/Köşe/Ayrıt", desc: "Küp, prizma ve piramitlerin yüz, köşe ve ayrıt sayılarını Euler kuralıyla incele." },
+        { id: "koordinat", ico: "🎯", title: "7. Koordinat Düzlemi Hedef Oyunu",sub: "8. Sınıf • Koordinat Sistemi",desc: "Verilen (x, y) noktasını koordinat düzleminde doğru yere tıklayarak işaretle." },
+        { id: "cark",      ico: "🎡", title: "8. Olasılık Çarkı Simülatörü",    sub: "6–8. Sınıf • Olasılık",       desc: "Renk dilimlerini ayarla, çarkı çevir ve deneysel ile teorik olasılığı kıyasla." }
+      ];
+
+      var activeId = EXPERIMENTS[0].id;
+      var tabsEl = document.getElementById("kmTabs");
+      var stageEl = document.getElementById("kmStage");
+
+      function renderXpHeader() {
+        var total = 0, done = 0;
+        EXPERIMENTS.forEach(function (e) {
+          var v = xpMap[e.id] || 0;
+          total += v;
+          if (v > 0) done++;
+        });
+        document.getElementById("kmTotalXp").textContent = total + " XP";
+        document.getElementById("kmDoneCount").textContent = done + " / 8 Deney Tamamlandı";
+      }
+
+      function renderTabs() {
+        tabsEl.innerHTML = EXPERIMENTS.map(function (e) {
+          var isAct = e.id === activeId;
+          var earned = xpMap[e.id] || 0;
+          return (
+            '<button type="button" class="km-tab-btn' + (isAct ? ' is-active' : '') + '" data-exp="' + e.id + '">' +
+              '<span class="km-tab-ico">' + e.ico + '</span>' +
+              '<span class="km-tab-meta">' +
+                '<strong>' + e.title + '</strong>' +
+                '<span>' + (earned > 0 ? '✓ ' + earned + ' XP' : e.sub) + '</span>' +
+              '</span>' +
+            '</button>'
+          );
+        }).join("");
+
+        tabsEl.querySelectorAll("[data-exp]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            activeId = btn.getAttribute("data-exp");
+            renderTabs();
+            renderStage();
+          });
+        });
+      }
+
+      function mountStageFrame(exp, bodyHtml, onReset) {
+        stageEl.innerHTML =
+          '<div class="km-stage-head">' +
+            '<div>' +
+              '<h2 class="km-stage-title">' + exp.ico + ' ' + exp.title + '</h2>' +
+              '<p class="km-stage-desc">' + exp.desc + '</p>' +
+            '</div>' +
+            '<div class="km-stage-controls">' +
+              '<span class="km-exp-xp" id="kmCurrentExpXp">⭐ ' + (xpMap[exp.id] || 0) + ' XP</span>' +
+              '<button type="button" class="km-btn" id="kmResetBtn">↺ Sıfırla</button>' +
+            '</div>' +
+          '</div>' +
+          bodyHtml;
+
+        document.getElementById("kmResetBtn").addEventListener("click", function () {
+          if (onReset) onReset();
+        });
+      }
+
+      /* 1. İNTERAKTİF CEBİR TERAZİSİ */
+      function initTerazi(exp) {
+        var puzzles = [
+          { a: 2, b: 3, rhs: 11, ans: 4 },
+          { a: 3, b: 2, rhs: 17, ans: 5 },
+          { a: 4, b: 1, rhs: 13, ans: 3 }
+        ];
+        var pIdx = 0;
+        var curX = 1;
+
+        function draw() {
+          var p = puzzles[pIdx];
+          var lhs = p.a * curX + p.b;
+          var diff = Math.max(-18, Math.min(18, (p.rhs - lhs) * 2.5));
+          var balanced = lhs === p.rhs;
+
+          mountStageFrame(exp,
+            '<div class="km-lab-grid">' +
+              '<div class="km-visual-box">' +
+                '<svg viewBox="0 0 360 220" width="100%" style="max-width:360px">' +
+                  '<polygon points="160,195 200,195 180,145" fill="#0F172A"/>' +
+                  '<rect x="120" y="195" width="120" height="12" rx="6" fill="#0F172A"/>' +
+                  '<g transform="rotate(' + diff + ' 180 145)">' +
+                    '<rect x="45" y="139" width="270" height="10" rx="5" fill="' + (balanced ? '#059669' : '#D97706') + '"/>' +
+                    '<line x1="75" y1="145" x2="75" y2="105" stroke="#475569" stroke-width="3"/>' +
+                    '<line x1="285" y1="145" x2="285" y2="105" stroke="#475569" stroke-width="3"/>' +
+                    '<rect x="30" y="75" width="90" height="34" rx="10" fill="#0F172A"/>' +
+                    '<text x="75" y="97" text-anchor="middle" fill="#FFF" font-size="14" font-weight="800">' + p.a + 'x + ' + p.b + ' = ' + lhs + '</text>' +
+                    '<rect x="240" y="75" width="90" height="34" rx="10" fill="#0F172A"/>' +
+                    '<text x="285" y="97" text-anchor="middle" fill="#FCD34D" font-size="15" font-weight="800">' + p.rhs + '</text>' +
+                  '</g>' +
+                '</svg>' +
+                '<strong style="margin-top:8px;color:' + (balanced ? '#059669' : '#0F172A') + '">' +
+                  (balanced ? '⚖️ Terazi Dengede! x = ' + curX : 'Sol Kefe: ' + lhs + ' | Sağ Kefe: ' + p.rhs) +
+                '</strong>' +
+              '</div>' +
+              '<div class="km-control-box">' +
+                '<div class="km-mission">🎯 Görev: ' + p.a + 'x + ' + p.b + ' = ' + p.rhs + ' denklemini dengeleyen x değerini bul!</div>' +
+                '<div class="km-slider-row">' +
+                  '<label><span>x Değeri</span><strong>x = ' + curX + '</strong></label>' +
+                  '<input type="range" id="teraziRange" min="0" max="10" value="' + curX + '">' +
+                '</div>' +
+                '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+                  '<button type="button" class="km-btn km-btn-amber" id="teraziCheck">Dengeyi Onayla (+25 XP)</button>' +
+                  '<button type="button" class="km-btn" id="teraziNext">Yeni Denklem →</button>' +
+                '</div>' +
+                '<div class="km-feedback" id="teraziMsg"></div>' +
+              '</div>' +
+            '</div>',
+            function () { curX = 1; draw(); }
+          );
+
+          document.getElementById("teraziRange").addEventListener("input", function (e) {
+            curX = Number(e.target.value);
+            draw();
+          });
+          document.getElementById("teraziCheck").addEventListener("click", function () {
+            var msg = document.getElementById("teraziMsg");
+            if (p.a * curX + p.b === p.rhs) {
+              msg.className = "km-feedback ok";
+              msg.textContent = "✅ Harika! x = " + curX + " ile iki kefe eşitlendi (+25 XP).";
+              addXp(exp.id, 25);
+            } else {
+              msg.className = "km-feedback err";
+              msg.textContent = "❌ Kefeler henüz dengede değil. x değerini ayarla!";
+            }
+          });
+          document.getElementById("teraziNext").addEventListener("click", function () {
+            pIdx = (pIdx + 1) % puzzles.length;
+            curX = 1;
+            draw();
+          });
+        }
+        draw();
+      }
+
+      /* 2. GÖKDELEN ASANSÖRÜ */
+      function initAsansor(exp) {
+        var missions = [
+          { start: 2, delta: -5, target: -3, text: "+2. kattasın. (−5) kat hareket edersen hangi kata ulaşırsın?" },
+          { start: -4, delta: 7, target: 3, text: "−4. kattasın. (+7) kat yukarı çıkarsan hangi kata ulaşırsın?" },
+          { start: -1, delta: -3, target: -4, text: "−1. kattasın. (−3) kat daha aşağı inersen hangi kata ulaşırsın?" }
+        ];
+        var mIdx = 0;
+        var floor = missions[0].start;
+
+        function draw() {
+          var m = missions[mIdx];
+          var floorsHtml = "";
+          for (var f = 5; f >= -5; f--) {
+            floorsHtml +=
+              '<div class="km-floor' + (f === 0 ? ' is-zero' : '') + (f === floor ? ' is-here' : '') + '">' +
+                '<span>' + (f > 0 ? '+' + f : f) + '. Kat ' + (f === 0 ? '(Zemin)' : '') + '</span>' +
+                '<span>' + (f === floor ? '🛗 KABİN' : '') + '</span>' +
+              '</div>';
+          }
+
+          mountStageFrame(exp,
+            '<div class="km-lab-grid">' +
+              '<div class="km-visual-box"><div class="km-shaft">' + floorsHtml + '</div></div>' +
+              '<div class="km-control-box">' +
+                '<div class="km-mission">🎯 Görev: ' + m.text + '</div>' +
+                '<div style="font-size:1.15rem;font-weight:800;">Mevcut Kat: ' + (floor > 0 ? '+' + floor : floor) + '</div>' +
+                '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+                  '<button type="button" class="km-btn" data-move="1">▲ +1 Kat</button>' +
+                  '<button type="button" class="km-btn" data-move="-1">▼ −1 Kat</button>' +
+                  '<button type="button" class="km-btn" data-move="3">▲ +3 Kat</button>' +
+                  '<button type="button" class="km-btn" data-move="-3">▼ −3 Kat</button>' +
+                '</div>' +
+                '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+                  '<button type="button" class="km-btn km-btn-amber" id="asansorCheck">Katı Onayla (+25 XP)</button>' +
+                  '<button type="button" class="km-btn" id="asansorNext">Sonraki Görev →</button>' +
+                '</div>' +
+                '<div class="km-feedback" id="asansorMsg"></div>' +
+              '</div>' +
+            '</div>',
+            function () { floor = missions[mIdx].start; draw(); }
+          );
+
+          stageEl.querySelectorAll("[data-move]").forEach(function (b) {
+            b.addEventListener("click", function () {
+              floor = Math.max(-5, Math.min(5, floor + Number(b.getAttribute("data-move"))));
+              draw();
+            });
+          });
+          document.getElementById("asansorCheck").addEventListener("click", function () {
+            var msg = document.getElementById("asansorMsg");
+            if (floor === m.target) {
+              msg.className = "km-feedback ok";
+              msg.textContent = "✅ Doğru kat! (" + m.start + ") + (" + m.delta + ") = " + m.target + " (+25 XP).";
+              addXp(exp.id, 25);
+            } else {
+              msg.className = "km-feedback err";
+              msg.textContent = "❌ Şu an " + floor + ". kattasın. İşlemi tekrar kontrol et!";
+            }
+          });
+          document.getElementById("asansorNext").addEventListener("click", function () {
+            mIdx = (mIdx + 1) % missions.length;
+            floor = missions[mIdx].start;
+            draw();
+          });
+        }
+        draw();
+      }
+
+      /* 3. KESİR DİLİMLERİ ATÖLYESİ */
+      function initKesir(exp) {
+        var pay = 1, payda = 2;
+
+        function draw() {
+          if (pay > payda) pay = payda;
+          var pct = Math.round((pay / payda) * 100);
+          var slices = "";
+          for (var i = 0; i < payda; i++) {
+            var a1 = (i / payda) * 2 * Math.PI - Math.PI / 2;
+            var a2 = ((i + 1) / payda) * 2 * Math.PI - Math.PI / 2;
+            var x1 = 100 + 86 * Math.cos(a1), y1 = 100 + 86 * Math.sin(a1);
+            var x2 = 100 + 86 * Math.cos(a2), y2 = 100 + 86 * Math.sin(a2);
+            var large = (a2 - a1) > Math.PI ? 1 : 0;
+            var fill = i < pay ? "#D97706" : "#E2E8F0";
+            slices += '<path d="M100,100 L' + x1.toFixed(1) + ',' + y1.toFixed(1) + ' A86,86 0 ' + large + ',1 ' + x2.toFixed(1) + ',' + y2.toFixed(1) + ' Z" fill="' + fill + '" stroke="#0F172A" stroke-width="2"/>';
+          }
+
+          mountStageFrame(exp,
+            '<div class="km-lab-grid">' +
+              '<div class="km-visual-box">' +
+                '<svg viewBox="0 0 200 200" width="210" height="210">' + slices + '</svg>' +
+                '<div style="margin-top:14px;font-size:1.35rem;font-weight:800;">' + pay + ' / ' + payda + ' = %' + pct + ' (' + (pay / payda).toFixed(2) + ')</div>' +
+              '</div>' +
+              '<div class="km-control-box">' +
+                '<div class="km-mission">🎯 Görev: 3/4 (%75) kesrine denk olan ama paydası 4 olmayan bir kesir oluştur (ör. 6/8 veya 9/12)!</div>' +
+                '<div class="km-slider-row">' +
+                  '<label><span>Pay (Seçilen Dilim)</span><strong>' + pay + '</strong></label>' +
+                  '<input type="range" id="kesirPay" min="1" max="' + payda + '" value="' + pay + '">' +
+                '</div>' +
+                '<div class="km-slider-row">' +
+                  '<label><span>Payda (Toplam Eş Dilim)</span><strong>' + payda + '</strong></label>' +
+                  '<input type="range" id="kesirPayda" min="2" max="12" value="' + payda + '">' +
+                '</div>' +
+                '<button type="button" class="km-btn km-btn-amber" id="kesirCheck">Denk Kesri Kontrol Et (+25 XP)</button>' +
+                '<div class="km-feedback" id="kesirMsg"></div>' +
+              '</div>' +
+            '</div>',
+            function () { pay = 1; payda = 2; draw(); }
+          );
+
+          document.getElementById("kesirPay").addEventListener("input", function (e) { pay = Number(e.target.value); draw(); });
+          document.getElementById("kesirPayda").addEventListener("input", function (e) { payda = Number(e.target.value); if (pay > payda) pay = payda; draw(); });
+          document.getElementById("kesirCheck").addEventListener("click", function () {
+            var msg = document.getElementById("kesirMsg");
+            if (pay * 4 === payda * 3 && payda !== 4) {
+              msg.className = "km-feedback ok";
+              msg.textContent = "✅ Süper! " + pay + "/" + payda + " kesri 3/4'e denktir (+25 XP).";
+              addXp(exp.id, 25);
+            } else {
+              msg.className = "km-feedback err";
+              msg.textContent = "❌ Şu an %" + pct + " oluştu. Paydası 4 dışında %75 veren bir denk kesir ayarla!";
+            }
+          });
+        }
+        draw();
+      }
+
+      /* 4. ERATOSTHENES KALBURU (1-100) */
+      function initKalbur(exp) {
+        var crossed = { 1: true };
+
+        function isPrime(n) {
+          if (n < 2) return false;
+          for (var i = 2; i * i <= n; i++) if (n % i === 0) return false;
+          return true;
+        }
+
+        function draw() {
+          var remaining = 0;
+          var allCompositesGone = true;
+          var cells = "";
+          for (var n = 1; n <= 100; n++) {
+            var c = !!crossed[n];
+            if (!c) {
+              remaining++;
+              if (!isPrime(n)) allCompositesGone = false;
+            }
+            var cls = c ? " is-crossed" : (allCompositesGone && isPrime(n) ? " is-prime" : "");
+            cells += '<button type="button" class="km-sieve-cell' + cls + '" data-num="' + n + '">' + n + '</button>';
+          }
+
+          mountStageFrame(exp,
+            '<div class="km-lab-grid">' +
+              '<div class="km-visual-box"><div class="km-sieve-grid">' + cells + '</div></div>' +
+              '<div class="km-control-box">' +
+                '<div class="km-mission">🎯 Görev: 2, 3, 5 ve 7\'nin katlarını eleyerek 1–100 arasındaki 25 asal sayıyı ortaya çıkar!</div>' +
+                '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+                  '<button type="button" class="km-btn km-btn-navy" data-sieve="2">2\'nin Katlarını Ele</button>' +
+                  '<button type="button" class="km-btn km-btn-navy" data-sieve="3">3\'ün Katlarını Ele</button>' +
+                  '<button type="button" class="km-btn km-btn-navy" data-sieve="5">5\'in Katlarını Ele</button>' +
+                  '<button type="button" class="km-btn km-btn-navy" data-sieve="7">7\'nin Katlarını Ele</button>' +
+                '</div>' +
+                '<div style="font-weight:700;">Kalan Sayı: ' + remaining + ' (Hedef: 25 Asal Sayı)</div>' +
+                '<div class="km-feedback' + (allCompositesGone && remaining === 25 ? ' ok' : '') + '" id="kalburMsg">' +
+                  (allCompositesGone && remaining === 25 ? '✅ Tebrikler! 1–100 arasındaki tüm 25 asal sayı bulundu!' : 'Kat eleme butonlarını kullan veya bileşik sayılara tıkla.') +
+                '</div>' +
+              '</div>' +
+            '</div>',
+            function () { crossed = { 1: true }; draw(); }
+          );
+
+          stageEl.querySelectorAll("[data-sieve]").forEach(function (b) {
+            b.addEventListener("click", function () {
+              var p = Number(b.getAttribute("data-sieve"));
+              for (var k = p * 2; k <= 100; k += p) crossed[k] = true;
+              draw();
+              checkWin();
+            });
+          });
+          stageEl.querySelectorAll("[data-num]").forEach(function (c) {
+            c.addEventListener("click", function () {
+              var n = Number(c.getAttribute("data-num"));
+              if (n > 1 && !isPrime(n)) {
+                crossed[n] = !crossed[n];
+                draw();
+                checkWin();
+              }
+            });
+          });
+        }
+
+        function checkWin() {
+          var rem = 0;
+          for (var n = 2; n <= 100; n++) if (!crossed[n]) rem++;
+          if (rem === 25 && !(xpMap[exp.id] > 0)) addXp(exp.id, 25);
+        }
+
+        draw();
+      }
+
+      /* 5. RAMPA EĞİMİ LABORATUVARI */
+      function initRampa(exp) {
+        var dikey = 3, yatay = 8;
+
+        function draw() {
+          var pct = Math.round((dikey / yatay) * 100);
+          var x2 = 40 + yatay * 26;
+          var y2 = 190 - dikey * 15;
+
+          mountStageFrame(exp,
+            '<div class="km-lab-grid">' +
+              '<div class="km-visual-box">' +
+                '<svg viewBox="0 0 340 220" width="100%" style="max-width:340px">' +
+                  '<polygon points="40,190 ' + x2 + ',190 ' + x2 + ',' + y2 + '" fill="rgba(217,119,6,0.18)" stroke="#0F172A" stroke-width="3" stroke-linejoin="round"/>' +
+                  '<line x1="40" y1="190" x2="' + x2 + '" y2="' + y2 + '" stroke="#D97706" stroke-width="4"/>' +
+                  '<text x="' + ((40 + x2) / 2) + '" y="210" text-anchor="middle" fill="#0F172A" font-size="13" font-weight="800">Yatay: ' + yatay + ' m</text>' +
+                  '<text x="' + (x2 + 8) + '" y="' + ((190 + y2) / 2) + '" fill="#0F172A" font-size="13" font-weight="800">Dikey: ' + dikey + ' m</text>' +
+                '</svg>' +
+                '<div style="font-size:1.25rem;font-weight:800;margin-top:8px;">Eğim = ' + dikey + '/' + yatay + ' = %' + pct + '</div>' +
+              '</div>' +
+              '<div class="km-control-box">' +
+                '<div class="km-mission">🎯 Görev: Eğimi tam %50 (1/2) olan bir rampa oluştur ve onayla!</div>' +
+                '<div class="km-slider-row">' +
+                  '<label><span>Dikey Uzunluk</span><strong>' + dikey + ' m</strong></label>' +
+                  '<input type="range" id="rampaDikey" min="1" max="10" value="' + dikey + '">' +
+                '</div>' +
+                '<div class="km-slider-row">' +
+                  '<label><span>Yatay Uzunluk</span><strong>' + yatay + ' m</strong></label>' +
+                  '<input type="range" id="rampaYatay" min="1" max="10" value="' + yatay + '">' +
+                '</div>' +
+                '<button type="button" class="km-btn km-btn-amber" id="rampaCheck">Eğimi Kontrol Et (+25 XP)</button>' +
+                '<div class="km-feedback" id="rampaMsg"></div>' +
+              '</div>' +
+            '</div>',
+            function () { dikey = 3; yatay = 8; draw(); }
+          );
+
+          document.getElementById("rampaDikey").addEventListener("input", function (e) { dikey = Number(e.target.value); draw(); });
+          document.getElementById("rampaYatay").addEventListener("input", function (e) { yatay = Number(e.target.value); draw(); });
+          document.getElementById("rampaCheck").addEventListener("click", function () {
+            var msg = document.getElementById("rampaMsg");
+            if (dikey * 2 === yatay) {
+              msg.className = "km-feedback ok";
+              msg.textContent = "✅ Mükemmel! Dikey/Yatay = " + dikey + "/" + yatay + " = %50 eğim (+25 XP).";
+              addXp(exp.id, 25);
+            } else {
+              msg.className = "km-feedback err";
+              msg.textContent = "❌ Şu an eğim %" + pct + ". Yatay uzunluk dikeyin 2 katı olmalı!";
+            }
+          });
+        }
+        draw();
+      }
+
+      /* 6. 3D GEOMETRİK CİSİMLER */
+      function initCisimler(exp) {
+        var SOLIDS = [
+          { id: "kup",    name: "Küp",                  y: 6, k: 8, a: 12, svg: '<rect x="65" y="75" width="75" height="75" fill="rgba(217,119,6,0.22)" stroke="#0F172A" stroke-width="2.5"/><rect x="95" y="45" width="75" height="75" fill="rgba(15,23,42,0.08)" stroke="#0F172A" stroke-width="2.5"/><line x1="65" y1="75" x2="95" y2="45" stroke="#0F172A" stroke-width="2"/><line x1="140" y1="75" x2="170" y2="45" stroke="#0F172A" stroke-width="2"/><line x1="65" y1="150" x2="95" y2="120" stroke="#0F172A" stroke-width="2"/><line x1="140" y1="150" x2="170" y2="120" stroke="#0F172A" stroke-width="2"/>' },
+          { id: "prizma", name: "Üçgen Prizma",         y: 5, k: 6, a: 9,  svg: '<polygon points="60,150 110,60 150,150" fill="rgba(217,119,6,0.22)" stroke="#0F172A" stroke-width="2.5"/><polygon points="105,125 155,35 195,125" fill="rgba(15,23,42,0.08)" stroke="#0F172A" stroke-width="2.5"/><line x1="60" y1="150" x2="105" y2="125" stroke="#0F172A" stroke-width="2"/><line x1="110" y1="60" x2="155" y2="35" stroke="#0F172A" stroke-width="2"/><line x1="150" y1="150" x2="195" y2="125" stroke="#0F172A" stroke-width="2"/>' },
+          { id: "piramit",name: "Kare Piramit",         y: 5, k: 5, a: 8,  svg: '<polygon points="65,155 155,155 185,120 95,120" fill="rgba(15,23,42,0.1)" stroke="#0F172A" stroke-width="2.5"/><line x1="125" y1="35" x2="65" y2="155" stroke="#D97706" stroke-width="2.5"/><line x1="125" y1="35" x2="155" y2="155" stroke="#D97706" stroke-width="2.5"/><line x1="125" y1="35" x2="185" y2="120" stroke="#0F172A" stroke-width="2"/><line x1="125" y1="35" x2="95" y2="120" stroke="#0F172A" stroke-width="2" stroke-dasharray="4 4"/>' },
+          { id: "dikdort",name: "Dikdörtgenler Prizması",y: 6, k: 8, a: 12, svg: '<rect x="45" y="85" width="110" height="65" fill="rgba(217,119,6,0.22)" stroke="#0F172A" stroke-width="2.5"/><rect x="80" y="55" width="110" height="65" fill="rgba(15,23,42,0.08)" stroke="#0F172A" stroke-width="2.5"/><line x1="45" y1="85" x2="80" y2="55" stroke="#0F172A" stroke-width="2"/><line x1="155" y1="85" x2="190" y2="55" stroke="#0F172A" stroke-width="2"/><line x1="45" y1="150" x2="80" y2="120" stroke="#0F172A" stroke-width="2"/><line x1="155" y1="150" x2="190" y2="120" stroke="#0F172A" stroke-width="2"/>' }
+        ];
+        var sIdx = 0;
+        var visited = { 0: true };
+
+        function draw() {
+          var s = SOLIDS[sIdx];
+          var visitedCount = Object.keys(visited).length;
+
+          mountStageFrame(exp,
+            '<div class="km-lab-grid">' +
+              '<div class="km-visual-box">' +
+                '<svg viewBox="0 0 240 190" width="240" height="190">' + s.svg + '</svg>' +
+                '<div class="km-solid-stats">' +
+                  '<div class="km-solid-stat"><strong>' + s.y + '</strong><span>Yüz (Y)</span></div>' +
+                  '<div class="km-solid-stat"><strong>' + s.k + '</strong><span>Köşe (K)</span></div>' +
+                  '<div class="km-solid-stat"><strong>' + s.a + '</strong><span>Ayrıt (A)</span></div>' +
+                '</div>' +
+                '<div style="margin-top:12px;font-weight:800;color:#059669;">Euler Kuralı: Y + K − A = ' + s.y + ' + ' + s.k + ' − ' + s.a + ' = 2 ✓</div>' +
+              '</div>' +
+              '<div class="km-control-box">' +
+                '<div class="km-mission">🎯 Görev: 4 farklı 3B cismin tamamını inceleyip Euler formülünü doğrula (' + visitedCount + '/4 incelendi)!</div>' +
+                '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
+                  SOLIDS.map(function (item, idx) {
+                    return '<button type="button" class="km-btn' + (idx === sIdx ? ' km-btn-navy' : '') + '" data-solid="' + idx + '">' + item.name + '</button>';
+                  }).join("") +
+                '</div>' +
+                '<div class="km-feedback' + (visitedCount === 4 ? ' ok' : '') + '">' +
+                  (visitedCount === 4 ? '✅ Tüm 4 cismin yüz, köşe ve ayrıt ilişkisi keşfedildi!' : 'Diğer cisimleri de seçerek karşılaştır.') +
+                '</div>' +
+              '</div>' +
+            '</div>',
+            function () { sIdx = 0; visited = { 0: true }; draw(); }
+          );
+
+          stageEl.querySelectorAll("[data-solid]").forEach(function (b) {
+            b.addEventListener("click", function () {
+              sIdx = Number(b.getAttribute("data-solid"));
+              visited[sIdx] = true;
+              if (Object.keys(visited).length === 4 && !(xpMap[exp.id] > 0)) addXp(exp.id, 25);
+              draw();
+            });
+          });
+        }
+        draw();
+      }
+
+      /* 7. KOORDİNAT DÜZLEMİ HEDEF OYUNU */
+      function initKoordinat(exp) {
+        var targets = [{ x: 3, y: 2 }, { x: -4, y: 3 }, { x: -2, y: -3 }, { x: 4, y: -2 }];
+        var tIdx = 0;
+        var lastClick = null;
+
+        function draw() {
+          var t = targets[tIdx];
+          var gridLines = "";
+          for (var i = -5; i <= 5; i++) {
+            var pos = 150 + i * 26;
+            gridLines += '<line x1="' + pos + '" y1="20" x2="' + pos + '" y2="280" stroke="' + (i === 0 ? '#0F172A' : '#CBD5E1') + '" stroke-width="' + (i === 0 ? 2.5 : 1) + '"/>';
+            gridLines += '<line x1="20" y1="' + pos + '" x2="280" y2="' + pos + '" stroke="' + (i === 0 ? '#0F172A' : '#CBD5E1') + '" stroke-width="' + (i === 0 ? 2.5 : 1) + '"/>';
+          }
+          var dotHtml = "";
+          if (lastClick) {
+            var cx = 150 + lastClick.x * 26;
+            var cy = 150 - lastClick.y * 26;
+            var hit = lastClick.x === t.x && lastClick.y === t.y;
+            dotHtml = '<circle cx="' + cx + '" cy="' + cy + '" r="8" fill="' + (hit ? '#059669' : '#DC2626') + '"/>';
+          }
+
+          mountStageFrame(exp,
+            '<div class="km-lab-grid">' +
+              '<div class="km-visual-box">' +
+                '<svg id="coordSvg" viewBox="0 0 300 300" width="290" height="290" style="cursor:crosshair;background:#FFF;border-radius:14px;border:1px solid #E2E8F0;">' +
+                  gridLines +
+                  '<text x="278" y="142" font-size="12" font-weight="800" fill="#0F172A">x</text>' +
+                  '<text x="158" y="28" font-size="12" font-weight="800" fill="#0F172A">y</text>' +
+                  dotHtml +
+                '</svg>' +
+              '</div>' +
+              '<div class="km-control-box">' +
+                '<div class="km-mission">🎯 Hedef Nokta: A(' + t.x + ', ' + t.y + ') noktasını koordinat düzleminde tıkla!</div>' +
+                '<div style="font-size:0.95rem;color:#475569;">Her kare 1 birimdir. Önce x ekseninde (sağ/sol), sonra y ekseninde (yukarı/aşağı) ilerle.</div>' +
+                '<button type="button" class="km-btn" id="coordNext">Yeni Hedef Nokta →</button>' +
+                '<div class="km-feedback" id="coordMsg"></div>' +
+              '</div>' +
+            '</div>',
+            function () { lastClick = null; draw(); }
+          );
+
+          document.getElementById("coordSvg").addEventListener("click", function (ev) {
+            var rect = ev.currentTarget.getBoundingClientRect();
+            var sx = ((ev.clientX - rect.left) / rect.width) * 300;
+            var sy = ((ev.clientY - rect.top) / rect.height) * 300;
+            var gx = Math.max(-5, Math.min(5, Math.round((sx - 150) / 26)));
+            var gy = Math.max(-5, Math.min(5, Math.round((150 - sy) / 26)));
+            lastClick = { x: gx, y: gy };
+            var hit = gx === t.x && gy === t.y;
+            draw();
+            var msg = document.getElementById("coordMsg");
+            if (hit) {
+              msg.className = "km-feedback ok";
+              msg.textContent = "✅ Tam isabet! (" + gx + ", " + gy + ") noktası doğru (+25 XP).";
+              addXp(exp.id, 25);
+            } else {
+              msg.className = "km-feedback err";
+              msg.textContent = "❌ İşaretlediğin nokta (" + gx + ", " + gy + "). Hedef (" + t.x + ", " + t.y + ")!";
+            }
+          });
+
+          document.getElementById("coordNext").addEventListener("click", function () {
+            tIdx = (tIdx + 1) % targets.length;
+            lastClick = null;
+            draw();
+          });
+        }
+        draw();
+      }
+
+      /* 8. OLASILIK ÇARKI SİMÜLATÖRÜ */
+      function initCark(exp) {
+        var counts = { amber: 3, navy: 3, emerald: 2 };
+        var hits = { amber: 0, navy: 0, emerald: 0 };
+        var spins = 0;
+        var angle = 0;
+
+        function buildGradient() {
+          var tot = counts.amber + counts.navy + counts.emerald;
+          var p1 = (counts.amber / tot) * 100;
+          var p2 = p1 + (counts.navy / tot) * 100;
+          return "conic-gradient(#D97706 0% " + p1 + "%, #0F172A " + p1 + "% " + p2 + "%, #059669 " + p2 + "% 100%)";
+        }
+
+        function spinTimes(n) {
+          var tot = counts.amber + counts.navy + counts.emerald;
+          for (var i = 0; i < n; i++) {
+            var r = Math.random() * tot;
+            if (r < counts.amber) hits.amber++;
+            else if (r < counts.amber + counts.navy) hits.navy++;
+            else hits.emerald++;
+            spins++;
+          }
+          angle += 720 + Math.floor(Math.random() * 360);
+          if (spins >= 10 && !(xpMap[exp.id] > 0)) addXp(exp.id, 25);
+          draw();
+        }
+
+        function draw() {
+          var tot = counts.amber + counts.navy + counts.emerald;
+          var thA = Math.round((counts.amber / tot) * 100);
+          var thN = Math.round((counts.navy / tot) * 100);
+          var thE = 100 - thA - thN;
+
+          var exA = spins ? Math.round((hits.amber / spins) * 100) : 0;
+          var exN = spins ? Math.round((hits.navy / spins) * 100) : 0;
+          var exE = spins ? Math.round((hits.emerald / spins) * 100) : 0;
+
+          mountStageFrame(exp,
+            '<div class="km-lab-grid">' +
+              '<div class="km-visual-box">' +
+                '<div class="km-wheel-wrap">' +
+                  '<div class="km-wheel-pointer"></div>' +
+                  '<div class="km-wheel-disc" style="background:' + buildGradient() + ';transform:rotate(' + angle + 'deg);"></div>' +
+                '</div>' +
+                '<div style="margin-top:16px;font-weight:800;">Toplam Çevirme: ' + spins + '</div>' +
+                '<div style="font-size:0.9rem;color:#475569;margin-top:6px;text-align:center;">' +
+                  'Kehribar: Teorik %' + thA + ' / Deneysel %' + exA + '<br>' +
+                  'Lacivert: Teorik %' + thN + ' / Deneysel %' + exN + '<br>' +
+                  'Zümrüt: Teorik %' + thE + ' / Deneysel %' + exE +
+                '</div>' +
+              '</div>' +
+              '<div class="km-control-box">' +
+                '<div class="km-mission">🎯 Görev: Dilim sayılarını ayarla ve çarkı en az 10 kez çevirerek deneysel olasılığın teorik olasılığa yaklaştığını gözlemle!</div>' +
+                '<div class="km-slider-row"><label><span>🟠 Kehribar Dilim</span><strong>' + counts.amber + '</strong></label><input type="range" id="carkA" min="1" max="6" value="' + counts.amber + '"></div>' +
+                '<div class="km-slider-row"><label><span>🔵 Lacivert Dilim</span><strong>' + counts.navy + '</strong></label><input type="range" id="carkN" min="1" max="6" value="' + counts.navy + '"></div>' +
+                '<div class="km-slider-row"><label><span>🟢 Zümrüt Dilim</span><strong>' + counts.emerald + '</strong></label><input type="range" id="carkE" min="1" max="6" value="' + counts.emerald + '"></div>' +
+                '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+                  '<button type="button" class="km-btn km-btn-amber" id="spin1">🎡 Çarkı Çevir (1×)</button>' +
+                  '<button type="button" class="km-btn km-btn-navy" id="spin10">⚡ Hızlı Deney (10×)</button>' +
+                '</div>' +
+                '<div class="km-feedback' + (spins >= 10 ? ' ok' : '') + '">' +
+                  (spins >= 10 ? '✅ Harika! Deney sayısı arttıkça deneysel olasılık teorik değere yaklaşır (+25 XP).' : '10 deneye ulaşarak Keşif XP kazan!') +
+                '</div>' +
+              '</div>' +
+            '</div>',
+            function () { counts = { amber: 3, navy: 3, emerald: 2 }; hits = { amber: 0, navy: 0, emerald: 0 }; spins = 0; angle = 0; draw(); }
+          );
+
+          document.getElementById("carkA").addEventListener("input", function (e) { counts.amber = Number(e.target.value); draw(); });
+          document.getElementById("carkN").addEventListener("input", function (e) { counts.navy = Number(e.target.value); draw(); });
+          document.getElementById("carkE").addEventListener("input", function (e) { counts.emerald = Number(e.target.value); draw(); });
+          document.getElementById("spin1").addEventListener("click", function () { spinTimes(1); });
+          document.getElementById("spin10").addEventListener("click", function () { spinTimes(10); });
+        }
+        draw();
+      }
+
+      var RENDERERS = {
+        terazi: initTerazi,
+        asansor: initAsansor,
+        kesir: initKesir,
+        kalbur: initKalbur,
+        rampa: initRampa,
+        cisimler: initCisimler,
+        koordinat: initKoordinat,
+        cark: initCark
+      };
+
+      function renderStage() {
+        var exp = EXPERIMENTS.filter(function (e) { return e.id === activeId; })[0] || EXPERIMENTS[0];
+        RENDERERS[exp.id](exp);
+      }
+
+      renderXpHeader();
+      renderTabs();
+      renderStage();
+    })();
+  </script>
+</body>
+</html>

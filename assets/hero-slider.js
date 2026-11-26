@@ -135,7 +135,7 @@
       titleHtml: "Ezberi bırak; <span class='zc-highlight'>dokunarak ve deneyerek</span> keşfet.",
       desc: "Kesirler, teraziler, koordinat düzlemi ve 3B şekillerle oynayarak matematiğin mantığını kendin keşfet.",
       primaryText: "Canlı Keşif Modunu Aç",
-      primaryHref: "kesif-modu.html",
+      primaryHref: "pages/kesif-modu.html",
       secondaryText: "Aşağıda Hemen Dene",
       secondaryHref: "#canli-kesif-vitrini",
       lottieSrc: "assets/lottie/slide-4.json",
