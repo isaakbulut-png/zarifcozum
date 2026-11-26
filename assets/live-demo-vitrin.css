@@ -1,0 +1,379 @@
+/* ZarifÇözüm Anasayfa — Canlı Keşif Vitrini (zc-live-demo-*) */
+.zc-live-demo-section {
+  background: #FAF6F0;
+  padding-block: 64px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #2C221E;
+}
+
+@media (min-width: 768px) {
+  .zc-live-demo-section {
+    padding-block: 96px;
+  }
+}
+
+.zc-live-demo-container {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding-inline: 20px;
+}
+
+@media (min-width: 768px) {
+  .zc-live-demo-container { padding-inline: 32px; }
+}
+
+@media (min-width: 1100px) {
+  .zc-live-demo-container { padding-inline: 48px; }
+}
+
+.zc-live-demo-head {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 32px;
+}
+
+.zc-live-demo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: #3B281E;
+  border: 1px solid #D4A359;
+  color: #f3d285;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin-bottom: 14px;
+}
+
+.zc-live-demo-head h2 {
+  margin: 0 0 12px;
+  font-family: 'Plus Jakarta Sans', Georgia, serif;
+  font-size: clamp(1.75rem, 2.8vw, 2.5rem);
+  line-height: 1.2;
+  color: #2C221E;
+}
+
+.zc-live-demo-head p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #6B5E57;
+}
+
+/* Ana Vitrin Kartı */
+.zc-live-demo-shell {
+  background: #FFFFFF;
+  border: 2px solid #3B281E;
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: 0 22px 54px rgba(59, 40, 30, 0.12);
+}
+
+/* 3 Sekme Barı */
+.zc-live-demo-tabs {
+  background: linear-gradient(135deg, #3B281E 0%, #2C221E 100%);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-bottom: 1.5px solid #D4A359;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.zc-live-demo-tabs::-webkit-scrollbar { display: none; }
+
+.zc-live-demo-tab {
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 163, 89, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+  color: #FAF6F0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+}
+
+.zc-live-demo-tab:hover:not(.is-active) {
+  background: rgba(212, 163, 89, 0.22);
+}
+
+.zc-live-demo-tab.is-active {
+  background: linear-gradient(135deg, #D4A359, #b8883b);
+  border-color: #f3d285;
+  color: #2C221E;
+  box-shadow: 0 6px 16px rgba(212, 163, 89, 0.34);
+}
+
+/* İç Oyun & Görev Grid'i */
+.zc-live-demo-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(290px, 0.85fr);
+  gap: 28px;
+  padding: 28px 32px;
+  align-items: center;
+  background: #FFFDF9;
+}
+
+.zc-live-demo-stage {
+  background: #FAF6F0;
+  border: 1px solid #E6DCD2;
+  border-radius: 20px;
+  padding: 22px;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  position: relative;
+}
+
+.zc-live-demo-canvas {
+  width: 100%;
+  max-width: 440px;
+  height: 290px;
+  border-radius: 14px;
+  background: radial-gradient(circle at 50% 45%, #FFFFFF 0%, #FAF6F0 100%);
+  border: 1px solid #E6DCD2;
+  cursor: grab;
+  touch-action: none;
+  display: block;
+}
+
+.zc-live-demo-canvas:active { cursor: grabbing; }
+
+.zc-live-demo-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.zc-live-demo-kicker {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #FEF3EB;
+  border: 1px solid rgba(200, 90, 23, 0.35);
+  color: #C85A17;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.zc-live-demo-info h3 {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', Georgia, serif;
+  font-size: 1.4rem;
+  line-height: 1.25;
+  color: #2C221E;
+}
+
+.zc-live-demo-info p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #6B5E57;
+}
+
+.zc-live-demo-status {
+  padding: 13px 16px;
+  border-radius: 14px;
+  background: #FAF6F0;
+  border: 1.5px solid #E6DCD2;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #3B281E;
+}
+
+.zc-live-demo-status.is-ok {
+  background: #ECFDF5;
+  border-color: #1E7550;
+  color: #1E7550;
+}
+
+.zc-live-demo-status.is-warn {
+  background: #FEF3EB;
+  border-color: #C85A17;
+  color: #9a3412;
+}
+
+.zc-live-demo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1.5px solid #E6DCD2;
+  background: #FFFFFF;
+  color: #2C221E;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.zc-live-demo-btn:hover { border-color: #D4A359; transform: translateY(-1px); }
+
+.zc-live-demo-btn.espresso {
+  background: #3B281E;
+  border-color: #D4A359;
+  color: #f3d285;
+}
+
+/* Konfeti / Parıltı Kutlama Kartı */
+.zc-live-demo-toast {
+  display: none;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1E7550 0%, #145338 100%);
+  border: 1.5px solid #a7f3d0;
+  color: #FFFFFF;
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 12px 26px rgba(30, 117, 80, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.zc-live-demo-toast.is-show {
+  display: block;
+  animation: zcDemoPop 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes zcDemoPop {
+  0% { opacity: 0; transform: scale(0.94) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Asansör Mini Stilleri */
+.zc-live-demo-elev {
+  display: grid;
+  grid-template-columns: 54px 210px;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.zc-live-demo-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-right: 3px solid #3B281E;
+  padding: 6px 10px 6px 0;
+  font-weight: 800;
+  font-size: 0.875rem;
+  color: #6B5E57;
+}
+
+.zc-live-demo-shaft {
+  background: #F4EDE4;
+  border: 2px solid #3B281E;
+  border-radius: 12px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.zc-live-demo-floor {
+  min-height: 30px;
+  padding: 4px 10px;
+  border-radius: 7px;
+  border: 1px solid #dfd2c4;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.zc-live-demo-floor.is-cur {
+  background: #3B281E;
+  color: #f3d285;
+  border-color: #D4A359;
+}
+
+/* Alt Dönüşüm Barı (CTA) */
+.zc-live-demo-footer {
+  background: linear-gradient(135deg, #FAF6F0 0%, #F4ECE1 100%);
+  border-top: 1px solid #E6DCD2;
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.zc-live-demo-xp-note {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #3B281E;
+}
+
+.zc-live-demo-cta-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.zc-live-demo-cta-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 11px 22px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3B281E 0%, #2C221E 100%);
+  border: 1.5px solid #D4A359;
+  color: #f3d285 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(44, 34, 30, 0.16);
+  transition: transform 0.16s ease, filter 0.16s ease;
+}
+
+.zc-live-demo-cta-primary:hover { transform: translateY(-2px); filter: brightness(1.06); }
+
+.zc-live-demo-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 11px 20px;
+  border-radius: 12px;
+  background: #FFFFFF;
+  border: 1.5px solid #3B281E;
+  color: #3B281E !important;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.94rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: background-color 0.16s ease, transform 0.16s ease;
+}
+
+.zc-live-demo-cta-secondary:hover { background: #FAF6F0; transform: translateY(-1px); }
+
+@media (max-width: 900px) {
+  .zc-live-demo-body { grid-template-columns: 1fr; padding: 20px; }
+  .zc-live-demo-footer { padding: 18px 20px; }
+  .zc-live-demo-tabs { justify-content: flex-start; }
+}
