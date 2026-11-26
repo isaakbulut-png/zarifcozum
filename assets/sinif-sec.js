@@ -175,7 +175,7 @@
       }
     });
 
-    var heroSrc = 'assets/img/sinif-' + data.sinif + '-hero.webp';
+    var heroSrc = 'assets/img/sinif-' + data.sinif + '-hero.jpg';
     var floatCards = data.floatingKartlar || [];
 
     grid.classList.remove('is-animating');
