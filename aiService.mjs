@@ -1033,31 +1033,37 @@ ${ragBundle.ragText}
 KADEME PEDAGOJİ KURALI (KESİN UYULACAK):
 ${gradeBandRule}
 
-ZORUNLU GÖRSEL (<svg>) VE [Görsel Betimleme] DÖNÜŞÜM KURALI:
-- Sana sağlanan MEB ders kitabı bağlamındaki [Görsel Betimleme] açıklamalarını, sayısal verileri, grafikleri ve etkinlik şekillerini incele; her bir sayfa (1'den 5'e kadar TÜM sayfalar) için konuyu somutlaştıran, etiketli, anlaşılır ve taşmayan (viewBox="0 0 420 200" ayarlı) renkli <svg> çizimleri üret.
+ZORUNLU GERÇEK SVG ÇİZİM KURALI (KRİTİK):
+- Her bir sayfa (1'den 5'e kadar TÜM sayfalar) için "svg_kodu" alanına doğrudan tarayıcıda geometrik şekil / model çizen eksiksiz ve geçerli bir inline <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">...</svg> kodu yaz.
+- ASLA düz metin listesi veya sadece <text> etiketi yazma! Mutlaka <rect>, <line>, <path>, <polygon>, <circle> gibi gerçek çizim elemanları, renkli çizgiler, açı yayları ve üst üste binmeyen okunaklı Türkçe etiketler içersin.
+- Renk paleti: zemin #FAF8F5 veya #FFFFFF, ana çizgiler #0F172A (gece mavisi), vurgu/açı yayı #D97706 (kehribar), yardımcı çizgi #059669 (zümrüt) ve #2563EB (mavi). SVG içinde $ veya KaTeX kullanma, düz Unicode (° , ⊥ , ∥) kullan.
 - ${visualInstruction}
-- Renk paleti: koyu kahve #2c1a0e, terracotta #c2570c, sıcak krem #fbf1e8, zümrüt #059669, mavi #2563eb. Metinler birbirinin üstüne binmesin, viewBox dışına taşmasın.
 
 TEMİZ METİN KURALI (KRİTİK):
-- Metin alanlarında ASLA ham Markdown yıldızları (**kalın** veya *italik*) kullanma! Düz, temiz Türkçe cümleler ve yalnızca matematik formülleri için $...$ veya $$...$$ (LaTeX) kullan.
+- Metin alanlarında ASLA ham Markdown yıldızları (**kalın** veya *italik*) kullanma! Düz, temiz Türkçe cümleler ve yalnızca matematik formülleri için $...$ (LaTeX) kullan.
 
 ÇIKTI FORMATI (KESİNLİKLE SADECE GEÇERLİ JSON DÖNDÜR):
 {
   "title": "Konu için net, motive edici başlık",
   "short_summary": "2-3 cümlelik temiz özet (ham ** veya * yok)",
+  "kazanim_kodu": "${outcomeCode}",
+  "surec_becerileri": ["Akıl Yürütme", "Matematiksel Modelleme", "Matematiksel Temsil"],
   "lessonPages": [
     {
       "pageNumber": 1,
-      "title": "1. Sayfa: Gerçek Hayat Keşfi",
-      "storyOrContext": "MEB ders kitabındaki günlük hayat bağlamına dayalı kısa hikâye/senaryo (2-3 cümle).",
-      "keyRuleBox": "Bu sayfanın temel tanımı veya ana kuralı ($LaTeX$ formüllü, net ve kısa).",
-      "visualSvg": "<svg viewBox=\"0 0 420 200\">...MEB [Görsel Betimleme] verisinden üretilen renkli, etiketli SVG...</svg>",
-      "commonMistakeBox": "Bu aşamada dikkat edilmesi gereken yaygın bir kavram yanılgısı (1-2 cümle).",
-      "miniChallenge": "Öğrencinin hemen zihninde test edeceği 1 mini soru ve parantez içinde kısa cevabı."
+      "baslik": "1. Sayfa: Gerçek Hayat Keşfi",
+      "kesif_hikayesi": "${g}. sınıf seviyesine uygun, günlük hayattan somut 2-3 cümlelik keşif metni.",
+      "altin_kural": "Bu sayfanın net matematik kuralı veya formülü.",
+      "kavram_yanilgisi": "Öğrencilerin bu konuda sık yaptığı 1 tipik hata uyarısı.",
+      "mini_soru": "Öğrencinin kendini test edeceği 1 kısa etkileşimli soru.",
+      "mini_cevap": "Mini sorunun kısa ve net açıklamalı cevabı.",
+      "svg_kodu": "<svg viewBox=\"0 0 400 260\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"400\" height=\"260\" rx=\"12\" fill=\"#FAF8F5\"/>...</svg>",
+      "kazanim_kodu": "${outcomeCode}",
+      "surec_becerileri": ["Akıl Yürütme", "Matematiksel Modelleme"]
     }
   ],
   "practicalNotes": [
-    "Hap Bilgi 1 (temiz metin + $LaTeX$, ham yıldız yok)",
+    "Hap Bilgi 1 (temiz metin, ham yıldız yok)",
     "Hap Bilgi 2",
     "Hap Bilgi 3",
     "Hap Bilgi 4",
@@ -1073,7 +1079,7 @@ NOT: lessonPages dizisi TAM OLARAK 5 sayfa içermelidir:
 3. Sayfa: Adım Adım Çözümlü Örnekler
 4. Sayfa: Sık Yapılan Hatalar ve Stratejiler
 5. Sayfa: Kendini Dene ve Özet Pekiştirme
-Her 5 sayfada da visualSvg dolu ve geçerli <svg viewBox="...">...</svg> olmalıdır. flashcards en az 5 kart içermelidir.`;
+Her 5 sayfada da svg_kodu geçerli ve gerçek geometrik çizim elemanları (<line>, <path>, <rect>, <circle>, <polygon>) içeren <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">...</svg> olmalıdır. flashcards en az 5 kart içermelidir.`;
 
   let response = null;
   let modelName = primaryModel;
@@ -1135,19 +1141,61 @@ Her 5 sayfada da visualSvg dolu ve geçerli <svg viewBox="...">...</svg> olmalı
     return sections.join('\n\n');
   };
 
+  const isValidInlineSvg = (val) => {
+    if (typeof val !== 'string') return false;
+    const s = val.trim();
+    return s.includes('<svg') && s.includes('</svg>') && /<(?:line|path|rect|circle|polygon|polyline|ellipse)\b/i.test(s);
+  };
+
+  let visualRenderer = null;
+  try {
+    const vrMod = await import('./assets/maarif-visual-renderer.js');
+    visualRenderer = vrMod.default || vrMod;
+  } catch (_) {}
+
+  const topSurec = Array.isArray(parsed.surec_becerileri) && parsed.surec_becerileri.length
+    ? parsed.surec_becerileri.map(s => stripRawMarkdownStars(s)).filter(Boolean)
+    : ['Akıl Yürütme', 'Matematiksel Modelleme', 'Matematiksel Temsil'];
+  const topKazanim = stripRawMarkdownStars(parsed.kazanim_kodu || outcomeCode);
+
   const lessonPages = (Array.isArray(parsed.lessonPages) ? parsed.lessonPages : []).slice(0, 5).map((p, idx) => {
-    const rawSvg = typeof p.visualSvg === 'string' && p.visualSvg.includes('<svg')
-      ? p.visualSvg.trim()
-      : (typeof p.svgDiagram === 'string' && p.svgDiagram.includes('<svg') ? p.svgDiagram.trim() : '');
+    const candidateSvg = p.svg_kodu || p.visualSvg || p.svgDiagram || '';
+    let cleanSvg = isValidInlineSvg(candidateSvg) ? candidateSvg.trim() : '';
+
+    const baslik = stripRawMarkdownStars(p.baslik || p.title || defaultTitles[idx] || `${idx + 1}. Sayfa`);
+    const kesif = stripRawMarkdownStars(p.kesif_hikayesi || p.storyOrContext || p.content || '');
+    const altin = stripRawMarkdownStars(p.altin_kural || p.keyRuleBox || '');
+    const yanilgi = stripRawMarkdownStars(p.kavram_yanilgisi || p.commonMistakeBox || '');
+    const miniSoru = stripRawMarkdownStars(p.mini_soru || p.miniChallenge || '');
+    const miniCevap = stripRawMarkdownStars(p.mini_cevap || '');
+    const pageKazanim = stripRawMarkdownStars(p.kazanim_kodu || topKazanim);
+    const pageSurec = Array.isArray(p.surec_becerileri) && p.surec_becerileri.length
+      ? p.surec_becerileri.map(s => stripRawMarkdownStars(s)).filter(Boolean)
+      : topSurec;
+
+    if (!cleanSvg && visualRenderer && typeof visualRenderer.inferVisualSpecFromText === 'function') {
+      const spec = visualRenderer.inferVisualSpecFromText(`${baslik} ${kesif} ${altin}`, subTopic || unitTopic, g);
+      if (spec) cleanSvg = visualRenderer.renderToSvg(spec) || '';
+    }
+
     const pageObj = {
       pageNumber: Number(p.pageNumber) || (idx + 1),
-      title: stripRawMarkdownStars(p.title || defaultTitles[idx] || `${idx + 1}. Sayfa`),
-      storyOrContext: stripRawMarkdownStars(p.storyOrContext || p.content || ''),
-      keyRuleBox: stripRawMarkdownStars(p.keyRuleBox || ''),
-      visualSvg: rawSvg,
-      commonMistakeBox: stripRawMarkdownStars(p.commonMistakeBox || ''),
-      miniChallenge: stripRawMarkdownStars(p.miniChallenge || ''),
-      svgDiagram: rawSvg
+      baslik,
+      title: baslik,
+      kesif_hikayesi: kesif,
+      storyOrContext: kesif,
+      altin_kural: altin,
+      keyRuleBox: altin,
+      kavram_yanilgisi: yanilgi,
+      commonMistakeBox: yanilgi,
+      mini_soru: miniSoru,
+      mini_cevap: miniCevap,
+      miniChallenge: miniCevap ? `${miniSoru} (Cevap: ${miniCevap})` : miniSoru,
+      svg_kodu: cleanSvg,
+      visualSvg: cleanSvg,
+      svgDiagram: cleanSvg,
+      kazanim_kodu: pageKazanim,
+      surec_becerileri: pageSurec
     };
     pageObj.content = composeLegacyContent(pageObj) || stripRawMarkdownStars(p.content || '');
     return pageObj;
@@ -1194,7 +1242,9 @@ Her 5 sayfada da visualSvg dolu ve geçerli <svg viewBox="...">...</svg> olmalı
     themeCode,
     themeTitle: unitTopic,
     subTopicTitle: subTopic,
-    outcome_code: outcomeCode,
+    outcome_code: topKazanim,
+    kazanim_kodu: topKazanim,
+    surec_becerileri: topSurec,
     official_boundary: officialBoundary,
     title: stripRawMarkdownStars(parsed.title || `${subTopic} - Konu Anlatımı`),
     short_summary: stripRawMarkdownStars(parsed.short_summary || ''),

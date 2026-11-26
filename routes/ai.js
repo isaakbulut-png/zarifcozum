@@ -1457,7 +1457,9 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
           subTopicTitle: generated.subTopicTitle || sub_topic,
           unit_topic,
           sub_topic,
-          outcome_code: generated.outcome_code,
+          outcome_code: generated.outcome_code || generated.kazanim_kodu || '',
+          kazanim_kodu: generated.kazanim_kodu || generated.outcome_code || '',
+          surec_becerileri: Array.isArray(generated.surec_becerileri) ? generated.surec_becerileri : ['Akıl Yürütme', 'Matematiksel Modelleme'],
           official_boundary: generated.official_boundary,
           title: generated.title,
           short_summary: generated.short_summary,
@@ -1487,19 +1489,54 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       const themeCode = typeof req.body?.themeCode === 'string' ? req.body.themeCode.trim() : '';
       const title = typeof req.body?.title === 'string' ? req.body.title.trim() : sub_topic;
       const order = Number(req.body?.order) || 0;
-      const outcome_code = typeof req.body?.outcome_code === 'string' ? req.body.outcome_code.trim() : '';
+      const outcome_code = typeof req.body?.outcome_code === 'string'
+        ? req.body.outcome_code.trim()
+        : (typeof req.body?.kazanim_kodu === 'string' ? req.body.kazanim_kodu.trim() : '');
+      const kazanim_kodu = typeof req.body?.kazanim_kodu === 'string' && req.body.kazanim_kodu.trim()
+        ? req.body.kazanim_kodu.trim()
+        : outcome_code;
+      const surec_becerileri = Array.isArray(req.body?.surec_becerileri)
+        ? req.body.surec_becerileri.map(s => String(s || '').trim()).filter(Boolean)
+        : [];
       const short_summary = typeof req.body?.short_summary === 'string' ? req.body.short_summary.trim() : '';
-      const lessonPages = Array.isArray(req.body?.lessonPages) ? req.body.lessonPages.map((p, idx) => ({
-        pageNumber: Number(p?.pageNumber) || (idx + 1),
-        title: String(p?.title || `${idx + 1}. Sayfa`).trim(),
-        storyOrContext: String(p?.storyOrContext || ''),
-        keyRuleBox: String(p?.keyRuleBox || ''),
-        visualSvg: typeof p?.visualSvg === 'string' ? p.visualSvg.trim() : (typeof p?.svgDiagram === 'string' ? p.svgDiagram.trim() : ''),
-        commonMistakeBox: String(p?.commonMistakeBox || ''),
-        miniChallenge: String(p?.miniChallenge || ''),
-        content: String(p?.content || ''),
-        svgDiagram: typeof p?.svgDiagram === 'string' ? p.svgDiagram.trim() : (typeof p?.visualSvg === 'string' ? p.visualSvg.trim() : '')
-      })) : [];
+      const lessonPages = Array.isArray(req.body?.lessonPages) ? req.body.lessonPages.map((p, idx) => {
+        const baslik = String(p?.baslik || p?.title || `${idx + 1}. Sayfa`).trim();
+        const kesif_hikayesi = String(p?.kesif_hikayesi || p?.storyOrContext || '').trim();
+        const altin_kural = String(p?.altin_kural || p?.keyRuleBox || '').trim();
+        const kavram_yanilgisi = String(p?.kavram_yanilgisi || p?.commonMistakeBox || '').trim();
+        const mini_soru = String(p?.mini_soru || p?.miniChallenge || '').trim();
+        const mini_cevap = String(p?.mini_cevap || p?.miniAnswer || '').trim();
+        const svg_kodu = typeof p?.svg_kodu === 'string' && p.svg_kodu.trim()
+          ? p.svg_kodu.trim()
+          : (typeof p?.visualSvg === 'string' && p.visualSvg.trim()
+              ? p.visualSvg.trim()
+              : (typeof p?.svgDiagram === 'string' ? p.svgDiagram.trim() : ''));
+        const pageKazanim = String(p?.kazanim_kodu || kazanim_kodu || '').trim();
+        const pageBeceriler = Array.isArray(p?.surec_becerileri) && p.surec_becerileri.length
+          ? p.surec_becerileri.map(s => String(s || '').trim()).filter(Boolean)
+          : surec_becerileri;
+        return {
+          pageNumber: Number(p?.pageNumber) || (idx + 1),
+          baslik,
+          kesif_hikayesi,
+          altin_kural,
+          kavram_yanilgisi,
+          mini_soru,
+          mini_cevap,
+          svg_kodu,
+          kazanim_kodu: pageKazanim,
+          surec_becerileri: pageBeceriler,
+          title: baslik,
+          storyOrContext: kesif_hikayesi,
+          keyRuleBox: altin_kural,
+          visualSvg: svg_kodu,
+          commonMistakeBox: kavram_yanilgisi,
+          miniChallenge: mini_soru,
+          miniAnswer: mini_cevap,
+          content: String(p?.content || ''),
+          svgDiagram: svg_kodu
+        };
+      }) : [];
       const referenceBookPages = Array.isArray(req.body?.referenceBookPages) ? req.body.referenceBookPages.map(rp => ({
         book: String(rp?.book || '').trim(),
         theme: String(rp?.theme || '').trim(),
@@ -1546,6 +1583,8 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         title,
         order,
         outcome_code,
+        kazanim_kodu,
+        surec_becerileri,
         short_summary,
         detailed_content,
         lessonPages,
