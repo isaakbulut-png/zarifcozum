@@ -508,6 +508,9 @@
 <script src="assets/bento-vitrin.js?v=1" defer></script>
 <link rel="stylesheet" href="assets/live-demo-vitrin.css?v=1">
 <script src="assets/live-demo-vitrin.js?v=1" defer></script>
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js" defer></script>
+<link rel="stylesheet" href="assets/hero-slider.css?v=1">
+<script src="assets/hero-slider.js?v=1" defer></script>
 <link rel="stylesheet" href="assets/home-scale.css?v=1">
 </head>
 <body class="homepage">
@@ -568,131 +571,80 @@
 </header>
 
 <main>
-  <div class="wrap">
-    <section class="hero" data-accent="coral">
-      <div class="hero-copy-slides" aria-live="polite">
-        <article class="hero-copy-slide is-active" data-hero-copy aria-label="1 / 4">
-          <span class="chip chip-primary">KİŞİYE ÖZEL ÇALIŞMA PLANI</span>
-          <h1>Bu hafta 5 hedef, <em>sen kaçını bitireceksin?</em></h1>
-          <p class="lead">Konu hedeflerini takip et, çalışma düzenini koru ve matematikte bir sonraki adımını Bul, çöz, bitir.</p>
-          <div class="cta">
-            <a class="btn btn-primary btn-lg" href="pages/ogrenci-paneli-tanitim.html">Öğrenci panelini gör</a>
-            <a class="btn btn-ghost btn-lg" href="kayit-giris.html?mode=register">Hemen ücretsiz kaydol</a>
+  <section class="zc-hero-section" id="heroSliderSection" aria-label="ZarifÇözüm Öne Çıkan Özellikler">
+    <div class="zc-hero-container">
+      <div class="zc-hero-grid">
+        <!-- Sol Metin Alanı (Çift Tonlu Başlık, Sade Aksiyonlar) -->
+        <div class="zc-hero-copy" id="zcHeroCopy" aria-live="polite">
+          <div class="zc-hero-eyebrow">
+            <span class="zc-hero-eyebrow-dot" aria-hidden="true"></span>
+            <span id="zcHeroEyebrowText">5–12. Sınıf MEB Uyumlu Anlatım</span>
           </div>
-          <p class="small muted hero-footnote">Çalışma planı, konu takibi ve ilerleme tek yerde.</p>
-        </article>
-        <article class="hero-copy-slide" data-hero-copy aria-label="2 / 4" aria-hidden="true">
-          <span class="chip chip-primary">KONU ANLATIMI</span>
-          <h1>Matematiği adım adım <em>öğren.</em></h1>
-          <p class="lead">Maarif Modeli kazanımlarıyla hizalı konu anlatımlarını incele, örnekleri çöz ve öğrendiklerini hemen pekiştir.</p>
-          <div class="cta">
-            <a class="btn btn-primary btn-lg" href="pages/konulari-kesfet-tanitim.html">Konuları keşfet</a>
-            <a class="btn btn-ghost btn-lg" href="kayit-giris.html?mode=register">Hemen ücretsiz kaydol</a>
-          </div>
-          <p class="small muted hero-footnote">Konu, örnek ve pratik bir öğrenme akışında.</p>
-        </article>
-        <article class="hero-copy-slide" data-hero-copy aria-label="3 / 4" aria-hidden="true">
-          <span class="chip chip-success">DENEME VE GELİŞİM</span>
-          <h1>Dün 6 doğru <em>bugün 8. Haydi 10'a!</em></h1>
-          <p class="lead">Optik deneme sınavını çöz, doğru ve yanlışlarını gör; tekrar etmen gereken konuları belirle.</p>
-          <div class="cta">
-            <a class="btn btn-primary btn-lg" href="deneme-sinavi-optik.html">Test Çöz</a>
-            <a class="btn btn-ghost btn-lg" href="kayit-giris.html?mode=register">Hemen ücretsiz kaydol</a>
-          </div>
-          <p class="small muted hero-footnote">Sonuçlarını gör, tekrarını planla, gelişimini izle.</p>
-        </article>
-        <article class="hero-copy-slide" data-hero-copy aria-label="4 / 4" aria-hidden="true">
-          <span class="chip chip-primary">ÖĞRENME ASİSTANI</span>
-          <h1>Takıldın mı? <em>Cevabı vermem, ama yolu gösteririm.</em></h1>
-          <p class="lead">Sorunun cevabını ararken adım adım düşün. Öğrenme asistanı matematik pratiğine destek olsun.</p>
-          <div class="cta">
-            <a class="btn btn-primary btn-lg" href="pages/asistanla-soru-coz-tanitim.html">Asistanla soru çöz</a>
-            <a class="btn btn-ghost btn-lg" href="kayit-giris.html?mode=register">Hemen ücretsiz kaydol</a>
-          </div>
-          <p class="small muted hero-footnote">Kendi hızında dene, ipuçlarıyla çözümünü geliştir.</p>
-        </article>
-      </div>
-      <div class="hero-visual">
-        <img id="homepage-hero-image" class="homepage-hero-image" alt="ZarifÇözüm ana sayfa görseli" hidden>
-        <div class="device">
-          <div class="device-screen">
-            <span class="sample-data-label">Örnek veri</span>
-            <section class="home-carousel" data-home-carousel role="region" aria-roledescription="carousel" aria-label="Öğrenme panosu">
-              <div class="carousel-slides" aria-live="polite">
-                <article class="carousel-slide is-active" data-carousel-slide role="group" aria-roledescription="slayt" aria-label="1 / 4">
-                  <div class="mini-row"><span class="chip chip-live">CANLI</span><span class="xs muted">6-A · Çarpanlar ve Katlar · 19:00</span></div>
-                  <div class="mini-row">
-                    <div class="mini-tile">Bu hafta<strong>4 / 5</strong>hedef tamamlandı</div>
-                    <div class="mini-tile">Test başarısı<strong>%78</strong>son 10 test</div>
-                    <div class="mini-tile">Çalışma serisi<strong>12 gün</strong>devam ediyor</div>
-                  </div>
-                  <div class="mini-tile carousel-progress">
-                    <span class="xs muted">Bu haftaki öğrenme hedefin</span>
-                    <div class="progress"><span style="width:72%"></span></div>
-                    <span class="xs muted">Hedefinin %72'sini tamamladın.</span>
-                  </div>
-                </article>
-                <article class="carousel-slide" data-carousel-slide role="group" aria-roledescription="slayt" aria-label="2 / 4" aria-hidden="true">
-                  <div class="mini-row carousel-slide-heading"><span class="chip chip-primary">KONU TAKİBİ</span><span class="xs muted">6. sınıf matematik</span></div>
-                  <div class="carousel-topic">
-                    <span class="xs muted">MAT.6.1 · SAYILAR VE NİCELİKLER</span>
-                    <strong>Çarpanlar ve Katlar</strong>
-                    <div class="progress"><span style="width:72%"></span></div>
-                    <span class="xs muted">Konu çalışman devam ediyor</span>
-                  </div>
-                  <div class="mini-row">
-                    <div class="mini-tile">Sonraki adım<strong>Örnekleri çöz</strong></div>
-                    <div class="mini-tile">Öğrenme planı<strong>12 konu</strong>bu dönemde</div>
-                  </div>
-                </article>
-                <article class="carousel-slide" data-carousel-slide role="group" aria-roledescription="slayt" aria-label="3 / 4" aria-hidden="true">
-                  <div class="mini-row carousel-slide-heading"><span class="chip chip-success">TEST SONUCU</span><span class="xs muted">Kazanım kontrolü</span></div>
-                  <div class="carousel-score">
-                    <div><span class="xs muted">Çarpanlar ve Katlar</span><strong>8 <small>/ 10 doğru</small></strong></div>
-                    <div class="score-ring-small" aria-hidden="true">80<span>%</span></div>
-                  </div>
-                  <div class="mini-tile carousel-review">
-                    <strong>İlerlemeni gör</strong>
-                    <span class="xs muted">Yanlış yaptığın soruları tekrar çöz, konuyu pekiştir.</span>
-                  </div>
-                </article>
-                <article class="carousel-slide" data-carousel-slide role="group" aria-roledescription="slayt" aria-label="4 / 4" aria-hidden="true">
-                  <div class="mini-row carousel-slide-heading"><span class="chip assistant-accent">ÖĞRENME ASİSTANI</span><span class="xs muted">Adım adım destek</span></div>
-                  <div class="carousel-question">
-                    <span class="xs muted">SORU</span>
-                    <strong>36'nın asal çarpanlarını bul.</strong>
-                  </div>
-                  <div class="carousel-hint">
-                    <span class="hint-mark" aria-hidden="true">?</span>
-                    <p><strong>Bir ipucu</strong><br>Önce en küçük asal sayıya bölmeyi dene.</p>
-                  </div>
-                </article>
-              </div>
-              <div class="carousel-controls">
-                <div class="carousel-indicators" aria-label="Pano seçimi">
-                  <button type="button" data-carousel-to="0" aria-label="1. panoyu göster" aria-current="true"></button>
-                  <button type="button" data-carousel-to="1" aria-label="2. panoyu göster"></button>
-                  <button type="button" data-carousel-to="2" aria-label="3. panoyu göster"></button>
-                  <button type="button" data-carousel-to="3" aria-label="4. panoyu göster"></button>
-                </div>
-                <span class="carousel-count" data-carousel-count aria-live="off">01 / 04</span>
-              </div>
-            </section>
+          <h1 class="zc-hero-title" id="zcHeroTitle">Matematiği <span class='zc-highlight'>adım adım</span> ve görerek öğren.</h1>
+          <p class="zc-hero-desc" id="zcHeroDesc">Konu anlatımı, çözümlü örnek ve pekiştirme soruları tek bir sade öğrenme akışında ilerler.</p>
+          <div class="zc-hero-actions">
+            <a class="zc-hero-btn-primary" id="zcHeroPrimaryBtn" href="#sinif-sec">Sınıfını Seç</a>
+            <a class="zc-hero-btn-secondary" id="zcHeroSecondaryBtn" href="kayit-giris.html?mode=register">Ücretsiz Başla</a>
           </div>
         </div>
-        <div class="float-card a"><strong class="assistant-label">Asistan:</strong> 36'nın asal çarpanlarını bul. Önce en küçük asalı dene.</div>
-        <div class="float-card b"><span class="sample-data-label sample-data-label-inline">Örnek veri</span> <strong>Test tamamlandı</strong> · 8/10 · 2 soru tekrara alındı</div>
+
+        <!-- Sağ Görsel Sahne (Lottie + Özel Animasyonlu SVG/CSS Fallback + Dinamik Yüzen Kartlar) -->
+        <div class="zc-hero-stage-wrap">
+          <div class="zc-hero-stage" role="region" aria-label="Etkileşimli Önizleme Sahnesi">
+            <div class="zc-hero-lottie-layer" id="zcHeroLottieLayer" aria-hidden="true"></div>
+            <div class="zc-hero-fallback-layer" id="zcHeroFallbackLayer"></div>
+          </div>
+
+          <div class="zc-hero-float zc-hero-float-top" id="zcHeroFloatTop">
+            <span class="zc-hero-float-icon" id="zcHeroFloatTopIcon" aria-hidden="true">📐</span>
+            <div class="zc-hero-float-text">
+              <strong class="zc-hero-float-title" id="zcHeroFloatTopTitle">Görsel Anlatım</strong>
+              <span class="zc-hero-float-sub" id="zcHeroFloatTopSub">Adım adım konu akışı</span>
+            </div>
+          </div>
+
+          <div class="zc-hero-float zc-hero-float-bottom" id="zcHeroFloatBottom">
+            <span class="zc-hero-float-icon" id="zcHeroFloatBottomIcon" aria-hidden="true">✨</span>
+            <div class="zc-hero-float-text">
+              <strong class="zc-hero-float-title" id="zcHeroFloatBottomTitle">MEB 2025–2026</strong>
+              <span class="zc-hero-float-sub" id="zcHeroFloatBottomSub">Güncel kazanım sırası</span>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="hero-carousel-arrows" aria-label="Ana sayfa slayt geçişleri">
-        <button class="carousel-arrow" type="button" data-carousel-prev aria-label="Önceki ana sayfa slaytı">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <button class="carousel-arrow" type="button" data-carousel-next aria-label="Sonraki ana sayfa slaytı">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
+
+      <!-- Alt Görünür Numaralı Slayt Belirteci (01 / 04) ve 6 Saniyelik İlerleme Çubuğu -->
+      <div class="zc-hero-navbar" role="tablist" aria-label="Vitrin Slaytları">
+        <div class="zc-hero-counter" aria-live="off">
+          <span class="zc-hero-counter-current" id="zcHeroCounterCurrent">01</span>
+          <span class="zc-hero-counter-total">/ 04</span>
+        </div>
+
+        <div class="zc-hero-tabs">
+          <button type="button" class="zc-hero-tab is-active" role="tab" aria-selected="true" data-slide="0">
+            <span class="zc-hero-tab-num">01</span>
+            <span class="zc-hero-tab-label">Konu</span>
+            <span class="zc-hero-tab-track" aria-hidden="true"><span class="zc-hero-tab-progress"></span></span>
+          </button>
+          <button type="button" class="zc-hero-tab" role="tab" aria-selected="false" data-slide="1">
+            <span class="zc-hero-tab-num">02</span>
+            <span class="zc-hero-tab-label">Deneme</span>
+            <span class="zc-hero-tab-track" aria-hidden="true"><span class="zc-hero-tab-progress"></span></span>
+          </button>
+          <button type="button" class="zc-hero-tab" role="tab" aria-selected="false" data-slide="2">
+            <span class="zc-hero-tab-num">03</span>
+            <span class="zc-hero-tab-label">AI Asistan</span>
+            <span class="zc-hero-tab-track" aria-hidden="true"><span class="zc-hero-tab-progress"></span></span>
+          </button>
+          <button type="button" class="zc-hero-tab" role="tab" aria-selected="false" data-slide="3">
+            <span class="zc-hero-tab-num">04</span>
+            <span class="zc-hero-tab-label">Keşif</span>
+            <span class="zc-hero-tab-track" aria-hidden="true"><span class="zc-hero-tab-progress"></span></span>
+          </button>
+        </div>
       </div>
-    </section>
-  </div>
+    </div>
+  </section>
 
   <section class="gs-section" id="sinif-sec" aria-labelledby="sinif-sec-title">
     <div class="gs-container">
