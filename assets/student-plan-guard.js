@@ -208,16 +208,78 @@
     });
   }
 
+  function readKesifModuProgress() {
+    try {
+      var raw = global.localStorage && global.localStorage.getItem('zc_kesif_modu_v1');
+      var arr = raw ? JSON.parse(raw) : [];
+      var list = Array.isArray(arr) ? arr : [];
+      return { ids: list, count: Math.min(4, list.length), xp: Math.min(4, list.length) * 25 };
+    } catch (e) {
+      return { ids: [], count: 0, xp: 0 };
+    }
+  }
+
+  function syncKesifXpToGamification(ids) {
+    if (!ids.length || !global.ZarifGamification || typeof global.ZarifGamification.awardXp !== 'function') return;
+    try {
+      var syncKey = 'zc_kesif_synced_gamify_v1';
+      var synced = JSON.parse(global.localStorage.getItem(syncKey) || '[]');
+      if (!Array.isArray(synced)) synced = [];
+      var changed = false;
+      ids.forEach(function (id) {
+        if (synced.indexOf(id) === -1) {
+          synced.push(id);
+          changed = true;
+          global.ZarifGamification.awardXp({
+            amount: 25,
+            reason: 'Keşif Modu oyunu tamamlandı',
+            silent: true
+          });
+        }
+      });
+      if (changed) {
+        global.localStorage.setItem(syncKey, JSON.stringify(synced));
+        if (typeof global.ZarifGamification.renderAllMounts === 'function') {
+          global.ZarifGamification.renderAllMounts();
+        }
+      }
+    } catch (e) {}
+  }
+
   function syncKesifModuMenuVisibility() {
     var navItem = document.getElementById('navItemKesifModu');
     var navLink = document.getElementById('navLinkKesifModu');
-    if (!navItem) return;
+    var sideBadge = document.getElementById('kesifModuSideBadge');
+    var dashWidget = document.getElementById('kesifModuDashboardWidget');
+    var dashXpChip = document.getElementById('kesifDashXpChip');
+    var dashSummary = document.getElementById('kesifDashSummary');
+    var dashFill = document.getElementById('kesifDashFill');
+    var dashCta = document.getElementById('kesifDashCta');
+
     var g = Number(planState.registeredGrade);
     var isMiddleSchool = (g >= 5 && g <= 8);
-    navItem.hidden = !(isMiddleSchool || planState.isStaff);
-    if (navLink && isMiddleSchool) {
-      navLink.href = 'kesif-modu.html?sinif=' + g;
+    var shouldShow = isMiddleSchool || planState.isStaff;
+    var targetHref = 'kesif-modu.html?sinif=' + (isMiddleSchool ? g : 5);
+
+    var prog = readKesifModuProgress();
+    syncKesifXpToGamification(prog.ids);
+
+    if (navItem) {
+      navItem.style.display = shouldShow ? '' : 'none';
+      navItem.hidden = !shouldShow;
     }
+    if (navLink) navLink.href = targetHref;
+    if (sideBadge) {
+      sideBadge.textContent = prog.xp > 0 ? (prog.count + '/4 · ' + prog.xp + ' XP') : (prog.count + '/4');
+    }
+
+    if (dashWidget) {
+      dashWidget.style.display = shouldShow ? 'block' : 'none';
+    }
+    if (dashXpChip) dashXpChip.textContent = '⚡ ' + prog.xp + ' Keşif XP';
+    if (dashSummary) dashSummary.textContent = prog.count + ' / 4 Oyun Tamamlandı • ' + prog.xp + ' Keşif XP';
+    if (dashFill) dashFill.style.width = Math.round((prog.count / 4) * 100) + '%';
+    if (dashCta) dashCta.href = targetHref;
   }
 
   function applyAllLocks() {
@@ -280,7 +342,13 @@
 
   function init() {
     refreshFromServer();
-    global.addEventListener('focus', refreshFromServer);
+    global.addEventListener('focus', function () {
+      refreshFromServer();
+      syncKesifModuMenuVisibility();
+    });
+    global.addEventListener('storage', function (e) {
+      if (e && e.key === 'zc_kesif_modu_v1') syncKesifModuMenuVisibility();
+    });
     document.addEventListener('visibilitychange', function () {
       if (!document.hidden) refreshFromServer();
     });
