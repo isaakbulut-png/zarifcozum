@@ -18,7 +18,7 @@
         { icon: 'check-circle-2', text: 'Adım Adım Çözümlü Pratik Sorular' },
         { icon: 'flame', text: 'XP ve Günlük Seri ile Oyunlaştırılmış Takip' }
       ],
-      ikincilCta: { label: 'Kazanım Testini Başlat', href: 'ogrenci-paneli.html#kazanim-testi' },
+      ikincilCta: { label: '🧪 5. Sınıf Keşif Laboratuvarı', href: 'pages/matematigi-kesfet.html?sinif=5' },
       floatingKartlar: ['145 XP • 5 Gün Seri 🔥', 'Maarif Modeli %100 Uyumlu', 'AI Mentör: 7/24 Destek'],
       gorselBaslik: 'Ortaokul Başlangıç Stüdyosu',
       gorselAlt: 'Sayılar, Kesirler ve Geometrik Şekiller'
@@ -35,7 +35,7 @@
         { icon: 'sparkles', text: 'Anında Çözüm Gösteren Soru Pratiği' },
         { icon: 'bar-chart-3', text: 'Konu Sonu Kazanım Testi ve Başarı Karnesi' }
       ],
-      ikincilCta: { label: 'Kazanım Testini Başlat', href: 'ogrenci-paneli.html#kazanim-testi' },
+      ikincilCta: { label: '🧪 6. Sınıf Keşif Laboratuvarı', href: 'pages/matematigi-kesfet.html?sinif=6' },
       floatingKartlar: ['Adım Adım Çözüm Desteği', 'Başarı Grafiği & Karne', 'MEB Maarif Uyumlu'],
       gorselBaslik: 'Kavram & Mantık Atölyesi',
       gorselAlt: 'Çarpanlar, Kesirler ve Cebirsel İfadeler'
@@ -52,7 +52,7 @@
         { icon: 'play-circle', text: 'Maarif Modeli Uyumlu Video Dersler' },
         { icon: 'calendar-check', text: 'Haftalık Kişisel Çalışma Takvimi' }
       ],
-      ikincilCta: { label: 'Çalışma Planımı Oluştur', href: 'pages/kisisel-calisma-plani.html' },
+      ikincilCta: { label: '🧪 7. Sınıf Keşif Laboratuvarı', href: 'pages/matematigi-kesfet.html?sinif=7' },
       floatingKartlar: ['Beceri Temelli Sorular', 'AI Mentör 7/24 Yanında', 'Yeni Maarif Programı'],
       gorselBaslik: 'Yeni Nesil Problem Kampı',
       gorselAlt: 'Rasyonel Sayılar, Oran-Orantı ve Denklemler'
@@ -69,7 +69,7 @@
         { icon: 'bot', text: 'AI Mentör ile Takıldığı Soruda Anında Destek' },
         { icon: 'trending-up', text: 'Kazanım Bazlı Eksik Kapatma ve Başarı Analizi' }
       ],
-      ikincilCta: { label: 'Kazanım Testini Başlat', href: 'ogrenci-paneli.html#kazanim-testi' },
+      ikincilCta: { label: '🧪 8. Sınıf Keşif Laboratuvarı', href: 'pages/matematigi-kesfet.html?sinif=8' },
       floatingKartlar: ['Hedef LGS • Net Takibi 🎯', 'AI Mentör: Birlikte Çözelim', 'Türkiye Geneli Deneme'],
       gorselBaslik: 'LGS Strateji & Net Merkezi',
       gorselAlt: 'Üslü-Kareköklü İfadeler ve Olasılık'

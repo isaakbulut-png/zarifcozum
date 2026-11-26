@@ -422,6 +422,120 @@
   color: #3B281E;
 }
 
+/* 5-8 Keşif Laboratuvarı & 9-12 Çalışma Planı Hızlı Erişim Şeridi */
+.gs-lab-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.gs-lab-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border-radius: 20px;
+  background: #FFFFFF;
+  border: 1.5px solid #EAE0D5;
+  box-shadow: 0 12px 30px rgba(44, 34, 30, 0.06);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gs-lab-banner:hover {
+  transform: translateY(-2px);
+  border-color: #D4A359;
+  box-shadow: 0 16px 36px rgba(44, 34, 30, 0.1);
+}
+
+.gs-lab-banner.is-lab {
+  background: linear-gradient(135deg, #3B281E 0%, #2C221E 100%);
+  border-color: #D4A359;
+  color: #FAF6F0;
+}
+
+.gs-lab-ico {
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: rgba(212, 163, 89, 0.18);
+  border: 1px solid rgba(212, 163, 89, 0.45);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.gs-lab-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.gs-lab-tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #D4A359;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.gs-lab-copy h3 {
+  margin: 0 0 4px;
+  font-family: 'Plus Jakarta Sans', Georgia, serif;
+  font-size: 1.06rem;
+  color: #2C221E;
+}
+
+.gs-lab-banner.is-lab .gs-lab-copy h3 {
+  color: #FFFFFF;
+}
+
+.gs-lab-copy p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #6B5E57;
+  line-height: 1.48;
+}
+
+.gs-lab-banner.is-lab .gs-lab-copy p {
+  color: #E8DFD5;
+}
+
+.gs-lab-cta {
+  padding: 10px 16px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #D4A359, #b8883b);
+  color: #2C221E !important;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform 0.16s ease, filter 0.16s ease;
+}
+
+.gs-lab-cta.secondary {
+  background: #3B281E;
+  color: #FAF6F0 !important;
+}
+
+.gs-lab-cta:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+@media (max-width: 960px) {
+  .gs-lab-strip {
+    grid-template-columns: 1fr;
+  }
+  .gs-lab-banner {
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 960px) {
   .gs-showcase {
     padding: 28px 24px;
