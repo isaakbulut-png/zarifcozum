@@ -3,948 +3,1531 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#fbf1e7">
-  <title>5-8. Sınıf: Matematiği Keşfet | Zarif Çözüm</title>
+  <meta name="theme-color" content="#FAF6F0">
+  <title>5–8. Sınıf: Matematiği Keşfet Laboratuvarı | ZarifÇözüm</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --cream: #fbf1e7;
-      --paper: #fffaf5;
-      --peach: #f5e2d0;
-      --peach2: #f8eadc;
-      --brown: #493020;
-      --brown2: #67472f;
-      --muted: #806b5c;
-      --gold: #b88a28;
-      --gold2: #e9d3a5;
-      --line: #ead8c5;
-      --green: #2e7d32;
-      --green-bg: #e8f5e9;
-      --blue: #1565c0;
-      --blue-bg: #e3f2fd;
-      --purple: #6a1b9a;
-      --purple-bg: #f3e5f5;
-      --orange: #e65100;
-      --orange-bg: #fff3e0;
-      --shadow: 0 16px 40px rgba(76,48,27,.08);
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-      color: var(--brown);
+      --bg: #FAF6F0;
+      --surface: #FFFFFF;
+      --surface-soft: #FDFBF7;
+      --border: #EAE0D5;
+      --text: #2C221E;
+      --muted: #6B5E57;
+      --gold: #C59B47;
+      --espresso: #3B281E;
+      --shadow: 0 10px 30px rgba(44, 34, 30, 0.05);
+      --g5: #2B6CB0; --g5-bg: #EBF4FF;
+      --g6: #D97706; --g6-bg: #FEF3C7;
+      --g7: #1E7550; --g7-bg: #ECFDF5;
+      --g8: #B83B2B; --g8-bg: #FEF2F2;
+      --active-accent: #2B6CB0;
+      --active-bg: #EBF4FF;
     }
+
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      background: radial-gradient(ellipse at 90% 0%, #fff9f1 0, transparent 40%), var(--cream);
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       line-height: 1.6;
     }
+
     a { color: inherit; }
-    .wrap {
-      max-width: 1040px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
+    .wrap { max-width: 1140px; margin: 0 auto; padding: 0 20px; }
+
+    /* Üst Bar */
     .topbar {
-      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(250, 246, 240, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbar-inner {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 16px;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 0;
       flex-wrap: wrap;
     }
     .brand {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 10px;
       text-decoration: none;
     }
-    .brand-logo {
-      width: 44px;
-      height: 44px;
-      object-fit: contain;
+    .brand img { width: 38px; height: 38px; object-fit: contain; }
+    .brand-copy strong {
+      display: block;
+      font-family: 'Plus Jakarta Sans', Georgia, serif;
+      font-size: 1.12rem;
+      color: var(--text);
+      line-height: 1.1;
     }
-    .brand strong {
-      font: 600 20px Georgia, serif;
-      letter-spacing: -.02em;
+    .brand-copy small {
+      display: block;
+      font-size: 0.72rem;
+      color: #9a7736;
+      font-weight: 700;
     }
-    .brand strong span { color: var(--gold); }
-    .crumb {
-      font-size: 13px;
-      color: var(--muted);
-    }
-    .crumb a { text-decoration: none; }
-    .crumb a:hover { text-decoration: underline; color: var(--brown); }
-    .crumb b { color: var(--gold); font-weight: 600; }
-
-    /* Hero */
-    .hero {
-      display: grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 32px;
-      align-items: center;
-      padding: 36px 0 28px;
-    }
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      background: #fff8ee;
-      border: 1px solid var(--gold2);
-      border-radius: 99px;
-      color: #8c6c2c;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-    .eyebrow::before {
-      content: "";
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--gold);
-    }
-    h1 {
-      font: 600 clamp(32px, 4.5vw, 44px)/1.15 Georgia, serif;
-      letter-spacing: -.03em;
-      margin: 16px 0 12px;
-    }
-    h1 em {
-      color: var(--gold);
-      font-style: normal;
-    }
-    .lead {
-      font-size: 16px;
-      color: #705c4d;
-      margin: 0 0 20px;
-      max-width: 580px;
-    }
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .chip {
-      padding: 6px 12px;
-      border: 1px solid var(--line);
-      border-radius: 99px;
-      background: var(--paper);
-      font-size: 12px;
-      color: #715b49;
-      font-weight: 500;
-    }
-    .hero-art {
-      min-height: 270px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(145deg, #fffaf4, #f5e2ce);
-      border: 1px solid #edd9c3;
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: var(--shadow);
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-art::before {
-      content: "";
-      position: absolute;
-      top: -40px;
-      right: -40px;
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      background: rgba(184,138,40,.08);
-      pointer-events: none;
-    }
-    .hero-art-icon {
-      font-size: 44px;
-      margin-bottom: 12px;
-      filter: drop-shadow(0 4px 12px rgba(184,138,40,.25));
-    }
-    .hero-art h3 {
-      font: 600 20px Georgia, serif;
-      margin: 0 0 6px;
-    }
-    .hero-art p {
-      font-size: 13px;
-      color: var(--muted);
-      margin: 0 0 16px;
-      max-width: 280px;
-    }
-
-    /* Buttons */
+    .top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 11px 18px;
-      border-radius: 12px;
-      background: var(--brown);
-      color: #fffaf5;
+      gap: 7px;
+      padding: 9px 16px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
       text-decoration: none;
-      font-weight: 700;
-      font-size: 13px;
       cursor: pointer;
-      border: none;
-      transition: all .2s ease;
+      transition: transform 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
     }
-    .btn:hover {
-      background: var(--brown2);
-      transform: translateY(-1px);
-    }
-    .btn.secondary {
-      background: #f5e5d5;
-      border: 1px solid var(--line);
-      color: var(--brown);
-    }
-    .btn.secondary:hover {
-      background: #ebd8c5;
-    }
-    .btn.gold {
-      background: linear-gradient(135deg, #c59734, #9f731c);
-      color: #fff;
-    }
-    .btn.gold:hover {
-      background: linear-gradient(135deg, #b88a28, #8a6214);
-    }
-    .btn.sm {
-      padding: 8px 14px;
-      font-size: 12px;
-      border-radius: 8px;
+    .btn:hover { transform: translateY(-1px); border-color: var(--gold); }
+    .btn-primary {
+      background: linear-gradient(135deg, #4A3B32 0%, #2C211B 100%);
+      color: #FFFFFF;
+      border-color: var(--gold);
     }
 
-    /* Section & Cards */
-    .section {
-      padding: 32px 0;
+    /* A. Hero Alanı */
+    .hero {
+      padding: 40px 0 28px;
     }
-    .section-head {
-      margin-bottom: 24px;
-    }
-    .section-head h2 {
-      font: 600 clamp(24px, 3.2vw, 32px) Georgia, serif;
-      letter-spacing: -.02em;
-      margin: 0 0 6px;
-    }
-    .section-head p {
-      font-size: 14px;
-      color: var(--muted);
-      margin: 0;
-    }
-    .card {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 22px;
-      box-shadow: 0 4px 16px rgba(76,48,27,.04);
-      transition: transform .2s, box-shadow .2s;
-    }
-    .card:hover {
-      box-shadow: 0 8px 24px rgba(76,48,27,.08);
-    }
-
-    /* Interactive Lab */
-    .lab-container {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      overflow: hidden;
+    .hero-card {
+      background: linear-gradient(135deg, #FFFFFF 0%, #FDFBF7 100%);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 34px 36px;
       box-shadow: var(--shadow);
-    }
-    .lab-tabs {
-      display: flex;
-      background: #f4e8dc;
-      border-bottom: 1px solid var(--line);
-      overflow-x: auto;
-    }
-    .lab-tab {
-      padding: 14px 20px;
-      border: none;
-      background: transparent;
-      font-weight: 700;
-      font-size: 13px;
-      color: #7a6352;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 3px solid transparent;
-      white-space: nowrap;
-      transition: all .2s;
-    }
-    .lab-tab:hover {
-      color: var(--brown);
-      background: rgba(255,255,255,.4);
-    }
-    .lab-tab.active {
-      color: var(--brown);
-      background: var(--paper);
-      border-bottom-color: var(--gold);
-    }
-    .lab-content {
-      padding: 28px;
-    }
-    .lab-panel {
-      display: none;
-    }
-    .lab-panel.active {
-      display: block;
-    }
-
-    /* Simulator 1: Fractions */
-    .sim-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.85fr);
       gap: 28px;
       align-items: center;
     }
-    .sim-controls {
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 13px;
+      border-radius: 999px;
+      background: #FAF6F0;
+      border: 1px solid rgba(197, 155, 71, 0.45);
+      color: #8c6821;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .hero h1 {
+      margin: 0 0 12px;
+      font-family: 'Plus Jakarta Sans', Georgia, serif;
+      font-size: clamp(1.8rem, 3.3vw, 2.55rem);
+      line-height: 1.18;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      max-width: 600px;
+    }
+
+    /* Canlı Keşif İlerlemesi & XP Kartı */
+    .progress-widget {
+      background: linear-gradient(135deg, #3B281E 0%, #2C221E 100%);
+      border: 1.5px solid var(--gold);
+      border-radius: 18px;
+      padding: 20px 22px;
+      color: #FAF6F0;
+      box-shadow: 0 14px 30px rgba(44, 34, 30, 0.16);
+    }
+    .pw-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .pw-title {
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #f3d285;
+    }
+    .pw-xp {
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(197, 155, 71, 0.22);
+      border: 1px solid rgba(197, 155, 71, 0.5);
+      color: #fde68a;
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+    .pw-stat {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-bottom: 10px;
+    }
+    .pw-track {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .pw-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #C59B47, #fde68a);
+      transition: width 0.35s ease;
+    }
+    .pw-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      color: #e4d7ca;
+    }
+    .pw-reset {
+      background: none;
+      border: none;
+      color: #f3d285;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    /* B. Kademeli Keşif Rotaları (4 Kart) */
+    .section-title {
+      margin: 26px 0 16px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .section-title h2 {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', Georgia, serif;
+      font-size: 1.38rem;
+      color: var(--text);
+    }
+    .section-title span { font-size: 0.86rem; color: var(--muted); }
+
+    .route-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .route-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: left;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .route-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 32px rgba(44, 34, 30, 0.09);
+    }
+    .route-card.is-active {
+      border-width: 2.5px;
+      border-color: var(--card-accent);
+      background: var(--card-bg);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 34px rgba(44, 34, 30, 0.12);
+    }
+    .rc-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .rc-badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--card-bg);
+      color: var(--card-accent);
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+    .route-card.is-active .rc-badge {
+      background: var(--card-accent);
+      color: #FFFFFF;
+    }
+    .rc-done {
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: var(--muted);
+    }
+    .route-card h3 {
+      margin: 2px 0 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.02rem;
+      color: var(--text);
+    }
+    .route-card p {
+      margin: 0;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.48;
+      flex: 1;
+    }
+    .rc-cta {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--card-accent);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* C. İnteraktif Keşif Laboratuvarı */
+    .lab-shell {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-top: 5px solid var(--active-accent);
+      border-radius: 24px;
+      padding: 28px 30px;
+      box-shadow: var(--shadow);
+      margin-bottom: 36px;
+      transition: border-color 0.25s ease;
+    }
+    .lab-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 22px;
+    }
+    .lab-header h2 {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', Georgia, serif;
+      font-size: 1.35rem;
+      color: var(--text);
+    }
+    .lab-header p { margin: 3px 0 0; font-size: 0.86rem; color: var(--muted); }
+
+    .lab-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .lab-tab {
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--surface-soft);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .lab-tab:hover { border-color: var(--active-accent); }
+    .lab-tab.is-active {
+      background: var(--active-accent);
+      border-color: var(--active-accent);
+      color: #FFFFFF;
+      box-shadow: 0 6px 16px rgba(44, 34, 30, 0.14);
+    }
+
+    .lab-stage {
+      animation: labFadeIn 0.32s ease;
+    }
+    @keyframes labFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .lab-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+      gap: 24px;
+      align-items: start;
+    }
+    .lab-visual-box {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      min-height: 290px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .lab-controls-box {
       display: flex;
       flex-direction: column;
       gap: 14px;
     }
-    .control-row {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+    .ctrl-card {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
     }
-    .control-row label {
-      font-size: 13px;
-      font-weight: 700;
-      color: #614a38;
+    .ctrl-label {
       display: flex;
       justify-content: space-between;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
     }
-    .sim-range {
+    .ctrl-label strong { color: var(--active-accent); }
+    input[type="range"] {
       width: 100%;
-      accent-color: var(--gold);
+      accent-color: var(--active-accent);
       cursor: pointer;
+      height: 8px;
     }
-    .sim-display {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 20px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
-    .fraction-bar-box {
-      width: 100%;
-      height: 38px;
-      background: #f0e6dc;
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip-btn {
+      padding: 8px 13px;
       border-radius: 10px;
-      overflow: hidden;
-      display: flex;
-      border: 2px solid var(--line);
+      border: 1.5px solid var(--border);
+      background: #FFFFFF;
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.14s ease;
     }
-    .fraction-bar-part {
-      height: 100%;
-      transition: background-color .2s;
-      border-right: 1px solid rgba(255,255,255,.6);
-    }
-    .fraction-bar-part.filled {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-    }
-    .fraction-badge {
-      font: 700 24px Georgia, serif;
-      color: var(--brown);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .fraction-math {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      vertical-align: middle;
-      line-height: 1;
-      font-size: 20px;
-    }
-    .fraction-math span:first-child {
-      border-bottom: 2px solid var(--brown);
-      padding-bottom: 2px;
-      width: 100%;
-      text-align: center;
-    }
+    .chip-btn:hover { border-color: var(--active-accent); color: var(--active-accent); }
+    .chip-btn.is-on { background: var(--active-accent); border-color: var(--active-accent); color: #FFFFFF; }
 
-    /* Simulator 2: Angle */
-    .angle-canvas-wrap {
-      width: 180px;
-      height: 180px;
-      margin: 0 auto;
-      position: relative;
-    }
-    .angle-info-box {
+    .metrics-row {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
       width: 100%;
-      margin-top: 8px;
     }
-    .angle-pill {
-      background: #fdf5ea;
-      border: 1px solid var(--gold2);
-      border-radius: 10px;
-      padding: 8px;
-      font-size: 12px;
+    .metric-pill {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
       text-align: center;
     }
-    .angle-pill strong {
-      display: block;
-      color: var(--gold);
-      font-size: 15px;
-    }
+    .metric-pill span { display: block; font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+    .metric-pill strong { display: block; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.15rem; color: var(--text); margin-top: 2px; }
 
-    /* Simulator 3: Ratio recipe */
-    .recipe-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 14px;
-    }
-    .recipe-item {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
-    }
-    .recipe-item b {
-      display: block;
-      font-size: 18px;
-      color: var(--brown);
-      margin-top: 4px;
-    }
-
-    /* Grade Grid */
-    .grade-cards {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-    .grade-card {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform .2s, box-shadow .2s;
-    }
-    .grade-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(76,48,27,.09);
-    }
-    .grade-num {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      font: 700 20px Georgia, serif;
-      margin-bottom: 12px;
-    }
-    .grade-num.c5 { background: #e0f2fe; color: #0369a1; }
-    .grade-num.c6 { background: #fef3c7; color: #b45309; }
-    .grade-num.c7 { background: #dcfce7; color: #15803d; }
-    .grade-num.c8 { background: #fee2e2; color: #b91c1c; }
-    .grade-card h3 {
-      font: 600 17px Georgia, serif;
-      margin: 0 0 6px;
-    }
-    .grade-card p {
-      font-size: 12px;
-      color: var(--muted);
-      margin: 0 0 16px;
-      flex-grow: 1;
-    }
-    .grade-card .tag {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 99px;
-      background: #f5e8d9;
-      color: #7b5b29;
-      display: inline-block;
-      margin-bottom: 8px;
-      align-self: flex-start;
-    }
-
-    /* FAQ Q&A */
-    .qa-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    .qa-card {
-      background: var(--paper);
-      border: 1px solid var(--line);
+    /* Mini Keşif Görevi Kutusu */
+    .mission-box {
+      margin-top: 20px;
+      padding: 16px 20px;
       border-radius: 16px;
-      padding: 18px 20px;
-    }
-    .qa-card h4 {
-      margin: 0 0 8px;
-      font: 600 16px Georgia, serif;
-      color: var(--brown);
+      background: var(--active-bg);
+      border: 1.5px solid var(--active-accent);
       display: flex;
       align-items: center;
-      gap: 8px;
-    }
-    .qa-card h4::before {
-      content: "💡";
-      font-size: 16px;
-    }
-    .qa-card p {
-      font-size: 13px;
-      color: #6a5647;
-      margin: 0;
-      line-height: 1.5;
-    }
-
-    /* CTA Section */
-    .cta-banner {
-      background: linear-gradient(135deg, #493020, #2f1d11);
-      color: #fffaf5;
-      border-radius: 24px;
-      padding: 36px 32px;
-      text-align: center;
-      box-shadow: var(--shadow);
-      margin-top: 16px;
-    }
-    .cta-banner h2 {
-      font: 600 clamp(24px, 3.5vw, 34px) Georgia, serif;
-      margin: 0 0 10px;
-    }
-    .cta-banner p {
-      max-width: 540px;
-      margin: 0 auto 24px;
-      font-size: 15px;
-      color: #d8c4b2;
-    }
-    .cta-btns {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
+      justify-content: space-between;
+      gap: 14px;
       flex-wrap: wrap;
     }
-
-    /* Responsive */
-    @media (max-width: 820px) {
-      .hero { grid-template-columns: 1fr; }
-      .sim-grid { grid-template-columns: 1fr; }
-      .grade-cards { grid-template-columns: 1fr 1fr; }
-      .qa-grid { grid-template-columns: 1fr; }
+    .mission-box.is-done {
+      background: #ECFDF5;
+      border-color: #10B981;
     }
-    @media (max-width: 520px) {
-      .grade-cards { grid-template-columns: 1fr; }
-      .recipe-grid { grid-template-columns: 1fr; }
+    .mission-text strong {
+      display: block;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--active-accent);
+      margin-bottom: 2px;
+    }
+    .mission-box.is-done .mission-text strong { color: #059669; }
+    .mission-text p { margin: 0; font-size: 0.9rem; font-weight: 600; color: var(--text); }
+    .mission-status {
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .mission-box.is-done .mission-status {
+      background: #059669;
+      border-color: #059669;
+      color: #FFFFFF;
+    }
+
+    /* Deney Özel Stilleri */
+    /* 5.2 Alan & Çevre 6x6 Izgara */
+    .area-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 44px);
+      gap: 5px;
+      touch-action: manipulation;
+    }
+    .area-cell {
+      width: 44px;
+      height: 44px;
+      border-radius: 9px;
+      border: 1.5px solid #d9cbbd;
+      background: #FFFFFF;
+      cursor: pointer;
+      transition: background-color 0.14s ease, transform 0.12s ease;
+    }
+    .area-cell.is-filled {
+      background: #2B6CB0;
+      border-color: #1e4e8c;
+      transform: scale(0.96);
+    }
+
+    /* 6.1 Eratosthenes 1-50 Tablosu */
+    .sieve-grid {
+      display: grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 5px;
+      width: 100%;
+    }
+    .sieve-cell {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #FFFFFF;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: all 0.22s ease;
+    }
+    .sieve-cell.is-one { opacity: 0.35; background: #f3ece4; }
+    .sieve-cell.is-elim { opacity: 0.24; text-decoration: line-through; background: #f5efe8; transform: scale(0.92); }
+    .sieve-cell.is-prime-glow {
+      background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+      border-color: #D97706;
+      color: #92400E;
+      box-shadow: 0 3px 10px rgba(217, 119, 6, 0.25);
+    }
+
+    /* 6.2 Mutfak Oran Barları */
+    .recipe-list { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+    .recipe-row { background: #FFFFFF; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; }
+    .recipe-top { display: flex; justify-content: space-between; font-size: 0.86rem; font-weight: 700; margin-bottom: 5px; }
+    .recipe-bar { height: 8px; border-radius: 999px; background: #f3ebe2; overflow: hidden; }
+    .recipe-fill { height: 100%; background: linear-gradient(90deg, #D97706, #F59E0B); border-radius: 999px; transition: width 0.25s ease; }
+
+    /* D. Zarif AI Merak Köşesi */
+    .curiosity-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .curiosity-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .curiosity-card h3 {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1rem;
+      color: var(--text);
+    }
+    .curiosity-card p {
+      margin: 0;
+      font-size: 0.86rem;
+      color: var(--muted);
+      flex: 1;
+    }
+    .curiosity-btn {
+      align-self: flex-start;
+      margin-top: 6px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(197, 155, 71, 0.55);
+      background: #FAF6F0;
+      color: #3B281E;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+    .curiosity-btn:hover { background: #3B281E; color: #f3d285; border-color: #3B281E; }
+
+    /* Alt Katalog Bandı */
+    .footer-cta {
+      background: linear-gradient(135deg, #3B281E 0%, #2C221E 100%);
+      border: 1px solid var(--gold);
+      border-radius: 20px;
+      padding: 26px 30px;
+      color: #FAF6F0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+    .footer-cta h3 { margin: 0 0 4px; font-family: 'Plus Jakarta Sans', Georgia, serif; font-size: 1.2rem; color: #FFFFFF; }
+    .footer-cta p { margin: 0; font-size: 0.86rem; color: #e4d7ca; }
+    .btn-gold {
+      background: linear-gradient(135deg, #C59B47, #b08635);
+      color: #2C221E;
+      border: none;
+      padding: 11px 20px;
+      border-radius: 12px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    @media (max-width: 960px) {
+      .hero-card, .lab-grid, .curiosity-grid { grid-template-columns: 1fr; }
+      .route-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 600px) {
+      .hero-card, .lab-shell { padding: 20px 18px; }
+      .route-grid { grid-template-columns: 1fr; }
+      .area-grid { grid-template-columns: repeat(6, 38px); }
+      .area-cell { width: 38px; height: 38px; }
+      .sieve-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .metrics-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-<body data-home="/" data-breadcrumb="Matematiği Keşfet">
+<body>
 
-  <!-- Topbar -->
-  <header class="wrap topbar">
-    <a class="brand" href="/" aria-label="ZarifÇözüm ana sayfa">
-      <img class="brand-logo" src="../assets/brand-mark.png" alt="ZarifÇözüm">
-      <strong>Zarif<span>Çözüm</span></strong>
-    </a>
-    <div class="crumb">
-      <a href="/">Ana Sayfa</a> › 5-8. Sınıf › <b>Matematiği Keşfet</b>
+  <!-- Üst Menü -->
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="../index.html">
+        <img src="../assets/brand-mark.png" alt="ZarifÇözüm">
+        <span class="brand-copy">
+          <strong>ZarifÇözüm</strong>
+          <small>İnteraktif Keşif Laboratuvarı</small>
+        </span>
+      </a>
+      <div class="top-actions">
+        <a class="btn" href="../index.html">← Ana Sayfa</a>
+        <a class="btn btn-primary" href="../kayit-giris.html?mode=register">Ücretsiz Kayıt Ol →</a>
+      </div>
     </div>
   </header>
 
   <main class="wrap">
-    <!-- Hero Section -->
-    <section class="hero">
+    <!-- A. HERO ALANI -->
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-card">
+        <div>
+          <span class="hero-kicker">🧪 5–8. Sınıf Etkileşimli Matematik Stüdyosu</span>
+          <h1 id="heroTitle">Matematiği Korkmadan, Görerek Keşfet.</h1>
+          <p>Formülleri ezberlemek yerine dokun, kaydır ve kendi gözünle gör! 5. sınıftan 8. sınıfa kadar her seviye için özel hazırlanmış 8 interaktif deneyde görevleri tamamla ve Keşif XP kazan.</p>
+        </div>
+
+        <aside class="progress-widget" aria-live="polite">
+          <div class="pw-top">
+            <span class="pw-title">🏅 Keşif İlerlemesi</span>
+            <span class="pw-xp" id="xpBadge">0 Keşif XP</span>
+          </div>
+          <div class="pw-stat" id="progressStat">Keşif Rozetin: 0/8 Deney Tamamlandı</div>
+          <div class="pw-track"><div class="pw-fill" id="progressBarFill"></div></div>
+          <div class="pw-foot">
+            <span id="progressHint">İlk görevini tamamla, +25 XP kazan!</span>
+            <button type="button" class="pw-reset" id="resetProgressBtn">Sıfırla</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- B. KADEMELİ KEŞİF ROTALARI (5–8. SINIF) -->
+    <section aria-labelledby="routesTitle">
+      <div class="section-title">
+        <h2 id="routesTitle">Kademeli Keşif Rotaları (5–8. Sınıf)</h2>
+        <span>Bir sınıf seç, altındaki laboratuvar anında o sınıfın deneylerine geçsin.</span>
+      </div>
+
+      <div class="route-grid" id="routeGrid">
+        <button type="button" class="route-card is-active" data-route-grade="5" style="--card-accent:var(--g5);--card-bg:var(--g5-bg);">
+          <div class="rc-top"><span class="rc-badge">5. Sınıf</span><span class="rc-done" id="rcDone5">0/2 Tamamlandı</span></div>
+          <h3>Temel Sayılar &amp; Geometri</h3>
+          <p>Kesir dilimlerini somutlaştır, birim kare tahtasında alan ile çevre farkını keşfet.</p>
+          <span class="rc-cta">5. Sınıf Deneylerini Aç ↓</span>
+        </button>
+
+        <button type="button" class="route-card" data-route-grade="6" style="--card-accent:var(--g6);--card-bg:var(--g6-bg);">
+          <div class="rc-top"><span class="rc-badge">6. Sınıf</span><span class="rc-done" id="rcDone6">0/2 Tamamlandı</span></div>
+          <h3>Asal Sayılar &amp; Oran</h3>
+          <p>Eratosthenes kalburuyla asalları yakala, oran-orantı mutfağında tarif ölçekle.</p>
+          <span class="rc-cta">6. Sınıf Deneylerini Aç ↓</span>
+        </button>
+
+        <button type="button" class="route-card" data-route-grade="7" style="--card-accent:var(--g7);--card-bg:var(--g7-bg);">
+          <div class="rc-top"><span class="rc-badge">7. Sınıf</span><span class="rc-done" id="rcDone7">0/2 Tamamlandı</span></div>
+          <h3>Tam Sayılar &amp; Cebir</h3>
+          <p>Canlı denklem terazisini dengele, yön pusulasıyla negatif sayıların mantığını gör.</p>
+          <span class="rc-cta">7. Sınıf Deneylerini Aç ↓</span>
+        </button>
+
+        <button type="button" class="route-card" data-route-grade="8" style="--card-accent:var(--g8);--card-bg:var(--g8-bg);">
+          <div class="rc-top"><span class="rc-badge">8. Sınıf · LGS</span><span class="rc-done" id="rcDone8">0/2 Tamamlandı</span></div>
+          <h3>Karekök &amp; Eğim</h3>
+          <p>Kare alanından kök değerine yaklaş, gerçek hayat rampa eğimini simüle et.</p>
+          <span class="rc-cta">8. Sınıf Deneylerini Aç ↓</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- C. İNTERAKTİF KEŞİF LABORATUVARI -->
+    <section class="lab-shell" id="labSection" aria-live="polite">
+      <div class="lab-header">
+        <div>
+          <h2 id="labGradeTitle">5. Sınıf Keşif Laboratuvarı</h2>
+          <p id="labGradeSubtitle">Temel Sayılar &amp; Geometri — İki etkileşimli deneyden birini seç ve görevi tamamla.</p>
+        </div>
+        <div class="lab-tabs" id="labTabs" role="tablist"></div>
+      </div>
+
+      <div class="lab-stage" id="labStage"></div>
+    </section>
+
+    <!-- D. ZARİF AI İLE MERAK KÖŞESİ -->
+    <section aria-labelledby="curiosityTitle">
+      <div class="section-title">
+        <h2 id="curiosityTitle">✨ Zarif AI ile Merak Köşesi</h2>
+        <span>Aklına takılan soruyu doğrudan yukarıdaki ilgili deneyde test et!</span>
+      </div>
+
+      <div class="curiosity-grid">
+        <article class="curiosity-card">
+          <h3>🧭 Eksi ile eksinin çarpımı neden artı olur?</h3>
+          <p>Sayı doğrusunda bir negatif sayıyı çıkarmak, geriye dönük adımın yönünü tersine çevirmek demektir — yani ileri gitmek!</p>
+          <button type="button" class="curiosity-btn" data-jump-grade="7" data-jump-exp="1">İlgili Deneyde Test Et ↑</button>
+        </article>
+
+        <article class="curiosity-card">
+          <h3>📐 Karekökler ve irrasyonel sayılar neden tam bitmez?</h3>
+          <p>Alanı tam kare olmayan bir karenin kenar uzunluğu iki tam sayı arasında yer alır; örneğin √50 sayısı 7 ile 8 arasındadır.</p>
+          <button type="button" class="curiosity-btn" data-jump-grade="8" data-jump-exp="0">İlgili Deneyde Test Et ↑</button>
+        </article>
+
+        <article class="curiosity-card">
+          <h3>💎 Asal sayılar neden matematiğin atomlarıdır?</h3>
+          <p>Bütün doğal sayılar asal sayıların çarpımı olarak yazılır. Antik Yunan'dan beri Eratosthenes kalburu bu atomları ayırır.</p>
+          <button type="button" class="curiosity-btn" data-jump-grade="6" data-jump-exp="0">İlgili Deneyde Test Et ↑</button>
+        </article>
+
+        <article class="curiosity-card">
+          <h3>♿ LGS yeni nesil soruları günlük hayatla nasıl bağlanır?</h3>
+          <p>Bir tekerlekli sandalye rampasının eğimi veya merdiven dikliği doğrudan dik üçgenin dikey/yatay oranıyla hesaplanır.</p>
+          <button type="button" class="curiosity-btn" data-jump-grade="8" data-jump-exp="1">İlgili Deneyde Test Et ↑</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- Alt Katalog Linki -->
+    <section class="footer-cta">
       <div>
-        <span class="eyebrow">EZBERE SON · KEŞİF ODAKLI MATEMATİK</span>
-        <h1>Matematiği Korkmadan, <em>Görerek Keşfet.</em></h1>
-        <p class="lead">5, 6, 7 ve 8. sınıf öğrencileri için formülleri ezberlemek yerine arkasındaki mantığı keşfetme alanı. İnteraktif görsel deneyler, günlük hayat modellemeleri ve LGS yeni nesil düşünme alışkanlığı tek çatı altında.</p>
-        <div class="chips">
-          <span class="chip">🎯 Görsel Simülasyonlar</span>
-          <span class="chip">📐 Maarif Modeli Uyumlu</span>
-          <span class="chip">🧩 LGS Beceri Temelli</span>
-          <span class="chip">🤖 Zarif AI Asistanı</span>
-        </div>
+        <h3>Tüm Konu Anlatımları ve Onaylı Testlere Hazır mısın?</h3>
+        <p>Laboratuvarda keşfettiğin kavramları sınıfına özel konu özetleri ve kazanım testleriyle pekiştir.</p>
       </div>
-      <div class="hero-art">
-        <div class="hero-art-icon">🔬</div>
-        <h3>Matematik Laboratuvarı</h3>
-        <p>Sayıları, şekilleri ve oranları hareket ettir; kuralların nasıl çalıştığını gözünle gör.</p>
-        <a class="btn gold" href="#kesif-laboratuvari">Laboratuvarı Dene ↓</a>
-      </div>
-    </section>
-
-    <!-- Interactive Discovery Lab -->
-    <section class="section" id="kesif-laboratuvari">
-      <div class="section-head">
-        <h2>İnteraktif Keşif Laboratuvarı</h2>
-        <p>Formülleri ezberleme; kaydırıcıları hareket ettir ve matematiğin ardındaki ritmi anında keşfet.</p>
-      </div>
-
-      <div class="lab-container">
-        <div class="lab-tabs" role="tablist">
-          <button class="lab-tab active" type="button" data-tab="tab-fractions" role="tab" aria-selected="true">
-            🍰 1. Kesir & Dilim Simülatörü
-          </button>
-          <button class="lab-tab" type="button" data-tab="tab-angles" role="tab" aria-selected="false">
-            🧭 2. Açı & Pusula Deneyi
-          </button>
-          <button class="lab-tab" type="button" data-tab="tab-ratio" role="tab" aria-selected="false">
-            🥣 3. Maarif Günlük Hayat (Oran-Orantı)
-          </button>
-        </div>
-
-        <div class="lab-content">
-          <!-- Tab 1: Fractions -->
-          <div class="lab-panel active" id="tab-fractions" role="tabpanel">
-            <div class="sim-grid">
-              <div class="sim-controls">
-                <div class="control-row">
-                  <label for="fractionDenom">Bütün Kaç Eşit Parçaya Bölünsün? (Payda): <span id="valDenom" style="color:var(--gold)">4</span></label>
-                  <input class="sim-range" id="fractionDenom" type="range" min="2" max="12" value="4">
-                </div>
-                <div class="control-row">
-                  <label for="fractionNum">Kaç Parça Alındı? (Pay): <span id="valNum" style="color:var(--gold)">3</span></label>
-                  <input class="sim-range" id="fractionNum" type="range" min="1" max="4" value="3">
-                </div>
-                <div style="background:#fffaf3;padding:12px;border-radius:10px;border:1px dashed var(--gold2);font-size:13px;color:#715b49">
-                  💡 <b>Keşif Notu:</b> Bir bütünü ne kadar çok parçaya bölerseniz (payda büyürse), her bir dilimin boyutu o kadar küçülür!
-                </div>
-              </div>
-
-              <div class="sim-display">
-                <div class="fraction-badge">
-                  <span>Değer:</span>
-                  <div class="fraction-math">
-                    <span id="dispNum">3</span>
-                    <span id="dispDenom">4</span>
-                  </div>
-                  <span style="font-size:16px;color:var(--muted)">= %<span id="dispPercent">75</span></span>
-                </div>
-                <!-- Visual Bar -->
-                <div class="fraction-bar-box" id="fractionBar"></div>
-                <div style="font-size:12px;color:var(--muted)">Görsel Şerit Modeli (Boyalı alan alınan payı temsil eder)</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tab 2: Angles -->
-          <div class="lab-panel" id="tab-angles" role="tabpanel">
-            <div class="sim-grid">
-              <div class="sim-controls">
-                <div class="control-row">
-                  <label for="angleRange">Açı Derecesi: <span id="valAngle" style="color:var(--gold)">90°</span></label>
-                  <input class="sim-range" id="angleRange" type="range" min="10" max="180" step="5" value="90">
-                </div>
-                <div class="angle-info-box">
-                  <div class="angle-pill">
-                    Açı Türü
-                    <strong id="dispAngleType">Dik Açı</strong>
-                  </div>
-                  <div class="angle-pill">
-                    Günlük Hayat Örneği
-                    <strong id="dispAngleReal">Oda Köşesi</strong>
-                  </div>
-                </div>
-                <div style="background:#fffaf3;padding:12px;border-radius:10px;border:1px dashed var(--gold2);font-size:13px;color:#715b49">
-                  🧭 <b>Keşif Notu:</b> 90 dereceden küçük açılar <i>dar</i>, 90 derece <i>dik</i>, 90-180 arası <i>geniş</i>, 180 derece ise <i>doğru</i> açıdır.
-                </div>
-              </div>
-
-              <div class="sim-display">
-                <div class="angle-canvas-wrap">
-                  <svg viewBox="0 0 180 180" width="180" height="180" style="overflow:visible">
-                    <!-- Base line -->
-                    <line x1="90" y1="90" x2="160" y2="90" stroke="#493020" stroke-width="4" stroke-linecap="round"/>
-                    <!-- Angle Arc -->
-                    <path id="angleArc" fill="rgba(184,138,40,0.2)" stroke="#b88a28" stroke-width="2"/>
-                    <!-- Rotating line -->
-                    <line id="angleArm" x1="90" y1="90" x2="90" y2="20" stroke="#b88a28" stroke-width="4" stroke-linecap="round"/>
-                    <!-- Center dot -->
-                    <circle cx="90" cy="90" r="5" fill="#493020"/>
-                  </svg>
-                </div>
-                <div style="font-size:14px;font-weight:700;color:var(--brown)">
-                  Ölçü: <span id="dispAngleBig" style="color:var(--gold)">90°</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tab 3: Ratio & Proportion (Daily Life) -->
-          <div class="lab-panel" id="tab-ratio" role="tabpanel">
-            <div class="sim-grid">
-              <div class="sim-controls">
-                <div class="control-row">
-                  <label for="portionRange">Kişi Sayısı: <span id="valPortion" style="color:var(--gold)">4 Kişi</span></label>
-                  <input class="sim-range" id="portionRange" type="range" min="1" max="12" value="4">
-                </div>
-                <p style="font-size:13px;color:#614a38;margin:0">
-                  Bir kek tarifi 4 kişiliktir. Misafir sayısı arttığında tüm malzemelerin <b>doğru orantı</b> ile aynı oranda artması gerekir.
-                </p>
-                <div style="background:#fffaf3;padding:12px;border-radius:10px;border:1px dashed var(--gold2);font-size:13px;color:#715b49">
-                  🥣 <b>Maarif Yaklaşımı:</b> Oran, iki çokluğun bölme yoluyla karşılaştırılmasıdır. Bir katı artırırken diğerini unutursak denge bozulur!
-                </div>
-              </div>
-
-              <div class="sim-display">
-                <div style="font-weight:700;font-size:15px;color:var(--brown)">Ölçeklenmiş Malzeme Listesi:</div>
-                <div class="recipe-grid">
-                  <div class="recipe-item">
-                    <span>🥚 Yumurta</span>
-                    <b id="itemEgg">2 Adet</b>
-                  </div>
-                  <div class="recipe-item">
-                    <span>🌾 Un</span>
-                    <b id="itemFlour">200 gr</b>
-                  </div>
-                  <div class="recipe-item">
-                    <span>🥛 Süt</span>
-                    <b id="itemMilk">1 Bardak</b>
-                  </div>
-                </div>
-                <div style="font-size:12px;color:var(--muted)">Orantı sabiti: Kişi başı 50 gr un & 0.5 adet yumurta</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Grade Routes (5 to 8) -->
-    <section class="section">
-      <div class="section-head">
-        <h2>Kademeli Keşif Rotaları (5–8. Sınıf)</h2>
-        <p>Hangi sınıftasın? Kendi seviyene uygun konseptleri ve kazanımları keşfetmeye başla.</p>
-      </div>
-
-      <div class="grade-cards">
-        <!-- 5. Grade -->
-        <article class="grade-card">
-          <div>
-            <div class="grade-num c5">5</div>
-            <span class="tag">Temel Sayılar</span>
-            <h3>5. Sınıf: Sayıların Dünyası</h3>
-            <p>Doğal sayılar, basamak değeri, zihinden işlem stratejileri, temel geometrik kavramlar ve örüntülerin ritmini keşfet.</p>
-          </div>
-          <a class="btn sm secondary" href="../konu.html?sinif=5">5. Sınıf Konularını Gör →</a>
-        </article>
-
-        <!-- 6. Grade -->
-        <article class="grade-card">
-          <div>
-            <div class="grade-num c6">6</div>
-            <span class="tag">Maarif Modeli</span>
-            <h3>6. Sınıf: Çarpanlar ve Oran</h3>
-            <p>Asal sayılar, çarpanlar ve katlar, kesirlerle işlem, ondalık gösterim ve günlük hayat oran-orantı problemleri.</p>
-          </div>
-          <a class="btn sm secondary" href="../konu.html?sinif=6">6. Sınıf Konularını Gör →</a>
-        </article>
-
-        <!-- 7. Grade -->
-        <article class="grade-card">
-          <div>
-            <div class="grade-num c7">7</div>
-            <span class="tag">Soyut Düşünce</span>
-            <h3>7. Sınıf: Cebir ve Denklemler</h3>
-            <p>Tam sayılarla işlemler, rasyonel sayılar, cebirsel ifadelerin geometrik modelleri ve birinci dereceden denklemler.</p>
-          </div>
-          <a class="btn sm secondary" href="../konu.html?sinif=7">7. Sınıf Konularını Gör →</a>
-        </article>
-
-        <!-- 8. Grade -->
-        <article class="grade-card">
-          <div>
-            <div class="grade-num c8">8</div>
-            <span class="tag">LGS Hazırlık</span>
-            <h3>8. Sınıf: LGS ve Akıl Yürütme</h3>
-            <p>Kareköklü ifadeler, üslü sayılar, veri analizi, doğrusal denklemler ve LGS tarzı beceri temelli yeni nesil sorular.</p>
-          </div>
-          <a class="btn sm secondary" href="../konu.html?sinif=8">8. Sınıf Konularını Gör →</a>
-        </article>
-      </div>
-    </section>
-
-    <!-- Why & How: Curious Questions -->
-    <section class="section">
-      <div class="section-head">
-        <h2>Zarif AI ile Merak Köşesi: Neden ve Nasıl?</h2>
-        <p>Matematiği sadece soru çözmek için değil; evrenin mantığını anlamak için öğreniyoruz.</p>
-      </div>
-
-      <div class="qa-grid">
-        <article class="qa-card">
-          <h4>Eksi ile eksinin çarpımı neden artıdır?</h4>
-          <p>Eksi işaretini matematiksel bir <b>"yönü tersine çevirme"</b> emri olarak düşünebilirsiniz. İleriye doğru gitmek (+) iken, bir kez tersine dönmek (-) geriye gitmektir. Ters yöndeyken bir kez daha tersine dönerseniz (- × -), yönünüz yeniden ileriye (+) döner!</p>
-        </article>
-
-        <article class="qa-card">
-          <h4>Pi (π) sayısı nereden doğdu?</h4>
-          <p>Evrendeki tüm çemberler —ister bir madeni para, ister bir bisiklet tekeri, isterse Dünya'nın ekvatoru olsun— çevrelerini çaplarına böldüğünüzde hep aynı sihirli sayıyı verir: yaklaşık 3,14159... Bu değişmez oran, çemberin doğasındaki evrensel bir yasadır.</p>
-        </article>
-
-        <article class="qa-card">
-          <h4>Asal sayılar gerçek hayatta nerede işe yarar?</h4>
-          <p>Asal sayılar, sayıların atomlarıdır. Bankaların şifreleme sistemleri (RSA şifreleme), yüzlerce basamaklı iki dev asal sayının çarpılmasıyla kurulur. Bu sayıyı çarpanlarına ayırmak süper bilgisayarlar için bile yıllar alacağından paranız ve verileriniz güvende kalır!</p>
-        </article>
-
-        <article class="qa-card">
-          <h4>LGS yeni nesil soruları nasıl daha kolay çözülür?</h4>
-          <p>Soruyu uzun bir Türkçe paragraf olarak görmek yerine 3 adıma ayırın: 1) Verilenleri ve isteneni şema olarak çizin, 2) Şekil veya tabloyu okuyun, 3) Gerçek hayat hikâyesini basit bir matematiksel modele dönüştürün.</p>
-        </article>
-      </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta-banner">
-      <h2>Matematik Yolculuğuna Hazır Mısın?</h2>
-      <p>Hemen seviyene uygun testleri çöz, eksiklerini Zarif Asistan ile tamamla ve başarı grafiğini yükselt.</p>
-      <div class="cta-btns">
-        <a class="btn gold" href="/pratik.html">Ücretsiz Pratik Yap</a>
-        <a class="btn secondary" href="ornek-sinav-akisi.html">Örnek Sınav Akışını Gör</a>
-        <a class="btn secondary" href="konulari-kesfet-tanitim.html">Konu Kataloğunu İncele</a>
-      </div>
+      <a class="btn-gold" href="../konu.html">Tüm Konu Kataloğuna Git →</a>
     </section>
   </main>
 
-  <footer style="text-align:center;padding:40px 20px;font-size:12px;color:var(--muted)">
-    © 2026 ZarifÇözüm · Millî Eğitim Bakanlığı Maarif Modeli Yaklaşımı ile Geliştirilmiştir.
-  </footer>
-
-  <!-- Interactive Simulator Script -->
   <script>
-    (function initDiscoveryLab() {
-      // Tab switching
-      const tabs = document.querySelectorAll('.lab-tab');
-      const panels = document.querySelectorAll('.lab-panel');
+    (() => {
+      'use strict';
 
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          tabs.forEach(t => {
-            t.classList.remove('active');
-            t.setAttribute('aria-selected', 'false');
+      // =========================================================================
+      // 1. DURUM VE LOCALSTORAGE KEŞİF İLERLEMESİ
+      // =========================================================================
+      const STORAGE_KEY = 'zc_kesif_lab_v1';
+      const GRADE_CONFIG = {
+        5: {
+          title: '5. Sınıf Keşif Laboratuvarı',
+          subtitle: 'Temel Sayılar & Geometri — Kesir dilimleri ve birim kare atölyesi.',
+          accent: '#2B6CB0', bg: '#EBF4FF',
+          exps: [
+            { id: 'g5_e1', title: '1. Kesir & Dilim Simülatörü' },
+            { id: 'g5_e2', title: '2. Alan & Çevre Tahtası' }
+          ]
+        },
+        6: {
+          title: '6. Sınıf Keşif Laboratuvarı',
+          subtitle: 'Çarpanlar, Asal Sayılar & Oran — Kalbur ve Oran-Orantı Mutfağı.',
+          accent: '#D97706', bg: '#FEF3C7',
+          exps: [
+            { id: 'g6_e1', title: '1. Eratosthenes Asal Kalburu' },
+            { id: 'g6_e2', title: '2. Oran-Orantı Mutfağı' }
+          ]
+        },
+        7: {
+          title: '7. Sınıf Keşif Laboratuvarı',
+          subtitle: 'Tam Sayılar, Cebir & Denklemler — Canlı Terazi ve Yön Pusulası.',
+          accent: '#1E7550', bg: '#ECFDF5',
+          exps: [
+            { id: 'g7_e1', title: '1. İnteraktif Denklem Terazisi' },
+            { id: 'g7_e2', title: '2. Tam Sayılar Yön Pusulası' }
+          ]
+        },
+        8: {
+          title: '8. Sınıf (LGS) Keşif Laboratuvarı',
+          subtitle: 'Karekök & Doğrusal İlişkiler — Kök Yaklaşım Cetveli ve Rampa Eğimi.',
+          accent: '#B83B2B', bg: '#FEF2F2',
+          exps: [
+            { id: 'g8_e1', title: '1. Kare & Kök Yaklaşım Cetveli' },
+            { id: 'g8_e2', title: '2. Eğim & Rampa Simülatörü' }
+          ]
+        }
+      };
+
+      const state = {
+        grade: 5,
+        expIdx: 0,
+        completed: loadCompleted(),
+        // Deney yerel durumları
+        g5_e1: { den: 4, num: 2 },
+        g5_e2: { cells: Array(36).fill(false) },
+        g6_e1: { primesElim: new Set(), selectedNum: 12 },
+        g6_e2: { people: 4 },
+        g7_e1: { leftX: 2, leftC: 3, rightX: 0, rightC: 11 }, // 2x + 3 = 11 (x = 4)
+        g7_e2: { start: 0, current: 0, lastOpText: 'Başlangıç noktasındasın.' },
+        g8_e1: { area: 20 },
+        g8_e2: { height: 2, length: 10 }
+      };
+
+      // Varsayılan 5.2 başlangıç şekli (2x2 kare)
+      state.g5_e2.cells[7] = true; state.g5_e2.cells[8] = true;
+      state.g5_e2.cells[13] = true; state.g5_e2.cells[14] = true;
+
+      function loadCompleted() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const arr = raw ? JSON.parse(raw) : [];
+          return new Set(Array.isArray(arr) ? arr : []);
+        } catch {
+          return new Set();
+        }
+      }
+
+      function saveCompleted() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify([...state.completed]));
+        } catch {}
+      }
+
+      function markMissionComplete(expId) {
+        if (!state.completed.has(expId)) {
+          state.completed.add(expId);
+          saveCompleted();
+          updateProgressUI();
+        }
+      }
+
+      function updateProgressUI() {
+        const count = state.completed.size;
+        const xp = count * 25;
+        document.getElementById('xpBadge').textContent = `${xp} Keşif XP`;
+        document.getElementById('progressStat').textContent = `Keşif Rozetin: ${count}/8 Deney Tamamlandı`;
+        document.getElementById('progressBarFill').style.width = `${Math.round((count / 8) * 100)}%`;
+        document.getElementById('progressHint').textContent = count === 8
+          ? '🏆 Tüm 8 keşif görevini tamamladın! Harikasın!'
+          : `Her tamamlanan görev +25 Keşif XP kazandırır.`;
+
+        [5, 6, 7, 8].forEach(g => {
+          const doneCount = GRADE_CONFIG[g].exps.filter(e => state.completed.has(e.id)).length;
+          const el = document.getElementById('rcDone' + g);
+          if (el) el.textContent = `${doneCount}/2 Tamamlandı`;
+        });
+      }
+
+      // =========================================================================
+      // 2. MATEMATİKSEL HESAPLAMA YARDIMCILARI
+      // =========================================================================
+      /** 6x6 birim kare ızgarasında boyalı hücrelerin toplam alanını ve dış çevresini hesaplar */
+      function computeGridAreaAndPerimeter(cells) {
+        let area = 0;
+        let perimeter = 0;
+        for (let r = 0; r < 6; r++) {
+          for (let c = 0; c < 6; c++) {
+            const idx = r * 6 + c;
+            if (!cells[idx]) continue;
+            area++;
+            if (r === 0 || !cells[(r - 1) * 6 + c]) perimeter++;
+            if (r === 5 || !cells[(r + 1) * 6 + c]) perimeter++;
+            if (c === 0 || !cells[r * 6 + (c - 1)]) perimeter++;
+            if (c === 5 || !cells[r * 6 + (c + 1)]) perimeter++;
+          }
+        }
+        return { area, perimeter };
+      }
+
+      /** Bir sayının tüm pozitif çarpanlarını döndürür */
+      function getDivisors(n) {
+        const divs = [];
+        for (let i = 1; i <= n; i++) if (n % i === 0) divs.push(i);
+        return divs;
+      }
+
+      /** Eratosthenes kalburunda n sayısının elenip elenmediğini kontrol eder */
+      function isEliminatedBySieve(n, elimSet) {
+        if (n <= 1) return true;
+        for (const p of elimSet) {
+          if (n > p && n % p === 0) return true;
+        }
+        return false;
+      }
+
+      // =========================================================================
+      // 3. SINIF & DENEY RENDER MOTORU
+      // =========================================================================
+      function selectGrade(grade, expIdx = 0, shouldScroll = false) {
+        state.grade = GRADE_CONFIG[grade] ? Number(grade) : 5;
+        state.expIdx = expIdx === 1 ? 1 : 0;
+
+        const cfg = GRADE_CONFIG[state.grade];
+        const root = document.documentElement;
+        root.style.setProperty('--active-accent', cfg.accent);
+        root.style.setProperty('--active-bg', cfg.bg);
+
+        document.querySelectorAll('.route-card[data-route-grade]').forEach(card => {
+          card.classList.toggle('is-active', Number(card.dataset.routeGrade) === state.grade);
+        });
+
+        document.getElementById('labGradeTitle').textContent = cfg.title;
+        document.getElementById('labGradeSubtitle').textContent = cfg.subtitle;
+
+        const tabsEl = document.getElementById('labTabs');
+        tabsEl.innerHTML = cfg.exps.map((exp, idx) => {
+          const isDone = state.completed.has(exp.id);
+          return `<button type="button" class="lab-tab${idx === state.expIdx ? ' is-active' : ''}" data-exp-idx="${idx}">${isDone ? '✓ ' : ''}${exp.title}</button>`;
+        }).join('');
+
+        tabsEl.querySelectorAll('.lab-tab').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.expIdx = Number(btn.dataset.expIdx);
+            selectGrade(state.grade, state.expIdx, false);
           });
-          panels.forEach(p => p.classList.remove('active'));
+        });
 
-          tab.classList.add('active');
-          tab.setAttribute('aria-selected', 'true');
-          const target = document.getElementById(tab.dataset.tab);
-          if (target) target.classList.add('active');
+        renderCurrentExperiment();
+
+        if (shouldScroll) {
+          document.getElementById('labSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      function renderMissionHtml(expId, missionText) {
+        const done = state.completed.has(expId);
+        return `
+          <div class="mission-box${done ? ' is-done' : ''}">
+            <div class="mission-text">
+              <strong>${done ? '🎉 Keşif Görevi Tamamlandı (+25 XP)' : '🎯 Mini Keşif Görevi'}</strong>
+              <p>${missionText}</p>
+            </div>
+            <span class="mission-status">${done ? '✓ Başarıldı' : 'Devam Ediyor'}</span>
+          </div>
+        `;
+      }
+
+      function renderCurrentExperiment() {
+        const stage = document.getElementById('labStage');
+        const expId = GRADE_CONFIG[state.grade].exps[state.expIdx].id;
+        stage.innerHTML = '';
+
+        if (expId === 'g5_e1') renderG5E1(stage);
+        else if (expId === 'g5_e2') renderG5E2(stage);
+        else if (expId === 'g6_e1') renderG6E1(stage);
+        else if (expId === 'g6_e2') renderG6E2(stage);
+        else if (expId === 'g7_e1') renderG7E1(stage);
+        else if (expId === 'g7_e2') renderG7E2(stage);
+        else if (expId === 'g8_e1') renderG8E1(stage);
+        else if (expId === 'g8_e2') renderG8E2(stage);
+      }
+
+      // --- 5. SINIF DENEY 1: KESİR & DİLİM SİMÜLATÖRÜ ---
+      function renderG5E1(stage) {
+        const d = state.g5_e1;
+        if (d.num > d.den) d.num = d.den;
+        const pct = Math.round((d.num / d.den) * 100);
+        const dec = (d.num / d.den).toFixed(2).replace('.', ',');
+
+        if (d.den === 8 && d.num === 6) markMissionComplete('g5_e1');
+
+        // SVG Pasta Dilimleri Oluştur
+        let slicesSvg = '';
+        const cx = 100, cy = 100, r = 82;
+        if (d.den === 1) {
+          slicesSvg = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${d.num === 1 ? '#2B6CB0' : '#EBF4FF'}" stroke="#2C221E" stroke-width="2"/>`;
+        } else {
+          for (let i = 0; i < d.den; i++) {
+            const a1 = (i * 2 * Math.PI) / d.den - Math.PI / 2;
+            const a2 = ((i + 1) * 2 * Math.PI) / d.den - Math.PI / 2;
+            const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+            const x2 = cx + r * Math.cos(a2), y2 = cy + r * Math.sin(a2);
+            const large = (a2 - a1) > Math.PI ? 1 : 0;
+            const filled = i < d.num;
+            slicesSvg += `<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z" fill="${filled ? '#2B6CB0' : '#EBF4FF'}" stroke="#FFFFFF" stroke-width="2.5"/>`;
+          }
+        }
+
+        const barCells = Array.from({ length: d.den }, (_, i) =>
+          `<div style="flex:1;height:24px;border-radius:6px;background:${i < d.num ? '#2B6CB0' : '#EBF4FF'};border:1px solid #bfdbfe;"></div>`
+        ).join('');
+
+        stage.innerHTML = `
+          <div class="lab-grid">
+            <div class="lab-visual-box">
+              <svg viewBox="0 0 200 200" width="190" height="190" aria-label="Kesir Daire Modeli">${slicesSvg}</svg>
+              <div style="display:flex;gap:4px;width:100%;max-width:340px;">${barCells}</div>
+              <div class="metrics-row">
+                <div class="metric-pill"><span>Kesir</span><strong>${d.num} / ${d.den}</strong></div>
+                <div class="metric-pill"><span>Ondalık</span><strong>${dec}</strong></div>
+                <div class="metric-pill"><span>Yüzde</span><strong>%${pct}</strong></div>
+              </div>
+            </div>
+            <div class="lab-controls-box">
+              <div class="ctrl-card">
+                <div class="ctrl-label"><span>Payda (Toplam Eşit Dilim)</span><strong>${d.den}</strong></div>
+                <input type="range" id="g5DenSlider" min="1" max="12" value="${d.den}">
+              </div>
+              <div class="ctrl-card">
+                <div class="ctrl-label"><span>Pay (Seçilen Dilim)</span><strong>${d.num}</strong></div>
+                <input type="range" id="g5NumSlider" min="0" max="${d.den}" value="${d.num}">
+              </div>
+              <div class="ctrl-card" style="font-size:0.84rem;color:var(--muted);">
+                💡 <strong>Keşif İpucu:</strong> Payda bütünün kaç eşit parçaya bölündüğünü, pay ise bu parçalardan kaç tanesinin seçildiğini gösterir.
+              </div>
+            </div>
+          </div>
+          ${renderMissionHtml('g5_e1', 'Paydayı 8 yap ve %75 değerine ulaşmak için kaç dilim alman gerektiğini bul.')}
+        `;
+
+        document.getElementById('g5DenSlider').addEventListener('input', e => {
+          d.den = Number(e.target.value);
+          if (d.num > d.den) d.num = d.den;
+          renderG5E1(stage);
+        });
+        document.getElementById('g5NumSlider').addEventListener('input', e => {
+          d.num = Number(e.target.value);
+          renderG5E1(stage);
+        });
+      }
+
+      // --- 5. SINIF DENEY 2: ALAN & ÇEVRE TAHTASI (6x6 BİRİM KARE) ---
+      function renderG5E2(stage) {
+        const { area, perimeter } = computeGridAreaAndPerimeter(state.g5_e2.cells);
+        if (area === 6 && perimeter === 14) markMissionComplete('g5_e2');
+
+        stage.innerHTML = `
+          <div class="lab-grid">
+            <div class="lab-visual-box">
+              <div class="area-grid" id="areaGrid">
+                ${state.g5_e2.cells.map((filled, idx) =>
+                  `<button type="button" class="area-cell${filled ? ' is-filled' : ''}" data-cell="${idx}" aria-label="Birim kare ${idx + 1}"></button>`
+                ).join('')}
+              </div>
+              <div class="metrics-row" style="grid-template-columns:repeat(2,minmax(0,1fr));max-width:340px;">
+                <div class="metric-pill"><span>Alan (Boyalı Kare)</span><strong>${area} br²</strong></div>
+                <div class="metric-pill"><span>Çevre (Dış Kenar)</span><strong>${perimeter} br</strong></div>
+              </div>
+            </div>
+            <div class="lab-controls-box">
+              <div class="ctrl-card">
+                <div class="ctrl-label"><span>Hızlı Şekil Şablonları</span><strong>6×6 Izgara</strong></div>
+                <div class="btn-row">
+                  <button type="button" class="chip-btn" id="shapeRect23">2×3 Dikdörtgen (Alan 6, Çevre 10)</button>
+                  <button type="button" class="chip-btn" id="shapeLine16">1×6 Şerit (Alan 6, Çevre 14)</button>
+                  <button type="button" class="chip-btn" id="shapeClear">🧹 Tahtayı Temizle</button>
+                </div>
+              </div>
+              <div class="ctrl-card" style="font-size:0.84rem;color:var(--muted);">
+                💡 <strong>Keşif Notu:</strong> Aynı alana sahip iki şeklin çevre uzunlukları farklı olabilir! Kareleri tıklayarak şekli uzatıp çevrenin nasıl büyüdüğünü gözlemle.
+              </div>
+            </div>
+          </div>
+          ${renderMissionHtml('g5_e2', 'Alanı 6 birimkare ama çevresi 14 birim olan ince uzun bir şekil oluştur.')}
+        `;
+
+        document.getElementById('areaGrid').addEventListener('click', e => {
+          const btn = e.target.closest('[data-cell]');
+          if (!btn) return;
+          const idx = Number(btn.dataset.cell);
+          state.g5_e2.cells[idx] = !state.g5_e2.cells[idx];
+          renderG5E2(stage);
+        });
+        document.getElementById('shapeRect23').addEventListener('click', () => {
+          state.g5_e2.cells.fill(false);
+          [7, 8, 9, 13, 14, 15].forEach(i => { state.g5_e2.cells[i] = true; });
+          renderG5E2(stage);
+        });
+        document.getElementById('shapeLine16').addEventListener('click', () => {
+          state.g5_e2.cells.fill(false);
+          [12, 13, 14, 15, 16, 17].forEach(i => { state.g5_e2.cells[i] = true; });
+          renderG5E2(stage);
+        });
+        document.getElementById('shapeClear').addEventListener('click', () => {
+          state.g5_e2.cells.fill(false);
+          renderG5E2(stage);
+        });
+      }
+
+      // --- 6. SINIF DENEY 1: ERATOSTHENES ASAL SAYI KALBURU ---
+      function renderG6E1(stage) {
+        const elimSet = state.g6_e1.primesElim;
+        const allFourDone = [2, 3, 5, 7].every(p => elimSet.has(p));
+        let remaining = 0;
+        for (let n = 2; n <= 50; n++) if (!isEliminatedBySieve(n, elimSet)) remaining++;
+        if (allFourDone && remaining === 15) markMissionComplete('g6_e1');
+
+        const sel = state.g6_e1.selectedNum;
+        const divs = getDivisors(sel);
+
+        stage.innerHTML = `
+          <div class="lab-grid">
+            <div class="lab-visual-box">
+              <div class="sieve-grid" id="sieveGrid">
+                ${Array.from({ length: 50 }, (_, idx) => {
+                  const n = idx + 1;
+                  const isOne = n === 1;
+                  const elim = isEliminatedBySieve(n, elimSet);
+                  const glow = !isOne && !elim && allFourDone;
+                  return `<button type="button" class="sieve-cell${isOne ? ' is-one' : (elim ? ' is-elim' : (glow ? ' is-prime-glow' : ''))}" data-sieve-num="${n}">${n}</button>`;
+                }).join('')}
+              </div>
+              <div class="metrics-row" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                <div class="metric-pill"><span>Kalan Sayı (2–50)</span><strong>${remaining}</strong></div>
+                <div class="metric-pill"><span>${sel} Çarpanları (${divs.length})</span><strong style="font-size:0.92rem;">${divs.join(', ')}</strong></div>
+              </div>
+            </div>
+            <div class="lab-controls-box">
+              <div class="ctrl-card">
+                <div class="ctrl-label"><span>Katlarını Ele (Asal Filtreleri)</span><strong>${elimSet.size}/4</strong></div>
+                <div class="btn-row">
+                  ${[2, 3, 5, 7].map(p =>
+                    `<button type="button" class="chip-btn${elimSet.has(p) ? ' is-on' : ''}" data-elim-p="${p}">${p}'nin Katlarını Ele</button>`
+                  ).join('')}
+                  <button type="button" class="chip-btn" id="sieveResetBtn">↺ Kalburu Sıfırla</button>
+                </div>
+              </div>
+              <div class="ctrl-card" style="font-size:0.84rem;color:var(--muted);">
+                💡 <strong>Keşif İpucu:</strong> Tablodaki herhangi bir sayıya tıklayarak tüm çarpanlarını görebilirsin. Yalnızca 1'e ve kendisine bölünen sayılar altın rengiyle parlar!
+              </div>
+            </div>
+          </div>
+          ${renderMissionHtml('g6_e1', '2, 3, 5 ve 7\'nin katlarını eleyerek 50\'ye kadar olan 15 asal sayıyı ortaya çıkar.')}
+        `;
+
+        stage.querySelectorAll('[data-elim-p]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const p = Number(btn.dataset.elimP);
+            if (elimSet.has(p)) elimSet.delete(p); else elimSet.add(p);
+            renderG6E1(stage);
+          });
+        });
+        document.getElementById('sieveResetBtn').addEventListener('click', () => {
+          elimSet.clear();
+          renderG6E1(stage);
+        });
+        document.getElementById('sieveGrid').addEventListener('click', e => {
+          const btn = e.target.closest('[data-sieve-num]');
+          if (!btn) return;
+          state.g6_e1.selectedNum = Number(btn.dataset.sieveNum);
+          renderG6E1(stage);
+        });
+      }
+
+      // --- 6. SINIF DENEY 2: MAARİF GÜNLÜK HAYAT (ORAN-ORANTI MUTFAĞI) ---
+      function renderG6E2(stage) {
+        const p = state.g6_e2.people;
+        const eggs = (p * 0.5).toFixed(1).replace('.0', '');
+        const flour = p * 50;   // 1 kişi = 50g un (7 kişi = 350g)
+        const milk = p * 30;    // 1 kişi = 30ml süt
+        const cocoa = p * 10;   // 1 kişi = 10g kakao
+
+        if (p === 7) markMissionComplete('g6_e2');
+
+        const items = [
+          { name: '🥚 Yumurta', val: `${eggs} adet`, pct: Math.round((p / 12) * 100) },
+          { name: '🌾 Un', val: `${flour} gram`, pct: Math.round((flour / 600) * 100) },
+          { name: '🥛 Süt', val: `${milk} ml`, pct: Math.round((milk / 360) * 100) },
+          { name: '🍫 Kakao', val: `${cocoa} gram`, pct: Math.round((cocoa / 120) * 100) }
+        ];
+
+        stage.innerHTML = `
+          <div class="lab-grid">
+            <div class="lab-visual-box">
+              <div style="font-size:0.9rem;font-weight:800;color:#92400E;">🧁 ${p} Kişilik Kakaolu Kek Tarifi (Orantı Sabiti: k = ${p})</div>
+              <div class="recipe-list">
+                ${items.map(it => `
+                  <div class="recipe-row">
+                    <div class="recipe-top"><span>${it.name}</span><strong style="color:#D97706;">${it.val}</strong></div>
+                    <div class="recipe-bar"><div class="recipe-fill" style="width:${it.pct}%;"></div></div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="lab-controls-box">
+              <div class="ctrl-card">
+                <div class="ctrl-label"><span>Kişi Sayısı</span><strong>${p} Kişi</strong></div>
+                <input type="range" id="g6PeopleSlider" min="1" max="12" value="${p}">
+              </div>
+              <div class="ctrl-card" style="font-size:0.84rem;color:var(--muted);">
+                💡 <strong>Doğru Orantı:</strong> Kişi sayısı kaç katına çıkarsa her malzeme aynı oranda artar. 1 kişilik un miktarı 50 gramdır; yani <strong>Un = 50 × Kişi</strong>.
+              </div>
+            </div>
+          </div>
+          ${renderMissionHtml('g6_e2', '7 kişilik tarif için kaç gram un gerektiğini simülatörle bul.')}
+        `;
+
+        document.getElementById('g6PeopleSlider').addEventListener('input', e => {
+          state.g6_e2.people = Number(e.target.value);
+          renderG6E2(stage);
+        });
+      }
+
+      // --- 7. SINIF DENEY 1: İNTERAKTİF DENKLEM TERAZİSİ (2x + 3 = 11) ---
+      function renderG7E1(stage) {
+        const b = state.g7_e1;
+        const TRUE_X = 4; // 2(4) + 3 = 11
+        const leftWeight = b.leftX * TRUE_X + b.leftC;
+        const rightWeight = b.rightX * TRUE_X + b.rightC;
+        const diff = rightWeight - leftWeight;
+        const angle = Math.max(-16, Math.min(16, diff * 2.5));
+        const isBalanced = Math.abs(diff) < 0.001;
+        const isSolved = isBalanced && b.leftX === 1 && b.leftC === 0 && b.rightX === 0 && b.rightC === 4;
+
+        if (isSolved) markMissionComplete('g7_e1');
+
+        const fmtSide = (xCount, cVal) => {
+          const parts = [];
+          if (xCount > 0) parts.push(xCount === 1 ? 'x' : `${xCount}x`);
+          if (cVal > 0 || parts.length === 0) parts.push(String(cVal));
+          return parts.join(' + ');
+        };
+
+        stage.innerHTML = `
+          <div class="lab-grid">
+            <div class="lab-visual-box">
+              <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.35rem;font-weight:800;color:${isBalanced ? '#1E7550' : '#B83B2B'};">
+                ${fmtSide(b.leftX, b.leftC)} ${isBalanced ? '=' : (leftWeight > rightWeight ? '>' : '<')} ${fmtSide(b.rightX, b.rightC)}
+              </div>
+              <svg viewBox="0 0 320 175" width="310" height="170" aria-label="Canlı Denklem Terazisi">
+                <!-- Terazi Ayağı -->
+                <path d="M 135 162 L 185 162 L 160 120 Z" fill="#3B281E"/>
+                <rect x="156" y="42" width="8" height="84" rx="4" fill="#6B5E57"/>
+                <circle cx="160" cy="46" r="8" fill="${isBalanced ? '#1E7550' : '#D97706'}"/>
+                <!-- Dönen Terazi Kolu -->
+                <g transform="rotate(${angle} 160 46)" style="transition:transform 0.35s cubic-bezier(.22,1,.36,1);">
+                  <rect x="44" y="42" width="232" height="8" rx="4" fill="${isBalanced ? '#1E7550' : '#B83B2B'}"/>
+                  <!-- Sol Kefe -->
+                  <line x1="68" y1="50" x2="68" y2="92" stroke="#6B5E57" stroke-width="2"/>
+                  <rect x="26" y="92" width="84" height="10" rx="5" fill="#C59B47"/>
+                  <text x="68" y="84" text-anchor="middle" font-size="14" font-weight="800" fill="#2C221E">${fmtSide(b.leftX, b.leftC)}</text>
+                  <!-- Sağ Kefe -->
+                  <line x1="252" y1="50" x2="252" y2="92" stroke="#6B5E57" stroke-width="2"/>
+                  <rect x="210" y="92" width="84" height="10" rx="5" fill="#C59B47"/>
+                  <text x="252" y="84" text-anchor="middle" font-size="14" font-weight="800" fill="#2C221E">${fmtSide(b.rightX, b.rightC)}</text>
+                </g>
+              </svg>
+              <div style="font-size:0.84rem;font-weight:700;color:${isSolved ? '#059669' : (isBalanced ? '#1E7550' : '#B83B2B')};">
+                ${isSolved ? '🎉 Harika! x = 4 yalnız kaldı ve terazi mükemmel dengede!' : (isBalanced ? '✓ Terazi dengede — x\'i yalnız bırakmaya devam et.' : '⚠️ Denge bozuldu! İki kefeye aynı işlemi uygulamalısın.')}
+              </div>
+            </div>
+            <div class="lab-controls-box">
+              <div class="ctrl-card">
+                <div class="ctrl-label"><span>Denge İşlemleri</span><strong>Hedef: x = ?</strong></div>
+                <div class="btn-row">
+                  <button type="button" class="chip-btn" id="balBothMinus1">⚖️ İki Kefeden −1 Çıkar</button>
+                  <button type="button" class="chip-btn" id="balBothDiv2">➗ İki Kefeyi 2'ye Böl</button>
+                  <button type="button" class="chip-btn" id="balLeftMinus1">Sol Kefeden −1</button>
+                  <button type="button" class="chip-btn" id="balRightMinus1">Sağ Kefeden −1</button>
+                  <button type="button" class="chip-btn" id="balReset">↺ Sıfırla (2x + 3 = 11)</button>
+                </div>
+              </div>
+              <div class="ctrl-card" style="font-size:0.84rem;color:var(--muted);">
+                💡 <strong>Eşitliğin Korunumu:</strong> Terazinin iki kefesinden aynı ağırlığı çıkardığında veya iki kefeyi aynı sayıya böldüğünde denge hiç bozulmaz!
+              </div>
+            </div>
+          </div>
+          ${renderMissionHtml('g7_e1', 'İki kefeden de 3 birlik çıkarıp ardından ikiye bölerek x değerini bul.')}
+        `;
+
+        document.getElementById('balBothMinus1').addEventListener('click', () => {
+          if (b.leftC >= 1 && b.rightC >= 1) { b.leftC--; b.rightC--; }
+          renderG7E1(stage);
+        });
+        document.getElementById('balBothDiv2').addEventListener('click', () => {
+          if (b.leftX % 2 === 0 && b.leftC % 2 === 0 && b.rightC % 2 === 0) {
+            b.leftX /= 2; b.leftC /= 2; b.rightC /= 2;
+          }
+          renderG7E1(stage);
+        });
+        document.getElementById('balLeftMinus1').addEventListener('click', () => { if (b.leftC >= 1) b.leftC--; renderG7E1(stage); });
+        document.getElementById('balRightMinus1').addEventListener('click', () => { if (b.rightC >= 1) b.rightC--; renderG7E1(stage); });
+        document.getElementById('balReset').addEventListener('click', () => {
+          b.leftX = 2; b.leftC = 3; b.rightX = 0; b.rightC = 11;
+          renderG7E1(stage);
+        });
+      }
+
+      // --- 7. SINIF DENEY 2: TAM SAYILAR YÖN PUSULASI ---
+      function renderG7E2(stage) {
+        const t = state.g7_e2;
+        const minN = -8, maxN = 8;
+        const toX = val => 25 + ((val - minN) / (maxN - minN)) * 310;
+        const startX = toX(t.start);
+        const curX = toX(t.current);
+
+        let ticksSvg = '';
+        for (let v = minN; v <= maxN; v++) {
+          const x = toX(v);
+          ticksSvg += `<line x1="${x}" y1="74" x2="${x}" y2="86" stroke="#6B5E57" stroke-width="${v === 0 ? 2.5 : 1.4}"/>`;
+          if (v % 2 === 0 || v === t.current || v === t.start) {
+            ticksSvg += `<text x="${x}" y="104" text-anchor="middle" font-size="10.5" font-weight="${v === 0 ? '800' : '600'}" fill="#2C221E">${v > 0 ? '+' + v : v}</text>`;
+          }
+        }
+
+        const arcSvg = t.start !== t.current
+          ? `<path d="M ${startX} 72 Q ${(startX + curX) / 2} 22 ${curX} 68" fill="none" stroke="#1E7550" stroke-width="3" stroke-dasharray="5 3"/>`
+          : '';
+
+        stage.innerHTML = `
+          <div class="lab-grid">
+            <div class="lab-visual-box">
+              <svg viewBox="0 0 360 124" width="100%" style="max-width:440px;" aria-label="Tam Sayılar Sayı Doğrusu">
+                <line x1="16" y1="80" x2="344" y2="80" stroke="#2C221E" stroke-width="2.5"/>
+                ${ticksSvg}
+                ${arcSvg}
+                <circle cx="${curX}" cy="72" r="10" fill="#1E7550" stroke="#FFFFFF" stroke-width="2.5"/>
+                <text x="${curX}" y="76" text-anchor="middle" font-size="10" font-weight="800" fill="#FFFFFF">${t.current}</text>
+              </svg>
+              <div style="font-size:0.9rem;font-weight:700;color:#1E7550;text-align:center;">${t.lastOpText}</div>
+            </div>
+            <div class="lab-controls-box">
+              <div class="ctrl-card">
+                <div class="ctrl-label"><span>Başlangıç Noktası</span><strong>${t.start > 0 ? '+' + t.start : t.start}</strong></div>
+                <input type="range" id="g7StartSlider" min="-5" max="5" value="${t.start}">
+              </div>
+              <div class="ctrl-card">
+                <div class="ctrl-label"><span>İşlem Uygula (Yönü Gözlemle)</span><strong>Konum: ${t.current}</strong></div>
+                <div class="btn-row">
+                  <button type="button" class="chip-btn" data-int-op="addPos">+ (+3) İleri</button>
+                  <button type="button" class="chip-btn" data-int-op="addNeg">+ (−4) Geri</button>
+                  <button type="button" class="chip-btn" data-int-op="subNeg">− (−2) Tersin Tersi → İleri!</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          ${renderMissionHtml('g7_e2', '−3 noktasından başlayarak (−2) çıkar ve hangi noktaya ulaştığını gör.')}
+        `;
+
+        document.getElementById('g7StartSlider').addEventListener('input', e => {
+          t.start = Number(e.target.value);
+          t.current = t.start;
+          t.lastOpText = `Başlangıç noktası ${t.start} seçildi.`;
+          renderG7E2(stage);
+        });
+        stage.querySelectorAll('[data-int-op]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const op = btn.dataset.intOp;
+            if (op === 'addPos') {
+              t.current = Math.min(8, t.start + 3);
+              t.lastOpText = `(${t.start}) + (+3) = ${t.current} · Pozitif yön (+3 adım ileri)`;
+            } else if (op === 'addNeg') {
+              t.current = Math.max(-8, t.start - 4);
+              t.lastOpText = `(${t.start}) + (−4) = ${t.current} · Negatif yön (4 adım geri)`;
+            } else if (op === 'subNeg') {
+              t.current = Math.min(8, t.start - (-2));
+              t.lastOpText = `(${t.start}) − (−2) = ${t.start} + 2 = ${t.current} · Çıkarma yönü çevirdi (+2 ileri!)`;
+              if (t.start === -3 && t.current === -1) markMissionComplete('g7_e2');
+            }
+            renderG7E2(stage);
+          });
+        });
+      }
+
+      // --- 8. SINIF DENEY 1: KARE VE KÖK YAKLAŞIM CETVELİ ---
+      function renderG8E1(stage) {
+        const area = state.g8_e1.area;
+        const side = Math.sqrt(area);
+        const low = Math.floor(side);
+        const high = Math.ceil(side);
+        const lowSq = low * low;
+        const highSq = high * high;
+        const isPerfect = low === high;
+        const boxPx = Math.round(44 + (side / 10) * 106);
+
+        if (area === 50) markMissionComplete('g8_e1');
+
+        const markerPct = isPerfect ? 50 : Math.round(((side - low) / (high - low)) * 100);
+
+        stage.innerHTML = `
+          <div class="lab-grid">
+            <div class="lab-visual-box">
+              <div style="width:${boxPx}px;height:${boxPx}px;border-radius:12px;background:rgba(184,59,43,0.14);border:2.5px solid #B83B2B;display:grid;place-items:center;transition:all 0.2s ease;">
+                <strong style="font-size:0.95rem;color:#B83B2B;">Alan: ${area}</strong>
+              </div>
+              <div style="width:100%;max-width:340px;">
+                <div style="display:flex;justify-content:space-between;font-size:0.78rem;font-weight:700;color:var(--muted);margin-bottom:5px;">
+                  <span>√${lowSq} = ${low}</span>
+                  <span style="color:#B83B2B;">√${area} ≈ ${side.toFixed(2).replace('.', ',')}</span>
+                  <span>√${highSq} = ${high}</span>
+                </div>
+                <div style="position:relative;height:10px;border-radius:999px;background:#f3e4e2;">
+                  <div style="position:absolute;top:-4px;left:calc(${markerPct}% - 9px);width:18px;height:18px;border-radius:50%;background:#B83B2B;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.2);"></div>
+                </div>
+              </div>
+              <div class="metrics-row">
+                <div class="metric-pill"><span>Alan</span><strong>${area} br²</strong></div>
+                <div class="metric-pill"><span>Kenar (√Alan)</span><strong>${side.toFixed(2).replace('.', ',')}</strong></div>
+                <div class="metric-pill"><span>Aralık</span><strong>${isPerfect ? `Tam Kare (${low})` : `${low} ile ${high} arası`}</strong></div>
+              </div>
+            </div>
+            <div class="lab-controls-box">
+              <div class="ctrl-card">
+                <div class="ctrl-label"><span>Karenin Alanı (1–100 br²)</span><strong>${area} br²</strong></div>
+                <input type="range" id="g8AreaSlider" min="1" max="100" value="${area}">
+              </div>
+              <div class="ctrl-card" style="font-size:0.84rem;color:var(--muted);">
+                💡 <strong>Karekök Mantığı:</strong> Bir karenin alanı verildiğinde bir kenar uzunluğunu bulma işlemine karekök alma denir. Alanı 50 olan karenin kenarı √49=7'ye çok yakındır!
+              </div>
+            </div>
+          </div>
+          ${renderMissionHtml('g8_e1', 'Alanı 50 birimkare yap ve kenar uzunluğunun hangi iki tam sayı arasında olduğunu keşfet.')}
+        `;
+
+        document.getElementById('g8AreaSlider').addEventListener('input', e => {
+          state.g8_e1.area = Number(e.target.value);
+          renderG8E1(stage);
+        });
+      }
+
+      // --- 8. SINIF DENEY 2: EĞİM VE RAMPA SİMÜLATÖRÜ ---
+      function renderG8E2(stage) {
+        const h = state.g8_e2.height;
+        const l = state.g8_e2.length;
+        const ratio = h / l;
+        const pct = Math.round(ratio * 100);
+
+        if (l === 10 && pct === 40) markMissionComplete('g8_e2');
+
+        const safety = pct <= 12
+          ? { text: '♿ Tekerlekli Sandalye Rampası İçin Uygun', color: '#059669', bg: '#ECFDF5' }
+          : pct <= 30
+            ? { text: '⚠️ Orta Diklikte Rampa (Yaya / Araç)', color: '#D97706', bg: '#FEF3C7' }
+            : { text: '🚫 Tekerlekli Sandalye İçin Çok Dik!', color: '#B83B2B', bg: '#FEF2F2' };
+
+        const baseX = 36, baseY = 148;
+        const drawL = l * 22;
+        const drawH = h * 11;
+
+        stage.innerHTML = `
+          <div class="lab-grid">
+            <div class="lab-visual-box">
+              <svg viewBox="0 0 300 170" width="300" height="170" aria-label="Eğim ve Rampa Çizimi">
+                <polygon points="${baseX},${baseY} ${baseX + drawL},${baseY} ${baseX + drawL},${baseY - drawH}" fill="rgba(184,59,43,0.16)" stroke="#B83B2B" stroke-width="3" stroke-linejoin="round"/>
+                <text x="${baseX + drawL / 2}" y="${baseY + 16}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2C221E">Yatay: ${l} m</text>
+                <text x="${baseX + drawL + 8}" y="${baseY - drawH / 2}" font-size="11.5" font-weight="700" fill="#B83B2B">Dikey: ${h} m</text>
+              </svg>
+              <div style="padding:7px 14px;border-radius:999px;background:${safety.bg};color:${safety.color};font-size:0.8rem;font-weight:800;">
+                ${safety.text}
+              </div>
+              <div class="metrics-row">
+                <div class="metric-pill"><span>Eğim (m = D/Y)</span><strong>${h} / ${l}</strong></div>
+                <div class="metric-pill"><span>Ondalık</span><strong>${ratio.toFixed(2).replace('.', ',')}</strong></div>
+                <div class="metric-pill"><span>Yüzde Eğim</span><strong>%${pct}</strong></div>
+              </div>
+            </div>
+            <div class="lab-controls-box">
+              <div class="ctrl-card">
+                <div class="ctrl-label"><span>Dikey Yükseklik</span><strong>${h} metre</strong></div>
+                <input type="range" id="g8HeightSlider" min="1" max="10" value="${h}">
+              </div>
+              <div class="ctrl-card">
+                <div class="ctrl-label"><span>Yatay Uzunluk</span><strong>${l} metre</strong></div>
+                <input type="range" id="g8LengthSlider" min="1" max="10" value="${l}">
+              </div>
+            </div>
+          </div>
+          ${renderMissionHtml('g8_e2', 'Yatay uzunluk 10 m iken eğimi %40 yapmak için dikey yüksekliği ayarla.')}
+        `;
+
+        document.getElementById('g8HeightSlider').addEventListener('input', e => {
+          state.g8_e2.height = Number(e.target.value);
+          renderG8E2(stage);
+        });
+        document.getElementById('g8LengthSlider').addEventListener('input', e => {
+          state.g8_e2.length = Number(e.target.value);
+          renderG8E2(stage);
+        });
+      }
+
+      // =========================================================================
+      // 4. OLAY BAĞLANTILARI
+      // =========================================================================
+      document.getElementById('routeGrid').addEventListener('click', e => {
+        const card = e.target.closest('.route-card[data-route-grade]');
+        if (!card) return;
+        selectGrade(Number(card.dataset.routeGrade), 0, true);
+      });
+
+      document.querySelectorAll('[data-jump-grade]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectGrade(Number(btn.dataset.jumpGrade), Number(btn.dataset.jumpExp), true);
         });
       });
 
-      // Simulator 1: Fractions
-      const fractionDenom = document.getElementById('fractionDenom');
-      const fractionNum = document.getElementById('fractionNum');
-      const valDenom = document.getElementById('valDenom');
-      const valNum = document.getElementById('valNum');
-      const dispNum = document.getElementById('dispNum');
-      const dispDenom = document.getElementById('dispDenom');
-      const dispPercent = document.getElementById('dispPercent');
-      const fractionBar = document.getElementById('fractionBar');
+      document.getElementById('resetProgressBtn').addEventListener('click', () => {
+        state.completed.clear();
+        saveCompleted();
+        updateProgressUI();
+        selectGrade(state.grade, state.expIdx, false);
+      });
 
-      function updateFraction() {
-        const d = parseInt(fractionDenom.value, 10);
-        fractionNum.max = d;
-        if (parseInt(fractionNum.value, 10) > d) fractionNum.value = d;
-        const n = parseInt(fractionNum.value, 10);
-
-        valDenom.textContent = d;
-        valNum.textContent = n;
-        dispNum.textContent = n;
-        dispDenom.textContent = d;
-        dispPercent.textContent = Math.round((n / d) * 100);
-
-        fractionBar.replaceChildren();
-        for (let i = 0; i < d; i++) {
-          const part = document.createElement('div');
-          part.className = 'fraction-bar-part' + (i < n ? ' filled' : '');
-          part.style.flex = '1';
-          fractionBar.appendChild(part);
-        }
-      }
-
-      if (fractionDenom && fractionNum) {
-        fractionDenom.addEventListener('input', updateFraction);
-        fractionNum.addEventListener('input', updateFraction);
-        updateFraction();
-      }
-
-      // Simulator 2: Angles
-      const angleRange = document.getElementById('angleRange');
-      const valAngle = document.getElementById('valAngle');
-      const dispAngleBig = document.getElementById('dispAngleBig');
-      const dispAngleType = document.getElementById('dispAngleType');
-      const dispAngleReal = document.getElementById('dispAngleReal');
-      const angleArm = document.getElementById('angleArm');
-      const angleArc = document.getElementById('angleArc');
-
-      function updateAngle() {
-        const deg = parseInt(angleRange.value, 10);
-        valAngle.textContent = deg + '°';
-        dispAngleBig.textContent = deg + '°';
-
-        if (deg < 90) {
-          dispAngleType.textContent = 'Dar Açı (< 90°)';
-          dispAngleReal.textContent = 'Açık Makas / Çatı';
-        } else if (deg === 90) {
-          dispAngleType.textContent = 'Dik Açı (90°)';
-          dispAngleReal.textContent = 'Oda Köşesi / Kitap';
-        } else if (deg < 180) {
-          dispAngleType.textContent = 'Geniş Açı (> 90°)';
-          dispAngleReal.textContent = 'Şezlong / Yelken';
-        } else {
-          dispAngleType.textContent = 'Doğru Açı (180°)';
-          dispAngleReal.textContent = 'Cetvel Kenarı';
-        }
-
-        // Rotate arm: SVG center is (90, 90). Radius = 70.
-        const rad = (deg * Math.PI) / 180;
-        const armX = 90 + 70 * Math.cos(Math.PI - rad);
-        const armY = 90 - 70 * Math.sin(Math.PI - rad);
-        angleArm.setAttribute('x2', armX);
-        angleArm.setAttribute('y2', armY);
-
-        // Arc path
-        const arcR = 30;
-        const arcX = 90 + arcR * Math.cos(Math.PI - rad);
-        const arcY = 90 - arcR * Math.sin(Math.PI - rad);
-        const largeArc = deg > 180 ? 1 : 0;
-        angleArc.setAttribute('d', `M 120 90 A ${arcR} ${arcR} 0 ${largeArc} 0 ${arcX} ${arcY} L 90 90 Z`);
-      }
-
-      if (angleRange) {
-        angleRange.addEventListener('input', updateAngle);
-        updateAngle();
-      }
-
-      // Simulator 3: Ratio
-      const portionRange = document.getElementById('portionRange');
-      const valPortion = document.getElementById('valPortion');
-      const itemEgg = document.getElementById('itemEgg');
-      const itemFlour = document.getElementById('itemFlour');
-      const itemMilk = document.getElementById('itemMilk');
-
-      function updateRecipe() {
-        const p = parseInt(portionRange.value, 10);
-        valPortion.textContent = p + ' Kişi';
-        itemEgg.textContent = (p * 0.5) + ' Adet';
-        itemFlour.textContent = (p * 50) + ' gr';
-        itemMilk.textContent = (p * 0.25) + ' Bardak';
-      }
-
-      if (portionRange) {
-        portionRange.addEventListener('input', updateRecipe);
-        updateRecipe();
-      }
+      updateProgressUI();
+      selectGrade(5, 0, false);
     })();
   </script>
 </body>
