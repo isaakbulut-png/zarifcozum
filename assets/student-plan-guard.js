@@ -213,7 +213,7 @@
       var raw = global.localStorage && global.localStorage.getItem('zc_kesif_modu_v1');
       var arr = raw ? JSON.parse(raw) : [];
       var list = Array.isArray(arr) ? arr : [];
-      return { ids: list, count: Math.min(4, list.length), xp: Math.min(4, list.length) * 25 };
+      return { ids: list, count: Math.min(8, list.length), xp: Math.min(8, list.length) * 25 };
     } catch (e) {
       return { ids: [], count: 0, xp: 0 };
     }
@@ -270,15 +270,15 @@
     }
     if (navLink) navLink.href = targetHref;
     if (sideBadge) {
-      sideBadge.textContent = prog.xp > 0 ? (prog.count + '/4 · ' + prog.xp + ' XP') : (prog.count + '/4');
+      sideBadge.textContent = prog.xp > 0 ? (prog.count + '/8 · ' + prog.xp + ' XP') : (prog.count + '/8');
     }
 
     if (dashWidget) {
       dashWidget.style.display = shouldShow ? 'block' : 'none';
     }
     if (dashXpChip) dashXpChip.textContent = '⚡ ' + prog.xp + ' Keşif XP';
-    if (dashSummary) dashSummary.textContent = prog.count + ' / 4 Oyun Tamamlandı • ' + prog.xp + ' Keşif XP';
-    if (dashFill) dashFill.style.width = Math.round((prog.count / 4) * 100) + '%';
+    if (dashSummary) dashSummary.textContent = prog.count + ' / 8 Oyun Tamamlandı • ' + prog.xp + ' Keşif XP';
+    if (dashFill) dashFill.style.width = Math.round((prog.count / 8) * 100) + '%';
     if (dashCta) dashCta.href = targetHref;
   }
 

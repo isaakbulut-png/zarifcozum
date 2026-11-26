@@ -188,6 +188,66 @@
       color: var(--zc-emerald);
     }
 
+    /* Sınıf İçi Oyun 1 / Oyun 2 Seçici Sekmeler */
+    .zc-kesif-game-tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .zc-kesif-gtab {
+      min-height: 52px;
+      padding: 12px 18px;
+      border-radius: 15px;
+      border: 1.5px solid var(--zc-border);
+      background: #FFFFFF;
+      color: var(--zc-espresso-dark);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      text-align: left;
+      transition: all 0.18s ease;
+    }
+
+    .zc-kesif-gtab:hover { border-color: var(--zc-gold); transform: translateY(-1px); }
+
+    .zc-kesif-gtab.is-active {
+      background: linear-gradient(135deg, var(--zc-espresso), var(--zc-espresso-dark));
+      border-color: var(--zc-gold);
+      color: #f3d285;
+      box-shadow: 0 8px 20px rgba(44, 34, 30, 0.16);
+    }
+
+    .zc-kesif-gtab-badge {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: #FAF6F0;
+      color: var(--zc-muted);
+      flex-shrink: 0;
+    }
+
+    .zc-kesif-gtab.is-active .zc-kesif-gtab-badge {
+      background: rgba(212, 163, 89, 0.22);
+      color: #fde68a;
+    }
+
+    .zc-kesif-gtab-badge.is-done {
+      background: #1E7550 !important;
+      color: #FFFFFF !important;
+    }
+
+    @media (max-width: 680px) {
+      .zc-kesif-game-tabs { grid-template-columns: 1fr; }
+    }
+
     /* Ana 2 Kolonlu Oyun Alanı (%65 Sahne / %35 Görev Paneli) */
     .zc-kesif-grid {
       display: grid;
@@ -550,10 +610,13 @@
         </div>
         <div class="zc-kesif-stats">
           <span class="zc-kesif-pill xp" id="zcXpPill">⚡ Keşif XP: 0</span>
-          <span class="zc-kesif-pill done" id="zcDonePill">🏅 Tamamlanan: 0/4</span>
+          <span class="zc-kesif-pill done" id="zcDonePill">🏅 Tamamlanan: 0/8</span>
           <a class="zc-kesif-btn" href="ogrenci-paneli.html" style="text-decoration:none;">← Panele Dön</a>
         </div>
       </section>
+
+      <!-- Sınıf İçi Oyun 1 / Oyun 2 Sekmeleri -->
+      <div class="zc-kesif-game-tabs" id="zcGameTabs" role="tablist" aria-label="Sınıf Oyun Seçimi"></div>
 
       <main class="zc-kesif-grid">
         <!-- Sol / Ana Alan (%65): Etkileşimli Oyun Sahnesi -->
@@ -595,44 +658,99 @@
       // 1. GENEL DURUM VE LOCALSTORAGE XP YÖNETİMİ
       // =========================================================================
       const STORAGE_KEY = 'zc_kesif_modu_v1';
-      const GAMES_META = {
-        5: {
-          id: 'g5_cube',
-          title: '5. Sınıf • 3D Küp Çevir & Köşeleri Keşfet',
-          subtitle: 'Geometrik Cisimler — Parmağınla veya farenle 360° döndür, 8 köşeyi işaretle.',
-          missionHeading: '8 Köşeyi Bul ve Doğrula',
-          missionDesc: 'Şeffaf 3B küpü çevirerek ön ve arka yüzdeki 8 köşenin tamamına tıkla, ardından doğrulama sorusunu yanıtla.',
-          hint: 'Küpün ön yüzünde 4 köşe görüyorsun. Küpü arkaya doğru çevirdiğinde tam simetrik 4 köşe daha olduğunu fark edeceksin!'
-        },
-        6: {
-          id: 'g6_elevator',
-          title: '6. Sınıf • Gökdelen Asansörü',
-          subtitle: 'Tam Sayılar & Dikey Sayı Doğrusu — Asansörle katlar arası mesafeyi keşfet.',
-          missionHeading: 'İki Aşamalı Asansör Görevi',
-          missionDesc: 'Görev 1: Asansörü −2 (Sığınak) katından +4 katına çıkar. Görev 2: +5\'ten −2\'ye inerken kaç kat hareket edildiğini bul.',
-          hint: 'Sıfır (Giriş) katını bir durak gibi düşün: +5\'ten 0\'a 5 kat, 0\'dan −2\'ye ise 2 kat daha inmen gerekir.'
-        },
-        7: {
-          id: 'g7_balance',
-          title: '7. Sınıf • İnteraktif Cebir Terazisi',
-          subtitle: 'Denklem Çözme — 2x + 3 = 9 terazisinin dengesini bozmadan x\'i yalnız bırak.',
-          missionHeading: 'Teraziyi Dengele ve x\'i Bul',
-          missionDesc: 'İki kefeden 3\'er birlik ağırlık çıkarıp ardından iki kefeyi yarıya bölerek x değerini ortaya çıkar.',
-          hint: 'Terazinin yatay dengesini bozmamak için sol kefeden kaç tane 1\'lik taş alıyorsan sağ kefeden de aynı sayıda taş almalısın.'
-        },
-        8: {
-          id: 'g8_skate',
-          title: '8. Sınıf (LGS) • Kaykay Rampası & Eğim Mühendisi',
-          subtitle: 'Doğrusal İlişkiler & Eğim — Hedef platforma tam iniş için %50 eğimli rampa tasarla.',
-          missionHeading: '%50 Eğimli Rampayı Tasarla',
-          missionDesc: 'Dikey yükseklik ve yatay uzunluk sürgüleriyle eğimi tam %50 (1/2) yap ve "Kaykayı Başlat" butonuna bas!',
-          hint: 'Eğim, dikey uzunluğun yatay uzunluğa bölümüdür. %50 eğim için yatay uzunluğu dikey uzunluğun tam 2 katı yapmalısın.'
-        }
+      const TOTAL_GAMES = 8;
+      const GAMES_BY_GRADE = {
+        5: [
+          {
+            id: 'g5_cube',
+            tabLabel: 'Oyun 1: 3D Küp Çevir',
+            title: '5. Sınıf • 3D Küp Çevir & Köşeleri Keşfet',
+            subtitle: 'Geometrik Cisimler — Parmağınla veya farenle 360° döndür, 8 köşeyi işaretle.',
+            missionHeading: '8 Köşeyi Bul ve Doğrula',
+            missionDesc: 'Şeffaf 3B küpü çevirerek ön ve arka yüzdeki 8 köşenin tamamına tıkla, ardından doğrulama sorusunu yanıtla.',
+            hint: 'Küpün ön yüzünde 4 köşe görüyorsun. Küpü arkaya doğru çevirdiğinde tam simetrik 4 köşe daha olduğunu fark edeceksin!'
+          },
+          {
+            id: 'g5_bakery',
+            tabLabel: 'Oyun 2: Kesir Pastanesi',
+            title: '5. Sınıf • Kesir Pastanesi & Denge',
+            subtitle: 'Kesirler & Yüzdeler — Farklı kesir dilimlerini birleştirerek müşterinin siparişini hazırla.',
+            missionHeading: 'Müşteri Siparişi: %75 (0,75)',
+            missionDesc: 'Müşteri tabağında tam olarak %75 (0,75) oranında pasta istiyor! Dilimleri tabağa ekle ve "Servis Et" butonuna bas.',
+            hint: '%75 demek çeyreklerden 3 tanesi (3/4) demektir. Önce yarım dilimi (1/2 = %50) tabağa koyup üzerine ne kadar eklemen gerektiğine bak!'
+          }
+        ],
+        6: [
+          {
+            id: 'g6_elevator',
+            tabLabel: 'Oyun 1: Gökdelen Asansörü',
+            title: '6. Sınıf • Gökdelen Asansörü',
+            subtitle: 'Tam Sayılar & Dikey Sayı Doğrusu — Asansörle katlar arası mesafeyi keşfet.',
+            missionHeading: 'İki Aşamalı Asansör Görevi',
+            missionDesc: 'Görev 1: Asansörü −2 (Sığınak) katından +4 katına çıkar. Görev 2: +5\'ten −2\'ye inerken kaç kat hareket edildiğini bul.',
+            hint: 'Sıfır (Giriş) katını bir durak gibi düşün: +5\'ten 0\'a 5 kat, 0\'dan −2\'ye ise 2 kat daha inmen gerekir.'
+          },
+          {
+            id: 'g6_potion',
+            tabLabel: 'Oyun 2: Oran-Orantı İksiri',
+            title: '6. Sınıf • Oran-Orantı İksir Laboratuvarı',
+            subtitle: 'Oran & Orantı — Mükemmel Zümrüt İksiri için Mavi / Sarı oranını 2 / 3 yap.',
+            missionHeading: 'Zümrüt İksiri Formülü (2 / 3)',
+            missionDesc: 'Kazanı doldurmak için 12 ölçek Sarı Öz kullandığına göre, oranı bozmamak için kaç ölçek Mavi Öz eklemelisin?',
+            hint: 'Sarı öz 3 birimden 12 birime çıktıysa yani 4 katına ulaştıysa, mavi özü de (2 birim) aynı oranda 4 katına çıkarmalısın.'
+          }
+        ],
+        7: [
+          {
+            id: 'g7_balance',
+            tabLabel: 'Oyun 1: Cebir Terazisi',
+            title: '7. Sınıf • İnteraktif Cebir Terazisi',
+            subtitle: 'Denklem Çözme — 2x + 3 = 9 terazisinin dengesini bozmadan x\'i yalnız bırak.',
+            missionHeading: 'Teraziyi Dengele ve x\'i Bul',
+            missionDesc: 'İki kefeden 3\'er birlik ağırlık çıkarıp ardından iki kefeyi yarıya bölerek x değerini ortaya çıkar.',
+            hint: 'Terazinin yatay dengesini bozmamak için sol kefeden kaç tane 1\'lik taş alıyorsan sağ kefeden de aynı sayıda taş almalısın.'
+          },
+          {
+            id: 'g7_coord',
+            tabLabel: 'Oyun 2: Koordinat Hazine Avı',
+            title: '7. Sınıf • Koordinat Hazine Avı',
+            subtitle: 'Koordinat Sistemi — Keşif gemisini doğru (x, y) noktalarına yönlendirip 3 sandığı bul.',
+            missionHeading: '3 Gizli Hazine Sandığını Bul',
+            missionDesc: 'X ve Y koordinatlarını kullanarak (veya haritaya dokunarak) gemiyi hedef noktalara götür ve "Demir At" butonuna bas.',
+            hint: 'Koordinatlarda ilk sayı (x) sağa veya sola gidişi, ikinci sayı (y) yukarı veya aşağı gidişi gösterir. Eksi (−) işaretler sol ve aşağı yönü temsil eder.'
+          }
+        ],
+        8: [
+          {
+            id: 'g8_skate',
+            tabLabel: 'Oyun 1: Kaykay Rampası',
+            title: '8. Sınıf (LGS) • Kaykay Rampası & Eğim Mühendisi',
+            subtitle: 'Doğrusal İlişkiler & Eğim — Hedef platforma tam iniş için %50 eğimli rampa tasarla.',
+            missionHeading: '%50 Eğimli Rampayı Tasarla',
+            missionDesc: 'Dikey yükseklik ve yatay uzunluk sürgüleriyle eğimi tam %50 (1/2) yap ve "Kaykayı Başlat" butonuna bas!',
+            hint: 'Eğim, dikey uzunluğun yatay uzunluğa bölümüdür. %50 eğim için yatay uzunluğu dikey uzunluğun tam 2 katı yapmalısın.'
+          },
+          {
+            id: 'g8_laser',
+            tabLabel: 'Oyun 2: Karekök & Lazer',
+            title: '8. Sınıf (LGS) • Karekök & Lazer Yansıması',
+            subtitle: 'Kareköklü İfadeler — Kare ayna bloğunun alanını ayarlayarak lazeri hedef sensöre ulaştır.',
+            missionHeading: 'Kenarı 6–7 Arasında (7\'ye Yakın) Ayarla',
+            missionDesc: 'Kare bloğun Alanını öyle bir ayarla ki kenar uzunluğu (√Alan) sayı doğrusunda 6 ile 7 arasında (7\'ye daha yakın) olsun ve "Lazeri Ateşle" de!',
+            hint: '6\'nın karesi 36, 7\'nin karesi 49\'dur. Kenar uzunluğunun 7\'ye daha yakın olması için karenin alanını 36 ile 49\'un tam ortasından (42,5) büyük seçmelisin.'
+          }
+        ]
       };
 
       let currentGrade = 5;
+      let currentGameIdx = 0;
       let completedGames = loadCompleted();
       let cleanupCurrentGame = null;
+
+      function getActiveMeta() {
+        const list = GAMES_BY_GRADE[currentGrade] || GAMES_BY_GRADE[5];
+        return list[currentGameIdx] || list[0];
+      }
 
       function loadCompleted() {
         try {
@@ -651,7 +769,8 @@
       function updateHeaderStats() {
         const count = completedGames.size;
         document.getElementById('zcXpPill').textContent = `⚡ Keşif XP: ${count * 25}`;
-        document.getElementById('zcDonePill').textContent = `🏅 Tamamlanan: ${count}/4`;
+        document.getElementById('zcDonePill').textContent = `🏅 Tamamlanan: ${count}/${TOTAL_GAMES}`;
+        renderGameTabs();
       }
 
       function setStatus(text, type = '') {
@@ -661,7 +780,7 @@
       }
 
       function completeCurrentGame() {
-        const meta = GAMES_META[currentGrade];
+        const meta = getActiveMeta();
         if (!meta) return;
         if (!completedGames.has(meta.id)) {
           completedGames.add(meta.id);
@@ -671,7 +790,9 @@
         const card = document.getElementById('zcCelebrateCard');
         card.classList.add('is-visible');
         const nextBtn = document.getElementById('zcNextGameBtn');
-        nextBtn.textContent = currentGrade < 8 ? `${currentGrade + 1}. Sınıf Oyununa Geç →` : '5. Sınıf Oyununa Dön →';
+        nextBtn.textContent = currentGameIdx === 0
+          ? `${currentGrade}. Sınıf 2. Oyuna Geç →`
+          : (currentGrade < 8 ? `${currentGrade + 1}. Sınıf Oyunlarına Geç →` : '5. Sınıf Oyununa Dön →');
       }
 
       // =========================================================================
@@ -1128,9 +1249,413 @@
       }
 
       // =========================================================================
-      // 2. OYUN YÜKLEYİCİ & SINIF KOŞULU KONTROLÜ
+      // YENİ OYUN 5 (5. SINIF - OYUN 2): KESİR PASTANESİ & DENGE
       // =========================================================================
-      function loadGradeGame(grade) {
+      function mountGame5Bakery() {
+        const SLICES = [
+          { label: '1/2', val: 0.5, color: '#C85A17' },
+          { label: '1/4', val: 0.25, color: '#D4A359' },
+          { label: '1/5', val: 0.2, color: '#1E7550' },
+          { label: '1/8', val: 0.125, color: '#2B6CB0' },
+          { label: '1/10', val: 0.1, color: '#8E3B78' }
+        ];
+        let plateSlices = [];
+
+        const stage = document.getElementById('zcStageMount');
+        const extra = document.getElementById('zcMissionExtra');
+
+        function renderBakery() {
+          const total = plateSlices.reduce((s, x) => s + x.val, 0);
+          const pct = Math.round(total * 1000) / 10;
+          const dec = total.toFixed(2).replace('.', ',');
+
+          // Pasta dilimlerini SVG dairesel sektörlere dönüştür
+          let accAngle = -Math.PI / 2;
+          const cx = 110, cy = 110, r = 88;
+          let svgPaths = '';
+          plateSlices.forEach(sl => {
+            const sweep = Math.min(sl.val, 1) * Math.PI * 2;
+            const a1 = accAngle;
+            const a2 = accAngle + sweep;
+            accAngle = a2;
+            if (sweep >= Math.PI * 1.999) {
+              svgPaths += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${sl.color}" stroke="#FFFDF9" stroke-width="2.5"/>`;
+            } else {
+              const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+              const x2 = cx + r * Math.cos(a2), y2 = cy + r * Math.sin(a2);
+              const large = sweep > Math.PI ? 1 : 0;
+              svgPaths += `<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z" fill="${sl.color}" stroke="#FFFDF9" stroke-width="2.5"/>`;
+            }
+          });
+
+          stage.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;">
+              <span class="zc-kesif-pill">🍰 Müşteri Siparişi: <strong>%75 (0,75)</strong></span>
+              <span class="zc-kesif-pill" style="color:${Math.abs(total - 0.75) < 0.001 ? '#1E7550' : '#3B281E'};">Tabaktaki: <strong>%${pct} (${dec})</strong></span>
+            </div>
+
+            <svg viewBox="0 0 220 220" width="210" height="210" aria-label="Kesir Pasta Tabağı">
+              <circle cx="110" cy="110" r="100" fill="#FAF6F0" stroke="#D4A359" stroke-width="4"/>
+              <circle cx="110" cy="110" r="88" fill="#FFFFFF" stroke="#E6DCD2" stroke-width="2" stroke-dasharray="5 4"/>
+              ${svgPaths}
+              <circle cx="110" cy="110" r="18" fill="#FFFDF9" stroke="#E6DCD2" stroke-width="2"/>
+              <text x="110" y="114" text-anchor="middle" font-size="11" font-weight="800" fill="#3B281E">%${Math.round(pct)}</text>
+            </svg>
+
+            <div style="font-size:0.84rem;color:var(--zc-muted);font-weight:600;">
+              Tabaktaki Dilimler: <strong>${plateSlices.length ? plateSlices.map(s => s.label).join(' + ') : 'Boş Tabak'}</strong>
+            </div>
+
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+              ${SLICES.map((s, idx) =>
+                `<button type="button" class="zc-kesif-btn" data-add-slice="${idx}" style="border-color:${s.color};">+ ${s.label} Dilim</button>`
+              ).join('')}
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+              <button type="button" class="zc-kesif-btn" id="zcBakeryUndo">↩ Son Dilimi Al</button>
+              <button type="button" class="zc-kesif-btn" id="zcBakeryClear">🧹 Tabağı Boşalt</button>
+              <button type="button" class="zc-kesif-btn gold" id="zcBakeryServe">🍰 Servis Et</button>
+            </div>
+          `;
+
+          stage.querySelectorAll('[data-add-slice]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const sl = SLICES[Number(btn.dataset.addSlice)];
+              if (total + sl.val > 1.001) {
+                setStatus('⚠️ Tabak taştı! 1 bütünü (%100) geçemezsin. Son dilimi geri alabilirsin.', 'is-warn');
+                return;
+              }
+              plateSlices.push(sl);
+              setStatus(`Tabakta şu an %${Math.round((total + sl.val) * 1000) / 10} pasta var.`);
+              renderBakery();
+            });
+          });
+
+          document.getElementById('zcBakeryUndo').addEventListener('click', () => {
+            plateSlices.pop();
+            renderBakery();
+          });
+          document.getElementById('zcBakeryClear').addEventListener('click', () => {
+            plateSlices = [];
+            setStatus('Tabak temizlendi. %75 (0,75) için dilimleri seç!');
+            renderBakery();
+          });
+          document.getElementById('zcBakeryServe').addEventListener('click', () => {
+            if (Math.abs(total - 0.75) < 0.001) {
+              setStatus(`🎉 Harika Servis! ${plateSlices.map(s => s.label).join(' + ')} = %75 (0,75)!`, 'is-ok');
+              completeCurrentGame();
+            } else if (total < 0.75) {
+              setStatus(`Sipariş eksik kaldı (%${pct}). %75'e ulaşmak için biraz daha dilim ekle!`, 'is-warn');
+            } else {
+              setStatus(`Sipariş fazla oldu (%${pct}). %75 için fazlalık dilimi geri al!`, 'is-warn');
+            }
+          });
+        }
+
+        extra.innerHTML = '';
+        setStatus('Dilimleri seçerek tabağı tam %75 (0,75) doldur ve Servis Et!');
+        renderBakery();
+        return null;
+      }
+
+      // =========================================================================
+      // YENİ OYUN 6 (6. SINIF - OYUN 2): ORAN-ORANTI İKSİR LABORATUVARI
+      // =========================================================================
+      function mountGame6Potion() {
+        const YELLOW_FIXED = 12;
+        let blueUnits = 4;
+
+        const stage = document.getElementById('zcStageMount');
+        const extra = document.getElementById('zcMissionExtra');
+
+        function getFlaskColor(b) {
+          if (b === 8) return '#1E7550'; // Mükemmel Zümrüt Yeşili (8/12 = 2/3)
+          if (b < 8) return '#CA8A04';   // Fazla sarı
+          return '#2563EB';              // Fazla mavi
+        }
+
+        function renderPotion() {
+          const flaskColor = getFlaskColor(blueUnits);
+          const blueH = Math.round((blueUnits / 16) * 110);
+          const yellowH = Math.round((YELLOW_FIXED / 16) * 110);
+
+          stage.innerHTML = `
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+              <span class="zc-kesif-pill">Hedef Oran: <strong>Mavi / Sarı = 2 / 3</strong></span>
+              <span class="zc-kesif-pill">Mevcut Karışım: <strong>${blueUnits} / ${YELLOW_FIXED}</strong></span>
+            </div>
+
+            <svg viewBox="0 0 380 215" width="100%" style="max-width:430px;" aria-label="İksir Laboratuvarı">
+              <!-- Mavi Öz Tüpü -->
+              <rect x="34" y="34" width="54" height="130" rx="22" fill="#EFF6FF" stroke="#3B281E" stroke-width="3"/>
+              <rect x="37" y="${161 - blueH}" width="48" height="${blueH}" rx="18" fill="#2563EB" style="transition:all 0.25s ease;"/>
+              <text x="61" y="186" text-anchor="middle" font-size="12" font-weight="800" fill="#2563EB">Mavi: ${blueUnits}</text>
+
+              <!-- Orta Karışım Şişesi -->
+              <path d="M 172 30 L 208 30 L 208 72 L 246 146 Q 252 166 230 166 L 150 166 Q 128 166 134 146 L 172 72 Z" fill="#FAF6F0" stroke="#3B281E" stroke-width="3.5"/>
+              <path d="M 152 110 L 228 110 L 243 145 Q 248 162 228 162 L 152 162 Q 132 162 137 145 Z" fill="${flaskColor}" opacity="0.88" style="transition:fill 0.35s ease;"/>
+              <text x="190" y="144" text-anchor="middle" font-size="13" font-weight="800" fill="#FFFFFF">${blueUnits === 8 ? '✨ ZÜMRÜT' : 'KARIŞIM'}</text>
+              <text x="190" y="188" text-anchor="middle" font-size="12" font-weight="800" fill="#3B281E">Karışım Kazanı</text>
+
+              <!-- Sarı Öz Tüpü (Sabit 12) -->
+              <rect x="292" y="34" width="54" height="130" rx="22" fill="#FEFCE8" stroke="#3B281E" stroke-width="3"/>
+              <rect x="295" y="${161 - yellowH}" width="48" height="${yellowH}" rx="18" fill="#EAB308"/>
+              <text x="319" y="186" text-anchor="middle" font-size="12" font-weight="800" fill="#A16207">Sarı: ${YELLOW_FIXED}</text>
+            </svg>
+
+            <div class="zc-kesif-slider-wrap" style="max-width:420px;">
+              <label><span>Mavi Öz Miktarı</span><strong>${blueUnits} Ölçek</strong></label>
+              <input type="range" id="zcBlueSlider" min="1" max="16" value="${blueUnits}">
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+              <button type="button" class="zc-kesif-btn" id="zcBlueMinus">− 1 Mavi</button>
+              <button type="button" class="zc-kesif-btn" id="zcBluePlus">+ 1 Mavi</button>
+              <button type="button" class="zc-kesif-btn gold" id="zcMixPotionBtn">🧪 İksiri Karıştır!</button>
+            </div>
+          `;
+
+          document.getElementById('zcBlueSlider').addEventListener('input', e => {
+            blueUnits = Number(e.target.value);
+            renderPotion();
+          });
+          document.getElementById('zcBlueMinus').addEventListener('click', () => {
+            if (blueUnits > 1) blueUnits--;
+            renderPotion();
+          });
+          document.getElementById('zcBluePlus').addEventListener('click', () => {
+            if (blueUnits < 16) blueUnits++;
+            renderPotion();
+          });
+          document.getElementById('zcMixPotionBtn').addEventListener('click', () => {
+            if (blueUnits === 8) {
+              setStatus('🎉 Mükemmel Zümrüt İksiri! 8 / 12 = 2 / 3 oranı tam tuttu!', 'is-ok');
+              completeCurrentGame();
+            } else if (blueUnits < 8) {
+              setStatus(`🫧 İksir köpürdü! ${blueUnits}/12 oranı 2/3'ten küçük (Sarı öz fazla kaldı). Mavi özü artır!`, 'is-warn');
+            } else {
+              setStatus(`🫧 İksir köpürdü! ${blueUnits}/12 oranı 2/3'ten büyük (Mavi öz fazla geldi). Mavi özü azalt!`, 'is-warn');
+            }
+          });
+        }
+
+        extra.innerHTML = '';
+        setStatus('12 ölçek Sarı Öz için doğru Mavi Öz miktarını ayarla ve İksiri Karıştır!');
+        renderPotion();
+        return null;
+      }
+
+      // =========================================================================
+      // YENİ OYUN 7 (7. SINIF - OYUN 2): KOORDİNAT HAZİNE AVI (-5..+5)
+      // =========================================================================
+      function mountGame7Coord() {
+        const CHESTS = [
+          { x: -3, y: 4, label: '(−3, +4)' },
+          { x: 2, y: -3, label: '(+2, −3)' },
+          { x: -4, y: -2, label: '(−4, −2)' }
+        ];
+        let shipX = 0, shipY = 0;
+        let foundChests = new Set();
+
+        const stage = document.getElementById('zcStageMount');
+        const extra = document.getElementById('zcMissionExtra');
+
+        function toSvgX(x) { return 160 + x * 26; }
+        function toSvgY(y) { return 160 - y * 26; }
+
+        function renderCoord() {
+          const nextChest = CHESTS.find((_, i) => !foundChests.has(i));
+          let gridLines = '';
+          for (let i = -5; i <= 5; i++) {
+            const px = toSvgX(i), py = toSvgY(i);
+            gridLines += `<line x1="${px}" y1="30" x2="${px}" y2="290" stroke="${i === 0 ? '#3B281E' : '#E6DCD2'}" stroke-width="${i === 0 ? 2.5 : 1}"/>`;
+            gridLines += `<line x1="30" y1="${py}" x2="290" y2="${py}" stroke="${i === 0 ? '#3B281E' : '#E6DCD2'}" stroke-width="${i === 0 ? 2.5 : 1}"/>`;
+            if (i !== 0) {
+              gridLines += `<text x="${px}" y="174" text-anchor="middle" font-size="9.5" font-weight="700" fill="#6B5E57">${i}</text>`;
+              gridLines += `<text x="150" y="${py + 3}" text-anchor="end" font-size="9.5" font-weight="700" fill="#6B5E57">${i}</text>`;
+            }
+          }
+
+          let foundMarks = '';
+          CHESTS.forEach((ch, idx) => {
+            if (foundChests.has(idx)) {
+              foundMarks += `<text x="${toSvgX(ch.x)}" y="${toSvgY(ch.y) + 6}" text-anchor="middle" font-size="18">💎</text>`;
+            }
+          });
+
+          stage.innerHTML = `
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+              <span class="zc-kesif-pill">Bulunan Sandık: <strong>${foundChests.size} / 3</strong></span>
+              <span class="zc-kesif-pill" style="color:#C85A17;">${nextChest ? ('Sıradaki Hedef: <strong>' + nextChest.label + '</strong>') : '🎉 Tüm Sandıklar Bulundu!'}</span>
+            </div>
+
+            <svg id="zcCoordSvg" viewBox="0 0 320 320" width="310" height="310" style="background:#FFFFFF;border:1.5px solid #E6DCD2;border-radius:16px;cursor:crosshair;touch-action:manipulation;" aria-label="Koordinat Düzlemi">
+              ${gridLines}
+              <!-- 4 Bölge Etiketleri -->
+              <text x="235" y="52" font-size="11" font-weight="800" fill="rgba(59,40,30,0.38)">I. Bölge (+,+)</text>
+              <text x="38" y="52" font-size="11" font-weight="800" fill="rgba(59,40,30,0.38)">II. Bölge (−,+)</text>
+              <text x="38" y="280" font-size="11" font-weight="800" fill="rgba(59,40,30,0.38)">III. Bölge (−,−)</text>
+              <text x="225" y="280" font-size="11" font-weight="800" fill="rgba(59,40,30,0.38)">IV. Bölge (+,−)</text>
+              ${foundMarks}
+              <g transform="translate(${toSvgX(shipX)}, ${toSvgY(shipY)})" style="transition:transform 0.3s ease;">
+                <circle cx="0" cy="0" r="13" fill="rgba(212,163,89,0.28)" stroke="#D4A359" stroke-width="2"/>
+                <text x="0" y="6" text-anchor="middle" font-size="17">⛵</text>
+              </g>
+            </svg>
+
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;">
+              <label style="font-size:0.86rem;font-weight:700;">X: <input type="number" id="zcCoordX" min="-5" max="5" value="${shipX}" style="width:62px;padding:7px;border-radius:9px;border:1.5px solid #E6DCD2;font-weight:800;text-align:center;"></label>
+              <label style="font-size:0.86rem;font-weight:700;">Y: <input type="number" id="zcCoordY" min="-5" max="5" value="${shipY}" style="width:62px;padding:7px;border-radius:9px;border:1.5px solid #E6DCD2;font-weight:800;text-align:center;"></label>
+              <button type="button" class="zc-kesif-btn gold" id="zcAnchorBtn">⚓ Demir At!</button>
+            </div>
+          `;
+
+          document.getElementById('zcCoordX').addEventListener('change', e => {
+            shipX = Math.max(-5, Math.min(5, Number(e.target.value) || 0));
+            renderCoord();
+          });
+          document.getElementById('zcCoordY').addEventListener('change', e => {
+            shipY = Math.max(-5, Math.min(5, Number(e.target.value) || 0));
+            renderCoord();
+          });
+          document.getElementById('zcCoordSvg').addEventListener('click', e => {
+            const svg = e.currentTarget;
+            const rect = svg.getBoundingClientRect();
+            const sx = (e.clientX - rect.left) * (320 / rect.width);
+            const sy = (e.clientY - rect.top) * (320 / rect.height);
+            shipX = Math.max(-5, Math.min(5, Math.round((sx - 160) / 26)));
+            shipY = Math.max(-5, Math.min(5, Math.round((160 - sy) / 26)));
+            renderCoord();
+          });
+          document.getElementById('zcAnchorBtn').addEventListener('click', () => {
+            const hitIdx = CHESTS.findIndex((ch, i) => !foundChests.has(i) && ch.x === shipX && ch.y === shipY);
+            if (hitIdx !== -1) {
+              foundChests.add(hitIdx);
+              if (foundChests.size === CHESTS.length) {
+                setStatus('🎉 Tüm 3 hazine sandığını koordinatlarla buldun!', 'is-ok');
+                completeCurrentGame();
+              } else {
+                setStatus(`💎 Sandık bulundu! (${foundChests.size}/3) Sıradaki hedefe ilerle.`, 'is-ok');
+              }
+              renderCoord();
+            } else {
+              setStatus(`(${shipX}, ${shipY}) noktasında hazine yok. Hedef koordinatı kontrol et!`, 'is-warn');
+            }
+          });
+        }
+
+        extra.innerHTML = '';
+        setStatus('1. Sandık için gemiyi (−3, +4) noktasına götür ve Demir At!');
+        renderCoord();
+        return null;
+      }
+
+      // =========================================================================
+      // YENİ OYUN 8 (8. SINIF LGS - OYUN 2): KAREKÖK & LAZER YANSIMASI
+      // =========================================================================
+      function mountGame8Laser() {
+        let area = 25;
+        let fired = false;
+
+        const stage = document.getElementById('zcStageMount');
+        const extra = document.getElementById('zcMissionExtra');
+
+        function renderLaser() {
+          const side = Math.sqrt(area);
+          const low = Math.floor(side), high = Math.ceil(side);
+          const isHit = area >= 43 && area <= 48; // √43..√48: 6 ile 7 arasında, 7'ye daha yakın
+          const boxSize = Math.round(34 + (side / 9) * 86);
+          const blockX = 165;
+          const blockY = Math.round(135 - boxSize / 2);
+          const numLineX = 50 + (side / 9) * 340;
+
+          const beamSvg = fired
+            ? (isHit
+                ? `<line x1="58" y1="135" x2="${blockX}" y2="135" stroke="#EF4444" stroke-width="4"/><line x1="${blockX + boxSize}" y1="135" x2="395" y2="135" stroke="#1E7550" stroke-width="4.5" stroke-dasharray="8 3"/>`
+                : `<line x1="58" y1="135" x2="${blockX}" y2="135" stroke="#EF4444" stroke-width="4"/><line x1="${blockX + boxSize}" y1="135" x2="395" y2="${area < 43 ? 195 : 75}" stroke="#C85A17" stroke-width="3.5" stroke-dasharray="6 4"/>`)
+            : '';
+
+          stage.innerHTML = `
+            <svg viewBox="0 0 440 245" width="100%" style="max-width:500px;background:#FAF6F0;border:1px solid #E6DCD2;border-radius:16px;" aria-label="Karekök Lazer Laboratuvarı">
+              <!-- Lazer Kaynağı -->
+              <rect x="14" y="118" width="44" height="34" rx="8" fill="#3B281E"/>
+              <text x="36" y="140" text-anchor="middle" font-size="14" fill="#f3d285">🔦</text>
+              <!-- Kare Ayna Bloğu -->
+              <rect x="${blockX}" y="${blockY}" width="${boxSize}" height="${boxSize}" rx="10" fill="rgba(212,163,89,0.28)" stroke="#3B281E" stroke-width="3" style="transition:all 0.2s ease;"/>
+              <text x="${blockX + boxSize / 2}" y="${blockY + boxSize / 2 + 4}" text-anchor="middle" font-size="12" font-weight="800" fill="#2C221E">A = ${area}</text>
+              <!-- Hedef Sensör -->
+              <circle cx="402" cy="135" r="20" fill="${fired && isHit ? '#1E7550' : '#FFFFFF'}" stroke="#1E7550" stroke-width="3"/>
+              <text x="402" y="140" text-anchor="middle" font-size="13" font-weight="800" fill="${fired && isHit ? '#FFFFFF' : '#1E7550'}">🎯</text>
+              ${beamSvg}
+              <!-- Sayı Doğrusu (0..9) -->
+              <line x1="50" y1="215" x2="390" y2="215" stroke="#3B281E" stroke-width="2.5"/>
+              ${[0, 3, 6, 7, 9].map(v => {
+                const vx = 50 + (v / 9) * 340;
+                return `<line x1="${vx}" y1="208" x2="${vx}" y2="222" stroke="#3B281E" stroke-width="2"/><text x="${vx}" y="236" text-anchor="middle" font-size="11" font-weight="700" fill="#2C221E">${v}</text>`;
+              }).join('')}
+              <circle cx="${numLineX}" cy="215" r="7" fill="#C85A17" stroke="#FFFFFF" stroke-width="2"/>
+            </svg>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+              <span class="zc-kesif-pill">Alan: <strong>${area} br²</strong></span>
+              <span class="zc-kesif-pill">Kenar (√${area}): <strong>${side.toFixed(2).replace('.', ',')}</strong></span>
+              <span class="zc-kesif-pill">Komşular: <strong>√36 = 6 · √49 = 7</strong></span>
+            </div>
+
+            <div class="zc-kesif-slider-wrap" style="max-width:440px;">
+              <label><span>Kare Ayna Alanı (1–81 br²)</span><strong>${area} br²</strong></label>
+              <input type="range" id="zcLaserArea" min="1" max="81" value="${area}">
+            </div>
+
+            <button type="button" class="zc-kesif-btn gold" id="zcFireLaserBtn" style="min-width:210px;">🔦 Lazeri Ateşle!</button>
+          `;
+
+          document.getElementById('zcLaserArea').addEventListener('input', e => {
+            area = Number(e.target.value);
+            fired = false;
+            renderLaser();
+          });
+
+          document.getElementById('zcFireLaserBtn').addEventListener('click', () => {
+            fired = true;
+            if (isHit) {
+              setStatus(`🎉 Tam İsabet! √${area} ≈ ${side.toFixed(2).replace('.', ',')} sayısı 6 ile 7 arasında ve 7'ye (√49) daha yakın!`, 'is-ok');
+              completeCurrentGame();
+            } else if (area <= 36) {
+              setStatus(`Işın aşağı saptı! √${area} ≤ 6. Kenar uzunluğu 6'dan büyük olmalı (Alan > 36).`, 'is-warn');
+            } else if (area <= 42) {
+              setStatus(`Çok yaklaştın! √${area} sayısı 6 ile 7 arasında ama 6'ya daha yakın. 7'ye daha yakın yap!`, 'is-warn');
+            } else {
+              setStatus(`Işın yukarı saptı! √${area} ≥ 7. Kenar uzunluğu 7'den küçük olmalı (Alan < 49).`, 'is-warn');
+            }
+            renderLaser();
+          });
+        }
+
+        extra.innerHTML = '';
+        setStatus('Kare bloğun alanını 6–7 arasında (7\'ye yakın) olacak şekilde ayarla ve Lazeri Ateşle!');
+        renderLaser();
+        return null;
+      }
+
+      // =========================================================================
+      // 2. OYUN YÜKLEYİCİ, SEKME ÇİZİCİ & SINIF KOŞULU KONTROLÜ
+      // =========================================================================
+      function renderGameTabs() {
+        const tabsEl = document.getElementById('zcGameTabs');
+        const list = GAMES_BY_GRADE[currentGrade];
+        if (!tabsEl || !list) return;
+        tabsEl.innerHTML = list.map((g, idx) => {
+          const isDone = completedGames.has(g.id);
+          return `<button type="button" class="zc-kesif-gtab${idx === currentGameIdx ? ' is-active' : ''}" data-gidx="${idx}">
+            <span>${g.tabLabel}</span>
+            <span class="zc-kesif-gtab-badge${isDone ? ' is-done' : ''}">${isDone ? '✓ +25 XP' : 'Oyna'}</span>
+          </button>`;
+        }).join('');
+      }
+
+      function loadGradeGame(grade, gameIdx = 0) {
         if (typeof cleanupCurrentGame === 'function') {
           cleanupCurrentGame();
           cleanupCurrentGame = null;
@@ -1146,7 +1671,10 @@
         if (!isMiddle) return;
 
         currentGrade = Number(grade);
-        const meta = GAMES_META[currentGrade];
+        currentGameIdx = gameIdx === 1 ? 1 : 0;
+        renderGameTabs();
+
+        const meta = getActiveMeta();
         document.getElementById('zcGameTitle').textContent = meta.title;
         document.getElementById('zcGameSubtitle').textContent = meta.subtitle;
         document.getElementById('zcMissionHeading').textContent = meta.missionHeading;
@@ -1155,34 +1683,47 @@
         document.getElementById('zcHintBubble').classList.remove('is-open');
         document.getElementById('zcCelebrateCard').classList.toggle('is-visible', completedGames.has(meta.id));
 
-        if (currentGrade === 5) cleanupCurrentGame = mountGame5Cube();
-        else if (currentGrade === 6) cleanupCurrentGame = mountGame6Elevator();
-        else if (currentGrade === 7) cleanupCurrentGame = mountGame7Balance();
-        else if (currentGrade === 8) cleanupCurrentGame = mountGame8Skate();
+        if (meta.id === 'g5_cube') cleanupCurrentGame = mountGame5Cube();
+        else if (meta.id === 'g5_bakery') cleanupCurrentGame = mountGame5Bakery();
+        else if (meta.id === 'g6_elevator') cleanupCurrentGame = mountGame6Elevator();
+        else if (meta.id === 'g6_potion') cleanupCurrentGame = mountGame6Potion();
+        else if (meta.id === 'g7_balance') cleanupCurrentGame = mountGame7Balance();
+        else if (meta.id === 'g7_coord') cleanupCurrentGame = mountGame7Coord();
+        else if (meta.id === 'g8_skate') cleanupCurrentGame = mountGame8Skate();
+        else if (meta.id === 'g8_laser') cleanupCurrentGame = mountGame8Laser();
       }
 
       // Olay Dinleyicileri
       document.getElementById('zcGradeBar').addEventListener('click', e => {
         const btn = e.target.closest('.zc-kesif-grade-btn');
-        if (btn) loadGradeGame(Number(btn.dataset.grade));
+        if (btn) loadGradeGame(Number(btn.dataset.grade), 0);
       });
 
-      document.getElementById('zcBackToMiddleBtn').addEventListener('click', () => loadGradeGame(5));
+      document.getElementById('zcGameTabs').addEventListener('click', e => {
+        const btn = e.target.closest('.zc-kesif-gtab[data-gidx]');
+        if (btn) loadGradeGame(currentGrade, Number(btn.dataset.gidx));
+      });
+
+      document.getElementById('zcBackToMiddleBtn').addEventListener('click', () => loadGradeGame(5, 0));
 
       document.getElementById('zcHintToggleBtn').addEventListener('click', () => {
         document.getElementById('zcHintBubble').classList.toggle('is-open');
       });
 
-      document.getElementById('zcResetGameBtn').addEventListener('click', () => loadGradeGame(currentGrade));
+      document.getElementById('zcResetGameBtn').addEventListener('click', () => loadGradeGame(currentGrade, currentGameIdx));
 
       document.getElementById('zcNextGameBtn').addEventListener('click', () => {
-        loadGradeGame(currentGrade < 8 ? currentGrade + 1 : 5);
+        if (currentGameIdx === 0) {
+          loadGradeGame(currentGrade, 1);
+        } else {
+          loadGradeGame(currentGrade < 8 ? currentGrade + 1 : 5, 0);
+        }
       });
 
       // Başlatma (?sinif= parametresini destekler)
       const qGrade = Number(new URLSearchParams(window.location.search).get('sinif'));
       updateHeaderStats();
-      loadGradeGame([5, 6, 7, 8, 9].includes(qGrade) ? qGrade : 5);
+      loadGradeGame([5, 6, 7, 8, 9].includes(qGrade) ? qGrade : 5, 0);
     })();
   </script>
 </body>
