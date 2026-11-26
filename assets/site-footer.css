@@ -6,10 +6,10 @@
 footer.site-footer.site-footer-rich {
   width: 100% !important;
   margin: 0 !important;
-  padding: 56px 0 36px !important;
-  background: #F3EFEA !important;
+  padding: 56px 0 0 !important;
+  background: #EAE3DA !important;
   color: #0F172A !important;
-  border-top: 1px solid #E2E8F0 !important;
+  border-top: 2px solid #D4C9BC !important;
   border-radius: 0 !important;
   font-family: "Inter", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   box-shadow: none !important;
@@ -112,8 +112,7 @@ footer.site-footer.site-footer-rich {
   display: grid;
   grid-template-columns: 1.35fr repeat(4, minmax(140px, 1fr));
   gap: 36px;
-  padding-bottom: 42px;
-  border-bottom: 1px solid #E2E8F0;
+  padding-bottom: 48px;
 }
 
 .zc-footer-brand {
@@ -162,13 +161,14 @@ footer.site-footer.site-footer-rich {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 7px 13px;
   border-radius: 999px;
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
+  background: #FFFFFF !important;
+  border: 1px solid #D4C9BC;
   color: #0F172A;
   font-size: 0.85rem;
   font-weight: 700;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
 }
 
 /* Sütun Başlıkları (16px #0F172A) & Linkler (15px #334155, gap 12px, hover #D97706) */
@@ -201,9 +201,15 @@ footer.site-footer.site-footer-rich {
   transform: translateX(2px);
 }
 
-/* 3. Alt Telif Hakkı & FSEK/KVKK Satırı (14px #475569) */
+/* 3. En Alt Bağımsız Taban Şeridi (Copyright Bar — #0F172A / #E2E8F0 / 14px) */
+.zc-footer-copyright-bar {
+  width: 100%;
+  background: #0F172A !important;
+  color: #E2E8F0 !important;
+  padding: 22px 0;
+}
+
 .zc-footer-bottom {
-  padding-top: 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -211,24 +217,24 @@ footer.site-footer.site-footer-rich {
   flex-wrap: wrap;
   font-size: 14px;
   line-height: 1.6;
-  color: #475569;
+  color: #E2E8F0 !important;
 }
 
 .zc-footer-bottom span {
   max-width: 960px;
-  color: #475569;
+  color: #E2E8F0 !important;
 }
 
 .zc-footer-bottom a {
   font-size: 14px;
   font-weight: 700;
-  color: #0F172A !important;
+  color: #FCD34D !important;
   text-decoration: none !important;
   white-space: nowrap;
 }
 
 .zc-footer-bottom a:hover {
-  color: #D97706 !important;
+  color: #FFFFFF !important;
   text-decoration: underline !important;
 }
 

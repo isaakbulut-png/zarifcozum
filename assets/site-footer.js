@@ -87,11 +87,15 @@
           <a href="/yasal.html#iptal-iade">İptal ve İade</a>
         </nav>
       </div>
+    </div>
 
-      <!-- Alt Telif Hakkı ve FSEK/KVKK Bilgilendirmesi -->
-      <div class="zc-footer-bottom">
-        <span>© ${year} ZarifÇözüm. Tüm hakları saklıdır. Platformdaki tüm soru, test, görsel ve yapay zekâ destekli özgün eğitim içerikleri 5846 sayılı FSEK kapsamında ZarifÇözüm'e aittir; izinsiz çoğaltılamaz.</span>
-        <a href="/yasal.html#art-07">Telif Hakları (5846 FSEK) &amp; KVKK</a>
+    <!-- En Alt Bağımsız Taban Şeridi (Copyright Bar — #0F172A) -->
+    <div class="zc-footer-copyright-bar">
+      <div class="zc-footer-container">
+        <div class="zc-footer-bottom">
+          <span>© ${year} ZarifÇözüm. Tüm hakları saklıdır. Platformdaki tüm soru, test, görsel ve yapay zekâ destekli özgün eğitim içerikleri 5846 sayılı FSEK kapsamında ZarifÇözüm'e aittir; izinsiz çoğaltılamaz.</span>
+          <a href="/yasal.html#art-07">Telif Hakları (5846 FSEK) &amp; KVKK</a>
+        </div>
       </div>
     </div>`;
 
@@ -100,7 +104,7 @@
   if (!document.querySelector('[data-site-footer-styles]')) {
     const stylesheet = document.createElement('link');
     stylesheet.rel = 'stylesheet';
-    stylesheet.href = '/assets/site-footer.css?v=2';
+    stylesheet.href = '/assets/site-footer.css?v=3';
     stylesheet.dataset.siteFooterStyles = '';
     document.head.append(stylesheet);
   }
