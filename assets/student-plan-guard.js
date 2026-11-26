@@ -208,10 +208,23 @@
     });
   }
 
+  function syncKesifModuMenuVisibility() {
+    var navItem = document.getElementById('navItemKesifModu');
+    var navLink = document.getElementById('navLinkKesifModu');
+    if (!navItem) return;
+    var g = Number(planState.registeredGrade);
+    var isMiddleSchool = (g >= 5 && g <= 8);
+    navItem.hidden = !(isMiddleSchool || planState.isStaff);
+    if (navLink && isMiddleSchool) {
+      navLink.href = 'kesif-modu.html?sinif=' + g;
+    }
+  }
+
   function applyAllLocks() {
     syncSidebarLocks();
     syncSectionLockOverlays();
     syncAllGradeSelectors();
+    syncKesifModuMenuVisibility();
     try {
       if (global.localStorage && planState.registeredGrade >= 5) {
         global.localStorage.setItem('zarif_student_grade', String(planState.registeredGrade));
