@@ -4,826 +4,324 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#FAF8F5">
   <title>Giriş & Kayıt | ZarifÇözüm</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <style>
-    :root {
-      font-family: Inter, system-ui, -apple-system, sans-serif;
-      color: #3a2618;
-      background: #fbf1e8;
-      font-synthesis: none;
-      --navy-900: #2c1a0e;
-      --navy-800: #3a2618;
-      --terracotta: #c2570c;
-      --terracotta-hover: #a84705;
-      --cream-bg: #fbf1e8;
-      --card-bg: #fffaf5;
-      --border-color: #ead3bd;
-      --muted-text: #6a5242;
-      --gold: #c59734;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      min-height: 100vh;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      background: var(--cream-bg);
-      color: var(--navy-800);
-    }
-
-    .auth-page-body {
-      flex: 1 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      padding: clamp(24px, 4vw, 48px) 16px clamp(36px, 5vw, 60px);
-      box-sizing: border-box;
-    }
-
-    .auth-split-wrapper {
-      width: min(100%, 1020px);
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 380px 1fr;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(58, 38, 24, 0.12);
-      overflow: hidden;
-    }
-
-    .site-footer.site-footer-rich {
-      width: 100% !important;
-      margin: 0 !important;
-      border-radius: 0 !important;
-      flex-shrink: 0;
-    }
-
-    /* Sol Sütun (Branded Dark Panel) */
-    .auth-sidebar-hero {
-      background: linear-gradient(165deg, var(--navy-900) 0%, var(--navy-800) 100%);
-      color: #fff;
-      padding: 40px 32px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-    }
-    .auth-sidebar-hero::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at 80% 20%, rgba(194, 87, 12, 0.18) 0%, transparent 60%);
-      pointer-events: none;
-    }
-
-    .sidebar-brand-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .sidebar-logo {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.12);
-      padding: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .sidebar-brand-text strong {
-      display: block;
-      font-size: 1.25rem;
-      letter-spacing: -0.01em;
-      color: #fff;
-    }
-    .sidebar-brand-text span {
-      display: block;
-      font-size: 0.75rem;
-      color: #ebd8c8;
-    }
-
-    .sidebar-middle {
-      margin-block: 36px;
-    }
-    .sidebar-middle h2 {
-      font-size: 1.65rem;
-      font-weight: 700;
-      line-height: 1.25;
-      margin-bottom: 24px;
-      color: #fff;
-    }
-
-    /* Stepper (Adımlar) */
-    .auth-stepper {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      position: relative;
-    }
-    .step-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      position: relative;
-    }
-    .step-item:not(:last-child)::after {
-      content: "";
-      position: absolute;
-      left: 15px;
-      top: 32px;
-      bottom: -14px;
-      width: 2px;
-      background: rgba(255, 255, 255, 0.2);
-    }
-    .step-circle {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      font-weight: 700;
-      flex-shrink: 0;
-      background: rgba(255, 255, 255, 0.15);
-      color: #ebd8c8;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-    .step-item.is-active .step-circle {
-      background: #fff;
-      color: var(--navy-900);
-      box-shadow: 0 0 0 3px rgba(194, 87, 12, 0.4);
-    }
-    .step-text strong {
-      display: block;
-      font-size: 0.92rem;
-      color: #fff;
-    }
-    .step-text span {
-      display: block;
-      font-size: 0.75rem;
-      color: #ebd8c8;
-    }
-
-    /* Sol Sütun Alt İstatistikler */
-    .sidebar-stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.15);
-      text-align: center;
-    }
-    .stat-box strong {
-      display: block;
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--gold);
-    }
-    .stat-box span {
-      display: block;
-      font-size: 0.7rem;
-      color: #ebd8c8;
-      margin-top: 2px;
-    }
-
-    /* Sağ Sütun (Form Alanı) */
-    .auth-form-card {
-      padding: 40px 48px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      background: var(--card-bg);
-      position: relative;
-    }
-
-    .form-top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      border-radius: 9999px;
-      background: #f3e1cf;
-      border: 1px solid var(--border-color);
-      color: var(--navy-800);
-      font-size: 0.82rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: background 0.2s ease;
-    }
-    .back-btn:hover {
-      background: #ead3bd;
-    }
-
-    .auth-label-badge {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--terracotta);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .auth-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--navy-800);
-      margin: 4px 0;
-      letter-spacing: -0.01em;
-    }
-    .intro {
-      font-size: 0.92rem;
-      color: var(--muted-text);
-      margin-bottom: 20px;
-      line-height: 1.45;
-    }
-
-    /* Mode Switcher Pills */
-    .switch {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-bottom: 18px;
-      padding: 5px;
-      border-radius: 12px;
-      background: #f3e1cf;
-    }
-    .switch button {
-      padding: 9px;
-      border: 0;
-      border-radius: 8px;
-      background: transparent;
-      color: var(--muted-text);
-      font: inherit;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .switch button[aria-pressed=true] {
-      background: #fff;
-      color: var(--navy-800);
-      box-shadow: 0 2px 6px rgba(58, 38, 24, 0.1);
-    }
-
-    .parent-actions {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-    .text-button {
-      padding: 0;
-      border: 0;
-      background: none;
-      color: var(--terracotta);
-      font: inherit;
-      font-size: 0.88rem;
-      font-weight: 600;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    .text-button:hover {
-      color: var(--terracotta-hover);
-    }
-
-    /* Google Button */
-    .google-wrap { margin-bottom: 8px; }
-    #googleButton { display: flex; justify-content: center; width: 100%; }
-    .google-disabled {
-      margin: 0;
-      color: var(--muted-text);
-      font-size: 0.85rem;
-      text-align: center;
-    }
-
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 14px 0 16px;
-      color: #8b7260;
-      font-size: 0.82rem;
-    }
-    .divider::before, .divider::after {
-      content: "";
-      height: 1px;
-      flex: 1;
-      background: var(--border-color);
-    }
-
-    /* Form Fields */
-    .form-grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .field-wrap {
-      margin-bottom: 14px;
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--navy-800);
-    }
-    input, select {
-      width: 100%;
-      padding: 11px 14px;
-      border: 1px solid var(--border-color);
-      border-radius: 9px;
-      background: #fff;
-      color: inherit;
-      font: inherit;
-      font-size: 0.92rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--terracotta);
-      box-shadow: 0 0 0 3px rgba(194, 87, 12, 0.15);
-    }
-
-    /* Telefon Açıklama Notu */
-    .phone-helper {
-      display: block;
-      margin-top: 5px;
-      font-size: 0.78rem;
-      color: #8b7260;
-      line-height: 1.35;
-    }
-
-    .forgot-row {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 6px;
-      margin-bottom: 14px;
-    }
-
-    .primary {
-      width: 100%;
-      padding: 13px;
-      border: 0;
-      border-radius: 9px;
-      background: linear-gradient(135deg, var(--terracotta), #952719);
-      color: #fff;
-      font: inherit;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(194, 87, 12, 0.25);
-      transition: transform 0.2s ease, filter 0.2s ease;
-    }
-    .primary:hover {
-      filter: brightness(1.06);
-      transform: translateY(-1px);
-    }
-    .primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* Bilgilendirme Kutusu */
-    .auth-notice-card {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 16px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      background: #fdf6ee;
-      border: 1px solid var(--border-color);
-      font-size: 0.8rem;
-      color: var(--muted-text);
-      line-height: 1.4;
-    }
-
-    /* Öğretmen ve Öğrenci Alanları Yumuşak Geçiş */
-    #teacherApplicationFields,
-    #studentApplicationFields {
-      transition: opacity 0.3s ease, transform 0.3s ease;
-      background: rgba(194, 87, 12, 0.03);
-      border: 1px solid #ebd9c8;
-      border-radius: 12px;
-      padding: 14px 14px 4px 14px;
-      margin-bottom: 14px;
-    }
-
-    /* Yasal Modal Stilleri */
-    .legal-modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(44, 26, 14, 0.65);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      padding: 16px;
-    }
-    .legal-modal-backdrop[hidden] {
-      display: none !important;
-    }
-    .legal-modal-card {
-      background: #fffaf5;
-      border: 1px solid var(--border-color);
-      border-radius: 18px;
-      max-width: 650px;
-      width: 100%;
-      max-height: 85vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 24px 60px rgba(58, 38, 24, 0.3);
-      overflow: hidden;
-      animation: modalFadeIn 0.25s ease;
-    }
-    @keyframes modalFadeIn {
-      from { opacity: 0; transform: scale(0.96); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    .legal-modal-header {
-      padding: 18px 24px;
-      background: #fbf1e8;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .legal-modal-header h3 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--navy-900);
-      margin: 0;
-    }
-    .legal-modal-close {
-      background: none;
-      border: none;
-      font-size: 1.6rem;
-      line-height: 1;
-      color: var(--muted-text);
-      cursor: pointer;
-      padding: 0 4px;
-    }
-    .legal-modal-close:hover {
-      color: var(--terracotta);
-    }
-    .legal-modal-body {
-      padding: 20px 24px;
-      overflow-y: auto;
-      font-size: 0.88rem;
-      line-height: 1.6;
-      color: var(--navy-800);
-    }
-    .legal-modal-body h4 {
-      margin: 14px 0 6px 0;
-      font-size: 0.95rem;
-      color: var(--terracotta);
-    }
-    .legal-modal-footer {
-      padding: 14px 24px;
-      background: #fbf1e8;
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .message {
-      min-height: 1.4em;
-      margin: 12px 0 0;
-      color: #a3201a;
-      font-size: 0.88rem;
-      font-weight: 600;
-      text-align: center;
-    }
-    .message.success { color: #17805f; }
-
-    .bottom-switch-link {
-      display: block;
-      margin-top: 16px;
-      text-align: center;
-      font-size: 0.88rem;
-      color: var(--muted-text);
-    }
-
-    [hidden] { display: none !important; }
-
-    /* Responsive */
-    @media (max-width: 880px) {
-      .auth-split-wrapper {
-        grid-template-columns: 1fr;
-        border-radius: 18px;
-      }
-      .auth-sidebar-hero {
-        padding: 28px 24px;
-      }
-      .sidebar-middle {
-        margin-block: 20px;
-      }
-      .auth-stepper {
-        display: none;
-      }
-      .auth-form-card {
-        padding: 32px 24px;
-      }
-    }
-    @media (max-width: 520px) {
-      .form-grid-2 {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/auth-contact-modern.css?v=1">
 </head>
-<body>
-  <div class="auth-page-body">
-    <div class="auth-split-wrapper">
-    <!-- Sol Sütun: Brand & Stepper -->
-    <aside class="auth-sidebar-hero">
-      <div class="sidebar-brand-row">
-        <img class="sidebar-logo" src="assets/brand-mark.png" alt="ZarifÇözüm">
-        <div class="sidebar-brand-text">
-          <strong>ZarifÇözüm</strong>
-          <span>Maarif Modeli Matematik Platformu</span>
-        </div>
-      </div>
+<body class="zc-modern-page">
+  <div class="zc-page-container" style="display:flex;align-items:center;">
+    <div class="zc-auth-shell">
+      <!-- Sol Sütun: Gece Mavisi Koordinat Ağı & Dinamik Maarif Modeli Kazanım Önizlemesi -->
+      <aside class="zc-auth-visual" aria-label="Maarif Modeli Önizleme">
+        <!-- İnce SVG Koordinat Çizgileri ve Matematiksel Eğri -->
+        <svg class="zc-auth-grid-svg" viewBox="0 0 600 720" preserveAspectRatio="xMidYMid slice" fill="none" aria-hidden="true">
+          <defs>
+            <pattern id="zcCoordGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(148,163,184,0.12)" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="600" height="720" fill="url(#zcCoordGrid)"/>
+          <!-- Eksenler -->
+          <line x1="60" y1="540" x2="560" y2="540" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+          <line x1="120" y1="80" x2="120" y2="620" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+          <!-- Parabol / Gelişim Eğrisi -->
+          <path d="M 120 510 Q 260 470, 340 310 T 540 120" stroke="#D97706" stroke-width="2.5" stroke-dasharray="6 6" fill="none" opacity="0.75"/>
+          <circle cx="340" cy="310" r="6" fill="#F59E0B"/>
+          <circle cx="480" cy="175" r="5" fill="#34D399"/>
+          <!-- Geometrik Üçgen Vurgu -->
+          <polygon points="410,540 490,410 545,540" stroke="rgba(217,119,6,0.35)" stroke-width="1.5" fill="rgba(217,119,6,0.06)"/>
+        </svg>
 
-      <div class="sidebar-middle">
-        <h2>Birkaç adımda hesabını oluştur, hemen başla.</h2>
-        <div class="auth-stepper">
-          <div class="step-item is-active">
-            <span class="step-circle">1</span>
-            <div class="step-text">
-              <strong>Genel Bilgiler</strong>
-              <span>Şu an buradasın</span>
-            </div>
+        <a class="zc-auth-brand" href="index.html">
+          <img src="assets/brand-mark.png" alt="ZarifÇözüm">
+          <div>
+            <span class="zc-auth-brand-name">ZarifÇözüm</span>
+            <span class="zc-auth-brand-sub">5–12. Sınıf Türkiye Yüzyılı Maarif Modeli</span>
           </div>
-          <div class="step-item">
-            <span class="step-circle">2</span>
-            <div class="step-text">
-              <strong>Sınıf & Profil Seçimi</strong>
-              <span>Sıradaki adım</span>
-            </div>
+        </a>
+
+        <!-- Seçilen Role Göre Değişen Matematiksel Görsel Kart -->
+        <div class="zc-math-card" id="zcRolePreviewCard" aria-live="polite">
+          <div class="zc-math-card-top">
+            <span class="zc-math-pill" id="zcPreviewBadge">🎓 Öğrenci Profili</span>
+            <span class="zc-math-eq" id="zcPreviewEq">f(x) = ax + b</span>
           </div>
-          <div class="step-item">
-            <span class="step-circle">3</span>
-            <div class="step-text">
-              <strong>Şifre Belirle</strong>
-              <span>Sıradaki adım</span>
-            </div>
-          </div>
-          <div class="step-item">
-            <span class="step-circle">4</span>
-            <div class="step-text">
-              <strong>Matematik Dünyasına Başla</strong>
-              <span>Sıradaki adım</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="sidebar-stats-row">
-        <div class="stat-box">
-          <strong>5-12. Sınıf</strong>
-          <span>Maarif Modeli</span>
-        </div>
-        <div class="stat-box">
-          <strong>10.000+</strong>
-          <span>Kazanım Sorusu</span>
-        </div>
-        <div class="stat-box">
-          <strong>%98</strong>
-          <span>Memnuniyet</span>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Sağ Sütun: Form Alanı -->
-    <main class="auth-form-card">
-      <div class="form-top-bar">
-        <a class="back-btn" href="index.html">← Siteye dön</a>
-        <span class="auth-label-badge">Üyelik Paneli</span>
-      </div>
-
-      <h1 class="auth-title" id="authTitle">Hesap oluştur</h1>
-      <p class="intro" id="intro">Hesabınıza giriş yapın veya yeni hesap oluşturun.</p>
-
-      <div id="authOptions">
-        <!-- Google Girişi -->
-        <div class="google-wrap" id="googleWrap">
-          <div id="googleButton"></div>
-          <p class="google-disabled" id="googleDisabled" hidden>Google ile giriş bu sitede henüz etkinleştirilmedi.</p>
-        </div>
-        <div class="divider" id="googleDivider"><span>veya</span></div>
-
-        <!-- Veli Seçenekleri -->
-        <div class="parent-actions">
-          <button class="text-button" id="parentLoginMode" type="button">Veli Girişi</button>
-          <button class="text-button" id="parentRegisterMode" type="button">Veli Kayıt Ol</button>
-        </div>
-
-        <!-- Giriş / Kayıt Geçiş Sekmeleri -->
-        <div class="switch" aria-label="İşlem seçin">
-          <button id="loginMode" type="button" aria-pressed="true">Giriş yap</button>
-          <button id="registerMode" type="button" aria-pressed="false">Kayıt ol</button>
-        </div>
-
-        <form id="authForm" action="/login" method="post">
-          <div class="form-grid-2">
-            <div id="nameField" class="field-wrap" hidden>
-              <label for="name">Ad</label>
-              <input id="name" name="name" autocomplete="name" maxlength="100" placeholder="Adınız" disabled>
-            </div>
-            <div id="surnameField" class="field-wrap" hidden>
-              <label for="surname">Soyad</label>
-              <input id="surname" name="surname" autocomplete="family-name" maxlength="100" placeholder="Soyadınız" disabled>
-            </div>
-          </div>
-
-          <div class="field-wrap">
-            <label for="email">E-posta adresi</label>
-            <input id="email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="ornek@zarifcozum.com" required>
-          </div>
-
-          <div id="phoneField" class="field-wrap" hidden>
-            <label for="phone">Telefon numarası</label>
-            <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" maxlength="20" disabled>
-            <p class="phone-helper">05xx xxx xx xx formatında gir. Sınav ve ödeme bildirimleri için zorunludur.</p>
-          </div>
-
-          <div class="field-wrap">
-            <label for="password">Şifre</label>
-            <input id="password" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="72" placeholder="En az 10 karakter" required>
-          </div>
-
-          <div id="confirmField" class="field-wrap" hidden>
-            <label for="passwordConfirmation">Şifreyi tekrar girin</label>
-            <input id="passwordConfirmation" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" placeholder="Şifrenizi doğrulayın" disabled>
-          </div>
-
-          <div id="roleField" class="field-wrap" hidden>
-            <label for="role">Kullanıcı profili</label>
-            <select id="role" name="role" disabled>
-              <option value="student">Öğrenci</option>
-              <option value="teacher">Öğretmen</option>
-            </select>
-          </div>
-
-          <!-- Öğretmen Başvuru Alanları -->
-          <div id="teacherApplicationFields" hidden>
-            <div class="field-wrap" style="margin-bottom:12px;">
-              <label for="branch">Branş / Kademe Seçimi <span style="color:#b91c1c;">*</span></label>
-              <select id="branch" name="branch" disabled>
-                <option value="" disabled selected>Kademe ve branş seçin</option>
-                <option value="Ortaokul Matematik (5-8)">Ortaokul Matematik (5-8)</option>
-                <option value="Lise Matematik (9-12)">Lise Matematik (9-12)</option>
-                <option value="Her İkisi (5-12)">Her İkisi (5-12 Matematik)</option>
-              </select>
-            </div>
-
-            <div class="field-wrap" style="margin-bottom:12px;">
-              <label for="graduationInfo">Mezuniyet ve Deneyim Bilgisi <span style="color:#b91c1c;">*</span></label>
-              <input id="graduationInfo" name="graduationInfo" type="text" placeholder="Örn: Ondokuz Mayıs Üni. - Matematik Öğretmenliği / 5 Yıl" maxlength="300" disabled>
-            </div>
-
-            <div class="field-wrap" style="margin-bottom:12px;">
-              <label for="okulKurumAdi">Görev Yaptığınız Okul veya Kurum (İsteğe bağlı)</label>
-              <input id="okulKurumAdi" name="okulKurumAdi" type="text" placeholder="Örn: Atatürk Anadolu Lisesi / Etüt Merkezi" maxlength="150" disabled>
-            </div>
-
-            <div class="field-wrap" style="margin-bottom:12px;">
-              <label for="basvuruNotu">Başvuru Notu (İsteğe bağlı)</label>
-              <input id="basvuruNotu" name="basvuruNotu" type="text" placeholder="Uzmanlık veya eklemek istediğiniz bilgiler..." maxlength="500" disabled>
-            </div>
-
-            <div class="field-wrap" style="margin-bottom:12px;">
-              <label for="teacherCode">Öğretmen Kodu (Davet / Hızlı Aktivasyon Kodu - İsteğe bağlı)</label>
-              <input id="teacherCode" name="teacherCode" type="password" placeholder="Varsa davet kodunuzu girin" autocomplete="off" disabled>
-              <small id="teacherCodeHelp" style="display:block; margin-top:4px; font-size:0.75rem; color:#8b7260;">Kodunuz varsa başvurunuz anında onaylanır; belge yükleme zorunlu değildir.</small>
-            </div>
-
-            <div class="field-wrap" id="docUploadWrap" style="margin-bottom:14px;">
-              <label for="verificationDocument">Öğretmenlik veya Mezuniyet Belgesi <span id="docRequiredStar" style="color:#b91c1c;">*</span></label>
-              <input id="verificationDocument" name="verificationDocument" type="file" accept=".pdf,image/jpeg,image/png" disabled>
-              <small id="docHelpText" style="display:block; margin-top:4px; font-size:0.75rem; color:#8b7260;">PDF, JPG veya PNG formatında (maks. 5MB). Öğretmen kodunuz yoksa yüklemeniz zorunludur.</small>
-            </div>
-
-            <div class="field-wrap" style="margin-bottom:14px;">
-              <label style="display:flex; align-items:flex-start; gap:10px; font-size:0.83rem; line-height:1.45; cursor:pointer; color:#3a2618;">
-                <input type="checkbox" id="contractAccepted" name="contractAccepted" value="true" style="margin-top:2px; accent-color:var(--terracotta); width:18px; height:18px; cursor:pointer;" disabled>
-                <span>
-                  <a href="javascript:void(0)" id="openContractModal" style="color:var(--terracotta); font-weight:700; text-decoration:underline;">Öğretmen Hizmet &amp; Telif Sözleşmesi</a> ile <a href="javascript:void(0)" id="openKvkkModal" style="color:var(--terracotta); font-weight:700; text-decoration:underline;">KVKK Aydınlatma Metni</a>'ni okudum, kabul ediyorum. <span style="color:#b91c1c;">*</span>
-                </span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Öğrenci Sınıf ve Veli Onay Alanları -->
-          <div id="studentApplicationFields" hidden>
-            <div class="field-wrap" style="margin-bottom:12px;">
-              <label for="grade">Sınıf Düzeyi <span style="color:#b91c1c;">*</span></label>
-              <select id="grade" name="grade" disabled>
-                <option value="" disabled selected>Sınıfınızı seçin</option>
-                <option value="5">5. Sınıf (Ortaokul)</option>
-                <option value="6">6. Sınıf (Ortaokul)</option>
-                <option value="7">7. Sınıf (Ortaokul)</option>
-                <option value="8">8. Sınıf (LGS Hazırlık)</option>
-                <option value="9">9. Sınıf (Lise)</option>
-                <option value="10">10. Sınıf (Lise)</option>
-                <option value="11">11. Sınıf (YKS Temel / Lise)</option>
-              </select>
-            </div>
-
-            <div class="field-wrap" style="margin-bottom:12px;">
-              <label for="parentContact">Veli E-posta veya Telefon Numarası <span style="color:#b91c1c;">*</span></label>
-              <input id="parentContact" name="parentContact" type="text" placeholder="Örn: 05xx xxx xx xx veya veli@ornek.com" maxlength="100" disabled>
-              <small style="display:block; margin-top:4px; font-size:0.75rem; color:#8b7260;">18 yaşından küçük öğrenciler için yasal bilgilendirme ve onay kaydı amacıyla zorunludur.</small>
-            </div>
-
-            <div class="field-wrap" style="margin-bottom:14px;">
-              <label style="display:flex; align-items:flex-start; gap:10px; font-size:0.83rem; line-height:1.45; cursor:pointer; color:#3a2618;">
-                <input type="checkbox" id="guardianConsentAccepted" name="guardianConsentAccepted" value="true" style="margin-top:2px; accent-color:var(--terracotta); width:18px; height:18px; cursor:pointer;" disabled>
-                <span>
-                  <a href="javascript:void(0)" id="openTermsModal" style="color:var(--terracotta); font-weight:700; text-decoration:underline;">Kullanım Koşulları</a>, <a href="javascript:void(0)" id="openStudentKvkkModal" style="color:var(--terracotta); font-weight:700; text-decoration:underline;">KVKK Aydınlatma Metni</a> ve 18 yaşından küçük kullanıcılar için <a href="javascript:void(0)" id="openGuardianModal" style="color:var(--terracotta); font-weight:700; text-decoration:underline;">Veli/Vasi Açık Rıza Beyanı</a>'nı velim ile birlikte okudum, onaylıyorum. <span style="color:#b91c1c;">*</span>
-                </span>
-              </label>
-            </div>
-          </div>
-
-          <div id="parentCodeField" class="field-wrap" hidden>
-            <label for="parentConnectionCode">6 karakterli veli bağlantı kodu</label>
-            <input id="parentConnectionCode" name="parentConnectionCode" autocomplete="off" autocapitalize="characters" maxlength="6" pattern="[A-Za-z0-9]{6}" disabled>
-          </div>
-
-          <div class="forgot-row" id="forgotRow">
-            <button class="text-button" id="forgotLink" type="button">Şifremi unuttum / Şifre değiştir</button>
-          </div>
-
-          <button class="primary" id="submitButton" type="submit">Giriş yap</button>
-          <p class="message" id="message" role="alert" aria-live="polite"></p>
-
-          <div class="auth-notice-card">
-            <span>📢 Gelişmelerden ve canlı derslerden haberdar olmak için platform bildirimlerini açık tutun.</span>
-          </div>
-
-          <p class="bottom-switch-link" id="switchLinkRow">
-            Zaten hesabınız var mı? <button type="button" class="text-button" id="toggleSwitchBtn">Giriş yap</button>
+          <h2 class="zc-math-preview-title" id="zcPreviewTitle">Maarif Modeli Kazanım Önizlemesi</h2>
+          <p class="zc-math-preview-desc" id="zcPreviewDesc">
+            5–12. sınıf müfredatına birebir uyumlu konu özetleri, Sokratik AI Mentör, 8 etkileşimli keşif laboratuvarı ve haftalık çalışma planıyla adım adım ilerle.
           </p>
+          <div class="zc-math-tags" id="zcPreviewTags">
+            <span class="zc-math-tag">📐 Görsel Konu Stüdyosu</span>
+            <span class="zc-math-tag">✨ AI Mentör İpuçları</span>
+            <span class="zc-math-tag">🧭 Keşif Modu XP</span>
+          </div>
+        </div>
+
+        <div class="zc-auth-stats">
+          <div class="zc-auth-stat">
+            <strong>5–12. Sınıf</strong>
+            <span>Maarif Modeli</span>
+          </div>
+          <div class="zc-auth-stat">
+            <strong>10.000+</strong>
+            <span>Kazanım Sorusu</span>
+          </div>
+          <div class="zc-auth-stat">
+            <strong>%98</strong>
+            <span>Memnuniyet</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Sağ Sütun: Rol Seçici + Yatay İlerleme Çubuğu + Ferah Form -->
+      <main class="zc-auth-form-col">
+        <div class="zc-auth-top-row">
+          <a class="zc-home-pill" href="index.html">← Anasayfa</a>
+          <span class="zc-auth-kicker">Üyelik &amp; Giriş</span>
+        </div>
+
+        <!-- Modern Rol Seçici (Segmented Control: Öğrenci | Veli | Öğretmen) -->
+        <div class="zc-role-segmented" id="zcRoleSegmented" role="tablist" aria-label="Kullanıcı Rolü Seçin">
+          <button type="button" class="zc-role-seg-btn is-active" role="tab" aria-selected="true" data-seg-role="student">🎓 Öğrenci</button>
+          <button type="button" class="zc-role-seg-btn" role="tab" aria-selected="false" data-seg-role="parent">👨‍👩‍👧 Veli</button>
+          <button type="button" class="zc-role-seg-btn" role="tab" aria-selected="false" data-seg-role="teacher">👨‍🏫 Öğretmen</button>
+        </div>
+
+        <h1 class="zc-auth-heading" id="authTitle">Giriş yap</h1>
+        <p class="zc-auth-sub" id="intro">Öğrenci hesabınızla giriş yapın veya yeni hesap oluşturun.</p>
+
+        <div id="authOptions">
+          <!-- Ferah Giriş Yap / Kayıt Ol Geçişi -->
+          <div class="zc-mode-switch" aria-label="İşlem seçin">
+            <button id="loginMode" type="button" aria-pressed="true">Giriş Yap</button>
+            <button id="registerMode" type="button" aria-pressed="false">Kayıt Ol</button>
+          </div>
+
+          <!-- Yatay Kayıt İlerleme Çubuğu (Kayıt Modunda Görünür) -->
+          <div class="zc-reg-progress" id="zcRegProgress" hidden>
+            <div class="zc-reg-steps">
+              <div class="zc-reg-step is-active" id="zcRegStep1">
+                <span class="zc-reg-step-num">1</span>
+                <span>Kimlik &amp; İletişim</span>
+              </div>
+              <div class="zc-reg-step" id="zcRegStep2">
+                <span class="zc-reg-step-num">2</span>
+                <span>Şifre Güvenliği</span>
+              </div>
+              <div class="zc-reg-step" id="zcRegStep3">
+                <span class="zc-reg-step-num">3</span>
+                <span>Profil &amp; Onay</span>
+              </div>
+            </div>
+            <div class="zc-reg-bar-track">
+              <div class="zc-reg-bar-fill" id="zcRegBarFill"></div>
+            </div>
+          </div>
+
+          <!-- Google Girişi -->
+          <div class="google-wrap" id="googleWrap" style="margin-bottom:8px;">
+            <div id="googleButton" style="display:flex;justify-content:center;width:100%;"></div>
+            <p class="zc-helper-text" id="googleDisabled" style="text-align:center;" hidden>Google ile giriş bu sitede henüz etkinleştirilmedi.</p>
+          </div>
+          <div class="zc-divider" id="googleDivider"><span>veya e-posta ile devam et</span></div>
+
+          <!-- Eski Veli Butonları (Gizli uyumluluk katmanı, segmented control bunları yönetir) -->
+          <div hidden>
+            <button id="parentLoginMode" type="button">Veli Girişi</button>
+            <button id="parentRegisterMode" type="button">Veli Kayıt Ol</button>
+          </div>
+
+          <form id="authForm" action="/login" method="post">
+            <div class="zc-form-grid-2">
+              <div id="nameField" class="zc-field" hidden>
+                <label for="name">Ad soyad</label>
+                <input id="name" name="name" autocomplete="name" maxlength="100" placeholder="Adınız" disabled>
+              </div>
+              <div id="surnameField" class="zc-field" hidden>
+                <label for="surname">Soyad</label>
+                <input id="surname" name="surname" autocomplete="family-name" maxlength="100" placeholder="Soyadınız" disabled>
+              </div>
+            </div>
+
+            <div class="zc-field">
+              <label for="email">E-posta adresi</label>
+              <input id="email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="ornek@zarifcozum.com" required>
+            </div>
+
+            <div id="phoneField" class="zc-field" hidden>
+              <label for="phone">Telefon numarası</label>
+              <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05xx xxx xx xx" maxlength="20" disabled>
+              <span class="zc-helper-text">05xx xxx xx xx formatında girin. Sınav ve bildirimler için gereklidir.</span>
+            </div>
+
+            <div class="zc-field">
+              <label for="password">Şifre</label>
+              <input id="password" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="72" placeholder="En az 10 karakter" required>
+            </div>
+
+            <div id="confirmField" class="zc-field" hidden>
+              <label for="passwordConfirmation">Şifreyi tekrar girin</label>
+              <input id="passwordConfirmation" name="passwordConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" placeholder="Şifrenizi doğrulayın" disabled>
+            </div>
+
+            <div id="roleField" class="zc-field" hidden>
+              <label for="role">Kullanıcı profili</label>
+              <select id="role" name="role" disabled>
+                <option value="student">Öğrenci</option>
+                <option value="teacher">Öğretmen</option>
+              </select>
+            </div>
+
+            <!-- Öğretmen Başvuru Alanları -->
+            <div id="teacherApplicationFields" class="zc-subpanel" hidden>
+              <div class="zc-field">
+                <label for="branch">Branş / Kademe Seçimi <span style="color:#DC2626;">*</span></label>
+                <select id="branch" name="branch" disabled>
+                  <option value="" disabled selected>Kademe ve branş seçin</option>
+                  <option value="Ortaokul Matematik (5-8)">Ortaokul Matematik (5-8)</option>
+                  <option value="Lise Matematik (9-12)">Lise Matematik (9-12)</option>
+                  <option value="Her İkisi (5-12)">Her İkisi (5-12 Matematik)</option>
+                </select>
+              </div>
+
+              <div class="zc-field">
+                <label for="graduationInfo">Mezuniyet ve Deneyim Bilgisi <span style="color:#DC2626;">*</span></label>
+                <input id="graduationInfo" name="graduationInfo" type="text" placeholder="Örn: Ondokuz Mayıs Üni. - Matematik Öğretmenliği / 5 Yıl" maxlength="300" disabled>
+              </div>
+
+              <div class="zc-field">
+                <label for="okulKurumAdi">Görev Yaptığınız Okul veya Kurum (İsteğe bağlı)</label>
+                <input id="okulKurumAdi" name="okulKurumAdi" type="text" placeholder="Örn: Atatürk Anadolu Lisesi / Etüt Merkezi" maxlength="150" disabled>
+              </div>
+
+              <div class="zc-field">
+                <label for="basvuruNotu">Başvuru Notu (İsteğe bağlı)</label>
+                <input id="basvuruNotu" name="basvuruNotu" type="text" placeholder="Uzmanlık veya eklemek istediğiniz bilgiler..." maxlength="500" disabled>
+              </div>
+
+              <div class="zc-field">
+                <label for="teacherCode">Öğretmen Kodu (Davet Kodu - İsteğe bağlı)</label>
+                <input id="teacherCode" name="teacherCode" type="password" placeholder="Varsa davet kodunuzu girin" autocomplete="off" disabled>
+                <span id="teacherCodeHelp" class="zc-helper-text">Kodunuz varsa başvurunuz anında onaylanır; belge yükleme zorunlu değildir.</span>
+              </div>
+
+              <div class="zc-field" id="docUploadWrap">
+                <label for="verificationDocument">Öğretmenlik veya Mezuniyet Belgesi <span id="docRequiredStar" style="color:#DC2626;">*</span></label>
+                <input id="verificationDocument" name="verificationDocument" type="file" accept=".pdf,image/jpeg,image/png" disabled>
+                <span id="docHelpText" class="zc-helper-text">PDF, JPG veya PNG formatında (maks. 5MB). Öğretmen kodunuz yoksa yüklemeniz zorunludur.</span>
+              </div>
+
+              <div class="zc-field">
+                <label class="zc-consent-row">
+                  <input type="checkbox" id="contractAccepted" name="contractAccepted" value="true" disabled>
+                  <span>
+                    <a href="javascript:void(0)" id="openContractModal">Öğretmen Hizmet &amp; Telif Sözleşmesi</a> ile <a href="javascript:void(0)" id="openKvkkModal">KVKK Aydınlatma Metni</a>'ni okudum, kabul ediyorum. <span style="color:#DC2626;">*</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Öğrenci Sınıf ve Veli Onay Alanları -->
+            <div id="studentApplicationFields" class="zc-subpanel" hidden>
+              <div class="zc-field">
+                <label for="grade">Sınıf Düzeyi <span style="color:#DC2626;">*</span></label>
+                <select id="grade" name="grade" disabled>
+                  <option value="" disabled selected>Sınıfınızı seçin</option>
+                  <option value="5">5. Sınıf (Ortaokul)</option>
+                  <option value="6">6. Sınıf (Ortaokul)</option>
+                  <option value="7">7. Sınıf (Ortaokul)</option>
+                  <option value="8">8. Sınıf (LGS Hazırlık)</option>
+                  <option value="9">9. Sınıf (Lise)</option>
+                  <option value="10">10. Sınıf (Lise)</option>
+                  <option value="11">11. Sınıf (YKS Temel / Lise)</option>
+                  <option value="12">12. Sınıf (YKS Hazırlık)</option>
+                </select>
+              </div>
+
+              <div class="zc-field">
+                <label for="parentContact">Veli E-posta veya Telefon Numarası <span style="color:#DC2626;">*</span></label>
+                <input id="parentContact" name="parentContact" type="text" placeholder="Örn: 05xx xxx xx xx veya veli@ornek.com" maxlength="100" disabled>
+                <span class="zc-helper-text">18 yaşından küçük öğrenciler için yasal bilgilendirme ve onay kaydı amacıyla zorunludur.</span>
+              </div>
+
+              <div class="zc-field">
+                <label class="zc-consent-row">
+                  <input type="checkbox" id="guardianConsentAccepted" name="guardianConsentAccepted" value="true" disabled>
+                  <span>
+                    <a href="javascript:void(0)" id="openTermsModal">Kullanım Koşulları</a>, <a href="javascript:void(0)" id="openStudentKvkkModal">KVKK Aydınlatma Metni</a> ve 18 yaşından küçük kullanıcılar için <a href="javascript:void(0)" id="openGuardianModal">Veli/Vasi Açık Rıza Beyanı</a>'nı velim ile birlikte okudum, onaylıyorum. <span style="color:#DC2626;">*</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div id="parentCodeField" class="zc-field" hidden>
+              <label for="parentConnectionCode">6 karakterli veli bağlantı kodu</label>
+              <input id="parentConnectionCode" name="parentConnectionCode" autocomplete="off" autocapitalize="characters" maxlength="6" pattern="[A-Za-z0-9]{6}" placeholder="Örn: ABC123" disabled>
+            </div>
+
+            <div id="forgotRow" style="display:flex;justify-content:flex-end;margin:-4px 0 18px;">
+              <button class="zc-text-link" id="forgotLink" type="button">Şifremi unuttum / Şifre değiştir</button>
+            </div>
+
+            <button class="zc-btn-amber" id="submitButton" type="submit">Giriş yap</button>
+            <p class="zc-auth-msg" id="message" role="alert" aria-live="polite"></p>
+
+            <div class="zc-notice-strip">
+              📢 Gelişmelerden ve canlı derslerden haberdar olmak için platform bildirimlerini açık tutun.
+            </div>
+
+            <p id="switchLinkRow" style="margin:18px 0 0;text-align:center;font-size:0.95rem;color:#475569;">
+              Hesabınız yok mu? <button type="button" class="zc-text-link" id="toggleSwitchBtn">Kayıt ol</button>
+            </p>
+          </form>
+        </div>
+
+        <!-- Şifremi Unuttum Formu -->
+        <form id="forgotForm" hidden>
+          <p style="margin:0 0 20px;color:#475569;">
+            Kayıtlı e-posta adresinizi girin; tek kullanımlık güvenli şifre sıfırlama bağlantısını hemen iletelim.
+          </p>
+          <div class="zc-field">
+            <label for="forgotEmail">Kayıtlı e-posta adresi</label>
+            <input id="forgotEmail" type="email" autocomplete="email" maxlength="254" placeholder="ornek@zarifcozum.com" required>
+          </div>
+          <button class="zc-btn-amber" type="submit">Sıfırlama bağlantısı gönder</button>
+          <p class="zc-auth-msg" id="forgotMessage" role="status" aria-live="polite"></p>
+          <div style="margin-top:20px;text-align:center;">
+            <button class="zc-text-link" type="button" data-mode="login">← Giriş ekranına dön</button>
+          </div>
         </form>
-      </div>
 
-      <!-- Şifremi Unuttum Formu -->
-      <form id="forgotForm" hidden style="margin-top: 10px;">
-        <p style="margin-bottom: 18px; color: var(--muted-text); font-size: 0.9rem; line-height: 1.55;">
-          Kayıtlı e-posta adresinizi girin; tek kullanımlık güvenli şifre sıfırlama bağlantısını hemen iletelim.
-        </p>
-        <div class="field-wrap">
-          <label for="forgotEmail">Kayıtlı e-posta adresi</label>
-          <input id="forgotEmail" type="email" autocomplete="email" maxlength="254" placeholder="ornek@zarifcozum.com" required>
-        </div>
-        <button class="primary" type="submit" style="margin-top: 8px;">Sıfırlama bağlantısı gönder</button>
-        <p class="message" id="forgotMessage" role="status" aria-live="polite"></p>
-        <div style="margin-top: 20px; text-align: center;">
-          <button class="text-button" type="button" data-mode="login" style="font-weight: 600; color: var(--terracotta);">← Giriş ekranına dön</button>
-        </div>
-      </form>
-
-      <!-- Şifre Sıfırlama Formu -->
-      <form id="resetForm" hidden style="margin-top: 10px;">
-        <p style="margin-bottom: 18px; color: var(--muted-text); font-size: 0.9rem; line-height: 1.55;">
-          Hesabınız için en az 10 karakterden oluşan yeni ve güvenli bir şifre belirleyin.
-        </p>
-        <div class="field-wrap">
-          <label for="resetEmail">E-posta adresi</label>
-          <input id="resetEmail" type="email" autocomplete="email" readonly required>
-        </div>
-        <div class="field-wrap">
-          <label for="resetPassword">Yeni şifre</label>
-          <input id="resetPassword" type="password" autocomplete="new-password" minlength="10" maxlength="72" placeholder="En az 10 karakter" required>
-        </div>
-        <div class="field-wrap">
-          <label for="resetConfirmation">Yeni şifreyi tekrar girin</label>
-          <input id="resetConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" placeholder="Şifrenizi doğrulayın" required>
-        </div>
-        <button class="primary" type="submit" style="margin-top: 8px;">Yeni Şifreyi Kaydet</button>
-        <p class="message" id="resetMessage" role="status" aria-live="polite"></p>
-        <div style="margin-top: 20px; text-align: center;">
-          <button class="text-button" type="button" data-mode="login" style="font-weight: 600; color: var(--terracotta);">← Giriş ekranına dön</button>
-        </div>
-      </form>
-    </main>
+        <!-- Şifre Sıfırlama Formu -->
+        <form id="resetForm" hidden>
+          <p style="margin:0 0 20px;color:#475569;">
+            Hesabınız için en az 10 karakterden oluşan yeni ve güvenli bir şifre belirleyin.
+          </p>
+          <div class="zc-field">
+            <label for="resetEmail">E-posta adresi</label>
+            <input id="resetEmail" type="email" autocomplete="email" readonly required>
+          </div>
+          <div class="zc-field">
+            <label for="resetPassword">Yeni şifre</label>
+            <input id="resetPassword" type="password" autocomplete="new-password" minlength="10" maxlength="72" placeholder="En az 10 karakter" required>
+          </div>
+          <div class="zc-field">
+            <label for="resetConfirmation">Yeni şifreyi tekrar girin</label>
+            <input id="resetConfirmation" type="password" autocomplete="new-password" minlength="10" maxlength="72" placeholder="Şifrenizi doğrulayın" required>
+          </div>
+          <button class="zc-btn-amber" type="submit">Yeni Şifreyi Kaydet</button>
+          <p class="zc-auth-msg" id="resetMessage" role="status" aria-live="polite"></p>
+          <div style="margin-top:20px;text-align:center;">
+            <button class="zc-text-link" type="button" data-mode="login">← Giriş ekranına dön</button>
+          </div>
+        </form>
+      </main>
+    </div>
   </div>
-</div>
 
   <!-- Yasal Sözleşme & KVKK Modalı -->
   <div id="legalModal" class="legal-modal-backdrop" hidden>
@@ -832,11 +330,9 @@
         <h3 id="legalModalTitle">Öğretmen Hizmet &amp; Telif Sözleşmesi</h3>
         <button type="button" id="closeLegalModal" class="legal-modal-close" aria-label="Kapat">&times;</button>
       </div>
-      <div class="legal-modal-body" id="legalModalBody">
-        <!-- İçerik Dinamik Yüklenir -->
-      </div>
+      <div class="legal-modal-body" id="legalModalBody"></div>
       <div class="legal-modal-footer">
-        <button type="button" class="primary" id="acceptLegalModalBtn" style="width:auto; padding:9px 24px;">Okudum ve Kabul Ediyorum</button>
+        <button type="button" class="zc-btn-amber" id="acceptLegalModalBtn" style="width:auto;min-height:44px;padding:0 24px;">Okudum ve Kabul Ediyorum</button>
       </div>
     </div>
   </div>
@@ -846,10 +342,88 @@
       const $ = id => document.getElementById(id);
       const params = new URLSearchParams(window.location.search);
       let mode = 'login';
-      let parentMode = params.get('role') === 'parent';
+      let activeProfile = params.get('role') === 'parent'
+        ? 'parent'
+        : params.get('role') === 'teacher'
+        ? 'teacher'
+        : 'student';
+      let parentMode = activeProfile === 'parent';
       let googleReady = false;
       const resetToken = params.get('token') || '';
       const resetEmail = params.get('email') || '';
+
+      const ROLE_PREVIEWS = {
+        student: {
+          badge: '🎓 Öğrenci Profili',
+          eq: 'f(x) = ax + b',
+          title: 'Maarif Modeli Kazanım Önizlemesi',
+          desc: '5–12. sınıf müfredatına birebir uyumlu konu özetleri, Sokratik AI Mentör, 8 etkileşimli keşif laboratuvarı ve haftalık çalışma planıyla adım adım ilerle.',
+          tags: ['📐 Görsel Konu Stüdyosu', '✨ AI Mentör İpuçları', '🧭 Keşif Modu XP']
+        },
+        parent: {
+          badge: '👨‍👩‍👧 Veli Takip Paneli',
+          eq: 'Net ↑ %84',
+          title: 'Anlık Gelişim & Karne Önizlemesi',
+          desc: 'Çocuğunuzun çözdüğü testleri, kazanım bazlı başarı grafiğini, canlı ders katılımını ve 15 dakika önceden ders bildirimlerini tek ekrandan izleyin.',
+          tags: ['📊 Haftalık Karne', '🔔 Canlı Ders Uyarısı', '🔗 6 Haneli Bağlantı']
+        },
+        teacher: {
+          badge: '👨‍🏫 Öğretmen Stüdyosu',
+          eq: 'MEB MAT.5–12',
+          title: 'Akıllı Soru & Sınıf Yönetimi',
+          desc: 'Türkiye Yüzyılı Maarif Modeli kazanımlarına uygun AI soru üretimi, onaylı merkezi soru bankası, canlı Zoom dersleri ve ödev analizi elinizin altında.',
+          tags: ['⚡ AI Soru Sihirbazı', '🎥 Canlı Ders Stüdyosu', '📋 Sınıf Analizi']
+        }
+      };
+
+      function updateRolePreview() {
+        const info = ROLE_PREVIEWS[activeProfile] || ROLE_PREVIEWS.student;
+        if ($('zcPreviewBadge')) $('zcPreviewBadge').textContent = info.badge;
+        if ($('zcPreviewEq')) $('zcPreviewEq').textContent = info.eq;
+        if ($('zcPreviewTitle')) $('zcPreviewTitle').textContent = info.title;
+        if ($('zcPreviewDesc')) $('zcPreviewDesc').textContent = info.desc;
+        if ($('zcPreviewTags')) {
+          $('zcPreviewTags').innerHTML = info.tags.map(t => `<span class="zc-math-tag">${t}</span>`).join('');
+        }
+        document.querySelectorAll('[data-seg-role]').forEach(btn => {
+          const on = btn.getAttribute('data-seg-role') === activeProfile;
+          btn.classList.toggle('is-active', on);
+          btn.setAttribute('aria-selected', String(on));
+        });
+      }
+
+      function updateRegProgress() {
+        const bar = $('zcRegProgress');
+        if (!bar) return;
+        const isReg = mode === 'register';
+        bar.hidden = !isReg;
+        if (!isReg) return;
+
+        const step1Done = ($('name')?.value.trim().length > 1) && ($('email')?.value.includes('@')) && ($('phone')?.value.trim().length >= 10);
+        const step2Done = ($('password')?.value.length >= 10) && ($('passwordConfirmation')?.value === $('password')?.value);
+        const step3Done = activeProfile === 'parent'
+          ? ($('parentConnectionCode')?.value.trim().length === 6)
+          : activeProfile === 'teacher'
+          ? Boolean($('branch')?.value && $('contractAccepted')?.checked)
+          : Boolean($('grade')?.value && $('guardianConsentAccepted')?.checked);
+
+        const s1 = $('zcRegStep1'), s2 = $('zcRegStep2'), s3 = $('zcRegStep3'), fill = $('zcRegBarFill');
+        [s1, s2, s3].forEach(el => el && el.classList.remove('is-active', 'is-done'));
+
+        if (step1Done && step2Done && step3Done) {
+          s1?.classList.add('is-done'); s2?.classList.add('is-done'); s3?.classList.add('is-done');
+          if (fill) fill.style.width = '100%';
+        } else if (step1Done && step2Done) {
+          s1?.classList.add('is-done'); s2?.classList.add('is-done'); s3?.classList.add('is-active');
+          if (fill) fill.style.width = '78%';
+        } else if (step1Done) {
+          s1?.classList.add('is-done'); s2?.classList.add('is-active');
+          if (fill) fill.style.width = '54%';
+        } else {
+          s1?.classList.add('is-active');
+          if (fill) fill.style.width = '28%';
+        }
+      }
 
       function apiError(data, fallback) {
         return data && typeof data.mesaj === 'string' ? data.mesaj : fallback;
@@ -878,9 +452,11 @@
         const parentRegistration = registering && parentMode;
         const forgot = mode === 'forgot';
         const resetting = mode === 'reset';
+
         $('authOptions').hidden = forgot || resetting;
         $('forgotForm').hidden = !forgot;
         $('resetForm').hidden = !resetting;
+        if ($('zcRoleSegmented')) $('zcRoleSegmented').hidden = forgot || resetting;
 
         if (forgot) {
           $('authTitle').textContent = 'Şifremi Unuttum';
@@ -893,13 +469,16 @@
           $('intro').textContent = 'Hesabınız için yeni ve güvenli bir şifre belirleyin.';
           return;
         }
+
+        updateRolePreview();
+
         $('loginMode').setAttribute('aria-pressed', String(!registering));
         $('registerMode').setAttribute('aria-pressed', String(registering));
         for (const id of ['nameField', 'phoneField', 'confirmField']) {
           $(id).hidden = !registering;
           $(id).querySelector('input, select').disabled = !registering;
         }
-        $('roleField').hidden = !registering || parentMode;
+        $('roleField').hidden = true;
         $('role').disabled = !registering || parentMode;
         $('surnameField').hidden = !parentRegistration;
         $('surname').disabled = !parentRegistration;
@@ -915,65 +494,48 @@
         $('forgotRow').hidden = registering;
         $('passwordConfirmation').required = registering;
         $('password').autocomplete = registering ? 'new-password' : 'current-password';
+
         const isTeacherReg = registering && !parentMode && $('role').value === 'teacher';
         const isStudentReg = registering && !parentMode && $('role').value === 'student';
 
         if ($('teacherApplicationFields')) {
           $('teacherApplicationFields').hidden = !isTeacherReg;
-          if ($('branch')) {
-            $('branch').disabled = !isTeacherReg;
-            $('branch').required = isTeacherReg;
-          }
-          if ($('graduationInfo')) {
-            $('graduationInfo').disabled = !isTeacherReg;
-            $('graduationInfo').required = isTeacherReg;
-          }
+          if ($('branch')) { $('branch').disabled = !isTeacherReg; $('branch').required = isTeacherReg; }
+          if ($('graduationInfo')) { $('graduationInfo').disabled = !isTeacherReg; $('graduationInfo').required = isTeacherReg; }
           if ($('okulKurumAdi')) $('okulKurumAdi').disabled = !isTeacherReg;
           if ($('basvuruNotu')) $('basvuruNotu').disabled = !isTeacherReg;
           if ($('teacherCode')) $('teacherCode').disabled = !isTeacherReg;
           if ($('verificationDocument')) $('verificationDocument').disabled = !isTeacherReg;
-          if ($('contractAccepted')) {
-            $('contractAccepted').disabled = !isTeacherReg;
-            $('contractAccepted').required = isTeacherReg;
-          }
+          if ($('contractAccepted')) { $('contractAccepted').disabled = !isTeacherReg; $('contractAccepted').required = isTeacherReg; }
           updateTeacherDocRequirement();
         }
 
         if ($('studentApplicationFields')) {
           $('studentApplicationFields').hidden = !isStudentReg;
-          if ($('grade')) {
-            $('grade').disabled = !isStudentReg;
-            $('grade').required = isStudentReg;
-          }
-          if ($('parentContact')) {
-            $('parentContact').disabled = !isStudentReg;
-            $('parentContact').required = isStudentReg;
-          }
-          if ($('guardianConsentAccepted')) {
-            $('guardianConsentAccepted').disabled = !isStudentReg;
-            $('guardianConsentAccepted').required = isStudentReg;
-          }
+          if ($('grade')) { $('grade').disabled = !isStudentReg; $('grade').required = isStudentReg; }
+          if ($('parentContact')) { $('parentContact').disabled = !isStudentReg; $('parentContact').required = isStudentReg; }
+          if ($('guardianConsentAccepted')) { $('guardianConsentAccepted').disabled = !isStudentReg; $('guardianConsentAccepted').required = isStudentReg; }
         }
-        
+
         $('authTitle').textContent = parentRegistration
-          ? 'Veli Kaydı'
+          ? 'Veli Hesabı Oluştur'
+          : (registering && activeProfile === 'teacher')
+          ? 'Öğretmen Başvurusu'
           : registering
-          ? 'Hesap oluştur'
+          ? 'Öğrenci Hesabı Oluştur'
           : parentMode
           ? 'Veli Girişi'
-          : params.get('role') === 'teacher'
+          : activeProfile === 'teacher'
           ? 'Öğretmen Girişi'
-          : params.get('role') === 'student'
-          ? 'Öğrenci Girişi'
-          : 'Giriş yap';
+          : 'Öğrenci Girişi';
 
         $('submitButton').textContent = parentRegistration
-          ? 'Veli hesabı oluştur'
+          ? 'Veli Hesabı Oluştur'
           : (registering && $('role').value === 'teacher')
           ? 'Öğretmen Başvurusu Gönder'
           : registering
-          ? 'Hesap oluştur'
-          : 'Giriş yap';
+          ? 'Ücretsiz Hesap Oluştur'
+          : 'Giriş Yap';
 
         $('authForm').action = parentMode
           ? parentRegistration ? '/parent/register' : '/parent/login'
@@ -982,24 +544,25 @@
 
         $('intro').textContent = parentMode
           ? parentRegistration
-            ? 'Çocuğunuzun panelindeki bağlantı koduyla veli hesabınızı oluşturun.'
-            : 'Veli hesabınızla giriş yapın.'
+            ? 'Çocuğunuzun panelindeki 6 haneli bağlantı koduyla veli hesabınızı oluşturun.'
+            : 'Veli hesabınızla giriş yaparak gelişim raporlarını inceleyin.'
           : registering
-          ? 'GYS/LGS/YKS veya okul hazırlığına doğru profille başla.'
-          : params.get('role') === 'teacher'
-            ? 'Öğretmen hesabınızla giriş yapın.'
-            : 'Öğrenci hesabınızla giriş yapın.';
+          ? '5–12. sınıf Maarif Modeli matematik platformuna seçtiğiniz profille hemen başlayın.'
+          : activeProfile === 'teacher'
+            ? 'Öğretmen hesabınızla soru stüdyosuna ve sınıflarınıza erişin.'
+            : 'Öğrenci hesabınızla derslerinize ve AI Mentör\'e kaldığınız yerden devam edin.';
 
         const switchPrompt = $('switchLinkRow');
         if (switchPrompt) {
           switchPrompt.innerHTML = registering
-            ? 'Zaten hesabınız var mı? <button type="button" class="text-button" id="toggleSwitchBtn">Giriş yap</button>'
-            : 'Hesabınız yok mu? <button type="button" class="text-button" id="toggleSwitchBtn">Kayıt ol</button>';
+            ? 'Zaten hesabınız var mı? <button type="button" class="zc-text-link" id="toggleSwitchBtn">Giriş yap</button>'
+            : 'Hesabınız yok mu? <button type="button" class="zc-text-link" id="toggleSwitchBtn">Kayıt ol</button>';
           const btn = $('toggleSwitchBtn');
           if (btn) btn.addEventListener('click', () => setMode(registering ? 'login' : 'register'));
         }
 
         $('message').textContent = '';
+        updateRegProgress();
       }
 
       function updateTeacherDocRequirement() {
@@ -1015,58 +578,58 @@
           if (help) help.textContent = 'Öğretmen kodunuz girildiği için belge yüklemek opsiyoneldir.';
         } else {
           if (star) star.style.display = 'inline';
-          if (fileInput && isTeacherReg) {
-            fileInput.required = true;
-          }
+          if (fileInput && isTeacherReg) fileInput.required = true;
           if (help) help.textContent = 'PDF, JPG veya PNG formatında (maks. 5MB). Kod girilmediğinde zorunludur.';
         }
       }
       $('teacherCode')?.addEventListener('input', updateTeacherDocRequirement);
 
+      /* Segmented Role Control Handler */
+      document.querySelectorAll('[data-seg-role]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeProfile = btn.getAttribute('data-seg-role');
+          parentMode = activeProfile === 'parent';
+          if (!parentMode && $('role')) {
+            $('role').value = activeProfile;
+          }
+          setMode(mode);
+        });
+      });
+
+      $('authForm').addEventListener('input', updateRegProgress);
+      $('authForm').addEventListener('change', updateRegProgress);
+
       const CONTRACT_TEXT = `
         <h4>1. TARAFLAR VE KAPSAM</h4>
         <p>İşbu Öğretmen Hizmet &amp; Telif Sözleşmesi ("Sözleşme"), ZarifÇözüm Eğitim Teknolojileri Platformu ile platforma Öğretmen veya İçerik Üreticisi olarak kayıt yaptıran kullanıcı arasında akdedilmiştir.</p>
         <h4>2. İÇERİK ÜRETİMİ VE TELİF HAKLARI</h4>
-        <p>Öğretmen, platform kapsamında hazırladığı veya katkı sunduğu çoktan seçmeli, açık uçlu soruların, konu özetlerinin, çözüm analizlerinin ve telafi materyallerinin özgün olduğunu, üçüncü şahısların fikri ve sınai mülkiyet haklarını ihlal etmediğini kabul ve taahhüt eder. Üretilen içeriklerin platform bünyesindeki dijital çoğaltma, yayınlama ve işleme hakları ZarifÇözüm'e aittir.</p>
+        <p>Öğretmen, platform kapsamında hazırladığı veya katkı sunduğu çoktan seçmeli, açık uçlu soruların, konu özetlerinin, çözüm analizlerinin ve telafi materyallerinin özgün olduğunu, üçüncü şahısların fikri ve sınai mülkiyet haklarını ihlal etmediğini kabul ve taahhüt eder.</p>
         <h4>3. MAARİF MODELİ STANDARTLARI</h4>
-        <p>Öğretmen, T.C. Millî Eğitim Bakanlığı Türkiye Yüzyılı Maarif Modeli öğretim programlarına, erdem-değer-eylem çerçevesine ve Soru Yazım Kılavuzlarına uygun hareket etmeyi; müfredat dışı veya pedagojik açıdan sakıncalı içerik oluşturmamayı taahhüt eder.</p>
-        <h4>4. HESAP GÜVENLİĞİ VE YETKİLENDİRME</h4>
-        <p>Öğretmen, hesabını yalnızca kendisi kullanabilir; yapay zekâ soru sihirbazı ve içerik havuzunu ticari suistimal amacıyla üçüncü şahıslara devredemez.</p>
+        <p>Öğretmen, T.C. Millî Eğitim Bakanlığı Türkiye Yüzyılı Maarif Modeli öğretim programlarına uygun hareket etmeyi taahhüt eder.</p>
       `;
 
       const KVKK_TEXT = `
         <h4>6698 SAYILI KVKK KAPSAMINDA ÖĞRETMEN BAŞVURU AYDINLATMA METNİ</h4>
-        <p>ZarifÇözüm ("Platform") olarak; 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca, öğretmen adaylarımızın başvuru süreçlerinde paylaştıkları kişisel verilerin güvenliğine ve gizliliğine azami hassasiyet göstermekteyiz.</p>
-        <h4>İŞLENEN KİŞİSEL VERİLER</h4>
-        <p>Başvuru sırasında toplanan ad, soyad, e-posta adresi, telefon numarası, branş/kademe bilgisi, mezuniyet ve deneyim beyanı ile yüklenen diploma/öğretmenlik belgesi verileriniz işlenmektedir.</p>
-        <h4>VERİ İŞLEME AMACI VE SAKLAMA SÜRESİ</h4>
-        <p>Kişisel verileriniz ve yüklenen resmi belgeleriniz; öğretmenlik niteliklerinin doğrulanması, admin onay sürecinin işletilmesi, platform güvenliğinin sağlanması ve yasal yükümlülüklerin ifası amacıyla güvenli sunucularda saklanmaktadır. Belgeler üçüncü kişi veya kurumlara ticari gayeyle asla aktarılmaz.</p>
-        <h4>HAKLARINIZ</h4>
-        <p>KVKK'nın 11. maddesi uyarınca veri sahibi olarak verilerinizin silinmesini, düzeltilmesini veya işlenme amacını öğrenme hakkına her zaman sahipsiniz.</p>
+        <p>ZarifÇözüm ("Platform") olarak; 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca öğretmen adaylarımızın kişisel verilerinin güvenliğine azami hassasiyet göstermekteyiz.</p>
+        <h4>VERİ İŞLEME AMACI</h4>
+        <p>Kişisel verileriniz ve yüklenen resmi belgeleriniz yalnızca öğretmenlik niteliklerinin doğrulanması ve platform güvenliği amacıyla işlenir, üçüncü kurumlara ticari amaçla aktarılmaz.</p>
       `;
 
       const TERMS_TEXT = `
-        <h4>1. TARAFLAR VE AMAC</h4>
-        <p>İşbu Kullanım Koşulları, ZarifÇözüm Eğitim Platformu tarafından sunulan dijital eğitim içerikleri, yapay zekâ destekli soru çözümü ve rehberlik hizmetlerinin kullanım kurallarını düzenler.</p>
-        <h4>2. HİZMETİN KULLANIMI VE YAŞ SINIRI</h4>
-        <p>Platformumuz 5–11. sınıf kademelerindeki öğrencilerin MEB Türkiye Yüzyılı Maarif Modeli kazanımlarına uygun şekilde öğrenmelerini desteklemek üzere tasarlanmıştır. 18 yaşından küçük öğrencilerin kayıt işlemleri veli/vasi gözetiminde ve onayında gerçekleştirilmelidir.</p>
-        <h4>3. HESAP GÜVENLİĞİ VE ETİK KULLANIM</h4>
-        <p>Kullanıcılar hesap erişim şifrelerini gizli tutmakla yükümlüdür. AI Mentör ve soru havuzunun kötüye kullanımı, etik dışı sorgular yapılması veya telif haklarına aykırı girişimler hesabın kısıtlanmasına neden olabilir.</p>
+        <h4>1. TARAFLAR VE AMAÇ</h4>
+        <p>İşbu Kullanım Koşulları, ZarifÇözüm Eğitim Platformu tarafından sunulan 5–12. sınıf dijital eğitim içerikleri ve AI Mentör rehberlik hizmetlerinin kullanım kurallarını düzenler.</p>
+        <h4>2. YAŞ SINIRI VE VELİ GÖZETİMİ</h4>
+        <p>18 yaşından küçük öğrencilerin kayıt işlemleri veli/vasi gözetiminde ve onayında gerçekleştirilmelidir.</p>
       `;
 
       const STUDENT_KVKK_TEXT = `
         <h4>6698 SAYILI KVKK KAPSAMINDA ÖĞRENCİ VE VELİ AYDINLATMA METNİ</h4>
-        <p>ZarifÇözüm olarak, öğrencilerimizin ve velilerimizin kişisel verilerinin korunmasına büyük önem veriyoruz.</p>
-        <h4>İŞLENEN KİŞİSEL VERİLER</h4>
-        <p>Öğrencinin adı, soyadı, sınıf seviyesi, e-posta adresi, telefon numarası ile veli irtibat bilgisi (telefon/e-posta) ve öğrenme performansı (çözülen sorular, AI sohbet etkileşimleri) işlenmektedir.</p>
-        <h4>VERİ İŞLEME AMACI</h4>
-        <p>Verileriniz; kişiselleştirilmiş Maarif Modeli öğrenme yol haritası sunulması, veli bilgilendirme mekanizmasının işletilmesi ve platform güvenliğinin sağlanması amacıyla işlenir. Veriler üçüncü şahıslara veya reklam amaçlı kurumlara kesinlikle satılmaz veya aktarılmaz.</p>
+        <p>Öğrencinin adı, soyadı, sınıf seviyesi, iletişim ve öğrenme performansı verileri yalnızca kişiselleştirilmiş Maarif Modeli yol haritası ve veli bilgilendirmesi amacıyla işlenir.</p>
       `;
 
       const GUARDIAN_CONSENT_TEXT = `
         <h4>18 YAŞINDAN KÜÇÜK KULLANICILAR İÇİN VELİ / VASİ AÇIK RIZA BEYANI</h4>
-        <p>Velisi/vasisi bulunduğum öğrencinin ZarifÇözüm platformuna üye olmasına, MEB Türkiye Yüzyılı Maarif Modeli kapsamındaki eğitim içeriklerinden, testlerden ve AI Mentör rehberliğinden faydalanmasına izin veriyorum.</p>
-        <p>Kullanım Koşulları ve KVKK Aydınlatma Metni'nde belirtilen ilkeler doğrultusunda, öğrencimin adı-soyadı, sınıf seviyesi, öğrenme gelişim verileri ve şahsıma ait veli iletişim bilgilerimin işlenmesini; sınav ve bilgilendirme bildirimlerinin tarafıma iletilmesini özgür irademle kabul ve beyan ederim.</p>
+        <p>Velisi/vasisi bulunduğum öğrencinin ZarifÇözüm platformuna üye olmasına, MEB Türkiye Yüzyılı Maarif Modeli kapsamındaki eğitim içeriklerinden ve AI Mentör rehberliğinden faydalanmasına izin veriyorum.</p>
       `;
 
       let currentLegalTarget = null;
@@ -1081,61 +644,25 @@
         if ($('legalModal')) $('legalModal').hidden = true;
       }
 
-      $('openContractModal')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        openLegalModal('Öğretmen Hizmet & Telif Sözleşmesi', CONTRACT_TEXT, 'contractAccepted');
-      });
-      $('openKvkkModal')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        openLegalModal('KVKK Öğretmen Başvuru Aydınlatma Metni', KVKK_TEXT, 'contractAccepted');
-      });
-      $('openTermsModal')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        openLegalModal('Kullanım Koşulları', TERMS_TEXT, 'guardianConsentAccepted');
-      });
-      $('openStudentKvkkModal')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        openLegalModal('Öğrenci & Veli KVKK Aydınlatma Metni', STUDENT_KVKK_TEXT, 'guardianConsentAccepted');
-      });
-      $('openGuardianModal')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        openLegalModal('18 Yaş Altı Veli / Vasi Açık Rıza Beyanı', GUARDIAN_CONSENT_TEXT, 'guardianConsentAccepted');
-      });
+      $('openContractModal')?.addEventListener('click', (e) => { e.preventDefault(); openLegalModal('Öğretmen Hizmet & Telif Sözleşmesi', CONTRACT_TEXT, 'contractAccepted'); });
+      $('openKvkkModal')?.addEventListener('click', (e) => { e.preventDefault(); openLegalModal('KVKK Öğretmen Başvuru Aydınlatma Metni', KVKK_TEXT, 'contractAccepted'); });
+      $('openTermsModal')?.addEventListener('click', (e) => { e.preventDefault(); openLegalModal('Kullanım Koşulları', TERMS_TEXT, 'guardianConsentAccepted'); });
+      $('openStudentKvkkModal')?.addEventListener('click', (e) => { e.preventDefault(); openLegalModal('Öğrenci & Veli KVKK Aydınlatma Metni', STUDENT_KVKK_TEXT, 'guardianConsentAccepted'); });
+      $('openGuardianModal')?.addEventListener('click', (e) => { e.preventDefault(); openLegalModal('18 Yaş Altı Veli / Vasi Açık Rıza Beyanı', GUARDIAN_CONSENT_TEXT, 'guardianConsentAccepted'); });
       $('closeLegalModal')?.addEventListener('click', closeLegalModal);
       $('acceptLegalModalBtn')?.addEventListener('click', () => {
-        if (currentLegalTarget && $(currentLegalTarget)) {
-          $(currentLegalTarget).checked = true;
-        } else {
-          if ($('contractAccepted')) $('contractAccepted').checked = true;
-          if ($('guardianConsentAccepted')) $('guardianConsentAccepted').checked = true;
-        }
+        if (currentLegalTarget && $(currentLegalTarget)) $(currentLegalTarget).checked = true;
+        updateRegProgress();
         closeLegalModal();
       });
-      $('legalModal')?.addEventListener('click', (e) => {
-        if (e.target === $('legalModal')) closeLegalModal();
-      });
+      $('legalModal')?.addEventListener('click', (e) => { if (e.target === $('legalModal')) closeLegalModal(); });
 
-      $('loginMode').addEventListener('click', () => {
-        parentMode = false;
-        setMode('login');
-      });
-      $('registerMode').addEventListener('click', () => {
-        parentMode = false;
-        setMode('register');
-      });
-      $('parentLoginMode').addEventListener('click', () => {
-        parentMode = true;
-        setMode('login');
-      });
-      $('parentRegisterMode').addEventListener('click', () => {
-        parentMode = true;
-        setMode('register');
-      });
+      $('loginMode').addEventListener('click', () => setMode('login'));
+      $('registerMode').addEventListener('click', () => setMode('register'));
+      $('parentLoginMode').addEventListener('click', () => { activeProfile = 'parent'; parentMode = true; setMode('login'); });
+      $('parentRegisterMode').addEventListener('click', () => { activeProfile = 'parent'; parentMode = true; setMode('register'); });
       $('role').addEventListener('change', () => setMode(mode));
-      $('forgotLink').addEventListener('click', () => {
-        $('forgotEmail').value = $('email').value;
-        setMode('forgot');
-      });
+      $('forgotLink').addEventListener('click', () => { $('forgotEmail').value = $('email').value; setMode('forgot'); });
       document.querySelectorAll('[data-mode="login"]').forEach(button => button.addEventListener('click', () => setMode('login')));
 
       $('forgotForm').addEventListener('submit', async event => {
@@ -1144,7 +671,7 @@
         button.disabled = true;
         setMessage('forgotMessage', '');
         try {
-          const result = await postJson('/forgot-password', {email: $('forgotEmail').value});
+          const result = await postJson('/forgot-password', { email: $('forgotEmail').value });
           setMessage('forgotMessage', result.mesaj, true);
         } catch (error) {
           setMessage('forgotMessage', error.message || 'Sunucuya bağlanılamadı.');
@@ -1195,7 +722,7 @@
 
       async function setupGoogle() {
         try {
-          const response = await fetch('/auth/config', {credentials: 'same-origin'});
+          const response = await fetch('/auth/config', { credentials: 'same-origin' });
           const config = await response.json();
           if (!response.ok || !config.googleClientId) throw new Error();
           const script = document.createElement('script');
@@ -1204,7 +731,7 @@
           script.defer = true;
           script.onload = () => {
             if (!window.google?.accounts?.id) { $('googleDisabled').hidden = false; return; }
-            window.google.accounts.id.initialize({client_id: config.googleClientId, callback: onGoogleCredential});
+            window.google.accounts.id.initialize({ client_id: config.googleClientId, callback: onGoogleCredential });
             window.google.accounts.id.renderButton($('googleButton'), {
               type: 'standard', theme: 'outline', size: 'large', text: 'continue_with',
               shape: 'rectangular', width: 340, locale: 'tr'
@@ -1229,7 +756,7 @@
 
         if (isStudentReg) {
           if (!$('grade') || !$('grade').value) {
-            setMessage('message', 'Lütfen sınıf düzeyinizi seçin (5-11. Sınıf).');
+            setMessage('message', 'Lütfen sınıf düzeyinizi seçin (5–12. Sınıf).');
             $('submitButton').disabled = false;
             return;
           }
@@ -1299,7 +826,7 @@
         }
       });
 
-      if (params.get('role') === 'teacher') $('role').value = 'teacher';
+      if (activeProfile === 'teacher') $('role').value = 'teacher';
       setupGoogle();
       if (resetToken && resetEmail) {
         $('resetEmail').value = resetEmail;
@@ -1312,6 +839,5 @@
     })();
   </script>
   <script src="/assets/site-footer.js"></script>
-  <script src="/assets/breadcrumb.js"></script>
 </body>
 </html>

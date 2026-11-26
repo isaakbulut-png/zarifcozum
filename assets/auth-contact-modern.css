@@ -1,0 +1,909 @@
+/* ==========================================================================
+   ZarifÇözüm — Modern Auth & Contact Design System
+   Palette: Ivory #FAF8F5 | Midnight Navy #0F172A | Warm Amber #D97706
+   Scale: 1360px container | >=16px body text | >=48px form inputs
+   ========================================================================== */
+
+:root {
+  --zc-ivory: #FAF8F5;
+  --zc-surface: #FFFFFF;
+  --zc-navy: #0F172A;
+  --zc-navy-soft: #1E293B;
+  --zc-amber: #D97706;
+  --zc-amber-hover: #B45309;
+  --zc-amber-soft: #FEF3C7;
+  --zc-slate: #475569;
+  --zc-muted: #64748B;
+  --zc-border: #E2E8F0;
+  --zc-emerald: #059669;
+  --zc-danger: #DC2626;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body.zc-modern-page {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--zc-ivory);
+  color: var(--zc-navy);
+  font-family: "Inter", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.zc-page-container {
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 36px 48px 72px;
+  flex: 1 0 auto;
+}
+
+/* ==========================================================================
+   AUTH PAGE (kayit-giris.html)
+   ========================================================================== */
+.zc-auth-shell {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 0.92fr 1.08fr;
+  background: var(--zc-surface);
+  border: 1px solid var(--zc-border);
+  border-radius: 28px;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+  min-height: 680px;
+}
+
+/* Left Midnight Navy Visual Panel with SVG Coordinate Grid */
+.zc-auth-visual {
+  position: relative;
+  background: linear-gradient(155deg, #0F172A 0%, #172540 58%, #0B1221 100%);
+  color: #F8FAFC;
+  padding: 44px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  overflow: hidden;
+}
+
+.zc-auth-grid-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.zc-auth-visual > *:not(.zc-auth-grid-svg) {
+  position: relative;
+  z-index: 2;
+}
+
+.zc-auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: #FFFFFF;
+}
+
+.zc-auth-brand img {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 6px;
+}
+
+.zc-auth-brand-name {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.zc-auth-brand-sub {
+  display: block;
+  font-size: 0.875rem;
+  color: #CBD5E1;
+}
+
+/* Mathematical Visual Card over Coordinate Lines */
+.zc-math-card {
+  background: rgba(15, 23, 42, 0.68);
+  border: 1px solid rgba(217, 119, 6, 0.38);
+  border-radius: 20px;
+  padding: 22px 24px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+}
+
+.zc-math-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.zc-math-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(217, 119, 6, 0.2);
+  border: 1px solid rgba(217, 119, 6, 0.45);
+  color: #FCD34D;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.zc-math-eq {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #94A3B8;
+}
+
+.zc-math-preview-title {
+  margin: 0 0 8px;
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #FFFFFF;
+}
+
+.zc-math-preview-desc {
+  margin: 0 0 18px;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #CBD5E1;
+}
+
+.zc-math-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.zc-math-tag {
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #F8FAFC;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.zc-auth-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.zc-auth-stat strong {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #F59E0B;
+}
+
+.zc-auth-stat span {
+  display: block;
+  font-size: 0.875rem;
+  color: #CBD5E1;
+}
+
+/* Right Form Column */
+.zc-auth-form-col {
+  padding: 40px 52px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--zc-surface);
+}
+
+.zc-auth-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.zc-home-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--zc-ivory);
+  border: 1px solid var(--zc-border);
+  color: var(--zc-navy);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.zc-home-pill:hover {
+  background: var(--zc-navy);
+  color: #FFFFFF;
+  border-color: var(--zc-navy);
+}
+
+.zc-auth-kicker {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--zc-amber);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Role Segmented Control (Öğrenci | Veli | Öğretmen) */
+.zc-role-segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 6px;
+  border-radius: 16px;
+  background: #F1F5F9;
+  border: 1px solid var(--zc-border);
+  margin-bottom: 22px;
+}
+
+.zc-role-seg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--zc-slate);
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.zc-role-seg-btn:hover {
+  color: var(--zc-navy);
+}
+
+.zc-role-seg-btn.is-active {
+  background: var(--zc-navy);
+  color: #FFFFFF;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+}
+
+.zc-auth-heading {
+  margin: 0 0 6px;
+  font-size: clamp(1.65rem, 2.4vw, 2.1rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--zc-navy);
+  letter-spacing: -0.02em;
+}
+
+.zc-auth-sub {
+  margin: 0 0 22px;
+  font-size: 1rem;
+  color: var(--zc-slate);
+}
+
+/* Spacious Giriş Yap / Kayıt Ol Switch */
+.zc-mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--zc-ivory);
+  border: 1px solid var(--zc-border);
+  margin-bottom: 20px;
+}
+
+.zc-mode-switch button {
+  min-height: 46px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--zc-slate);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.zc-mode-switch button[aria-pressed="true"] {
+  background: #FFFFFF;
+  color: var(--zc-navy);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--zc-border);
+}
+
+/* Horizontal Registration Progress Bar */
+.zc-reg-progress {
+  margin-bottom: 22px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--zc-ivory);
+  border: 1px solid var(--zc-border);
+}
+
+.zc-reg-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.zc-reg-step {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--zc-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zc-reg-step.is-done,
+.zc-reg-step.is-active {
+  color: var(--zc-navy);
+}
+
+.zc-reg-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 800;
+  background: #E2E8F0;
+  color: var(--zc-slate);
+  flex-shrink: 0;
+}
+
+.zc-reg-step.is-active .zc-reg-step-num {
+  background: var(--zc-amber);
+  color: #FFFFFF;
+}
+
+.zc-reg-step.is-done .zc-reg-step-num {
+  background: var(--zc-emerald);
+  color: #FFFFFF;
+}
+
+.zc-reg-bar-track {
+  height: 6px;
+  border-radius: 99px;
+  background: #E2E8F0;
+  overflow: hidden;
+}
+
+.zc-reg-bar-fill {
+  height: 100%;
+  width: 34%;
+  background: linear-gradient(90deg, var(--zc-amber), #F59E0B);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+/* Form Controls (>=48px inputs, >=16px text) */
+.zc-form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.zc-field {
+  margin-bottom: 16px;
+}
+
+.zc-field label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--zc-navy);
+}
+
+.zc-field input:not([type="checkbox"]):not([type="file"]),
+.zc-field select,
+.zc-field textarea {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--zc-border);
+  border-radius: 12px;
+  background: #FFFFFF;
+  color: var(--zc-navy);
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.4;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zc-field input[type="file"] {
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 14px;
+  border: 1.5px dashed var(--zc-border);
+  border-radius: 12px;
+  background: var(--zc-ivory);
+  font-size: 0.95rem;
+  color: var(--zc-navy);
+}
+
+.zc-field textarea {
+  min-height: 136px;
+  resize: vertical;
+}
+
+.zc-field input:focus,
+.zc-field select:focus,
+.zc-field textarea:focus {
+  outline: none;
+  border-color: var(--zc-amber);
+  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.15);
+}
+
+.zc-helper-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.875rem;
+  color: var(--zc-muted);
+  line-height: 1.45;
+}
+
+.zc-btn-amber {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  background: var(--zc-amber);
+  color: #FFFFFF;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 10px 24px rgba(217, 119, 6, 0.25);
+  transition: background 0.2s ease, transform 0.18s ease, box-shadow 0.2s ease;
+}
+
+.zc-btn-amber:hover {
+  background: var(--zc-amber-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(217, 119, 6, 0.32);
+}
+
+.zc-btn-amber:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.zc-text-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--zc-amber-hover);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.zc-text-link:hover {
+  color: var(--zc-navy);
+}
+
+.zc-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  color: var(--zc-muted);
+  font-size: 0.9rem;
+}
+
+.zc-divider::before,
+.zc-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--zc-border);
+}
+
+.zc-subpanel {
+  background: var(--zc-ivory);
+  border: 1px solid var(--zc-border);
+  border-radius: 16px;
+  padding: 18px 18px 4px;
+  margin-bottom: 16px;
+}
+
+.zc-notice-strip {
+  margin-top: 18px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #F8FAFC;
+  border: 1px solid var(--zc-border);
+  font-size: 0.9rem;
+  color: var(--zc-slate);
+}
+
+.zc-auth-msg {
+  min-height: 1.4em;
+  margin: 12px 0 0;
+  color: var(--zc-danger);
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.zc-auth-msg.success {
+  color: var(--zc-emerald);
+}
+
+/* Legal Modal */
+.legal-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+}
+.legal-modal-backdrop[hidden] { display: none !important; }
+.legal-modal-card {
+  background: #FFFFFF;
+  border: 1px solid var(--zc-border);
+  border-radius: 20px;
+  max-width: 660px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
+  overflow: hidden;
+}
+.legal-modal-header {
+  padding: 20px 24px;
+  background: var(--zc-ivory);
+  border-bottom: 1px solid var(--zc-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.legal-modal-header h3 { margin: 0; font-size: 1.15rem; color: var(--zc-navy); }
+.legal-modal-close { background: none; border: none; font-size: 1.6rem; color: var(--zc-slate); cursor: pointer; }
+.legal-modal-body { padding: 22px 24px; overflow-y: auto; font-size: 0.95rem; line-height: 1.65; color: var(--zc-navy); }
+.legal-modal-body h4 { margin: 16px 0 6px; color: var(--zc-amber-hover); }
+.legal-modal-footer { padding: 16px 24px; background: var(--zc-ivory); border-top: 1px solid var(--zc-border); display: flex; justify-content: flex-end; }
+
+/* ==========================================================================
+   CONTACT PAGE (iletisim.html)
+   ========================================================================== */
+.zc-contact-header {
+  margin: 18px 0 32px;
+}
+
+.zc-contact-header h1 {
+  margin: 10px 0 10px;
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--zc-navy);
+}
+
+.zc-contact-header p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--zc-slate);
+  max-width: 740px;
+}
+
+/* 3-Column Quick Routing Cards */
+.zc-contact-routing {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 36px;
+}
+
+.zc-route-card {
+  background: var(--zc-surface);
+  border: 1px solid var(--zc-border);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zc-route-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--zc-amber);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+}
+
+.zc-route-ico {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--zc-amber-soft);
+  color: var(--zc-amber-hover);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+.zc-route-card h2 {
+  margin: 0;
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: var(--zc-navy);
+}
+
+.zc-route-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--zc-slate);
+  line-height: 1.5;
+}
+
+.zc-route-action {
+  margin-top: auto;
+  padding-top: 6px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--zc-amber-hover);
+}
+
+/* 60% Form / 40% Location & Hours Grid */
+.zc-contact-main-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.zc-card-white {
+  background: var(--zc-surface);
+  border: 1px solid var(--zc-border);
+  border-radius: 24px;
+  padding: 36px;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.05);
+}
+
+.zc-card-title {
+  margin: 0 0 8px;
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--zc-navy);
+}
+
+.zc-card-desc {
+  margin: 0 0 24px;
+  font-size: 1rem;
+  color: var(--zc-slate);
+}
+
+.zc-consent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 18px 0 24px;
+}
+
+.zc-consent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: var(--zc-slate);
+  cursor: pointer;
+}
+
+.zc-consent-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: var(--zc-amber);
+  flex-shrink: 0;
+}
+
+.zc-consent-row a {
+  color: var(--zc-amber-hover);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.zc-success-alert {
+  display: none;
+  margin-top: 18px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  color: #065F46;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Right Column: Full-Width Map + Light High-Contrast Hours Card */
+.zc-office-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.zc-map-card {
+  background: var(--zc-surface);
+  border: 1px solid var(--zc-border);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.05);
+}
+
+.zc-map-stage {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  background: #E2E8F0;
+}
+
+.zc-map-stage svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.zc-map-open-pill {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: var(--zc-navy);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.14);
+}
+
+.zc-map-open-pill:hover {
+  background: var(--zc-navy);
+  color: #FFFFFF;
+}
+
+.zc-map-caption {
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.zc-map-caption strong {
+  display: block;
+  font-size: 1.08rem;
+  color: var(--zc-navy);
+}
+
+.zc-map-caption p {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+  color: var(--zc-slate);
+}
+
+/* Light High-Contrast Working Hours Card */
+.zc-hours-card {
+  background: var(--zc-surface);
+  border: 1px solid var(--zc-border);
+  border-top: 4px solid var(--zc-amber);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.05);
+}
+
+.zc-hours-card h3 {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--zc-navy);
+}
+
+.zc-hours-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--zc-border);
+  font-size: 1rem;
+}
+
+.zc-hours-row span {
+  color: var(--zc-slate);
+  font-weight: 600;
+}
+
+.zc-hours-row strong {
+  color: var(--zc-navy);
+  font-weight: 800;
+}
+
+.zc-support-badge {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--zc-ivory);
+  border: 1px solid var(--zc-border);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--zc-navy);
+}
+
+[hidden] { display: none !important; }
+
+/* Responsive */
+@media (max-width: 1080px) {
+  .zc-page-container { padding: 28px 32px 60px; }
+  .zc-auth-shell { grid-template-columns: 1fr; }
+  .zc-contact-routing { grid-template-columns: 1fr; }
+  .zc-contact-main-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .zc-page-container { padding: 20px 20px 48px; }
+  .zc-auth-visual, .zc-auth-form-col, .zc-card-white { padding: 24px 20px; }
+  .zc-form-grid-2 { grid-template-columns: 1fr; }
+  .zc-role-seg-btn { font-size: 0.9rem; padding: 0 8px; }
+  .zc-reg-steps { grid-template-columns: 1fr; gap: 6px; }
+}

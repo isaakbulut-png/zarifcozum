@@ -1,584 +1,247 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>İletişim & Destek Formu | ZarifÇözüm</title>
-<meta name="description" content="ZarifÇözüm ekibiyle iletişime geçin. Maarif Modeli matematik öğrenimi, öğrenci ve veli destek talepleri ile kurumsal iş birlikleri için buradayız.">
-<link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600&f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css">
-<style>
-/* ==========================================================================
-   İLETİŞİM SAYFASI ÖZEL TASARIMI (ZARİF & ŞIK 2 SÜTUN DÜZENİ)
-   ========================================================================== */
-.contact-page-wrap {
-  max-width: 1220px;
-  margin: 0 auto;
-  padding: 2.5rem 1.25rem 4rem;
-}
-
-.contact-top-bar {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 1.25rem;
-}
-
-.contact-home-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1.2rem;
-  background: #fff;
-  color: #3a2618;
-  border: 1px solid #ebd9c8;
-  border-radius: 999px;
-  font-size: 0.92rem;
-  font-weight: 700;
-  text-decoration: none;
-  box-shadow: 0 4px 12px rgba(58, 38, 24, 0.05);
-  transition: all 0.2s ease;
-}
-
-.contact-home-btn:hover {
-  background: #3a2618;
-  color: #fff;
-  border-color: #3a2618;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(58, 38, 24, 0.14);
-}
-
-.contact-header-section {
-  text-align: center;
-  margin-bottom: 2.5rem;
-}
-.contact-header-section .contact-chip {
-  display: inline-block;
-  background: #fbf1e8;
-  color: #c2570c;
-  border: 1px solid #ead3bd;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 4px 14px;
-  border-radius: 999px;
-  margin-bottom: 0.75rem;
-}
-.contact-header-section h1 {
-  font-family: 'Clash Display', 'General Sans', sans-serif;
-  font-size: clamp(2rem, 3.5vw, 2.75rem);
-  color: #3a2618;
-  font-weight: 700;
-  margin: 0 0 0.75rem;
-  line-height: 1.2;
-}
-.contact-header-section p {
-  font-size: 1.05rem;
-  color: #6a5242;
-  max-width: 680px;
-  margin: 0 auto;
-  line-height: 1.6;
-}
-
-/* 2 Sütunlu Ana Grid */
-.contact-grid {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 2rem;
-  align-items: start;
-}
-
-/* Sol Kart: Form */
-.contact-card {
-  background: #fff;
-  border: 1px solid #ebd9c8;
-  border-radius: 1.25rem;
-  padding: 2.25rem;
-  box-shadow: 0 12px 36px rgba(58, 38, 24, 0.05);
-}
-.contact-card-title {
-  font-family: 'Clash Display', sans-serif;
-  font-size: 1.45rem;
-  color: #3a2618;
-  font-weight: 700;
-  margin: 0 0 0.4rem;
-}
-.contact-card-desc {
-  font-size: 0.9rem;
-  color: #786455;
-  line-height: 1.5;
-  margin: 0 0 1.75rem;
-}
-
-.contact-form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.1rem;
-}
-.contact-form-group {
-  margin-bottom: 1.1rem;
-}
-.contact-form-group label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #3a2618;
-  margin-bottom: 0.4rem;
-}
-.contact-input,
-.contact-select,
-.contact-textarea {
-  width: 100%;
-  padding: 0.75rem 0.95rem;
-  background: #fffdfa;
-  border: 1px solid #ebd9c8;
-  border-radius: 0.65rem;
-  font-size: 0.92rem;
-  color: #3a2618;
-  font-family: inherit;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  box-sizing: border-box;
-}
-.contact-input:focus,
-.contact-select:focus,
-.contact-textarea:focus {
-  outline: none;
-  border-color: #c2570c;
-  box-shadow: 0 0 0 3px rgba(194, 87, 12, 0.12);
-  background: #fff;
-}
-.contact-textarea {
-  min-height: 110px;
-  resize: vertical;
-}
-
-/* Checkbox Alanları */
-.contact-consent {
-  margin: 1.25rem 0 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-}
-.consent-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  font-size: 0.82rem;
-  color: #6a5242;
-  line-height: 1.45;
-  cursor: pointer;
-}
-.consent-item input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  margin-top: 2px;
-  accent-color: #c2570c;
-  cursor: pointer;
-}
-.consent-item a {
-  color: #c2570c;
-  text-decoration: underline;
-  font-weight: 600;
-}
-
-/* Gönder Butonu */
-.contact-submit-btn {
-  width: 100%;
-  padding: 0.85rem 1.5rem;
-  background: #3a2618;
-  color: #fff;
-  border: none;
-  border-radius: 0.65rem;
-  font-size: 0.98rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-}
-.contact-submit-btn:hover {
-  background: #c2570c;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(194, 87, 12, 0.25);
-}
-
-/* Sağ Kart: Ofis & Harita */
-.office-card {
-  background: #fff;
-  border: 1px solid #ebd9c8;
-  border-radius: 1.25rem;
-  padding: 2.25rem;
-  box-shadow: 0 12px 36px rgba(58, 38, 24, 0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.office-banner-badge {
-  background: linear-gradient(135deg, #c59734, #a77c24);
-  color: #fff;
-  font-weight: 800;
-  font-size: 0.9rem;
-  padding: 0.75rem 1.2rem;
-  border-radius: 0.65rem;
-  letter-spacing: 0.02em;
-}
-
-.office-address-box {
-  background: #fffdfa;
-  border: 1px solid #f0e2d3;
-  border-radius: 0.75rem;
-  padding: 1rem 1.15rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-.office-address-box .icon {
-  font-size: 1.3rem;
-  color: #c2570c;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-.office-address-box p {
-  margin: 0;
-  font-size: 0.88rem;
-  color: #553e2e;
-  line-height: 1.5;
-  font-weight: 500;
-}
-
-/* Şık Harita Önizleme Alanı */
-.office-map-preview {
-  position: relative;
-  background: #eef2f6;
-  border-radius: 0.85rem;
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
-  min-height: 220px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.office-map-svg {
-  width: 100%;
-  height: 220px;
-  display: block;
-}
-.map-open-link {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: #fff;
-  color: #2563eb;
-  padding: 5px 11px;
-  border-radius: 6px;
-  font-size: 0.76rem;
-  font-weight: 700;
-  text-decoration: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.map-open-link:hover {
-  background: #f8fafc;
-}
-
-/* Doğrudan İletişim Kutusu (Alt) */
-.direct-contact-box {
-  background: #3a2618;
-  color: #fff;
-  border-radius: 0.85rem;
-  padding: 1.25rem 1.4rem;
-}
-.direct-contact-box h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1rem;
-  color: #fbf1e8;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-.direct-contact-box p {
-  margin: 0 0 0.4rem;
-  font-size: 0.84rem;
-  color: #ebd9c8;
-  line-height: 1.5;
-}
-.direct-contact-box .note-badge {
-  display: inline-block;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  color: #f3e1cf;
-  margin-top: 0.3rem;
-}
-
-/* Başarı Mesajı */
-.contact-success-msg {
-  display: none;
-  background: #dcfce7;
-  border: 1px solid #86efac;
-  color: #166534;
-  padding: 1rem 1.25rem;
-  border-radius: 0.75rem;
-  margin-top: 1.25rem;
-  font-size: 0.92rem;
-  line-height: 1.5;
-}
-
-@media (max-width: 900px) {
-  .contact-grid {
-    grid-template-columns: 1fr;
-    gap: 1.75rem;
-  }
-  .contact-card, .office-card {
-    padding: 1.5rem;
-  }
-  .contact-form-row {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-}
-</style>
-<link rel="stylesheet" href="assets/site-navbar.css?v=1">
-<script src="assets/site-navbar.js?v=1" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FAF8F5">
+  <title>İletişim & Destek | ZarifÇözüm</title>
+  <meta name="description" content="ZarifÇözüm ekibiyle iletişime geçin. 5–12. sınıf Maarif Modeli matematik öğrenimi, öğrenci/veli desteği ve okul lisanslama talepleri için buradayız.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/site-navbar.css?v=1">
+  <link rel="stylesheet" href="assets/auth-contact-modern.css?v=1">
+  <script src="assets/site-navbar.js?v=1" defer></script>
 </head>
-<body class="homepage">
-<header class="site-header site-header-expanded">
-  <div class="wrap">
-    <a class="brand" href="index.html"><img class="brand-logo" src="assets/brand-mark.png" alt="">ZarifÇözüm</a>
-    <button
-      class="menu-toggle"
-      type="button"
-      aria-controls="site-navigation"
-      aria-expanded="false"
-      aria-label="Menüyü aç">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 7h16M4 12h16M4 17h16"
-              fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round"/>
-      </svg>
-      <span>Menü</span>
-    </button>
-    <nav class="site-nav" id="site-navigation" aria-label="Site">
-      <a href="index.html#nasil">Nasıl çalışır</a>
-      <a href="index.html#sss">SSS</a>
-      <a href="hakkimizda.html">Hakkımızda</a>
-      <a href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html">Platform Ayrıcalıkları</a>
-      <a href="Paketler.html">Paketler</a>
-      <a href="iletisim.html" aria-current="page">İletişim</a>
-    </nav>
-    <div class="row">
-      <a class="btn btn-ghost btn-sm" href="kayit-giris.html">Giriş Yap</a>
-      <a class="btn btn-primary btn-sm" href="kayit-giris.html?mode=register">Kayıt Ol</a>
-    </div>
-  </div>
-</header>
+<body class="zc-modern-page">
+  <header class="site-header"></header>
 
-<main>
-  <div class="contact-page-wrap">
-    <div class="contact-top-bar">
-      <a class="contact-home-btn" href="index.html">
+  <main class="zc-page-container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <a class="zc-home-pill" href="index.html">
         <span aria-hidden="true">←</span>
         <span>Anasayfa</span>
       </a>
+      <span class="zc-auth-kicker">5–12. Sınıf Türkiye Yüzyılı Maarif Modeli</span>
     </div>
 
-    <!-- Başlık Alanı -->
-    <div class="contact-header-section">
-      <span class="contact-chip">ZarifÇözüm Destek</span>
-      <h1>İletişim Formu</h1>
-      <p>İhtiyacınıza göre en doğru hazırlık programını ve Maarif Modeli matematik çözümlerini birlikte netleştirelim.</p>
-    </div>
+    <!-- Üst Başlık -->
+    <header class="zc-contact-header">
+      <h1>Size Nasıl Yardımcı Olabiliriz?</h1>
+      <p>Öğrenci ve veli destek talepleriniz, okul lisanslama süreçleriniz veya Samsun Atakum merkez ofisimizle görüşmek için aşağıdaki kanalları kullanabilirsiniz.</p>
+    </header>
 
-    <!-- 2 Sütunlu Form & Bilgi Kartları -->
-    <div class="contact-grid">
-      <!-- Sol: Görüşme & Destek Talebi Formu -->
-      <div class="contact-card">
-        <h2 class="contact-card-title">Görüşme Talebi Oluştur</h2>
-        <p class="contact-card-desc">
-          Kısa bilgileri bırakın; sınav programı, üyelik veya kurumsal ihtiyaçlarınız için nasıl yardımcı olabileceğimizi birlikte değerlendirelim.
-        </p>
+    <!-- 3 Sütunlu Hızlı Yönlendirme Kartları -->
+    <section class="zc-contact-routing" aria-label="Hızlı Destek Yönlendirmeleri">
+      <button type="button" class="zc-route-card" data-route-subject="uyelik">
+        <span class="zc-route-ico" aria-hidden="true">🎓</span>
+        <h2>Öğrenci &amp; Veli Desteği</h2>
+        <p>Üyelik paketleri, sınıf geçişleri, canlı ders saatleri ve veli bağlantı kodu desteği için doğrudan ulaşın.</p>
+        <span class="zc-route-action">Destek formunu doldur →</span>
+      </button>
+
+      <button type="button" class="zc-route-card" data-route-subject="okul">
+        <span class="zc-route-ico" aria-hidden="true">🏫</span>
+        <h2>Okul &amp; Toplu Lisanslama</h2>
+        <p>Özel okullar, etüt merkezleri ve öğretmen zümreleri için kurumsal Maarif Modeli lisans ve demo talepleri.</p>
+        <span class="zc-route-action">Kurumsal teklif iste →</span>
+      </button>
+
+      <button type="button" class="zc-route-card" id="btnScrollOffice">
+        <span class="zc-route-ico" aria-hidden="true">📍</span>
+        <h2>Samsun Atakum Merkez Ofis</h2>
+        <p>ZarifÇözüm Eğitim Teknolojileri merkez ofis konumumuz, çalışma saatlerimiz ve harita yönlendirmesi.</p>
+        <span class="zc-route-action">Konum ve saatleri gör →</span>
+      </button>
+    </section>
+
+    <!-- Ana 2 Sütun: %60 Form / %40 Konum & Çalışma Saatleri -->
+    <section class="zc-contact-main-grid" aria-label="İletişim Formu ve Ofis Bilgileri">
+      <!-- Sol (%60): İletişim Formu -->
+      <div class="zc-card-white" id="contactFormCard">
+        <h2 class="zc-card-title">Görüşme ve Destek Talebi Oluştur</h2>
+        <p class="zc-card-desc">Bilgilerinizi bırakın; eğitim danışmanlarımız en kısa sürede belirttiğiniz iletişim kanalı üzerinden size dönüş yapsın.</p>
 
         <form id="contactForm">
-          <div class="contact-form-group">
+          <div class="zc-field">
             <label for="contactFullName">Ad Soyad *</label>
-            <input type="text" id="contactFullName" class="contact-input" placeholder="Adınız ve soyadınız" required>
+            <input type="text" id="contactFullName" placeholder="Adınız ve soyadınız" required>
           </div>
 
-          <div class="contact-form-row">
-            <div>
+          <div class="zc-form-grid-2">
+            <div class="zc-field">
               <label for="contactEmail">E-posta *</label>
-              <input type="email" id="contactEmail" class="contact-input" placeholder="ornek@eposta.com" required>
+              <input type="email" id="contactEmail" placeholder="ornek@eposta.com" required>
             </div>
-            <div>
+            <div class="zc-field">
               <label for="contactPhone">Telefon *</label>
-              <input type="tel" id="contactPhone" class="contact-input" placeholder="05xx xxx xx xx" required>
+              <input type="tel" id="contactPhone" placeholder="05xx xxx xx xx" required>
             </div>
           </div>
 
-          <div class="contact-form-group">
+          <div class="zc-field">
             <label for="contactSubject">Konu *</label>
-            <select id="contactSubject" class="contact-select" required>
+            <select id="contactSubject" required>
               <option value="" disabled selected>Lütfen konu seçiniz</option>
-              <option value="genel">Genel Soru & Bilgi Talebi</option>
-              <option value="uyelik">Öğrenci & Veli Üyeliği</option>
+              <option value="genel">Genel Soru &amp; Bilgi Talebi</option>
+              <option value="uyelik">Öğrenci &amp; Veli Üyeliği</option>
               <option value="mufredat">Maarif Modeli Matematik Müfredatı</option>
-              <option value="okul">Öğretmen & Okul Lisansı</option>
-              <option value="canli">Canlı Dersler & Zoom Entegrasyonu</option>
-              <option value="teknik">Teknik Destek & Öneri</option>
+              <option value="okul">Öğretmen &amp; Okul Lisansı</option>
+              <option value="canli">Canlı Dersler &amp; Zoom Entegrasyonu</option>
+              <option value="teknik">Teknik Destek &amp; Öneri</option>
             </select>
           </div>
 
-          <div class="contact-form-group">
-            <label for="contactMessage">Mesajın *</label>
-            <textarea id="contactMessage" class="contact-textarea" placeholder="Sana nasıl yardımcı olabiliriz? Sorularınızı veya talebinizi detaylandırın..." required></textarea>
+          <div class="zc-field">
+            <label for="contactMessage">Mesajınız *</label>
+            <textarea id="contactMessage" placeholder="Size nasıl yardımcı olabiliriz? Sorularınızı veya talebinizi kısaca paylaşın..." required></textarea>
           </div>
 
-          <!-- Onay Kutuları -->
-          <div class="contact-consent">
-            <label class="consent-item">
+          <div class="zc-consent-list">
+            <label class="zc-consent-row">
               <input type="checkbox" id="consentPrivacy" required>
               <span><a href="yasal.html" target="_blank">Gizlilik politikasını</a> okudum ve kabul ediyorum.</span>
             </label>
-            <label class="consent-item">
+            <label class="zc-consent-row">
               <input type="checkbox" id="consentKvkk" required>
-              <span><a href="yasal.html" target="_blank">KVKK kapsamında</a> kişisel verilerimin işlenmesine ilişkin aydınlatmayı okudum ve kabul ediyorum.</span>
+              <span><a href="yasal.html" target="_blank">KVKK kapsamında</a> kişisel verilerimin işlenmesine ilişkin aydınlatma metnini okudum ve kabul ediyorum.</span>
             </label>
           </div>
 
-          <button type="submit" class="contact-submit-btn" id="btnSubmitContact">
+          <button type="submit" class="zc-btn-amber" id="btnSubmitContact">
             <span>Mesajı Gönder</span>
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
           </button>
 
-          <div class="contact-success-msg" id="contactSuccessAlert" role="alert">
+          <div class="zc-success-alert" id="contactSuccessAlert" role="alert">
             <strong>✓ Talebiniz Başarıyla Alındı!</strong><br>
             Ekibimiz mesajınızı inceleyerek en kısa sürede belirttiğiniz iletişim kanalları üzerinden sizinle iletişime geçecektir.
           </div>
         </form>
       </div>
 
-      <!-- Sağ: Ofisimiz & Bilgiler -->
-      <div class="office-card">
-        <div class="office-banner-badge">
-          🏢 Samsun Merkez Ofis
-        </div>
-
-        <div class="office-address-box">
-          <div class="icon">📍</div>
-          <div>
-            <p><strong>ZarifÇözüm Eğitim Teknolojileri</strong></p>
-            <p>Atakum / Samsun, Türkiye</p>
-            <small style="color:#8c7361;font-size:0.78rem">Maarif Modeli Matematik &amp; Dijital Öğrenme Merkezi</small>
+      <!-- Sağ (%40): Tam Genişlik Harita & Açık Temalı Yüksek Kontrastlı Çalışma Saatleri -->
+      <aside class="zc-office-stack" id="officeLocationPanel">
+        <div class="zc-map-card">
+          <div class="zc-map-stage">
+            <a class="zc-map-open-pill" href="https://maps.google.com/?q=Samsun+Atakum" target="_blank" rel="noopener noreferrer">
+              <span>Haritalar'da aç</span>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+            </a>
+            <svg viewBox="0 0 560 280" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Samsun Atakum Merkez Ofis Harita Önizlemesi">
+              <rect width="560" height="280" fill="#EFF4F9"/>
+              <path d="M0 40 H560 M0 110 H560 M0 180 H560 M0 240 H560" stroke="#E2E8F0" stroke-width="1"/>
+              <path d="M80 0 V280 M190 0 V280 M310 0 V280 M430 0 V280" stroke="#E2E8F0" stroke-width="1"/>
+              <!-- Sahil & Yollar -->
+              <path d="M-20 68 Q 160 82 330 46 T 580 86" stroke="#CBD5E1" stroke-width="16" fill="none"/>
+              <path d="M-20 68 Q 160 82 330 46 T 580 86" stroke="#FFFFFF" stroke-width="11" fill="none"/>
+              <path d="M135 -10 L 235 290" stroke="#CBD5E1" stroke-width="14" fill="none"/>
+              <path d="M135 -10 L 235 290" stroke="#FFFFFF" stroke-width="9" fill="none"/>
+              <path d="M385 -10 L 315 290" stroke="#CBD5E1" stroke-width="12" fill="none"/>
+              <path d="M385 -10 L 315 290" stroke="#FFFFFF" stroke-width="7" fill="none"/>
+              <path d="M40 212 Q 260 164 580 220" stroke="#CBD5E1" stroke-width="12" fill="none"/>
+              <path d="M40 212 Q 260 164 580 220" stroke="#FFFFFF" stroke-width="7" fill="none"/>
+              <!-- Park & Deniz -->
+              <rect x="46" y="102" width="96" height="72" rx="12" fill="#D1FAE5" opacity="0.85"/>
+              <text x="64" y="143" fill="#065F46" font-size="12" font-weight="700" font-family="Inter, sans-serif">Atakum Sahil</text>
+              <rect x="405" y="104" width="110" height="72" rx="12" fill="#DBEAFE" opacity="0.85"/>
+              <!-- ZarifÇözüm Pin -->
+              <g transform="translate(288, 126)">
+                <circle cx="0" cy="0" r="22" fill="rgba(217, 119, 6, 0.22)"/>
+                <circle cx="0" cy="0" r="11" fill="#D97706"/>
+                <circle cx="0" cy="0" r="4.5" fill="#FFFFFF"/>
+              </g>
+              <rect x="218" y="72" width="142" height="32" rx="8" fill="#0F172A"/>
+              <text x="289" y="93" text-anchor="middle" fill="#FFFFFF" font-size="12.5" font-weight="700" font-family="Inter, sans-serif">📍 ZarifÇözüm Ofis</text>
+            </svg>
+          </div>
+          <div class="zc-map-caption">
+            <span class="zc-route-ico" style="width:42px;height:42px;font-size:1.2rem;flex-shrink:0;" aria-hidden="true">🏢</span>
+            <div>
+              <strong>ZarifÇözüm Eğitim Teknolojileri</strong>
+              <p>Atakum / Samsun, Türkiye • Türkiye Yüzyılı Maarif Modeli Dijital Öğrenme Merkezi</p>
+            </div>
           </div>
         </div>
 
-        <!-- Şık Harita Alanı -->
-        <div class="office-map-preview">
-          <a class="map-open-link" href="https://maps.google.com/?q=Samsun+Atakum" target="_blank" rel="noopener noreferrer">
-            <span>Haritalar'da aç</span>
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-          </a>
-          <svg class="office-map-svg" viewBox="0 0 500 240" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="500" height="240" fill="#f1f5f9"/>
-            <!-- Yollar -->
-            <path d="M-20 60 Q 150 70 300 40 T 520 80" stroke="#cbd5e1" stroke-width="14" fill="none"/>
-            <path d="M-20 60 Q 150 70 300 40 T 520 80" stroke="#ffffff" stroke-width="10" fill="none"/>
-            <path d="M120 -10 L 220 250" stroke="#cbd5e1" stroke-width="12" fill="none"/>
-            <path d="M120 -10 L 220 250" stroke="#ffffff" stroke-width="8" fill="none"/>
-            <path d="M340 -10 L 280 250" stroke="#cbd5e1" stroke-width="10" fill="none"/>
-            <path d="M340 -10 L 280 250" stroke="#ffffff" stroke-width="6" fill="none"/>
-            <path d="M60 180 Q 240 140 520 190" stroke="#cbd5e1" stroke-width="10" fill="none"/>
-            <path d="M60 180 Q 240 140 520 190" stroke="#ffffff" stroke-width="6" fill="none"/>
-            <!-- Park / Yeşil Alan -->
-            <rect x="60" y="80" width="80" height="70" rx="8" fill="#dcfce7" opacity="0.8"/>
-            <text x="75" y="120" fill="#15803d" font-size="11" font-weight="600" font-family="sans-serif">Yeşil Alan</text>
-            <rect x="360" y="90" width="90" height="70" rx="8" fill="#e0e7ff" opacity="0.8"/>
-            <!-- Pin İşareti -->
-            <g transform="translate(260, 105)">
-              <circle cx="0" cy="0" r="18" fill="rgba(194, 87, 12, 0.2)"/>
-              <circle cx="0" cy="0" r="10" fill="#c2570c"/>
-              <circle cx="0" cy="0" r="4" fill="#ffffff"/>
-            </g>
-            <rect x="205" y="60" width="110" height="26" rx="6" fill="#3a2618"/>
-            <text x="215" y="77" fill="#ffffff" font-size="11" font-weight="700" font-family="sans-serif">📍 ZarifÇözüm</text>
-          </svg>
-        </div>
-
-        <!-- Doğrudan İletişim Kutusu (Kullanıcı Talebi: Mail Konumu Boş Bırakıldı) -->
-        <div class="direct-contact-box">
-          <h3>Doğrudan İletişim</h3>
-          <p>Çalışma Saatleri: <strong>Hafta içi 09:00 – 18:00</strong></p>
-          <p>Hafta Sonu Destek: <strong>Cumartesi 10:00 – 16:00</strong></p>
-          <div class="note-badge">
-            💬 Platform içi destek biletleri 7/24 aktiftir.
+        <div class="zc-hours-card">
+          <h3>🕒 Çalışma Saatleri &amp; Destek</h3>
+          <div class="zc-hours-row">
+            <span>Hafta İçi (Pzt – Cum)</span>
+            <strong>09:00 – 18:00</strong>
+          </div>
+          <div class="zc-hours-row">
+            <span>Cumartesi Destek</span>
+            <strong>10:00 – 16:00</strong>
+          </div>
+          <div class="zc-hours-row" style="border-bottom:none;">
+            <span>Pazar</span>
+            <strong>Yalnızca Online Bilet</strong>
+          </div>
+          <div class="zc-support-badge">
+            💬 Platform içi öğrenci &amp; veli destek biletleri <strong>7/24 aktiftir</strong>.
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</main>
+      </aside>
+    </section>
+  </main>
 
-<footer class="site-footer">
-  <div class="wrap">
-    <span>ZarifÇözüm · Maarif Modeli Matematik Platformu · 2026</span>
-    <div class="row">
-      <a href="index.html">Ana Sayfa</a>
-      <a href="hakkimizda.html">Hakkımızda</a>
-      <a href="Platform%20Ayr%C4%B1cal%C4%B1klar%C4%B1.html">Platform Ayrıcalıkları</a>
-      <a href="Paketler.html">Paketler</a>
-      <a href="iletisim.html">İletişim</a>
-      <a href="yasal.html">Yasal</a>
-    </div>
-  </div>
-</footer>
-
-<script src="/assets/app-store.js"></script>
-<script>
-  document.getElementById('contactForm')?.addEventListener('submit', function (e) {
-    e.preventDefault();
-    const alertBox = document.getElementById('contactSuccessAlert');
-    const submitBtn = document.getElementById('btnSubmitContact');
-    const nameEl = document.getElementById('contactFullName');
-    const emailEl = document.getElementById('contactEmail');
-    const phoneEl = document.getElementById('contactPhone');
-    const subjectEl = document.getElementById('contactSubject');
-    const messageEl = document.getElementById('contactMessage');
-
-    const subjectText = subjectEl && subjectEl.selectedIndex >= 0
-      ? subjectEl.options[subjectEl.selectedIndex].text
-      : (subjectEl ? subjectEl.value : 'Genel Destek');
-
-    if (window.ZarifStore && window.ZarifStore.contacts) {
-      window.ZarifStore.contacts.add({
-        name: nameEl ? nameEl.value : '',
-        email: emailEl ? emailEl.value : '',
-        phone: phoneEl ? phoneEl.value : '',
-        subject: subjectText,
-        message: messageEl ? messageEl.value : ''
+  <script src="/assets/app-store.js"></script>
+  <script>
+    (function () {
+      document.querySelectorAll('[data-route-subject]').forEach(function (card) {
+        card.addEventListener('click', function () {
+          var subjectEl = document.getElementById('contactSubject');
+          if (subjectEl) subjectEl.value = card.getAttribute('data-route-subject');
+          var formCard = document.getElementById('contactFormCard');
+          if (formCard) formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          var nameEl = document.getElementById('contactFullName');
+          if (nameEl) setTimeout(function () { nameEl.focus(); }, 350);
+        });
       });
-    }
 
-    if (submitBtn) submitBtn.disabled = true;
-    if (alertBox) alertBox.style.display = 'block';
-    this.reset();
-    setTimeout(() => {
-      if (submitBtn) submitBtn.disabled = false;
-    }, 3000);
-  });
-</script>
-<script src="/assets/site-footer.js"></script>
-<script src="/assets/site-media-targets.js"></script>
-<script src="/assets/site-media.js"></script>
-<script src="assets/mobile-menu.js" defer></script>
+      var officeBtn = document.getElementById('btnScrollOffice');
+      if (officeBtn) {
+        officeBtn.addEventListener('click', function () {
+          var panel = document.getElementById('officeLocationPanel');
+          if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+
+      document.getElementById('contactForm')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const alertBox = document.getElementById('contactSuccessAlert');
+        const submitBtn = document.getElementById('btnSubmitContact');
+        const nameEl = document.getElementById('contactFullName');
+        const emailEl = document.getElementById('contactEmail');
+        const phoneEl = document.getElementById('contactPhone');
+        const subjectEl = document.getElementById('contactSubject');
+        const messageEl = document.getElementById('contactMessage');
+
+        const subjectText = subjectEl && subjectEl.selectedIndex >= 0
+          ? subjectEl.options[subjectEl.selectedIndex].text
+          : (subjectEl ? subjectEl.value : 'Genel Destek');
+
+        if (window.ZarifStore && window.ZarifStore.contacts) {
+          window.ZarifStore.contacts.add({
+            name: nameEl ? nameEl.value : '',
+            email: emailEl ? emailEl.value : '',
+            phone: phoneEl ? phoneEl.value : '',
+            subject: subjectText,
+            message: messageEl ? messageEl.value : ''
+          });
+        }
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (alertBox) alertBox.style.display = 'block';
+        this.reset();
+        setTimeout(() => {
+          if (submitBtn) submitBtn.disabled = false;
+        }, 3000);
+      });
+    })();
+  </script>
+  <script src="/assets/site-footer.js"></script>
 </body>
 </html>
