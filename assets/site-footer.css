@@ -1,130 +1,268 @@
-/* Panel sayfalarında footer kesinlikle gösterilmez */
-body:has(.teacher-layout) .site-footer,
-body:has(.app-shell) .site-footer,
-body:has(.admin-panel) .site-footer,
-body:has(#studentAvatar) .site-footer,
-body[data-page*="paneli"] .site-footer {
-  display: none !important;
+/* ==========================================================================
+   ZarifÇözüm — Modern Ferah Footer Tasarımı
+   Zemin: #F3EFEA | CTA Banner: #0F172A | Vurgu: #D97706 | Konteyner: 1360px
+   ========================================================================== */
+
+footer.site-footer.site-footer-rich {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 56px 0 36px !important;
+  background: #F3EFEA !important;
+  color: #0F172A !important;
+  border-top: 1px solid #E2E8F0 !important;
+  border-radius: 0 !important;
+  font-family: "Inter", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  box-shadow: none !important;
 }
 
-.site-footer.site-footer-rich {
-  padding-block: 3rem 1.25rem;
-  border-top: 0;
-  background: #4a2e1a;
-  color: #d5cdc6;
-  font-size: 0.9rem;
+.zc-footer-container {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding-inline: 48px;
 }
 
-.site-footer-rich .wrap {
-  display: block;
-  width: min(100% - 2rem, 1180px);
-  margin-inline: auto;
+/* 1. Üst Hızlı Başlangıç Şeridi (Footer CTA Kartı) */
+.zc-footer-cta {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  color: #FFFFFF;
+  border-radius: 20px;
+  padding: 34px 40px;
+  margin-bottom: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  flex-wrap: wrap;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14);
 }
 
-.site-footer-columns {
-  display: grid;
-  grid-template-columns: minmax(210px, 1.35fr) repeat(3, minmax(125px, 0.85fr)) minmax(190px, 1fr);
-  gap: clamp(1.25rem, 3vw, 3rem);
-  align-items: start;
-  padding-bottom: 2rem;
+.zc-footer-cta-copy {
+  max-width: 660px;
 }
 
-.site-footer-rich .site-footer-brand .brand {
+.zc-footer-cta-copy h2 {
+  margin: 0 0 8px;
+  font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+  font-weight: 800;
+  line-height: 1.25;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+}
+
+.zc-footer-cta-copy p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #CBD5E1;
+}
+
+.zc-footer-cta-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.zc-footer-btn-amber {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0;
-  color: #fff;
-  font-size: 1.25rem;
-  font-weight: 600;
-  text-decoration: none;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 12px;
+  background: #D97706 !important;
+  color: #FFFFFF !important;
+  font-size: 0.98rem;
+  font-weight: 800;
+  text-decoration: none !important;
+  border: 1.5px solid #D97706;
+  transition: background 0.18s ease, transform 0.18s ease;
 }
 
-.site-footer-rich .site-footer-brand .brand-logo {
-  width: 64px;
-  height: 64px;
-  flex-basis: 64px;
+.zc-footer-btn-amber:hover {
+  background: #B45309 !important;
+  border-color: #B45309;
+  transform: translateY(-1px);
 }
 
-.site-footer-brand > p {
-  max-width: 29ch;
-  margin-top: 0.8rem;
-  color: #d5cdc6;
-  font-size: 0.9rem;
-  line-height: 1.7;
+.zc-footer-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 12px;
+  background: transparent !important;
+  color: #FFFFFF !important;
+  font-size: 0.98rem;
+  font-weight: 700;
+  text-decoration: none !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
 }
 
-.site-footer-group {
+.zc-footer-btn-outline:hover {
+  border-color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.08) !important;
+  transform: translateY(-1px);
+}
+
+/* 2. Ana Sütun Düzeni: Sol Marka + Sağ 4 Sütun */
+.zc-footer-main {
   display: grid;
-  justify-items: start;
-  gap: 0.55rem;
+  grid-template-columns: 1.35fr repeat(4, minmax(140px, 1fr));
+  gap: 36px;
+  padding-bottom: 42px;
+  border-bottom: 1px solid #E2E8F0;
 }
 
-.site-footer-group h2 {
-  margin-bottom: 0.2rem;
-  color: #fff;
-  font-family: var(--font-body, Arial, sans-serif);
+.zc-footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.zc-footer-logo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none !important;
+  color: #0F172A !important;
+}
+
+.zc-footer-logo-link img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.zc-footer-logo-link span {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0F172A;
+}
+
+.zc-footer-brand p {
+  margin: 0;
   font-size: 0.95rem;
+  line-height: 1.6;
+  color: #475569;
+  max-width: 340px;
+}
+
+.zc-footer-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.zc-footer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  color: #0F172A;
+  font-size: 0.85rem;
   font-weight: 700;
 }
 
-.site-footer-rich a:not(.brand) {
-  color: #d5cdc6;
-  font-size: 0.88rem;
-  line-height: 1.5;
-  text-decoration: none;
-}
-
-.site-footer-rich a:not(.brand):hover {
-  color: #fff;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.site-footer-bottom {
+/* Sütun Başlıkları (16px #0F172A) & Linkler (15px #334155, gap 12px, hover #D97706) */
+.zc-footer-col {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(213, 205, 198, 0.2);
-  color: #c0b4aa;
-  font-size: 0.82rem;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.site-footer-bottom a {
+.zc-footer-col h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.01em;
+}
+
+.zc-footer-col a {
+  display: inline-block;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #334155 !important;
+  text-decoration: none !important;
+  transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.zc-footer-col a:hover {
+  color: #D97706 !important;
+  transform: translateX(2px);
+}
+
+/* 3. Alt Telif Hakkı & FSEK/KVKK Satırı (14px #475569) */
+.zc-footer-bottom {
+  padding-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #475569;
+}
+
+.zc-footer-bottom span {
+  max-width: 960px;
+  color: #475569;
+}
+
+.zc-footer-bottom a {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F172A !important;
+  text-decoration: none !important;
   white-space: nowrap;
 }
 
-@media (max-width: 960px) {
-  .site-footer-columns {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+.zc-footer-bottom a:hover {
+  color: #D97706 !important;
+  text-decoration: underline !important;
+}
 
-  .site-footer-brand {
-    grid-column: span 2;
+/* Yazdırma Koruması */
+@media print {
+  footer.site-footer.site-footer-rich {
+    display: none !important;
   }
 }
 
-@media (max-width: 600px) {
-  .site-footer.site-footer-rich {
-    padding-block: 2.25rem 1rem;
+/* Responsive */
+@media (max-width: 1120px) {
+  .zc-footer-main {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
   }
-
-  .site-footer-columns {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.75rem 1rem;
-  }
-
-  .site-footer-brand {
+  .zc-footer-brand {
     grid-column: 1 / -1;
   }
+}
 
-  .site-footer-legal {
-    grid-column: 1 / -1;
+@media (max-width: 768px) {
+  .zc-footer-container {
+    padding-inline: 20px;
   }
-
-  .site-footer-bottom {
-    align-items: flex-start;
+  .zc-footer-cta {
+    padding: 26px 22px;
+  }
+  .zc-footer-main {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .zc-footer-bottom {
     flex-direction: column;
+    align-items: flex-start;
   }
 }
