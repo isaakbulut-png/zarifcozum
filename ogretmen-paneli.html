@@ -2436,6 +2436,7 @@ body.teacher-menu-open {
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js" integrity="sha384-reiVBUvj2HgLgCZalqLFSMBVD9LdtiwGyybRGCq2AfP8Rgebz5DxEnwKp4FpagKV" crossorigin="anonymous"></script>
 <script src="/assets/math-text.js"></script>
 <script src="/assets/safe-svg.js"></script>
+<script src="/assets/maarif-visual-renderer.js?v=1"></script>
 <script src="/assets/ai-visual.js"></script>
 <script src="/assets/meb-curriculum-tree.js"></script>
 <script src="/assets/maarif-konu-formu.js" defer></script>
@@ -5392,65 +5393,93 @@ body.teacher-menu-open {
       <p class="hint">Kontrol ettiğiniz soruları onaylayın; onaylananları soru bankasına aktarabilir, test olarak yayınlayabilir veya PDF/DOCX indirebilirsiniz.</p>
       ${quiz.questions.map((question, index) => {
         const isOpenEnded = question.questionType === 'open_ended' || (!question.options || Object.keys(question.options).length === 0);
+        const fmt = (val) => window.zarifMathText ? window.zarifMathText.format(val || '') : esc(val || '');
+        const hasStructured = Boolean(question.senaryo || question.soruKoku);
+        const optLetters = Object.keys(question.options || {}).length >= 5 ? ['A', 'B', 'C', 'D', 'E'] : ['A', 'B', 'C', 'D'];
         return `
-        <article class="question-card" data-ai-question="${index}">
-          <div class="question-top">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <strong>Soru ${index + 1}</strong>
+        <article class="question-card" data-ai-question="${index}" style="background:#ffffff;border:1.5px solid #e2e8f0;border-radius:16px;padding:20px 22px;box-shadow:0 6px 20px rgba(15,23,42,0.05);color:#1e293b;">
+          <!-- 1. Üst Profesyonel Yayınevi Meta Şeridi -->
+          <div class="question-top" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-bottom:12px;margin-bottom:14px;border-bottom:1.5px solid #f1f5f9;">
+            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:7px;">
+              <span style="display:inline-flex;align-items:center;justify-content:center;padding:4px 12px;border-radius:999px;background:#0f172a;color:#ffffff;font-size:12px;font-weight:800;">Soru ${index + 1}</span>
               ${isOpenEnded
-                ? '<span style="font-size:11px;background:#e0f2fe;color:#0369a1;padding:2px 8px;border-radius:4px;font-weight:600;">✍️ Açık Uçlu (Maarif Modeli)</span>'
-                : '<span style="font-size:11px;background:#f3e8ff;color:#7e22ce;padding:2px 8px;border-radius:4px;font-weight:600;">🔘 Çoktan Seçmeli</span>'}
+                ? '<span style="font-size:11.5px;background:#e0f2fe;color:#0369a1;padding:3px 9px;border-radius:6px;font-weight:700;">✍️ Açık Uçlu (TYMM)</span>'
+                : '<span style="font-size:11.5px;background:#f3e8ff;color:#7e22ce;padding:3px 9px;border-radius:6px;font-weight:700;">🔘 Çoktan Seçmeli</span>'}
+              ${question.bilisselDuzey ? `<span style="font-size:11.5px;background:#fef3c7;color:#92400e;padding:3px 9px;border-radius:6px;font-weight:700;">🎯 ${esc(question.bilisselDuzey)}</span>` : ''}
+              ${question.outcomeCode ? `<span style="font-size:11.5px;background:#f1f5f9;color:#334155;padding:3px 9px;border-radius:6px;font-weight:700;font-family:monospace;">${esc(question.outcomeCode)}</span>` : ''}
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
-              <button type="button" class="btn sm light" data-ai-add-single-basket="${index}" style="padding:3px 8px;font-size:11px;font-weight:700;background:#f0fdf4!important;border:1px solid #bbf7d0!important;color:#166534!important;cursor:pointer;border-radius:6px;">➕ Sepete Ekle</button>
-              <label><input type="checkbox" data-ai-approved="${index}" checked> Soruyu onayla</label>
+              <button type="button" class="btn sm light" data-ai-add-single-basket="${index}" style="padding:5px 11px;font-size:12px;font-weight:700;background:#ecfdf5!important;border:1px solid #a7f3d0!important;color:#065f46!important;cursor:pointer;border-radius:8px;">➕ Sepete Ekle</button>
+              <label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#1e293b;cursor:pointer;"><input type="checkbox" data-ai-approved="${index}" checked style="width:16px;height:16px;accent-color:#d97706;"> Onayla</label>
             </div>
           </div>
-          <p style="font-size:15px;line-height:1.6;margin:10px 0;">${window.zarifMathText ? window.zarifMathText.format(question.text) : esc(question.text)}</p>
-          <div class="ai-question-svg-mount" data-ai-svg="${index}"></div>
 
+          <!-- 2. Opsiyonel MEB Bilgi / Kural Kutusu -->
+          ${question.bilgiKutusu ? `
+          <div style="background:#f8fafc;border:1px solid #cbd5e1;border-left:4px solid #0f172a;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13.5px;color:#334155;">
+            <strong style="color:#0f172a;font-size:12px;text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:3px;">📌 Bilgi / Hatırlatma</strong>
+            ${fmt(question.bilgiKutusu)}
+          </div>` : ''}
+
+          <!-- 3. Bağlam / Senaryo Metni -->
+          ${hasStructured ? `
+            ${question.senaryo ? `<p style="font-size:15px;line-height:1.68;margin:0 0 12px;color:#1e293b;">${fmt(question.senaryo)}</p>` : ''}
+          ` : `<p style="font-size:15px;line-height:1.68;margin:0 0 12px;color:#1e293b;">${fmt(question.text)}</p>`}
+
+          <!-- 4. Çerçeveli Görsel & Diyagram Alanı -->
+          <div class="ai-question-svg-mount" data-ai-svg="${index}" style="background:#faf8f5;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin:12px 0;"></div>
+
+          <!-- 5. Vurgulu Soru Kökü -->
+          ${question.soruKoku ? `<p style="font-size:15.5px;font-weight:800;line-height:1.55;margin:12px 0 14px;color:#0f172a;">${fmt(question.soruKoku)}</p>` : ''}
+
+          <!-- 6. 2x2 Modern Seçenek Kartları -->
           ${!isOpenEnded && question.options ? `
-          <div class="question-options">
-            ${['A', 'B', 'C', 'D'].map(letter => `
-              <p><strong>${letter})</strong> ${window.zarifMathText && question.options[letter] ? window.zarifMathText.format(question.options[letter]) : esc(question.options[letter] || '')}</p>
-            `).join('')}
+          <div class="question-options" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0;">
+            ${optLetters.map(letter => {
+              const isCorrect = question.answer === letter;
+              return `
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:1.5px solid ${isCorrect ? '#059669' : '#e2e8f0'};background:${isCorrect ? '#ecfdf5' : '#faf8f5'};color:#0f172a;font-size:14.5px;font-weight:${isCorrect ? '700' : '500'};">
+                <span style="width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;background:${isCorrect ? '#059669' : '#0f172a'};color:#ffffff;">${letter}</span>
+                <span style="line-height:1.4;color:#0f172a;">${fmt(question.options[letter] || '')}</span>
+              </div>`;
+            }).join('')}
           </div>
-          <p style="margin:8px 0;"><strong>Doğru cevap:</strong> <span class="badge" style="background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:4px;font-weight:700;">${esc(question.answer)}</span></p>
           ` : ''}
 
-          <!-- Adım Adım Beklenen Çözüm Süreci -->
-          <div style="background:#fefce8;border:1px solid #fef08a;border-left:4px solid #ca8a04;padding:10px 14px;border-radius:6px;margin:12px 0;font-size:0.92rem;">
-            <strong style="color:#854d0e;display:block;margin-bottom:4px;">📝 Beklenen Çözüm ve Modelleme Adımları:</strong>
-            <div>${window.zarifMathText ? window.zarifMathText.format(question.solution || question.explanation || 'Çözüm adımları belirtilmemiş.') : esc(question.solution || question.explanation || '')}</div>
-          </div>
+          <!-- 7. Açılır-Kapanır Çözüm & Çeldirici Analizi -->
+          <details open style="background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #d97706;padding:12px 15px;border-radius:10px;margin:14px 0 10px;font-size:13.5px;color:#1e293b;">
+            <summary style="cursor:pointer;font-weight:800;color:#92400e;margin-bottom:6px;">📝 Adım Adım Çözüm &amp; Öğretmen Çeldirici Analizi</summary>
+            <div style="line-height:1.6;color:#1e293b;">${fmt(question.solution || question.explanation || 'Çözüm adımları belirtilmemiş.')}</div>
+            ${question.celdiriciAnalizi ? `<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #fcd34d;font-size:12.5px;color:#78350f;"><strong>🔍 Çeldirici Analizi:</strong> ${fmt(question.celdiriciAnalizi)}</div>` : ''}
+          </details>
 
           <!-- Analitik Değerlendirme Rubriği -->
           ${question.rubric && question.rubric.length ? `
-          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #16a34a;padding:10px 14px;border-radius:6px;margin:12px 0;">
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #16a34a;padding:10px 14px;border-radius:10px;margin:12px 0;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <strong style="color:#166534;font-size:0.9rem;">📊 Değerlendirme Rubriği (Puanlama Anahtarı)</strong>
               <span style="font-size:11px;font-weight:700;color:#166534;background:#dcfce7;padding:2px 8px;border-radius:999px;">100 Puan Üzerinden</span>
             </div>
             <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
               <thead>
-                <tr style="border-bottom:1px solid #bbf7d0;text-align:left;color:#166534;">
-                  <th style="padding:4px 6px;">Kriter / Bilişsel Süreç</th>
-                  <th style="padding:4px 6px;width:70px;text-align:right;">Puan</th>
+                <tr style="border-bottom:1px solid #bbf7d0;text-align:left;">
+                  <th style="padding:5px 8px;background:#dcfce7;color:#166534;">Kriter / Bilişsel Süreç</th>
+                  <th style="padding:5px 8px;width:70px;text-align:right;background:#dcfce7;color:#166534;">Puan</th>
                 </tr>
               </thead>
               <tbody>
                 ${question.rubric.map(r => `
                   <tr style="border-bottom:1px dashed #dcfce7;">
-                    <td style="padding:5px 6px;">${window.zarifMathText ? window.zarifMathText.format(r.criterion) : esc(r.criterion)}</td>
-                    <td style="padding:5px 6px;text-align:right;font-weight:700;color:#15803d;">+${esc(r.points)} P</td>
+                    <td style="padding:5px 8px;color:#1e293b;">${fmt(r.criterion)}</td>
+                    <td style="padding:5px 8px;text-align:right;font-weight:700;color:#15803d;">+${esc(r.points)} P</td>
                   </tr>
                 `).join('')}
               </tbody>
             </table>
           </div>` : ''}
 
-          <div class="field" style="margin-top:10px;"><label for="ai-outcome-${index}">MEB kazanım kodu</label>
-            <input id="ai-outcome-${index}" data-ai-outcome="${index}" value="${esc(question.outcomeCode || '')}" placeholder="Örn: MAT.5.1.1">
+          <div class="field" style="margin-top:10px;"><label for="ai-outcome-${index}" style="color:#334155;">MEB Kazanım Kodu</label>
+            <input id="ai-outcome-${index}" data-ai-outcome="${index}" value="${esc(question.outcomeCode || '')}" placeholder="Örn: MAT.5.1.1" style="background:#f8fafc;color:#0f172a;">
           </div>
         </article>`;
       }).join('')}
@@ -5465,13 +5494,17 @@ body.teacher-menu-open {
 
     if (typeof window !== 'undefined') {
       quiz.questions.forEach((question, index) => {
-        if (question.svg && typeof question.svg === 'string' && question.svg.trim()) {
+        let svgMarkup = (question.svg && typeof question.svg === 'string') ? question.svg.trim() : '';
+        if (!svgMarkup && question.visualSpec && window.ZarifVisualRenderer) {
+          svgMarkup = window.ZarifVisualRenderer.renderToSvg(question.visualSpec) || '';
+        }
+        if (svgMarkup) {
           const mount = container.querySelector(`[data-ai-svg="${index}"]`);
           if (mount) {
             let rendered = false;
             if (window.zarifSafeSvg) {
               try {
-                const parsed = window.zarifSafeSvg.parse(question.svg.trim());
+                const parsed = window.zarifSafeSvg.parse(svgMarkup);
                 window.zarifSafeSvg.render(mount, parsed);
                 rendered = true;
               } catch (err) {
@@ -5481,12 +5514,12 @@ body.teacher-menu-open {
             if (!rendered) {
               try {
                 const parser = new DOMParser();
-                const doc = parser.parseFromString(question.svg.trim(), 'image/svg+xml');
+                const doc = parser.parseFromString(svgMarkup, 'image/svg+xml');
                 const svgEl = doc.querySelector('svg');
                 if (svgEl) {
                   mount.replaceChildren(svgEl);
                 } else {
-                  mount.innerHTML = question.svg.trim();
+                  mount.innerHTML = svgMarkup;
                 }
               } catch (e2) {
                 console.error('SVG mount hatası:', e2);
