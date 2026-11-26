@@ -504,6 +504,8 @@
 <script src="assets/site-navbar.js?v=1" defer></script>
 <link rel="stylesheet" href="assets/sinif-sec.css?v=4">
 <script src="assets/sinif-sec.js?v=4" defer></script>
+<link rel="stylesheet" href="assets/bento-vitrin.css?v=1">
+<script src="assets/bento-vitrin.js?v=1" defer></script>
 </head>
 <body class="homepage">
 <!-- TOP ANNOUNCEMENT BANNER -->
@@ -1502,49 +1504,23 @@
     })();
   </script>
 
-  <section class="home-section why-section" aria-labelledby="neden-title" data-accent="cobalt">
-    <div class="wrap">
-      <header class="section-head">
+  <section class="bv-section" id="bento-vitrin" aria-labelledby="neden-title">
+    <div class="bv-container">
+      <header class="bv-head">
+        <span class="bv-kicker">✦ ZARİFÇÖZÜM EKOSİSTEMİ · 12 AKILLI MODÜL</span>
         <h2 id="neden-title">Konuyu öğren, soruyu çöz, gelişimini gör.</h2>
-        <p>Öğrenmeyi kolaylaştıran ayrıcalıklı eğitim deneyimi.</p>
+        <p>Öğrenme, pratik ve gelişim araçlarını üç odaklı kategoride canlı panel önizlemeleriyle keşfet.</p>
       </header>
-      <div class="why-grid">
-        <a class="why-card" href="pages/konu_anlatimlari.html">
-          <span class="why-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 6.5c-1.6-1.1-3.5-1.6-6-1.6H4v13h2c2.5 0 4.4.5 6 1.6m0-13c1.6-1.1 3.5-1.6 6-1.6h2v13h-2c-2.5 0-4.4.5-6 1.6m0-13v13"/>
-            </svg>
-          </span>
-          <strong>Konu Anlatımları</strong><small>Adım adım öğrenme</small>
-        </a>
-        <a class="why-card" href="pages/cozumlu-sorular-tanitim.html">
-          <span class="why-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 3.5h8l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20z"/>
-              <path d="M14 3.5v4h4M8.5 13l2.2 2.2 4.8-4.8"/>
-            </svg>
-          </span>
-          <strong>Çözümlü Sorular</strong><small>Örneklerle pekiştirme</small>
-        </a>
-        <a class="why-card" href="pages/test-ve-etkinlikler-tanitim.html">
-          <span class="why-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="5" y="4" width="14" height="17" rx="2"/>
-              <path d="M9 4.5h6M8 10h1m3 0h4M8 14h1m3 0h4M8 18h1m3 0h4"/>
-            </svg>
-          </span>
-          <strong>Test ve Etkinlikler</strong><small>Bilgini ölçme</small>
-        </a>
-        <a class="why-card" href="pages/ilerlemeni-takip-et-tanitim.html">
-          <span class="why-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 19V5m0 14h16"/>
-              <path d="M8 16v-4m4 4V9m4 7V6m-8 3 3-3 3 2 4-4"/>
-            </svg>
-          </span>
-          <strong>Başarı Takibi</strong><small>Gelişimini izleme</small>
-        </a>
+
+      <div class="bv-tabs-wrap">
+        <div class="bv-tabs" id="bvTabs" role="tablist" aria-label="Platform Özellik Kategorileri">
+          <button type="button" class="bv-tab is-active" role="tab" aria-selected="true" data-bv-cat="kesfet">✨ Keşfet ve Öğren</button>
+          <button type="button" class="bv-tab" role="tab" aria-selected="false" data-bv-cat="pratik">🎯 Pratik ve Sınav</button>
+          <button type="button" class="bv-tab" role="tab" aria-selected="false" data-bv-cat="gelisim">📊 Planlama ve Gelişim</button>
+        </div>
       </div>
+
+      <div class="bv-grid" id="bvGrid" role="tabpanel" aria-live="polite"></div>
     </div>
   </section>
 

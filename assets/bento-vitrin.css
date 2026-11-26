@@ -1,0 +1,388 @@
+/* ZarifÇözüm — 3 Sekmeli Asimetrik Kategorili Bento Vitrin & Hibrit Önizleme Modalı */
+.bv-section {
+  background: #FAF6F0;
+  padding: 68px 0 74px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #2C221E;
+}
+
+.bv-container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.bv-head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 28px;
+}
+
+.bv-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  border: 1px solid rgba(197, 155, 71, 0.42);
+  color: #8c6821;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.bv-head h2 {
+  margin: 0 0 10px;
+  font-family: 'Plus Jakarta Sans', Georgia, serif;
+  font-size: clamp(1.65rem, 3vw, 2.3rem);
+  font-weight: 800;
+  color: #2C221E;
+  letter-spacing: -0.02em;
+}
+
+.bv-head p {
+  margin: 0;
+  font-size: 0.96rem;
+  color: #6B5E57;
+}
+
+/* 1. Üst Kategori Seçici (3 Sekme) */
+.bv-tabs-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.bv-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  border: 1px solid #EAE0D5;
+  box-shadow: 0 10px 28px rgba(44, 34, 30, 0.06);
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.bv-tabs::-webkit-scrollbar { display: none; }
+
+.bv-tab {
+  border: none;
+  background: transparent;
+  color: #6B5E57;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 11px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bv-tab:hover:not(.is-active) {
+  background: #FAF6F0;
+  color: #2C221E;
+}
+
+.bv-tab.is-active {
+  background: linear-gradient(135deg, #3B281E 0%, #2C221E 100%);
+  color: #f3d285;
+  box-shadow: 0 8px 18px rgba(44, 34, 30, 0.18);
+}
+
+/* 2. Asimetrik Bento Grid (2+1 / 1+2) */
+.bv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.bv-grid.is-animating {
+  animation: bvFadeSlide 0.34s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes bvFadeSlide {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bv-card {
+  background: #FFFFFF;
+  border: 1px solid #EAE0D5;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(44, 34, 30, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.bv-card:hover {
+  transform: translateY(-3px);
+  border-color: #C59B47;
+  box-shadow: 0 18px 40px rgba(44, 34, 30, 0.09);
+}
+
+/* Büyük Öne Çıkan Kartlar (1. ve 4. Kart: 2 Sütun Genişliğinde) */
+.bv-card.is-wide {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+.bv-card.is-featured {
+  background: linear-gradient(135deg, #3B281E 0%, #2C221E 100%);
+  border-color: #C59B47;
+  color: #FAF6F0;
+}
+
+.bv-card.is-soft {
+  background: #FDFBF7;
+}
+
+.bv-card-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bv-tag {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: #FAF6F0;
+  border: 1px solid rgba(197, 155, 71, 0.35);
+  color: #8c6821;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.bv-card.is-featured .bv-tag {
+  background: rgba(197, 155, 71, 0.2);
+  color: #f3d285;
+  border-color: rgba(197, 155, 71, 0.45);
+}
+
+.bv-card h3 {
+  margin: 4px 0 6px;
+  font-family: 'Plus Jakarta Sans', Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #2C221E;
+  line-height: 1.25;
+}
+
+.bv-card.is-featured h3 { color: #FFFFFF; font-size: 1.32rem; }
+
+.bv-card p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #6B5E57;
+  line-height: 1.56;
+}
+
+.bv-card.is-featured p { color: #E4D7CA; }
+
+/* Mini Panel Arayüz Temsili (UI Snippet Alanı) */
+.bv-snippet {
+  background: #FAF6F0;
+  border: 1px solid #EAE0D5;
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-height: 126px;
+}
+
+.bv-card.is-featured .bv-snippet {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(197, 155, 71, 0.35);
+}
+
+.bv-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.bv-inspect-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 15px;
+  border-radius: 10px;
+  border: 1.5px solid #C59B47;
+  background: #FFFFFF;
+  color: #3B281E;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+.bv-inspect-btn:hover {
+  background: #3B281E;
+  color: #f3d285;
+  transform: translateX(2px);
+}
+
+.bv-card.is-featured .bv-inspect-btn {
+  background: linear-gradient(135deg, #C59B47, #b08635);
+  color: #2C221E;
+  border-color: #f3d285;
+}
+
+.bv-card.is-featured .bv-inspect-btn:hover {
+  filter: brightness(1.06);
+}
+
+/* Mini UI Snippet İç Elemanları */
+.bvs-bubble {
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.bvs-bubble.ai { background: rgba(255,255,255,0.12); color: #FAF6F0; border-left: 3px solid #C59B47; }
+.bvs-bubble.user { background: rgba(197,155,71,0.22); color: #fde68a; align-self: flex-end; font-weight: 700; }
+.bvs-bar { height: 7px; border-radius: 999px; background: #e8dfd5; overflow: hidden; }
+.bvs-bar > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #3B281E, #C59B47); }
+.bvs-pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.bvs-pill { padding: 4px 9px; border-radius: 8px; background: #FFFFFF; border: 1px solid #e2d5c7; font-size: 0.72rem; font-weight: 700; color: #3B281E; }
+.bvs-pill.dark { background: #3B281E; color: #f3d285; border-color: #C59B47; }
+.bvs-opt-row { display: flex; align-items: center; gap: 6px; font-size: 0.74rem; font-weight: 800; color: #3B281E; }
+.bvs-dot { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #b59a7d; background: #fff; display: grid; place-items: center; font-size: 0.68rem; }
+.bvs-dot.on { background: #3B281E; color: #f3d285; border-color: #3B281E; }
+
+/* Hibrit Önizleme Modalı */
+.bv-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10090;
+  background: rgba(30, 20, 14, 0.72);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.bv-modal {
+  width: 100%;
+  max-width: 660px;
+  background: #FAF6F0;
+  border: 1.5px solid #C59B47;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(30, 20, 14, 0.36);
+  animation: bvFadeSlide 0.24s ease;
+}
+
+.bv-modal-head {
+  background: linear-gradient(135deg, #3B281E 0%, #2C221E 100%);
+  padding: 20px 24px;
+  color: #FAF6F0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bv-modal-head h3 {
+  margin: 4px 0 0;
+  font-family: 'Plus Jakarta Sans', Georgia, serif;
+  font-size: 1.24rem;
+  color: #FFFFFF;
+}
+
+.bv-modal-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.1);
+  color: #FFFFFF;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.bv-modal-body {
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bv-modal-preview {
+  background: #FFFFFF;
+  border: 1px solid #EAE0D5;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.bv-modal-bullets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.bv-modal-bullets li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2C221E;
+}
+
+.bv-modal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px solid #EAE0D5;
+}
+
+.bv-modal-cta {
+  padding: 11px 20px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #3B281E, #2C221E);
+  border: 1px solid #C59B47;
+  color: #f3d285 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (max-width: 960px) {
+  .bv-grid { grid-template-columns: 1fr; }
+  .bv-card.is-wide { grid-column: span 1; grid-template-columns: 1fr; }
+}
