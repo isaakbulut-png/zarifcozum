@@ -3,55 +3,72 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#fbf1e7">
-  <title>9-12. Sınıf: Hedefine Odaklan & Kişisel Çalışma Planı | Zarif Çözüm</title>
+  <meta name="theme-color" content="#FAF8F5">
+  <title>9-12. Sınıf: Hedefine Odaklan & Kişisel Çalışma Planı | ZarifÇözüm</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --cream: #fbf1e7;
-      --paper: #fffaf5;
-      --peach: #f5e2d0;
-      --peach2: #f8eadc;
-      --brown: #493020;
-      --brown2: #67472f;
-      --muted: #806b5c;
-      --gold: #b88a28;
-      --gold2: #e9d3a5;
-      --line: #ead8c5;
-      --green: #2e7d32;
-      --green-bg: #e8f5e9;
-      --blue: #1565c0;
-      --blue-bg: #e3f2fd;
-      --purple: #6a1b9a;
-      --purple-bg: #f3e5f5;
-      --shadow: 0 16px 40px rgba(76,48,27,.08);
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-      color: var(--brown);
+      --ivory: #FAF8F5;
+      --surface: #FFFFFF;
+      --navy: #0F172A;
+      --navy-soft: #1E293B;
+      --amber: #D97706;
+      --amber-hover: #B45309;
+      --amber-soft: #FEF3C7;
+      --slate: #475569;
+      --muted: #64748B;
+      --line: #E2E8F0;
+      --emerald: #059669;
+      --emerald-soft: #ECFDF5;
+      --shadow: 0 18px 44px rgba(15, 23, 42, 0.06);
     }
-    * { box-sizing: border-box; }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
-      background: radial-gradient(ellipse at 90% 0%, #fff9f1 0, transparent 40%), var(--cream);
+      background: var(--ivory);
+      color: var(--navy);
+      font-family: "Inter", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      font-size: 1rem;
       line-height: 1.6;
     }
+
     a { color: inherit; }
+
     .wrap {
-      max-width: 1040px;
+      max-width: 1360px;
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 0 48px;
     }
+
+    /* Mevcut Üst Menü (Navbar) Korundu */
     .topbar {
-      padding: 16px 0;
+      padding: 20px 48px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 16px;
       flex-wrap: wrap;
+      border-bottom: 1px solid var(--line);
+      background: rgba(250, 248, 245, 0.92);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       text-decoration: none;
     }
     .brand-logo {
@@ -60,105 +77,108 @@
       object-fit: contain;
     }
     .brand strong {
-      font: 600 20px Georgia, serif;
-      letter-spacing: -.02em;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--navy);
     }
-    .brand strong span { color: var(--gold); }
+    .brand strong span { color: var(--amber); }
     .crumb {
-      font-size: 13px;
+      font-size: 0.95rem;
       color: var(--muted);
     }
-    .crumb a { text-decoration: none; }
-    .crumb a:hover { text-decoration: underline; color: var(--brown); }
-    .crumb b { color: var(--gold); font-weight: 600; }
+    .crumb a { text-decoration: none; font-weight: 600; }
+    .crumb a:hover { text-decoration: underline; color: var(--navy); }
+    .crumb b { color: var(--amber-hover); font-weight: 700; }
 
     /* Hero */
     .hero {
       display: grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 32px;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 36px;
       align-items: center;
-      padding: 36px 0 28px;
+      padding: 44px 0 32px;
     }
     .eyebrow {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 12px;
-      background: #fff8ee;
-      border: 1px solid var(--gold2);
+      padding: 6px 14px;
+      background: var(--amber-soft);
+      border: 1px solid rgba(217, 119, 6, 0.35);
       border-radius: 99px;
-      color: #8c6c2c;
-      font-size: 11px;
+      color: var(--amber-hover);
+      font-size: 0.875rem;
       font-weight: 800;
-      letter-spacing: .08em;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
     }
     .eyebrow::before {
       content: "";
-      width: 7px;
-      height: 7px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: var(--gold);
+      background: var(--amber);
     }
     h1 {
-      font: 600 clamp(32px, 4.5vw, 44px)/1.15 Georgia, serif;
-      letter-spacing: -.03em;
-      margin: 16px 0 12px;
+      font-size: clamp(2.1rem, 3.8vw, 3.25rem);
+      font-weight: 800;
+      line-height: 1.16;
+      letter-spacing: -0.025em;
+      margin: 16px 0 14px;
+      color: var(--navy);
     }
     h1 em {
-      color: var(--gold);
+      color: var(--amber);
       font-style: normal;
     }
     .lead {
-      font-size: 16px;
-      color: #705c4d;
-      margin: 0 0 20px;
-      max-width: 580px;
+      font-size: 1.08rem;
+      color: var(--slate);
+      margin: 0 0 22px;
+      max-width: 640px;
     }
     .chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 10px;
     }
     .chip {
-      padding: 6px 12px;
+      padding: 8px 14px;
       border: 1px solid var(--line);
       border-radius: 99px;
-      background: var(--paper);
-      font-size: 12px;
-      color: #715b49;
-      font-weight: 500;
+      background: var(--surface);
+      font-size: 0.9rem;
+      color: var(--navy);
+      font-weight: 600;
     }
     .hero-art {
-      min-height: 270px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(145deg, #fffaf4, #f5e2ce);
-      border: 1px solid #edd9c3;
+      background: linear-gradient(150deg, #0F172A 0%, #1E293B 100%);
+      color: #F8FAFC;
       border-radius: 24px;
-      padding: 24px;
+      padding: 32px 28px;
       box-shadow: var(--shadow);
       text-align: center;
-      position: relative;
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     .hero-art-icon {
-      font-size: 44px;
+      font-size: 2.8rem;
       margin-bottom: 12px;
-      filter: drop-shadow(0 4px 12px rgba(184,138,40,.25));
     }
     .hero-art h3 {
-      font: 600 20px Georgia, serif;
-      margin: 0 0 6px;
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin: 0 0 8px;
+      color: #FFFFFF;
     }
     .hero-art p {
-      font-size: 13px;
-      color: var(--muted);
-      margin: 0 0 16px;
-      max-width: 280px;
+      font-size: 0.98rem;
+      color: #CBD5E1;
+      margin: 0 0 20px;
+      max-width: 320px;
     }
 
     /* Buttons */
@@ -167,311 +187,439 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 11px 18px;
+      min-height: 48px;
+      padding: 0 22px;
       border-radius: 12px;
-      background: var(--brown);
-      color: #fffaf5;
+      background: var(--navy);
+      color: #FFFFFF;
       text-decoration: none;
+      font-family: inherit;
       font-weight: 700;
-      font-size: 13px;
+      font-size: 0.98rem;
       cursor: pointer;
-      border: none;
-      transition: all .2s ease;
+      border: 1.5px solid transparent;
+      transition: all 0.2s ease;
     }
     .btn:hover {
-      background: var(--brown2);
+      background: var(--navy-soft);
       transform: translateY(-1px);
     }
     .btn.secondary {
-      background: #f5e5d5;
-      border: 1px solid var(--line);
-      color: var(--brown);
+      background: var(--surface);
+      border-color: var(--line);
+      color: var(--navy);
     }
     .btn.secondary:hover {
-      background: #ebd8c5;
+      border-color: var(--navy);
+      background: #F8FAFC;
     }
-    .btn.gold {
-      background: linear-gradient(135deg, #c59734, #9f731c);
-      color: #fff;
+    .btn.amber {
+      background: var(--amber);
+      color: #FFFFFF;
+      box-shadow: 0 10px 24px rgba(217, 119, 6, 0.25);
     }
-    .btn.gold:hover {
-      background: linear-gradient(135deg, #b88a28, #8a6214);
+    .btn.amber:hover {
+      background: var(--amber-hover);
     }
     .btn.sm {
-      padding: 8px 14px;
-      font-size: 12px;
-      border-radius: 8px;
+      min-height: 42px;
+      padding: 0 16px;
+      font-size: 0.9rem;
     }
 
-    /* Section & Headings */
+    /* Section Headings */
     .section {
-      padding: 32px 0;
+      padding: 40px 0;
     }
     .section-head {
-      margin-bottom: 24px;
+      margin-bottom: 26px;
     }
     .section-head h2 {
-      font: 600 clamp(24px, 3.2vw, 32px) Georgia, serif;
-      letter-spacing: -.02em;
-      margin: 0 0 6px;
+      font-size: clamp(1.65rem, 2.8vw, 2.3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0 0 8px;
+      color: var(--navy);
     }
     .section-head p {
-      font-size: 14px;
-      color: var(--muted);
+      font-size: 1.02rem;
+      color: var(--slate);
       margin: 0;
     }
 
-    /* Planner Tool Card */
-    .planner-card {
-      background: var(--paper);
+    /* ==========================================================================
+       2 SÜTUNLU CANLI ÇALIŞMA PLANI STÜDYOSU (%35 Sol Seçim / %65 Sağ Sonuç)
+       ========================================================================== */
+    .planner-studio {
+      display: grid;
+      grid-template-columns: 35fr 65fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    /* Sol Sütun (%35): 3 Adımlı Seçim Paneli */
+    .planner-controls-col {
+      background: var(--surface);
       border: 1px solid var(--line);
       border-radius: 24px;
+      padding: 28px;
       box-shadow: var(--shadow);
-      padding: 32px;
+      position: sticky;
+      top: 96px;
     }
-    .step-box {
-      margin-bottom: 28px;
+
+    .step-block {
+      margin-bottom: 24px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--line);
     }
-    .step-title {
-      font: 600 16px Georgia, serif;
-      margin: 0 0 12px;
+    .step-block:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .step-header {
       display: flex;
       align-items: center;
       gap: 10px;
+      margin-bottom: 14px;
     }
-    .step-badge {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--gold);
-      color: #fff;
+    .step-num {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      background: var(--navy);
+      color: #FFFFFF;
+      font-size: 0.9rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-label {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .choice-grid {
       display: grid;
-      place-items: center;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    .choice-group {
-      display: flex;
-      flex-wrap: wrap;
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
-    .choice-btn {
-      padding: 10px 16px;
-      border: 1.5px solid var(--line);
-      background: #fff;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 13px;
-      color: #6a5342;
-      cursor: pointer;
-      transition: all .2s;
-    }
-    .choice-btn:hover {
-      border-color: var(--gold);
-      color: var(--brown);
-    }
-    .choice-btn.selected {
-      border-color: var(--gold);
-      background: #fff8ec;
-      color: #8c6a23;
-      box-shadow: 0 0 0 2px rgba(184,138,40,.2);
-    }
-
-    /* Planner Output */
-    .plan-result {
-      background: #fffaf4;
-      border: 1.5px solid var(--gold2);
-      border-radius: 20px;
-      padding: 24px;
-      margin-top: 24px;
-    }
-    .metrics-row {
-      display: grid;
+    .choice-grid.cols-3 {
       grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-bottom: 22px;
     }
-    .metric-card {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 14px;
-      text-align: center;
-    }
-    .metric-card span {
-      display: block;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-    .metric-card strong {
-      font: 700 22px Georgia, serif;
-      color: var(--gold);
+    .choice-grid.cols-1 {
+      grid-template-columns: 1fr;
     }
 
-    /* Weekly Calendar */
-    .week-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 8px;
-      margin-bottom: 22px;
-    }
-    .day-col {
-      background: #fff;
-      border: 1px solid var(--line);
+    .choice-btn {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--line);
       border-radius: 12px;
-      padding: 10px 8px;
-      text-align: center;
-      font-size: 12px;
-    }
-    .day-name {
+      background: var(--ivory);
+      color: var(--navy);
+      font-family: inherit;
+      font-size: 0.95rem;
       font-weight: 700;
-      color: var(--brown);
-      border-bottom: 1px solid #f0e4d7;
-      padding-bottom: 6px;
-      margin-bottom: 8px;
-    }
-    .day-task {
-      color: #634f3f;
-      font-size: 11px;
-      line-height: 1.4;
-      min-height: 60px;
+      text-align: left;
+      cursor: pointer;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      gap: 2px;
+      transition: all 0.18s ease;
     }
-    .day-col.rest {
-      background: #fdfbf7;
-      border-style: dashed;
+    .choice-btn small {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .choice-btn:hover {
+      border-color: var(--amber);
+      background: #FFFFFF;
+    }
+    .choice-btn.selected {
+      background: var(--navy);
+      border-color: var(--navy);
+      color: #FFFFFF;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
+    }
+    .choice-btn.selected small {
+      color: #FCD34D;
     }
 
-    /* Checklist */
-    .checklist-wrap {
-      background: #fff;
+    /* Sağ Sütun (%65): Canlı Güncellenen Sonuç Paneli */
+    .planner-output-col {
+      background: var(--surface);
       border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: var(--shadow);
     }
-    .checklist-wrap h4 {
-      margin: 0 0 10px;
-      font: 600 15px Georgia, serif;
-      color: var(--brown);
+
+    .plan-output-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 20px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+    .plan-output-title {
+      margin: 0;
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--navy);
+    }
+    .plan-active-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--amber-soft);
+      color: var(--amber-hover);
+      font-size: 0.875rem;
+      font-weight: 800;
+    }
+
+    /* Metrik Kartları */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+    .metric-card {
+      background: var(--ivory);
+      border: 1px solid var(--line);
+      border-top: 3px solid var(--amber);
+      border-radius: 16px;
+      padding: 18px 16px;
+    }
+    .metric-card span {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--slate);
+      margin-bottom: 6px;
+    }
+    .metric-card strong {
+      display: block;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.25;
+    }
+
+    /* 7 Günlük Program Kartları */
+    .output-subhead {
+      margin: 0 0 14px;
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+    .day-card {
+      background: var(--ivory);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .day-card.is-sunday {
+      grid-column: 1 / -1;
+      background: #F8FAFC;
+      border-style: dashed;
+      border-color: #CBD5E1;
+    }
+    .day-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .day-name {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--navy);
+    }
+    .day-tag {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      color: var(--amber-hover);
+    }
+    .day-task {
+      font-size: 0.95rem;
+      color: var(--slate);
+      line-height: 1.5;
+    }
+
+    /* İşaretlenebilir Öncelikli Konu Kontrol Listesi */
+    .checklist-box {
+      background: var(--ivory);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px 22px;
+      margin-bottom: 24px;
+    }
+    .checklist-counter {
+      font-size: 0.875rem;
+      font-weight: 800;
+      color: var(--emerald);
+      background: var(--emerald-soft);
+      padding: 4px 12px;
+      border-radius: 999px;
     }
     .check-items {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
     }
     .check-label {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: #604d3f;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--navy);
       cursor: pointer;
+      transition: border-color 0.16s ease, background 0.16s ease;
+    }
+    .check-label:hover {
+      border-color: var(--amber);
     }
     .check-label input {
-      accent-color: var(--gold);
-      width: 16px;
-      height: 16px;
+      width: 19px;
+      height: 19px;
+      margin-top: 2px;
+      accent-color: var(--amber);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .check-label.is-checked {
+      background: var(--emerald-soft);
+      border-color: rgba(5, 150, 105, 0.35);
+      color: var(--emerald);
+    }
+    .check-label.is-checked span {
+      text-decoration: line-through;
     }
 
-    /* High School Roadmap */
-    .grade-road-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-    .road-card {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 20px;
+    .plan-actions {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform .2s, box-shadow .2s;
-    }
-    .road-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(76,48,27,.09);
-    }
-    .road-card .badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 99px;
-      background: #f5e8d9;
-      color: #7b5b29;
-      margin-bottom: 8px;
-      align-self: flex-start;
-    }
-    .road-card h3 {
-      font: 600 18px Georgia, serif;
-      margin: 0 0 8px;
-    }
-    .road-card p {
-      font-size: 12px;
-      color: var(--muted);
-      margin: 0 0 16px;
-      flex-grow: 1;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: flex-end;
     }
 
-    /* Spaced Repetition Flow */
+    /* Roadmap & Spaced Repetition & CTA */
+    .grade-road-grid,
     .flow-steps {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
+      gap: 18px;
+    }
+    .road-card,
+    .flow-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+    .road-card .badge {
+      display: inline-block;
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: var(--amber-soft);
+      color: var(--amber-hover);
+      margin-bottom: 10px;
+      align-self: flex-start;
+    }
+    .road-card h3,
+    .flow-card h4 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin: 0 0 8px;
+      color: var(--navy);
+    }
+    .road-card p,
+    .flow-card p {
+      font-size: 0.95rem;
+      color: var(--slate);
+      margin: 0 0 16px;
     }
     .flow-card {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 18px;
       text-align: center;
+      align-items: center;
     }
+    .flow-card p { margin-bottom: 0; }
     .flow-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: #fff2dd;
-      color: var(--gold);
-      font-size: 18px;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: var(--navy);
+      color: #FCD34D;
+      font-size: 1.1rem;
+      font-weight: 800;
       display: grid;
       place-items: center;
-      margin: 0 auto 12px;
-    }
-    .flow-card h4 {
-      font: 600 15px Georgia, serif;
-      margin: 0 0 6px;
-    }
-    .flow-card p {
-      font-size: 12px;
-      color: var(--muted);
-      margin: 0;
+      margin-bottom: 12px;
     }
 
-    /* CTA Section */
     .cta-banner {
-      background: linear-gradient(135deg, #493020, #2f1d11);
-      color: #fffaf5;
+      background: linear-gradient(140deg, #0F172A 0%, #1E293B 100%);
+      color: #FFFFFF;
       border-radius: 24px;
-      padding: 36px 32px;
+      padding: 40px 32px;
       text-align: center;
       box-shadow: var(--shadow);
       margin-top: 16px;
     }
     .cta-banner h2 {
-      font: 600 clamp(24px, 3.5vw, 34px) Georgia, serif;
+      font-size: clamp(1.6rem, 3vw, 2.3rem);
+      font-weight: 800;
       margin: 0 0 10px;
     }
     .cta-banner p {
-      max-width: 540px;
+      max-width: 580px;
       margin: 0 auto 24px;
-      font-size: 15px;
-      color: #d8c4b2;
+      font-size: 1.02rem;
+      color: #CBD5E1;
     }
     .cta-btns {
       display: flex;
@@ -480,33 +628,89 @@
       flex-wrap: wrap;
     }
 
-    /* Print Styles */
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      margin-top: 40px;
+    }
+
+    /* ==========================================================================
+       @media print — Yalnızca Temiz Haftalık Ders Programı Çıktısı
+       ========================================================================== */
     @media print {
-      body { background: #fff !important; }
-      .topbar, .hero, .step-box, .cta-banner, footer, .btn-print-hide { display: none !important; }
-      .wrap { max-width: 100% !important; padding: 0 !important; }
-      .plan-result { border: 1px solid #000 !important; box-shadow: none !important; }
+      @page {
+        size: A4 portrait;
+        margin: 14mm;
+      }
+      body {
+        background: #FFFFFF !important;
+        color: #0F172A !important;
+        font-size: 11pt !important;
+      }
+      header.topbar,
+      .hero,
+      .section-head,
+      .planner-controls-col,
+      .print-hide-section,
+      .btn-print-hide,
+      footer {
+        display: none !important;
+      }
+      .wrap {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      .section {
+        padding: 0 !important;
+      }
+      .planner-studio {
+        display: block !important;
+      }
+      .planner-output-col {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+      .metric-card,
+      .day-card,
+      .checklist-box,
+      .check-label {
+        background: #FFFFFF !important;
+        border: 1px solid #CBD5E1 !important;
+        break-inside: avoid;
+      }
+      .week-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
     }
 
     /* Responsive */
-    @media (max-width: 820px) {
+    @media (max-width: 1080px) {
+      .wrap { padding: 0 32px; }
+      .topbar { padding: 18px 32px; }
       .hero { grid-template-columns: 1fr; }
-      .grade-road-grid { grid-template-columns: 1fr 1fr; }
-      .flow-steps { grid-template-columns: 1fr 1fr; }
-      .metrics-row { grid-template-columns: 1fr; }
-      .week-grid { grid-template-columns: repeat(2, 1fr); }
-      .check-items { grid-template-columns: 1fr; }
+      .planner-studio { grid-template-columns: 1fr; }
+      .planner-controls-col { position: static; }
+      .grade-road-grid, .flow-steps { grid-template-columns: repeat(2, 1fr); }
     }
-    @media (max-width: 520px) {
-      .grade-road-grid { grid-template-columns: 1fr; }
-      .flow-steps { grid-template-columns: 1fr; }
-      .week-grid { grid-template-columns: 1fr; }
+
+    @media (max-width: 640px) {
+      .wrap { padding: 0 20px; }
+      .topbar { padding: 14px 20px; }
+      .planner-controls-col, .planner-output-col { padding: 20px; }
+      .metrics-row, .week-grid, .check-items, .choice-grid.cols-3, .grade-road-grid, .flow-steps {
+        grid-template-columns: 1fr;
+      }
+      .choice-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body data-home="/" data-breadcrumb="Kişisel Çalışma Planı">
 
-  <!-- Topbar -->
+  <!-- Mevcut Üst Menü (Navbar) -->
   <header class="wrap topbar">
     <a class="brand" href="/" aria-label="ZarifÇözüm ana sayfa">
       <img class="brand-logo" src="../assets/brand-mark.png" alt="ZarifÇözüm">
@@ -521,112 +725,153 @@
     <!-- Hero Section -->
     <section class="hero">
       <div>
-        <span class="eyebrow">HEDEF ODAKLI ÇALIŞMA · YKS & LİSE STRATEJİSİ</span>
+        <span class="eyebrow">HEDEF ODAKLI ÇALIŞMA · YKS &amp; LİSE STRATEJİSİ</span>
         <h1>Hedefine Odaklan, <em>Akıllı Planını Oluştur.</em></h1>
-        <p class="lead">9, 10, 11 ve 12. sınıf matematik müfredatı ve YKS (TYT-AYT) maratonunda rastgele değil, stratejik ilerleyin. Seviyenizi, hedefinizi ve günlük çalışma sürenizi belirleyin; size özel haftalık çalışma planı ve eksik kapatma rotasını anında oluşturun.</p>
+        <p class="lead">9, 10, 11 ve 12. sınıf matematik müfredatı ve YKS (TYT-AYT) maratonunda rastgele değil, stratejik ilerleyin. Sınıfınızı, alan odağınızı ve günlük sürenizi seçin; haftalık çalışma programınız canlı olarak oluşsun.</p>
         <div class="chips">
-          <span class="chip">📅 Kişiselleştirilmiş Çizelge</span>
+          <span class="chip">📅 7 Günlük Canlı Çizelge</span>
           <span class="chip">🎯 TYT-AYT Konu Ağırlıkları</span>
-          <span class="chip">🔄 Aralıklı Tekrar Modeli</span>
+          <span class="chip">✅ İşaretlenebilir Kontrol Listesi</span>
           <span class="chip">🖨️ Yazdırılabilir / PDF Uyumlu</span>
         </div>
       </div>
       <div class="hero-art">
         <div class="hero-art-icon">📊</div>
-        <h3>YKS & Lise Çalışma Motoru</h3>
-        <p>Hedef netini ve haftalık soru kotanı belirle; yapay zekâ destekli haftalık takvimini oluştur.</p>
-        <a class="btn gold" href="#akilli-planlayici">Hemen Planla ↓</a>
+        <h3>YKS &amp; Lise Çalışma Motoru</h3>
+        <p>Sınıfına ve alanına göre haftalık soru kotanı ve 7 günlük ders programını tek tıkla özelleştir.</p>
+        <a class="btn amber" href="#akilli-planlayici">Canlı Planlayıcıya Git ↓</a>
       </div>
     </section>
 
-    <!-- Smart Interactive Planner Widget -->
+    <!-- 3 Adımda Canlı Çalışma Planı Oluşturucu (2 Sütunlu Canlı Stüdyo) -->
     <section class="section" id="akilli-planlayici">
       <div class="section-head">
         <h2>3 Adımda Canlı Çalışma Planı Oluşturucu</h2>
-        <p>Seçimlerinizi yapın; seviyenize ve hedefinize uygun haftalık çalışma çizelgesi ve konu kontrol listesi dinamik olarak üretilsin.</p>
+        <p>Soldaki adımlardan seçim yaptığınızda sağdaki 7 günlük program, haftalık soru kotası ve konu kontrol listesi anında güncellenir.</p>
       </div>
 
-      <div class="planner-card">
-        <!-- Step 1: Grade -->
-        <div class="step-box">
-          <div class="step-title">
-            <span class="step-badge">1</span>
-            <span>Sınıfını veya Durumunu Seç:</span>
+      <div class="planner-studio">
+        <!-- Sol Sütun (%35): Seçim Adımları -->
+        <aside class="planner-controls-col" aria-label="Çalışma Planı Seçim Adımları">
+          <!-- Adım 1: Sınıf Seçimi -->
+          <div class="step-block">
+            <div class="step-header">
+              <span class="step-num">1</span>
+              <span class="step-label">Sınıf Seçimi</span>
+            </div>
+            <div class="choice-grid" id="gradeGroup">
+              <button class="choice-btn" type="button" data-grade="9">
+                <span>9. Sınıf</span>
+                <small>Lise Temeli</small>
+              </button>
+              <button class="choice-btn" type="button" data-grade="10">
+                <span>10. Sınıf</span>
+                <small>TYT Çekirdeği</small>
+              </button>
+              <button class="choice-btn" type="button" data-grade="11">
+                <span>11. Sınıf</span>
+                <small>AYT Omurgası</small>
+              </button>
+              <button class="choice-btn selected" type="button" data-grade="12">
+                <span>12. Sınıf / YKS</span>
+                <small>TYT + AYT Zirve</small>
+              </button>
+            </div>
           </div>
-          <div class="choice-group" id="gradeGroup">
-            <button class="choice-btn selected" type="button" data-grade="9">9. Sınıf</button>
-            <button class="choice-btn" type="button" data-grade="10">10. Sınıf</button>
-            <button class="choice-btn" type="button" data-grade="11">11. Sınıf (AYT Hazırlık)</button>
-            <button class="choice-btn" type="button" data-grade="12">12. Sınıf / YKS</button>
-            <button class="choice-btn" type="button" data-grade="mezun">Mezun (YKS Odaklı)</button>
-          </div>
-        </div>
 
-        <!-- Step 2: Goal -->
-        <div class="step-box">
-          <div class="step-title">
-            <span class="step-badge">2</span>
-            <span>Öncelikli Hedefini Belirle:</span>
+          <!-- Adım 2: Alan / Odak -->
+          <div class="step-block">
+            <div class="step-header">
+              <span class="step-num">2</span>
+              <span class="step-label">Alan / Odak</span>
+            </div>
+            <div class="choice-grid cols-1" id="focusGroup">
+              <button class="choice-btn selected" type="button" data-focus="sayisal">
+                <span>Sayısal TYT+AYT</span>
+                <small>Yüksek AYT ağırlığı, türev-integral ve problem rutini</small>
+              </button>
+              <button class="choice-btn" type="button" data-focus="ea">
+                <span>Eşit Ağırlık</span>
+                <small>TYT hız + AYT yüksek getiri sağlayan seçili konular</small>
+              </button>
+              <button class="choice-btn" type="button" data-focus="tyt">
+                <span>Sadece TYT / Okul</span>
+                <small>Yazılılarda 90+ hedefi ve sağlam TYT temeli</small>
+              </button>
+              <button class="choice-btn" type="button" data-focus="eksik">
+                <span>Eksik Kapatma</span>
+                <small>Yanlış analizi, konu tekrarı ve hızlı net artışı</small>
+              </button>
+            </div>
           </div>
-          <div class="choice-group" id="goalGroup">
-            <button class="choice-btn selected" type="button" data-goal="school">Okul Yazılılarında 90+ & Temel Güçlendirme</button>
-            <button class="choice-btn" type="button" data-goal="tyt">TYT Matematik 25–30+ Net</button>
-            <button class="choice-btn" type="button" data-goal="top">AYT & Sayısal İlk 20.000 Derecesi</button>
-            <button class="choice-btn" type="button" data-goal="speed">Eksikleri Kapatma & Hız Kampı</button>
-          </div>
-        </div>
 
-        <!-- Step 3: Daily Time -->
-        <div class="step-box" style="margin-bottom:12px">
-          <div class="step-title">
-            <span class="step-badge">3</span>
-            <span>Günlük Ayırabileceğin Matematik Süresi:</span>
+          <!-- Adım 3: Günlük Süre -->
+          <div class="step-block">
+            <div class="step-header">
+              <span class="step-num">3</span>
+              <span class="step-label">Günlük Süre</span>
+            </div>
+            <div class="choice-grid cols-3" id="timeGroup">
+              <button class="choice-btn" type="button" data-hours="1.5">
+                <span>1.5 Saat</span>
+                <small>Dengeli</small>
+              </button>
+              <button class="choice-btn selected" type="button" data-hours="3">
+                <span>3 Saat</span>
+                <small>Odaklı</small>
+              </button>
+              <button class="choice-btn" type="button" data-hours="4.5">
+                <span>4.5+ Saat</span>
+                <small>Yoğun</small>
+              </button>
+            </div>
           </div>
-          <div class="choice-group" id="timeGroup">
-            <button class="choice-btn" type="button" data-hours="1.5">1.5 Saat (Dengeli Tempo)</button>
-            <button class="choice-btn selected" type="button" data-hours="3">3 Saat (Odaklı Çalışma)</button>
-            <button class="choice-btn" type="button" data-hours="4.5">4.5+ Saat (Yoğun Kamp)</button>
-          </div>
-        </div>
+        </aside>
 
-        <!-- Dynamic Output -->
-        <div class="plan-result" id="planOutput">
-          <!-- Metrics -->
+        <!-- Sağ Sütun (%65): Canlı Güncellenen Sonuç Paneli -->
+        <div class="planner-output-col" id="planOutput" aria-live="polite">
+          <div class="plan-output-head">
+            <h3 class="plan-output-title" id="planTitle">12. Sınıf / YKS Haftalık Çalışma Programı</h3>
+            <span class="plan-active-pill" id="planSummaryBadge">Sayısal TYT+AYT • 3 Saat/Gün</span>
+          </div>
+
+          <!-- Haftalık Özet Metrikleri -->
           <div class="metrics-row">
             <div class="metric-card">
-              <span>Haftalık Çalışma Süresi</span>
+              <span>Haftalık Toplam Süre</span>
               <strong id="outHours">21 Saat</strong>
             </div>
             <div class="metric-card">
-              <span>Haftalık Hedef Soru Kotası</span>
-              <strong id="outQuestions">350 Soru</strong>
+              <span>Haftalık Soru Kotası</span>
+              <strong id="outQuestions">420 Soru</strong>
             </div>
             <div class="metric-card">
-              <span>Öğrenme Stratejisi</span>
-              <strong id="outRatio">%30 Konu · %70 Soru/Deneme</strong>
+              <span>Çalışma Dağılımı</span>
+              <strong id="outRatio">%25 Konu · %75 Soru</strong>
             </div>
           </div>
 
-          <!-- Weekly Schedule -->
-          <h4 style="font:600 16px Georgia,serif;margin:0 0 12px;color:var(--brown)">Haftalık Çalışma Çizelgeniz:</h4>
-          <div class="week-grid" id="weekSchedule">
-            <!-- Injected by script -->
+          <!-- Pazartesi - Pazar 7 Günlük Ders Programı -->
+          <div class="output-subhead">
+            <span>📅 Pazartesi – Pazar 7 Günlük Program</span>
           </div>
+          <div class="week-grid" id="weekSchedule"></div>
 
-          <!-- Checklist -->
-          <div class="checklist-wrap">
-            <h4 id="checklistTitle">Kritik Konu Kontrol Listesi:</h4>
-            <div class="check-items" id="checkList">
-              <!-- Injected by script -->
+          <!-- Öncelikli Konu Kontrol Listesi -->
+          <div class="checklist-box">
+            <div class="output-subhead" style="margin-bottom:14px;">
+              <span id="checklistTitle">✅ Öncelikli Konu Kontrol Listesi</span>
+              <span class="checklist-counter" id="checklistCounter">0 / 6 Tamamlandı</span>
             </div>
+            <div class="check-items" id="checkList"></div>
           </div>
 
-          <!-- Actions -->
-          <div class="btn-print-hide" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end">
+          <!-- Aksiyon Butonları -->
+          <div class="plan-actions btn-print-hide">
             <button class="btn secondary" type="button" id="printBtn">
-              🖨️ Bu Planı Yazdır / PDF Kaydet
+              🖨️ Planı Yazdır / PDF Kaydet
             </button>
-            <a class="btn gold" href="../kayit-giris.html?role=student">
+            <a class="btn amber" href="../kayit-giris.html?role=student&mode=register">
               🚀 ZarifÇözüm'de Uygulamaya Başla →
             </a>
           </div>
@@ -635,49 +880,45 @@
     </section>
 
     <!-- Strategic High School Roadmap (9-12) -->
-    <section class="section">
+    <section class="section print-hide-section">
       <div class="section-head">
         <h2>Lise Kademelerine Göre Başarı Pusulası (9–12. Sınıf)</h2>
         <p>Her kademenin sınav stratejisi ve konu matematiği farklıdır. Seviyeni keşfet.</p>
       </div>
 
       <div class="grade-road-grid">
-        <!-- 9. Grade -->
         <article class="road-card">
           <div>
             <span class="badge">Temel Taşları</span>
             <h3>9. Sınıf: Lisenin Dili</h3>
-            <p>Mantık, Kümeler, Denklem ve Eşitsizlikler, Üçgenler ve Fonksiyonlara giriş. Lise matematiğinin soyut altyapısının kurulduğu kritik yıl.</p>
+            <p>Gerçek sayılar, doğrusal fonksiyonlar, algoritma ve üçgenler. Lise matematiğinin sağlam altyapısının kurulduğu kritik yıl.</p>
           </div>
           <a class="btn sm secondary" href="../konu.html?sinif=9">9. Sınıf Konularına Git →</a>
         </article>
 
-        <!-- 10. Grade -->
         <article class="road-card">
           <div>
             <span class="badge">TYT Çekirdeği</span>
             <h3>10. Sınıf: TYT Temeli</h3>
-            <p>Sayma ve Olasılık, Polinomlar, İkinci Dereceden Denklemler, Dörtgenler ve Çokgenler. TYT'nin en çok eleyen sorularının kaynağı.</p>
+            <p>Sayma, permütasyon, kombinasyon, binom, parabol ve dörtgenler. TYT'nin en çok eleyen sorularının kaynağı.</p>
           </div>
           <a class="btn sm secondary" href="../konu.html?sinif=10">10. Sınıf Konularına Git →</a>
         </article>
 
-        <!-- 11. Grade -->
         <article class="road-card">
           <div>
             <span class="badge">AYT Omurgası</span>
             <h3>11. Sınıf: AYT Mimarı</h3>
-            <p>Trigonometri, Analitik Geometri, Fonksiyon Uygulamaları, Çember-Daire ve Olasılık. AYT puanının %40'ından fazlasını inşa eden kademe.</p>
+            <p>Trigonometri, analitik geometri, fonksiyon uygulamaları ve çember-daire. AYT puanının %40'ından fazlasını inşa eden kademe.</p>
           </div>
           <a class="btn sm secondary" href="../konu.html?sinif=11">11. Sınıf Konularına Git →</a>
         </article>
 
-        <!-- 12. Grade -->
         <article class="road-card">
           <div>
             <span class="badge">YKS Zirvesi</span>
-            <h3>12. Sınıf & YKS: Zirve</h3>
-            <p>Diziler, Trigonometrik Denklemler, Türev, İntegral ve karma branş denemeleri. Zaman yönetimi ve net sabitleme teknikleri.</p>
+            <h3>12. Sınıf &amp; YKS: Zirve</h3>
+            <p>Üstel-logaritma, diziler, limit, türev, integral ve karma branş denemeleri. Zaman yönetimi ve net sabitleme teknikleri.</p>
           </div>
           <a class="btn sm secondary" href="../konu.html?sinif=12">12. Sınıf Konularına Git →</a>
         </article>
@@ -685,7 +926,7 @@
     </section>
 
     <!-- Spaced Repetition -->
-    <section class="section">
+    <section class="section print-hide-section">
       <div class="section-head">
         <h2>Zarif Aralıklı Tekrar Modeli (Spaced Repetition)</h2>
         <p>Unutma eğrisini kıran yapay zekâ destekli eksik tamamlama döngümüz nasıl çalışır?</p>
@@ -716,200 +957,227 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="cta-banner">
+    <section class="cta-banner print-hide-section">
       <h2>Planını Hayata Geçirmeye Başla</h2>
       <p>Kişiselleştirilmiş planınızı ZarifÇözüm öğrenci panelinize entegre edin; seviyenize özel denemeler ve akıllı analizlerle hedefinize ulaşın.</p>
       <div class="cta-btns">
-        <a class="btn gold" href="../kayit-giris.html?role=student">Öğrenci Girişi Yap</a>
+        <a class="btn amber" href="../kayit-giris.html?role=student">Öğrenci Girişi Yap</a>
         <a class="btn secondary" href="deneme-sinavi-tanitim.html">Türkiye Geneli Denemeler</a>
-        <a class="btn secondary" href="../planli-calisma.html">Planlı Çalışma Rehberi</a>
+        <a class="btn secondary" href="../konu.html?sinif=12">12. Sınıf Konularını İncele</a>
       </div>
     </section>
   </main>
 
-  <footer style="text-align:center;padding:40px 20px;font-size:12px;color:var(--muted)">
+  <!-- Mevcut Alt Bilgi (Footer) Korundu -->
+  <footer>
     © 2026 ZarifÇözüm · Millî Eğitim Bakanlığı ve ÖSYM YKS Standartlarına Uygun Olarak Geliştirilmiştir.
   </footer>
 
-  <!-- Planner Script -->
+  <!-- Canlı Çalışma Planı Motoru -->
   <script>
-    (function initPlanner() {
-      let currentGrade = '9';
-      let currentGoal = 'school';
-      let currentHours = '3';
+    (function initLivePlanner() {
+      "use strict";
 
-      const schedules = {
-        '9': {
-          days: [
-            'Mantık & Önermeler: Konu Anlatımı + 25 Soru',
-            'Kümeler İşlemleri: Çözümlü Örnekler + 30 Soru',
-            'Haftalık Ara Tekrar & Yanlış Defteri Taraması',
-            'Denklem & Eşitsizlikler: Temel Kavrama (35 Soru)',
-            'Zarif AI Asistan ile Çözülemeyen Soruları Analiz',
-            '9. Sınıf Hafta Sonu Tarama Testi (40 Soru)',
-            'Dinlenme & Eksik Tamamlama / Hafta Değerlendirmesi'
-          ],
+      /* Varsayılan Dolu Başlangıç: 12. Sınıf / YKS + Sayısal TYT+AYT + 3 Saat */
+      var state = {
+        grade: "12",
+        focus: "sayisal",
+        hours: 3
+      };
+
+      var GRADE_LABELS = {
+        "9": "9. Sınıf",
+        "10": "10. Sınıf",
+        "11": "11. Sınıf",
+        "12": "12. Sınıf / YKS"
+      };
+
+      var FOCUS_META = {
+        sayisal: { label: "Sayısal TYT+AYT", qPerHour: 20, ratio: "%25 Konu · %75 TYT+AYT Soru" },
+        ea:      { label: "Eşit Ağırlık",     qPerHour: 18, ratio: "%30 Konu · %70 Stratejik Soru" },
+        tyt:     { label: "Sadece TYT / Okul", qPerHour: 15, ratio: "%40 Konu · %60 Temel & Yazılı" },
+        eksik:   { label: "Eksik Kapatma",     qPerHour: 16, ratio: "%20 Tekrar · %80 Hata Analizi" }
+      };
+
+      var GRADE_DATA = {
+        "9": {
           checks: [
-            'Mantık ve Doğruluk Tabloları',
-            'Kümelerde Kesişim ve Birleşim',
-            'Mutlak Değerli Denklemler',
-            'Birinci Dereceden İki Bilinmeyenli Sistemler',
-            'Üçgende Açı ve Kenar Bağıntıları'
+            "Gerçek Sayıların Üslü ve Köklü Gösterimleri",
+            "Doğrusal Fonksiyonlar ve Grafik Yorumlama",
+            "Algoritma ve Bilişimsel Düşünme",
+            "Üçgenlerde Eşlik ve Benzerlik",
+            "Dik Üçgende Trigonometrik Oranlar",
+            "İstatistiksel Araştırma Süreci"
+          ],
+          baseDays: [
+            { tag: "Konu + Örnek", text: "Gerçek Sayılar & Üslü/Köklü Gösterimler konu özeti + {q} çözümlü soru" },
+            { tag: "Pekiştirme",   text: "Doğrusal Fonksiyonlar grafik yorumlama + {q} kazanım sorusu" },
+            { tag: "Ara Tekrar",   text: "Hafta içi yanlış defteri taraması + AI Mentör ile ipucu tekrarı" },
+            { tag: "Geometri",     text: "Üçgenlerde Eşlik & Benzerlik temel çizimler + {q} soru" },
+            { tag: "Uygulama",     text: "Yeni nesil problem pratiği ve yazılı hazırlık soruları ({q} soru)" },
+            { tag: "Hafta Sonu",   text: "9. Sınıf Haftalık 40 Soruluk Kazanım Tarama Testi" },
+            { tag: "Analiz",       text: "Haftalık karne incelemesi, eksik konu işaretleme ve dinlenme" }
           ]
         },
-        '10': {
-          days: [
-            'Polinomlar: Tanım ve Katsayılar Toplamı + 30 Soru',
-            'Sayma ve Olasılık: Permütasyon / Kombinasyon (35 Soru)',
-            'Geçmiş Konulardan 20 Soru Hızlı Tarama',
-            'İkinci Dereceden Denklemler & Kökler İlişkisi (35 Soru)',
-            'ÖSYM Çıkmış Sorular İncelemesi & Canlı Destek',
-            '10. Sınıf Mini Bölüm Denemesi (45 Soru)',
-            'Dinlenme & Haftalık Yanlış Soru Taraması'
-          ],
+        "10": {
           checks: [
-            'Polinomlarda Kalan Bulma Teoremi',
-            'Faktöriyel ve Kombinasyon Hesapları',
-            'Diskriminant (Δ) ve Karmaşık Kökler',
-            'Özel Dörtgenler (Yamuk & Paralelkenar)',
-            'Katı Cisimlerde Hacim ve Yüzey Alanı'
+            "Sayma Yöntemleri ve Permütasyon",
+            "Kombinasyon ve Binom Açılımı",
+            "Basit Olayların Olasılıkları",
+            "İkinci Dereceden Fonksiyonlar (Parabol)",
+            "Çokgenler ve Özel Dörtgenler",
+            "Katı Cisimler (Prizma ve Piramit)"
+          ],
+          baseDays: [
+            { tag: "TYT Çekirdek", text: "Sayma Yöntemleri & Permütasyon konu tekrar + {q} soru" },
+            { tag: "Seçme & Binom",text: "Kombinasyon, Pascal Üçgeni ve Binom açılımı ({q} soru)" },
+            { tag: "Hızlı Tarama", text: "TYT temel problemler rutini + önceki haftanın yanlış analizi" },
+            { tag: "Fonksiyon",    text: "İkinci Dereceden Fonksiyonlar (Parabol) tepe noktası + {q} soru" },
+            { tag: "Geometri",     text: "Çokgenler, özel dörtgenler ve katı cisimler ({q} soru)" },
+            { tag: "Mini Deneme",  text: "10. Sınıf TYT Uyumlu 40 Soruluk Süreli Bölüm Denemesi" },
+            { tag: "Analiz",       text: "Deneme hata analizi, formül kartı tekrarı ve dinlenme" }
           ]
         },
-        '11': {
-          days: [
-            'Trigonometri: Birim Çember ve Esas Ölçü (40 Soru)',
-            'Analitik Geometri: Doğrunun Analitiği & Eğim (35 Soru)',
-            'TYT Matematik Problem Rutini (20 Soru)',
-            'Fonksiyon Uygulamaları & Parabol Tepe Noktası (40 Soru)',
-            'Çember ve Dairede Açı Bağıntıları (35 Soru)',
-            '11. Sınıf AYT Odaklı Hafta Sonu Denemesi (50 Soru)',
-            'Haftalık Analiz & Dinlenme'
-          ],
+        "11": {
           checks: [
-            'Trigonometrik Fonksiyonların İşaret ve Değerleri',
-            'Toplam-Fark ve İki Kat Açı Formülleri',
-            'Noktanın Doğruya Uzaklığı ve Eğim',
-            'İkinci Dereceden Fonksiyon Grafikleri (Parabol)',
-            'Çemberde Kiriş, Teğet ve Yay Özellikleri'
+            "Trigonometri: Birim Çember ve Esas Ölçü",
+            "Trigonometrik Özdeşlikler ve Denklemler",
+            "Analitik Geometri: Nokta ve Doğru",
+            "Fonksiyonlarda Uygulamalar & Parabol",
+            "İkinci Dereceden Eşitsizlik Sistemleri",
+            "Çember ve Dairenin Analitiği"
+          ],
+          baseDays: [
+            { tag: "AYT Omurga",   text: "Trigonometri: Yönlü açılar, birim çember ve özdeşlikler ({q} soru)" },
+            { tag: "Analitik",     text: "Noktanın ve Doğrunun Analitiği: Eğim ve uzaklık ({q} soru)" },
+            { tag: "TYT Rutini",   text: "TYT Matematik zamanlı problem seti (20 soru) + hata analizi" },
+            { tag: "Fonksiyon",    text: "Fonksiyon dönüşümleri ve eşitsizlik sistemleri ({q} soru)" },
+            { tag: "Geometri",     text: "Çemberde açı, uzunluk ve dairede alan ({q} soru)" },
+            { tag: "AYT Deneme",   text: "11. Sınıf AYT Odaklı 40 Soruluk Hafta Sonu Denemesi" },
+            { tag: "Analiz",       text: "Yanlış soruların AI Mentör ile adım adım çözümü ve dinlenme" }
           ]
         },
-        '12': {
-          days: [
-            'AYT Türev: Türev Alma Kuralları ve Teğet Eğimi (45 Soru)',
-            'TYT Matematik 40 Soruluk Hız Denemesi (70 dk)',
-            'İntegral / Belirsiz İntegral & Alan Hesabı (45 Soru)',
-            'Logaritma & Diziler Hızlı Tekrar Testi (35 Soru)',
-            'Zarif AI Hata Analizi: Hafta Boyu Kaçan Kazanımlar',
-            'Tam Kapsamlı TYT-AYT Genel Deneme Sınavı',
-            'Detaylı Deneme Analizi & Telafi Çalışması'
-          ],
+        "12": {
           checks: [
-            'Türevin Fiziksel ve Geometrik Yorumu',
-            'Maksimum-Minimum Problemleri',
-            'Belirli İntegral ile Alan Hesabı',
-            'Aritmetik ve Geometrik Diziler',
-            'TYT Problemler: Hız, Karışım ve Sayı Kesir'
-          ]
-        },
-        'mezun': {
-          days: [
-            'Pazartesi TYT Genel Tarama + 60 Soru Problem/Geometri',
-            'Salı AYT Ağır Konular (Türev/İntegral/Trigo) 50 Soru',
-            'Çarşamba Yanlış Defteri Taraması + Eksik Kapatma Kampı',
-            'Perşembe Geometri Odaklı 40 Soru (Katı Cisimler & Analitik)',
-            'Cuma AYT Matematik Branş Denemesi (40 Soru / Zamanlı)',
-            'Cumartesi Türkiye Geneli ZarifÇözüm Denemesi',
-            'Pazar Soru Analizi, Optik Değerlendirme & Dinlenme'
+            "Üstel ve Logaritmik Fonksiyonlar",
+            "Aritmetik ve Geometrik Diziler",
+            "Limit ve Süreklilik",
+            "Türev Alma Kuralları ve Ekstremum",
+            "Belirli İntegral ve Alan Hesabı",
+            "TYT Problemler & Hız Denemesi Rutini"
           ],
-          checks: [
-            'TYT Matematikte İlk 12 Soru Kalıpları',
-            'AYT Trigonometri & Ters Trigonometri',
-            'Türev-İntegral İlişkisi ve Alan',
-            'Olasılık ve Binom Açılımı',
-            'Çemberin Analitik İncelenmesi'
+          baseDays: [
+            { tag: "AYT Zirve",    text: "Türev & Maksimum-Minimum problemleri konu pekiştirme ({q} soru)" },
+            { tag: "TYT Hız",      text: "40 Soruluk Zamanlı TYT Matematik Branş Denemesi + analiz" },
+            { tag: "AYT İntegral", text: "Belirsiz/Belirli İntegral ve eğri altında alan ({q} soru)" },
+            { tag: "Tekrar",       text: "Logaritma, Diziler ve Trigonometri karma tarama ({q} soru)" },
+            { tag: "AI Analiz",    text: "Hafta boyu kaçan kazanımların AI Mentör ile telafi kampı" },
+            { tag: "Genel Deneme", text: "Tam Kapsamlı TYT + AYT Genel Deneme Sınavı (Optik Süreli)" },
+            { tag: "Değerlendirme",text: "Detaylı net karnesi analizi, haftalık hedef güncelleme ve dinlenme" }
           ]
         }
       };
 
-      function updatePlanUI() {
-        const h = parseFloat(currentHours);
-        const weeklyHours = h * 7;
-        let qCount = Math.round(weeklyHours * (currentGoal === 'top' ? 20 : (currentGoal === 'tyt' ? 18 : 14)));
+      var DAY_NAMES = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 
-        document.getElementById('outHours').textContent = weeklyHours + ' Saat';
-        document.getElementById('outQuestions').textContent = qCount + ' Soru';
-
-        let ratioText = '%30 Konu · %70 Soru/Deneme';
-        if (currentGoal === 'top') ratioText = '%20 Konu · %80 Ağır Soru & Deneme';
-        else if (currentGoal === 'school') ratioText = '%40 Konu · %60 Çözümlü Soru';
-        else if (currentGoal === 'speed') ratioText = '%15 Konu · %85 Hızlı Soru & Branş';
-        document.getElementById('outRatio').textContent = ratioText;
-
-        // Schedule
-        const activeData = schedules[currentGrade] || schedules['9'];
-        const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-        const weekContainer = document.getElementById('weekSchedule');
-        weekContainer.replaceChildren();
-
-        dayNames.forEach((name, i) => {
-          const col = document.createElement('div');
-          col.className = 'day-col' + (i === 6 ? ' rest' : '');
-          const dName = document.createElement('div');
-          dName.className = 'day-name';
-          dName.textContent = name;
-          const dTask = document.createElement('div');
-          dTask.className = 'day-task';
-          dTask.textContent = activeData.days[i];
-          col.appendChild(dName);
-          col.appendChild(dTask);
-          weekContainer.appendChild(col);
-        });
-
-        // Checklist
-        const checkList = document.getElementById('checkList');
-        checkList.replaceChildren();
-        document.getElementById('checklistTitle').textContent = `${currentGrade === 'mezun' ? 'YKS Mezun' : currentGrade + '. Sınıf'} Öncelikli Konu Kontrol Listesi:`;
-
-        activeData.checks.forEach((item, idx) => {
-          const lbl = document.createElement('label');
-          lbl.className = 'check-label';
-          const inp = document.createElement('input');
-          inp.type = 'checkbox';
-          inp.id = 'chk_' + idx;
-          const sp = document.createElement('span');
-          sp.textContent = item;
-          lbl.appendChild(inp);
-          lbl.appendChild(sp);
-          checkList.appendChild(lbl);
-        });
+      function getFocusSuffix(focus) {
+        if (focus === "ea") return " (Eşit Ağırlık öncelikli)";
+        if (focus === "tyt") return " (TYT & Okul odaklı)";
+        if (focus === "eksik") return " (Eksik kapatma tekrarı)";
+        return "";
       }
 
-      function wireGroup(groupId, callback) {
-        const group = document.getElementById(groupId);
+      function updateChecklistCounter() {
+        var box = document.getElementById("checkList");
+        var counter = document.getElementById("checklistCounter");
+        if (!box || !counter) return;
+        var all = box.querySelectorAll('input[type="checkbox"]');
+        var done = 0;
+        all.forEach(function (inp) {
+          var lbl = inp.closest(".check-label");
+          if (lbl) lbl.classList.toggle("is-checked", inp.checked);
+          if (inp.checked) done++;
+        });
+        counter.textContent = done + " / " + all.length + " Tamamlandı";
+      }
+
+      function renderPlan() {
+        var fMeta = FOCUS_META[state.focus] || FOCUS_META.sayisal;
+        var gData = GRADE_DATA[state.grade] || GRADE_DATA["12"];
+        var gLabel = GRADE_LABELS[state.grade] || "12. Sınıf / YKS";
+
+        var weeklyHours = Number((state.hours * 7).toFixed(1));
+        var weeklyQuestions = Math.round(weeklyHours * fMeta.qPerHour);
+        var dailyQ = Math.max(15, Math.round(weeklyQuestions / 6));
+
+        document.getElementById("planTitle").textContent = gLabel + " Haftalık Çalışma Programı";
+        document.getElementById("planSummaryBadge").textContent =
+          fMeta.label + " • Günlük " + (state.hours >= 4.5 ? "4.5+" : state.hours) + " Saat";
+
+        document.getElementById("outHours").textContent = weeklyHours + " Saat";
+        document.getElementById("outQuestions").textContent = weeklyQuestions + " Soru";
+        document.getElementById("outRatio").textContent = fMeta.ratio;
+
+        /* 7 Günlük Program Kartları */
+        var weekEl = document.getElementById("weekSchedule");
+        var suffix = getFocusSuffix(state.focus);
+        weekEl.innerHTML = DAY_NAMES.map(function (day, idx) {
+          var item = gData.baseDays[idx];
+          var taskText = item.text.replace("{q}", String(dailyQ)) + (idx < 5 ? suffix : "");
+          return (
+            '<div class="day-card' + (idx === 6 ? ' is-sunday' : '') + '">' +
+              '<div class="day-card-top">' +
+                '<span class="day-name">' + day + '</span>' +
+                '<span class="day-tag">' + item.tag + '</span>' +
+              '</div>' +
+              '<div class="day-task">' + taskText + '</div>' +
+            '</div>'
+          );
+        }).join("");
+
+        /* İşaretlenebilir Öncelikli Konu Kontrol Listesi */
+        document.getElementById("checklistTitle").textContent = "✅ " + gLabel + " Öncelikli Konu Kontrol Listesi";
+        var checkEl = document.getElementById("checkList");
+        checkEl.innerHTML = gData.checks.map(function (topic, i) {
+          return (
+            '<label class="check-label">' +
+              '<input type="checkbox" id="planChk_' + state.grade + '_' + i + '">' +
+              '<span>' + topic + '</span>' +
+            '</label>'
+          );
+        }).join("");
+
+        checkEl.querySelectorAll('input[type="checkbox"]').forEach(function (inp) {
+          inp.addEventListener("change", updateChecklistCounter);
+        });
+        updateChecklistCounter();
+      }
+
+      function bindGroup(groupId, onSelect) {
+        var group = document.getElementById(groupId);
         if (!group) return;
-        const btns = group.querySelectorAll('.choice-btn');
-        btns.forEach(btn => {
-          btn.addEventListener('click', () => {
-            btns.forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            callback(btn);
-            updatePlanUI();
+        var btns = Array.prototype.slice.call(group.querySelectorAll(".choice-btn"));
+        btns.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            btns.forEach(function (b) { b.classList.remove("selected"); });
+            btn.classList.add("selected");
+            onSelect(btn);
+            renderPlan();
           });
         });
       }
 
-      wireGroup('gradeGroup', btn => currentGrade = btn.dataset.grade);
-      wireGroup('goalGroup', btn => currentGoal = btn.dataset.goal);
-      wireGroup('timeGroup', btn => currentHours = btn.dataset.hours);
+      bindGroup("gradeGroup", function (btn) { state.grade = btn.getAttribute("data-grade"); });
+      bindGroup("focusGroup", function (btn) { state.focus = btn.getAttribute("data-focus"); });
+      bindGroup("timeGroup",  function (btn) { state.hours = parseFloat(btn.getAttribute("data-hours")); });
 
-      const printBtn = document.getElementById('printBtn');
+      var printBtn = document.getElementById("printBtn");
       if (printBtn) {
-        printBtn.addEventListener('click', () => {
-          window.print();
-        });
+        printBtn.addEventListener("click", function () { window.print(); });
       }
 
-      updatePlanUI();
+      /* Sayfa açılır açılmaz varsayılan dolu planı çiz */
+      renderPlan();
     })();
   </script>
 </body>
