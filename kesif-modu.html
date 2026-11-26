@@ -1,0 +1,1189 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FAF6F0">
+  <title>İnteraktif Keşif Modu — Oyunlaştırılmış Matematik Stüdyosu | ZarifÇözüm</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --zc-bg: #FAF6F0;
+      --zc-stage: #FFFDF9;
+      --zc-espresso: #3B281E;
+      --zc-espresso-dark: #2C221E;
+      --zc-gold: #D4A359;
+      --zc-emerald: #1E7550;
+      --zc-terracotta: #C85A17;
+      --zc-muted: #6B5E57;
+      --zc-border: #E6DCD2;
+      --zc-shadow: 0 12px 32px rgba(59, 40, 30, 0.07);
+    }
+
+    * { box-sizing: border-box; }
+    html { font-size: 16px; }
+    body {
+      margin: 0;
+      background: var(--zc-bg);
+      color: var(--zc-espresso-dark);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    .zc-kesif-wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 20px 24px 48px;
+    }
+
+    /* 1. Üst Marka & Geliştirici Sınıf Seçici Barı */
+    .zc-kesif-header {
+      background: linear-gradient(135deg, var(--zc-espresso) 0%, var(--zc-espresso-dark) 100%);
+      border: 1.5px solid var(--zc-gold);
+      border-radius: 20px;
+      padding: 16px 22px;
+      color: #FAF6F0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: 0 14px 32px rgba(44, 34, 30, 0.16);
+      margin-bottom: 20px;
+    }
+
+    .zc-kesif-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .zc-kesif-brand img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1.5px solid var(--zc-gold);
+      background: rgba(212, 163, 89, 0.12);
+      padding: 4px;
+      object-fit: contain;
+    }
+
+    .zc-kesif-brand strong {
+      display: block;
+      font-family: 'Plus Jakarta Sans', Georgia, serif;
+      font-size: 1.12rem;
+      color: #FFFFFF;
+    }
+
+    .zc-kesif-brand small {
+      display: block;
+      font-size: 0.78rem;
+      color: #f3d285;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .zc-kesif-grade-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .zc-kesif-grade-btn {
+      min-height: 44px;
+      padding: 8px 15px;
+      border-radius: 11px;
+      border: 1px solid rgba(212, 163, 89, 0.35);
+      background: rgba(255, 255, 255, 0.08);
+      color: #FAF6F0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .zc-kesif-grade-btn:hover {
+      background: rgba(212, 163, 89, 0.22);
+    }
+
+    .zc-kesif-grade-btn.is-active {
+      background: linear-gradient(135deg, var(--zc-gold), #b9893d);
+      color: #2C221E;
+      border-color: #f3d285;
+      box-shadow: 0 4px 14px rgba(212, 163, 89, 0.35);
+    }
+
+    .zc-kesif-grade-btn.is-highschool {
+      border-style: dashed;
+      opacity: 0.82;
+    }
+
+    /* 2. Ortak Oyun Çerçevesi (Game Shell) */
+    .zc-kesif-topbar {
+      background: #FFFFFF;
+      border: 1px solid var(--zc-border);
+      border-radius: 18px;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      box-shadow: var(--zc-shadow);
+      margin-bottom: 20px;
+    }
+
+    .zc-kesif-title-group h1 {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', Georgia, serif;
+      font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+      color: var(--zc-espresso-dark);
+      line-height: 1.2;
+    }
+
+    .zc-kesif-title-group p {
+      margin: 4px 0 0;
+      font-size: 0.9rem;
+      color: var(--zc-muted);
+    }
+
+    .zc-kesif-stats {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .zc-kesif-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 800;
+      border: 1px solid var(--zc-border);
+      background: #FAF6F0;
+      color: var(--zc-espresso);
+    }
+
+    .zc-kesif-pill.xp {
+      background: linear-gradient(135deg, #3B281E, #2C221E);
+      border-color: var(--zc-gold);
+      color: #f3d285;
+    }
+
+    .zc-kesif-pill.done {
+      background: #ECFDF5;
+      border-color: #a7f3d0;
+      color: var(--zc-emerald);
+    }
+
+    /* Ana 2 Kolonlu Oyun Alanı (%65 Sahne / %35 Görev Paneli) */
+    .zc-kesif-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.85fr) minmax(300px, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .zc-kesif-stage {
+      background: var(--zc-stage);
+      border: 1.5px solid var(--zc-border);
+      border-radius: 22px;
+      padding: 24px;
+      min-height: 490px;
+      box-shadow: var(--zc-shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .zc-kesif-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .zc-kesif-card {
+      background: #FFFFFF;
+      border: 1px solid var(--zc-border);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: var(--zc-shadow);
+    }
+
+    .zc-kesif-card-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--zc-terracotta);
+      margin-bottom: 8px;
+    }
+
+    .zc-kesif-card h2 {
+      margin: 0 0 8px;
+      font-family: 'Plus Jakarta Sans', Georgia, serif;
+      font-size: 1.14rem;
+      color: var(--zc-espresso-dark);
+    }
+
+    .zc-kesif-card p {
+      margin: 0 0 14px;
+      font-size: 0.92rem;
+      color: var(--zc-muted);
+    }
+
+    .zc-kesif-status-box {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #FAF6F0;
+      border: 1px solid var(--zc-border);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--zc-espresso);
+    }
+
+    .zc-kesif-status-box.is-warn {
+      background: #FEF3EB;
+      border-color: var(--zc-terracotta);
+      color: #9a3412;
+    }
+
+    .zc-kesif-status-box.is-ok {
+      background: #ECFDF5;
+      border-color: var(--zc-emerald);
+      color: var(--zc-emerald);
+    }
+
+    /* Butonlar (Min 44px dokunma hedefi) */
+    .zc-kesif-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1.5px solid var(--zc-border);
+      background: #FFFFFF;
+      color: var(--zc-espresso-dark);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .zc-kesif-btn:hover {
+      border-color: var(--zc-gold);
+      transform: translateY(-1px);
+    }
+
+    .zc-kesif-btn.primary {
+      background: linear-gradient(135deg, var(--zc-espresso), var(--zc-espresso-dark));
+      border-color: var(--zc-gold);
+      color: #f3d285;
+    }
+
+    .zc-kesif-btn.gold {
+      background: linear-gradient(135deg, var(--zc-gold), #b9893d);
+      border-color: #b9893d;
+      color: #2C221E;
+    }
+
+    .zc-kesif-btn.hint {
+      background: #FEF3EB;
+      border-color: rgba(200, 90, 23, 0.45);
+      color: var(--zc-terracotta);
+      width: 100%;
+    }
+
+    .zc-kesif-hint-bubble {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #FFF8F1;
+      border: 1px dashed var(--zc-terracotta);
+      color: var(--zc-espresso-dark);
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .zc-kesif-hint-bubble.is-open {
+      display: block;
+      animation: zcFadeUp 0.22s ease;
+    }
+
+    /* Kutlama Kartı */
+    .zc-kesif-celebrate {
+      background: linear-gradient(135deg, #1E7550 0%, #145338 100%);
+      border: 1.5px solid #a7f3d0;
+      border-radius: 18px;
+      padding: 20px;
+      color: #FFFFFF;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 14px 30px rgba(30, 117, 80, 0.24);
+    }
+
+    .zc-kesif-celebrate.is-visible {
+      display: flex;
+      animation: zcFadeUp 0.28s ease;
+    }
+
+    .zc-kesif-celebrate strong {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.08rem;
+    }
+
+    /* 9-12. Sınıf Pedagojik Uyarı Ekranı */
+    .zc-kesif-highschool-notice {
+      background: #FFFFFF;
+      border: 1.5px solid var(--zc-gold);
+      border-radius: 22px;
+      padding: 42px 32px;
+      text-align: center;
+      max-width: 720px;
+      margin: 28px auto;
+      box-shadow: var(--zc-shadow);
+    }
+
+    .zc-kesif-highschool-notice h2 {
+      font-family: 'Plus Jakarta Sans', Georgia, serif;
+      color: var(--zc-espresso);
+      margin: 12px 0 10px;
+    }
+
+    .zc-kesif-highschool-notice p {
+      color: var(--zc-muted);
+      font-size: 1rem;
+      margin: 0 0 22px;
+    }
+
+    /* Oyun Özel Kontrolleri */
+    .zc-kesif-canvas {
+      width: 100%;
+      max-width: 520px;
+      height: 360px;
+      border-radius: 16px;
+      background: radial-gradient(circle at 50% 45%, #FFFFFF 0%, #FAF6F0 100%);
+      border: 1px solid var(--zc-border);
+      cursor: grab;
+      touch-action: none;
+      display: block;
+    }
+
+    .zc-kesif-canvas:active { cursor: grabbing; }
+
+    .zc-kesif-quiz-opts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .zc-kesif-slider-wrap {
+      width: 100%;
+      background: #FAF6F0;
+      border: 1px solid var(--zc-border);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+
+    .zc-kesif-slider-wrap label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .zc-kesif-slider-wrap input[type="range"] {
+      width: 100%;
+      accent-color: var(--zc-espresso);
+      height: 10px;
+      cursor: pointer;
+    }
+
+    /* Oyun 2: Gökdelen Asansörü */
+    .zc-elev-wrap {
+      display: grid;
+      grid-template-columns: 80px 240px;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .zc-elev-shaft {
+      position: relative;
+      background: #F4EDE4;
+      border: 2px solid var(--zc-espresso);
+      border-radius: 14px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .zc-elev-floor {
+      height: 40px;
+      border-radius: 8px;
+      border: 1px solid #dfd2c4;
+      background: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .zc-elev-floor.is-zero {
+      background: #FEF3EB;
+      border-color: var(--zc-gold);
+    }
+
+    .zc-elev-floor.is-current {
+      background: var(--zc-espresso);
+      color: #f3d285;
+      border-color: var(--zc-gold);
+      box-shadow: 0 4px 12px rgba(59, 40, 30, 0.22);
+    }
+
+    .zc-elev-axis {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px 0;
+      align-items: flex-end;
+      border-right: 3px solid var(--zc-espresso);
+      padding-right: 12px;
+    }
+
+    .zc-elev-tick {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--zc-muted);
+    }
+
+    .zc-elev-tick.is-current {
+      color: var(--zc-terracotta);
+      transform: scale(1.15);
+    }
+
+    @keyframes zcFadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 960px) {
+      .zc-kesif-grid { grid-template-columns: 1fr; }
+      .zc-kesif-stage { min-height: 400px; padding: 18px; }
+    }
+
+    @media (max-width: 600px) {
+      .zc-kesif-wrap { padding: 14px 14px 36px; }
+      .zc-elev-wrap { grid-template-columns: 60px 1fr; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="zc-kesif-wrap">
+    <!-- Üst Marka & Geliştirme / Sınıf Seçici Barı -->
+    <header class="zc-kesif-header">
+      <a class="zc-kesif-brand" href="index.html">
+        <img src="assets/brand-mark.png" alt="ZarifÇözüm">
+        <span>
+          <strong>ZarifÇözüm • İnteraktif Keşif Modu</strong>
+          <small>5–8. SINIF OYUNLAŞTIRILMIŞ MATEMATİK STÜDYOSU</small>
+        </span>
+      </a>
+
+      <div class="zc-kesif-grade-bar" id="zcGradeBar" role="tablist" aria-label="Sınıf Seçici">
+        <button type="button" class="zc-kesif-grade-btn is-active" data-grade="5">5. Sınıf</button>
+        <button type="button" class="zc-kesif-grade-btn" data-grade="6">6. Sınıf</button>
+        <button type="button" class="zc-kesif-grade-btn" data-grade="7">7. Sınıf</button>
+        <button type="button" class="zc-kesif-grade-btn" data-grade="8">8. Sınıf (LGS)</button>
+        <button type="button" class="zc-kesif-grade-btn is-highschool" data-grade="9">9–12. Sınıf</button>
+      </div>
+    </header>
+
+    <!-- 9-12. Sınıf Uyarı Alanı -->
+    <section id="zcHighSchoolNotice" class="zc-kesif-highschool-notice" hidden>
+      <div style="font-size:2.6rem;">🎓</div>
+      <h2>Bu Stüdyo Ortaokul (5–8. Sınıf) Öğrencilerine Özeldir</h2>
+      <p>İnteraktif Keşif Modu; 5, 6, 7 ve 8. sınıf Maarif Modeli ve LGS konularını somutlaştıran oyunlar içerir. 9–12. sınıf (Lise &amp; YKS) öğrencileri için <strong>Kazanım Testleri</strong>, <strong>AI Mentör</strong> ve <strong>Kişisel Çalışma Planı</strong> modüllerimiz aktiftir.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a class="zc-kesif-btn primary" href="ogrenci-paneli.html#kazanim-testi" style="text-decoration:none;">🎯 Lise Kazanım Testlerine Git →</a>
+        <button type="button" class="zc-kesif-btn" id="zcBackToMiddleBtn">← 5–8. Sınıf Oyunlarına Dön</button>
+      </div>
+    </section>
+
+    <!-- Ortaokul (5-8. Sınıf) Ortak Oyun Çerçevesi -->
+    <div id="zcGameShell">
+      <section class="zc-kesif-topbar">
+        <div class="zc-kesif-title-group">
+          <h1 id="zcGameTitle">5. Sınıf • 3D Küp Çevir &amp; Köşeleri Keşfet</h1>
+          <p id="zcGameSubtitle">Geometrik Cisimler — Küpü 360° döndürerek 8 köşenin tamamını bul.</p>
+        </div>
+        <div class="zc-kesif-stats">
+          <span class="zc-kesif-pill xp" id="zcXpPill">⚡ Keşif XP: 0</span>
+          <span class="zc-kesif-pill done" id="zcDonePill">🏅 Tamamlanan: 0/4</span>
+          <a class="zc-kesif-btn" href="ogrenci-paneli.html" style="text-decoration:none;">← Panele Dön</a>
+        </div>
+      </section>
+
+      <main class="zc-kesif-grid">
+        <!-- Sol / Ana Alan (%65): Etkileşimli Oyun Sahnesi -->
+        <section class="zc-kesif-stage" id="zcStageMount" aria-live="polite"></section>
+
+        <!-- Sağ / Görev Paneli (%35) -->
+        <aside class="zc-kesif-panel">
+          <div class="zc-kesif-card">
+            <span class="zc-kesif-card-kicker">🎯 Keşif Görevi</span>
+            <h2 id="zcMissionHeading">Görevin</h2>
+            <p id="zcMissionDesc"></p>
+            <div class="zc-kesif-status-box" id="zcMissionStatus">Hazır!</div>
+            <div id="zcMissionExtra" style="margin-top:14px;"></div>
+          </div>
+
+          <div class="zc-kesif-card">
+            <button type="button" class="zc-kesif-btn hint" id="zcHintToggleBtn">💡 Zarif AI İpucu Al</button>
+            <div class="zc-kesif-hint-bubble" id="zcHintBubble"></div>
+            <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+              <button type="button" class="zc-kesif-btn" id="zcResetGameBtn" style="flex:1;">↺ Oyunu Sıfırla</button>
+            </div>
+          </div>
+
+          <div class="zc-kesif-celebrate" id="zcCelebrateCard">
+            <strong>🎉 +25 Keşif XP Kazandın!</strong>
+            <span style="font-size:0.9rem;opacity:0.95;">Görevi başarıyla tamamladın ve matematiksel kuralı kendi gözünle keşfettin.</span>
+            <button type="button" class="zc-kesif-btn gold" id="zcNextGameBtn">Sonraki Oyuna Geç →</button>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      // =========================================================================
+      // 1. GENEL DURUM VE LOCALSTORAGE XP YÖNETİMİ
+      // =========================================================================
+      const STORAGE_KEY = 'zc_kesif_modu_v1';
+      const GAMES_META = {
+        5: {
+          id: 'g5_cube',
+          title: '5. Sınıf • 3D Küp Çevir & Köşeleri Keşfet',
+          subtitle: 'Geometrik Cisimler — Parmağınla veya farenle 360° döndür, 8 köşeyi işaretle.',
+          missionHeading: '8 Köşeyi Bul ve Doğrula',
+          missionDesc: 'Şeffaf 3B küpü çevirerek ön ve arka yüzdeki 8 köşenin tamamına tıkla, ardından doğrulama sorusunu yanıtla.',
+          hint: 'Küpün ön yüzünde 4 köşe görüyorsun. Küpü arkaya doğru çevirdiğinde tam simetrik 4 köşe daha olduğunu fark edeceksin!'
+        },
+        6: {
+          id: 'g6_elevator',
+          title: '6. Sınıf • Gökdelen Asansörü',
+          subtitle: 'Tam Sayılar & Dikey Sayı Doğrusu — Asansörle katlar arası mesafeyi keşfet.',
+          missionHeading: 'İki Aşamalı Asansör Görevi',
+          missionDesc: 'Görev 1: Asansörü −2 (Sığınak) katından +4 katına çıkar. Görev 2: +5\'ten −2\'ye inerken kaç kat hareket edildiğini bul.',
+          hint: 'Sıfır (Giriş) katını bir durak gibi düşün: +5\'ten 0\'a 5 kat, 0\'dan −2\'ye ise 2 kat daha inmen gerekir.'
+        },
+        7: {
+          id: 'g7_balance',
+          title: '7. Sınıf • İnteraktif Cebir Terazisi',
+          subtitle: 'Denklem Çözme — 2x + 3 = 9 terazisinin dengesini bozmadan x\'i yalnız bırak.',
+          missionHeading: 'Teraziyi Dengele ve x\'i Bul',
+          missionDesc: 'İki kefeden 3\'er birlik ağırlık çıkarıp ardından iki kefeyi yarıya bölerek x değerini ortaya çıkar.',
+          hint: 'Terazinin yatay dengesini bozmamak için sol kefeden kaç tane 1\'lik taş alıyorsan sağ kefeden de aynı sayıda taş almalısın.'
+        },
+        8: {
+          id: 'g8_skate',
+          title: '8. Sınıf (LGS) • Kaykay Rampası & Eğim Mühendisi',
+          subtitle: 'Doğrusal İlişkiler & Eğim — Hedef platforma tam iniş için %50 eğimli rampa tasarla.',
+          missionHeading: '%50 Eğimli Rampayı Tasarla',
+          missionDesc: 'Dikey yükseklik ve yatay uzunluk sürgüleriyle eğimi tam %50 (1/2) yap ve "Kaykayı Başlat" butonuna bas!',
+          hint: 'Eğim, dikey uzunluğun yatay uzunluğa bölümüdür. %50 eğim için yatay uzunluğu dikey uzunluğun tam 2 katı yapmalısın.'
+        }
+      };
+
+      let currentGrade = 5;
+      let completedGames = loadCompleted();
+      let cleanupCurrentGame = null;
+
+      function loadCompleted() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const arr = raw ? JSON.parse(raw) : [];
+          return new Set(Array.isArray(arr) ? arr : []);
+        } catch {
+          return new Set();
+        }
+      }
+
+      function saveCompleted() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...completedGames])); } catch {}
+      }
+
+      function updateHeaderStats() {
+        const count = completedGames.size;
+        document.getElementById('zcXpPill').textContent = `⚡ Keşif XP: ${count * 25}`;
+        document.getElementById('zcDonePill').textContent = `🏅 Tamamlanan: ${count}/4`;
+      }
+
+      function setStatus(text, type = '') {
+        const box = document.getElementById('zcMissionStatus');
+        box.textContent = text;
+        box.className = 'zc-kesif-status-box' + (type ? ' ' + type : '');
+      }
+
+      function completeCurrentGame() {
+        const meta = GAMES_META[currentGrade];
+        if (!meta) return;
+        if (!completedGames.has(meta.id)) {
+          completedGames.add(meta.id);
+          saveCompleted();
+          updateHeaderStats();
+        }
+        const card = document.getElementById('zcCelebrateCard');
+        card.classList.add('is-visible');
+        const nextBtn = document.getElementById('zcNextGameBtn');
+        nextBtn.textContent = currentGrade < 8 ? `${currentGrade + 1}. Sınıf Oyununa Geç →` : '5. Sınıf Oyununa Dön →';
+      }
+
+      // =========================================================================
+      // OYUN 1 (5. SINIF): 3D KÜP ÇEVİR & KÖŞELERİ KEŞFET (HTML5 CANVAS 3D)
+      // =========================================================================
+      function mountGame5Cube() {
+        const stage = document.getElementById('zcStageMount');
+        const extra = document.getElementById('zcMissionExtra');
+        stage.innerHTML = `
+          <canvas id="zcCubeCanvas" class="zc-kesif-canvas" width="520" height="360"></canvas>
+          <div style="font-size:0.86rem;color:var(--zc-muted);font-weight:600;">🖱️ Farenle veya parmağınla sürükleyerek küpü 360° çevir, köşe noktalarına dokun!</div>
+        `;
+        extra.innerHTML = '';
+
+        const canvas = document.getElementById('zcCubeCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Küpün 8 köşe koordinatı (birim küp: -1 ve +1)
+        const vertices = [
+          [-1,-1,-1], [1,-1,-1], [1,1,-1], [-1,1,-1],
+          [-1,-1, 1], [1,-1, 1], [1,1, 1], [-1,1, 1]
+        ];
+        // Küpün 12 ayrıtı
+        const edges = [
+          [0,1],[1,2],[2,3],[3,0],
+          [4,5],[5,6],[6,7],[7,4],
+          [0,4],[1,5],[2,6],[3,7]
+        ];
+
+        let rotX = 0.48;
+        let rotY = 0.62;
+        let foundSet = new Set();
+        let dragging = false;
+        let movedDist = 0;
+        let lastX = 0, lastY = 0;
+        let projected = [];
+        let quizShown = false;
+
+        /** 3B noktayı rotX ve rotY açılarına göre döndürüp 2B tuvale yansıtır */
+        function projectVertex(v) {
+          const [x0, y0, z0] = v;
+          const cy = Math.cos(rotY), sy = Math.sin(rotY);
+          const x1 = x0 * cy - z0 * sy;
+          const z1 = x0 * sy + z0 * cy;
+          const cx = Math.cos(rotX), sx = Math.sin(rotX);
+          const y2 = y0 * cx - z1 * sx;
+          const z2 = y0 * sx + z1 * cx;
+          const scale = 290 / (4.2 - z2);
+          return {
+            x: canvas.width / 2 + x1 * scale,
+            y: canvas.height / 2 + y2 * scale,
+            z: z2
+          };
+        }
+
+        function drawCube() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          projected = vertices.map(projectVertex);
+
+          // Ayrıtları çiz (arkadaki kenarlar kesikli, öndekiler net)
+          edges.forEach(([a, b]) => {
+            const p1 = projected[a], p2 = projected[b];
+            const avgZ = (p1.z + p2.z) / 2;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.lineWidth = avgZ > 0 ? 3 : 1.8;
+            ctx.strokeStyle = avgZ > 0 ? '#3B281E' : 'rgba(107, 94, 87, 0.42)';
+            ctx.setLineDash(avgZ > 0 ? [] : [6, 5]);
+            ctx.stroke();
+          });
+          ctx.setLineDash([]);
+
+          // Köşeleri derinliğe göre sıralayıp çiz
+          const order = projected.map((p, i) => ({ ...p, i })).sort((a, b) => a.z - b.z);
+          order.forEach(p => {
+            const isFound = foundSet.has(p.i);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, isFound ? 12 : 9.5, 0, Math.PI * 2);
+            ctx.fillStyle = isFound ? '#D4A359' : '#FFFFFF';
+            ctx.fill();
+            ctx.lineWidth = 2.6;
+            ctx.strokeStyle = isFound ? '#3B281E' : '#C85A17';
+            ctx.stroke();
+
+            if (isFound) {
+              ctx.fillStyle = '#2C221E';
+              ctx.font = 'bold 11px Inter, sans-serif';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('✓', p.x, p.y + 0.5);
+            }
+          });
+        }
+
+        function renderQuizStep() {
+          if (quizShown) return;
+          quizShown = true;
+          extra.innerHTML = `
+            <div style="font-size:0.9rem;font-weight:700;color:var(--zc-espresso-dark);margin-bottom:8px;">
+              ✅ Tüm köşeleri buldun! Son doğrulama: Küpün kaç köşesi ve kaç ayrıtı vardır?
+            </div>
+            <div class="zc-kesif-quiz-opts">
+              <button type="button" class="zc-kesif-btn" data-cube-ans="wrong">6 köşe ve 8 ayrıt</button>
+              <button type="button" class="zc-kesif-btn" data-cube-ans="correct">8 köşe ve 12 ayrıt</button>
+              <button type="button" class="zc-kesif-btn" data-cube-ans="wrong">8 köşe ve 10 ayrıt</button>
+            </div>
+          `;
+          extra.querySelectorAll('[data-cube-ans]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              if (btn.dataset.cubeAns === 'correct') {
+                setStatus('🎉 Doğru! Küpün 8 köşesi ve 12 ayrıtı vardır.', 'is-ok');
+                btn.style.background = '#1E7550';
+                btn.style.color = '#fff';
+                completeCurrentGame();
+              } else {
+                setStatus('Tekrar say: 4 üstte + 4 altta + 4 dikey ayrıt = kaç ayrıt?', 'is-warn');
+              }
+            });
+          });
+        }
+
+        function onPointerDown(e) {
+          dragging = true;
+          movedDist = 0;
+          lastX = e.clientX;
+          lastY = e.clientY;
+          canvas.setPointerCapture(e.pointerId);
+        }
+
+        function onPointerMove(e) {
+          if (!dragging) return;
+          const dx = e.clientX - lastX;
+          const dy = e.clientY - lastY;
+          movedDist += Math.hypot(dx, dy);
+          rotY += dx * 0.012;
+          rotX += dy * 0.012;
+          lastX = e.clientX;
+          lastY = e.clientY;
+          drawCube();
+        }
+
+        function onPointerUp(e) {
+          if (!dragging) return;
+          dragging = false;
+          if (movedDist < 8) {
+            const rect = canvas.getBoundingClientRect();
+            const px = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const py = (e.clientY - rect.top) * (canvas.height / rect.height);
+            let hitIdx = -1, bestDist = 26;
+            projected.forEach((p, i) => {
+              const d = Math.hypot(p.x - px, p.y - py);
+              if (d < bestDist) { bestDist = d; hitIdx = i; }
+            });
+            if (hitIdx !== -1) {
+              foundSet.add(hitIdx);
+              setStatus(`Bulunan Köşe: ${foundSet.size} / 8`, foundSet.size === 8 ? 'is-ok' : '');
+              drawCube();
+              if (foundSet.size === 8) renderQuizStep();
+            }
+          }
+        }
+
+        canvas.addEventListener('pointerdown', onPointerDown);
+        canvas.addEventListener('pointermove', onPointerMove);
+        canvas.addEventListener('pointerup', onPointerUp);
+
+        setStatus('Bulunan Köşe: 0 / 8 (Küpü çevir ve noktalara tıkla)');
+        drawCube();
+
+        return () => {
+          canvas.removeEventListener('pointerdown', onPointerDown);
+          canvas.removeEventListener('pointermove', onPointerMove);
+          canvas.removeEventListener('pointerup', onPointerUp);
+        };
+      }
+
+      // =========================================================================
+      // OYUN 2 (6. SINIF): GÖKDELEN ASANSÖRÜ (TAM SAYILAR & SAYI DOĞRUSU)
+      // =========================================================================
+      function mountGame6Elevator() {
+        const floors = [5, 4, 3, 2, 1, 0, -1, -2, -3];
+        const floorNames = { 5: 'Teras (+5)', 4: '4. Kat', 3: '3. Kat', 2: '2. Kat', 1: '1. Kat', 0: 'Giriş (0)', '-1': 'Bodrum 1', '-2': 'Sığınak (−2)', '-3': 'Otopark (−3)' };
+
+        let curFloor = -2;
+        let step1Done = false;
+        let movedFromNeg2 = 0;
+
+        const stage = document.getElementById('zcStageMount');
+        const extra = document.getElementById('zcMissionExtra');
+
+        function renderElevator() {
+          stage.innerHTML = `
+            <div class="zc-elev-wrap">
+              <div class="zc-elev-axis">
+                ${floors.map(f => `<span class="zc-elev-tick${f === curFloor ? ' is-current' : ''}">${f > 0 ? '+' + f : f}</span>`).join('')}
+              </div>
+              <div class="zc-elev-shaft" id="zcElevShaft">
+                ${floors.map(f => `
+                  <button type="button" class="zc-elev-floor${f === 0 ? ' is-zero' : ''}${f === curFloor ? ' is-current' : ''}" data-floor="${f}">
+                    <span>${floorNames[f]}</span>
+                    <span>${f === curFloor ? '🛗 Kabin' : ''}</span>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button type="button" class="zc-kesif-btn primary" id="zcElevUp">▲ 1 Kat Yukarı (+1)</button>
+              <button type="button" class="zc-kesif-btn primary" id="zcElevDown">▼ 1 Kat Aşağı (−1)</button>
+            </div>
+          `;
+
+          document.getElementById('zcElevUp').addEventListener('click', () => moveFloor(Math.min(5, curFloor + 1)));
+          document.getElementById('zcElevDown').addEventListener('click', () => moveFloor(Math.max(-3, curFloor - 1)));
+          document.getElementById('zcElevShaft').addEventListener('click', e => {
+            const btn = e.target.closest('[data-floor]');
+            if (btn) moveFloor(Number(btn.dataset.floor));
+          });
+        }
+
+        function moveFloor(target) {
+          const delta = Math.abs(target - curFloor);
+          curFloor = target;
+          if (!step1Done) {
+            movedFromNeg2 += delta;
+            if (curFloor === 4) {
+              step1Done = true;
+              setStatus('✓ Görev 1 Tamam! −2\'den +4\'e tam 6 kat çıktın. Şimdi Görev 2\'yi yanıtla!', 'is-ok');
+              renderStep2Quiz();
+            } else {
+              setStatus(`Şu an ${floorNames[curFloor]} katındasın. Hedef: +4. Kat`);
+            }
+          } else {
+            setStatus(`Asansör ${floorNames[curFloor]} katında. (+5 ile −2 arasındaki mesafeyi say!)`);
+          }
+          renderElevator();
+        }
+
+        function renderStep2Quiz() {
+          extra.innerHTML = `
+            <div style="font-size:0.9rem;font-weight:700;margin-bottom:8px;">
+              Görev 2: Asansör <strong>+5. kattan −2. kata</strong> indiğinde toplam kaç kat hareket etmiş olur?
+            </div>
+            <div class="zc-kesif-quiz-opts">
+              <button type="button" class="zc-kesif-btn" data-elev-ans="3">3 kat</button>
+              <button type="button" class="zc-kesif-btn" data-elev-ans="7">7 kat</button>
+              <button type="button" class="zc-kesif-btn" data-elev-ans="6">6 kat</button>
+            </div>
+          `;
+          extra.querySelectorAll('[data-elev-ans]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              if (btn.dataset.elevAns === '7') {
+                setStatus('🎉 Doğru! (+5) − (−2) = 7 kat hareket eder.', 'is-ok');
+                btn.style.background = '#1E7550';
+                btn.style.color = '#fff';
+                completeCurrentGame();
+              } else {
+                setStatus('İpucu: +5\'ten 0\'a 5 kat, 0\'dan −2\'ye kaç kat daha?', 'is-warn');
+              }
+            });
+          });
+        }
+
+        extra.innerHTML = '';
+        setStatus('Görev 1: Asansör −2 (Sığınak) katında. +4 katına çıkar!');
+        renderElevator();
+        return null;
+      }
+
+      // =========================================================================
+      // OYUN 3 (7. SINIF): İNTERAKTİF CEBİR TERAZİSİ (2x + 3 = 9)
+      // =========================================================================
+      function mountGame7Balance() {
+        const TRUE_X = 3; // 2(3) + 3 = 9
+        let leftX = 2, leftC = 3, rightC = 9;
+
+        const stage = document.getElementById('zcStageMount');
+        const extra = document.getElementById('zcMissionExtra');
+
+        function renderBalance() {
+          const leftW = leftX * TRUE_X + leftC;
+          const rightW = rightC;
+          const diff = rightW - leftW;
+          const tiltDeg = Math.max(-16, Math.min(16, diff * 3.2));
+          const isBalanced = diff === 0;
+          const isSolved = isBalanced && leftX === 1 && leftC === 0 && rightC === 3;
+
+          const fmtLeft = (leftX > 0 ? (leftX === 1 ? 'x' : `${leftX}x`) : '') + (leftC > 0 ? (leftX > 0 ? ` + ${leftC}` : `${leftC}`) : '');
+
+          stage.innerHTML = `
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.55rem;font-weight:800;color:${isBalanced ? '#1E7550' : '#C85A17'};">
+              ${fmtLeft || '0'} ${isBalanced ? '=' : (leftW > rightW ? '>' : '<')} ${rightC}
+            </div>
+            <svg viewBox="0 0 380 220" width="100%" style="max-width:440px;" aria-label="Canlı Cebir Terazisi">
+              <path d="M 155 205 L 225 205 L 190 150 Z" fill="#3B281E"/>
+              <rect x="185" y="54" width="10" height="100" rx="5" fill="#6B5E57"/>
+              <circle cx="190" cy="58" r="10" fill="${isBalanced ? '#1E7550' : '#C85A17'}"/>
+              <g transform="rotate(${tiltDeg} 190 58)" style="transition:transform 0.35s cubic-bezier(.22,1,.36,1);">
+                <rect x="48" y="53" width="284" height="10" rx="5" fill="${isBalanced ? '#1E7550' : '#C85A17'}"/>
+                <!-- Sol Kefe -->
+                <line x1="80" y1="63" x2="80" y2="115" stroke="#6B5E57" stroke-width="2.5"/>
+                <rect x="30" y="115" width="100" height="12" rx="6" fill="#D4A359"/>
+                <text x="80" y="104" text-anchor="middle" font-size="16" font-weight="800" fill="#2C221E">${fmtLeft || '0'}</text>
+                <!-- Sağ Kefe -->
+                <line x1="300" y1="63" x2="300" y2="115" stroke="#6B5E57" stroke-width="2.5"/>
+                <rect x="250" y="115" width="100" height="12" rx="6" fill="#D4A359"/>
+                <text x="300" y="104" text-anchor="middle" font-size="16" font-weight="800" fill="#2C221E">${rightC}</text>
+              </g>
+            </svg>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+              <button type="button" class="zc-kesif-btn" id="zcBalLeftSub">Sol Kefeden 1 Çıkar (−1)</button>
+              <button type="button" class="zc-kesif-btn" id="zcBalRightSub">Sağ Kefeden 1 Çıkar (−1)</button>
+              <button type="button" class="zc-kesif-btn primary" id="zcBalDiv2">➗ İki Kefeyi Yarıya Böl (÷2)</button>
+            </div>
+          `;
+
+          if (isSolved) {
+            setStatus('🎉 Mükemmel! x = 3 yalnız kaldı ve terazi tam dengede!', 'is-ok');
+            completeCurrentGame();
+          } else if (!isBalanced) {
+            setStatus('⚠️ Denge bozuldu! Eşitliği korumak için diğer kefeden de aynı işlemi yapmalısın.', 'is-warn');
+          } else {
+            setStatus('✓ Terazi yatay dengede. 1\'lik ağırlıkları iki kefeden eşit çıkar, sonra 2\'ye böl.');
+          }
+
+          document.getElementById('zcBalLeftSub').addEventListener('click', () => {
+            if (leftC > 0) leftC--;
+            renderBalance();
+          });
+          document.getElementById('zcBalRightSub').addEventListener('click', () => {
+            if (rightC > 0) rightC--;
+            renderBalance();
+          });
+          document.getElementById('zcBalDiv2').addEventListener('click', () => {
+            if (!isBalanced) {
+              setStatus('⚠️ Önce iki kefeyi eşitleyip dengeye getir!', 'is-warn');
+              return;
+            }
+            if (leftX % 2 === 0 && leftC % 2 === 0 && rightC % 2 === 0) {
+              leftX /= 2; leftC /= 2; rightC /= 2;
+              renderBalance();
+            } else {
+              setStatus('İki kefeyi yarıya bölebilmek için önce tek sayılı 1\'lik taşları temizle!', 'is-warn');
+            }
+          });
+        }
+
+        extra.innerHTML = '';
+        renderBalance();
+        return null;
+      }
+
+      // =========================================================================
+      // OYUN 4 (8. SINIF - LGS): KAYKAY RAMPASI & EĞİM MÜHENDİSİ
+      // =========================================================================
+      function mountGame8Skate() {
+        let heightM = 2; // 1 - 8 m
+        let lengthM = 6; // 2 - 10 m
+        let animState = 'idle'; // 'idle' | 'success' | 'steep' | 'flat'
+        let skaterX = 46, skaterY = 232;
+
+        const stage = document.getElementById('zcStageMount');
+        const extra = document.getElementById('zcMissionExtra');
+
+        function renderSkate() {
+          const slope = heightM / lengthM;
+          const pct = Math.round(slope * 100);
+          const baseX = 46, baseY = 240;
+          const drawW = lengthM * 26;
+          const drawH = heightM * 20;
+          const rampTopX = baseX + drawW;
+          const rampTopY = baseY - drawH;
+
+          // Hedef platform: rampanın hemen önünde ideal %50 yüksekliğinde
+          const targetX = rampTopX + 24;
+          const targetY = baseY - Math.round(lengthM * 0.5 * 20);
+
+          if (animState === 'idle') {
+            skaterX = baseX + 12;
+            skaterY = baseY - 12;
+          }
+
+          stage.innerHTML = `
+            <svg viewBox="0 0 460 270" width="100%" style="max-width:520px;background:#FAF6F0;border-radius:16px;border:1px solid #E6DCD2;" aria-label="Kaykay Rampası">
+              <!-- Zemin -->
+              <line x1="16" y1="${baseY}" x2="444" y2="${baseY}" stroke="#3B281E" stroke-width="3"/>
+              <!-- Ayarlanabilir Dik Üçgen Rampa -->
+              <polygon points="${baseX},${baseY} ${rampTopX},${baseY} ${rampTopX},${rampTopY}" fill="rgba(212,163,89,0.28)" stroke="#3B281E" stroke-width="3" stroke-linejoin="round"/>
+              <!-- Hedef Platform (%50 ideal iniş noktası) -->
+              <rect x="${Math.min(350, targetX)}" y="${Math.max(40, targetY)}" width="84" height="14" rx="6" fill="#1E7550"/>
+              <text x="${Math.min(392, targetX + 42)}" y="${Math.max(32, targetY - 6)}" text-anchor="middle" font-size="11" font-weight="800" fill="#1E7550">🎯 HEDEF (%50)</text>
+              <!-- Etiketler -->
+              <text x="${baseX + drawW / 2}" y="${baseY + 20}" text-anchor="middle" font-size="12" font-weight="700" fill="#2C221E">Yatay: ${lengthM} m</text>
+              <text x="${rampTopX - 6}" y="${baseY - drawH / 2}" text-anchor="end" font-size="12" font-weight="700" fill="#C85A17">Dikey: ${heightM} m</text>
+              <!-- Kaykaycı -->
+              <g id="zcSkaterGroup" transform="translate(${skaterX}, ${skaterY})" style="transition:transform 0.75s cubic-bezier(.22,1,.36,1);">
+                <text x="0" y="0" font-size="26" text-anchor="middle">🛹</text>
+              </g>
+            </svg>
+
+            <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+              <span class="zc-kesif-pill">Eğim (m = D/Y): <strong>${heightM} / ${lengthM}</strong></span>
+              <span class="zc-kesif-pill" style="color:${pct === 50 ? '#1E7550' : '#C85A17'};">Yüzde Eğim: <strong>%${pct}</strong></span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%;">
+              <div class="zc-kesif-slider-wrap">
+                <label><span>Dikey Yükseklik</span><strong>${heightM} m</strong></label>
+                <input type="range" id="zcSkateH" min="1" max="8" value="${heightM}">
+              </div>
+              <div class="zc-kesif-slider-wrap">
+                <label><span>Yatay Uzunluk</span><strong>${lengthM} m</strong></label>
+                <input type="range" id="zcSkateL" min="2" max="10" value="${lengthM}">
+              </div>
+            </div>
+
+            <button type="button" class="zc-kesif-btn gold" id="zcLaunchSkateBtn" style="min-width:220px;">🛹 Kaykayı Başlat!</button>
+          `;
+
+          document.getElementById('zcSkateH').addEventListener('input', e => {
+            heightM = Number(e.target.value);
+            animState = 'idle';
+            renderSkate();
+          });
+          document.getElementById('zcSkateL').addEventListener('input', e => {
+            lengthM = Number(e.target.value);
+            animState = 'idle';
+            renderSkate();
+          });
+          document.getElementById('zcLaunchSkateBtn').addEventListener('click', () => {
+            const skater = document.getElementById('zcSkaterGroup');
+            if (!skater) return;
+            if (Math.abs(slope - 0.5) < 0.001) {
+              animState = 'success';
+              skater.setAttribute('transform', `translate(${Math.min(392, targetX + 42)}, ${Math.max(36, targetY - 6)})`);
+              setStatus(`🎉 Muhteşem İniş! ${heightM}/${lengthM} = %50 eğimle hedef platforma tam oturdun!`, 'is-ok');
+              completeCurrentGame();
+            } else if (slope > 0.5) {
+              animState = 'steep';
+              skater.setAttribute('transform', `translate(${rampTopX - 18}, ${rampTopY + 14})`);
+              setStatus(`⚠️ Rampa çok dik (%${pct})! Kaykaycı tepeye çıkamadan geri kaydı. Yatayı artır veya dikeyi azalt.`, 'is-warn');
+            } else {
+              animState = 'flat';
+              skater.setAttribute('transform', `translate(${Math.min(370, targetX + 20)}, ${baseY - 10})`);
+              setStatus(`⚠️ Eğim çok düşük (%${pct})! Kaykaycı hedef platformun altında kaldı. %50 eğime ulaş!`, 'is-warn');
+            }
+          });
+        }
+
+        extra.innerHTML = '';
+        setStatus('Rampayı %50 eğime (1/2) ayarla ve Kaykayı Başlat\'a bas!');
+        renderSkate();
+        return null;
+      }
+
+      // =========================================================================
+      // 2. OYUN YÜKLEYİCİ & SINIF KOŞULU KONTROLÜ
+      // =========================================================================
+      function loadGradeGame(grade) {
+        if (typeof cleanupCurrentGame === 'function') {
+          cleanupCurrentGame();
+          cleanupCurrentGame = null;
+        }
+
+        document.querySelectorAll('.zc-kesif-grade-btn').forEach(b => {
+          b.classList.toggle('is-active', Number(b.dataset.grade) === Number(grade));
+        });
+
+        const isMiddle = [5, 6, 7, 8].includes(Number(grade));
+        document.getElementById('zcHighSchoolNotice').hidden = isMiddle;
+        document.getElementById('zcGameShell').hidden = !isMiddle;
+        if (!isMiddle) return;
+
+        currentGrade = Number(grade);
+        const meta = GAMES_META[currentGrade];
+        document.getElementById('zcGameTitle').textContent = meta.title;
+        document.getElementById('zcGameSubtitle').textContent = meta.subtitle;
+        document.getElementById('zcMissionHeading').textContent = meta.missionHeading;
+        document.getElementById('zcMissionDesc').textContent = meta.missionDesc;
+        document.getElementById('zcHintBubble').textContent = '💡 ' + meta.hint;
+        document.getElementById('zcHintBubble').classList.remove('is-open');
+        document.getElementById('zcCelebrateCard').classList.toggle('is-visible', completedGames.has(meta.id));
+
+        if (currentGrade === 5) cleanupCurrentGame = mountGame5Cube();
+        else if (currentGrade === 6) cleanupCurrentGame = mountGame6Elevator();
+        else if (currentGrade === 7) cleanupCurrentGame = mountGame7Balance();
+        else if (currentGrade === 8) cleanupCurrentGame = mountGame8Skate();
+      }
+
+      // Olay Dinleyicileri
+      document.getElementById('zcGradeBar').addEventListener('click', e => {
+        const btn = e.target.closest('.zc-kesif-grade-btn');
+        if (btn) loadGradeGame(Number(btn.dataset.grade));
+      });
+
+      document.getElementById('zcBackToMiddleBtn').addEventListener('click', () => loadGradeGame(5));
+
+      document.getElementById('zcHintToggleBtn').addEventListener('click', () => {
+        document.getElementById('zcHintBubble').classList.toggle('is-open');
+      });
+
+      document.getElementById('zcResetGameBtn').addEventListener('click', () => loadGradeGame(currentGrade));
+
+      document.getElementById('zcNextGameBtn').addEventListener('click', () => {
+        loadGradeGame(currentGrade < 8 ? currentGrade + 1 : 5);
+      });
+
+      // Başlatma (?sinif= parametresini destekler)
+      const qGrade = Number(new URLSearchParams(window.location.search).get('sinif'));
+      updateHeaderStats();
+      loadGradeGame([5, 6, 7, 8, 9].includes(qGrade) ? qGrade : 5);
+    })();
+  </script>
+</body>
+</html>
