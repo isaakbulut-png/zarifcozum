@@ -1,0 +1,247 @@
+/* ZarifÇözüm Anasayfa — Geniş Ekran & Mobil Ölçek, Akışkan Tipografi ve Ferahlık Sistemi */
+
+/* 1. KÖK TİPOGRAFİ & KONTEYNER ÖLÇEĞİ */
+html {
+  font-size: 16px !important;
+}
+
+body.homepage {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.homepage .wrap,
+.homepage .zc-nav-inner,
+.homepage .gs-container,
+.homepage .bv-container {
+  max-width: 1380px !important;
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 20px !important;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .homepage .wrap,
+  .homepage .zc-nav-inner,
+  .homepage .gs-container,
+  .homepage .bv-container {
+    padding-inline: 32px !important;
+  }
+}
+
+@media (min-width: 1100px) {
+  .homepage .wrap,
+  .homepage .zc-nav-inner,
+  .homepage .gs-container,
+  .homepage .bv-container {
+    padding-inline: 48px !important;
+  }
+}
+
+/* 2. AKIŞKAN TİPOGRAFİ ÖLÇEĞİ (12px altı metin bırakma) */
+.homepage h1 {
+  font-size: clamp(2.25rem, 3.8vw, 3.5rem) !important;
+  line-height: 1.2 !important;
+}
+
+.homepage h2,
+.homepage .gs-heading,
+.homepage .bv-head h2 {
+  font-size: clamp(1.75rem, 2.8vw, 2.5rem) !important;
+  line-height: 1.2 !important;
+}
+
+.homepage h3,
+.homepage h4 {
+  line-height: 1.25;
+}
+
+.homepage p,
+.homepage .lead,
+.homepage .gs-desc,
+.homepage .bv-head p,
+.homepage .bv-card p,
+.homepage .gs-lab-copy p,
+.homepage .gs-footnote {
+  font-size: max(1rem, 16px) !important;
+  line-height: 1.6 !important;
+}
+
+/* Kart içi yardımcı metinler, rozetler ve alt etiketler en az 14px (0.875rem) */
+.homepage small,
+.homepage .small,
+.homepage .chip,
+.homepage .gs-badge,
+.homepage .gs-float-card,
+.homepage .gs-lab-tag,
+.homepage .gs-svg-sub,
+.homepage .bv-kicker,
+.homepage .bv-tag,
+.homepage .bvs-bubble,
+.homepage .bvs-pill,
+.homepage .bvs-opt-row,
+.homepage .zc-nav-brand-sub,
+.homepage .zc-role-copy small,
+.homepage .hero-footnote {
+  font-size: 0.875rem !important;
+  line-height: 1.45 !important;
+}
+
+.homepage .gs-feature-item {
+  font-size: 1rem !important;
+  line-height: 1.5;
+}
+
+/* 3. BÖLÜM BOŞLUKLARI & KART FERAHLIĞI */
+.homepage .home-section,
+.homepage .gs-section,
+.homepage .bv-section {
+  padding-block: 64px !important;
+}
+
+.homepage .hero {
+  padding-block: 48px 64px !important;
+}
+
+@media (min-width: 768px) {
+  .homepage .home-section,
+  .homepage .gs-section,
+  .homepage .bv-section {
+    padding-block: 96px !important;
+  }
+  .homepage .hero {
+    padding-block: 64px 88px !important;
+  }
+}
+
+.homepage .section-head,
+.homepage .bv-head,
+.homepage .gs-heading-wrap {
+  margin-bottom: 36px !important;
+}
+
+/* Kart iç boşlukları (28px - 32px) ve grid gap'leri (24px - 32px) */
+.homepage .gs-showcase,
+.homepage .bv-card,
+.homepage .gs-lab-banner,
+.homepage .step,
+.homepage .subscription-plan-card,
+.homepage .ecosystem-card,
+.homepage .compare-card,
+.homepage .three-step-card {
+  padding: 28px 32px !important;
+}
+
+.homepage .bv-grid,
+.homepage .gs-lab-strip,
+.homepage .three-step-grid,
+.homepage .ecosystem-grid,
+.homepage .compare-grid,
+.homepage .subscription-pricing-grid,
+.homepage .pricing {
+  gap: 28px !important;
+}
+
+.homepage .gs-showcase-grid {
+  gap: 32px !important;
+}
+
+/* Canlı panel demoları ve SVG alanlarına nefes alma alanı */
+.homepage .bv-snippet {
+  padding: 20px 22px !important;
+  gap: 12px !important;
+  min-height: 156px !important;
+}
+
+.homepage .gs-visual-stage {
+  min-height: 440px !important;
+  padding: 20px 10px !important;
+}
+
+.homepage .gs-visual-frame {
+  max-width: 600px !important;
+}
+
+.homepage .smart-panel-mockup,
+.homepage .panel-showcase-window,
+.homepage .home-carousel {
+  padding: 24px !important;
+}
+
+.homepage .smart-panel-mockup svg,
+.homepage .bv-snippet svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 4. MOBİL & MASAÜSTÜ RESPONSİVE UYUMLULUK VE 44px DOKUNMA HEDEFLERİ */
+.homepage .btn,
+.homepage .gs-tab,
+.homepage .gs-btn-primary,
+.homepage .gs-btn-secondary,
+.homepage .gs-lab-cta,
+.homepage .bv-tab,
+.homepage .bv-inspect-btn,
+.homepage .bv-modal-cta,
+.homepage .panel-tab,
+.homepage .zc-login-trigger,
+.homepage .zc-cta-register,
+.homepage .subscription-plan-cta {
+  min-height: 44px !important;
+  font-size: 0.95rem !important;
+}
+
+.homepage .gs-tabbar,
+.homepage .bv-tabs,
+.homepage .smart-panel-tabs {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 8px;
+}
+
+.homepage .gs-tabbar::-webkit-scrollbar,
+.homepage .bv-tabs::-webkit-scrollbar,
+.homepage .smart-panel-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .homepage .gs-showcase,
+  .homepage .bv-card,
+  .homepage .gs-lab-banner,
+  .homepage .step,
+  .homepage .subscription-plan-card,
+  .homepage .ecosystem-card,
+  .homepage .compare-card,
+  .homepage .three-step-card {
+    padding: 24px 20px !important;
+  }
+
+  .homepage .gs-showcase-grid,
+  .homepage .bv-grid,
+  .homepage .bv-card.is-wide,
+  .homepage .gs-lab-strip,
+  .homepage .three-step-grid,
+  .homepage .ecosystem-grid,
+  .homepage .compare-grid,
+  .homepage .subscription-pricing-grid,
+  .homepage .pricing,
+  .homepage .steps,
+  .homepage .hero {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+
+  .homepage .gs-visual-stage {
+    min-height: 300px !important;
+  }
+
+  .homepage .bv-tabs,
+  .homepage .smart-panel-tabs {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+  }
+}
