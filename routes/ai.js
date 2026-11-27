@@ -1057,65 +1057,8 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       source: 'ai',
       createdBy: req.session.user.id
     });
-
-    // 3. Kitle Kaynaklı Havuz Büyütme: Üretilen soruları tek tek onaylı soru olarak havuza ekle
-    for (const q of preparedQuestions) {
-      try {
-        await ContentLibrary.create({
-          title: `${resolvedSub} Sorusu (${grade}. Sınıf)`,
-          type: 'soru',
-          ders: 'matematik',
-          grade,
-          topic: resolvedSub,
-          difficulty: String(difficulty || 'orta').toLowerCase(),
-          content: {
-            text: q.text,
-            options: q.options || {},
-            answer: q.answer || null,
-            explanation: q.explanation || '',
-            solution: q.solution || '',
-            rubric: q.rubric || [],
-            svg: q.svg || ''
-          },
-          metadata: {
-            kazanim: resolvedSub,
-            outcomeCode: q.outcomeCode || outcomeCode,
-            unitTopic: resolvedUnit,
-            source: 'ai_crowdsourced',
-            teacherRole: req.session.user?.ogretmenTipi || 'standart_ogretmen'
-          },
-          status: 'approved',
-          source: 'ai_crowdsourced',
-          createdBy: req.session.user.id
-        });
-      } catch (crowdErr) {
-        // Mükerrer veya sessiz geçiş
-      }
-    }
-
-    // Merkezi İçerik Havuzuna taslak test kaydı
-    await ContentLibrary.create({
-      title: quiz.title,
-      type: 'ai_test',
-      ders: 'matematik',
-      grade,
-      topic: resolvedSub,
-      difficulty: String(difficulty || 'orta').toLowerCase(),
-      content: {
-        description: quiz.description,
-        questions: preparedQuestions,
-        draftId: draftRecord._id
-      },
-      metadata: {
-        questionCount: preparedQuestions.length,
-        unitTopic: resolvedUnit,
-        subTopic: resolvedSub,
-        draftId: draftRecord._id
-      },
-      status: 'draft',
-      source: 'ai',
-      createdBy: req.session.user.id
-    });
+    // Not: Üretilen sorular öğretmen inceleyip "Soru Bankasına Aktar" veya "Yayınla"
+    // diyene kadar ContentLibrary / Soru havuzuna yazılmaz (veritabanı şişkinliğini önler).
   } catch (draftErr) {
     console.warn('[AI] Otomatik taslak kaydı hatası:', draftErr.message);
   }
@@ -1223,7 +1166,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     }
   });
 
-  // Tüm Taslakları Toplu Sil
+  // Tüm Taslakları Toplu Sil (Bağlı onaysız ContentLibrary taslaklarıyla birlikte)
   router.delete('/questions/drafts', requireRole('teacher', 'admin'), async (req, res) => {
     try {
       const uid = String(req.session.user.id || req.session.user._id || '');
@@ -1231,6 +1174,13 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         ? {}
         : { createdBy: { $in: [uid, req.session.user.id, req.session.user._id].filter(Boolean) } };
       const result = await AiQuestionDraft.deleteMany(filter);
+      await ContentLibrary.deleteMany({
+        ...filter,
+        $or: [
+          { source: 'ai_crowdsourced' },
+          { type: 'ai_test', status: 'draft', source: 'ai' }
+        ]
+      });
       res.json({ success: true, deletedCount: result.deletedCount || 0 });
     } catch (err) {
       res.status(500).json({ mesaj: 'Taslaklar silinemedi.' });
@@ -1424,13 +1374,17 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     }
   });
 
-  // Taslak Sil
-  router.delete('/questions/drafts/:id', requireRole('teacher'), async (req, res) => {
+  // Taslak Sil (Bağlı onaysız ContentLibrary kaydı varsa onu da siler)
+  router.delete('/questions/drafts/:id', requireRole('teacher', 'admin'), async (req, res) => {
     try {
       if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz taslak ID.' });
       const del = await AiQuestionDraft.findByIdAndDelete(req.params.id);
       if (!del) return res.status(404).json({ mesaj: 'Taslak bulunamadı.' });
-      res.json({ mesaj: 'Taslak silindi.' });
+      await ContentLibrary.deleteMany({
+        $or: [{ 'content.draftId': del._id }, { 'metadata.draftId': del._id }],
+        status: 'draft'
+      });
+      res.json({ success: true, mesaj: 'Taslak kalıcı olarak silindi.' });
     } catch (err) {
       res.status(500).json({ mesaj: 'Taslak silinemedi.' });
     }
