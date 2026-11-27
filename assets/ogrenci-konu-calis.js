@@ -55,9 +55,43 @@
       .kc-modal-backdrop{padding:8px !important;background:rgba(15,23,42,0.78) !important;backdrop-filter:blur(5px) !important;align-items:stretch !important;justify-content:stretch !important}
       .kc-modal-sheet{width:calc(100vw - 16px) !important;max-width:none !important;height:calc(100vh - 16px) !important;max-height:calc(100vh - 16px) !important;margin:0 auto !important;border-radius:14px !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;background:#FAF8F5 !important;border:2px solid #E2DDD5 !important;box-shadow:0 24px 60px rgba(15,23,42,0.34) !important;transition:all .18s ease}
       .kc-modal-sheet.is-fullscreen{width:100vw !important;max-width:100vw !important;height:100vh !important;max-height:100vh !important;border-radius:0 !important}
-      .kc-modal-head{padding:14px 28px !important;background:#FFFFFF !important;border-bottom:1.5px solid #E2DDD5 !important;flex-shrink:0 !important}
-      .kc-modal-head [data-reader-mode]{display:none !important}
+      .kc-modal-head{padding:14px 28px !important;background:#0F172A !important;color:#FFFFFF !important;border-bottom:2px solid #D97706 !important;flex-shrink:0 !important}
       .kc-modal-body{flex:1 1 auto !important;overflow-y:auto !important;padding:22px 32px !important;max-height:none !important;background:#FAF8F5 !important}
+      .kc-block-body{font-size:1.04rem !important;line-height:1.74 !important}
+      .kc-hap-grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr)) !important;gap:16px !important}
+      .kc-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;margin-top:12px}
+      .kc-gcard{perspective:1000px;min-height:230px;cursor:pointer}
+      .kc-gcard-inner{position:relative;width:100%;height:100%;min-height:230px;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.22,1,.36,1)}
+      .kc-gcard.flipped .kc-gcard-inner{transform:rotateY(180deg)}
+      .kc-gcard-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;box-shadow:0 8px 22px rgba(15,23,42,0.08)}
+      .kc-gcard-front{background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);color:#FFFFFF;border:2px solid #0F172A}
+      .kc-gcard-back{background:linear-gradient(135deg,#FFFFFF 0%,#FFFBEB 100%);color:#0F172A;border:2px solid #D97706;transform:rotateY(180deg)}
+      .kc-gcard.mastered .kc-gcard-front{border-color:#059669;box-shadow:0 0 0 2px rgba(5,150,105,0.25)}
+      .ks-disc-2col{display:grid;grid-template-columns:58fr 42fr;gap:18px;align-items:start}
+      .ks-mission-box{background:#FFFFFF;border:1.5px solid #E2DDD5;border-radius:16px;padding:20px}
+      .ks-mission-head{font-size:1.05rem;font-weight:800;color:#0F172A;margin-bottom:6px}
+      .ks-mission-item{padding:11px 14px;border-radius:11px;background:#FAF8F5;border:1.5px solid #E2DDD5;font-size:0.94rem;font-weight:700;color:#334155;display:flex;justify-content:space-between;align-items:center;gap:8px}
+      .ks-mission-item.done{background:#ECFDF5;border-color:#059669;color:#065F46}
+      .ks-mission-win{margin-top:12px;padding:12px 14px;border-radius:11px;background:#FEF3C7;border:1.5px solid #D97706;color:#92400E;font-weight:800;text-align:center}
+      .ks-m-lg{display:flex;align-items:center;gap:12px;min-height:74px;padding:14px 18px !important;font-size:1.08rem !important;line-height:1.45 !important}
+      .ks-m-num{width:30px;height:30px;border-radius:9px;background:#0F172A;color:#FFFFFF;display:grid;place-items:center;font-size:0.88rem;font-weight:800;flex-shrink:0}
+      .ks-mascot-stage{margin-top:20px;padding:18px 22px;border-radius:16px;background:linear-gradient(135deg,#FAF8F5 0%,#FFFBEB 100%);border:2px solid #E2DDD5;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+      .ks-mascot-stage.is-celebrating{border-color:#059669;background:linear-gradient(135deg,#ECFDF5 0%,#FEF3C7 100%)}
+      .ks-mascot-speech{flex:1;min-width:220px}
+      .ks-mascot-speech strong{display:block;font-size:1.12rem;color:#0F172A;margin-bottom:4px}
+      .ks-mascot-speech p{margin:0;font-size:0.98rem;color:#334155;line-height:1.55}
+      .ks-mascot-clap .ks-arm-l,.ks-mascot-jump .ks-arm-l{animation:ksClapL .35s ease-in-out infinite alternate;transform-origin:44px 92px}
+      .ks-mascot-clap .ks-arm-r,.ks-mascot-jump .ks-arm-r{animation:ksClapR .35s ease-in-out infinite alternate;transform-origin:96px 92px}
+      .ks-mascot-jump{animation:ksJump .55s ease-in-out infinite alternate}
+      .ks-star-pop{animation:ksStar .6s ease-in-out infinite alternate}
+      @keyframes ksClapL{from{transform:rotate(-10deg)}to{transform:rotate(14deg)}}
+      @keyframes ksClapR{from{transform:rotate(10deg)}to{transform:rotate(-14deg)}}
+      @keyframes ksJump{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+      @keyframes ksStar{from{opacity:.5;transform:scale(.9)}to{opacity:1;transform:scale(1.15)}}
+      .ks-confetti-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+      .ks-confetti-piece{position:absolute;top:-14px;width:10px;height:14px;border-radius:3px;animation:ksConfettiFall 2.2s linear infinite}
+      @keyframes ksConfettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(420px) rotate(360deg);opacity:0}}
+      @media(max-width:900px){.ks-disc-2col{grid-template-columns:1fr}}
       .kc-modal-foot{padding:12px 28px !important;background:#FFFFFF !important;border-top:1.5px solid #E2DDD5 !important;flex-shrink:0 !important}
       .kc-station-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;padding:12px 14px;background:#FFFFFF;border:1.5px solid #E2DDD5;border-radius:14px;align-items:center}
       .kc-station-btn{padding:8px 14px;border-radius:10px;border:1.5px solid #E2DDD5;background:#FFFFFF;color:#0F172A;font-size:12.5px;font-weight:800;cursor:pointer;transition:transform .14s ease,background .14s ease}
@@ -810,7 +844,7 @@
                   <span class="kc-hap-num" style="background:${th.bg};">${num}</span>
                   <span class="kc-hap-cat">${th.icon} ${th.cat}</span>
                 </div>
-                <div style="color:#2c1a0e;font-size:0.95rem;line-height:1.68;">${formatInlineMath(n)}</div>
+                <div style="color:#0F172A;font-size:1.04rem;line-height:1.72;">${formatInlineMath(n)}</div>
               </div>
             `;
           }).join('')}
@@ -826,29 +860,83 @@
         return;
       }
 
-      const pct = readerState.totalCards > 0 ? Math.round((readerState.masteredCount / readerState.totalCards) * 100) : 0;
+      if (!readerState.gridMastered) readerState.gridMastered = new Set();
+      const learnedCount = readerState.gridMastered.size;
+      const pct = Math.round((learnedCount / allCards.length) * 100);
 
-      if (!readerState.deckQueue.length) {
-        playFeedbackTone('celebrate');
-        body.innerHTML = `
-          <div style="max-width:520px;margin:20px auto;text-align:center;background:#fff;border:2px solid #059669;border-radius:20px;padding:34px 24px;box-shadow:0 12px 30px rgba(5,150,105,0.12);">
-            <div style="font-size:3rem;margin-bottom:8px;">🎉🏆</div>
-            <span style="display:inline-block;padding:4px 12px;border-radius:999px;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;font-size:0.8rem;font-weight:800;margin-bottom:10px;">+50 XP · BİLGİ KARTI USTASI ROZETİ</span>
-            <h3 style="margin:0 0 8px;font-family:Georgia,serif;color:#065f46;font-size:1.35rem;">Tebrikler! Tüm Kartları Öğrendin</h3>
-            <p style="margin:0 0 18px;color:#6a5242;font-size:0.94rem;"><strong>${readerState.totalCards} / ${readerState.totalCards}</strong> bilgi kartını başarıyla tamamladın. Konu anlatımını pekiştirmek için artık soru çözmeye hazırsın!</p>
-            <div style="height:10px;border-radius:999px;background:#d1fae5;overflow:hidden;margin-bottom:20px;">
-              <div style="width:100%;height:100%;background:#059669;"></div>
-            </div>
-            <button type="button" id="kcRestartDeckBtn" style="padding:10px 22px;border-radius:10px;border:0;background:linear-gradient(135deg,#c2570c 0%,#9a3412 100%);color:#fff;font-weight:700;cursor:pointer;">🔁 Desteyi Baştan Oyna</button>
+      body.innerHTML = stationTabsHtml + `
+        <div style="background:#FFFFFF;border:1.5px solid #E2DDD5;border-radius:16px;padding:16px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;">
+          <div>
+            <strong style="font-size:1.1rem;color:#0F172A;">🃏 3D İnteraktif Bilgi Kartları (${allCards.length} Kart)</strong>
+            <p style="margin:2px 0 0;font-size:0.88rem;color:#64748B;">Herhangi bir kartın üzerine tıklayarak 3D çevir ve cevabı/ipucunu gör.</p>
           </div>
-        `;
-        $('kcRestartDeckBtn')?.addEventListener('click', () => {
-          initFlashcardDeck(allCards);
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <span style="padding:5px 12px;border-radius:999px;background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;font-size:0.84rem;font-weight:800;">✓ ${learnedCount} / ${allCards.length} Öğrenildi (%${pct})</span>
+            ${learnedCount > 0 ? '<button type="button" id="kcResetGridCards" style="padding:6px 12px;border-radius:9px;border:1px solid #CBD5E1;background:#FAF8F5;color:#0F172A;font-size:0.8rem;font-weight:700;cursor:pointer;">🔁 Sıfırla</button>' : ''}
+          </div>
+        </div>
+        ${learnedCount === allCards.length ? `
+          <div style="margin-bottom:16px;padding:16px 20px;border-radius:14px;background:linear-gradient(135deg,#ECFDF5 0%,#FEF3C7 100%);border:2px solid #059669;color:#065F46;font-weight:800;font-size:1rem;text-align:center;">
+            🎉🏆 Tebrikler! Tüm ${allCards.length} bilgi kartını öğrendin (+50 XP Bilgi Kartı Ustası Rozeti)!
+          </div>
+        ` : ''}
+        <div class="kc-cards-grid">
+          ${allCards.map((fc, idx) => {
+            const isM = readerState.gridMastered.has(idx);
+            return `
+              <div class="kc-gcard ${isM ? 'mastered' : ''}" data-gcard="${idx}">
+                <div class="kc-gcard-inner">
+                  <div class="kc-gcard-face kc-gcard-front">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                      <span style="font-size:0.75rem;font-weight:800;padding:3px 9px;border-radius:999px;background:rgba(217,119,6,0.28);color:#FDE68A;">KART #${idx + 1}</span>
+                      ${isM ? '<span style="font-size:0.76rem;font-weight:800;color:#34D399;">✓ Öğrenildi</span>' : '<span style="font-size:0.76rem;color:#94A3B8;">Tıkla &amp; Çevir ↻</span>'}
+                    </div>
+                    <div style="font-size:1.08rem;font-weight:700;line-height:1.55;text-align:center;margin:auto 0;">${formatInlineMath(fc.front)}</div>
+                    <div style="font-size:0.76rem;color:#CBD5E1;text-align:center;">Cevabı görmek için karta dokun</div>
+                  </div>
+                  <div class="kc-gcard-face kc-gcard-back">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                      <span style="font-size:0.75rem;font-weight:800;color:#D97706;">✅ CEVAP &amp; AÇIKLAMA</span>
+                      <button type="button" data-gcard-master="${idx}" style="padding:4px 10px;border-radius:8px;border:none;background:${isM ? '#059669' : '#0F172A'};color:#FFFFFF;font-size:0.75rem;font-weight:800;cursor:pointer;">${isM ? '✓ Öğrenildi' : 'Öğrendim ✓'}</button>
+                    </div>
+                    <div style="font-size:1.02rem;font-weight:700;line-height:1.55;color:#0F172A;margin:auto 0;">${formatInlineMath(fc.back)}</div>
+                    ${fc.tip ? `<div style="font-size:0.82rem;color:#92400E;background:#FEF3C7;padding:6px 10px;border-radius:8px;">💡 ${formatInlineMath(fc.tip)}</div>` : '<div style="font-size:0.76rem;color:#64748B;">Ön yüze dönmek için tıkla ↻</div>'}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+      bindStationTabs();
+
+      body.querySelectorAll('[data-gcard]').forEach(el => {
+        el.addEventListener('click', (e) => {
+          if (e.target.closest('[data-gcard-master]')) return;
+          el.classList.toggle('flipped');
+          playFeedbackTone('click');
+        });
+      });
+      body.querySelectorAll('[data-gcard-master]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = Number(btn.dataset.gcardMaster);
+          if (readerState.gridMastered.has(idx)) readerState.gridMastered.delete(idx);
+          else {
+            readerState.gridMastered.add(idx);
+            playFeedbackTone(readerState.gridMastered.size === allCards.length ? 'celebrate' : 'master');
+          }
           renderReader();
         });
-        return;
-      }
+      });
+      $('kcResetGridCards')?.addEventListener('click', () => {
+        readerState.gridMastered.clear();
+        renderReader();
+      });
+      return;
+    }
 
+    if (false) {
       const card = readerState.deckQueue[0];
       body.innerHTML = `
         <div style="max-width:560px;margin:0 auto;">
