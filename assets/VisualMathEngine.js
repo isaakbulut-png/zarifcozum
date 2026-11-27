@@ -339,10 +339,168 @@
     return out;
   }
 
+  function renderLineOrRay(p, title, kind) {
+    var n1 = esc(p.nokta1 || p.baslangic || (Array.isArray(p.noktalar) && p.noktalar[0]) || 'A');
+    var n2 = esc(p.nokta2 || p.bitis || (Array.isArray(p.noktalar) && p.noktalar[1]) || 'B');
+    var dogruAd = esc(p.dogru_adi || p.etiket || '');
+    var uzunluk = esc(p.uzunluk || '');
+    var kareli = p.kareli !== false;
+
+    var out = svgHeader(460, 210, title || (kind === 'isin' ? 'Işın Modeli' : (kind === 'dogru_parcasi' ? 'Doğru Parçası Modeli' : 'Doğru Modeli')));
+    if (kareli) {
+      for (var gx = 32; gx <= 428; gx += 22) out += '<line x1="' + gx + '" y1="42" x2="' + gx + '" y2="188" stroke="' + COLORS.grid + '" stroke-width="1"/>';
+      for (var gy = 42; gy <= 188; gy += 22) out += '<line x1="32" y1="' + gy + '" x2="428" y2="' + gy + '" stroke="' + COLORS.grid + '" stroke-width="1"/>';
+    }
+
+    var y = 114;
+    if (kind === 'dogru') {
+      out += '<line x1="68" y1="' + y + '" x2="392" y2="' + y + '" stroke="' + COLORS.blue + '" stroke-width="3.4"/>';
+      out += '<polygon points="68,' + (y - 6) + ' 54,' + y + ' 68,' + (y + 6) + '" fill="' + COLORS.blue + '"/>';
+      out += '<polygon points="392,' + (y - 6) + ' 406,' + y + ' 392,' + (y + 6) + '" fill="' + COLORS.blue + '"/>';
+      out += '<circle cx="152" cy="' + y + '" r="5" fill="' + COLORS.navy + '" stroke="#FFFFFF" stroke-width="2"/>';
+      out += '<circle cx="308" cy="' + y + '" r="5" fill="' + COLORS.navy + '" stroke="#FFFFFF" stroke-width="2"/>';
+      out += '<text x="152" y="' + (y - 14) + '" text-anchor="middle" font-size="14" font-weight="800" fill="' + COLORS.navy + '">' + n1 + '</text>';
+      out += '<text x="308" y="' + (y - 14) + '" text-anchor="middle" font-size="14" font-weight="800" fill="' + COLORS.navy + '">' + n2 + '</text>';
+      if (dogruAd) out += '<text x="396" y="' + (y - 14) + '" text-anchor="end" font-size="13" font-style="italic" font-weight="800" fill="' + COLORS.amber + '">' + dogruAd + '</text>';
+    } else if (kind === 'isin') {
+      out += '<line x1="112" y1="' + y + '" x2="386" y2="' + y + '" stroke="' + COLORS.amber + '" stroke-width="3.4"/>';
+      out += '<polygon points="386,' + (y - 6.5) + ' 402,' + y + ' 386,' + (y + 6.5) + '" fill="' + COLORS.amber + '"/>';
+      out += '<circle cx="112" cy="' + y + '" r="6" fill="' + COLORS.navy + '" stroke="#FFFFFF" stroke-width="2"/>';
+      out += '<circle cx="272" cy="' + y + '" r="4.5" fill="' + COLORS.navy + '" stroke="#FFFFFF" stroke-width="1.5"/>';
+      out += '<text x="112" y="' + (y - 15) + '" text-anchor="middle" font-size="14" font-weight="800" fill="' + COLORS.navy + '">' + n1 + '</text>';
+      out += '<text x="272" y="' + (y - 15) + '" text-anchor="middle" font-size="14" font-weight="800" fill="' + COLORS.navy + '">' + n2 + '</text>';
+    } else {
+      out += '<line x1="110" y1="' + y + '" x2="350" y2="' + y + '" stroke="' + COLORS.emerald + '" stroke-width="3.6" stroke-linecap="round"/>';
+      out += '<circle cx="110" cy="' + y + '" r="6" fill="' + COLORS.navy + '" stroke="#FFFFFF" stroke-width="2"/>';
+      out += '<circle cx="350" cy="' + y + '" r="6" fill="' + COLORS.navy + '" stroke="#FFFFFF" stroke-width="2"/>';
+      out += '<text x="110" y="' + (y - 15) + '" text-anchor="middle" font-size="14" font-weight="800" fill="' + COLORS.navy + '">' + n1 + '</text>';
+      out += '<text x="350" y="' + (y - 15) + '" text-anchor="middle" font-size="14" font-weight="800" fill="' + COLORS.navy + '">' + n2 + '</text>';
+      if (uzunluk) {
+        out += '<rect x="196" y="' + (y + 12) + '" width="68" height="22" rx="6" fill="#FFFFFF" stroke="' + COLORS.emerald + '" stroke-width="1.4"/>';
+        out += '<text x="230" y="' + (y + 27) + '" text-anchor="middle" font-size="12" font-weight="800" fill="' + COLORS.emerald + '">' + uzunluk + '</text>';
+      }
+    }
+    out += '</svg>';
+    return out;
+  }
+
+  function renderDikme(p, title) {
+    var nokta = esc(p.nokta || p.ust_nokta || 'A');
+    var dogruAd = esc(p.dogru_adi || 'd');
+    var ayak = esc(p.dikme_ayagi || 'H');
+    var karsilastir = p.egik_yollar !== false;
+
+    var out = svgHeader(460, 232, title || 'Noktadan Doğruya Dikme ve En Kısa Yol');
+    for (var gx = 32; gx <= 428; gx += 22) out += '<line x1="' + gx + '" y1="42" x2="' + gx + '" y2="210" stroke="' + COLORS.grid + '" stroke-width="1"/>';
+    for (var gy = 42; gy <= 210; gy += 22) out += '<line x1="32" y1="' + gy + '" x2="428" y2="' + gy + '" stroke="' + COLORS.grid + '" stroke-width="1"/>';
+
+    var ax = 230, ay = 64, dy = 174;
+    // d doğrusu
+    out += '<line x1="56" y1="' + dy + '" x2="404" y2="' + dy + '" stroke="' + COLORS.navy + '" stroke-width="3"/>';
+    out += '<polygon points="56,' + (dy - 5) + ' 44,' + dy + ' 56,' + (dy + 5) + '" fill="' + COLORS.navy + '"/>';
+    out += '<polygon points="404,' + (dy - 5) + ' 416,' + dy + ' 404,' + (dy + 5) + '" fill="' + COLORS.navy + '"/>';
+    out += '<text x="410" y="' + (dy - 10) + '" text-anchor="end" font-size="13" font-style="italic" font-weight="800" fill="' + COLORS.navy + '">' + dogruAd + '</text>';
+
+    // Eğik karşılaştırma yolları (B ve C noktaları)
+    if (karsilastir) {
+      out += '<line x1="' + ax + '" y1="' + ay + '" x2="120" y2="' + dy + '" stroke="' + COLORS.muted + '" stroke-width="2" stroke-dasharray="5,4"/>';
+      out += '<line x1="' + ax + '" y1="' + ay + '" x2="340" y2="' + dy + '" stroke="' + COLORS.muted + '" stroke-width="2" stroke-dasharray="5,4"/>';
+      out += '<circle cx="120" cy="' + dy + '" r="4.5" fill="' + COLORS.slate + '"/>';
+      out += '<text x="120" y="' + (dy + 18) + '" text-anchor="middle" font-size="13" font-weight="800" fill="' + COLORS.slate + '">K</text>';
+      out += '<circle cx="340" cy="' + dy + '" r="4.5" fill="' + COLORS.slate + '"/>';
+      out += '<text x="340" y="' + (dy + 18) + '" text-anchor="middle" font-size="13" font-weight="800" fill="' + COLORS.slate + '">M</text>';
+    }
+
+    // Dikme (AH) ve 90° dik açı karesi
+    out += '<line x1="' + ax + '" y1="' + ay + '" x2="' + ax + '" y2="' + dy + '" stroke="' + COLORS.amber + '" stroke-width="3.2"/>';
+    out += '<rect x="' + ax + '" y="' + (dy - 18) + '" width="18" height="18" fill="' + COLORS.amberSoft + '" stroke="' + COLORS.amber + '" stroke-width="1.8"/>';
+    out += '<circle cx="' + (ax + 9) + '" cy="' + (dy - 9) + '" r="2" fill="' + COLORS.amber + '"/>';
+
+    out += '<circle cx="' + ax + '" cy="' + ay + '" r="5.5" fill="' + COLORS.navy + '" stroke="#FFFFFF" stroke-width="2"/>';
+    out += '<text x="' + ax + '" y="' + (ay - 10) + '" text-anchor="middle" font-size="14" font-weight="800" fill="' + COLORS.navy + '">' + nokta + '</text>';
+    out += '<circle cx="' + ax + '" cy="' + dy + '" r="5" fill="' + COLORS.amber + '" stroke="#FFFFFF" stroke-width="1.8"/>';
+    out += '<text x="' + ax + '" y="' + (dy + 18) + '" text-anchor="middle" font-size="13.5" font-weight="800" fill="' + COLORS.amber + '">' + ayak + '</text>';
+    out += '</svg>';
+    return out;
+  }
+
+  function renderParallelIntersecting(p, title) {
+    var mod = String(p.durum || p.mode || 'paralel').toLowerCase();
+    var l1 = esc(p.dogru1 || 'd₁');
+    var l2 = esc(p.dogru2 || 'd₂');
+    var out = svgHeader(460, 224, title || (mod === 'dik' ? 'Dik Doğrular' : (mod === 'kesisen' ? 'Kesişen Doğrular' : 'Paralel Doğrular')));
+    for (var gx = 32; gx <= 428; gx += 22) out += '<line x1="' + gx + '" y1="42" x2="' + gx + '" y2="202" stroke="' + COLORS.grid + '" stroke-width="1"/>';
+    for (var gy = 42; gy <= 202; gy += 22) out += '<line x1="32" y1="' + gy + '" x2="428" y2="' + gy + '" stroke="' + COLORS.grid + '" stroke-width="1"/>';
+
+    if (mod === 'dik') {
+      out += '<line x1="76" y1="130" x2="384" y2="130" stroke="' + COLORS.blue + '" stroke-width="3"/>';
+      out += '<line x1="230" y1="54" x2="230" y2="196" stroke="' + COLORS.amber + '" stroke-width="3"/>';
+      out += '<rect x="230" y="110" width="20" height="20" fill="' + COLORS.amberSoft + '" stroke="' + COLORS.amber + '" stroke-width="2"/>';
+      out += '<circle cx="240" cy="120" r="2.2" fill="' + COLORS.amber + '"/>';
+      out += '<text x="386" y="122" text-anchor="end" font-size="13" font-weight="800" fill="' + COLORS.blue + '">' + l1 + '</text>';
+      out += '<text x="242" y="64" font-size="13" font-weight="800" fill="' + COLORS.amber + '">' + l2 + '</text>';
+    } else if (mod === 'kesisen') {
+      out += '<line x1="88" y1="184" x2="372" y2="68" stroke="' + COLORS.blue + '" stroke-width="3"/>';
+      out += '<line x1="88" y1="68" x2="372" y2="184" stroke="' + COLORS.amber + '" stroke-width="3"/>';
+      out += '<circle cx="230" cy="126" r="5" fill="' + COLORS.navy + '" stroke="#FFFFFF" stroke-width="2"/>';
+      out += '<text x="230" y="108" text-anchor="middle" font-size="13" font-weight="800" fill="' + COLORS.navy + '">O</text>';
+      out += '<text x="376" y="72" font-size="13" font-weight="800" fill="' + COLORS.blue + '">' + l1 + '</text>';
+      out += '<text x="376" y="186" font-size="13" font-weight="800" fill="' + COLORS.amber + '">' + l2 + '</text>';
+    } else {
+      out += '<line x1="74" y1="92" x2="386" y2="92" stroke="' + COLORS.blue + '" stroke-width="3.2"/>';
+      out += '<line x1="74" y1="158" x2="386" y2="158" stroke="' + COLORS.amber + '" stroke-width="3.2"/>';
+      out += '<text x="392" y="96" font-size="13" font-weight="800" fill="' + COLORS.blue + '">' + l1 + '</text>';
+      out += '<text x="392" y="162" font-size="13" font-weight="800" fill="' + COLORS.amber + '">' + l2 + '</text>';
+      out += '<text x="230" y="130" text-anchor="middle" font-size="12" font-weight="800" fill="' + COLORS.slate + '">' + l1 + ' ∥ ' + l2 + '</text>';
+    }
+    out += '</svg>';
+    return out;
+  }
+
+  function renderSolid3D(p, title) {
+    var sekil = String(p.sekil || p.cisim || 'silindir').toLowerCase();
+    var rLbl = esc(p.yaricap || p.taban || '');
+    var hLbl = esc(p.yukseklik || p.h || '');
+    var out = svgHeader(460, 236, title || 'Katı Cisim Modeli');
+
+    if (sekil === 'koni') {
+      out += '<ellipse cx="230" cy="186" rx="74" ry="22" fill="' + COLORS.amberSoft + '" stroke="' + COLORS.navy + '" stroke-width="2.4"/>';
+      out += '<line x1="156" y1="186" x2="230" y2="56" stroke="' + COLORS.navy + '" stroke-width="2.6"/>';
+      out += '<line x1="304" y1="186" x2="230" y2="56" stroke="' + COLORS.navy + '" stroke-width="2.6"/>';
+      out += '<line x1="230" y1="56" x2="230" y2="186" stroke="' + COLORS.amber + '" stroke-width="2" stroke-dasharray="5,4"/>';
+      if (hLbl) out += '<text x="244" y="130" font-size="12.5" font-weight="800" fill="' + COLORS.amber + '">' + hLbl + '</text>';
+      if (rLbl) out += '<text x="268" y="200" font-size="12.5" font-weight="800" fill="' + COLORS.blue + '">' + rLbl + '</text>';
+    } else if (sekil === 'prizma' || sekil === 'kup') {
+      out += '<rect x="148" y="92" width="124" height="104" fill="' + COLORS.blueSoft + '" stroke="' + COLORS.navy + '" stroke-width="2.4"/>';
+      out += '<polygon points="148,92 196,56 320,56 272,92" fill="' + COLORS.amberSoft + '" stroke="' + COLORS.navy + '" stroke-width="2.4"/>';
+      out += '<polygon points="272,92 320,56 320,160 272,196" fill="' + COLORS.emeraldSoft + '" stroke="' + COLORS.navy + '" stroke-width="2.4"/>';
+      if (rLbl) out += '<text x="210" y="214" text-anchor="middle" font-size="12.5" font-weight="800" fill="' + COLORS.blue + '">' + rLbl + '</text>';
+      if (hLbl) out += '<text x="334" y="120" font-size="12.5" font-weight="800" fill="' + COLORS.amber + '">' + hLbl + '</text>';
+    } else {
+      // Silindir
+      out += '<ellipse cx="230" cy="184" rx="70" ry="20" fill="' + COLORS.blueSoft + '" stroke="' + COLORS.navy + '" stroke-width="2.4"/>';
+      out += '<rect x="160" y="74" width="140" height="110" fill="' + COLORS.blueSoft + '" stroke="none"/>';
+      out += '<line x1="160" y1="74" x2="160" y2="184" stroke="' + COLORS.navy + '" stroke-width="2.4"/>';
+      out += '<line x1="300" y1="74" x2="300" y2="184" stroke="' + COLORS.navy + '" stroke-width="2.4"/>';
+      out += '<ellipse cx="230" cy="74" rx="70" ry="20" fill="' + COLORS.amberSoft + '" stroke="' + COLORS.navy + '" stroke-width="2.4"/>';
+      out += '<line x1="230" y1="74" x2="300" y2="74" stroke="' + COLORS.amber + '" stroke-width="2.2"/>';
+      if (rLbl) out += '<text x="266" y="68" text-anchor="middle" font-size="12" font-weight="800" fill="' + COLORS.amber + '">' + rLbl + '</text>';
+      if (hLbl) out += '<text x="316" y="134" font-size="12.5" font-weight="800" fill="' + COLORS.navy + '">' + hLbl + '</text>';
+    }
+    out += '</svg>';
+    return out;
+  }
+
   function renderGeometri(p, title) {
     var alt = String(p.alt_tip || p.subtype || p.sekil || p.shape || '').toLowerCase().trim();
     if (alt === 'aciolcer' || alt === 'iletki' || alt === 'protractor') return renderProtractor(p, title);
     if (alt === 'aci' || alt === 'angle') return renderAngle(p, title);
+    if (alt === 'dogru' || alt === 'nokta_dogru' || alt === 'line') return renderLineOrRay(p, title, 'dogru');
+    if (alt === 'isin' || alt === 'ray') return renderLineOrRay(p, title, 'isin');
+    if (alt === 'dogru_parcasi' || alt === 'segment') return renderLineOrRay(p, title, 'dogru_parcasi');
+    if (alt === 'dikme' || alt === 'en_kisa_yol' || alt === 'perpendicular') return renderDikme(p, title);
+    if (alt === 'paralel_kesisen' || alt === 'paralel' || alt === 'kesisen' || alt === 'dik_dogrular') return renderParallelIntersecting(p, title);
+    if (alt === 'kati_cisim' || alt === 'silindir' || alt === 'prizma' || alt === 'koni' || alt === 'kup') return renderSolid3D(p, title);
     if (alt === 'ucgen' || alt === 'triangle') return renderTriangle(p, title);
     if (alt === 'cember' || alt === 'daire' || alt === 'circle') return renderCircle(p, title);
     if (alt === 'dortgen' || alt === 'dikdortgen' || alt === 'kare' || alt === 'paralelkenar' || alt === 'yamuk' || alt === 'rectangle' || alt === 'square') {
@@ -353,7 +511,9 @@
     }
     if (p.yaricap != null || p.merkez_aci != null) return renderCircle(p, title);
     if (p.koseler && p.koseler.length === 3) return renderTriangle(p, title);
-    return renderQuad(p, title);
+    if (p.uzun_kenar || p.kisa_kenar || p.widthLabel || p.heightLabel) return renderQuad(p, title);
+    // Tanınmayan geometrik tipte ASLA yanlış ABCD dikdörtgeni çizme!
+    return '';
   }
 
   /* ========================================================================
@@ -839,7 +999,24 @@
     var t = String(text || '');
     var low = (t + ' ' + String(topic || '')).toLowerCase();
 
-    // 1. Açı / Açıölçer
+    // 1. Temel Geometri: Işın, Doğru Parçası, Dikme, Paralel/Kesişen Doğrular, Açı/Açıölçer
+    if (low.indexOf('dikme') >= 0 || low.indexOf('en kısa yol') >= 0) {
+      return { gorsel_tipi: 'geometri', gorsel_baslik: 'Dikme ve En Kısa Yol', gorsel_parametreleri: { alt_tip: 'dikme' } };
+    }
+    if (low.indexOf('ışın') >= 0) {
+      return { gorsel_tipi: 'geometri', gorsel_baslik: 'Işın Modeli', gorsel_parametreleri: { alt_tip: 'isin', nokta1: 'A', nokta2: 'B' } };
+    }
+    if (low.indexOf('doğru parçası') >= 0) {
+      var segLen = t.match(/\b\d{1,3}\s*(?:cm|m)\b/i);
+      return { gorsel_tipi: 'geometri', gorsel_baslik: 'Doğru Parçası Modeli', gorsel_parametreleri: { alt_tip: 'dogru_parcasi', nokta1: 'A', nokta2: 'B', uzunluk: segLen ? segLen[0] : '' } };
+    }
+    if (low.indexOf('paralel') >= 0) {
+      return { gorsel_tipi: 'geometri', gorsel_baslik: 'Paralel Doğrular', gorsel_parametreleri: { alt_tip: 'paralel_kesisen', durum: 'paralel' } };
+    }
+    if (low.indexOf('silindir') >= 0 || low.indexOf('koni') >= 0 || low.indexOf('prizma') >= 0) {
+      var cisim = low.indexOf('koni') >= 0 ? 'koni' : (low.indexOf('prizma') >= 0 ? 'prizma' : 'silindir');
+      return { gorsel_tipi: 'geometri', gorsel_baslik: 'Katı Cisim Modeli', gorsel_parametreleri: { alt_tip: 'kati_cisim', sekil: cisim } };
+    }
     if (low.indexOf('açıölçer') >= 0 || low.indexOf('iletki') >= 0 || low.indexOf('açı') >= 0) {
       var degMatch = t.match(/\b(\d{1,3})\s*(?:°|\^\\circ|derece)/i);
       var deg = degMatch ? clamp(Number(degMatch[1]), 10, 175) : 65;

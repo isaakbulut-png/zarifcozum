@@ -10,6 +10,8 @@ const draftQuestionItemSchema = new mongoose.Schema({
   outcomeCode: { type: String, maxlength: 60, default: '' },
   questionType: { type: String, default: 'open_ended' },
   svg: { type: String, default: '' },
+  imageUrl: { type: String, default: '' },
+  illustrasyon_promptu: { type: String, default: '' },
   curriculum_node_id: { type: mongoose.Schema.Types.ObjectId, default: null },
   status: { type: String, enum: ['draft', 'approved', 'rejected'], default: 'draft' },
   similarityScore: { type: Number, min: 0, max: 100, default: 0 },

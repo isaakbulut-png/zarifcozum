@@ -1837,8 +1837,12 @@ body.teacher-menu-open {
                         </select>
                       </div>
                     </div>
-                    <div class="button-row" style="margin-top:12px;">
+                    <div class="button-row" style="margin-top:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
                       <button class="btn" id="generateAiQuestions" type="submit" style="background:#7e22ce; color:#fff; font-weight:700;">Yapay Zeka ile Soru Üret</button>
+                      <label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#0F172A;background:#FEF3C7;border:1px solid #FDE68A;padding:6px 11px;border-radius:8px;cursor:pointer;">
+                        <input type="checkbox" id="aiGenerateIllustrations" checked style="accent-color:#D97706;">
+                        <span>🎨 Hikâye İllüstrasyonu Üret (5–6. Sınıfta Otomatik)</span>
+                      </label>
                     </div>
                     <p class="status" id="aiQuestionStatus" role="status" aria-live="polite"></p>
                   </form>
@@ -5401,7 +5405,8 @@ body.teacher-menu-open {
           questionType: mappedQuestionType,
           difficulty: $('aiDifficulty').value,
           count: Number($('aiCount').value),
-          selectedModel: $('aiModelSelect')?.value || 'gemini-3.8-flash'
+          selectedModel: $('aiModelSelect')?.value || 'gemini-3.8-flash',
+          generateIllustrations: Boolean($('aiGenerateIllustrations')?.checked)
         })
       });
       const quiz = res.quiz;
@@ -5420,6 +5425,47 @@ body.teacher-menu-open {
   });
 
   $('aiQuestionList').addEventListener('click', async event => {
+
+    // Tekil Soru İçin Hikâye İllüstrasyonu Üret / Yenile (Imagen 3 + R2)
+    const illBtn = event.target.closest('[data-ai-gen-illustration]');
+    if (illBtn && aiDraft && Array.isArray(aiDraft.questions)) {
+      const idx = Number(illBtn.dataset.aiGenIllustration);
+      const q = aiDraft.questions[idx];
+      if (!q) return;
+      illBtn.disabled = true;
+      const origTxt = illBtn.textContent;
+      illBtn.textContent = '🎨 Üretiliyor…';
+      try {
+        const r = await api('/api/ai/questions/generate-illustration', {
+          method: 'POST',
+          body: JSON.stringify({
+            grade: aiDraft.grade || 5,
+            topic: aiDraft.topic || 'Matematik',
+            text: q.senaryo || q.text || '',
+            illustrasyon_promptu: q.illustrasyon_promptu || ''
+          })
+        });
+        if (r && r.imageUrl) {
+          q.imageUrl = r.imageUrl;
+          const imgMount = $('aiQuestionList').querySelector(`[data-ai-img="${idx}"]`);
+          const stage = $('aiQuestionList').querySelector(`[data-ai-stage="${idx}"]`);
+          if (stage) stage.style.display = 'grid';
+          if (imgMount) {
+            imgMount.style.display = 'flex';
+            imgMount.innerHTML = `<img src="${esc(r.imageUrl)}" alt="Hikâye İllüstrasyonu" style="width:100%;max-height:240px;object-fit:cover;border-radius:10px;border:1px solid #e2ddd5;box-shadow:0 4px 12px rgba(15,23,42,0.08);">`;
+          }
+          illBtn.textContent = '🎨 Görseli Yenile';
+        } else {
+          illBtn.textContent = origTxt;
+        }
+      } catch (err) {
+        alert('Hikâye görseli üretilemedi: ' + err.message);
+        illBtn.textContent = origTxt;
+      } finally {
+        illBtn.disabled = false;
+      }
+      return;
+    }
 
     // Soru Bankasına Aktar
     const bankBtn = event.target.closest('[data-ai-transfer-bank]');
@@ -5655,7 +5701,8 @@ body.teacher-menu-open {
               ${question.bilisselDuzey ? `<span style="font-size:11.5px;background:#fef3c7;color:#92400e;padding:3px 9px;border-radius:6px;font-weight:700;">🎯 ${esc(question.bilisselDuzey)}</span>` : ''}
               ${question.outcomeCode ? `<span style="font-size:11.5px;background:#f1f5f9;color:#334155;padding:3px 9px;border-radius:6px;font-weight:700;font-family:monospace;">${esc(question.outcomeCode)}</span>` : ''}
             </div>
-            <div style="display:flex;align-items:center;gap:10px;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button type="button" class="btn sm light" data-ai-gen-illustration="${index}" style="padding:5px 10px;font-size:12px;font-weight:700;background:#fffbeb!important;border:1px solid #fde68a!important;color:#92400e!important;cursor:pointer;border-radius:8px;">🎨 ${question.imageUrl ? 'Görseli Yenile' : 'Hikâye Görseli Üret'}</button>
               <button type="button" class="btn sm light" data-ai-add-single-basket="${index}" style="padding:5px 11px;font-size:12px;font-weight:700;background:#ecfdf5!important;border:1px solid #a7f3d0!important;color:#065f46!important;cursor:pointer;border-radius:8px;">➕ Sepete Ekle</button>
               <label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:#1e293b;cursor:pointer;"><input type="checkbox" data-ai-approved="${index}" checked style="width:16px;height:16px;accent-color:#d97706;"> Onayla</label>
             </div>
@@ -5673,8 +5720,13 @@ body.teacher-menu-open {
             ${question.senaryo ? `<p style="font-size:15px;line-height:1.68;margin:0 0 12px;color:#1e293b;">${fmt(question.senaryo)}</p>` : ''}
           ` : `<p style="font-size:15px;line-height:1.68;margin:0 0 12px;color:#1e293b;">${fmt(question.text)}</p>`}
 
-          <!-- 4. Çerçeveli Görsel & Diyagram Alanı -->
-          <div class="ai-question-svg-mount" data-ai-svg="${index}" style="background:#faf8f5;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin:12px 0;"></div>
+          <!-- 4. Yayınevi Hibrit Görsel Sahnesi (Hikâye İllüstrasyonu + Matematik Şeması) -->
+          <div class="ai-question-visual-stage" data-ai-stage="${index}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;align-items:center;background:#faf8f5;border:1.5px solid #e2ddd5;border-radius:12px;padding:12px;margin:12px 0;">
+            <div class="ai-question-illustration-mount" data-ai-img="${index}" style="${question.imageUrl ? 'display:flex;flex-direction:column;align-items:center;gap:6px;' : 'display:none;'}">
+              ${question.imageUrl ? `<img src="${esc(question.imageUrl)}" alt="Hikâye İllüstrasyonu" style="width:100%;max-height:240px;object-fit:cover;border-radius:10px;border:1px solid #e2ddd5;box-shadow:0 4px 12px rgba(15,23,42,0.08);">` : ''}
+            </div>
+            <div class="ai-question-svg-mount" data-ai-svg="${index}"></div>
+          </div>
 
           <!-- 5. Vurgulu Soru Kökü -->
           ${question.soruKoku ? `<p style="font-size:15.5px;font-weight:800;line-height:1.55;margin:12px 0 14px;color:#0f172a;">${fmt(question.soruKoku)}</p>` : ''}
@@ -5742,6 +5794,7 @@ body.teacher-menu-open {
     if (typeof window !== 'undefined') {
       quiz.questions.forEach((question, index) => {
         const mount = container.querySelector(`[data-ai-svg="${index}"]`);
+        const stage = container.querySelector(`[data-ai-stage="${index}"]`);
         if (!mount) return;
         let visualMarkup = window.VisualMathEngine ? window.VisualMathEngine.renderFromQuestion(question) : '';
         if (!visualMarkup && question.svg && typeof question.svg === 'string') {
@@ -5749,6 +5802,7 @@ body.teacher-menu-open {
         }
         if (!visualMarkup) {
           mount.style.display = 'none';
+          if (stage && !question.imageUrl) stage.style.display = 'none';
           return;
         }
         if (visualMarkup.trim().startsWith('<div')) {
@@ -6538,6 +6592,11 @@ body.teacher-menu-open {
       console.warn('Önceki taslak geri yüklenemedi:', e.message);
     }
   }
+
+  $('aiGrade')?.addEventListener('change', () => {
+    const chk = $('aiGenerateIllustrations');
+    if (chk) chk.checked = Number($('aiGrade').value) <= 6;
+  });
 
   // Restore on load if present
   checkAndRestoreLastAiDraft();

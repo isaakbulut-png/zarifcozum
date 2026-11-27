@@ -12,6 +12,7 @@ const ContentLibrary = require('../models/ContentLibrary');
 const CurriculumContent = require('../models/CurriculumContent');
 const { checkQuestionSimilarity, indexQuestionInPinecone } = require('../lib/content-similarity');
 const { exportQuestions } = require('../lib/document-exporter');
+const { generateIllustration } = require('../lib/image-generator');
 
 const { SINIF_KONULARI, TUM_KONULAR } = require('../lib/konu-haritasi');
 const { getCurriculumTree, findSubTopicMeta, SINIF_KONULARI_V2 } = require('../lib/meb-curriculum');
@@ -333,6 +334,10 @@ function prepareAIQuestion(question, context = {}) {
     gorsel_tipi: resolvedGorselTipi,
     ...(resolvedGorselBaslik ? { gorsel_baslik: resolvedGorselBaslik } : {}),
     ...(resolvedGorselParams ? { gorsel_parametreleri: resolvedGorselParams } : {}),
+    ...(typeof question.illustrasyon_promptu === 'string' && question.illustrasyon_promptu.trim()
+      ? { illustrasyon_promptu: question.illustrasyon_promptu.trim() }
+      : {}),
+    ...(typeof question.imageUrl === 'string' && question.imageUrl.trim() ? { imageUrl: question.imageUrl.trim() } : {}),
     ...(normalizedOptions ? { options: normalizedOptions, answer: question.answer || 'A' } : { options: {} }),
     ...(visualHtml ? { visualHtml } : {}),
     ...(cleanSvg ? { svg: cleanSvg } : {})
@@ -440,7 +445,11 @@ function soruSemasi(grade = 5) {
             },
             gorsel_parametreleri: {
               type: 'STRING',
-              description: 'VisualMathEngine için geçerli JSON stringi. Soru metnindeki tüm sayılar, açılar ve harflerle %100 birebir tutarlı olmalıdır. Örnekler — geometri(aciolcer): {"alt_tip":"aciolcer","aci_derece":65,"kose":"L","kol1":"K","kol2":"M","olcu_goster":false}; geometri(aci): {"alt_tip":"aci","aci_derece":120,"kose":"B","kol1":"A","kol2":"C","etiket":"120°"}; geometri(ucgen): {"alt_tip":"ucgen","koseler":["A","B","C"],"kenarlar":{"taban":"12 cm","sol":"8 cm"},"acilar":{"A":"50°","B":"60°"}}; geometri(dortgen): {"alt_tip":"dortgen","sekil":"dikdortgen","uzun_kenar":"14 cm","kisa_kenar":"8 cm"}; geometri(cember): {"alt_tip":"cember","merkez":"O","yaricap":"6 cm","merkez_aci":90}; sayi_dogrusu_kesir(kesir): {"alt_tip":"kesir_daire","pay":3,"payda":8}; sayi_dogrusu_kesir(sayi_dogrusu): {"alt_tip":"sayi_dogrusu","min":0,"max":4,"adim":8,"noktalar":[{"etiket":"A","deger":1.5}]}; fonksiyon_grafik: {"alt_tip":"parabol","a":1,"b":-2,"c":-3,"etiket":"y = x² - 2x - 3"}; veri_grafigi: {"alt_tip":"sutun","veriler":[{"etiket":"Pzt","deger":14},{"etiket":"Sal","deger":22}]}; cebir_model: {"alt_tip":"terazi","sol_kefe":["x","x","3"],"sag_kefe":["11"]}; tablo: {"basliklar":["Ürün","Fiyat"],"satirlar":[["Defter","25 TL"],["Kalem","12 TL"]]}. gorsel_tipi "yok" ise "{}" yaz.'
+              description: 'VisualMathEngine için geçerli JSON stringi. Soru metnindeki tüm sayılar, açılar ve harflerle %100 birebir tutarlı olmalıdır. Örnekler — geometri(dogru): {"alt_tip":"dogru","nokta1":"A","nokta2":"B","dogru_adi":"d"}; geometri(isin): {"alt_tip":"isin","nokta1":"A","nokta2":"B"}; geometri(dogru_parcasi): {"alt_tip":"dogru_parcasi","nokta1":"K","nokta2":"L","uzunluk":"8 cm"}; geometri(dikme): {"alt_tip":"dikme","nokta":"A","dogru_adi":"d","dikme_ayagi":"H","egik_yollar":true}; geometri(paralel_kesisen): {"alt_tip":"paralel_kesisen","durum":"paralel","dogru1":"d₁","dogru2":"d₂"}; geometri(kati_cisim): {"alt_tip":"kati_cisim","sekil":"silindir","yaricap":"4 cm","yukseklik":"10 cm"}; geometri(aciolcer): {"alt_tip":"aciolcer","aci_derece":65,"kose":"L","kol1":"K","kol2":"M","olcu_goster":false}; geometri(aci): {"alt_tip":"aci","aci_derece":120,"kose":"B","kol1":"A","kol2":"C","etiket":"120°"}; geometri(ucgen): {"alt_tip":"ucgen","koseler":["A","B","C"],"kenarlar":{"taban":"12 cm","sol":"8 cm"},"acilar":{"A":"50°","B":"60°"}}; geometri(dortgen): {"alt_tip":"dortgen","sekil":"dikdortgen","uzun_kenar":"14 cm","kisa_kenar":"8 cm"}; geometri(cember): {"alt_tip":"cember","merkez":"O","yaricap":"6 cm","merkez_aci":90}; sayi_dogrusu_kesir(kesir): {"alt_tip":"kesir_daire","pay":3,"payda":8}; sayi_dogrusu_kesir(sayi_dogrusu): {"alt_tip":"sayi_dogrusu","min":0,"max":4,"adim":8,"noktalar":[{"etiket":"A","deger":1.5}]}; fonksiyon_grafik: {"alt_tip":"parabol","a":1,"b":-2,"c":-3,"etiket":"y = x² - 2x - 3"}; veri_grafigi: {"alt_tip":"sutun","veriler":[{"etiket":"Pzt","deger":14},{"etiket":"Sal","deger":22}]}; cebir_model: {"alt_tip":"terazi","sol_kefe":["x","x","3"],"sag_kefe":["11"]}; tablo: {"basliklar":["Ürün","Fiyat"],"satirlar":[["Defter","25 TL"],["Kalem","12 TL"]]}. gorsel_tipi "yok" ise "{}" yaz.'
+            },
+            illustrasyon_promptu: {
+              type: 'STRING',
+              description: '5–6. sınıflarda ve gerçek hayat hikayeli sorularda Imagen 3 için İNGİLİZCE, METİNSİZ (no text, no letters, no numbers), sıcak ders kitabı illüstrasyonu tarifi. Örn: "Warm 5th grade Turkish textbook storybook illustration of two 10-year-old students Elif and Murat in a sunny classroom measuring a wooden desk with a ruler, clean ivory background, flat vector style, no text, no numbers". Soyut 9–12. sınıf cebir/türev sorularında boş bırak.'
             },
             svg: {
               type: 'STRING',
@@ -847,11 +856,14 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         : '- Soru metnindeki (text), seçeneklerdeki (options) ve çözümdeki (explanation/solution) TÜM matematiksel/geometrik ifadeleri, formülleri, değişkenleri ($x$, $y$), geometrik sembolleri ve sayıları tek dolar ($...$) içine alarak yaz.',
       '- JSON içinde geçerli olması için LaTeX komutlarındaki ters eğik çizgileri MUTLAKA çift ters eğik çizgi ile kaçır: "\\\\perp", "\\\\frac", "\\\\sqrt", "\\\\times", "\\\\cdot".',
       '',
-      'EVRENSEL GÖRSEL MOTORU (VisualMathEngine) VE TUTARLILIK KURALLARI (KESİN ZORUNLU):',
+      'EVRENSEL GÖRSEL MOTORU (VisualMathEngine), HİKÂYE İLLÜSTRASYONU VE ANTİ-EZBER KURALLARI (KESİN ZORUNLU):',
+      '- ANTİ-EZBER YASAĞI (5–12. SINIF TÜM KONULAR): "Bu şeklin adı nedir?", "Hangi araç kullanılır?" gibi tek adımlı kuru tanım/ezber soruları ASLA yazma (özellikle Orta ve Zor seviyede)! Bunun yerine öğrenciye görsel okut, iki/üç çocuğun çizimini karşılaştır, kareli zeminde birim saydır, en kısa yolu/hatalı adımı buldur veya günlük yaşam kararı verdir!',
+      '- SPOİLER (CEVABI ELE VERME) YASAĞI: "bilgiKutusu" alanı ASLA sorunun doğru cevabı olan tanımı veya doğrudan cevabı ele veren ipucunu içeremez! Gerekmiyorsa "bilgiKutusu" alanını boş ("") bırak.',
+      '- HİKÂYE İLLÜSTRASYONU ("illustrasyon_promptu"): 5–6. sınıflarda HER soruda (7–8. sınıflarda günlük hayat bağlamlı sorularda) hikayedeki karakterleri (örn. Elif ile Murat) ve nesneleri (fener, cetvel, park, pizza, saat) betimleyen, KESİNLİKLE YAZISIZ ("no text, no letters, no numbers"), sıcak çocuk/ders kitabı tarzında İngilizce bir "illustrasyon_promptu" yaz!',
       '- Konunun doğasına en uygun "gorsel_tipi"ni seç: "geometri" | "sayi_dogrusu_kesir" | "fonksiyon_grafik" | "veri_grafigi" | "cebir_model" | "tablo" | "yok".',
-      '- KRİTİK YASAK: Geometri, açı, açıölçer/iletki, üçgen, dörtgen, çember, fonksiyon, kesir ve grafik konularında ASLA "tablo" kullanma! İlgili parametrik görsel tipini seç (ör. Açıları Ölçme konusunda mutlaka gorsel_tipi: "geometri" ve gorsel_parametreleri içinde {"alt_tip":"aciolcer","aci_derece":65,"kose":"L","kol1":"K","kol2":"M","olcu_goster":false} kullan!).',
+      '- KRİTİK YASAK: Geometri, doğru, ışın, doğru parçası, dikme, paralel doğrular, açı, açıölçer, üçgen, dörtgen, çember, katı cisim, fonksiyon, kesir ve grafik konularında ASLA "tablo" kullanma! Doğru alt_tip seç (dogru, isin, dogru_parcasi, dikme, paralel_kesisen, kati_cisim, aciolcer, aci, ucgen, dortgen, cember).',
       '- %100 BİREBİR TUTARLILIK: Soru metninde geçen tüm sayılar, açılar, kenar uzunlukları, noktalar ve harfler "gorsel_parametreleri" ile %100 birebir aynı olmak zorundadır. Metinde olmayan uydurma veri ("Veri 1: 12" vb.) ASLA üretme!',
-      '- "bilgiKutusu" (varsa kısa 1 cümle ön bilgi), "senaryo" (somut olay), "soruKoku" (tek net soru), "celdiriciAnalizi" (her yanlış şıkkın hangi öğrenci hatasını ölçtüğü) ve "explanation" (adım adım pedagojik çözüm) alanlarını eksiksiz doldur.',
+      '- "senaryo" (somut olay), "soruKoku" (tek net soru), "celdiriciAnalizi" (her yanlış şıkkın hangi öğrenci hatasını ölçtüğü) ve "explanation" (adım adım pedagojik çözüm) alanlarını eksiksiz doldur.',
       '',
       'Yalnızca istenen JSON şemasına uyan JSON döndür; Markdown bloğu veya fazladan açıklama metni ekleme.'
     ].filter(Boolean).join('\n');
@@ -1017,6 +1029,29 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     questions: preparedQuestions
   };
 
+  // 0. Paralel Hikâye İllüstrasyonu Üretimi (5–6. sınıfta varsayılan açık, 7–12'de öğretmen seçimine bağlı; fail-safe)
+  const wantIllustrations = req.body?.generateIllustrations === true ||
+    (req.body?.generateIllustrations !== false && Number(grade) <= 6);
+  if (wantIllustrations && preparedQuestions.length) {
+    try {
+      await Promise.allSettled(
+        preparedQuestions.slice(0, 5).map(async (q, idx) => {
+          if (q.imageUrl || !q.illustrasyon_promptu) return;
+          const styleHint = Number(grade) <= 6
+            ? 'Warm Turkish 5th-6th grade math textbook storybook illustration, friendly flat vector art, bright pastel colors, clean ivory background, strictly NO text, NO letters, NO numbers, NO watermark.'
+            : 'Clean modern educational textbook illustration, realistic flat editorial style, crisp geometry context, clean ivory background, strictly NO text, NO letters, NO numbers.';
+          const fullPrompt = `${q.illustrasyon_promptu}. ${styleHint}`;
+          const resImg = await generateIllustration({ prompt: fullPrompt, filename: `q_${grade}_${Date.now()}_${idx}.png` });
+          if (resImg && resImg.url) {
+            q.imageUrl = resImg.url;
+          }
+        })
+      );
+    } catch (imgErr) {
+      console.warn('[AI] Paralel hikâye illüstrasyonu uyarısı:', imgErr.message);
+    }
+  }
+
   // Semantik Benzerlik ve Mükerrer Kontrolü
   try {
     const existing = await Soru.find({ grade }).select('text imageFile _id').limit(100).lean();
@@ -1049,6 +1084,8 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         outcomeCode: q.outcomeCode || outcomeCode,
         questionType: q.questionType || questionType,
         svg: q.svg || '',
+        imageUrl: q.imageUrl || '',
+        illustrasyon_promptu: q.illustrasyon_promptu || '',
         status: 'draft',
         similarityScore: q.similarityScore || 0,
         similarQuestionId: q.similarQuestionId || null
@@ -1132,6 +1169,34 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     } catch (error) {
       console.error('Yapay zeka sorusu yayınlanamadı:', error);
       res.status(500).json({ mesaj: 'Soru yayınlanamadı. Lütfen yeniden deneyin.' });
+    }
+  });
+
+  // Tekil Soru İçin İsteğe Bağlı Hikâye İllüstrasyonu Üret / Yenile (5–12. Sınıf)
+  router.post('/questions/generate-illustration', requireRole('teacher', 'admin'), async (req, res) => {
+    try {
+      const grade = Number(req.body?.grade) || 5;
+      const customPrompt = String(req.body?.illustrasyon_promptu || '').trim();
+      const questionText = String(req.body?.text || '').trim();
+      const topic = String(req.body?.topic || 'Matematik').trim();
+      if (!customPrompt && !questionText) {
+        return res.status(400).json({ mesaj: 'Görsel üretmek için soru metni veya tarif gereklidir.' });
+      }
+      const styleHint = grade <= 6
+        ? 'Warm Turkish 5th-6th grade math textbook storybook illustration, friendly flat vector art, bright colors, clean ivory background, strictly NO text, NO letters, NO numbers.'
+        : 'Modern Turkish math textbook editorial illustration, clean minimal educational style, clean ivory background, strictly NO text, NO letters, NO numbers.';
+      const finalPrompt = customPrompt
+        ? `${customPrompt}. ${styleHint}`
+        : `Educational storybook scene illustrating this ${grade}th grade math context about ${topic}: ${questionText.slice(0, 260)}. ${styleHint}`;
+
+      const result = await generateIllustration({ prompt: finalPrompt });
+      if (!result || !result.url) {
+        return res.status(502).json({ mesaj: 'Görsel üretici şu an yanıt veremedi (API kotası veya R2 ayarı kontrol edilmeli).' });
+      }
+      res.json({ success: true, imageUrl: result.url });
+    } catch (err) {
+      console.error('[AI] Tekil illüstrasyon hatası:', err);
+      res.status(500).json({ mesaj: err.message || 'Hikâye görseli üretilemedi.' });
     }
   });
 
@@ -1253,7 +1318,8 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
             : (q.svg && typeof q.svg === 'object' ? (safeSvg.validate(q.svg) || JSON.stringify(q.svg)) : '');
 
           const soruPayload = {
-            format: 'text_svg',
+            format: q.imageUrl ? 'hybrid' : 'text_svg',
+            ...(q.imageUrl ? { imageUrl: q.imageUrl } : {}),
             questionType: formattedOptions.length >= 2 ? 'multiple_choice' : 'open_ended',
             text: q.text,
             options: formattedOptions,
