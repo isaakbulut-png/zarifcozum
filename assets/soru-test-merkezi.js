@@ -80,15 +80,35 @@
     return 7;
   }
 
+  let cachedStudentId = '';
+
+  function matchesStudentTarget(pub, studentId) {
+    if (!pub || !Array.isArray(pub.targetStudentIds) || pub.targetStudentIds.length === 0) return true;
+    if (!studentId) return true;
+    return pub.targetStudentIds.includes(String(studentId));
+  }
+
+  async function fetchBackendMaarifPublished(grade, workType = '') {
+    try {
+      const qs = new URLSearchParams({ sinif: String(grade) });
+      if (workType) qs.set('workType', workType);
+      const res = await fetch(`/api/pratik/maarif-yayinlar?${qs.toString()}`, { credentials: 'include' });
+      if (!res.ok) return [];
+      const data = await res.json();
+      if (data && data.studentId) cachedStudentId = String(data.studentId);
+      return Array.isArray(data?.items) ? data.items : [];
+    } catch {
+      return [];
+    }
+  }
+
   async function fetchGradeApprovedTopics(grade) {
     if (gradeTopicsCache.has(grade)) return gradeTopicsCache.get(grade);
     const itemsMap = new Map();
 
-    // 1. Öğretmenin "Onayla ve Yayınla" ile yayınladığı (yalnızca status === 'published') ZarifStore testleri
-    const publishedStoreItems = (window.ZarifStore && window.ZarifStore.publishedTests)
-      ? window.ZarifStore.publishedTests.list({ grade, status: 'published' })
-      : [];
-    publishedStoreItems.forEach(pub => {
+    // 1a. Backend MongoDB'ye yayınlanan 4 Maarif Modülü testleri (tüm cihazlardan senkron + öğrenci filtreli)
+    const backendPublished = await fetchBackendMaarifPublished(grade);
+    backendPublished.forEach(pub => {
       const title = extractTopicTitle(pub.topicTitle || pub.title);
       if (!title) return;
       const key = title.toLowerCase();
@@ -96,6 +116,25 @@
       itemsMap.set(key, {
         title,
         questionCount: (prev ? prev.questionCount : 0) + (Number(pub.questionCount) || (Array.isArray(pub.questions) ? pub.questions.length : 0)),
+        approved: true,
+        workType: pub.workType || 'coktan_secmeli',
+        workTypeLabel: pub.workTypeLabel || MODE_LABELS[pub.workType] || 'Öğrenme Çıktısı Testi',
+        publishedItem: pub
+      });
+    });
+
+    // 1b. Öğretmenin "Onayla ve Yayınla" ile yayınladığı (yalnızca status === 'published') ZarifStore testleri
+    const publishedStoreItems = (window.ZarifStore && window.ZarifStore.publishedTests)
+      ? window.ZarifStore.publishedTests.list({ grade, status: 'published' }).filter(p => matchesStudentTarget(p, cachedStudentId))
+      : [];
+    publishedStoreItems.forEach(pub => {
+      const title = extractTopicTitle(pub.topicTitle || pub.title);
+      if (!title) return;
+      const key = title.toLowerCase();
+      if (itemsMap.has(key)) return;
+      itemsMap.set(key, {
+        title,
+        questionCount: Number(pub.questionCount) || (Array.isArray(pub.questions) ? pub.questions.length : 0),
         approved: true,
         workType: pub.workType || 'coktan_secmeli',
         workTypeLabel: pub.workTypeLabel || MODE_LABELS[pub.workType] || 'Öğrenme Çıktısı Testi',
@@ -411,10 +450,15 @@
   async function launchMode(workType, specificTopic = '') {
     const modeLabel = MODE_LABELS[workType] || 'Onaylı Çalışma';
 
-    // 1. Önce öğretmenin "Onayla ve Yayınla" ile ZarifStore.publishedTests'e aktardığı gerçek testleri ara
-    const published = (window.ZarifStore && window.ZarifStore.publishedTests)
-      ? window.ZarifStore.publishedTests.list({ grade: selectedGrade, status: 'published', workType })
+    // 1a. Önce sunucuda yayınlanan (tüm cihazlardan senkron + öğrenci filtreli) Maarif testlerini kontrol et
+    const backendList = await fetchBackendMaarifPublished(selectedGrade, workType);
+
+    // 1b. Yerel ZarifStore.publishedTests yedek listesi (öğrenci filtreli)
+    const localList = (window.ZarifStore && window.ZarifStore.publishedTests)
+      ? window.ZarifStore.publishedTests.list({ grade: selectedGrade, status: 'published', workType }).filter(p => matchesStudentTarget(p, cachedStudentId))
       : [];
+
+    const published = [...backendList, ...localList];
 
     const matched = specificTopic
       ? (published.find(p => String(p.topicTitle || '').toLowerCase() === specificTopic.toLowerCase()) || published[0])

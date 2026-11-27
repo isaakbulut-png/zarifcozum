@@ -238,6 +238,106 @@ function createPratikRouter({
     return { kim, uye, limitYok, izin: mevcut || kullanilan.length < haklar.konu };
   }
 
+  // Öğretmenin sepetten 4 Maarif modülüne (sınıf veya belirli öğrenciler için) yayınladığı testler
+  router.post('/maarif-yayinla', sarmala(async (req, res) => {
+    const user = req.session?.user;
+    if (!user || !['teacher', 'admin'].includes(user.role)) {
+      return res.status(403).json({ mesaj: 'Bu işlem için öğretmen yetkisi gerekir.' });
+    }
+    const ContentLibrary = require('../models/ContentLibrary');
+    const grade = Number(req.body?.grade) || 5;
+    const workType = String(req.body?.workType || 'coktan_secmeli').trim();
+    const workTypeLabel = String(req.body?.workTypeLabel || 'Öğrenme Çıktısı Testi').trim();
+    const title = String(req.body?.title || `${grade}. Sınıf ${workTypeLabel}`).trim().slice(0, 180);
+    const topicTitle = String(req.body?.topicTitle || title).trim().slice(0, 180);
+    const targetStudentIds = Array.isArray(req.body?.targetStudentIds)
+      ? req.body.targetStudentIds.map(id => String(id).trim()).filter(Boolean)
+      : [];
+    const targetStudentNames = Array.isArray(req.body?.targetStudentNames)
+      ? req.body.targetStudentNames.map(n => String(n).trim()).filter(Boolean)
+      : [];
+    const questions = Array.isArray(req.body?.questions) ? req.body.questions : [];
+    if (!questions.length) {
+      return res.status(400).json({ mesaj: 'Yayınlanacak en az bir soru bulunmalıdır.' });
+    }
+
+    const doc = await ContentLibrary.create({
+      title,
+      type: 'maarif_published_test',
+      ders: 'matematik',
+      grade,
+      topic: topicTitle,
+      difficulty: String(req.body?.difficulty || 'orta').toLowerCase(),
+      content: {
+        title,
+        topicTitle,
+        grade,
+        workType,
+        workTypeLabel,
+        targetStudentIds,
+        targetStudentNames,
+        questions,
+        publishedAt: new Date().toISOString()
+      },
+      status: 'approved',
+      source: 'teacher_published',
+      createdBy: String(user.id || user._id || 'teacher')
+    });
+
+    res.status(201).json({
+      success: true,
+      id: String(doc._id),
+      mesaj: `${title} başarıyla yayınlandı.`
+    });
+  }));
+
+  router.get('/maarif-yayinlar', sarmala(async (req, res) => {
+    const sinif = Number(req.query?.sinif);
+    const workType = String(req.query?.workType || '').trim();
+    const ContentLibrary = require('../models/ContentLibrary');
+    const filter = { type: 'maarif_published_test', status: 'approved' };
+    if (Number.isInteger(sinif) && sinif >= 5 && sinif <= 12) {
+      filter.grade = sinif;
+    }
+
+    const docs = await ContentLibrary.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(60)
+      .lean();
+
+    const user = req.session?.user;
+    const isStudent = user && user.role === 'student';
+    const studentId = isStudent ? String(user.id || user._id || '') : '';
+
+    const items = docs
+      .map(d => {
+        const c = (d.content && typeof d.content === 'object') ? d.content : {};
+        return {
+          id: String(d._id),
+          title: c.title || d.title || 'Maarif Çalışması',
+          topicTitle: c.topicTitle || d.topic || d.title || 'Genel',
+          grade: Number(c.grade || d.grade) || 5,
+          workType: c.workType || 'coktan_secmeli',
+          workTypeLabel: c.workTypeLabel || 'Öğrenme Çıktısı Testi',
+          targetStudentIds: Array.isArray(c.targetStudentIds) ? c.targetStudentIds : [],
+          targetStudentNames: Array.isArray(c.targetStudentNames) ? c.targetStudentNames : [],
+          questions: Array.isArray(c.questions) ? c.questions : [],
+          questionCount: Array.isArray(c.questions) ? c.questions.length : 0,
+          status: 'published',
+          createdAt: d.createdAt
+        };
+      })
+      .filter(it => {
+        if (workType && it.workType !== workType) return false;
+        if (isStudent && it.targetStudentIds.length > 0) {
+          return it.targetStudentIds.includes(studentId);
+        }
+        return true;
+      });
+
+    res.json({ success: true, items, studentId });
+  }));
+
   router.get('/konular', sarmala(async (req, res) => {
     const sinif = Number(req.query?.sinif);
     if (!Number.isInteger(sinif) || sinif < 5 || sinif > 12) {

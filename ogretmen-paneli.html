@@ -1953,17 +1953,53 @@ body.teacher-menu-open {
                   </button>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;border-radius:10px;background:#FAF6F0;border:1px solid #ead8c5;">
-                  <label style="font-size:11.5px;font-weight:700;color:#3E2F26;display:flex;flex-direction:column;gap:4px;">Yayın Kapsamı
-                    <select id="basketExamScope" style="padding:6px 8px;border-radius:7px;border:1px solid #d8c3ae;background:#fff;font-size:12px;font-weight:600;color:#3E2F26;">
+                  <label style="font-size:11.5px;font-weight:700;color:#3E2F26;display:flex;flex-direction:column;gap:4px;grid-column:1/-1;">Yayın Kapsamı
+                    <select id="basketExamScope" style="padding:7px 8px;border-radius:7px;border:1px solid #d8c3ae;background:#fff;font-size:12px;font-weight:700;color:#0F172A;">
                       <option value="standard">Standart Test / Çalışma</option>
-                      <option value="turkiye">🇹🇷 Türkiye Geneli Deneme</option>
-                      <option value="il">📍 İl Geneli Deneme</option>
-                      <option value="yazili">📝 Yazılıya Hazırlık Provası (MEB Senaryolu)</option>
+                      <optgroup label="Öğrenci Soru &amp; Test Merkezi (4 Maarif Modülü)">
+                        <option value="coktan_secmeli">📋 Öğrenme Çıktısı Testleri</option>
+                        <option value="dogru_yanlis">⚡ Tanılayıcı Doğru / Yanlış &amp; Grid</option>
+                        <option value="baglam_beceri">🧩 Bağlam Temelli Beceri Soruları</option>
+                        <option value="acik_uclu">🎯 Açık Uçlu &amp; Rubrikli Senaryolar</option>
+                      </optgroup>
+                      <optgroup label="Sınav &amp; Deneme Modülleri">
+                        <option value="yazili">📝 Yazılıya Hazırlık Provası (MEB Senaryolu)</option>
+                        <option value="turkiye">🇹🇷 Türkiye Geneli Deneme</option>
+                        <option value="il">📍 İl Geneli Deneme</option>
+                      </optgroup>
                     </select>
                   </label>
-                  <label id="basketExamProvinceWrap" style="font-size:11.5px;font-weight:700;color:#3E2F26;display:none;flex-direction:column;gap:4px;">İl Adı
+                  <label id="basketExamProvinceWrap" style="font-size:11.5px;font-weight:700;color:#3E2F26;display:none;flex-direction:column;gap:4px;grid-column:1/-1;">İl Adı
                     <input id="basketExamProvince" type="text" value="Samsun" maxlength="40" placeholder="Örn. Samsun" style="padding:6px 8px;border-radius:7px;border:1px solid #d8c3ae;background:#fff;font-size:12px;font-weight:600;color:#3E2F26;">
                   </label>
+                </div>
+
+                <!-- Hedef Sınıf & Öğrenci Seçici (Tüm Sınıf veya Belirli Öğrenciler) -->
+                <div id="basketAudienceWrap" style="display:grid;grid-template-columns:130px 1fr;gap:8px;padding:10px;border-radius:10px;background:#FAF8F5;border:1.5px solid #E2DDD5;">
+                  <label style="font-size:11.5px;font-weight:700;color:#0F172A;display:flex;flex-direction:column;gap:4px;">Hedef Sınıf
+                    <select id="basketTargetGrade" style="padding:6px 8px;border-radius:7px;border:1px solid #CBD5E1;background:#FFFFFF;font-size:12px;font-weight:700;color:#0F172A;">
+                      <option value="5">5. Sınıf</option>
+                      <option value="6">6. Sınıf</option>
+                      <option value="7">7. Sınıf</option>
+                      <option value="8" selected>8. Sınıf</option>
+                      <option value="9">9. Sınıf</option>
+                      <option value="10">10. Sınıf</option>
+                      <option value="11">11. Sınıf</option>
+                      <option value="12">12. Sınıf</option>
+                    </select>
+                  </label>
+                  <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+                      <span style="font-size:11.5px;font-weight:700;color:#0F172A;">Hedef Öğrenciler</span>
+                      <span id="basketSelectedStudentsBadge" style="font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:999px;background:#FEF3C7;color:#92400E;">Tüm Sınıf</span>
+                    </div>
+                    <div id="basketTargetStudentsBox" style="max-height:92px;overflow-y:auto;padding:6px 8px;border-radius:7px;border:1px solid #CBD5E1;background:#FFFFFF;display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:#334155;">
+                      <label style="display:flex;align-items:center;gap:6px;font-weight:700;color:#0F172A;cursor:pointer;">
+                        <input type="checkbox" id="basketTargetAllStudents" checked style="accent-color:#D97706;"> Tüm Sınıf (Varsayılan)
+                      </label>
+                      <div id="basketTargetStudentItems" style="display:flex;flex-direction:column;gap:3px;padding-left:2px;color:#64748B;">Öğrenciler yükleniyor…</div>
+                    </div>
+                  </div>
                 </div>
                 <div id="basketYaziliOptionsWrap" style="display:none;flex-direction:column;gap:8px;padding:12px;border-radius:10px;background:linear-gradient(135deg,#FFFDF9,#FDF5E6);border:1.5px solid #D4A359;">
                   <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
@@ -4359,7 +4395,14 @@ body.teacher-menu-open {
     }
   });
 
-  // Deneme & Yazılı Kapsamı seçici görünürlüğü
+  // Deneme, Maarif 4 Modül & Yazılı Kapsamı seçici görünürlüğü
+  const MAARIF_SCOPE_LABELS = {
+    coktan_secmeli: 'Öğrenme Çıktısı Testleri',
+    dogru_yanlis: 'Tanılayıcı Doğru / Yanlış & Grid',
+    baglam_beceri: 'Bağlam Temelli Beceri Soruları',
+    acik_uclu: 'Açık Uçlu & Rubrikli Senaryolar'
+  };
+
   $('basketExamScope')?.addEventListener('change', () => {
     const val = $('basketExamScope').value;
     const wrap = $('basketExamProvinceWrap');
@@ -4367,10 +4410,104 @@ body.teacher-menu-open {
     if (wrap) wrap.style.display = val === 'il' ? 'flex' : 'none';
     if (yaziliWrap) yaziliWrap.style.display = val === 'yazili' ? 'flex' : 'none';
     if ($('publishBtnText')) {
-      $('publishBtnText').textContent = val === 'yazili' ? 'Yazılı Provasını Yayınla' : 'Testi Yayınla';
+      $('publishBtnText').textContent = val === 'yazili'
+        ? 'Yazılı Provasını Yayınla'
+        : (MAARIF_SCOPE_LABELS[val] ? `${MAARIF_SCOPE_LABELS[val]} Olarak Yayınla` : 'Testi Yayınla');
     }
     updateQuizBasketUI();
   });
+
+  // Hedef Sınıf & Öğrenci Listesi Yönetimi
+  let basketAllStudentsCache = [];
+  function updateBasketSelectedBadge() {
+    const badge = $('basketSelectedStudentsBadge');
+    const allChk = $('basketTargetAllStudents');
+    const selected = [...document.querySelectorAll('.basket-student-chk:checked')];
+    if (!badge) return;
+    if (allChk?.checked || selected.length === 0) {
+      badge.textContent = 'Tüm Sınıf';
+      badge.style.background = '#FEF3C7';
+      badge.style.color = '#92400E';
+    } else {
+      badge.textContent = `${selected.length} Öğrenci Seçili`;
+      badge.style.background = '#DBEAFE';
+      badge.style.color = '#1E40AF';
+    }
+  }
+
+  function renderBasketStudentsForGrade(gradeVal) {
+    const box = $('basketTargetStudentItems');
+    if (!box) return;
+    const g = Number(gradeVal);
+    const list = basketAllStudentsCache.filter(s => Number(s.grade) === g);
+    const allChk = $('basketTargetAllStudents');
+    if (allChk) allChk.checked = true;
+    if (!list.length) {
+      box.innerHTML = '<span style="font-size:11px;color:#94A3B8;">Bu sınıfta kayıtlı öğrenci bulunamadı (Tüm sınıfa yayınlanır).</span>';
+      updateBasketSelectedBadge();
+      return;
+    }
+    box.innerHTML = list.map(s => {
+      const sid = String(s.id || s._id || '');
+      const sname = esc(s.name || s.fullName || 'Öğrenci');
+      const sec = s.section ? ` (${esc(s.section)})` : '';
+      return `<label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#1E293B;font-weight:500;">
+        <input type="checkbox" class="basket-student-chk" value="${esc(sid)}" data-student-name="${sname}" style="accent-color:#0F172A;">
+        <span>${sname}${sec}</span>
+      </label>`;
+    }).join('');
+    updateBasketSelectedBadge();
+  }
+
+  async function loadBasketStudents() {
+    try {
+      const res = await api('/api/ogretmen/ogrenciler');
+      basketAllStudentsCache = Array.isArray(res?.students) ? res.students.filter(s => s.active !== false) : [];
+      const curGrade = $('basketTargetGrade')?.value || $('quizGrade')?.value || '8';
+      renderBasketStudentsForGrade(curGrade);
+    } catch (e) {
+      const box = $('basketTargetStudentItems');
+      if (box) box.innerHTML = '<span style="font-size:11px;color:#94A3B8;">Öğrenci listesi alınamadı (Tüm sınıfa yayınlanır).</span>';
+    }
+  }
+
+  $('basketTargetGrade')?.addEventListener('change', () => {
+    const g = $('basketTargetGrade').value;
+    if ($('quizGrade')) $('quizGrade').value = g;
+    renderBasketStudentsForGrade(g);
+  });
+  $('quizGrade')?.addEventListener('change', () => {
+    const g = $('quizGrade').value;
+    if ($('basketTargetGrade') && g) {
+      $('basketTargetGrade').value = g;
+      renderBasketStudentsForGrade(g);
+    }
+  });
+  $('basketTargetAllStudents')?.addEventListener('change', () => {
+    if ($('basketTargetAllStudents').checked) {
+      document.querySelectorAll('.basket-student-chk').forEach(chk => { chk.checked = false; });
+    }
+    updateBasketSelectedBadge();
+  });
+  $('basketTargetStudentItems')?.addEventListener('change', (e) => {
+    if (e.target.classList.contains('basket-student-chk')) {
+      const anyChecked = document.querySelectorAll('.basket-student-chk:checked').length > 0;
+      if ($('basketTargetAllStudents')) $('basketTargetAllStudents').checked = !anyChecked;
+      updateBasketSelectedBadge();
+    }
+  });
+  loadBasketStudents();
+
+  function getSelectedBasketAudience() {
+    const grade = Number($('basketTargetGrade')?.value || $('quizGrade')?.value || 5);
+    const allChecked = $('basketTargetAllStudents')?.checked;
+    const checked = allChecked ? [] : [...document.querySelectorAll('.basket-student-chk:checked')];
+    return {
+      grade,
+      targetStudentIds: checked.map(c => c.value).filter(Boolean),
+      targetStudentNames: checked.map(c => c.dataset.studentName || '').filter(Boolean)
+    };
+  }
 
   // Sepetten Yayınla Butonu
   $('btnPublishBasketQuiz')?.addEventListener('click', async () => {
@@ -4379,6 +4516,78 @@ body.teacher-menu-open {
       return;
     }
     const scope = $('basketExamScope')?.value || 'standard';
+    const audience = getSelectedBasketAudience();
+
+    // 4 Maarif Soru & Test Merkezi Modülüne Doğrudan Yayın
+    if (MAARIF_SCOPE_LABELS[scope]) {
+      const qEls = [...$('questionList').children];
+      const workTypeLabel = MAARIF_SCOPE_LABELS[scope];
+      const title = ($('quizTitle')?.value || '').trim() || `${audience.grade}. Sınıf ${workTypeLabel}`;
+      const topicTitle = ($('aiSubTopicSelect')?.selectedOptions?.[0]?.textContent || $('aiThemeSelect')?.selectedOptions?.[0]?.textContent || title).replace(/\[.*?\]/g, '').trim() || title;
+
+      const questions = qEls.map((card, i) => {
+        const editor = questionEditors.get(card);
+        let text = '';
+        if (editor) {
+          try { text = (typeof editor.getText === 'function' ? editor.getText() : (editor.root?.textContent || '')).trim(); } catch {}
+        }
+        if (!text) text = card.querySelector('.question-editor')?.textContent?.trim() || `Soru ${i + 1}`;
+        const ans = (card.querySelector('.correct-answer')?.value || 'A').trim().toUpperCase();
+        const imgUrl = card.querySelector('.question-image-url')?.value?.trim() || '';
+        const svgCode = card.querySelector('.question-svg-code')?.value?.trim() || '';
+        const outcomeCode = card.querySelector('.question-outcome')?.value?.trim() || '';
+        const options = {};
+        ['A', 'B', 'C', 'D', 'E'].forEach(l => {
+          const val = card.querySelector(`.option-${l}`)?.value?.trim();
+          if (val) options[l] = val;
+        });
+        return {
+          id: 'mq_' + Date.now() + '_' + i,
+          text,
+          options,
+          answer: ans,
+          svg: svgCode || '',
+          imageUrl: imgUrl || '',
+          outcomeCode,
+          explanation: card.querySelector('.question-explanation')?.value?.trim() || `Doğru cevap: ${ans}`
+        };
+      });
+
+      const pubPayload = {
+        title,
+        topicTitle,
+        grade: audience.grade,
+        workType: scope,
+        workTypeLabel,
+        targetStudentIds: audience.targetStudentIds,
+        targetStudentNames: audience.targetStudentNames,
+        questions,
+        questionCount: questions.length,
+        status: 'published'
+      };
+
+      try {
+        if (window.ZarifStore && window.ZarifStore.publishedTests) {
+          window.ZarifStore.publishedTests.publish(pubPayload);
+        }
+      } catch (e) {}
+
+      try {
+        await api('/api/pratik/maarif-yayinla', {
+          method: 'POST',
+          body: JSON.stringify(pubPayload)
+        });
+      } catch (e) {
+        durumYaz('quizStatus', 'Sunucuya yayınlama hatası: ' + e.message, 'error');
+        return;
+      }
+
+      const targetText = audience.targetStudentIds.length > 0
+        ? `${audience.targetStudentIds.length} seçili öğrenciye`
+        : `tüm ${audience.grade}. sınıf öğrencilerine`;
+      durumYaz('quizStatus', `✅ "${title}" → ${workTypeLabel} alanına (${targetText}) yayınlandı!`, 'ok');
+      return;
+    }
 
     if (scope === 'yazili') {
       const qEls = [...$('questionList').children];
