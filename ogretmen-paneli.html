@@ -5598,6 +5598,23 @@ body.teacher-menu-open {
   window.ZarifStore?.events?.subscribe?.('publishedTests', renderTeacherPublishedMaarifList);
 
   // Helper to render AI questions list with F5 recovery & action buttons
+  // Global köprü: Bağımsız taslak yöneticisi buradan aiDraft'ı ekrana basabilir (erken tanımlı)
+  window.__zcRestoreAiDraftToUi = function (draft) {
+    if (!draft) return;
+    const resolvedId = String(draft.id || draft._id || '');
+    aiDraft = {
+      topic: draft.topic,
+      grade: draft.grade,
+      difficulty: draft.difficulty,
+      draftId: resolvedId,
+      questions: Array.isArray(draft.questions) ? draft.questions : [],
+      soruSayisi: Array.isArray(draft.questions) ? draft.questions.length : 0
+    };
+    if (resolvedId) localStorage.setItem('zarif_last_ai_draft_id', resolvedId);
+    renderAiQuestionCards(aiDraft, true);
+    $('aiQuestionList')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   function renderAiQuestionCards(quiz, isRestored = false) {
     const container = $('aiQuestionList');
     if (!container) return;
@@ -6624,6 +6641,73 @@ body.teacher-menu-open {
       }
     });
 
+    function fallbackRenderDraftToUi(draft) {
+      const container = document.getElementById('aiQuestionList');
+      if (!container) return;
+      const draftId = String(draft.id || draft._id || '');
+      const qs = Array.isArray(draft.questions) ? draft.questions : [];
+      const fmt = txt => (window.zarifMathText && typeof window.zarifMathText.format === 'function')
+        ? window.zarifMathText.format(String(txt || ''))
+        : safeEsc(String(txt || ''));
+
+      container.innerHTML = `
+        <div style="background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <strong style="color:#0F172A;font-size:14px;">📂 Geri Yüklenen Taslak: ${safeEsc(String(draft.grade || 5))}. Sınıf — ${safeEsc(draft.topic || 'Genel')} (${qs.length} Soru)</strong>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" id="fbTransferBankBtn" style="padding:7px 14px;border-radius:8px;border:none;background:#4338CA;color:#FFFFFF;font-size:12.5px;font-weight:700;cursor:pointer;">📚 Soru Bankasına Aktar</button>
+            <a href="/api/ai/questions/drafts/${encodeURIComponent(draftId)}/export?format=pdf" target="_blank" style="padding:7px 12px;border-radius:8px;border:1px solid #CBD5E1;background:#FFFFFF;color:#0F172A;font-size:12.5px;font-weight:700;text-decoration:none;">📥 PDF İndir</a>
+            <a href="/api/ai/questions/drafts/${encodeURIComponent(draftId)}/export?format=docx" target="_blank" style="padding:7px 12px;border-radius:8px;border:1px solid #CBD5E1;background:#FFFFFF;color:#0F172A;font-size:12.5px;font-weight:700;text-decoration:none;">📄 DOCX İndir</a>
+          </div>
+        </div>
+        ${qs.map((q, idx) => {
+          const opts = q.options && typeof q.options === 'object' ? Object.entries(q.options) : [];
+          return `<article class="question-card" style="background:#FFFFFF;border:1.5px solid #E2DDD5;border-radius:14px;padding:16px;margin-bottom:12px;color:#0F172A;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="padding:3px 10px;border-radius:999px;background:#0F172A;color:#FFFFFF;font-size:12px;font-weight:800;">Soru ${idx + 1}</span>
+              ${q.outcomeCode ? `<span style="font-size:11.5px;font-weight:700;color:#64748B;">${safeEsc(q.outcomeCode)}</span>` : ''}
+            </div>
+            <p style="font-size:14.5px;line-height:1.65;color:#0F172A;margin:0 0 10px;">${fmt(q.text)}</p>
+            <div data-fb-svg="${idx}" style="margin:10px 0;"></div>
+            ${opts.length ? `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0;">${opts.map(([k, v]) => `
+              <div style="padding:8px 12px;border-radius:9px;border:1.5px solid ${q.answer === k ? '#059669' : '#E2E8F0'};background:${q.answer === k ? '#ECFDF5' : '#FAF8F5'};color:#0F172A;font-size:13.5px;">
+                <strong style="margin-right:6px;">${safeEsc(k)})</strong>${fmt(v)}
+              </div>`).join('')}</div>` : ''}
+            ${(q.solution || q.explanation) ? `<div style="margin-top:10px;padding:10px 12px;border-radius:9px;background:#FFFBEB;border-left:4px solid #D97706;font-size:13px;color:#1E293B;"><strong>📝 Çözüm:</strong> ${fmt(q.solution || q.explanation)}</div>` : ''}
+          </article>`;
+        }).join('')}
+      `;
+
+      qs.forEach((q, idx) => {
+        const mount = container.querySelector(`[data-fb-svg="${idx}"]`);
+        if (!mount) return;
+        const markup = window.VisualMathEngine ? window.VisualMathEngine.renderFromQuestion(q) : (q.svg || '');
+        if (markup) mount.innerHTML = markup;
+        else mount.style.display = 'none';
+      });
+
+      container.querySelector('#fbTransferBankBtn')?.addEventListener('click', async (ev) => {
+        const b = ev.currentTarget;
+        b.disabled = true;
+        b.textContent = 'Aktarılıyor…';
+        try {
+          const r = await fetchJsonWithTimeout(`/api/ai/questions/drafts/${encodeURIComponent(draftId)}/transfer-to-bank`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questionIndices: qs.map((_, i) => i) })
+          });
+          alert(`Tebrikler! ${r.transferredCount || qs.length} soru kalıcı olarak Soru Bankasına aktarıldı.`);
+          b.textContent = '✅ Aktarıldı';
+          loadSavedAiDrafts();
+        } catch (err) {
+          alert('Soru bankasına aktarma hatası: ' + err.message);
+          b.disabled = false;
+          b.textContent = '📚 Soru Bankasına Aktar';
+        }
+      });
+
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     document.getElementById('savedAiDraftsList')?.addEventListener('click', async (e) => {
       const restoreBtn = e.target.closest('[data-restore-draft]');
       if (restoreBtn) {
@@ -6632,10 +6716,13 @@ body.teacher-menu-open {
         restoreBtn.textContent = 'Yükleniyor…';
         try {
           const res = await fetchJsonWithTimeout('/api/ai/questions/drafts/' + encodeURIComponent(id));
-          if (res && res.draft && typeof window.__zcRestoreAiDraftToUi === 'function') {
-            window.__zcRestoreAiDraftToUi(res.draft);
+          const draft = res?.draft || (Array.isArray(res?.questions) ? res : null);
+          if (!draft) {
+            alert('Taslak verisi sunucudan boş döndü.');
+          } else if (typeof window.__zcRestoreAiDraftToUi === 'function') {
+            window.__zcRestoreAiDraftToUi(draft);
           } else {
-            alert('Taslak içeriği okunamadı.');
+            fallbackRenderDraftToUi(draft);
           }
         } catch (err) {
           alert('Taslak geri yüklenemedi: ' + err.message);
