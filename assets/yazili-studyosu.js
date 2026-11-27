@@ -1,6 +1,10 @@
 /* ==========================================================================
-   ZarifÇözüm — MEB Senaryolu İnteraktif Yazılı Stüdyosu (5 Adımlı SPA)
-   Öğretmen Özel Provaları + Hazır MEB Havuzu + 40:00 Sayaç + AI İpucu + Karne + Print
+   ZarifÇözüm — İnteraktif Yazılı Stüdyosu v2 (5 Adımlı Tam Genişlik SPA)
+   - 5 Adımlı Akıcı Sihirbaz (Dönem -> Hazırlık Animasyonu -> Mod -> Senaryo -> Kurallar & Dağılım)
+   - 2 Sütunlu Geniş Sınav Stüdyosu (Sol: İnteraktif Geometri Lab / Şema | Sağ: a/b/c/d Alt Sorular & Klavye)
+   - Web Audio API Mikro Sesler (🔊/🔇) + Sekmede Kal Odak Takibi + Boş Soru Teslim Modalı
+   - Öğretmen Özel Provaları (zc_ogretmen_yazili_provalari) + Öğretmen Karne Senkronizasyonu
+   Marka Paleti: #FAF8F5 (fildişi), #0F172A (gece mavisi), #D97706 (kehribar)
    ========================================================================== */
 (function (global) {
   "use strict";
@@ -9,22 +13,69 @@
   var LEGACY_TEACHER_KEY = "zc_teacher_yazili_v1";
   var RESULTS_LS_KEY = "zc_yazili_sonuclar_v1";
 
+  /* ── Web Audio API Mikro Ses Motoru ── */
+  var SoundEngine = (function () {
+    var muted = false;
+    var ctx = null;
+    function getCtx() {
+      if (muted) return null;
+      try {
+        var AC = global.AudioContext || global.webkitAudioContext;
+        if (!AC) return null;
+        if (!ctx) ctx = new AC();
+        if (ctx.state === "suspended") ctx.resume();
+        return ctx;
+      } catch (e) { return null; }
+    }
+    function play(kind) {
+      var c = getCtx();
+      if (!c) return;
+      var now = c.currentTime;
+      var seq = kind === "success"
+        ? [{ f: 523.25, d: 0.09, t: 0 }, { f: 659.25, d: 0.09, t: 0.08 }, { f: 783.99, d: 0.16, t: 0.16 }]
+        : kind === "draw"
+        ? [{ f: 440, d: 0.06, t: 0 }, { f: 660, d: 0.1, t: 0.05 }]
+        : kind === "snap"
+        ? [{ f: 720, d: 0.05, t: 0 }]
+        : kind === "step"
+        ? [{ f: 392, d: 0.06, t: 0 }, { f: 523.25, d: 0.08, t: 0.05 }]
+        : [{ f: 540, d: 0.035, t: 0 }];
+      seq.forEach(function (n) {
+        var osc = c.createOscillator();
+        var gain = c.createGain();
+        osc.type = kind === "click" ? "triangle" : "sine";
+        osc.frequency.setValueAtTime(n.f, now + n.t);
+        gain.gain.setValueAtTime(0.0001, now + n.t);
+        gain.gain.exponentialRampToValueAtTime(0.065, now + n.t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d);
+        osc.connect(gain);
+        gain.connect(c.destination);
+        osc.start(now + n.t);
+        osc.stop(now + n.t + n.d + 0.02);
+      });
+    }
+    return {
+      play: play,
+      isMuted: function () { return muted; },
+      toggleMute: function () { muted = !muted; return muted; }
+    };
+  })();
+  global.ZarifYaziliSound = SoundEngine;
+
   function esc(str) {
-    return String(str || "")
+    return String(str == null ? "" : str)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
   }
 
-  function normalizeAns(val) {
+  function norm(val) {
     return String(val || "")
       .toLowerCase()
       .replace(/\s+/g, "")
       .replace(/,/g, ".")
-      .replace(/°/g, "")
-      .replace(/tl$/g, "")
-      .replace(/cm2|cm²|cm|m2|m²|m|gün|paket|şişe|derece|puan/g, "")
+      .replace(/°|tl$|cm2|cm²|cm|m2|m²|m|derece|köşe|kose/g, "")
       .trim();
   }
 
@@ -37,12 +88,16 @@
       var u = JSON.parse(localStorage.getItem("zarif_active_user") || localStorage.getItem("currentUser") || "null");
       if (u && (u.kayitliSinif || u.grade)) return String(u.kayitliSinif || u.grade);
     } catch (e) {}
-    var domGrade = document.querySelector("#studentProfileGrade, .student-grade-badge");
-    if (domGrade) {
-      var m = domGrade.textContent.match(/\b(5|6|7|8|9|10|11|12)\b/);
-      if (m) return m[1];
-    }
     return "5";
+  }
+
+  function detectStudentName() {
+    if (global.__currentStudent && global.__currentStudent.name) return global.__currentStudent.name;
+    try {
+      var u = JSON.parse(localStorage.getItem("zarif_active_user") || localStorage.getItem("currentUser") || "null");
+      if (u && u.name) return u.name;
+    } catch (e) {}
+    return "Öğrenci";
   }
 
   function readLocalTeacherExams(grade, donem) {
@@ -61,23 +116,20 @@
     return out;
   }
 
-  function detectStudentName() {
-    if (global.__currentStudent && global.__currentStudent.name) return global.__currentStudent.name;
-    try {
-      var u = JSON.parse(localStorage.getItem("zarif_active_user") || localStorage.getItem("currentUser") || "null");
-      if (u && u.name) return u.name;
-    } catch (e) {}
-    var el = document.querySelector("#studentProfileName, .student-name");
-    return (el && el.textContent.trim()) || "Öğrenci";
-  }
-
   function saveResultRecord(rec) {
     try {
       var arr = JSON.parse(localStorage.getItem(RESULTS_LS_KEY) || "[]");
       if (!Array.isArray(arr)) arr = [];
       arr.unshift(rec);
-      localStorage.setItem(RESULTS_LS_KEY, JSON.stringify(arr.slice(0, 20)));
+      localStorage.setItem(RESULTS_LS_KEY, JSON.stringify(arr.slice(0, 25)));
     } catch (e) {}
+  }
+
+  function formatMMSS(sec) {
+    var s = Math.max(0, sec);
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    return String(m).padStart(2, "0") + ":" + String(r).padStart(2, "0");
   }
 
   function initYaziliStudyosu() {
@@ -86,46 +138,26 @@
 
     var pool = global.ZARIF_YAZILI_HAVUZU;
     var state = {
+      step: "terms", // terms | loading | mode | scenario | briefing | exam | result
       grade: detectStudentGrade(),
       donem: "1_donem_1_yazili",
+      mode: "interactive", // interactive | print
       senaryoNo: 1,
-      view: "lobby", // lobby | exam | report
-      teacherExams: [],
-      activeExam: null,
+      selectedTeacherExam: null,
+      activeQuestions: [],
       qIdx: 0,
-      answers: {}, // { idx: { steps: '', final: '', hintUsed: false } }
-      secondsLeft: 40 * 60,
-      timerId: null
+      subIdx: 0,
+      answers: {},       // { "qIdx": "..." } veya { "qIdx_subIdx": "..." }
+      drawDone: {},      // { "qIdx": true }
+      openRuleCard: null, // 'count' | 'time' | 'focus'
+      showConfirmModal: false,
+      showSolutions: false,
+      remainingSec: 40 * 60,
+      timerId: null,
+      tabLeaveCount: 0,
+      tabWarningVisible: false,
+      lastScore: 0
     };
-
-    root.innerHTML =
-      '<div class="zy-studio" id="zyStudioApp"></div>' +
-      '<div class="zy-modal-backdrop" id="zyModeModal" role="dialog" aria-modal="true">' +
-        '<div class="zy-modal">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-            '<h3 style="margin:0;font-size:1.3rem;font-weight:800;color:#3B281E;">Çözüm Modunu Seç</h3>' +
-            '<button type="button" class="zy-btn-outline" id="zyCloseModal" style="min-height:36px;padding:0 12px;">×</button>' +
-          '</div>' +
-          '<p style="margin:0;color:#6E5A4F;font-size:0.95rem;" id="zyModalSubtitle"></p>' +
-          '<div class="zy-mode-grid">' +
-            '<button type="button" class="zy-mode-card" id="zyStartDigital">' +
-              '<div style="font-size:1.7rem;margin-bottom:8px;">💻</div>' +
-              '<strong style="display:block;font-size:1.05rem;margin-bottom:4px;color:#3B281E;">İnteraktif Ekranda Çöz</strong>' +
-              '<span style="font-size:0.86rem;color:#6E5A4F;">40 dakikalık sayaç, açık uçlu işlem kutusu, AI ipucu ve anında 100 üzerinden yazılı karnesi.</span>' +
-            '</button>' +
-            '<button type="button" class="zy-mode-card" id="zyStartPrint">' +
-              '<div style="font-size:1.7rem;margin-bottom:8px;">🖨️</div>' +
-              '<strong style="display:block;font-size:1.05rem;margin-bottom:4px;color:#3B281E;">Kağıt Çıktısı Al (MEB Formatı)</strong>' +
-              '<span style="font-size:0.86rem;color:#6E5A4F;">Ad-Soyad, puan baremi ve en sonda ayrı sayfada Cevap Anahtarı bulunan yazdırılabilir sınav kağıdı.</span>' +
-            '</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="zy-print-sheet" id="zyPrintSheet"></div>';
-
-    var appEl = document.getElementById("zyStudioApp");
-    var modalEl = document.getElementById("zyModeModal");
-    var printSheetEl = document.getElementById("zyPrintSheet");
 
     function stopTimer() {
       if (state.timerId) {
@@ -134,456 +166,694 @@
       }
     }
 
-    function formatTime(sec) {
-      var m = Math.floor(sec / 60);
-      var s = sec % 60;
-      return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
-    }
-
-    async function fetchTeacherExams() {
-      var combined = readLocalTeacherExams(state.grade, state.donem);
-      try {
-        var res = await fetch("/api/yazili?grade=" + encodeURIComponent(state.grade) + "&donem=" + encodeURIComponent(state.donem), { credentials: "same-origin" });
-        if (res.ok) {
-          var data = await res.json();
-          if (data && Array.isArray(data.provalar)) {
-            data.provalar.forEach(function (p) {
-              if (!combined.some(function (x) { return x.id === p.id; })) {
-                combined.push({
-                  id: p.id,
-                  title: p.title,
-                  grade: p.grade,
-                  donem: p.donem,
-                  senaryoNo: p.senaryoNo || 1,
-                  aciklama: p.aciklama || "Öğretmeninin yayınladığı özel yazılı provası",
-                  toplamPuan: p.toplamPuan || 100,
-                  fromApi: true
-                });
-              }
-            });
-          }
-        }
-      } catch (e) {}
-      state.teacherExams = combined;
-      if (state.view === "lobby") renderLobby();
-    }
-
-    function buildCurrentScenarioExam() {
-      var donemObj = pool.DONEMLER.filter(function (d) { return d.id === state.donem; })[0] || pool.DONEMLER[0];
-      var senObj = pool.SENARYOLAR.filter(function (s) { return s.no === state.senaryoNo; })[0] || pool.SENARYOLAR[0];
-      var sorular = pool.getSorular(state.grade, state.donem, state.senaryoNo);
-      return {
-        id: "meb-" + state.grade + "-" + state.donem + "-s" + state.senaryoNo,
-        title: state.grade + ". Sınıf " + donemObj.ad + " — " + senObj.ad,
-        grade: state.grade,
-        donemAd: donemObj.ad,
-        senaryoAd: senObj.ad,
-        sorular: sorular
-      };
-    }
-
-    function openModeModal(examObj) {
-      state.activeExam = examObj;
-      document.getElementById("zyModalSubtitle").textContent =
-        examObj.title + " • " + examObj.sorular.length + " Açık Uçlu Soru (100 Puan)";
-      modalEl.classList.add("is-open");
-    }
-
-    function triggerPrintPaper(examObj) {
-      modalEl.classList.remove("is-open");
-      var qHtml = examObj.sorular.map(function (q, idx) {
-        return (
-          '<div style="margin-bottom:20px;page-break-inside:avoid;">' +
-            '<div style="font-weight:700;margin-bottom:6px;">Soru ' + (idx + 1) + ' (' + (q.puan || 15) + ' Puan) ' +
-              (q.kazanimKodu ? '<span style="font-weight:400;font-size:9.5pt;">[' + esc(q.kazanimKodu) + ']</span>' : '') +
-            '</div>' +
-            '<div style="margin-bottom:10px;line-height:1.5;">' + esc(q.metin) + '</div>' +
-            (q.resimUrl ? '<div style="margin-bottom:10px;"><img src="' + esc(q.resimUrl) + '" style="max-width:260px;max-height:160px;border:1px solid #ccc;"></div>' : '') +
-            '<div style="height:68px;border:1px dashed #999;border-radius:6px;"></div>' +
-          '</div>'
-        );
-      }).join("");
-
-      var keyHtml = examObj.sorular.map(function (q, idx) {
-        return (
-          '<div style="margin-bottom:12px;">' +
-            '<strong>Soru ' + (idx + 1) + ' (' + (q.puan || 15) + ' Puan):</strong> ' +
-            '<div style="white-space:pre-line;margin-top:3px;">' + esc(q.cozumAdimlari || q.cozumMetni || '') + '</div>' +
-          '</div>'
-        );
-      }).join("");
-
-      printSheetEl.innerHTML =
-        '<div style="border:2px solid #000;padding:12px 16px;margin-bottom:18px;">' +
-          '<div style="text-align:center;font-weight:700;font-size:13pt;">T.C. MİLLÎ EĞİTİM BAKANLIĞI MAARİF MODELİ UYUMLU YAZILI PROVASI</div>' +
-          '<div style="text-align:center;margin-top:4px;font-size:11pt;">' + esc(examObj.title) + ' (ZarifÇözüm)</div>' +
-          '<div style="display:flex;justify-content:space-between;margin-top:12px;font-size:10pt;border-top:1px solid #000;padding-top:8px;">' +
-            '<span>Adı Soyadı: _______________________</span>' +
-            '<span>Sınıfı: ' + esc(examObj.grade) + '/___</span>' +
-            '<span>Tarih: ___/___/2026</span>' +
-            '<span>Puan: _____ / 100</span>' +
-          '</div>' +
-        '</div>' +
-        qHtml +
-        '<div class="zy-print-key">' +
-          '<h3 style="border-bottom:1px solid #000;padding-bottom:6px;">CEVAP ANAHTARI VE DEĞERLENDİRME RUBRİĞİ</h3>' +
-          keyHtml +
-        '</div>';
-
-      document.body.classList.add("zy-printing-exam");
-      setTimeout(function () {
-        global.print();
-        setTimeout(function () {
-          document.body.classList.remove("zy-printing-exam");
-        }, 400);
-      }, 100);
-    }
-
-    function startInteractiveExam(examObj) {
-      modalEl.classList.remove("is-open");
+    function startTimer() {
       stopTimer();
-      state.activeExam = examObj;
-      state.view = "exam";
-      state.qIdx = 0;
-      state.answers = {};
-      state.secondsLeft = 40 * 60;
-      renderExam();
-
+      state.remainingSec = 40 * 60;
       state.timerId = setInterval(function () {
-        state.secondsLeft--;
-        var tEl = document.getElementById("zyTimerDisplay");
-        if (tEl) tEl.textContent = "⏱ " + formatTime(Math.max(0, state.secondsLeft));
-        if (state.secondsLeft <= 0) {
+        state.remainingSec -= 1;
+        var el = root.querySelector("[data-yz-timer]");
+        if (el) el.textContent = formatMMSS(state.remainingSec);
+        if (state.remainingSec <= 0) {
           stopTimer();
           finishExam();
         }
       }, 1000);
     }
 
-    function gradeQuestion(q, ansObj) {
-      var maxPts = Number(q.puan || 15);
-      var finalRaw = (ansObj && ansObj.final) || "";
-      var stepsRaw = (ansObj && ansObj.steps) || "";
-      var hintPenalty = (ansObj && ansObj.hintUsed) ? 2 : 0;
-
-      var normFinal = normalizeAns(finalRaw);
-      var normAll = normalizeAns(stepsRaw + " " + finalRaw);
-
-      var expected = Array.isArray(q.beklenenSonuc) ? q.beklenenSonuc : (q.beklenenSonuc ? [q.beklenenSonuc] : []);
-      var matchedFull = expected.some(function (e) {
-        var ne = normalizeAns(e);
-        return ne && (normFinal === ne || (normFinal.length > 0 && normFinal.indexOf(ne) !== -1));
-      });
-
-      if (matchedFull) {
-        return { puan: Math.max(0, maxPts - hintPenalty), maxPts: maxPts, durum: "tam", hintPenalty: hintPenalty };
+    // Sekmede Kal odak takibi
+    document.addEventListener("visibilitychange", function () {
+      if (state.step === "exam" && document.hidden) {
+        state.tabLeaveCount += 1;
+        state.tabWarningVisible = true;
+      } else if (state.step === "exam" && !document.hidden && state.tabWarningVisible) {
+        var warn = root.querySelector("[data-yz-tab-warn]");
+        if (warn) {
+          warn.style.display = "flex";
+          warn.querySelector("span").textContent = "⚠️ Sekmeden ayrıldığın tespit edildi (" + state.tabLeaveCount + " kez). Gerçek sınav disiplini için bu sekmede kal!";
+        }
       }
+    });
 
-      // Kısmi puan: çözüm adımlarında yöntem anahtar kelimeleri geçiyorsa %50 puan
-      var keys = Array.isArray(q.yontemAnahtar) ? q.yontemAnahtar : [];
-      var hitCount = 0;
-      keys.forEach(function (k) {
-        if (normAll.indexOf(normalizeAns(k)) !== -1) hitCount++;
-      });
-      if (hitCount >= 2 || (stepsRaw.trim().length >= 18 && hitCount >= 1)) {
-        var partial = Math.round(maxPts * 0.5);
-        return { puan: Math.max(0, partial - hintPenalty), maxPts: maxPts, durum: "kismi", hintPenalty: hintPenalty };
+    function getTermLabel(id) {
+      var found = (pool.DONEMLER || []).find(function (d) { return d.id === id; });
+      return found ? found.ad : "1. Dönem 1. Yazılı";
+    }
+
+    function loadScenarioQuestions() {
+      if (state.selectedTeacherExam && Array.isArray(state.selectedTeacherExam.sorular)) {
+        state.activeQuestions = state.selectedTeacherExam.sorular;
+      } else {
+        state.activeQuestions = pool.getSorular(state.grade, state.donem, state.senaryoNo) || [];
       }
+    }
 
-      return { puan: 0, maxPts: maxPts, durum: "eksik", hintPenalty: hintPenalty };
+    function isQuestionAnswered(idx) {
+      var q = state.activeQuestions[idx];
+      if (!q) return false;
+      if (Array.isArray(q.altSorular) && q.altSorular.length) {
+        return q.altSorular.some(function (sub, si) {
+          if (sub.tip === "cizim") return Boolean(state.drawDone[idx]);
+          return String(state.answers[idx + "_" + si] || "").trim().length > 0;
+        });
+      }
+      return String(state.answers[String(idx)] || "").trim().length > 0;
+    }
+
+    function openPrintView() {
+      loadScenarioQuestions();
+      var title = state.grade + ". Sınıf Matematik — " + getTermLabel(state.donem) + " (Senaryo " + state.senaryoNo + ")";
+      var html = '<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>' + esc(title) + '</title>' +
+        '<style>body{font-family:Georgia,serif;color:#0F172A;max-width:780px;margin:28px auto;padding:0 20px;line-height:1.65;}' +
+        'h1{font-size:20px;border-bottom:2px solid #0F172A;padding-bottom:8px;}' +
+        '.q{margin:18px 0;padding:14px;border:1px solid #CBD5E1;border-radius:8px;page-break-inside:avoid;}' +
+        '.ans-space{height:68px;border-bottom:1px dashed #94A3B8;margin-top:12px;}' +
+        '.key{page-break-before:always;margin-top:32px;}</style></head><body>' +
+        '<h1>ZarifÇözüm — ' + esc(title) + '</h1>' +
+        '<p><strong>Ad Soyad:</strong> ___________________________ &nbsp;&nbsp; <strong>Süre:</strong> 40 Dakika &nbsp;&nbsp; <strong>Toplam:</strong> 100 Puan</p>' +
+        state.activeQuestions.map(function (q, i) {
+          var subHtml = Array.isArray(q.altSorular)
+            ? '<ol type="a">' + q.altSorular.map(function (s) { return '<li>' + esc(s.metin) + '</li>'; }).join("") + '</ol>'
+            : "";
+          return '<div class="q"><strong>Soru ' + (i + 1) + ' (' + (q.puan || 20) + ' Puan · ' + esc(q.kazanimKodu || "") + '):</strong><p>' + esc(q.metin) + '</p>' + subHtml + '<div class="ans-space"></div></div>';
+        }).join("") +
+        '<div class="key"><h2>Cevap Anahtarı ve Çözüm Adımları</h2>' +
+        state.activeQuestions.map(function (q, i) {
+          return '<p><strong>Soru ' + (i + 1) + ':</strong> ' + esc(q.cozumAdimlari || "") + '</p>';
+        }).join("") +
+        '</div><script>window.onload=function(){window.print();};</script></body></html>';
+      var w = window.open("", "_blank");
+      if (w) { w.document.write(html); w.document.close(); }
     }
 
     function finishExam() {
       stopTimer();
-      state.view = "report";
-      var exam = state.activeExam;
       var totalScore = 0;
-      var maxTotal = 0;
-      var missingTopics = [];
-
-      var details = exam.sorular.map(function (q, idx) {
-        var g = gradeQuestion(q, state.answers[idx]);
-        totalScore += g.puan;
-        maxTotal += g.maxPts;
-        if (g.durum !== "tam") missingTopics.push(q.konu + " (" + (q.kazanimKodu || "MEB") + ")");
-        return { q: q, grade: g, ans: state.answers[idx] || {} };
+      var maxScore = 0;
+      state.activeQuestions.forEach(function (q, idx) {
+        var pts = Number(q.puan) || Math.round(100 / Math.max(1, state.activeQuestions.length));
+        maxScore += pts;
+        if (Array.isArray(q.altSorular) && q.altSorular.length) {
+          var subPts = pts / q.altSorular.length;
+          q.altSorular.forEach(function (sub, si) {
+            if (sub.tip === "cizim") {
+              if (state.drawDone[idx]) totalScore += subPts;
+            } else {
+              var uVal = norm(state.answers[idx + "_" + si] || "");
+              var ok = (sub.beklenen || []).some(function (b) { return uVal && (uVal === norm(b) || uVal.indexOf(norm(b)) >= 0); });
+              if (ok) totalScore += subPts;
+            }
+          });
+        } else {
+          var val = norm(state.answers[String(idx)] || "");
+          var matched = (q.beklenenSonuc || []).some(function (b) { return val && val.indexOf(norm(b)) >= 0; });
+          if (matched) totalScore += pts;
+          else if (val.length >= 6 && (q.yontemAnahtar || []).some(function (k) { return val.indexOf(norm(k)) >= 0; })) {
+            totalScore += Math.round(pts * 0.5);
+          }
+        }
       });
 
-      var normalized100 = maxTotal > 0 ? Math.round((totalScore / maxTotal) * 100) : 0;
-      var label = normalized100 >= 85 ? "Pekiyi 🌟" : normalized100 >= 70 ? "İyi 👍" : normalized100 >= 50 ? "Orta 📘" : "Geliştirilmeli 💪";
+      var finalPct = maxScore > 0 ? Math.min(100, Math.round((totalScore / maxScore) * 100)) : 0;
+      state.lastScore = finalPct;
+      state.step = "result";
+      state.showConfirmModal = false;
+      SoundEngine.play("success");
+
+      var title = state.selectedTeacherExam
+        ? state.selectedTeacherExam.title
+        : (state.grade + ". Sınıf " + getTermLabel(state.donem) + " (Senaryo " + state.senaryoNo + ")");
 
       saveResultRecord({
-        date: new Date().toISOString(),
         studentName: detectStudentName(),
-        title: exam.title,
-        grade: exam.grade,
-        score: normalized100,
-        missingTopics: missingTopics
+        grade: state.grade,
+        title: title,
+        score: finalPct,
+        tabLeaves: state.tabLeaveCount,
+        date: new Date().toISOString()
       });
 
-      var isMiddle = ["5", "6", "7", "8"].indexOf(String(state.grade)) !== -1;
-
-      var itemsHtml = details.map(function (d, idx) {
-        var isLow = d.grade.durum !== "tam";
-        return (
-          '<div class="zy-report-item' + (isLow ? ' is-low' : '') + '">' +
-            '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px;">' +
-              '<strong>Soru ' + (idx + 1) + ' • ' + esc(d.q.konu || 'Açık Uçlu Soru') + '</strong>' +
-              '<span class="zy-q-pts">' + d.grade.puan + ' / ' + d.grade.maxPts + ' Puan' + (d.grade.hintPenalty ? ' (−2 İpucu)' : '') + '</span>' +
-            '</div>' +
-            '<div style="font-size:0.9rem;color:#6E5A4F;margin-bottom:8px;">Senin Sonucun: <strong>' + esc(d.ans.final || 'Boş bırakıldı') + '</strong></div>' +
-            '<div style="padding:10px 12px;border-radius:10px;background:#FAF6F0;font-size:0.9rem;white-space:pre-line;">' +
-              '<strong>✅ Resmi Çözüm Adımları:</strong>\n' + esc(d.q.cozumAdimlari || d.q.cozumMetni || '') +
-            '</div>' +
-          '</div>'
-        );
-      }).join("");
-
-      appEl.innerHTML =
-        '<div class="zy-report-hero">' +
-          '<div style="font-size:0.9rem;color:#F4D28D;font-weight:700;margin-bottom:6px;">' + esc(exam.title) + '</div>' +
-          '<div class="zy-report-score">' + normalized100 + ' / 100 • ' + label + '</div>' +
-          '<div style="margin-top:8px;font-size:0.95rem;color:#E6DCD2;">' +
-            (missingTopics.length ? 'Tekrar Edilmesi Önerilen Kazanımlar: ' + esc(missingTopics.slice(0, 3).join(', ')) : 'Tebrikler! Tüm kazanımlarda tam başarı sağladın.') +
-          '</div>' +
-        '</div>' +
-        itemsHtml +
-        '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:20px;">' +
-          (isMiddle ? '<a class="zy-btn-emerald" href="pages/kesif-modu.html">🧭 Eksik Kazanımları Keşif Modu\'nda Telafi Et →</a>' : '') +
-          '<button type="button" class="zy-btn-primary" id="zyGoTopicsBtn">📖 Konu Çalış\'ta Telafi Et →</button>' +
-          '<button type="button" class="zy-btn-outline" id="zyBackLobbyBtn">← Yazılı Stüdyosuna Dön</button>' +
-        '</div>';
-
-      document.getElementById("zyBackLobbyBtn").addEventListener("click", function () {
-        state.view = "lobby";
-        renderLobby();
-      });
-      document.getElementById("zyGoTopicsBtn").addEventListener("click", function () {
-        var link = document.querySelector('a[href="#konularim"], a[href="#konu-anlatimlari"]');
-        if (link) link.click();
-        else global.location.href = "konu.html?sinif=" + encodeURIComponent(state.grade);
-      });
-    }
-
-    function renderExam() {
-      var exam = state.activeExam;
-      var q = exam.sorular[state.qIdx];
-      var curAns = state.answers[state.qIdx] || { steps: "", final: "", hintUsed: false };
-
-      var pillsHtml = exam.sorular.map(function (_, idx) {
-        var a = state.answers[idx];
-        var answered = a && (a.final.trim() || a.steps.trim());
-        return '<button type="button" class="zy-q-pill' + (idx === state.qIdx ? ' is-active' : answered ? ' is-answered' : '') + '" data-qidx="' + idx + '">' + (idx + 1) + '</button>';
-      }).join("");
-
-      appEl.innerHTML =
-        '<div class="zy-exam-bar">' +
-          '<div><strong>' + esc(exam.title) + '</strong></div>' +
-          '<div class="zy-q-pills">' + pillsHtml + '</div>' +
-          '<div style="display:flex;align-items:center;gap:10px;">' +
-            '<span class="zy-timer" id="zyTimerDisplay">⏱ ' + formatTime(state.secondsLeft) + '</span>' +
-            '<button type="button" class="zy-btn-emerald" id="zyFinishExamBtn" style="min-height:38px;padding:0 16px;">Sınavı Bitir ve Teslim Et ✓</button>' +
-          '</div>' +
-        '</div>' +
-        '<div class="zy-paper-card">' +
-          '<div class="zy-q-meta">' +
-            '<div>' +
-              '<strong style="font-size:1.1rem;">Soru ' + (state.qIdx + 1) + ' / ' + exam.sorular.length + '</strong>' +
-              (q.kazanimKodu ? ' <span style="font-size:0.85rem;color:#6E5A4F;">• ' + esc(q.kazanimKodu) + ' (' + esc(q.konu || '') + ')</span>' : '') +
-            '</div>' +
-            '<span class="zy-q-pts">' + (q.puan || 15) + ' Puan</span>' +
-          '</div>' +
-          '<p class="zy-q-text">' + esc(q.metin) + '</p>' +
-          (q.resimUrl ? '<div style="margin-bottom:16px;"><img src="' + esc(q.resimUrl) + '" alt="Soru Görseli" style="max-width:100%;max-height:260px;border-radius:12px;border:1px solid #E6DCD2;"></div>' : '') +
-          '<div class="zy-work-area">' +
-            '<label style="display:block;font-weight:700;font-size:0.9rem;margin-bottom:6px;">✍️ Adım Adım İşlem Kutusu</label>' +
-            '<textarea id="zyStepsInput" placeholder="Çözüm adımlarını buraya yaz (doğru yöntem kısmi puan kazandırır)...">' + esc(curAns.steps) + '</textarea>' +
-            '<label style="display:block;font-weight:700;font-size:0.9rem;margin-bottom:6px;">🎯 Nihai Sonucun</label>' +
-            '<input type="text" id="zyFinalInput" placeholder="Örn: 42 veya 3/8 veya 8x − 2" value="' + esc(curAns.final) + '">' +
-          '</div>' +
-          '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:16px;">' +
-            '<button type="button" class="zy-btn-outline" id="zyHintBtn"' + (curAns.hintUsed ? ' disabled' : '') + '>' +
-              (curAns.hintUsed ? '✨ İpucu Kullanıldı (−2 Puan)' : '✨ Zarif AI İpucu (−2 Puan)') +
-            '</button>' +
-            '<div style="display:flex;gap:8px;">' +
-              '<button type="button" class="zy-btn-outline" id="zyPrevQ"' + (state.qIdx === 0 ? ' disabled style="opacity:.45"' : '') + '>← Önceki</button>' +
-              '<button type="button" class="zy-btn-primary" id="zyNextQ">' + (state.qIdx === exam.sorular.length - 1 ? 'Teslim Et ✓' : 'Sonraki Soru →') + '</button>' +
-            '</div>' +
-          '</div>' +
-          (curAns.hintUsed ? '<div class="zy-hint-box">💡 Zarif AI İpucu: ' + esc(q.ipucu || 'Verilenleri adım adım denklem veya oran haline getirerek sonuca ulaş.') + '</div>' : '') +
-        '</div>';
-
-      function syncInputs() {
-        var sVal = document.getElementById("zyStepsInput")?.value || "";
-        var fVal = document.getElementById("zyFinalInput")?.value || "";
-        state.answers[state.qIdx] = {
-          steps: sVal,
-          final: fVal,
-          hintUsed: Boolean(state.answers[state.qIdx]?.hintUsed)
-        };
+      if (global.ZarifStore && global.ZarifStore.tests && typeof global.ZarifStore.tests.recordResult === "function") {
+        try {
+          global.ZarifStore.tests.recordResult({
+            topicTitle: title,
+            grade: Number(state.grade),
+            source: "yazili_provasi",
+            total: state.activeQuestions.length,
+            correct: Math.round((finalPct / 100) * state.activeQuestions.length),
+            score: finalPct
+          });
+        } catch (e) {}
       }
 
-      document.getElementById("zyStepsInput").addEventListener("input", syncInputs);
-      document.getElementById("zyFinalInput").addEventListener("input", syncInputs);
-
-      document.getElementById("zyHintBtn").addEventListener("click", function () {
-        syncInputs();
-        state.answers[state.qIdx].hintUsed = true;
-        renderExam();
-      });
-
-      appEl.querySelectorAll("[data-qidx]").forEach(function (b) {
-        b.addEventListener("click", function () {
-          syncInputs();
-          state.qIdx = Number(b.getAttribute("data-qidx"));
-          renderExam();
-        });
-      });
-
-      document.getElementById("zyPrevQ").addEventListener("click", function () {
-        if (state.qIdx > 0) { syncInputs(); state.qIdx--; renderExam(); }
-      });
-
-      document.getElementById("zyNextQ").addEventListener("click", function () {
-        syncInputs();
-        if (state.qIdx === exam.sorular.length - 1) finishExam();
-        else { state.qIdx++; renderExam(); }
-      });
-
-      document.getElementById("zyFinishExamBtn").addEventListener("click", function () {
-        syncInputs();
-        finishExam();
-      });
+      render();
     }
 
-    function renderLobby() {
-      stopTimer();
-      var examPreview = buildCurrentScenarioExam();
-      var totalPts = examPreview.sorular.reduce(function (acc, q) { return acc + Number(q.puan || 15); }, 0);
+    function render() {
+      var soundIcon = SoundEngine.isMuted() ? "🔇" : "🔊";
 
-      var teacherHtml = "";
-      if (state.teacherExams.length > 0) {
-        teacherHtml =
-          '<div class="zy-teacher-section">' +
-            state.teacherExams.map(function (t, idx) {
-              return (
-                '<div class="zy-teacher-card">' +
-                  '<div>' +
-                    '<span class="zy-gold-badge">👩‍🏫 Öğretmeninin Yayınladığı Özel Yazılı Provası</span>' +
-                    '<h3 style="margin:0 0 4px;font-size:1.1rem;">' + esc(t.title) + '</h3>' +
-                    '<p style="margin:0;font-size:0.88rem;color:#6E5A4F;">' + esc(t.aciklama || '') + ' • ' + (t.sorular ? t.sorular.length : (t.soruSayisi || 6)) + ' Soru</p>' +
+      /* ── ADIM 1: DÖNEM KARTLARI & ÖĞRETMEN PROVALARI ── */
+      if (state.step === "terms") {
+        var teacherExams = readLocalTeacherExams(state.grade, null);
+        var grades = ["5", "6", "7", "8", "9", "10", "11", "12"];
+        root.innerHTML =
+          '<div class="yz2-shell yz2-fade">' +
+            '<div class="yz2-hero">' +
+              '<div class="yz2-hero-left">' +
+                '<div class="yz2-hero-emblem">✍️</div>' +
+                '<div>' +
+                  '<h2 class="yz2-hero-title">İnteraktif Yazılı Stüdyosu</h2>' +
+                  '<p class="yz2-hero-sub">MEB Türkiye Yüzyılı Maarif Modeli açık uçlu ve interaktif geometri araçlı yazılı simülasyonu.</p>' +
+                '</div>' +
+              '</div>' +
+              '<div class="yz2-hero-actions">' +
+                '<select class="yz2-grade-select" data-yz-grade>' +
+                  grades.map(function (g) { return '<option value="' + g + '"' + (g === state.grade ? ' selected' : '') + '>' + g + '. Sınıf</option>'; }).join("") +
+                '</select>' +
+                '<button type="button" class="yz2-icon-btn" data-yz-sound title="Ses Aç/Kapat">' + soundIcon + '</button>' +
+              '</div>' +
+            '</div>' +
+
+            (teacherExams.length ? (
+              '<div class="yz2-teacher-strip">' +
+                '<div class="yz2-teacher-head">👩‍🏫 Öğretmeninin Yayınladığı Özel Yazılı Provaları (' + state.grade + '. Sınıf)</div>' +
+                '<div class="yz2-teacher-grid">' +
+                  teacherExams.map(function (ex) {
+                    return '<div class="yz2-teacher-card">' +
+                      '<div><strong>' + esc(ex.title) + '</strong><p>' + esc(ex.aciklama || (ex.sorular.length + " Soru · 100 Puan")) + '</p></div>' +
+                      '<button type="button" class="yz2-amber-btn" data-yz-teacher-exam="' + esc(ex.id) + '">Provası Başlat →</button>' +
+                    '</div>';
+                  }).join("") +
+                '</div>' +
+              '</div>'
+            ) : "") +
+
+            '<div class="yz2-term-grid">' +
+              (pool.DONEMLER || []).map(function (d, idx) {
+                return '<div class="yz2-term-card">' +
+                  '<div class="yz2-term-top">' +
+                    '<span class="yz2-term-pill">' + esc(d.ay) + '</span>' +
+                    '<span class="yz2-term-num">0' + (idx + 1) + '</span>' +
                   '</div>' +
-                  '<button type="button" class="zy-btn-primary" data-open-teacher-exam="' + idx + '">Provayı Başlat →</button>' +
-                '</div>'
-              );
-            }).join("") +
+                  '<h3>' + esc(d.ad) + '</h3>' +
+                  '<p>' + state.grade + '. Sınıf Matematik MEB Senaryolu İnteraktif &amp; Yazdırılabilir Yazılı Provaları</p>' +
+                  '<button type="button" class="yz2-navy-btn" data-yz-term="' + esc(d.id) + '">→ İncele &amp; Başla</button>' +
+                '</div>';
+              }).join("") +
+            '</div>' +
+
+            '<div class="yz2-info-card">' +
+              '<h4>İnteraktif Yazılı Nedir?</h4>' +
+              '<ul>' +
+                '<li>Gerçek sınav disipliniyle 40 dakikalık geri sayım ve <strong>Sekmede Kal</strong> odak takibiyle çözersin.</li>' +
+                '<li>Sürüklenebilir <strong>Açıölçer</strong>, <strong>Pergel</strong> ve <strong>Çokgen Tahtası</strong> ile şekilleri bizzat ölçüp çizersin.</li>' +
+                '<li>Teslim ettiğin anda puanını, adım adım çözümlerini ve öğretmen karnene yansıyan analizini görürsün.</li>' +
+              '</ul>' +
+            '</div>' +
           '</div>';
+
+        root.querySelector("[data-yz-grade]")?.addEventListener("change", function (e) {
+          state.grade = e.target.value;
+          SoundEngine.play("click");
+          render();
+        });
+        root.querySelector("[data-yz-sound]")?.addEventListener("click", function () {
+          SoundEngine.toggleMute();
+          render();
+        });
+        root.querySelectorAll("[data-yz-term]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            state.donem = btn.dataset.yzTerm;
+            state.selectedTeacherExam = null;
+            SoundEngine.play("step");
+            goToLoadingThen("mode");
+          });
+        });
+        root.querySelectorAll("[data-yz-teacher-exam]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var id = btn.dataset.yzTeacherExam;
+            state.selectedTeacherExam = teacherExams.find(function (x) { return x.id === id; }) || null;
+            SoundEngine.play("step");
+            goToLoadingThen("mode");
+          });
+        });
+        return;
       }
 
-      var periodsHtml = pool.DONEMLER.map(function (d) {
-        return (
-          '<button type="button" class="zy-period-btn' + (d.id === state.donem ? ' is-active' : '') + '" data-donem="' + d.id + '">' +
-            '<small>' + esc(d.ay) + '</small>' +
-            '<strong>' + esc(d.ad) + '</strong>' +
-          '</button>'
-        );
-      }).join("");
-
-      var scenariosHtml = pool.SENARYOLAR.map(function (s) {
-        return (
-          '<button type="button" class="zy-scenario-btn' + (s.no === state.senaryoNo ? ' is-active' : '') + '" data-senaryo="' + s.no + '">' +
-            '<strong>' + esc(s.ad) + '</strong>' +
-            '<span>' + esc(s.aciklama) + '</span>' +
-          '</button>'
-        );
-      }).join("");
-
-      var distRows = examPreview.sorular.map(function (q, i) {
-        return (
-          '<tr>' +
-            '<td><strong>Soru ' + (i + 1) + '</strong></td>' +
-            '<td>' + esc(q.kazanimKodu || 'MEB') + '</td>' +
-            '<td>' + esc(q.konu || 'Açık Uçlu') + '</td>' +
-            '<td><strong>' + (q.puan || 15) + ' Puan</strong></td>' +
-          '</tr>'
-        );
-      }).join("");
-
-      appEl.innerHTML =
-        '<div class="zy-top-header">' +
-          '<div>' +
-            '<h2>📝 MEB Senaryolu İnteraktif Yazılı Stüdyosu</h2>' +
-            '<p>' + esc(state.grade) + '. Sınıf Türkiye Yüzyılı Maarif Modeli açık uçlu yazılı provaları, kağıt çıktısı ve anında puanlama.</p>' +
-          '</div>' +
-          '<span class="zy-status-pill">✓ ' + esc(state.grade) + '. Sınıf MEB Senaryo Havuzu Aktif</span>' +
-        '</div>' +
-        teacherHtml +
-        '<div class="zy-period-grid">' + periodsHtml + '</div>' +
-        '<div class="zy-scenario-tabs">' + scenariosHtml + '</div>' +
-        '<div class="zy-dist-card">' +
-          '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;">' +
-            '<div>' +
-              '<strong style="font-size:1.05rem;">📊 Konu ve Soru Dağılım Tablosu</strong>' +
-              '<div style="font-size:0.86rem;color:#6E5A4F;">' + esc(examPreview.title) + '</div>' +
+      /* ── ADIM 2: HAZIRLIK ANİMASYONU ── */
+      if (state.step === "loading") {
+        root.innerHTML =
+          '<div class="yz2-shell yz2-loading-wrap yz2-fade">' +
+            '<div class="yz2-pen-anim">' +
+              '<svg viewBox="0 0 120 110" width="112" height="102" xmlns="http://www.w3.org/2000/svg">' +
+                '<rect x="18" y="14" width="74" height="86" rx="12" fill="#FFFFFF" stroke="#0F172A" stroke-width="2.5"/>' +
+                '<line x1="32" y1="36" x2="78" y2="36" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round"/>' +
+                '<line x1="32" y1="52" x2="72" y2="52" stroke="#D97706" stroke-width="3" stroke-linecap="round"/>' +
+                '<line x1="32" y1="68" x2="64" y2="68" stroke="#CBD5E1" stroke-width="3" stroke-linecap="round"/>' +
+                '<g class="yz2-pen-bob"><path d="M74 62 L102 22 L110 28 L82 68 L70 72 Z" fill="#D97706" stroke="#0F172A" stroke-width="2"/></g>' +
+              '</svg>' +
             '</div>' +
-            '<button type="button" class="zy-btn-primary" id="zyLaunchScenarioBtn">Senaryo Provasını Başlat →</button>' +
-          '</div>' +
-          '<table class="zy-dist-table">' +
-            '<thead><tr><th>Soru</th><th>Kazanım Kodu</th><th>Konu</th><th>Puan</th></tr></thead>' +
-            '<tbody>' + distRows + '</tbody>' +
-            '<tfoot><tr><td colspan="3">Toplam (' + examPreview.sorular.length + ' Açık Uçlu Soru)</td><td>' + totalPts + ' Puan</td></tr></tfoot>' +
-          '</table>' +
-        '</div>';
+            '<h3>Yazılın hazırlanıyor…</h3>' +
+            '<p>Kalemini ve kâğıdını hazırla. MEB senaryo kazanımları yükleniyor.</p>' +
+            '<div class="yz2-load-bar"><div class="yz2-load-fill"></div></div>' +
+          '</div>';
+        return;
+      }
 
-      appEl.querySelectorAll("[data-donem]").forEach(function (b) {
-        b.addEventListener("click", function () {
-          state.donem = b.getAttribute("data-donem");
-          fetchTeacherExams();
-          renderLobby();
+      /* ── ADIM 3: ÇÖZÜM MODU SEÇİMİ ── */
+      if (state.step === "mode") {
+        root.innerHTML =
+          '<div class="yz2-shell yz2-fade">' +
+            '<div class="yz2-step-header">' +
+              '<button type="button" class="yz2-back-btn" data-yz-back="terms">← Dönemlere Dön</button>' +
+              '<span class="yz2-crumb">' + state.grade + '. Sınıf Matematik · ' + esc(getTermLabel(state.donem)) + '</span>' +
+              '<button type="button" class="yz2-icon-btn" data-yz-sound>' + soundIcon + '</button>' +
+            '</div>' +
+            '<div class="yz2-center-title">' +
+              '<span class="yz2-kicker">İNTERAKTİF YAZILI</span>' +
+              '<h2>Yazılıyı nasıl çözeceksin?</h2>' +
+            '</div>' +
+            '<div class="yz2-mode-grid">' +
+              '<button type="button" class="yz2-mode-card" data-yz-mode="interactive">' +
+                '<div class="yz2-mode-icon">💻</div>' +
+                '<h3>İnteraktif olarak ekrandan çözeceğim</h3>' +
+                '<p>Senaryonu seç, interaktif geometri araçlarıyla soruları ekranda çöz. Puanın ve adım adım çözümün anında gelsin.</p>' +
+                '<span class="yz2-mode-cta">Devam Et →</span>' +
+              '</button>' +
+              '<button type="button" class="yz2-mode-card" data-yz-mode="print">' +
+                '<div class="yz2-mode-icon yz2-icon-amber">🖨️</div>' +
+                '<h3>Çıktı alıp kâğıt üzerinde çözeceğim</h3>' +
+                '<p>Senaryonu seç, yazdırılabilir MEB yazılı kâğıdı yeni sekmede açılsın; cevap anahtarı son sayfada hazır gelsin.</p>' +
+                '<span class="yz2-mode-cta">PDF / Yazdır →</span>' +
+              '</button>' +
+            '</div>' +
+          '</div>';
+
+        root.querySelector("[data-yz-back]")?.addEventListener("click", function () { state.step = "terms"; SoundEngine.play("click"); render(); });
+        root.querySelector("[data-yz-sound]")?.addEventListener("click", function () { SoundEngine.toggleMute(); render(); });
+        root.querySelectorAll("[data-yz-mode]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            state.mode = btn.dataset.yzMode;
+            SoundEngine.play("step");
+            if (state.selectedTeacherExam) {
+              if (state.mode === "print") { openPrintView(); return; }
+              state.step = "briefing";
+            } else {
+              state.step = "scenario";
+            }
+            render();
+          });
         });
-      });
+        return;
+      }
 
-      appEl.querySelectorAll("[data-senaryo]").forEach(function (b) {
-        b.addEventListener("click", function () {
-          state.senaryoNo = Number(b.getAttribute("data-senaryo"));
-          renderLobby();
+      /* ── ADIM 4: SENARYO SEÇİCİ ── */
+      if (state.step === "scenario") {
+        var scenarios = [
+          { no: 1, ad: "Senaryo 1", alt: "Temel Kazanımlar · 100 Puan", badge: "MEB Temel" },
+          { no: 2, ad: "Senaryo 2", alt: "Beceri Temelli · 100 Puan", badge: "Yeni Nesil" },
+          { no: 3, ad: "Senaryo 3", alt: "Karma Prova · 100 Puan", badge: "Dengeli" }
+        ];
+        root.innerHTML =
+          '<div class="yz2-shell yz2-fade">' +
+            '<div class="yz2-stepper">' +
+              '<span class="yz2-st active"><strong>1</strong> Senaryonu seç</span>' +
+              '<span class="yz2-st"><strong>2</strong> Kuralları ve konuları incele</span>' +
+              '<span class="yz2-st"><strong>3</strong> Yazılıya başla</span>' +
+            '</div>' +
+            '<div class="yz2-center-title">' +
+              '<h2>Hangi senaryodan sorumlusun?</h2>' +
+              '<p>Öğretmeninin söylediği senaryoyu seç; sorular seçtiğin senaryonun MEB kazanımlarına uygun gelir.</p>' +
+            '</div>' +
+            '<div class="yz2-scenario-grid">' +
+              scenarios.map(function (sc) {
+                var qs = pool.getSorular(state.grade, state.donem, sc.no) || [];
+                return '<div class="yz2-sc-card">' +
+                  '<div class="yz2-sc-num">' + sc.no + '</div>' +
+                  '<span class="yz2-sc-tag">' + esc(sc.badge) + '</span>' +
+                  '<h3>' + esc(sc.ad) + '</h3>' +
+                  '<p>' + qs.length + ' soru · 100 puan</p>' +
+                  '<button type="button" class="yz2-amber-btn" data-yz-pick-sc="' + sc.no + '">Seç →</button>' +
+                '</div>';
+              }).join("") +
+            '</div>' +
+            '<div style="text-align:center;margin-top:20px;">' +
+              '<button type="button" class="yz2-back-btn" data-yz-back="mode">← Çözüm Moduna Dön</button>' +
+            '</div>' +
+          '</div>';
+
+        root.querySelector("[data-yz-back]")?.addEventListener("click", function () { state.step = "mode"; SoundEngine.play("click"); render(); });
+        root.querySelectorAll("[data-yz-pick-sc]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            state.senaryoNo = Number(btn.dataset.yzPickSc);
+            SoundEngine.play("step");
+            if (state.mode === "print") {
+              openPrintView();
+            } else {
+              loadScenarioQuestions();
+              state.openRuleCard = "count";
+              state.step = "briefing";
+              render();
+            }
+          });
         });
-      });
+        return;
+      }
 
-      document.getElementById("zyLaunchScenarioBtn").addEventListener("click", function () {
-        openModeModal(buildCurrentScenarioExam());
-      });
+      /* ── ADIM 5: 2 SÜTUNLU KURALLAR & KONU-SORU DAĞILIMI ── */
+      if (state.step === "briefing") {
+        loadScenarioQuestions();
+        var qCount = state.activeQuestions.length;
+        var ruleDetails = {
+          count: "Bu yazılıda " + qCount + " soru var. Üstteki numaralarla sorular arasında özgürce geçebilir, cevapların otomatik kaydedilir.",
+          time: "Süren 40 dakika. Kalan süreyi üstteki sayaçtan takip edebilirsin. Süre bitince yazılım otomatik değerlendirilir.",
+          focus: "Başka sekmeye ya da uygulamaya geçme. Kaç kez ayrıldığın raporuna yazılır; geri döndüğünde uyarı alırsın."
+        };
+        var activeRuleText = state.openRuleCard ? ruleDetails[state.openRuleCard] : "";
 
-      appEl.querySelectorAll("[data-open-teacher-exam]").forEach(function (b) {
-        b.addEventListener("click", async function () {
-          var t = state.teacherExams[Number(b.getAttribute("data-open-teacher-exam"))];
-          if (!t) return;
-          if (t.fromApi && (!t.sorular || !t.sorular.length)) {
-            try {
-              var res = await fetch("/api/yazili/" + encodeURIComponent(t.id), { credentials: "same-origin" });
-              if (res.ok) {
-                var d = await res.json();
-                if (d.prova && Array.isArray(d.prova.sorular) && d.prova.sorular.length) {
-                  t.sorular = d.prova.sorular;
-                }
-              }
-            } catch (e) {}
+        root.innerHTML =
+          '<div class="yz2-shell yz2-fade">' +
+            '<div class="yz2-stepper">' +
+              '<span class="yz2-st done">✓ Senaryo seçildi</span>' +
+              '<span class="yz2-st active"><strong>2</strong> Kuralları ve konuları incele</span>' +
+              '<span class="yz2-st"><strong>3</strong> Yazılıya başla</span>' +
+            '</div>' +
+            '<div class="yz2-brief-grid">' +
+              '<div class="yz2-brief-left">' +
+                '<span class="yz2-kicker">' + state.grade + '. SINIF MATEMATİK · ' + esc(getTermLabel(state.donem)) + '</span>' +
+                '<h2>İnteraktif Yazılı Kuralları</h2>' +
+                '<div class="yz2-rules-row">' +
+                  '<button type="button" class="yz2-rule-tile' + (state.openRuleCard === "count" ? " open" : "") + '" data-yz-rule="count">' +
+                    '<strong>' + qCount + ' soru</strong><span>' + (state.openRuleCard === "count" ? "Kapat ▲" : "Kuralı gör ▼") + '</span>' +
+                  '</button>' +
+                  '<button type="button" class="yz2-rule-tile' + (state.openRuleCard === "time" ? " open" : "") + '" data-yz-rule="time">' +
+                    '<strong>40 dakika</strong><span>' + (state.openRuleCard === "time" ? "Kapat ▲" : "Kuralı gör ▼") + '</span>' +
+                  '</button>' +
+                  '<button type="button" class="yz2-rule-tile' + (state.openRuleCard === "focus" ? " open" : "") + '" data-yz-rule="focus">' +
+                    '<strong>Sekmede kal</strong><span>' + (state.openRuleCard === "focus" ? "Kapat ▲" : "Kuralı gör ▼") + '</span>' +
+                  '</button>' +
+                '</div>' +
+                (activeRuleText ? '<div class="yz2-rule-detail">' + esc(activeRuleText) + '</div>' : '') +
+                '<div class="yz2-start-box">' +
+                  '<p>Hazırsan başlayalım!</p>' +
+                  '<button type="button" class="yz2-start-cta" data-yz-start>🚀 Yazılıya Başla</button>' +
+                '</div>' +
+              '</div>' +
+              '<div class="yz2-brief-right">' +
+                '<div class="yz2-brief-rhead">' +
+                  '<h3>Konu ve Soru Dağılımı</h3>' +
+                  '<button type="button" class="yz2-back-btn" data-yz-back="scenario">Senaryoyu değiştir</button>' +
+                '</div>' +
+                '<div class="yz2-dist-list">' +
+                  state.activeQuestions.map(function (q, i) {
+                    var toolBadge = q.interaktifArac ? '<span class="yz2-tool-pill">🧰 İnteraktif Araç</span>' : '';
+                    return '<div class="yz2-dist-row">' +
+                      '<span class="yz2-kaz-code">' + esc(q.kazanimKodu || ("MAT." + state.grade)) + '</span>' +
+                      '<div class="yz2-dist-mid"><strong>' + (i + 1) + '. ' + esc(q.konu || "Açık Uçlu Soru") + '</strong>' + toolBadge + '</div>' +
+                      '<span class="yz2-dist-pts">' + (q.puan || 20) + ' puan</span>' +
+                    '</div>';
+                  }).join("") +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+
+        root.querySelectorAll("[data-yz-rule]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var k = btn.dataset.yzRule;
+            state.openRuleCard = state.openRuleCard === k ? null : k;
+            SoundEngine.play("click");
+            render();
+          });
+        });
+        root.querySelector("[data-yz-back]")?.addEventListener("click", function () {
+          state.step = state.selectedTeacherExam ? "mode" : "scenario";
+          SoundEngine.play("click");
+          render();
+        });
+        root.querySelector("[data-yz-start]")?.addEventListener("click", function () {
+          state.qIdx = 0;
+          state.subIdx = 0;
+          state.answers = {};
+          state.drawDone = {};
+          state.tabLeaveCount = 0;
+          state.tabWarningVisible = false;
+          state.step = "exam";
+          SoundEngine.play("step");
+          startTimer();
+          render();
+        });
+        return;
+      }
+
+      /* ── ADIM 6: 2 SÜTUNLU GENİŞ İNTERAKTİF SINAV STÜDYOSU ── */
+      if (state.step === "exam") {
+        var q = state.activeQuestions[state.qIdx];
+        if (!q) { finishExam(); return; }
+        var hasSub = Array.isArray(q.altSorular) && q.altSorular.length > 0;
+        if (hasSub && state.subIdx >= q.altSorular.length) state.subIdx = 0;
+        var curSub = hasSub ? q.altSorular[state.subIdx] : null;
+        var ansKey = hasSub ? (state.qIdx + "_" + state.subIdx) : String(state.qIdx);
+        var curVal = state.answers[ansKey] || "";
+        var symbols = ["°", "⊥", "∥", "∠", "[", "]", "→", "²", "√", "π", "×", "÷"];
+
+        // Boş bırakılan sorular
+        var emptyNums = [];
+        state.activeQuestions.forEach(function (_, i) { if (!isQuestionAnswered(i)) emptyNums.push(i + 1); });
+
+        root.innerHTML =
+          '<div class="yz2-exam-shell yz2-fade">' +
+            '<div class="yz2-exam-topbar">' +
+              '<div class="yz2-q-pills">' +
+                state.activeQuestions.map(function (_, i) {
+                  var cls = "yz2-q-pill" + (i === state.qIdx ? " active" : "") + (isQuestionAnswered(i) ? " done" : "");
+                  return '<button type="button" class="' + cls + '" data-yz-q="' + i + '">' + (i + 1) + '</button>';
+                }).join("") +
+              '</div>' +
+              '<div class="yz2-exam-meta">' +
+                '<span class="yz2-timer-pill">⏱ Kalan süre: <strong data-yz-timer>' + formatMMSS(state.remainingSec) + '</strong></span>' +
+                '<button type="button" class="yz2-icon-btn" data-yz-sound>' + soundIcon + '</button>' +
+                '<button type="button" class="yz2-submit-top" data-yz-ask-submit>Teslim Et</button>' +
+              '</div>' +
+            '</div>' +
+
+            '<div class="yz2-tab-warn" data-yz-tab-warn style="display:none;"><span></span><button type="button" data-yz-warn-ok>Tamam</button></div>' +
+
+            '<div class="yz2-exam-grid">' +
+              // SOL SÜTUN: İnteraktif Geometri Laboratuvarı / Görsel Şema
+              '<div class="yz2-exam-left">' +
+                '<div class="yz2-left-mount" data-yz-left-mount></div>' +
+              '</div>' +
+
+              // SAĞ SÜTUN: Soru + a/b/c/d Alt Şıklar + Cevap & Sembol Klavyesi
+              '<div class="yz2-exam-right">' +
+                '<div class="yz2-q-head">' +
+                  '<span class="yz2-kaz-code">' + esc(q.kazanimKodu || ("MAT." + state.grade)) + '</span>' +
+                  '<span class="yz2-pts-badge">' + (q.puan || 20) + ' Puan</span>' +
+                '</div>' +
+                '<p class="yz2-q-stem">' + esc(q.metin) + '</p>' +
+
+                (hasSub ? (
+                  '<div class="yz2-sub-tabs">' +
+                    q.altSorular.map(function (s, si) {
+                      var filled = s.tip === "cizim" ? Boolean(state.drawDone[state.qIdx]) : Boolean(String(state.answers[state.qIdx + "_" + si] || "").trim());
+                      return '<button type="button" class="yz2-sub-tab' + (si === state.subIdx ? " active" : "") + (filled ? " done" : "") + '" data-yz-sub="' + si + '">' + esc(s.harf) + '</button>';
+                    }).join("") +
+                    '<span class="yz2-sub-count">' + (state.subIdx + 1) + '. şık / ' + q.altSorular.length + ' şık</span>' +
+                  '</div>' +
+                  '<div class="yz2-sub-prompt"><strong>' + esc(curSub.harf) + ')</strong> ' + esc(curSub.metin) + '</div>'
+                ) : '') +
+
+                (curSub && curSub.tip === "cizim" ? (
+                  '<div class="yz2-draw-status' + (state.drawDone[state.qIdx] ? ' ok' : '') + '">' +
+                    (state.drawDone[state.qIdx]
+                      ? '✅ Çizim tamamlandı! Bir sonraki şıkka geçebilirsin.'
+                      : '✏️ Henüz çizmedin. Soldaki interaktif geometri aracını kullanarak çizimi tamamla.') +
+                  '</div>'
+                ) : (
+                  '<div class="yz2-ans-wrap">' +
+                    (curSub && curSub.tip === "sayi"
+                      ? '<div class="yz2-num-row"><input type="text" class="yz2-num-input" data-yz-ans value="' + esc(curVal) + '" placeholder="Cevabını yaz…"><span class="yz2-unit">' + esc(curSub.birim || "") + '</span></div>'
+                      : '<textarea class="yz2-textarea" rows="4" data-yz-ans placeholder="Çözüm adımlarını ve cevabını buraya yaz…">' + esc(curVal) + '</textarea>'
+                    ) +
+                    '<div class="yz2-sym-bar">' +
+                      '<span class="yz2-sym-lbl">Semboller:</span>' +
+                      symbols.map(function (sym) {
+                        return '<button type="button" class="yz2-sym-btn" data-yz-sym="' + esc(sym) + '">' + esc(sym) + '</button>';
+                      }).join("") +
+                    '</div>' +
+                  '</div>'
+                )) +
+
+                (q.ipucu ? (
+                  '<details class="yz2-hint-box"><summary>💡 İpucu Gör</summary><p>' + esc(q.ipucu) + '</p></details>'
+                ) : '') +
+
+                '<div class="yz2-exam-foot">' +
+                  '<button type="button" class="yz2-back-btn" data-yz-prev' + (state.qIdx === 0 ? ' disabled' : '') + '>← Önceki</button>' +
+                  (state.qIdx < state.activeQuestions.length - 1
+                    ? '<button type="button" class="yz2-amber-btn" data-yz-next>Sonraki →</button>'
+                    : '<button type="button" class="yz2-navy-btn" data-yz-ask-submit>✅ Yazılıyı Teslim Et</button>'
+                  ) +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+            (state.showConfirmModal ? (
+              '<div class="yz2-modal-backdrop">' +
+                '<div class="yz2-modal-card">' +
+                  '<h3>Yazılıyı Teslim Et</h3>' +
+                  (emptyNums.length
+                    ? '<p>Boş bıraktığın sorular: <strong>' + emptyNums.join(", ") + '</strong>.<br>Yazılıyı teslim etmek istiyor musun? Teslimden sonra cevapların değiştirilemez.</p>'
+                    : '<p>Tüm soruları yanıtladın! Yazılıyı teslim edip puanını ve çözümlerini görmek istiyor musun?</p>') +
+                  '<div class="yz2-modal-actions">' +
+                    '<button type="button" class="yz2-back-btn" data-yz-modal-cancel>Geri Dön</button>' +
+                    '<button type="button" class="yz2-navy-btn" data-yz-modal-confirm>Teslim Et</button>' +
+                  '</div>' +
+                '</div>' +
+              '</div>'
+            ) : '') +
+          '</div>';
+
+        // Sol Geometri Lab / SVG / Görsel montajı
+        var leftMount = root.querySelector("[data-yz-left-mount]");
+        var mountedLab = global.ZarifGeoLab && global.ZarifGeoLab.mount(leftMount, q, function () {
+          state.drawDone[state.qIdx] = true;
+          var stEl = root.querySelector(".yz2-draw-status");
+          if (stEl) {
+            stEl.classList.add("ok");
+            stEl.textContent = "✅ Çizim tamamlandı! Bir sonraki şıkka geçebilirsin.";
           }
-          if (!t.sorular || !t.sorular.length) {
-            t.sorular = pool.getSorular(t.grade || state.grade, t.donem || state.donem, t.senaryoNo || 1);
-          }
-          openModeModal(t);
+          var pill = root.querySelector('[data-yz-q="' + state.qIdx + '"]');
+          if (pill) pill.classList.add("done");
         });
-      });
+
+        if (!mountedLab && leftMount) {
+          var visualHtml = "";
+          if (q.resimUrl) {
+            visualHtml += '<img src="' + esc(q.resimUrl) + '" alt="Soru Görseli" style="width:100%;max-height:280px;object-fit:contain;border-radius:10px;border:1px solid #E2DDD5;margin-bottom:10px;">';
+          }
+          if (q.svg && typeof q.svg === "string" && q.svg.trim().indexOf("<svg") === 0) {
+            visualHtml += q.svg;
+          } else if (!visualHtml && global.VisualMathEngine && typeof global.VisualMathEngine.inferVisualSpecFromText === "function") {
+            var inf = global.VisualMathEngine.inferVisualSpecFromText(q.metin, q.konu, state.grade);
+            if (inf) visualHtml = global.VisualMathEngine.renderToSvg(inf) || "";
+          }
+          leftMount.innerHTML = visualHtml
+            ? '<div class="yz-geo-card"><div class="yz-geo-topbar"><span class="yz-geo-badge">📐 Soru Görseli &amp; Modeli</span></div><div class="yz-geo-stage" style="padding:12px;">' + visualHtml + '</div></div>'
+            : '<div class="yz-geo-card"><div class="yz-geo-topbar"><span class="yz-geo-badge">📝 ' + esc(q.konu || "Açık Uçlu Soru") + '</span></div><div style="padding:26px 18px;text-align:center;color:#64748B;font-size:13.5px;line-height:1.6;">Bu soru metin tabanlı açık uçlu bir problemdir. İşlem adımlarını sağdaki alana net biçimde yazabilirsin.</div></div>';
+        }
+
+        // Event bağlamaları
+        root.querySelectorAll("[data-yz-q]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            state.qIdx = Number(btn.dataset.yzQ);
+            state.subIdx = 0;
+            SoundEngine.play("click");
+            render();
+          });
+        });
+        root.querySelectorAll("[data-yz-sub]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            state.subIdx = Number(btn.dataset.yzSub);
+            SoundEngine.play("click");
+            render();
+          });
+        });
+        var ansEl = root.querySelector("[data-yz-ans]");
+        if (ansEl) {
+          ansEl.addEventListener("input", function () {
+            state.answers[ansKey] = ansEl.value;
+            var pill = root.querySelector('[data-yz-q="' + state.qIdx + '"]');
+            if (pill) pill.classList.toggle("done", isQuestionAnswered(state.qIdx));
+          });
+        }
+        root.querySelectorAll("[data-yz-sym]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            if (!ansEl) return;
+            var sym = btn.dataset.yzSym;
+            ansEl.value = (ansEl.value || "") + sym;
+            state.answers[ansKey] = ansEl.value;
+            ansEl.focus();
+            SoundEngine.play("click");
+          });
+        });
+        root.querySelector("[data-yz-prev]")?.addEventListener("click", function () {
+          if (state.qIdx > 0) { state.qIdx -= 1; state.subIdx = 0; SoundEngine.play("click"); render(); }
+        });
+        root.querySelector("[data-yz-next]")?.addEventListener("click", function () {
+          if (state.qIdx < state.activeQuestions.length - 1) { state.qIdx += 1; state.subIdx = 0; SoundEngine.play("step"); render(); }
+        });
+        root.querySelectorAll("[data-yz-ask-submit]").forEach(function (btn) {
+          btn.addEventListener("click", function () { state.showConfirmModal = true; SoundEngine.play("click"); render(); });
+        });
+        root.querySelector("[data-yz-modal-cancel]")?.addEventListener("click", function () { state.showConfirmModal = false; SoundEngine.play("click"); render(); });
+        root.querySelector("[data-yz-modal-confirm]")?.addEventListener("click", function () { finishExam(); });
+        root.querySelector("[data-yz-warn-ok]")?.addEventListener("click", function () {
+          state.tabWarningVisible = false;
+          var w = root.querySelector("[data-yz-tab-warn]");
+          if (w) w.style.display = "none";
+        });
+        root.querySelector("[data-yz-sound]")?.addEventListener("click", function () { SoundEngine.toggleMute(); render(); });
+        return;
+      }
+
+      /* ── ADIM 7: SONUÇ KARNESİ & ÇÖZÜM İNCELEME ── */
+      if (state.step === "result") {
+        root.innerHTML =
+          '<div class="yz2-shell yz2-fade">' +
+            '<div class="yz2-result-hero">' +
+              '<div class="yz2-score-ring"><strong>' + state.lastScore + '</strong><span>/ 100</span></div>' +
+              '<div>' +
+                '<span class="yz2-kicker">YAZILI DEĞERLENDİRME KARNESİ</span>' +
+                '<h2>' + (state.lastScore >= 85 ? "Harika Performans! 🏆" : state.lastScore >= 60 ? "Güzel İlerleme! 💪" : "Eksikleri Birlikte Tamamlayalım! 📘") + '</h2>' +
+                '<p>' + state.grade + '. Sınıf · ' + esc(getTermLabel(state.donem)) + ' · Sekmeden ayrılma: ' + state.tabLeaveCount + ' kez</p>' +
+                '<div class="yz2-res-actions">' +
+                  '<button type="button" class="yz2-navy-btn" data-yz-toggle-sol>👁️ ' + (state.showSolutions ? "Çözümleri Gizle" : "Çözümleri Göster") + '</button>' +
+                  '<button type="button" class="yz2-amber-btn" data-yz-retry>🔄 Yeniden Dene</button>' +
+                  '<button type="button" class="yz2-back-btn" data-yz-home>← Yazılı Merkezine Dön</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+            (state.showSolutions ? (
+              '<div class="yz2-sol-list">' +
+                state.activeQuestions.map(function (q, i) {
+                  return '<div class="yz2-sol-card">' +
+                    '<div class="yz2-q-head"><span class="yz2-kaz-code">Soru ' + (i + 1) + ' · ' + esc(q.kazanimKodu || "") + '</span><span class="yz2-pts-badge">' + (q.puan || 20) + ' Puan</span></div>' +
+                    '<p class="yz2-sol-q">' + esc(q.metin) + '</p>' +
+                    '<div class="yz2-sol-ans"><strong>📝 Adım Adım Çözüm:</strong><br>' + esc(q.cozumAdimlari || "").replace(/\n/g, "<br>") + '</div>' +
+                  '</div>';
+                }).join("") +
+              '</div>'
+            ) : '') +
+          '</div>';
+
+        root.querySelector("[data-yz-toggle-sol]")?.addEventListener("click", function () {
+          state.showSolutions = !state.showSolutions;
+          SoundEngine.play("click");
+          render();
+        });
+        root.querySelector("[data-yz-retry]")?.addEventListener("click", function () {
+          state.qIdx = 0; state.subIdx = 0; state.answers = {}; state.drawDone = {}; state.showSolutions = false;
+          state.step = "exam"; SoundEngine.play("step"); startTimer(); render();
+        });
+        root.querySelector("[data-yz-home]")?.addEventListener("click", function () {
+          state.step = "terms"; SoundEngine.play("click"); render();
+        });
+      }
     }
 
-    document.getElementById("zyCloseModal").addEventListener("click", function () { modalEl.classList.remove("is-open"); });
-    modalEl.addEventListener("click", function (e) { if (e.target === modalEl) modalEl.classList.remove("is-open"); });
-    document.getElementById("zyStartDigital").addEventListener("click", function () { if (state.activeExam) startInteractiveExam(state.activeExam); });
-    document.getElementById("zyStartPrint").addEventListener("click", function () { if (state.activeExam) triggerPrintPaper(state.activeExam); });
+    function goToLoadingThen(nextStep) {
+      state.step = "loading";
+      render();
+      setTimeout(function () {
+        state.step = nextStep;
+        SoundEngine.play("step");
+        render();
+      }, 950);
+    }
 
-    renderLobby();
-    fetchTeacherExams();
+    render();
   }
 
   if (document.readyState === "loading") {

@@ -23,7 +23,48 @@
     "5": {
       "1_donem_1_yazili": [
         {
-          soruNo: 1, kazanimKodu: "MAT.5.1.1", konu: "Çok Basamaklı Doğal Sayılar", puan: 15,
+          soruNo: 1, kazanimKodu: "MAT.5.3.1", konu: "Pergelle Çember Çizimi", puan: 20,
+          metin: "Ece, cetvelle |KL| = 3 cm olan [KL] doğru parçasını çizdi. Pergeli |KL| kadar açıp B merkezli bir çember çizmek istiyor. Soldaki pergel aracıyla çemberi çiziniz ve alt soruları yanıtlayınız.",
+          interaktifArac: { tip: "pergel", hedefYaricap: 3, referansUzunluk: 3, merkez: "B" },
+          altSorular: [
+            { harf: "a", metin: "Soldaki pergel aracını 3 cm'ye ayarlayıp B merkezli çemberi çiziniz.", tip: "cizim", beklenen: ["cizildi"] },
+            { harf: "b", metin: "Çizdiğiniz çemberin yarıçapı kaç cm'dir?", tip: "sayi", birim: "cm", beklenen: ["3", "3 cm"] },
+            { harf: "c", metin: "Bu çemberin çap uzunluğu kaç cm olur?", tip: "sayi", birim: "cm", beklenen: ["6", "6 cm"] }
+          ],
+          ipucu: "Pergel açıklığını 3 cm yapıp 'Çemberi Çiz' butonuna bas. Çap, yarıçapın 2 katıdır.",
+          beklenenSonuc: ["3", "6"],
+          yontemAnahtar: ["3", "6", "çap"],
+          cozumAdimlari: "a) Pergel 3 cm açılıp B merkezli çember çizilir.\nb) Yarıçap r = 3 cm'dir.\nc) Çap = 2 × r = 2 × 3 = 6 cm'dir."
+        },
+        {
+          soruNo: 2, kazanimKodu: "MAT.5.3.3", konu: "Açıları Ölçme & Sınıflandırma", puan: 20,
+          metin: "Soldaki sürüklenebilir açıölçeri (iletkiyi) B köşesine yerleştirerek ABC açısının ölçüsünü bulunuz ve alt soruları yanıtlayınız.",
+          interaktifArac: { tip: "aciolcer", hedefAci: 65, kose: "B", kol1: "A", kol2: "C" },
+          altSorular: [
+            { harf: "a", metin: "m(ABC) açısının ölçüsü kaç derecedir?", tip: "sayi", birim: "°", beklenen: ["65", "65°"] },
+            { harf: "b", metin: "Bu açı hangi açı çeşididir? (Dar / Dik / Geniş)", tip: "metin", beklenen: ["dar", "dar açı"] }
+          ],
+          ipucu: "Açıölçerin (+) merkezini B köşesine sürükle veya 'Köşeye Hizala'ya bas. 0° çizgisinden mavi ışına kadar oku.",
+          beklenenSonuc: ["65", "dar"],
+          yontemAnahtar: ["65", "dar", "90"],
+          cozumAdimlari: "a) İletkide bir kol 0°'de, diğer kol 65°'dedir → m(ABC) = 65°.\nb) 0° < 65° < 90° olduğu için Dar Açıdır."
+        },
+        {
+          soruNo: 3, kazanimKodu: "MAT.5.3.5", konu: "Çokgenler ve Temel Elemanları", puan: 20,
+          metin: "Soldaki kapalı çokgeni inceleyiniz, köşelere tıklayarak bir köşegen çiziniz ve alt soruları yanıtlayınız.",
+          interaktifArac: { tip: "cokgen", kenarSayisi: 5 },
+          altSorular: [
+            { harf: "a", metin: "Bu çokgenin adı nedir?", tip: "metin", beklenen: ["beşgen", "besgen"] },
+            { harf: "b", metin: "Bu çokgenin kaç köşesi vardır?", tip: "sayi", birim: "köşe", beklenen: ["5"] },
+            { harf: "c", metin: "Sol tahtada komşu olmayan iki köşeye tıklayarak en az bir köşegen çiziniz.", tip: "cizim", beklenen: ["cizildi"] }
+          ],
+          ipucu: "Köşeleri say (A, B, C, D, E → 5 köşe). Köşegen için A ve C gibi komşu olmayan iki noktaya tıkla.",
+          beklenenSonuc: ["beşgen", "5"],
+          yontemAnahtar: ["5", "beşgen", "köşegen"],
+          cozumAdimlari: "a) 5 kenarlı olduğu için Beşgen.\nb) 5 köşesi vardır (A, B, C, D, E).\nc) Örneğin [AC] veya [AD] bir köşegendir."
+        },
+        {
+          soruNo: 4, kazanimKodu: "MAT.5.1.1", konu: "Çok Basamaklı Doğal Sayılar", puan: 20,
           metin: "Okunuşu 'Kırk iki milyon üç yüz yedi bin seksen beş' olan doğal sayıyı rakamlarla yazınız ve binler bölüğündeki rakamların sayı değerleri toplamını bulunuz.",
           ipucu: "Milyonlar | Binler | Birler şeklinde üçerli bölük çizgileri çiz; binler bölüğündeki 3 rakamı topla.",
           beklenenSonuc: ["10", "42307085", "42 307 085"],
@@ -31,44 +72,12 @@
           cozumAdimlari: "Sayı: 42 307 085.\nBinler bölüğü: 307.\nRakamların sayı değerleri toplamı: 3 + 0 + 7 = 10."
         },
         {
-          soruNo: 2, kazanimKodu: "MAT.5.1.2", konu: "Doğal Sayılarla Dört İşlem", puan: 15,
+          soruNo: 5, kazanimKodu: "MAT.5.1.2", konu: "Doğal Sayılarla Dört İşlem", puan: 20,
           metin: "Bir kırtasiyeci tanesi 18 TL olan defterlerden 24 adet satmış ve kasasında gün başında bulunan 150 TL'nin üzerine eklemiştir. Kasada toplam kaç TL olmuştur?",
           ipucu: "Önce 24 × 18 işlemini yapıp defter gelirini bul, ardından 150 TL ile topla.",
           beklenenSonuc: ["582", "582 tl"],
           yontemAnahtar: ["432", "18", "24", "150"],
           cozumAdimlari: "Defter geliri: 24 × 18 = 432 TL.\nKasada toplam: 432 + 150 = 582 TL."
-        },
-        {
-          soruNo: 3, kazanimKodu: "MAT.5.1.3", konu: "Bölme İşlemi & Kalan Yorumlama", puan: 15,
-          metin: "Bir bölme işleminde bölen 12, bölüm 15 ve kalan 7 olduğuna göre bölünen doğal sayı kaçtır?",
-          ipucu: "Bölünen = (Bölen × Bölüm) + Kalan kuralını uygula.",
-          beklenenSonuc: ["187"],
-          yontemAnahtar: ["180", "12", "15", "7"],
-          cozumAdimlari: "12 × 15 = 180.\nKalanı ekleyelim: 180 + 7 = 187."
-        },
-        {
-          soruNo: 4, kazanimKodu: "MAT.5.2.1", konu: "Temel Geometrik Kavramlar & Açılar", puan: 20,
-          metin: "Bir üçgenin iki iç açısının ölçüsü 48° ve 67°'dir. Üçüncü iç açının ölçüsü kaç derecedir ve bu açı hangi açı çeşididir?",
-          ipucu: "Üçgenin iç açıları toplamı 180°'dir. 48 + 67 toplamını 180'den çıkar.",
-          beklenenSonuc: ["65", "65 derece", "65 dar"],
-          yontemAnahtar: ["115", "180", "dar"],
-          cozumAdimlari: "Verilen iki açı toplamı: 48° + 67° = 115°.\nÜçüncü açı: 180° − 115° = 65° (90°'den küçük olduğu için dar açıdır)."
-        },
-        {
-          soruNo: 5, kazanimKodu: "MAT.5.2.2", konu: "Dikdörtgenin Çevre Uzunluğu", puan: 15,
-          metin: "Kısa kenarı 9 cm, uzun kenarı ise kısa kenarının 2 katından 3 cm fazla olan dikdörtgenin çevre uzunluğu kaç cm'dir?",
-          ipucu: "Uzun kenarı bul: (9 × 2) + 3. Sonra Çevre = 2 × (kısa + uzun).",
-          beklenenSonuc: ["60", "60 cm"],
-          yontemAnahtar: ["21", "30", "2"],
-          cozumAdimlari: "Uzun kenar: 9 × 2 + 3 = 21 cm.\nÇevre: 2 × (9 + 21) = 2 × 30 = 60 cm."
-        },
-        {
-          soruNo: 6, kazanimKodu: "MAT.5.2.3", konu: "Dikdörtgenin Alanı", puan: 20,
-          metin: "Kenar uzunlukları 14 m ve 8 m olan dikdörtgen şeklindeki bir bahçenin tamamına metrekare fiyatı 25 TL olan çim ekilecektir. Toplam maliyet kaç TL olur?",
-          ipucu: "Önce bahçenin alanını (14 × 8) m² olarak hesapla, sonra 25 ile çarp.",
-          beklenenSonuc: ["2800", "2800 tl", "2.800"],
-          yontemAnahtar: ["112", "25", "14", "8"],
-          cozumAdimlari: "Bahçe alanı: 14 × 8 = 112 m².\nToplam maliyet: 112 × 25 = 2800 TL."
         }
       ],
       "1_donem_2_yazili": [
