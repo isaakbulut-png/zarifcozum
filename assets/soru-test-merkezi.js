@@ -109,24 +109,43 @@
       if (res.ok) {
         const data = await res.json();
         const list = Array.isArray(data.konular) ? data.konular : (Array.isArray(data) ? data : []);
+        const mufredatList = (window.MATEMATIK_MUFREDATI && window.MATEMATIK_MUFREDATI[grade]) || [];
+        const mufredatTitles = mufredatList.map(extractTopicTitle).filter(Boolean);
+
+        const resolveThemeTitle = (rawTitle) => {
+          const low = String(rawTitle || '').toLowerCase();
+          const exact = mufredatTitles.find(m => m.toLowerCase() === low);
+          if (exact) return exact;
+          const parent = String(rawTitle || '').split(/\s*(?:>|—| - )\s*/)[0].trim().toLowerCase();
+          const byParent = mufredatTitles.find(m => {
+            const ml = m.toLowerCase();
+            const mStripped = ml.replace(/^\d+\.\s*tema:\s*/i, '').trim();
+            return ml === parent || ml.includes(parent) || parent.includes(ml) || (mStripped && (low.includes(mStripped) || mStripped.includes(parent)));
+          });
+          return byParent || rawTitle;
+        };
+
         list.forEach(k => {
-          const title = extractTopicTitle(k);
-          if (!title) return;
+          const rawTitle = extractTopicTitle(k);
+          if (!rawTitle) return;
           const count = Number(k.soruSayisi ?? k.count ?? k.questionCount ?? 0);
+          if (count <= 0) return;
+          const title = resolveThemeTitle(rawTitle);
           const key = title.toLowerCase();
           const prev = itemsMap.get(key);
           if (prev) {
             prev.questionCount = Math.max(prev.questionCount, count);
-            prev.approved = prev.approved || count > 0;
-            prev.hasBackendQuestions = count > 0;
+            prev.approved = true;
+            prev.hasBackendQuestions = true;
+            if (!prev.workTypeLabel) prev.workTypeLabel = 'Öğrenme Çıktısı Testi';
           } else {
             itemsMap.set(key, {
               title,
               questionCount: count,
-              approved: count > 0,
-              hasBackendQuestions: count > 0,
+              approved: true,
+              hasBackendQuestions: true,
               workType: 'coktan_secmeli',
-              workTypeLabel: count > 0 ? 'Öğrenme Çıktısı Testi' : ''
+              workTypeLabel: 'Öğrenme Çıktısı Testi'
             });
           }
         });
@@ -164,11 +183,17 @@
       const data = await res.json();
       const rawList = Array.isArray(data.sorular) ? data.sorular : (Array.isArray(data) ? data : []);
       return rawList.filter(q => q && (q.text || q.soru || q.question)).map(q => ({
+        id: q.id || q._id || '',
         text: q.text || q.soru || q.question || '',
         options: q.options || q.secenekler || {},
         answer: q.answer || q.cevap || '',
         explanation: q.explanation || q.cozum || q.solution || '',
-        rubric: q.rubric || []
+        solution: q.solution || q.explanation || q.cozum || '',
+        rubric: q.rubric || [],
+        svg: q.svg || '',
+        imageUrl: q.imageUrl || '',
+        outcomeCode: q.outcomeCode || '',
+        questionType: q.questionType || 'multiple_choice'
       }));
     } catch {
       return [];

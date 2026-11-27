@@ -238,6 +238,94 @@ function createPratikRouter({
     return { kim, uye, limitYok, izin: mevcut || kullanilan.length < haklar.konu };
   }
 
+  router.get('/konular', sarmala(async (req, res) => {
+    const sinif = Number(req.query?.sinif);
+    if (!Number.isInteger(sinif) || sinif < 5 || sinif > 12) {
+      return res.json({ success: true, konular: [] });
+    }
+    const Soru = require('../models/Soru');
+    const docs = await Soru.find({ grade: sinif })
+      .select('topic questionType')
+      .lean();
+
+    const counts = new Map();
+    const bump = (name) => {
+      const clean = String(name || '').trim();
+      if (!clean) return;
+      counts.set(clean, (counts.get(clean) || 0) + 1);
+    };
+
+    docs.forEach(d => {
+      const raw = String(d.topic || '').trim();
+      if (!raw) return;
+      bump(raw);
+      // "1. Tema: Geometrik Şekiller > Açıları Ölçme" gibi alt konu kayıtlarını ana temaya da say
+      const parent = raw.split(/\s*(?:>|—| - )\s*/)[0].trim();
+      if (parent && parent !== raw) {
+        bump(parent);
+      }
+    });
+
+    const konular = Array.from(counts.entries())
+      .map(([konu, soruSayisi]) => ({ konu, title: konu, soruSayisi, count: soruSayisi }))
+      .sort((a, b) => b.soruSayisi - a.soruSayisi);
+
+    res.json({ success: true, konular });
+  }));
+
+  router.get('/sorular', sarmala(async (req, res) => {
+    const sinif = Number(req.query?.sinif);
+    const konu = String(req.query?.konu || '').trim();
+    if (!Number.isInteger(sinif) || sinif < 5 || sinif > 12) {
+      return res.json({ success: true, sorular: [] });
+    }
+    const Soru = require('../models/Soru');
+    const filter = { grade: sinif };
+    if (konu) {
+      const escaped = konu.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const strippedTheme = konu.replace(/^\d+\.\s*Tema:\s*/i, '').trim();
+      const escapedStripped = strippedTheme ? strippedTheme.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
+      filter.$or = [
+        { topic: { $regex: escaped, $options: 'i' } },
+        ...(escapedStripped && escapedStripped !== escaped
+          ? [{ topic: { $regex: escapedStripped, $options: 'i' } }]
+          : [])
+      ];
+    }
+    const docs = await Soru.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(30)
+      .lean();
+
+    const sorular = docs.map(d => {
+      let optsObj = {};
+      if (Array.isArray(d.options)) {
+        d.options.forEach(o => {
+          if (o && o.label) optsObj[String(o.label).toUpperCase()] = String(o.text || '');
+        });
+      } else if (d.options && typeof d.options === 'object') {
+        optsObj = d.options;
+      }
+      return {
+        id: String(d._id),
+        text: d.text || '',
+        options: optsObj,
+        answer: d.answer || 'A',
+        explanation: d.explanation || d.solution || '',
+        solution: d.solution || d.explanation || '',
+        rubric: Array.isArray(d.rubric) ? d.rubric : [],
+        svg: typeof d.svg === 'string' ? d.svg : '',
+        imageUrl: d.imageUrl || '',
+        outcomeCode: d.outcomeCode || '',
+        questionType: d.questionType || 'multiple_choice',
+        topic: d.topic || konu,
+        difficulty: d.difficulty || 'orta'
+      };
+    });
+
+    res.json({ success: true, sorular });
+  }));
+
   router.get('/durum', sarmala(async (req, res) => {
     res.set('Cache-Control', 'no-store');
     const haklar = haklariEsle(await getVisitorSettings());

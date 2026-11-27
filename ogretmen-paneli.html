@@ -1843,6 +1843,17 @@ body.teacher-menu-open {
                     <p class="status" id="aiQuestionStatus" role="status" aria-live="polite"></p>
                   </form>
 
+                  <!-- Kayıtlı AI Taslaklarım (F5 Sonrası Anında Geri Yükle) -->
+                  <details id="savedAiDraftsDetails" style="margin-top:16px;background:#FAF8F5;border:1.5px solid #E2DDD5;border-radius:12px;padding:12px 14px;">
+                    <summary style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;list-style:none;font-weight:800;font-size:13.5px;color:#0F172A;">
+                      <span>📂 Kayıtlı AI Taslaklarım <span id="savedAiDraftsCount" style="margin-left:6px;padding:2px 8px;border-radius:999px;background:#FEF3C7;color:#92400E;font-size:11.5px;font-weight:800;">0</span></span>
+                      <button type="button" id="refreshSavedAiDraftsBtn" style="padding:4px 10px;border-radius:8px;border:1px solid #CBD5E1;background:#FFFFFF;color:#0F172A;font-size:11.5px;font-weight:700;cursor:pointer;">↻ Yenile</button>
+                    </summary>
+                    <div id="savedAiDraftsList" style="margin-top:10px;display:grid;gap:8px;font-size:13px;color:#334155;">
+                      <span style="color:#64748B;">Taslaklar yükleniyor…</span>
+                    </div>
+                  </details>
+
                   <!-- Üretilen AI Soruları & Toplu Sepete Ekle Butonu -->
                   <div id="aiBasketToolbar" style="display:none; justify-content:space-between; align-items:center; margin-top:20px; padding:10px 14px; background:#faf5ff; border:1px solid #e9d5ff; border-radius:8px;">
                     <strong style="color:#6b21a8; font-size:13px;">Üretilen Sorular</strong>
@@ -5218,6 +5229,7 @@ body.teacher-menu-open {
         });
         alert(`Tebrikler! ${transRes.transferredCount || approvedIndices.length} soru kalıcı olarak Soru Bankasına aktarıldı ve Pinecone'a indekslendi.`);
         bankBtn.textContent = '✅ Aktarıldı';
+        if (typeof loadSavedAiDrafts === 'function') loadSavedAiDrafts();
       } catch (e) {
         alert('Soru bankasına aktarma hatası: ' + e.message);
         bankBtn.disabled = false;
@@ -6291,8 +6303,98 @@ body.teacher-menu-open {
     }
   }
 
-  // Restore on load if present
+  // Kayıtlı AI Taslaklarını Listele & Geri Yükle
+  async function loadSavedAiDrafts() {
+    const listEl = $('savedAiDraftsList');
+    const countEl = $('savedAiDraftsCount');
+    if (!listEl) return;
+    try {
+      const res = await api('/api/ai/questions/drafts');
+      const drafts = Array.isArray(res?.drafts) ? res.drafts : [];
+      if (countEl) countEl.textContent = String(drafts.length);
+      if (!drafts.length) {
+        listEl.innerHTML = '<span style="color:#64748B;font-size:12.5px;">Henüz kayıtlı AI soru taslağınız yok.</span>';
+        return;
+      }
+      listEl.innerHTML = drafts.slice(0, 12).map(d => {
+        const dt = d.createdAt ? new Date(d.createdAt).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+        const isApproved = d.status === 'approved';
+        const badgeStyle = isApproved
+          ? 'background:#DCFCE7;color:#166534;'
+          : 'background:#FEF3C7;color:#92400E;';
+        const badgeText = isApproved ? '✅ Bankaya Aktarıldı' : '📝 Taslak';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 12px;border-radius:10px;background:#FFFFFF;border:1px solid #E2DDD5;">
+          <div style="min-width:0;flex:1;">
+            <div style="font-weight:700;color:#0F172A;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(String(d.grade || 5))}. Sınıf — ${esc(d.topic || 'Genel')}</div>
+            <div style="font-size:11.5px;color:#64748B;margin-top:2px;">${Number(d.questionCount) || 0} soru · ${esc(d.difficulty || 'Orta')} · ${esc(dt)} <span style="margin-left:6px;padding:1px 7px;border-radius:999px;font-weight:700;font-size:10.5px;${badgeStyle}">${badgeText}</span></div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button type="button" data-restore-draft="${esc(d.id)}" style="padding:5px 10px;border-radius:8px;border:none;background:#0F172A;color:#FFFFFF;font-size:12px;font-weight:700;cursor:pointer;">🔄 Ekrana Getir</button>
+            <button type="button" data-delete-draft="${esc(d.id)}" style="padding:5px 9px;border-radius:8px;border:1px solid #FECACA;background:#FEF2F2;color:#B91C1C;font-size:12px;font-weight:700;cursor:pointer;">Sil</button>
+          </div>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      listEl.innerHTML = `<span style="color:#B91C1C;font-size:12.5px;">Taslaklar yüklenemedi: ${esc(e.message)}</span>`;
+    }
+  }
+
+  $('refreshSavedAiDraftsBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    loadSavedAiDrafts();
+  });
+
+  $('savedAiDraftsList')?.addEventListener('click', async (e) => {
+    const restoreBtn = e.target.closest('[data-restore-draft]');
+    if (restoreBtn) {
+      const id = restoreBtn.dataset.restoreDraft;
+      restoreBtn.disabled = true;
+      restoreBtn.textContent = 'Yükleniyor…';
+      try {
+        const res = await api('/api/ai/questions/drafts/' + encodeURIComponent(id));
+        if (res && res.success && res.draft) {
+          const draft = res.draft;
+          aiDraft = {
+            topic: draft.topic,
+            grade: draft.grade,
+            difficulty: draft.difficulty,
+            draftId: draft._id,
+            questions: draft.questions,
+            soruSayisi: draft.questions.length
+          };
+          localStorage.setItem('zarif_last_ai_draft_id', String(draft._id));
+          renderAiQuestionCards(aiDraft, true);
+          $('aiQuestionList')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } catch (err) {
+        alert('Taslak geri yüklenemedi: ' + err.message);
+      } finally {
+        restoreBtn.disabled = false;
+        restoreBtn.textContent = '🔄 Ekrana Getir';
+      }
+      return;
+    }
+
+    const delBtn = e.target.closest('[data-delete-draft]');
+    if (delBtn) {
+      if (!confirm('Bu AI soru taslağını silmek istediğinize emin misiniz?')) return;
+      const id = delBtn.dataset.deleteDraft;
+      try {
+        await api('/api/ai/questions/drafts/' + encodeURIComponent(id), { method: 'DELETE' });
+        if (localStorage.getItem('zarif_last_ai_draft_id') === id) {
+          localStorage.removeItem('zarif_last_ai_draft_id');
+        }
+        loadSavedAiDrafts();
+      } catch (err) {
+        alert('Taslak silinemedi: ' + err.message);
+      }
+    }
+  });
+
+  // Restore on load if present + load saved drafts list
   checkAndRestoreLastAiDraft();
+  loadSavedAiDrafts();
 
 </script>
 <script>
