@@ -6498,15 +6498,16 @@ body.teacher-menu-open {
     if (aiDraft) return; // already loaded
     try {
       const res = await api('/api/ai/questions/drafts/' + lastDraftId);
-      if (res && res.success && res.draft) {
+      if (res && res.draft) {
         const draft = res.draft;
+        const resolvedId = String(draft.id || draft._id || lastDraftId);
         aiDraft = {
           topic: draft.topic,
           grade: draft.grade,
           difficulty: draft.difficulty,
-          draftId: draft._id,
-          questions: draft.questions,
-          soruSayisi: draft.questions.length
+          draftId: resolvedId,
+          questions: Array.isArray(draft.questions) ? draft.questions : [],
+          soruSayisi: Array.isArray(draft.questions) ? draft.questions.length : 0
         };
         renderAiQuestionCards(aiDraft, true);
       }
@@ -6521,15 +6522,16 @@ body.teacher-menu-open {
   // Global köprü: Bağımsız taslak yöneticisi buradan aiDraft'ı ekrana basabilir
   window.__zcRestoreAiDraftToUi = function (draft) {
     if (!draft) return;
+    const resolvedId = String(draft.id || draft._id || '');
     aiDraft = {
       topic: draft.topic,
       grade: draft.grade,
       difficulty: draft.difficulty,
-      draftId: draft._id,
-      questions: draft.questions,
+      draftId: resolvedId,
+      questions: Array.isArray(draft.questions) ? draft.questions : [],
       soruSayisi: Array.isArray(draft.questions) ? draft.questions.length : 0
     };
-    localStorage.setItem('zarif_last_ai_draft_id', String(draft._id));
+    if (resolvedId) localStorage.setItem('zarif_last_ai_draft_id', resolvedId);
     renderAiQuestionCards(aiDraft, true);
     $('aiQuestionList')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -6630,8 +6632,10 @@ body.teacher-menu-open {
         restoreBtn.textContent = 'Yükleniyor…';
         try {
           const res = await fetchJsonWithTimeout('/api/ai/questions/drafts/' + encodeURIComponent(id));
-          if (res && res.success && res.draft && typeof window.__zcRestoreAiDraftToUi === 'function') {
+          if (res && res.draft && typeof window.__zcRestoreAiDraftToUi === 'function') {
             window.__zcRestoreAiDraftToUi(res.draft);
+          } else {
+            alert('Taslak içeriği okunamadı.');
           }
         } catch (err) {
           alert('Taslak geri yüklenemedi: ' + err.message);

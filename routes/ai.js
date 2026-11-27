@@ -1245,8 +1245,10 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       if (!draft) return res.status(404).json({ mesaj: 'Taslak bulunamadı.' });
 
       res.json({
+        success: true,
         draft: {
           id: draft._id.toString(),
+          _id: draft._id.toString(),
           title: draft.title,
           topic: draft.topic,
           grade: draft.grade,
@@ -1261,7 +1263,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
   });
 
   // Taslaktaki Soruları Soru Bankasına Aktar
-  router.post('/questions/drafts/:id/transfer-to-bank', requireRole('teacher'), async (req, res) => {
+  router.post('/questions/drafts/:id/transfer-to-bank', requireRole('teacher', 'admin'), async (req, res) => {
     try {
       if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz taslak ID.' });
       const draft = await AiQuestionDraft.findById(req.params.id);
