@@ -5441,6 +5441,9 @@ body.teacher-menu-open {
         const r = await api('/api/ai/questions/generate-illustration', {
           method: 'POST',
           body: JSON.stringify({
+            draftId: aiDraft.draftId || aiDraft.id || aiDraft._id || '',
+            questionIndex: idx,
+            questionId: q._id || '',
             grade: aiDraft.grade || 5,
             topic: aiDraft.topic || 'Matematik',
             text: q.senaryo || q.text || '',

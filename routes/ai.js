@@ -1224,7 +1224,36 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       if (!resolvedUrl) {
         return res.status(502).json({ mesaj: 'Görsel üretici şu an yanıt veremedi (API kotası veya model erişimi kontrol edilmeli).' });
       }
-      res.json({ success: true, imageUrl: resolvedUrl });
+
+      // Taslak ID gönderildiyse görseli MongoDB taslağına kalıcı olarak kaydet
+      let persisted = false;
+      const draftId = String(req.body?.draftId || '').trim();
+      const questionIndex = Number(req.body?.questionIndex);
+      const questionId = String(req.body?.questionId || '').trim();
+      if (draftId && ObjectId.isValid(draftId)) {
+        try {
+          const draft = await AiQuestionDraft.findById(draftId);
+          if (draft && Array.isArray(draft.questions)) {
+            let targetQ = null;
+            if (questionId && ObjectId.isValid(questionId)) {
+              targetQ = draft.questions.id(questionId);
+            }
+            if (!targetQ && Number.isInteger(questionIndex) && questionIndex >= 0 && questionIndex < draft.questions.length) {
+              targetQ = draft.questions[questionIndex];
+            }
+            if (targetQ) {
+              targetQ.imageUrl = resolvedUrl;
+              if (customPrompt) targetQ.illustrasyon_promptu = customPrompt;
+              await draft.save();
+              persisted = true;
+            }
+          }
+        } catch (persistErr) {
+          console.warn('[AI] Hikâye görseli taslağa kaydedilemedi:', persistErr.message);
+        }
+      }
+
+      res.json({ success: true, imageUrl: resolvedUrl, persisted });
     } catch (err) {
       console.error('[AI] Tekil illüstrasyon hatası:', err);
       res.status(500).json({ mesaj: err.message || 'Hikâye görseli üretilemedi.' });
@@ -1290,6 +1319,14 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       const draft = await AiQuestionDraft.findById(req.params.id).lean();
       if (!draft) return res.status(404).json({ mesaj: 'Taslak bulunamadı.' });
 
+      const normalizedQuestions = (draft.questions || []).map(q => {
+        if (typeof q?.imageUrl === 'string' && /\.r2\.dev\/(ai-illustrations\/.+)$/i.test(q.imageUrl)) {
+          const m = q.imageUrl.match(/\.r2\.dev\/(ai-illustrations\/.+)$/i);
+          return { ...q, imageUrl: `/uploads/${m[1]}` };
+        }
+        return q;
+      });
+
       res.json({
         success: true,
         draft: {
@@ -1300,7 +1337,7 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
           grade: draft.grade,
           difficulty: draft.difficulty,
           status: draft.status,
-          questions: draft.questions
+          questions: normalizedQuestions
         }
       });
     } catch (err) {
