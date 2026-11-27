@@ -4265,7 +4265,7 @@ body.teacher-menu-open {
   }
 
   // Sepet Buton Delegasyonu (Yukarı, Aşağı, Önizle, Sil)
-  $('basketItemsList')?.addEventListener('click', event => {
+  $('basketItemsList')?.addEventListener('click', async event => {
     const upBtn = event.target.closest('.btn-basket-up');
     const downBtn = event.target.closest('.btn-basket-down');
     const viewBtn = event.target.closest('.btn-basket-view');
