@@ -378,11 +378,13 @@
       });
     });
 
-    textColorInput?.addEventListener('input', () => {
+    const onColorPick = () => {
       selectedTextColor = textColorInput.value;
       document.querySelectorAll('[data-zc-color-swatch]').forEach(b => { b.style.outline = 'none'; });
       pushLiveTextPreview();
-    });
+    };
+    textColorInput?.addEventListener('input', onColorPick);
+    textColorInput?.addEventListener('change', onColorPick);
 
     textColorResetBtn?.addEventListener('click', () => {
       selectedTextColor = '';

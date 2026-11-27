@@ -22,8 +22,13 @@
       el.textContent = override.customText;
       preserved.forEach(node => el.append(node));
     }
-    if (override.textColor) el.style.setProperty('color', override.textColor, 'important');
-    else if (override.resetColor) el.style.removeProperty('color');
+    if (override.textColor) {
+      el.style.setProperty('color', override.textColor, 'important');
+      el.style.setProperty('-webkit-text-fill-color', override.textColor, 'important');
+    } else if (override.resetColor) {
+      el.style.removeProperty('color');
+      el.style.removeProperty('-webkit-text-fill-color');
+    }
 
     if (override.fontFamily) el.style.setProperty('font-family', override.fontFamily, 'important');
     else if (override.resetFont) el.style.removeProperty('font-family');
@@ -399,8 +404,9 @@
       }
       if (event.data?.type === 'site-media-preview-text' && event.data.targetKey) {
         const found = targets.entries(document).find(item => item.key === event.data.targetKey);
-        if (found?.element) {
-          applyTextStyle(found.element, event.data);
+        const targetEl = (found && found.element) || selectedElement;
+        if (targetEl) {
+          applyTextStyle(targetEl, event.data);
         }
       }
     });
