@@ -52,6 +52,65 @@
       .kc-fc-back{background:linear-gradient(135deg,#fffaf5 0%,#fdf1e3 100%);color:#2c1a0e;border:2px solid #c2570c;transform:rotateY(180deg)}
       .kc-lightbox{display:none;position:fixed;inset:0;z-index:10050;background:rgba(20,10,4,0.82);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px}
       .kc-lightbox-inner{background:#fffaf5;border-radius:16px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;border:2px solid #c2570c}
+      .kc-station-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding:10px;background:#FAF8F5;border:1.5px solid #E2DDD5;border-radius:14px}
+      .kc-station-btn{padding:8px 14px;border-radius:10px;border:1.5px solid #E2DDD5;background:#FFFFFF;color:#0F172A;font-size:12.5px;font-weight:800;cursor:pointer;transition:transform .14s ease,background .14s ease}
+      .kc-station-btn:hover{border-color:#D97706;transform:translateY(-1px)}
+      .kc-station-btn.active{background:#0F172A;color:#FFFFFF;border-color:#0F172A}
+      .kc-textbook-2col{display:grid;grid-template-columns:55fr 45fr;gap:18px;align-items:start}
+      .kc-tb-col{display:flex;flex-direction:column;gap:14px}
+      .kc-kunye-card{margin-top:16px;padding:14px 18px;border-radius:14px;background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);color:#FAF8F5;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+      .kc-kunye-pills{display:flex;gap:6px;flex-wrap:wrap}
+      .kc-kunye-pill{padding:3px 10px;border-radius:999px;background:rgba(217,119,6,0.22);border:1px solid #D97706;color:#FDE68A;font-size:11.5px;font-weight:800}
+      .ks-card{background:#FFFFFF;border:1.5px solid #E2DDD5;border-radius:16px;padding:20px;color:#0F172A}
+      .ks-head-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+      .ks-head{font-size:1.05rem;font-weight:800;color:#0F172A}
+      .ks-sub{margin:4px 0 14px;font-size:0.88rem;color:#64748B;line-height:1.55}
+      .ks-pill{padding:4px 11px;border-radius:999px;background:#FAF8F5;border:1px solid #E2DDD5;font-size:0.78rem;font-weight:800;color:#0F172A}
+      .ks-slider-row{margin-top:14px;padding:12px 14px;border-radius:12px;background:#FAF8F5;border:1px solid #E2DDD5;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:0.88rem;font-weight:700}
+      .ks-note{margin-top:10px;padding:10px 14px;border-radius:10px;background:#FFFBEB;border-left:4px solid #D97706;font-size:0.88rem;color:#334155}
+      .ks-win-banner{margin-bottom:14px;padding:12px 16px;border-radius:12px;background:#ECFDF5;border:1.5px solid #059669;color:#065F46;font-weight:800;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+      .ks-match-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+      .ks-match-col{display:flex;flex-direction:column;gap:8px}
+      .ks-m-item{padding:12px 14px;border-radius:11px;border:2px solid #E2DDD5;background:#FAF8F5;color:#0F172A;font-weight:700;font-size:0.88rem;text-align:left;cursor:pointer;transition:transform .12s ease,border-color .12s ease}
+      .ks-m-item:hover{border-color:#D97706;transform:translateY(-1px)}
+      .ks-m-item.active{border-color:#D97706;background:#FEF3C7}
+      .ks-m-item.matched{border-color:#059669;background:#ECFDF5;color:#065F46;opacity:0.82;cursor:default}
+      .ks-m-item.wrong{border-color:#DC2626;background:#FEF2F2}
+      .ks-arena-intro{background:#FFFFFF;border:1.5px solid #E2DDD5;border-radius:18px;padding:28px;text-align:center}
+      .ks-arena-intro h3{margin:10px 0 14px;font-size:1.3rem;color:#0F172A}
+      .ks-intro-rules{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 auto 20px;max-width:640px}
+      .ks-intro-rules>div{background:#FAF8F5;border:1px solid #E2DDD5;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:4px}
+      .ks-intro-rules strong{color:#0F172A;font-size:0.95rem}
+      .ks-intro-rules span{color:#64748B;font-size:0.78rem}
+      .ks-btn-amber,.ks-btn-navy{padding:9px 16px;border-radius:10px;border:none;font-weight:800;font-size:0.88rem;cursor:pointer}
+      .ks-btn-amber{background:#D97706;color:#FFFFFF}
+      .ks-btn-navy{background:#0F172A;color:#FFFFFF}
+      .ks-btn-lg{padding:13px 26px;font-size:1rem}
+      .ks-arena-wrap{background:#FFFFFF;border:1.5px solid #E2DDD5;border-radius:18px;overflow:hidden}
+      .ks-arena-top{background:#0F172A;color:#FFFFFF;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+      .ks-streak-badge{padding:4px 10px;border-radius:999px;background:rgba(217,119,6,0.24);color:#FDE68A;font-size:0.82rem;font-weight:800}
+      .ks-hearts{font-size:1rem;letter-spacing:2px}
+      .ks-arena-body{display:grid;grid-template-columns:1fr 165px;gap:16px;padding:18px}
+      .ks-arena-visual{position:relative;background:#FAF8F5;border:1px solid #E2DDD5;border-radius:12px;padding:10px;margin-bottom:12px;cursor:zoom-in;text-align:center}
+      .ks-zoom-tag{position:absolute;top:8px;right:8px;padding:3px 8px;border-radius:999px;background:#0F172A;color:#FFFFFF;font-size:11px;font-weight:700}
+      .ks-arena-q{font-size:0.98rem;font-weight:700;color:#0F172A;line-height:1.6;margin-bottom:12px}
+      .ks-arena-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .ks-opt-btn{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:11px;border:2px solid #E2DDD5;background:#FAF8F5;color:#0F172A;font-weight:600;font-size:0.9rem;text-align:left;cursor:pointer}
+      .ks-opt-btn:hover:not(:disabled){border-color:#D97706;background:#FFFBEB}
+      .ks-opt-lbl{width:26px;height:26px;border-radius:8px;background:#0F172A;color:#FFFFFF;display:grid;place-items:center;font-weight:800;font-size:0.8rem;flex-shrink:0}
+      .ks-opt-btn.elim{opacity:0.28;text-decoration:line-through;cursor:not-allowed}
+      .ks-opt-btn.correct{border-color:#059669;background:#ECFDF5}
+      .ks-opt-btn.wrong{border-color:#DC2626;background:#FEF2F2}
+      .ks-arena-feedback{margin-top:14px;padding:12px 14px;border-radius:12px;background:#FFFBEB;border-left:4px solid #D97706;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:0.86rem;color:#334155}
+      .ks-joker-rail{background:#FAF8F5;border:1px solid #E2DDD5;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+      .ks-joker-title{font-size:0.72rem;font-weight:900;color:#64748B;text-align:center;letter-spacing:0.05em}
+      .ks-joker-btn{padding:9px 10px;border-radius:10px;border:1.5px solid #E2DDD5;background:#FFFFFF;color:#0F172A;font-size:0.8rem;font-weight:800;cursor:pointer;text-align:left}
+      .ks-joker-btn:hover:not(:disabled){border-color:#D97706;background:#FFFBEB}
+      .ks-joker-btn:disabled{opacity:0.4;cursor:not-allowed}
+      .ks-overlay{position:fixed;inset:0;z-index:12500;background:rgba(15,23,42,0.65);backdrop-filter:blur(4px);display:grid;place-items:center;padding:18px}
+      .ks-env-card,.ks-zoom-card{background:#FFFFFF;border:2px solid #D97706;border-radius:18px;padding:24px;max-width:460px;width:100%;text-align:center}
+      .ks-zoom-card{max-width:680px}
+      @media(max-width:860px){.kc-textbook-2col,.ks-match-grid,.ks-arena-body,.ks-arena-opts,.ks-intro-rules{grid-template-columns:1fr}}
     `;
     document.head.appendChild(style);
   }
@@ -474,37 +533,82 @@
     const body = $('kcReaderBody');
     if (!body) return;
 
+    const stationTabsHtml = `
+      <div class="kc-station-bar">
+        <button type="button" class="kc-station-btn ${readerState.mode === 'lesson' ? 'active' : ''}" data-kc-station="lesson">📖 Ders Kitabı</button>
+        <button type="button" class="kc-station-btn ${readerState.mode === 'discover' ? 'active' : ''}" data-kc-station="discover">🔬 Deneyimle &amp; Keşfet</button>
+        <button type="button" class="kc-station-btn ${readerState.mode === 'matching' ? 'active' : ''}" data-kc-station="matching">🧩 Kavrama Eşleştirme</button>
+        <button type="button" class="kc-station-btn ${readerState.mode === 'arena' ? 'active' : ''}" data-kc-station="arena">🏆 Konu Yarışması</button>
+        <button type="button" class="kc-station-btn ${readerState.mode === 'notes' ? 'active' : ''}" data-kc-station="notes">📝 Hap Notlar</button>
+        <button type="button" class="kc-station-btn ${readerState.mode === 'cards' ? 'active' : ''}" data-kc-station="cards">🃏 3D Kartlar</button>
+      </div>
+    `;
+
+    const bindStationTabs = () => {
+      body.querySelectorAll('[data-kc-station]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          readerState.mode = btn.dataset.kcStation;
+          playFeedbackTone('click');
+          renderReader();
+        });
+      });
+    };
+
+    if (readerState.mode === 'discover') {
+      body.innerHTML = stationTabsHtml + '<div id="kcStationMount"></div>';
+      bindStationTabs();
+      if (window.ZarifKonuIstasyonlari) window.ZarifKonuIstasyonlari.renderDiscoveryLab($('kcStationMount'), t);
+      return;
+    }
+
+    if (readerState.mode === 'matching') {
+      body.innerHTML = stationTabsHtml + '<div id="kcStationMount"></div>';
+      bindStationTabs();
+      if (window.ZarifKonuIstasyonlari) window.ZarifKonuIstasyonlari.renderMatchingGame($('kcStationMount'), t.flashcards || [], t.subTopicTitle || t.title);
+      return;
+    }
+
+    if (readerState.mode === 'arena') {
+      body.innerHTML = stationTabsHtml + '<div id="kcStationMount"></div>';
+      bindStationTabs();
+      if (window.ZarifKonuIstasyonlari) window.ZarifKonuIstasyonlari.renderArenaRace($('kcStationMount'), t);
+      return;
+    }
+
     if (readerState.mode === 'lesson') {
       const pages = t.lessonPages || [];
       const curPage = pages[readerState.pageIdx] || pages[0] || {};
       const hasBlocks = Boolean(curPage.storyOrContext || curPage.keyRuleBox || curPage.commonMistakeBox || curPage.miniChallenge);
-      const svgCode = curPage.visualSvg || curPage.svgDiagram || '';
-      const challenge = splitMiniChallenge(curPage.miniChallenge);
+      let svgCode = curPage.svg_kodu || curPage.visualSvg || curPage.svgDiagram || '';
+      if (!svgCode && window.VisualMathEngine && typeof window.VisualMathEngine.inferVisualSpecFromText === 'function') {
+        const inf = window.VisualMathEngine.inferVisualSpecFromText(`${curPage.title || ''} ${curPage.storyOrContext || ''}`, t.subTopicTitle || t.title, t.grade);
+        if (inf) svgCode = window.VisualMathEngine.renderToSvg(inf) || '';
+      }
+      const challenge = splitMiniChallenge(curPage.mini_soru ? `${curPage.mini_soru} (Cevap: ${curPage.mini_cevap || ''})` : curPage.miniChallenge);
+      const kazanimCode = curPage.kazanim_kodu || t.kazanim_kodu || t.outcome_code || t.themeCode || `MAT.${t.grade}`;
+      const surecList = Array.isArray(curPage.surec_becerileri) && curPage.surec_becerileri.length
+        ? curPage.surec_becerileri
+        : ['Akıl Yürütme', 'Matematiksel Modelleme', 'Görsel Temsil'];
 
       body.innerHTML = `
+        ${stationTabsHtml}
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
           ${pages.map((p, i) => `
-            <button type="button" data-reader-page="${i}" style="padding:6px 12px;border-radius:8px;border:1.5px solid ${i === readerState.pageIdx ? '#c2570c' : '#e6d7c8'};background:${i === readerState.pageIdx ? '#c2570c' : '#fff'};color:${i === readerState.pageIdx ? '#fff' : '#2c1a0e'};font-size:12.5px;font-weight:700;cursor:pointer;">
+            <button type="button" data-reader-page="${i}" style="padding:6px 12px;border-radius:8px;border:1.5px solid ${i === readerState.pageIdx ? '#D97706' : '#E2DDD5'};background:${i === readerState.pageIdx ? '#0F172A' : '#FFFFFF'};color:${i === readerState.pageIdx ? '#FFFFFF' : '#0F172A'};font-size:12.5px;font-weight:700;cursor:pointer;">
               ${i + 1}. Sayfa
             </button>
           `).join('')}
         </div>
 
-        <h3 style="margin:0 0 14px;color:#2c1a0e;font-family:Georgia,serif;font-size:1.2rem;">${esc(curPage.title || `${readerState.pageIdx + 1}. Sayfa`)}</h3>
+        <h3 style="margin:0 0 14px;color:#0F172A;font-family:Georgia,serif;font-size:1.25rem;">${esc(curPage.baslik || curPage.title || `${readerState.pageIdx + 1}. Sayfa`)}</h3>
 
-        <div class="kc-blocks-stack">
-          ${hasBlocks ? `
+        ${hasBlocks ? `
+        <div class="kc-textbook-2col">
+          <div class="kc-tb-col">
             ${curPage.storyOrContext ? `
               <div class="kc-block-card kc-block-story">
-                <div class="kc-block-head">🎯 Keşif &amp; Bağlam</div>
+                <div class="kc-block-head">🎯 Keşif Hikâyesi</div>
                 <div class="kc-block-body">${formatInlineMath(curPage.storyOrContext)}</div>
-              </div>
-            ` : ''}
-
-            ${svgCode && svgCode.includes('<svg') ? `
-              <div class="kc-block-card kc-block-svg">
-                <div class="kc-block-head">📐 Görsel Şema</div>
-                <div class="kc-svg-frame" id="kcPageSvgMount"></div>
               </div>
             ` : ''}
 
@@ -521,33 +625,51 @@
                 <div class="kc-block-body">${formatInlineMath(curPage.commonMistakeBox)}</div>
               </div>
             ` : ''}
+          </div>
+
+          <div class="kc-tb-col">
+            ${svgCode && svgCode.includes('<svg') ? `
+              <div class="kc-block-card kc-block-svg">
+                <div class="kc-block-head">📐 Görsel Matematik Sahnesi</div>
+                <div class="kc-svg-frame" id="kcPageSvgMount"></div>
+              </div>
+            ` : ''}
 
             ${challenge.question ? `
               <div class="kc-block-card kc-block-challenge">
-                <div class="kc-block-head">🎮 Etkileşimli Mini Meydan Okuma</div>
+                <div class="kc-block-head">🎮 Mini Meydan Okuma</div>
                 <div class="kc-block-body" style="font-weight:600;">${formatInlineMath(challenge.question)}</div>
                 <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                  <button type="button" id="kcRevealChallengeBtn" style="padding:8px 16px;border-radius:9px;border:0;background:#2c1a0e;color:#fff;font-weight:700;font-size:0.84rem;cursor:pointer;">🔍 Cevabı Kontrol Et</button>
+                  <button type="button" id="kcRevealChallengeBtn" style="padding:8px 16px;border-radius:9px;border:0;background:#0F172A;color:#fff;font-weight:700;font-size:0.84rem;cursor:pointer;">👁️ Cevabı Gör</button>
                   <span id="kcChallengeBadge" style="display:none;padding:4px 10px;border-radius:999px;font-size:0.8rem;font-weight:700;"></span>
                 </div>
                 <div class="kc-challenge-answer" id="kcChallengeAnswerBox">
                   <div>✅ Çözüm / Cevap: ${formatInlineMath(challenge.answer)}</div>
                   <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
                     <button type="button" id="kcChallengeCorrectBtn" style="padding:5px 12px;border-radius:8px;border:1px solid #059669;background:#059669;color:#fff;font-size:0.8rem;font-weight:700;cursor:pointer;">🎉 Doğru Bildim!</button>
-                    <button type="button" id="kcChallengeRetryBtn" style="padding:5px 12px;border-radius:8px;border:1px solid #c2570c;background:#fff;color:#c2570c;font-size:0.8rem;font-weight:700;cursor:pointer;">🔁 Tekrar Gözden Geçireyim</button>
+                    <button type="button" id="kcChallengeRetryBtn" style="padding:5px 12px;border-radius:8px;border:1px solid #D97706;background:#fff;color:#92400E;font-size:0.8rem;font-weight:700;cursor:pointer;">🔁 Tekrar Bak</button>
                   </div>
                 </div>
               </div>
             ` : ''}
-          ` : `
-            <div class="kc-block-card">
-              <div class="kc-block-body">${formatInlineMath(curPage.content || '')}</div>
-              ${svgCode && svgCode.includes('<svg') ? '<div class="kc-svg-frame" id="kcPageSvgMount" style="margin-top:14px;"></div>' : ''}
-            </div>
-          `}
+          </div>
         </div>
+        ` : `
+          <div class="kc-block-card">
+            <div class="kc-block-body">${formatInlineMath(curPage.content || '')}</div>
+            ${svgCode && svgCode.includes('<svg') ? '<div class="kc-svg-frame" id="kcPageSvgMount" style="margin-top:14px;"></div>' : ''}
+          </div>
+        `}
 
-        ${renderReferencePagesHtml(t.referenceBookPages)}
+        <div class="kc-kunye-card">
+          <div>
+            <div style="font-size:0.75rem;color:#FDE68A;font-weight:800;letter-spacing:0.04em;">🇹🇷 TÜRKİYE YÜZYILI MAARİF MODELİ KAZANIM KÜNYESİ</div>
+            <div style="font-size:0.95rem;font-weight:800;margin-top:2px;">${esc(kazanimCode)} · ${esc(t.subTopicTitle || t.title)}</div>
+          </div>
+          <div class="kc-kunye-pills">
+            ${surecList.map(b => `<span class="kc-kunye-pill">${esc(b)}</span>`).join('')}
+          </div>
+        </div>
         ${(() => {
           const topicLabel = t.subTopicTitle || t.title || 'Seçili Konu';
           let solvedBadgeHtml = '';
@@ -584,6 +706,7 @@
         </div>
       `;
 
+      bindStationTabs();
       if (svgCode && svgCode.includes('<svg')) {
         mountSafeSvg($('kcPageSvgMount'), svgCode);
       }
@@ -647,7 +770,8 @@
     } else if (readerState.mode === 'notes') {
       const notes = t.practicalNotes || [];
       if (!notes.length) {
-        body.innerHTML = '<div style="text-align:center;padding:40px;color:#6a5242;background:#fffaf5;border:1px dashed #dccab8;border-radius:14px;">Bu konu için henüz pratik hap bilgi eklenmemiş.</div>';
+        body.innerHTML = stationTabsHtml + '<div style="text-align:center;padding:40px;color:#6a5242;background:#fffaf5;border:1px dashed #dccab8;border-radius:14px;">Bu konu için henüz pratik hap bilgi eklenmemiş.</div>';
+        bindStationTabs();
         return;
       }
       const themes = [
@@ -657,7 +781,7 @@
         { bg: '#059669', icon: '🔑', cat: 'Kilit Formül' },
         { bg: '#9a3412', icon: '📌', cat: 'Unutma' }
       ];
-      body.innerHTML = `
+      body.innerHTML = stationTabsHtml + `
         <div class="kc-hap-grid">
           ${notes.map((n, idx) => {
             const th = themes[idx % themes.length];
@@ -674,11 +798,13 @@
           }).join('')}
         </div>
       `;
+      bindStationTabs();
 
     } else if (readerState.mode === 'cards') {
       const allCards = t.flashcards || [];
       if (!allCards.length) {
-        body.innerHTML = '<div style="text-align:center;padding:40px;color:#6a5242;background:#fffaf5;border:1px dashed #dccab8;border-radius:14px;">Bu konu için henüz bilgi kartı eklenmemiş.</div>';
+        body.innerHTML = stationTabsHtml + '<div style="text-align:center;padding:40px;color:#6a5242;background:#fffaf5;border:1px dashed #dccab8;border-radius:14px;">Bu konu için henüz bilgi kartı eklenmemiş.</div>';
+        bindStationTabs();
         return;
       }
 
