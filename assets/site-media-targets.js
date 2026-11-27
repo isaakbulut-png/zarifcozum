@@ -69,12 +69,21 @@
 
   function cleanInnerText(element) {
     if (!element) return '';
-    if (!element.querySelector || !element.querySelector('.site-media-placement, #siteMediaHoverBadge')) {
-      return String(element.innerText || element.textContent || '');
+    if (element.dataset && typeof element.dataset.zcOrigText === 'string') {
+      return element.dataset.zcOrigText;
     }
-    const clone = element.cloneNode(true);
-    clone.querySelectorAll('.site-media-placement, #siteMediaHoverBadge').forEach(n => n.remove());
-    return String(clone.textContent || '');
+    let raw = '';
+    if (!element.querySelector || !element.querySelector('.site-media-placement, #siteMediaHoverBadge')) {
+      raw = String(element.innerText || element.textContent || '');
+    } else {
+      const clone = element.cloneNode(true);
+      clone.querySelectorAll('.site-media-placement, #siteMediaHoverBadge').forEach(n => n.remove());
+      raw = String(clone.textContent || '');
+    }
+    if (element.dataset && raw.trim()) {
+      element.dataset.zcOrigText = raw;
+    }
+    return raw;
   }
 
   function textOf(element) {

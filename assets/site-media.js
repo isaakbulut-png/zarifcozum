@@ -385,7 +385,11 @@
         target: {
           tag: found.tag, kind: found.kind, id: found.id, label: found.label,
           context: found.context, occurrence: found.occurrence, key: found.key,
-          currentText: (typeof targets.textOf === 'function' ? targets.textOf(found.element) : found.label).trim(),
+          currentText: (() => {
+            const clone = found.element.cloneNode(true);
+            clone.querySelectorAll?.('.site-media-placement, #siteMediaHoverBadge').forEach(n => n.remove());
+            return String(clone.textContent || '').replace(/\s+/g, ' ').trim();
+          })(),
           computedFontSize: parseInt(cs.fontSize, 10) || 16
         }
       }, window.location.origin);
