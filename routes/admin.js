@@ -195,6 +195,27 @@ function createAdminRouter({
     }
   });
 
+  router.delete('/homepage-assets/:slot', allow('superadmin'), async (req, res) => {
+    const slot = req.params.slot;
+    if (!['animation', 'heroImage', 'featureImage'].includes(slot)) {
+      return res.status(400).json({ mesaj: 'Geçersiz ana sayfa medya alanı.' });
+    }
+    try {
+      const current = await SystemConfig.getHomepageAssets();
+      const oldUrl = current?.[slot];
+      const homepageAssets = await SystemConfig.saveHomepageAsset(slot, null);
+      if (typeof oldUrl === 'string' && oldUrl.startsWith('/uploads/homepage/')) {
+        const oldKey = oldUrl.replace(/^\/uploads\//, '');
+        await mediaStorage.remove(oldKey).catch(() => {});
+      }
+      await audit(req, 'homepage_asset.deleted', 'homepage_asset', slot, { oldUrl });
+      res.json({ mesaj: slot === 'animation' ? 'Ana sayfa Lottie animasyonu kaldırıldı.' : 'Ana sayfa görseli kaldırıldı.', homepageAssets });
+    } catch (error) {
+      console.error('Ana sayfa medyası kaldırılamadı:', error);
+      res.status(500).json({ mesaj: 'Ana sayfa medyası kaldırılamadı.' });
+    }
+  });
+
   router.get('/site-media', allow('superadmin'), async (req, res) => {
     try {
       res.json({placements: await SystemConfig.getSiteMediaPlacements()});

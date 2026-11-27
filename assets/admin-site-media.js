@@ -103,6 +103,35 @@
       });
     }
 
+    const removeAnimBtn = $('removeHomepageAnimation');
+    if (removeAnimBtn && !removeAnimBtn.dataset.wired) {
+      removeAnimBtn.dataset.wired = '1';
+      removeAnimBtn.addEventListener('click', async () => {
+        const msg = $('homepageAnimationMsg');
+        const ok = window.zcConfirm
+          ? await window.zcConfirm('Ana sayfadaki mevcut Lottie (.json) animasyonunu kaldırmak istediğinize emin misiniz?')
+          : true;
+        if (!ok) return;
+        removeAnimBtn.disabled = true;
+        setMsg(msg, 'Animasyon kaldırılıyor...', true);
+        try {
+          const res = await fetch('/api/admin/homepage-assets/animation', {
+            method: 'DELETE', credentials: 'same-origin'
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.mesaj || 'Animasyon kaldırılamadı.');
+          setMsg(msg, '✅ ' + (data.mesaj || 'Ana sayfa Lottie animasyonu kaldırıldı.'), true);
+          if ($('homepageAnimationPath')) {
+            $('homepageAnimationPath').textContent = 'Henüz animasyon yüklenmedi.';
+          }
+        } catch (err) {
+          setMsg(msg, err.message, false);
+        } finally {
+          removeAnimBtn.disabled = false;
+        }
+      });
+    }
+
     const imgForm = $('homepageImageForm');
     if (imgForm && !imgForm.dataset.wired) {
       imgForm.dataset.wired = '1';
@@ -261,7 +290,7 @@
         delBtn.type = 'button';
         delBtn.className = 'btn light';
         delBtn.style.cssText = 'font-size:0.75rem;padding:5px 10px;color:#b91c1c;margin-left:auto;';
-        delBtn.textContent = '🗑️ Kaldır';
+        delBtn.textContent = p.assetType === 'animation' ? '🗑️ Animasyonu Kaldır' : '🗑️ Görseli Kaldır';
         delBtn.onclick = async () => {
           if (!await window.zcConfirm('Bu medya yerleşimini sayfadan kaldırmak istediğinize emin misiniz?')) return;
           delBtn.disabled = true;
