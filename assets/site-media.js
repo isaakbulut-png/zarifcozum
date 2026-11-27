@@ -18,18 +18,20 @@
   function applyTextStyle(el, override) {
     if (!el || !override) return;
     if (typeof override.customText === 'string' && override.customText.trim()) {
+      const preserved = [...el.children].filter(ch => ch.classList?.contains('site-media-placement'));
       el.textContent = override.customText;
+      preserved.forEach(node => el.append(node));
     }
-    if (override.textColor) el.style.color = override.textColor;
+    if (override.textColor) el.style.setProperty('color', override.textColor, 'important');
     else if (override.resetColor) el.style.removeProperty('color');
 
-    if (override.fontFamily) el.style.fontFamily = override.fontFamily;
+    if (override.fontFamily) el.style.setProperty('font-family', override.fontFamily, 'important');
     else if (override.resetFont) el.style.removeProperty('font-family');
 
-    if (override.fontSizePx) el.style.fontSize = `${override.fontSizePx}px`;
+    if (override.fontSizePx) el.style.setProperty('font-size', `${override.fontSizePx}px`, 'important');
     else if (override.resetSize) el.style.removeProperty('font-size');
 
-    if (override.fontWeight) el.style.fontWeight = String(override.fontWeight);
+    if (override.fontWeight) el.style.setProperty('font-weight', String(override.fontWeight), 'important');
     else if (override.resetWeight) el.style.removeProperty('font-weight');
   }
 
@@ -378,7 +380,7 @@
         target: {
           tag: found.tag, kind: found.kind, id: found.id, label: found.label,
           context: found.context, occurrence: found.occurrence, key: found.key,
-          currentText: (found.element.innerText || found.element.textContent || '').trim(),
+          currentText: (typeof targets.textOf === 'function' ? targets.textOf(found.element) : found.label).trim(),
           computedFontSize: parseInt(cs.fontSize, 10) || 16
         }
       }, window.location.origin);

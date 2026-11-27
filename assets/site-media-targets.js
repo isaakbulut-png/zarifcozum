@@ -67,6 +67,16 @@
     return PAGES.some(page => page.path === path) ? path : null;
   }
 
+  function cleanInnerText(element) {
+    if (!element) return '';
+    if (!element.querySelector || !element.querySelector('.site-media-placement, #siteMediaHoverBadge')) {
+      return String(element.innerText || element.textContent || '');
+    }
+    const clone = element.cloneNode(true);
+    clone.querySelectorAll('.site-media-placement, #siteMediaHoverBadge').forEach(n => n.remove());
+    return String(clone.textContent || '');
+  }
+
   function textOf(element) {
     const tag = element.tagName.toLowerCase();
     if (element.dataset?.mediaSlot) return element.dataset.mediaSlot.trim().slice(0, 160);
@@ -78,18 +88,18 @@
     }
     if (tag === 'section' || tag === 'article' || tag === 'div') {
       const heading = element.querySelector('h1, h2, h3, h4');
-      const raw = element.getAttribute('aria-label') || heading?.textContent || element.id || element.innerText || '';
+      const raw = element.getAttribute('aria-label') || (heading ? cleanInnerText(heading) : '') || element.id || cleanInnerText(element);
       return String(raw).replace(/\s+/g, ' ').trim().slice(0, 120);
     }
     return String(element.getAttribute('aria-label') || element.getAttribute('title') ||
-      element.innerText || element.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 160);
+      cleanInnerText(element)).replace(/\s+/g, ' ').trim().slice(0, 160);
   }
 
   function contextOf(element) {
     const parent = element.parentElement;
     const container = parent?.closest('section, article, nav, main, header, footer, form') || parent;
     const heading = container?.querySelector('h1, h2, h3, h4');
-    return String(heading?.textContent || container?.getAttribute('aria-label') || container?.id || '')
+    return String((heading ? cleanInnerText(heading) : '') || container?.getAttribute('aria-label') || container?.id || '')
       .replace(/\s+/g, ' ').trim().slice(0, 120);
   }
 
@@ -143,5 +153,5 @@
       Number.isInteger(parts[4]) && parts[4] >= 0 && parts[4] <= 1000;
   }
 
-  return {PAGES, TARGET_SELECTOR, KIND_LABELS, normalizePagePath, entries, descriptors, validTargetKey};
+  return {PAGES, TARGET_SELECTOR, KIND_LABELS, normalizePagePath, textOf, entries, descriptors, validTargetKey};
 });
