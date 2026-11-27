@@ -5621,10 +5621,16 @@ body.teacher-menu-open {
 
     const unitTitle = quiz.unit_topic ? `${quiz.unit_topic} › ` : '';
     const subTitle = quiz.sub_topic || quiz.topic || '';
+    const selectedWorkTypeLabel = (quiz.workTypeLabel
+      || $('aiQuestionType')?.selectedOptions?.[0]?.textContent?.trim()
+      || 'Çoktan Seçmeli Öğrenme Çıktısı Testi').trim();
 
     container.innerHTML = `
       <div style="background:#064e3b;color:#34d399;padding:10px 14px;border-radius:8px;font-size:0.85rem;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-        <span>💾 <strong>Otomatik Taslak Kaydı Aktif:</strong> Sayfa yenilense de sorular silinmez. (Taslak ID: ${quiz.draftId || 'Kayıtlı'})${isRestored ? ' [Geri Yüklendi]' : ''}</span>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
+          <span>💾 <strong>Otomatik Taslak Kaydı Aktif:</strong> Sayfa yenilense de sorular silinmez. (Taslak ID: ${quiz.draftId || 'Kayıtlı'})${isRestored ? ' [Geri Yüklendi]' : ''}</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:999px;font-size:0.78rem;font-weight:800;">🎯 Çalışma Türü: ${esc(selectedWorkTypeLabel)}</span>
+        </div>
         <span style="font-size:0.75rem;background:#047857;color:#fff;padding:2px 8px;border-radius:4px;">Pinecone Katı Filtreli &amp; Maarif Modeli Senkronize</span>
       </div>
       <div class="field">
