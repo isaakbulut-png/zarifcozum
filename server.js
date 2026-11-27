@@ -485,7 +485,12 @@ app.get('/api/site-media', async (req, res) => {
     res.json({
       placements: placements
         .filter(item => item.pagePath === pagePath)
-        .map(({targetKey, assetType, url}) => ({targetKey, assetType, url}))
+        .map(({targetKey, assetType, url, position, widthPx, align}) => ({
+          targetKey, assetType, url,
+          position: position || 'after',
+          widthPx: widthPx || 320,
+          align: align || 'center'
+        }))
     });
   } catch (error) {
     console.error('Sayfa medyaları alınamadı:', error);

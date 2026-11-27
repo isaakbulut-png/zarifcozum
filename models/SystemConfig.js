@@ -66,7 +66,10 @@ const systemConfigSchema = new mongoose.Schema({
   pagePath: {type: String, default: null},
   targetKey: {type: String, default: null},
   assetType: {type: String, enum: ['image', 'animation', null], default: null},
-  url: {type: String, default: null}
+  url: {type: String, default: null},
+  position: {type: String, enum: ['after', 'before', 'prepend', 'append', 'replace', null], default: 'after'},
+  widthPx: {type: Number, min: 32, max: 900, default: 320},
+  align: {type: String, enum: ['left', 'center', 'right', null], default: 'center'}
 }, { timestamps: true, collection: 'system_configs', versionKey: false });
 
 systemConfigSchema.statics.getVisitorSettings = async function () {
@@ -117,19 +120,32 @@ systemConfigSchema.statics.saveHomepageAsset = async function (slot, url) {
 
 systemConfigSchema.statics.getSiteMediaPlacements = function () {
   return this.find({_id: /^site-media-/})
-    .select('_id pagePath targetKey assetType url')
-    .sort({pagePath: 1})
+    .select('_id pagePath targetKey assetType url position widthPx align updatedAt')
+    .sort({pagePath: 1, updatedAt: -1})
     .lean();
 };
 
-systemConfigSchema.statics.saveSiteMediaPlacement = async function ({pagePath, targetKey, assetType, url}) {
+systemConfigSchema.statics.saveSiteMediaPlacement = async function ({
+  pagePath, targetKey, assetType, url, position = 'after', widthPx = 320, align = 'center'
+}) {
   const id = `site-media-${createHash('sha256').update(`${pagePath}\0${targetKey}`).digest('hex')}`;
+  const cleanPos = ['after', 'before', 'prepend', 'append', 'replace'].includes(position) ? position : 'after';
+  const cleanWidth = Number.isFinite(Number(widthPx)) ? Math.max(32, Math.min(900, Math.round(Number(widthPx)))) : 320;
+  const cleanAlign = ['left', 'center', 'right'].includes(align) ? align : 'center';
   await this.findOneAndUpdate(
     {_id: id},
-    {$set: {pagePath, targetKey, assetType, url}, $setOnInsert: {_id: id}},
+    {
+      $set: {pagePath, targetKey, assetType, url, position: cleanPos, widthPx: cleanWidth, align: cleanAlign},
+      $setOnInsert: {_id: id}
+    },
     {upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true}
   );
-  return this.findById(id).select('_id pagePath targetKey assetType url').lean();
+  return this.findById(id).select('_id pagePath targetKey assetType url position widthPx align updatedAt').lean();
+};
+
+systemConfigSchema.statics.deleteSiteMediaPlacement = async function (id) {
+  if (typeof id !== 'string' || !/^site-media-[a-f0-9]{64}$/i.test(id)) return null;
+  return this.findByIdAndDelete(id).lean();
 };
 
 systemConfigSchema.statics.getAnnouncementBanner = async function () {

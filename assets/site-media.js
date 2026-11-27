@@ -8,7 +8,17 @@
   const pagePath = targets.normalizePagePath(window.location.pathname);
   if (!pagePath) return;
 
+  const stylesheet = document.createElement('link');
+  stylesheet.rel = 'stylesheet';
+  stylesheet.href = '/assets/site-media.css?v=2';
+  document.head.append(stylesheet);
+
   if (new URLSearchParams(window.location.search).has('siteMediaDesigner')) {
+    const badge = document.createElement('div');
+    badge.id = 'siteMediaHoverBadge';
+    badge.hidden = true;
+    document.body.append(badge);
+
     const announce = () => {
       window.parent.postMessage({
         type: 'site-media-targets',
@@ -16,32 +26,76 @@
         targets: targets.descriptors(document)
       }, window.location.origin);
     };
+
     let activeElement = null;
+    let selectedElement = null;
+
+    const findTargetForNode = (node) => {
+      if (!node || !node.closest) return null;
+      const el = node.closest(targets.TARGET_SELECTOR);
+      if (!el || el.closest('.site-media-placement') || el.id === 'siteMediaHoverBadge') return null;
+      return targets.entries(document).find(item => item.element === el) || null;
+    };
+
     document.addEventListener('pointerover', event => {
-      const element = event.target.closest?.('a[href], button');
+      const found = findTargetForNode(event.target);
+      const element = found?.element || null;
       if (activeElement === element) return;
       activeElement?.classList.remove('site-media-target-hover');
       activeElement = element;
-      activeElement?.classList.add('site-media-target-hover');
+      if (activeElement && found) {
+        activeElement.classList.add('site-media-target-hover');
+        badge.textContent = `🎯 ${found.kind}: ${found.label.slice(0, 60)}`;
+        badge.hidden = false;
+      } else {
+        badge.hidden = true;
+      }
     }, true);
+
+    document.addEventListener('pointermove', event => {
+      if (!badge.hidden) {
+        badge.style.left = `${Math.min(window.innerWidth - 260, event.clientX + 14)}px`;
+        badge.style.top = `${Math.max(8, event.clientY - 34)}px`;
+      }
+    }, true);
+
     document.addEventListener('click', event => {
-      const element = event.target.closest?.('a[href], button');
-      if (!element) return;
-      const target = targets.entries(document).find(item => item.element === element);
-      if (!target) return;
+      const found = findTargetForNode(event.target);
+      if (!found) return;
       event.preventDefault();
       event.stopImmediatePropagation();
+      selectedElement?.classList.remove('site-media-target-selected');
+      selectedElement = found.element;
+      selectedElement.classList.add('site-media-target-selected');
       window.parent.postMessage({
         type: 'site-media-target-selected',
         pagePath,
         target: {
-          tag: target.tag, id: target.id, label: target.label, context: target.context,
-          occurrence: target.occurrence, key: target.key
+          tag: found.tag, kind: found.kind, id: found.id, label: found.label,
+          context: found.context, occurrence: found.occurrence, key: found.key
         }
       }, window.location.origin);
     }, true);
+
+    window.addEventListener('message', event => {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type === 'site-media-highlight' && event.data.targetKey) {
+        const found = targets.entries(document).find(item => item.key === event.data.targetKey);
+        selectedElement?.classList.remove('site-media-target-selected');
+        selectedElement = found?.element || null;
+        if (selectedElement) {
+          selectedElement.classList.add('site-media-target-selected');
+          selectedElement.scrollIntoView({behavior: 'smooth', block: 'center'});
+        }
+      }
+    });
+
     announce();
-    new MutationObserver(announce).observe(document.body, {childList: true, subtree: true});
+    let announceTimer = null;
+    new MutationObserver(() => {
+      clearTimeout(announceTimer);
+      announceTimer = setTimeout(announce, 250);
+    }).observe(document.body, {childList: true, subtree: true});
     return;
   }
 
@@ -68,6 +122,51 @@
       /^\/uploads\/site-media\/[a-f0-9-]+\.json$/i.test(placement.url);
   }
 
+  function applyLayoutStyles(holder, mediaEl, placement) {
+    const widthPx = Number.isFinite(Number(placement.widthPx))
+      ? Math.max(32, Math.min(900, Math.round(Number(placement.widthPx))))
+      : 320;
+    const align = ['left', 'center', 'right'].includes(placement.align) ? placement.align : 'center';
+
+    holder.dataset.align = align;
+    mediaEl.style.width = `min(100%, ${widthPx}px)`;
+    if (placement.assetType === 'animation') {
+      mediaEl.style.height = `min(${Math.round(widthPx * 0.85)}px, 70vw)`;
+    }
+    if (align === 'left') {
+      mediaEl.style.marginInline = '0 auto';
+    } else if (align === 'right') {
+      mediaEl.style.marginInline = 'auto 0';
+    } else {
+      mediaEl.style.marginInline = 'auto';
+    }
+  }
+
+  function insertHolder(element, holder, position) {
+    const voidTags = new Set(['IMG', 'INPUT', 'BR', 'HR']);
+    const isVoid = voidTags.has(element.tagName);
+    const pos = ['after', 'before', 'prepend', 'append', 'replace'].includes(position) ? position : 'after';
+
+    if (pos === 'replace') {
+      element.style.display = 'none';
+      element.insertAdjacentElement('afterend', holder);
+      return;
+    }
+    if (pos === 'before') {
+      element.insertAdjacentElement('beforebegin', holder);
+      return;
+    }
+    if (pos === 'prepend') {
+      element.insertAdjacentElement(isVoid ? 'beforebegin' : 'afterbegin', holder);
+      return;
+    }
+    if (pos === 'append') {
+      element.insertAdjacentElement(isVoid ? 'afterend' : 'beforeend', holder);
+      return;
+    }
+    element.insertAdjacentElement('afterend', holder);
+  }
+
   async function renderPlacement(placement, element) {
     const holder = document.createElement('div');
     holder.className = 'site-media-placement';
@@ -78,17 +177,21 @@
       image.alt = 'Sayfa görseli';
       image.loading = 'lazy';
       image.className = 'site-media-image';
+      applyLayoutStyles(holder, image, placement);
       image.addEventListener('error', () => {
         console.error('Sayfa görseli yüklenemedi:', placement.url);
         holder.remove();
       }, {once: true});
       holder.append(image);
+      insertHolder(element, holder, placement.position);
     } else {
       const container = document.createElement('div');
       container.className = 'site-media-animation';
       container.setAttribute('role', 'img');
       container.setAttribute('aria-label', 'Sayfa animasyonu');
+      applyLayoutStyles(holder, container, placement);
       holder.append(container);
+      insertHolder(element, holder, placement.position);
       try {
         const lottie = await loadLottie();
         const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -106,10 +209,8 @@
       } catch (error) {
         console.error('Sayfa Lottie animasyonu başlatılamadı:', error);
         holder.remove();
-        return;
       }
     }
-    element.insertAdjacentElement('afterend', holder);
   }
 
   async function loadPlacements() {
@@ -137,9 +238,5 @@
     }
   }
 
-  const stylesheet = document.createElement('link');
-  stylesheet.rel = 'stylesheet';
-  stylesheet.href = '/assets/site-media.css';
-  document.head.append(stylesheet);
   loadPlacements();
 })();

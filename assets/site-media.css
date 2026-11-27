@@ -10,7 +10,7 @@
 .site-media-image {
   display: block;
   width: min(100%, 520px);
-  max-height: 420px;
+  max-height: 520px;
   margin-inline: auto;
   object-fit: contain;
   border-radius: 0.75rem;
@@ -18,7 +18,7 @@
 
 .site-media-animation {
   width: min(100%, 320px);
-  height: clamp(140px, 30vw, 260px);
+  height: clamp(120px, 30vw, 280px);
   margin-inline: auto;
 }
 
@@ -28,6 +28,31 @@
 }
 
 .site-media-target-hover {
-  outline: 3px solid #e08b36 !important;
+  outline: 3px dashed #ea580c !important;
   outline-offset: 3px !important;
+  cursor: crosshair !important;
+}
+
+.site-media-target-selected {
+  outline: 3.5px solid #16a34a !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.18) !important;
+}
+
+#siteMediaHoverBadge {
+  position: fixed;
+  z-index: 2147483647;
+  pointer-events: none;
+  background: #0f172a;
+  color: #ffffff;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.32);
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

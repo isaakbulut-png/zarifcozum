@@ -1991,18 +1991,44 @@
           </div>
         </div>
 
-        <h3 style="margin-top:32px">Sayfa İçi Buton & Medya Tasarımcısı</h3>
+        <h3 style="margin-top:32px">🎨 Sayfa İçi Görsel &amp; Lottie Animasyon Tasarımcısı</h3>
+        <p style="font-size:0.85rem;color:#6a5242;margin:4px 0 14px;background:#fff7ed;border:1px solid #fed7aa;padding:10px 14px;border-radius:10px;">
+          <strong>Nasıl Kullanılır?</strong> 1) Aşağıdan bir sayfa seçin → 2) Altta açılan canlı sayfa önizlemesinde istediğiniz <strong>buton, başlık, kart, görsel veya bölümün</strong> üzerine tıklayın → 3) Konum, boyut ve hizalamayı seçip dosyanızı (.json veya resim) yerleştirin.
+        </p>
         <form id="siteMediaForm">
           <div class="settings-grid">
-            <label>Sayfa Seçin<select id="siteMediaPage"><option value="">Sayfa seçin...</option></select></label>
-            <label>Hedef Buton / Alan<select id="siteMediaTarget" disabled><option value="">Önce sayfa seçin</option></select></label>
-            <label>Medya Türü<select id="siteMediaType"><option value="image">Görsel (Resim)</option><option value="animation">Lottie Animasyon (.json)</option></select></label>
-            <label>Dosya<input id="siteMediaFile" type="file" required></label>
+            <label>1. Sayfa Seçin<select id="siteMediaPage"><option value="">Sayfa seçin...</option></select></label>
+            <label>2. Hedef Buton / Alan<select id="siteMediaTarget" disabled><option value="">Önce sayfa seçin</option></select></label>
+            <label>3. Medya Türü<select id="siteMediaType"><option value="image">Görsel (Resim)</option><option value="animation">Lottie Animasyon (.json)</option></select></label>
+            <label>4. Dosya<input id="siteMediaFile" type="file" required></label>
+            <label>5. Yerleşim Konumu
+              <select id="siteMediaPosition">
+                <option value="after">Altına Ekle (Varsayılan)</option>
+                <option value="before">Üstüne Ekle</option>
+                <option value="prepend">İçine Ekle (Başına)</option>
+                <option value="append">İçine Ekle (Sonuna)</option>
+                <option value="replace">Mevcut Öğenin Yerine Koy</option>
+              </select>
+            </label>
+            <label>6. Genişlik (<span id="siteMediaWidthVal">320px</span>)
+              <input id="siteMediaWidth" type="range" min="48" max="640" step="8" value="320">
+            </label>
+            <label>7. Hizalama
+              <select id="siteMediaAlign">
+                <option value="center">Orta</option>
+                <option value="left">Sola Yaslı</option>
+                <option value="right">Sağa Yaslı</option>
+              </select>
+            </label>
           </div>
+          <div id="siteMediaLocalPreview" hidden style="margin:12px 0;padding:12px;background:#fff;border:1px dashed #cbd5e1;border-radius:10px;text-align:center;"></div>
           <p id="siteMediaTargetDescription" style="font-size:0.85rem;color:#6a5242;margin:10px 0"></p>
-          <button class="btn primary sm" type="submit" id="uploadSiteMedia" disabled>Medyayı Yerleştir</button>
+          <button class="btn primary sm" type="submit" id="uploadSiteMedia" disabled>✨ Medyayı Yerleştir</button>
           <p class="msg" id="siteMediaMsg" role="alert"></p>
         </form>
+        <div id="siteMediaPreviewHint" hidden style="margin-top:12px;padding:8px 12px;background:#0f172a;color:#f8fafc;border-radius:10px 10px 0 0;font-size:0.8rem;font-weight:600;">
+          🎯 Canlı Hedef Seçici Aktif — Aşağıdaki sayfada fareyle gezerek turuncu çerçeveli herhangi bir öğeye tıklayın (seçilen öğe yeşil olur).
+        </div>
         <iframe id="siteMediaTargetPreview" title="Medya yerleşim hedefi seçme önizlemesi" hidden></iframe>
         <div id="siteMediaCurrent" aria-live="polite"></div>
       </div>
@@ -2057,7 +2083,7 @@
   <script src="/assets/cozumlu-sorular-admin.js"></script>
   <script src="/assets/rich-content.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js" integrity="sha384-reiVBUvj2HgLgCZalqLFSMBVD9LdtiwGyybRGCq2AfP8Rgebz5DxEnwKp4FpagKV" crossorigin="anonymous"></script>
-  <script src="/assets/site-media-targets.js"></script>
+  <script src="/assets/site-media-targets.js?v=2"></script>
   <script>
     (() => {
       const $ = id => document.getElementById(id);
@@ -5235,6 +5261,7 @@
   </script>
   <script src="/assets/VisualMathEngine.js?v=2" defer></script>
   <script src="/assets/content-pool-viewer.js?v=1" defer></script>
+  <script src="/assets/admin-site-media.js?v=1" defer></script>
   <script src="/assets/page-transitions.js?v=1" defer></script>
   <script src="/assets/mobile-nav.js?v=1" defer></script>
 </body>

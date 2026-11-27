@@ -100,7 +100,7 @@ function createAdminRouter({
   const router = express.Router();
   const mediaUpload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: MAX_IMAGE_BYTES, files: 1, fields: 3, fieldSize: 1024 },
+    limits: { fileSize: MAX_IMAGE_BYTES, files: 1, fields: 10, fieldSize: 2048 },
     fileFilter: (req, file, callback) => {
       const extension = path.extname(file.originalname).toLowerCase();
       const allowedMimes = ALLOWED_MEDIA_TYPES.get(extension);
@@ -238,15 +238,20 @@ function createAdminRouter({
     const filename = `${randomUUID()}${extension}`;
     const key = `site-media/${filename}`;
     const publicPath = `/uploads/site-media/${filename}`;
+    const position = ['after', 'before', 'prepend', 'append', 'replace'].includes(req.body?.position)
+      ? req.body.position : 'after';
+    const rawW = Number(req.body?.widthPx);
+    const widthPx = Number.isFinite(rawW) ? Math.max(32, Math.min(900, Math.round(rawW))) : 320;
+    const align = ['left', 'center', 'right'].includes(req.body?.align) ? req.body.align : 'center';
     let saved = false;
     try {
       await mediaStorage.put(key, req.file.buffer);
       const placement = await SystemConfig.saveSiteMediaPlacement({
-        pagePath, targetKey, assetType, url: publicPath
+        pagePath, targetKey, assetType, url: publicPath, position, widthPx, align
       });
       saved = true;
       await audit(req, 'site_media.updated', 'site_media', placement._id, {
-        pagePath, targetKey, assetType, filename
+        pagePath, targetKey, assetType, filename, position, widthPx, align
       });
       res.status(201).json({mesaj: 'Medya seçilen sayfa ve hedefe yerleştirildi.', placement});
     } catch (error) {
@@ -255,6 +260,24 @@ function createAdminRouter({
       });
       console.error('Sayfa medyası kaydedilemedi:', error);
       res.status(500).json({mesaj: 'Sayfa medyası kaydedilemedi.'});
+    }
+  });
+
+  router.delete('/site-media/:id', allow('superadmin'), async (req, res) => {
+    try {
+      const deleted = await SystemConfig.deleteSiteMediaPlacement(req.params.id);
+      if (!deleted) return res.status(404).json({mesaj: 'Yerleşim kaydı bulunamadı.'});
+      if (typeof deleted.url === 'string' && deleted.url.startsWith('/uploads/site-media/')) {
+        const fileKey = deleted.url.replace(/^\/uploads\//, '');
+        await mediaStorage.remove(fileKey).catch(() => {});
+      }
+      await audit(req, 'site_media.deleted', 'site_media', deleted._id, {
+        pagePath: deleted.pagePath, targetKey: deleted.targetKey
+      });
+      res.json({mesaj: 'Medya yerleşimi sayfadan kaldırıldı.', deletedId: deleted._id});
+    } catch (error) {
+      console.error('Sayfa medyası silinemedi:', error);
+      res.status(500).json({mesaj: 'Sayfa medyası kaldırılamadı.'});
     }
   });
 
