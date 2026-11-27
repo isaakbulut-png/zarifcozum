@@ -63,6 +63,7 @@ function validateAnimation(buffer) {
     return 'JSON dosyası geçerli ve sınırlar içindeki bir Lottie animasyonu değil.';
   }
 
+  const SAFE_DATA_IMAGE_RE = /^data:image\/(?:png|jpe?g|webp);base64,[a-z0-9+/=\s]+$/i;
   let nodeCount = 0;
   const inspect = (value, depth = 0) => {
     if (!value || typeof value !== 'object') return null;
@@ -71,11 +72,15 @@ function validateAnimation(buffer) {
       if (key === 'x' && typeof child === 'string' && child.trim()) {
         return 'Lottie ifadeleri içeren animasyonlara izin verilmiyor.';
       }
-      if ((key === 'p' || key === 'u') && typeof child === 'string' && child.trim()) {
-        return 'Harici görsel kullanan animasyonlara izin verilmiyor.';
+      if (key === 'u' && typeof child === 'string' && child.trim()) {
+        return 'Harici URL/klasör kullanan animasyonlara izin verilmiyor.';
       }
-      if (key === 'ty' && child === 2) {
-        return 'Görsel katmanı içeren Lottie dosyaları desteklenmiyor.';
+      if (key === 'p' && typeof child === 'string' && child.trim()) {
+        // Yalnızca güvenle gömülü raster görsellere (PNG/JPEG/WebP base64) izin ver;
+        // harici URL, SVG veya script içerebilecek veri yollarını engelle.
+        if (!SAFE_DATA_IMAGE_RE.test(child.trim())) {
+          return 'Harici görsel veya desteklenmeyen veri yolu kullanan animasyonlara izin verilmiyor.';
+        }
       }
       const error = inspect(child, depth + 1);
       if (error) return error;
