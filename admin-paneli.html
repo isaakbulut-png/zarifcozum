@@ -691,6 +691,11 @@
       <span class="nav-text">📊 AI Maliyet &amp; Token</span>
       <span class="nav-badge" style="background:#0284c7;color:#fff">Canlı</span>
     </button>
+    <button class="nav-btn" type="button" data-view="content-audit" data-admin-roles="superadmin">
+      <svg viewBox="0 0 24 24" style="stroke:#f59e0b"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+      <span class="nav-text">🛡️ İçerik Denetim Merkezi</span>
+      <span class="nav-badge" style="background:#D97706;color:#fff">2 Katman</span>
+    </button>
     <button class="nav-btn" type="button" data-view="system-health" data-admin-roles="superadmin">
       <svg viewBox="0 0 24 24" style="stroke:#10b981"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
       <span class="nav-text">Sistem Sağlığı & Güvenlik</span>
@@ -2002,6 +2007,30 @@
       </div>
     </section>
 
+    <!-- İÇERİK DENETİM MERKEZİ (2 KATMANLI MATEMATİK & PEDAGOJİ DENETİM KUYRUĞU) -->
+    <section id="view-content-audit" hidden>
+      <div class="panel" style="margin-top:0;background:#FAF8F5;border:1.5px solid #E2DDD5;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+          <div>
+            <h3 style="margin:0;color:#0F172A;">🛡️ İçerik Denetim Merkezi (ZarifDenetim)</h3>
+            <p style="margin:4px 0 0;color:#475569;font-size:13px;">Öğretmenlerin denetime gönderdiği soru ve konuların Deterministik + Kör Hakem AI raporları.</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select id="auditStatusFilter" style="padding:7px 10px;border-radius:8px;border:1px solid #CBD5E1;background:#fff;color:#0F172A;font-weight:700;font-size:12.5px;">
+              <option value="">Tümü</option>
+              <option value="pending" selected>⏳ Onay Bekleyenler</option>
+              <option value="approved">✅ Onaylananlar</option>
+              <option value="rejected">❌ Reddedilenler</option>
+            </select>
+            <button type="button" id="refreshAuditQueueBtn" class="btn" style="background:#0F172A;color:#FDE68A;border:none;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;">↻ Yenile</button>
+          </div>
+        </div>
+        <div id="auditQueueContainer" style="display:grid;gap:12px;">
+          <p style="color:#64748B;">Denetim kayıtları yükleniyor…</p>
+        </div>
+      </div>
+    </section>
+
     <!-- SİSTEM SAĞLIĞI VE GÜVENLİK KONTROLÜ (REACT + TYPESCRIPT + TAILWIND) -->
     <section id="view-system-health" hidden>
       <div id="system-health-root"></div>
@@ -2056,6 +2085,7 @@
         'ai-content': 'AI İçerik Stüdyosu',
         'ai-maliyet': 'AI Maliyet & Token Takip Sistemi',
         'content-pool': '📚 Merkezi İçerik Havuzu',
+        'content-audit': '🛡️ İçerik Denetim Merkezi',
         'system-health': 'Sistem Sağlığı ve Güvenlik'
       };
       const subtitles = {
@@ -2139,6 +2169,7 @@
           }
         },
         'content-pool': loadContentPool,
+        'content-audit': () => { if (typeof window.loadContentAuditQueue === 'function') window.loadContentAuditQueue(); },
         'system-health': () => {
           if (typeof window.initSystemHealthApp === 'function') {
             window.initSystemHealthApp('system-health-root');
@@ -5086,5 +5117,89 @@
   <script src="/assets/admin-topics-manage.js" defer></script>
   <script src="/assets/admin-contacts.js?v=2"></script>
   <script src="/assets/breadcrumb.js"></script>
+  <script>
+    (function initAdminAuditCenter() {
+      const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+      async function loadContentAuditQueue() {
+        const box = document.getElementById('auditQueueContainer');
+        const statusSel = document.getElementById('auditStatusFilter');
+        if (!box) return;
+        box.innerHTML = '<p style="color:#64748B;">Denetim kayıtları yükleniyor…</p>';
+        try {
+          const qs = statusSel && statusSel.value ? ('?status=' + encodeURIComponent(statusSel.value)) : '';
+          const res = await fetch('/api/audit/queue' + qs, { credentials: 'include' });
+          const data = await res.json();
+          const items = Array.isArray(data?.items) ? data.items : [];
+          if (!items.length) {
+            box.innerHTML = '<div style="padding:28px;text-align:center;background:#FFFFFF;border:1px dashed #CBD5E1;border-radius:12px;color:#64748B;">Bu filtrede bekleyen denetim kaydı bulunmuyor.</div>';
+            return;
+          }
+          box.innerHTML = items.map(it => {
+            const rep = it.auditReport || {};
+            const sc = Number(rep.overallScore) || 0;
+            const badgeColor = rep.verdict === 'approved' ? '#059669' : (rep.verdict === 'rejected' ? '#DC2626' : '#D97706');
+            const stBadge = it.adminStatus === 'approved' ? '✅ Onaylandı' : (it.adminStatus === 'rejected' ? '❌ Reddedildi' : '⏳ Onay Bekliyor');
+            const dt = it.createdAt ? new Date(it.createdAt).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+            const itemRows = (rep.items || []).map(r => {
+              const iss = (r.issues || []).map(x => x.msg).join(' · ');
+              return `<div style="padding:7px 10px;border-radius:8px;background:#FAF8F5;border:1px solid #E2DDD5;font-size:12.5px;color:#1E293B;">
+                <strong>${esc(r.label)} (${r.score}/100)</strong>
+                ${r.refereeAnswer ? `<span style="margin-left:6px;color:#475569;">[Üretici: ${esc(r.producerAnswer || '-')} | Hakem AI: ${esc(r.refereeAnswer)}]</span>` : ''}
+                ${iss ? `<div style="color:#B91C1C;margin-top:2px;">${esc(iss)}</div>` : `<div style="color:#065F46;margin-top:2px;">${esc(r.suggestion || 'Doğrulandı')}</div>`}
+              </div>`;
+            }).join('');
+
+            return `<article style="background:#FFFFFF;border:1.5px solid #E2DDD5;border-left:5px solid ${badgeColor};border-radius:14px;padding:16px 18px;color:#0F172A;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+                <div>
+                  <strong style="font-size:15px;">${esc(it.title || it.topic)}</strong>
+                  <div style="font-size:12px;color:#64748B;margin-top:2px;">${it.grade}. Sınıf · ${it.contentType === 'lesson' ? '📖 Konu Anlatımı' : '❓ Soru Seti'} (${it.itemCount} öge) · Gönderen: <strong>${esc(it.submittedByName)}</strong> · ${esc(dt)}</div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                  <span style="padding:4px 10px;border-radius:999px;background:${badgeColor};color:#FFFFFF;font-size:12px;font-weight:800;">Skor: %${sc}</span>
+                  <span style="padding:4px 10px;border-radius:999px;background:#F1F5F9;color:#0F172A;font-size:12px;font-weight:700;">${stBadge}</span>
+                </div>
+              </div>
+              <div style="display:grid;gap:6px;margin:10px 0;">${itemRows}</div>
+              ${it.adminStatus === 'pending' ? `
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                  <button type="button" data-audit-decide="${esc(it.id)}" data-decision="approved" style="padding:7px 14px;border-radius:8px;border:none;background:#059669;color:#FFFFFF;font-size:12.5px;font-weight:800;cursor:pointer;">✅ Onayla</button>
+                  <button type="button" data-audit-decide="${esc(it.id)}" data-decision="rejected" style="padding:7px 14px;border-radius:8px;border:1px solid #FECACA;background:#FEF2F2;color:#B91C1C;font-size:12.5px;font-weight:800;cursor:pointer;">❌ Reddet</button>
+                </div>
+              ` : (it.adminNote ? `<div style="margin-top:6px;font-size:12px;color:#475569;"><strong>Admin Notu:</strong> ${esc(it.adminNote)}</div>` : '')}
+            </article>`;
+          }).join('');
+        } catch (err) {
+          box.innerHTML = `<p style="color:#B91C1C;">Denetim kuyruğu yüklenemedi: ${esc(err.message)}</p>`;
+        }
+      }
+
+      window.loadContentAuditQueue = loadContentAuditQueue;
+      document.getElementById('auditStatusFilter')?.addEventListener('change', loadContentAuditQueue);
+      document.getElementById('refreshAuditQueueBtn')?.addEventListener('click', loadContentAuditQueue);
+      document.getElementById('auditQueueContainer')?.addEventListener('click', async (e) => {
+        const btn = e.target.closest('[data-audit-decide]');
+        if (!btn) return;
+        const id = btn.dataset.auditDecide;
+        const decision = btn.dataset.decision;
+        const note = decision === 'rejected' ? (prompt('Reddetme gerekçesi / öğretmene not (isteğe bağlı):') || '') : '';
+        btn.disabled = true;
+        try {
+          const res = await fetch('/api/audit/' + encodeURIComponent(id) + '/decision', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ decision, adminNote: note })
+          });
+          if (!res.ok) throw new Error('Karar kaydedilemedi');
+          loadContentAuditQueue();
+        } catch (err) {
+          alert('Hata: ' + err.message);
+          btn.disabled = false;
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

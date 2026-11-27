@@ -716,6 +716,52 @@
 
     $('publishCurriculumBtn')?.addEventListener('click', () => saveTopic('published'));
     $('saveDraftCurriculumBtn')?.addEventListener('click', () => saveTopic('draft'));
+
+    // Konu Üret stüdyosuna "🛡️ Denetime Gönder" butonu ekle
+    const pubBtn = $('publishCurriculumBtn');
+    if (pubBtn && !$('auditCurriculumBtn')) {
+      const audBtn = document.createElement('button');
+      audBtn.type = 'button';
+      audBtn.id = 'auditCurriculumBtn';
+      audBtn.textContent = '🛡️ Denetime Gönder';
+      audBtn.style.cssText = 'padding:9px 15px;border-radius:10px;border:1.5px solid #D97706;background:#0F172A;color:#FDE68A;font-weight:800;font-size:13px;cursor:pointer;';
+      pubBtn.parentNode.insertBefore(audBtn, pubBtn);
+      audBtn.addEventListener('click', async () => {
+        if (!currentTopic || !Array.isArray(currentTopic.lessonPages) || !currentTopic.lessonPages.length) {
+          setStatus('Önce bir konu anlatımı üretin.', 'error');
+          return;
+        }
+        audBtn.disabled = true;
+        audBtn.textContent = '🛡️ Denetleniyor…';
+        try {
+          const res = await apiJson('/api/audit/submit', {
+            method: 'POST',
+            body: JSON.stringify({
+              contentType: 'lesson',
+              grade: currentTopic.grade || 5,
+              topic: currentTopic.subTopicTitle || currentTopic.title || 'Konu Anlatımı',
+              title: currentTopic.title || `${currentTopic.grade || 5}. Sınıf Konu Anlatımı`,
+              items: currentTopic.lessonPages
+            })
+          });
+          const rep = res?.report;
+          const ok = rep?.verdict === 'approved';
+          const warnSummary = (rep?.items || [])
+            .flatMap(it => (it.issues || []).map(x => `${it.label}: ${x.msg}`))
+            .slice(0, 4)
+            .join(' | ');
+          setStatus(
+            `${ok ? '✅' : '⚠️'} Konu Denetim Skoru: %${rep?.overallScore || 0} — Admin Denetim Kuyruğuna gönderildi.${warnSummary ? ' Bulgular: ' + warnSummary : ''}`,
+            ok ? 'ok' : 'error'
+          );
+        } catch (err) {
+          setStatus('Denetim hatası: ' + err.message, 'error');
+        } finally {
+          audBtn.disabled = false;
+          audBtn.textContent = '🛡️ Denetime Gönder';
+        }
+      });
+    }
     $('publishedTopicsGradeFilter')?.addEventListener('change', loadPublishedList);
     $('refreshPublishedTopicsBtn')?.addEventListener('click', loadPublishedList);
 

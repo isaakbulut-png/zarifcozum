@@ -5467,6 +5467,71 @@ body.teacher-menu-open {
       return;
     }
 
+    // 2 Katmanlı Bağımsız Denetime Gönder (Deterministik + Kör Hakem AI -> Admin Denetim Kuyruğu)
+    const auditBtn = event.target.closest('[data-ai-send-audit]');
+    if (auditBtn && aiDraft && Array.isArray(aiDraft.questions)) {
+      const cards = [...$('aiQuestionList').querySelectorAll('[data-ai-question]')];
+      const selectedQs = cards
+        .filter(card => card.querySelector('[data-ai-approved]')?.checked)
+        .map(card => aiDraft.questions[Number(card.dataset.aiQuestion)])
+        .filter(Boolean);
+      if (!selectedQs.length) {
+        alert('Lütfen denetime gönderilecek en az bir soruyu işaretleyin.');
+        return;
+      }
+      auditBtn.disabled = true;
+      const origTxt = auditBtn.textContent;
+      auditBtn.textContent = '🛡️ Denetleniyor (Hakem AI Çözüyor)…';
+      try {
+        const res = await api('/api/audit/submit', {
+          method: 'POST',
+          body: JSON.stringify({
+            contentType: 'questions',
+            grade: aiDraft.grade || 5,
+            topic: aiDraft.topic || 'Matematik',
+            title: ($('aiTestTitle')?.value || '').trim() || `${aiDraft.grade || 5}. Sınıf ${aiDraft.topic || 'Test'}`,
+            items: selectedQs
+          })
+        });
+        const rep = res?.report;
+        const banner = $('aiAuditSummaryBanner');
+        if (banner && rep) {
+          const isOk = rep.verdict === 'approved';
+          const isRej = rep.verdict === 'rejected';
+          const bg = isOk ? '#ECFDF5' : (isRej ? '#FEF2F2' : '#FFFBEB');
+          const br = isOk ? '#059669' : (isRej ? '#DC2626' : '#D97706');
+          const titleTxt = isOk
+            ? `✅ Denetimden Geçti (%${rep.overallScore}) — Admin Denetim Kuyruğuna Kaydedildi`
+            : (isRej ? `🚨 Kritik Hata Tespit Edildi (%${rep.overallScore}) — İnceleme Gerekli` : `⚠️ Kısmi Uyarı (%${rep.overallScore}) — Gözden Geçirilmesi Önerilir`);
+          banner.style.display = 'block';
+          banner.innerHTML = `<div style="padding:14px 16px;border-radius:12px;background:${bg};border:1.5px solid ${br};color:#0F172A;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
+              <strong style="font-size:14px;">${titleTxt}</strong>
+              <span style="font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:999px;background:#0F172A;color:#FDE68A;">${rep.refereeUsed ? '🤖 2 Katmanlı (Kural + Kör Hakem AI)' : '⚙️ Katman 1 Kural Denetimi'}</span>
+            </div>
+            <div style="display:grid;gap:6px;margin-top:8px;">
+              ${(rep.items || []).map(it => {
+                const badge = it.verdict === 'approved' ? '✅ Onaylı' : (it.verdict === 'rejected' ? '🚨 Hatalı' : '⚠️ Uyarı');
+                const iss = (it.issues || []).map(x => x.msg).join(' • ');
+                return `<div style="padding:8px 10px;border-radius:8px;background:#FFFFFF;border:1px solid #E2DDD5;font-size:12.5px;">
+                  <strong>${esc(it.label)} (${it.score}/100) — ${badge}</strong>
+                  ${it.refereeAnswer ? `<span style="margin-left:8px;color:#475569;">(Üretici: ${esc(it.producerAnswer || '-')} · Hakem: ${esc(it.refereeAnswer)})</span>` : ''}
+                  ${iss ? `<div style="margin-top:3px;color:#B91C1C;">${esc(iss)}</div>` : `<div style="margin-top:3px;color:#065F46;">${esc(it.suggestion || 'Doğrulandı.')}</div>`}
+                </div>`;
+              }).join('')}
+            </div>
+          </div>`;
+        }
+        auditBtn.textContent = '✅ Denetim Tamamlandı';
+      } catch (err) {
+        alert('Denetim hatası: ' + err.message);
+        auditBtn.textContent = origTxt;
+      } finally {
+        auditBtn.disabled = false;
+      }
+      return;
+    }
+
     // Soru Bankasına Aktar
     const bankBtn = event.target.closest('[data-ai-transfer-bank]');
     if (bankBtn && aiDraft && aiDraft.draftId) {
@@ -5786,9 +5851,11 @@ body.teacher-menu-open {
         <button class="btn sm" type="button" data-ai-add-all-to-basket style="background:#2c1a0e;color:#fff;font-weight:700;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;">🛒 Tüm Onaylıları Test Sepetine Ekle</button>
         <button class="btn" type="button" data-ai-publish>Onaylı soruları test olarak yayınla</button>
         <button class="btn secondary" type="button" data-ai-transfer-bank style="background:#4338ca;color:#fff;">📚 Soru Bankasına Aktar</button>
+        <button class="btn" type="button" data-ai-send-audit style="background:#0F172A;color:#FDE68A;border:1.5px solid #D97706;font-weight:800;">🛡️ Denetime Gönder (Matematik &amp; Pedagoji Kontrolü)</button>
         <button class="btn light" type="button" data-ai-export-pdf>📥 PDF İndir</button>
         <button class="btn light" type="button" data-ai-export-docx>📄 DOCX İndir</button>
       </div>
+      <div id="aiAuditSummaryBanner" style="display:none;margin-top:12px;"></div>
       <p class="status ai-publish-status" role="status" aria-live="polite" style="margin-top:8px;"></p>`;
 
     if (typeof window !== 'undefined') {

@@ -21,6 +21,7 @@ const session = require('express-session');
 const { MongoStore } = require('connect-mongo');
 const { router: authRouter, requireRole, redirectForRole } = require('./routes/auth');
 const { createAIRouter } = require('./routes/ai');
+const createAuditRouter = require('./routes/audit');
 const { createStudentTopicsRouter } = require('./routes/student-topics');
 const { createTopicsManageRouter } = require('./routes/topics-manage');
 const { createContentLibraryRouter } = require('./routes/content-library');
@@ -730,6 +731,7 @@ app.use('/api/admin', createAdminRouter({
 }));
 app.use('/api/payments', createPaymentRouter({ requireStudent: ogrenciKontrol }));
 app.use('/api/yazili', createYaziliRouter({ requireRole }));
+app.use('/api/audit', createAuditRouter({ requireRole, AdminLog }));
 app.use('/api/ai', createAIRouter({
   getQuizCollection: () => quizKoleksiyonu,
   requireRole,
