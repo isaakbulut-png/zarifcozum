@@ -1073,13 +1073,13 @@ TEMİZ METİN KURALI (KRİTİK):
     { "front": "Ön yüz soru/kavram", "back": "Arka yüz net cevap/formül", "tip": "Kısa ipucu" }
   ]
 }
-NOT: lessonPages dizisi TAM OLARAK 5 sayfa içermelidir:
-1. Sayfa: Gerçek Hayat Keşfi
-2. Sayfa: Kavram İnşası ve Temel Kurallar
-3. Sayfa: Adım Adım Çözümlü Örnekler
-4. Sayfa: Sık Yapılan Hatalar ve Stratejiler
-5. Sayfa: Kendini Dene ve Özet Pekiştirme
-Her 5 sayfada da svg_kodu geçerli ve gerçek geometrik çizim elemanları (<line>, <path>, <rect>, <circle>, <polygon>) içeren <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">...</svg> olmalıdır. flashcards en az 5 kart içermelidir.`;
+NOT: DİNAMİK YOĞUNLUK VE KAPSAM KURALI (SABİT 5 SAYFA SINIRI YOKTUR!):
+- Sana verilen MEB ders kitabı (R2 + Pinecone) bağlamının ve konunun gerçek kapsamına göre sayfa sayısını KENDİN DİNAMİK BELİRLE:
+  * Dar/kısa kazanımlar için: 5–7 sayfa, en az 6 hap not (practicalNotes) ve en az 6 bilgi kartı (flashcards).
+  * Orta yoğunluklu konular için: 7–10 sayfa, 8–10 hap not ve 8–12 bilgi kartı.
+  * Yoğun/geniş konular için (örn. Çokgenler, Kesirler, Üçgenler, Fonksiyonlar, Türev, İntegral vb.): 10–15 sayfa, 10–14 hap not ve 10–15 bilgi kartı!
+- Sayfaları pedagojik sırayla kurgula (Gerçek Hayat Keşfi → Kavram İnşası → Kurallar & Alt Özellikler → Adım Adım Çözümlü Örnekler → Sık Yapılan Hatalar → Pekiştirme & Uygulama).
+- Her sayfada svg_kodu geçerli ve gerçek geometrik çizim elemanları (<line>, <path>, <rect>, <circle>, <polygon>) içeren <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">...</svg> olmalıdır.`;
 
   let response = null;
   let modelName = primaryModel;
@@ -1091,7 +1091,8 @@ Her 5 sayfada da svg_kodu geçerli ve gerçek geometrik çizim elemanları (<lin
         contents: prompt,
         config: {
           responseMimeType: 'application/json',
-          temperature: 0.35
+          temperature: 0.35,
+          maxOutputTokens: 16384
         }
       });
       modelName = cand;
@@ -1158,7 +1159,7 @@ Her 5 sayfada da svg_kodu geçerli ve gerçek geometrik çizim elemanları (<lin
     : ['Akıl Yürütme', 'Matematiksel Modelleme', 'Matematiksel Temsil'];
   const topKazanim = stripRawMarkdownStars(parsed.kazanim_kodu || outcomeCode);
 
-  const lessonPages = (Array.isArray(parsed.lessonPages) ? parsed.lessonPages : []).slice(0, 5).map((p, idx) => {
+  const lessonPages = (Array.isArray(parsed.lessonPages) ? parsed.lessonPages : []).slice(0, 20).map((p, idx) => {
     const candidateSvg = p.svg_kodu || p.visualSvg || p.svgDiagram || '';
     let cleanSvg = isValidInlineSvg(candidateSvg) ? candidateSvg.trim() : '';
 

@@ -8,13 +8,22 @@ const illustrationSchema = new mongoose.Schema({
 }, { _id: false });
 
 const lessonPageSchema = new mongoose.Schema({
-  pageNumber: { type: Number, required: true, min: 1, max: 10 },
+  pageNumber: { type: Number, required: true, min: 1, max: 25 },
   title: { type: String, default: '', trim: true, maxlength: 200 },
+  baslik: { type: String, default: '', trim: true, maxlength: 200 },
   storyOrContext: { type: String, default: '' },
+  kesif_hikayesi: { type: String, default: '' },
   keyRuleBox: { type: String, default: '' },
+  altin_kural: { type: String, default: '' },
   visualSvg: { type: String, default: '' },
+  svg_kodu: { type: String, default: '' },
   commonMistakeBox: { type: String, default: '' },
+  kavram_yanilgisi: { type: String, default: '' },
   miniChallenge: { type: String, default: '' },
+  mini_soru: { type: String, default: '' },
+  mini_cevap: { type: String, default: '' },
+  kazanim_kodu: { type: String, default: '' },
+  surec_becerileri: { type: [String], default: [] },
   content: { type: String, default: '' },
   svgDiagram: { type: String, default: '' }
 }, { _id: false });
