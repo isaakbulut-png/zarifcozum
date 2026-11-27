@@ -70,7 +70,13 @@ const systemConfigSchema = new mongoose.Schema({
   position: {type: String, enum: ['after', 'before', 'prepend', 'append', 'replace', 'overlay', null], default: 'after'},
   widthPx: {type: Number, min: 32, max: 900, default: 320},
   align: {type: String, enum: ['left', 'center', 'right', null], default: 'center'},
-  customText: {type: String, maxlength: 2000, default: null}
+  offsetX: {type: Number, min: -1600, max: 1600, default: 0},
+  offsetY: {type: Number, min: -1600, max: 1600, default: 0},
+  customText: {type: String, maxlength: 2000, default: null},
+  textColor: {type: String, maxlength: 30, default: null},
+  fontFamily: {type: String, maxlength: 120, default: null},
+  fontSizePx: {type: Number, min: 10, max: 96, default: null},
+  fontWeight: {type: String, enum: ['400', '500', '600', '700', '800', null], default: null}
 }, { timestamps: true, collection: 'system_configs', versionKey: false });
 
 systemConfigSchema.statics.getVisitorSettings = async function () {
@@ -121,27 +127,45 @@ systemConfigSchema.statics.saveHomepageAsset = async function (slot, url) {
 
 systemConfigSchema.statics.getSiteMediaPlacements = function () {
   return this.find({_id: /^site-media-/})
-    .select('_id pagePath targetKey assetType url position widthPx align updatedAt')
+    .select('_id pagePath targetKey assetType url position widthPx align offsetX offsetY updatedAt')
     .sort({pagePath: 1, updatedAt: -1})
     .lean();
 };
 
 systemConfigSchema.statics.saveSiteMediaPlacement = async function ({
-  pagePath, targetKey, assetType, url, position = 'after', widthPx = 320, align = 'center'
+  pagePath, targetKey, assetType, url, position = 'after', widthPx = 320, align = 'center', offsetX = 0, offsetY = 0
 }) {
   const id = `site-media-${createHash('sha256').update(`${pagePath}\0${targetKey}`).digest('hex')}`;
   const cleanPos = ['after', 'before', 'prepend', 'append', 'replace', 'overlay'].includes(position) ? position : 'after';
   const cleanWidth = Number.isFinite(Number(widthPx)) ? Math.max(32, Math.min(900, Math.round(Number(widthPx)))) : 320;
   const cleanAlign = ['left', 'center', 'right'].includes(align) ? align : 'center';
+  const cleanX = Number.isFinite(Number(offsetX)) ? Math.max(-1600, Math.min(1600, Math.round(Number(offsetX)))) : 0;
+  const cleanY = Number.isFinite(Number(offsetY)) ? Math.max(-1600, Math.min(1600, Math.round(Number(offsetY)))) : 0;
   await this.findOneAndUpdate(
     {_id: id},
     {
-      $set: {pagePath, targetKey, assetType, url, position: cleanPos, widthPx: cleanWidth, align: cleanAlign},
+      $set: {
+        pagePath, targetKey, assetType, url,
+        position: cleanPos, widthPx: cleanWidth, align: cleanAlign,
+        offsetX: cleanX, offsetY: cleanY
+      },
       $setOnInsert: {_id: id}
     },
     {upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true}
   );
-  return this.findById(id).select('_id pagePath targetKey assetType url position widthPx align updatedAt').lean();
+  return this.findById(id).select('_id pagePath targetKey assetType url position widthPx align offsetX offsetY updatedAt').lean();
+};
+
+systemConfigSchema.statics.updateSiteMediaTransform = async function (id, {offsetX, offsetY, widthPx}) {
+  if (typeof id !== 'string' || !/^site-media-[a-f0-9]{64}$/i.test(id)) return null;
+  const patch = {};
+  if (Number.isFinite(Number(offsetX))) patch.offsetX = Math.max(-1600, Math.min(1600, Math.round(Number(offsetX))));
+  if (Number.isFinite(Number(offsetY))) patch.offsetY = Math.max(-1600, Math.min(1600, Math.round(Number(offsetY))));
+  if (Number.isFinite(Number(widthPx))) patch.widthPx = Math.max(32, Math.min(900, Math.round(Number(widthPx))));
+  if (!Object.keys(patch).length) return null;
+  return this.findByIdAndUpdate(id, {$set: patch}, {new: true})
+    .select('_id pagePath targetKey assetType url position widthPx align offsetX offsetY updatedAt')
+    .lean();
 };
 
 systemConfigSchema.statics.deleteSiteMediaPlacement = async function (id) {
@@ -151,20 +175,33 @@ systemConfigSchema.statics.deleteSiteMediaPlacement = async function (id) {
 
 systemConfigSchema.statics.getSiteTextOverrides = function () {
   return this.find({_id: /^site-text-/})
-    .select('_id pagePath targetKey customText updatedAt')
+    .select('_id pagePath targetKey customText textColor fontFamily fontSizePx fontWeight updatedAt')
     .sort({pagePath: 1, updatedAt: -1})
     .lean();
 };
 
-systemConfigSchema.statics.saveSiteTextOverride = async function ({pagePath, targetKey, customText}) {
+systemConfigSchema.statics.saveSiteTextOverride = async function ({
+  pagePath, targetKey, customText, textColor = null, fontFamily = null, fontSizePx = null, fontWeight = null
+}) {
   const id = `site-text-${createHash('sha256').update(`${pagePath}\0${targetKey}`).digest('hex')}`;
   const cleanText = String(customText || '').trim().slice(0, 2000);
+  const cleanColor = typeof textColor === 'string' && /^#[0-9a-f]{3,8}$/i.test(textColor.trim()) ? textColor.trim() : null;
+  const cleanFont = typeof fontFamily === 'string' && fontFamily.trim() ? fontFamily.trim().slice(0, 120) : null;
+  const rawSize = Number(fontSizePx);
+  const cleanSize = Number.isFinite(rawSize) && rawSize >= 10 && rawSize <= 96 ? Math.round(rawSize) : null;
+  const cleanWeight = ['400', '500', '600', '700', '800'].includes(String(fontWeight || '')) ? String(fontWeight) : null;
   await this.findOneAndUpdate(
     {_id: id},
-    {$set: {pagePath, targetKey, customText: cleanText}, $setOnInsert: {_id: id}},
+    {
+      $set: {
+        pagePath, targetKey, customText: cleanText,
+        textColor: cleanColor, fontFamily: cleanFont, fontSizePx: cleanSize, fontWeight: cleanWeight
+      },
+      $setOnInsert: {_id: id}
+    },
     {upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true}
   );
-  return this.findById(id).select('_id pagePath targetKey customText updatedAt').lean();
+  return this.findById(id).select('_id pagePath targetKey customText textColor fontFamily fontSizePx fontWeight updatedAt').lean();
 };
 
 systemConfigSchema.statics.deleteSiteTextOverride = async function (id) {

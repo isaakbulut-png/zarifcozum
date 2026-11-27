@@ -488,15 +488,20 @@ app.get('/api/site-media', async (req, res) => {
     res.json({
       placements: placements
         .filter(item => item.pagePath === pagePath)
-        .map(({targetKey, assetType, url, position, widthPx, align}) => ({
+        .map(({_id, targetKey, assetType, url, position, widthPx, align, offsetX, offsetY}) => ({
+          id: _id,
           targetKey, assetType, url,
           position: position || 'after',
           widthPx: widthPx || 320,
-          align: align || 'center'
+          align: align || 'center',
+          offsetX: Number(offsetX) || 0,
+          offsetY: Number(offsetY) || 0
         })),
       textOverrides: textOverrides
         .filter(item => item.pagePath === pagePath)
-        .map(({targetKey, customText}) => ({targetKey, customText}))
+        .map(({targetKey, customText, textColor, fontFamily, fontSizePx, fontWeight}) => ({
+          targetKey, customText, textColor, fontFamily, fontSizePx, fontWeight
+        }))
     });
   } catch (error) {
     console.error('Sayfa medyaları alınamadı:', error);

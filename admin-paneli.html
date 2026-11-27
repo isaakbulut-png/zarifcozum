@@ -2028,16 +2028,57 @@
           <button class="btn primary sm" type="submit" id="uploadSiteMedia" disabled>✨ Medyayı Yerleştir</button>
           <p class="msg" id="siteMediaMsg" role="alert"></p>
         </form>
-        <div id="siteTextEditorBox" hidden style="margin:14px 0;padding:14px 16px;background:#faf6f1;border:1.5px solid #e7d9cc;border-radius:12px;">
-          <div style="font-size:0.88rem;font-weight:800;color:#2b180d;margin-bottom:6px;">✏️ Seçili Öğenin Yazısını Düzenle</div>
+        <div id="siteTextEditorBox" hidden style="margin:14px 0;padding:16px 18px;background:#faf6f1;border:1.5px solid #e7d9cc;border-radius:14px;">
+          <div style="font-size:0.9rem;font-weight:800;color:#2b180d;margin-bottom:8px;">✏️ Seçili Öğenin Yazısını, Fontunu ve Rengini Düzenle</div>
           <textarea id="siteTextEditorInput" rows="3" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #d6c8bc;font-family:inherit;font-size:0.88rem;resize:vertical;"></textarea>
-          <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
-            <button type="button" id="saveSiteTextBtn" class="btn primary sm" disabled>💾 Yazıyı Kaydet</button>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px;align-items:end;">
+            <label style="font-size:0.78rem;font-weight:700;color:#475569;display:block;">Yazı Tipi (Font)
+              <select id="siteTextFontFamily" style="width:100%;margin-top:4px;padding:6px 8px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;">
+                <option value="">Varsayılan Font</option>
+                <option value="Inter, sans-serif">Inter (Modern)</option>
+                <option value="'Poppins', 'Segoe UI', sans-serif">Poppins (Yuvarlak)</option>
+                <option value="'Montserrat', sans-serif">Montserrat (Güçlü)</option>
+                <option value="'Playfair Display', Georgia, serif">Playfair (Klasik Serif)</option>
+                <option value="Georgia, serif">Georgia (Editoryal)</option>
+                <option value="'Fira Code', monospace">Fira Code (Teknik / Kod)</option>
+              </select>
+            </label>
+            <label style="font-size:0.78rem;font-weight:700;color:#475569;display:block;">Kalınlık
+              <select id="siteTextFontWeight" style="width:100%;margin-top:4px;padding:6px 8px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;">
+                <option value="">Varsayılan</option>
+                <option value="400">Normal (400)</option>
+                <option value="500">Orta (500)</option>
+                <option value="600">Yarı Kalın (600)</option>
+                <option value="700">Kalın (700)</option>
+                <option value="800">Çok Kalın (800)</option>
+              </select>
+            </label>
+            <label style="font-size:0.78rem;font-weight:700;color:#475569;display:block;">Boyut (<span id="siteTextFontSizeVal">Varsayılan</span>)
+              <input id="siteTextFontSize" type="range" min="9" max="64" step="1" value="9" style="width:100%;margin-top:6px;">
+            </label>
+          </div>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:0.78rem;font-weight:700;color:#475569;">🎨 Renk Paleti:</span>
+            <button type="button" data-zc-color-swatch="#ffffff" title="Beyaz" style="width:24px;height:24px;border-radius:999px;border:1.5px solid #cbd5e1;background:#ffffff;cursor:pointer;"></button>
+            <button type="button" data-zc-color-swatch="#0f172a" title="Koyu Lacivert" style="width:24px;height:24px;border-radius:999px;border:1.5px solid #cbd5e1;background:#0f172a;cursor:pointer;"></button>
+            <button type="button" data-zc-color-swatch="#2b180d" title="Zarif Espresso" style="width:24px;height:24px;border-radius:999px;border:1.5px solid #cbd5e1;background:#2b180d;cursor:pointer;"></button>
+            <button type="button" data-zc-color-swatch="#ea580c" title="Bakır Turuncu" style="width:24px;height:24px;border-radius:999px;border:1.5px solid #cbd5e1;background:#ea580c;cursor:pointer;"></button>
+            <button type="button" data-zc-color-swatch="#f59e0b" title="Altın Sarı" style="width:24px;height:24px;border-radius:999px;border:1.5px solid #cbd5e1;background:#f59e0b;cursor:pointer;"></button>
+            <button type="button" data-zc-color-swatch="#059669" title="Zümrüt Yeşil" style="width:24px;height:24px;border-radius:999px;border:1.5px solid #cbd5e1;background:#059669;cursor:pointer;"></button>
+            <button type="button" data-zc-color-swatch="#2563eb" title="Kraliyet Mavi" style="width:24px;height:24px;border-radius:999px;border:1.5px solid #cbd5e1;background:#2563eb;cursor:pointer;"></button>
+            <button type="button" data-zc-color-swatch="#7c3aed" title="Mor" style="width:24px;height:24px;border-radius:999px;border:1.5px solid #cbd5e1;background:#7c3aed;cursor:pointer;"></button>
+            <button type="button" data-zc-color-swatch="#dc2626" title="Kırmızı" style="width:24px;height:24px;border-radius:999px;border:1.5px solid #cbd5e1;background:#dc2626;cursor:pointer;"></button>
+            <button type="button" data-zc-color-swatch="#94a3b8" title="Açık Gri" style="width:24px;height:24px;border-radius:999px;border:1.5px solid #cbd5e1;background:#94a3b8;cursor:pointer;"></button>
+            <input type="color" id="siteTextColor" value="#2b180d" title="Özel Renk Seç" style="width:30px;height:26px;border:none;background:transparent;cursor:pointer;">
+            <button type="button" id="siteTextColorReset" class="btn light" style="font-size:0.72rem;padding:3px 8px;">Rengi Sıfırla</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;">
+            <button type="button" id="saveSiteTextBtn" class="btn primary sm" disabled>💾 Yazıyı &amp; Stili Kaydet</button>
             <span class="msg" id="siteTextMsg" role="alert" style="margin:0;"></span>
           </div>
         </div>
-        <div id="siteMediaPreviewHint" hidden style="margin-top:12px;padding:8px 12px;background:#0f172a;color:#f8fafc;border-radius:10px 10px 0 0;font-size:0.8rem;font-weight:600;">
-          🎯 Canlı Hedef Seçici Aktif — Aşağıdaki sayfada fareyle gezerek turuncu çerçeveli herhangi bir öğeye tıklayın (seçilen öğe yeşil olur).
+        <div id="siteMediaPreviewHint" hidden style="margin-top:12px;padding:9px 14px;background:#0f172a;color:#f8fafc;border-radius:10px 10px 0 0;font-size:0.8rem;font-weight:600;">
+          🎯 Hedef seçmek için öğeye tıklayın · ✋ Yerleştirilmiş animasyon/görseli <strong>fareyle tutup sürükleyerek</strong> istediğiniz boş alana taşıyın, sağ alt köşesinden (⤡) boyutlandırın (otomatik kaydedilir).
         </div>
         <iframe id="siteMediaTargetPreview" title="Medya yerleşim hedefi seçme önizlemesi" hidden></iframe>
         <div id="siteMediaCurrent" aria-live="polite"></div>
@@ -5272,7 +5313,7 @@
   </script>
   <script src="/assets/VisualMathEngine.js?v=2" defer></script>
   <script src="/assets/content-pool-viewer.js?v=1" defer></script>
-  <script src="/assets/admin-site-media.js?v=3" defer></script>
+  <script src="/assets/admin-site-media.js?v=4" defer></script>
   <script src="/assets/page-transitions.js?v=1" defer></script>
   <script src="/assets/mobile-nav.js?v=1" defer></script>
 </body>

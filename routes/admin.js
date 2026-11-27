@@ -307,6 +307,21 @@ function createAdminRouter({
     }
   });
 
+  router.patch('/site-media/:id/position', allow('superadmin'), async (req, res) => {
+    try {
+      const updated = await SystemConfig.updateSiteMediaTransform(req.params.id, {
+        offsetX: req.body?.offsetX,
+        offsetY: req.body?.offsetY,
+        widthPx: req.body?.widthPx
+      });
+      if (!updated) return res.status(404).json({mesaj: 'Yerleşim kaydı bulunamadı.'});
+      res.json({mesaj: 'Konum kaydedildi.', placement: updated});
+    } catch (error) {
+      console.error('Medya konumu güncellenemedi:', error);
+      res.status(500).json({mesaj: 'Medya konumu kaydedilemedi.'});
+    }
+  });
+
   router.get('/site-text', allow('superadmin'), async (req, res) => {
     try {
       res.json({overrides: await SystemConfig.getSiteTextOverrides()});
@@ -320,6 +335,10 @@ function createAdminRouter({
     const pagePath = SiteMediaTargets.normalizePagePath(req.body?.pagePath);
     const targetKey = req.body?.targetKey;
     const customText = typeof req.body?.customText === 'string' ? req.body.customText.trim() : '';
+    const textColor = req.body?.textColor || null;
+    const fontFamily = req.body?.fontFamily || null;
+    const fontSizePx = req.body?.fontSizePx || null;
+    const fontWeight = req.body?.fontWeight || null;
     if (!pagePath || !SiteMediaTargets.validTargetKey(targetKey)) {
       return res.status(400).json({mesaj: 'Geçersiz sayfa veya hedef seçimi.'});
     }
@@ -327,9 +346,11 @@ function createAdminRouter({
       return res.status(400).json({mesaj: 'Metin 1 ile 2000 karakter arasında olmalıdır.'});
     }
     try {
-      const override = await SystemConfig.saveSiteTextOverride({pagePath, targetKey, customText});
-      await audit(req, 'site_text.updated', 'site_text', override._id, {pagePath, targetKey});
-      res.status(201).json({mesaj: 'Sayfa yazısı güncellendi.', override});
+      const override = await SystemConfig.saveSiteTextOverride({
+        pagePath, targetKey, customText, textColor, fontFamily, fontSizePx, fontWeight
+      });
+      await audit(req, 'site_text.updated', 'site_text', override._id, {pagePath, targetKey, textColor, fontFamily});
+      res.status(201).json({mesaj: 'Sayfa yazısı ve stili güncellendi.', override});
     } catch (error) {
       console.error('Sayfa metni kaydedilemedi:', error);
       res.status(500).json({mesaj: 'Sayfa metni kaydedilemedi.'});

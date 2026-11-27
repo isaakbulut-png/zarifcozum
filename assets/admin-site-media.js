@@ -337,9 +337,67 @@
     const previewHint = $('siteMediaPreviewHint');
     const textEditorBox = $('siteTextEditorBox');
     const textInput = $('siteTextEditorInput');
+    const textColorInput = $('siteTextColor');
+    const textColorResetBtn = $('siteTextColorReset');
+    const textFontSelect = $('siteTextFontFamily');
+    const textSizeInput = $('siteTextFontSize');
+    const textSizeVal = $('siteTextFontSizeVal');
+    const textWeightSelect = $('siteTextFontWeight');
     const saveTextBtn = $('saveSiteTextBtn');
     const textMsgEl = $('siteTextMsg');
     const textCurrentEl = $('siteTextCurrent');
+    let selectedTextColor = '';
+
+    const pushLiveTextPreview = () => {
+      if (!iframe?.contentWindow || !targetSelect.value) return;
+      const sz = Number(textSizeInput?.value || 0);
+      iframe.contentWindow.postMessage({
+        type: 'site-media-preview-text',
+        targetKey: targetSelect.value,
+        customText: textInput?.value || '',
+        textColor: selectedTextColor || null,
+        resetColor: !selectedTextColor,
+        fontFamily: textFontSelect?.value || null,
+        resetFont: !textFontSelect?.value,
+        fontSizePx: sz >= 10 ? sz : null,
+        resetSize: sz < 10,
+        fontWeight: textWeightSelect?.value || null,
+        resetWeight: !textWeightSelect?.value
+      }, window.location.origin);
+    };
+
+    document.querySelectorAll('[data-zc-color-swatch]').forEach((sw) => {
+      sw.addEventListener('click', () => {
+        selectedTextColor = sw.dataset.zcColorSwatch || '';
+        if (textColorInput && selectedTextColor) textColorInput.value = selectedTextColor;
+        document.querySelectorAll('[data-zc-color-swatch]').forEach(b => {
+          b.style.outline = b === sw ? '2.5px solid #0f172a' : 'none';
+          b.style.outlineOffset = '2px';
+        });
+        pushLiveTextPreview();
+      });
+    });
+
+    textColorInput?.addEventListener('input', () => {
+      selectedTextColor = textColorInput.value;
+      document.querySelectorAll('[data-zc-color-swatch]').forEach(b => { b.style.outline = 'none'; });
+      pushLiveTextPreview();
+    });
+
+    textColorResetBtn?.addEventListener('click', () => {
+      selectedTextColor = '';
+      document.querySelectorAll('[data-zc-color-swatch]').forEach(b => { b.style.outline = 'none'; });
+      pushLiveTextPreview();
+    });
+
+    textFontSelect?.addEventListener('change', pushLiveTextPreview);
+    textWeightSelect?.addEventListener('change', pushLiveTextPreview);
+    textInput?.addEventListener('input', pushLiveTextPreview);
+    textSizeInput?.addEventListener('input', () => {
+      const v = Number(textSizeInput.value || 0);
+      if (textSizeVal) textSizeVal.textContent = v >= 10 ? `${v}px` : 'Varsayılan';
+      pushLiveTextPreview();
+    });
 
     if (!form || !pageSelect || !window.SiteMediaTargets) return;
 
@@ -451,6 +509,7 @@
       saveTextBtn.disabled = true;
       setMsg(textMsgEl, 'Yazı kaydediliyor...', true);
       try {
+        const sz = Number(textSizeInput?.value || 0);
         const res = await fetch('/api/admin/site-text', {
           method: 'POST',
           credentials: 'same-origin',
@@ -458,19 +517,17 @@
           body: JSON.stringify({
             pagePath: pageSelect.value,
             targetKey: targetSelect.value,
-            customText
+            customText,
+            textColor: selectedTextColor || null,
+            fontFamily: textFontSelect?.value || null,
+            fontSizePx: sz >= 10 ? sz : null,
+            fontWeight: textWeightSelect?.value || null
           })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.mesaj || 'Yazı kaydedilemedi.');
-        setMsg(textMsgEl, '✅ Sayfa yazısı canlı olarak güncellendi.', true);
-        if (iframe?.contentWindow) {
-          iframe.contentWindow.postMessage({
-            type: 'site-media-preview-text',
-            targetKey: targetSelect.value,
-            customText
-          }, window.location.origin);
-        }
+        setMsg(textMsgEl, '✅ Sayfa yazısı ve stili canlı olarak kaydedildi.', true);
+        pushLiveTextPreview();
         loadTextOverrides();
       } catch (err) {
         setMsg(textMsgEl, err.message, false);
@@ -638,6 +695,25 @@
             : '');
         setMsg(msgEl, 'Hedef canlı önizlemeden seçildi.' + hintSuffix, true);
       }
+
+      if (data.type === 'site-media-transform' && data.id) {
+        fetch(`/api/admin/site-media/${encodeURIComponent(data.id)}/position`, {
+          method: 'PATCH',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            offsetX: data.offsetX,
+            offsetY: data.offsetY,
+            widthPx: data.widthPx
+          })
+        })
+          .then(r => r.json().catch(() => ({})))
+          .then(() => {
+            setMsg(msgEl, `✅ Yeni konum kaydedildi (X: ${data.offsetX}px, Y: ${data.offsetY}px · Genişlik: ${data.widthPx}px)`, true);
+            loadCurrentPlacements();
+          })
+          .catch(err => setMsg(msgEl, 'Konum kaydedilemedi: ' + err.message, false));
+      }
     });
 
     form.addEventListener('submit', async (e) => {
@@ -667,10 +743,13 @@
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.mesaj || 'Medya yerleştirilemedi.');
-        setMsg(msgEl, '✅ ' + (data.mesaj || 'Medya seçilen hedefe yerleştirildi.'), true);
+        setMsg(msgEl, '✅ ' + (data.mesaj || 'Medya yerleştirildi.') + ' Aşağıdaki önizlemede fareyle tutup istediğiniz yere sürükleyebilirsiniz!', true);
         fileInput.value = '';
         previewSelectedLocalFile(null, 'image');
         loadCurrentPlacements();
+        if (iframe && !iframe.hidden && pageSelect.value) {
+          iframe.src = `${pageSelect.value}?siteMediaDesigner=1&_t=${Date.now()}`;
+        }
       } catch (err) {
         setMsg(msgEl, err.message, false);
       } finally {
