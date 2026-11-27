@@ -12,7 +12,8 @@ const contentLibrarySchema = new mongoose.Schema({
       'ai_topic_summary',
       'ai_study_plan',
       'pdf_document',
-      'teacher_upload'
+      'teacher_upload',
+      'maarif_published_test'
     ],
     index: true
   },
@@ -36,7 +37,7 @@ const contentLibrarySchema = new mongoose.Schema({
   pineconeId: { type: String, default: null, index: true },
   source: {
     type: String,
-    enum: ['ai', 'ai_mentor', 'ai_wizard', 'teacher', 'teacher_upload', 'admin', 'admin_import', 'manual'],
+    enum: ['ai', 'ai_mentor', 'ai_wizard', 'teacher', 'teacher_upload', 'teacher_published', 'admin', 'admin_import', 'manual'],
     default: 'ai',
     index: true
   },

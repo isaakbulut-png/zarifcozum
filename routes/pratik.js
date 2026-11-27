@@ -261,13 +261,16 @@ function createPratikRouter({
       return res.status(400).json({ mesaj: 'Yayınlanacak en az bir soru bulunmalıdır.' });
     }
 
+    const rawDiff = String(req.body?.difficulty || 'orta').trim().toLowerCase();
+    const safeDiff = ['kolay', 'orta', 'zor'].includes(rawDiff) ? rawDiff : 'orta';
+
     const doc = await ContentLibrary.create({
       title,
       type: 'maarif_published_test',
       ders: 'matematik',
       grade,
       topic: topicTitle,
-      difficulty: String(req.body?.difficulty || 'orta').toLowerCase(),
+      difficulty: safeDiff,
       content: {
         title,
         topicTitle,
