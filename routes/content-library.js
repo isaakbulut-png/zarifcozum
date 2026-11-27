@@ -125,6 +125,23 @@ function createContentLibraryRouter({ requireStaff, mediaStorage, privateDocumen
       }
 
       const exportFormat = format === 'docx' ? 'docx' : 'pdf';
+      const wantDownload = req.query?.download === '1' || req.query?.download === 'true';
+
+      // Tekil bir PDF dokümanı (R2'de kayıtlı gerçek PDF) istendiyse doğrudan kendi PDF'ini inline aç
+      if (exportFormat === 'pdf' && items.length === 1 && items[0].r2Key) {
+        const storage = privateDocumentStorage || mediaStorage;
+        if (storage && typeof storage.get === 'function') {
+          const stored = await storage.get(items[0].r2Key);
+          if (stored) {
+            const pdfName = (items[0].metadata?.originalName || `${items[0].title || 'dokuman'}.pdf`).replace(/["\r\n]/g, '');
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `${wantDownload ? 'attachment' : 'inline'}; filename="${pdfName}"`);
+            if (Buffer.isBuffer(stored)) return res.send(stored);
+            if (stored.pipe) return stored.pipe(res);
+          }
+        }
+      }
+
       const fileBuffer = exportContentItems(items, { title, format: exportFormat });
 
       const contentType = exportFormat === 'docx'
@@ -132,9 +149,10 @@ function createContentLibraryRouter({ requireStaff, mediaStorage, privateDocumen
         : 'application/pdf';
 
       const filename = `zarifcozum-icerik-havuzu-${Date.now()}.${exportFormat}`;
+      const disposition = (exportFormat === 'pdf' && !wantDownload) ? 'inline' : 'attachment';
 
       res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Disposition', `${disposition}; filename="${filename}"`);
       res.send(fileBuffer);
     } catch (err) {
       console.error('[ContentLibrary] Export hatası:', err);

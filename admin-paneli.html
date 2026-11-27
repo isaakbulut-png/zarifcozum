@@ -1423,8 +1423,8 @@
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn light" id="poolRefreshBtn" type="button">🔄 Yenile</button>
-            <button class="btn light" id="poolExportPdfBtn" type="button">📥 Toplu PDF İndir</button>
-            <button class="btn light" id="poolExportDocxBtn" type="button">📄 Toplu DOCX İndir</button>
+            <button class="btn light" id="poolExportPdfBtn" type="button">👁️ Toplu PDF Önizle</button>
+            <button class="btn light" id="poolPreviewImageBtn" type="button">🖼️ Toplu Görsel (PNG/JPEG)</button>
             <button class="btn secondary" id="poolArchiveR2Btn" type="button" style="background:#7c3aed;color:#fff;">☁ R2'ye Toplu Arşivle</button>
           </div>
         </div>
@@ -3438,27 +3438,41 @@
             tdActions.append(btnApprove);
           }
 
-          // PDF İndir
-          const btnPdf = document.createElement('a');
+          // PDF Görüntüle (Doğrudan indirmeden orijinal KaTeX/SVG PDF önizleme)
+          const btnPdf = document.createElement('button');
+          btnPdf.type = 'button';
           btnPdf.className = 'btn light';
           btnPdf.style.fontSize = '0.75rem';
           btnPdf.style.padding = '4px 8px';
           btnPdf.style.marginRight = '4px';
-          btnPdf.textContent = '📥 PDF';
-          btnPdf.href = `/api/content-library/export?format=pdf&ids=${itemId}`;
-          btnPdf.target = '_blank';
+          btnPdf.textContent = '👁️ PDF';
+          btnPdf.title = 'PDF olarak görüntüle (Farklı Kaydet ile masaüstüne kaydedilebilir)';
+          btnPdf.onclick = () => {
+            if (window.ZarifPoolViewer) {
+              window.ZarifPoolViewer.previewPdf([item]);
+            } else {
+              window.open(`/api/content-library/export?format=pdf&ids=${itemId}`, '_blank');
+            }
+          };
           tdActions.append(btnPdf);
 
-          // DOCX İndir
-          const btnDocx = document.createElement('a');
-          btnDocx.className = 'btn light';
-          btnDocx.style.fontSize = '0.75rem';
-          btnDocx.style.padding = '4px 8px';
-          btnDocx.style.marginRight = '4px';
-          btnDocx.textContent = '📄 DOCX';
-          btnDocx.href = `/api/content-library/export?format=docx&ids=${itemId}`;
-          btnDocx.target = '_blank';
-          tdActions.append(btnDocx);
+          // PNG / JPEG Görsel Görüntüle (DOCX yerine)
+          const btnImg = document.createElement('button');
+          btnImg.type = 'button';
+          btnImg.className = 'btn light';
+          btnImg.style.fontSize = '0.75rem';
+          btnImg.style.padding = '4px 8px';
+          btnImg.style.marginRight = '4px';
+          btnImg.textContent = '🖼️ PNG/JPEG';
+          btnImg.title = 'Soruyu yüksek çözünürlüklü PNG veya JPEG olarak görüntüle';
+          btnImg.onclick = () => {
+            if (window.ZarifPoolViewer) {
+              window.ZarifPoolViewer.previewImage([item], 'png');
+            } else {
+              alert('Görsel görüntüleyici henüz yüklenmedi, lütfen sayfayı yenileyin.');
+            }
+          };
+          tdActions.append(btnImg);
 
           // R2 Arşivle Butonu
           if (!item.r2Key) {
@@ -3520,18 +3534,35 @@
           });
         });
 
-        // Toplu PDF İndir
+        const getSelectedOrVisiblePoolItems = () => {
+          const selectedIds = new Set(Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value));
+          if (selectedIds.size > 0) {
+            return currentPoolItems.filter(it => selectedIds.has(String(it._id || it.id)));
+          }
+          return currentPoolItems.slice(0, 15);
+        };
+
+        // Toplu PDF Önizle (indirmeden görüntüle)
         $('poolExportPdfBtn')?.addEventListener('click', () => {
-          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
-          const query = selected.length > 0 ? `&ids=${selected.join(',')}` : '';
-          window.open(`/api/content-library/export?format=pdf${query}`, '_blank');
+          const items = getSelectedOrVisiblePoolItems();
+          if (!items.length) { alert('Önizlenecek içerik bulunamadı.'); return; }
+          if (window.ZarifPoolViewer) {
+            window.ZarifPoolViewer.previewPdf(items);
+          } else {
+            const ids = items.map(i => i._id || i.id).join(',');
+            window.open(`/api/content-library/export?format=pdf&ids=${ids}`, '_blank');
+          }
         });
 
-        // Toplu DOCX İndir
-        $('poolExportDocxBtn')?.addEventListener('click', () => {
-          const selected = Array.from(document.querySelectorAll('.pool-item-check:checked')).map(c => c.value);
-          const query = selected.length > 0 ? `&ids=${selected.join(',')}` : '';
-          window.open(`/api/content-library/export?format=docx${query}`, '_blank');
+        // Toplu PNG / JPEG Görsel Önizle (DOCX yerine)
+        $('poolPreviewImageBtn')?.addEventListener('click', () => {
+          const items = getSelectedOrVisiblePoolItems();
+          if (!items.length) { alert('Önizlenecek içerik bulunamadı.'); return; }
+          if (window.ZarifPoolViewer) {
+            window.ZarifPoolViewer.previewImage(items, 'png');
+          } else {
+            alert('Görsel görüntüleyici henüz yüklenmedi, lütfen sayfayı yenileyin.');
+          }
         });
 
         // Toplu R2 Arşivle
@@ -5202,6 +5233,8 @@
       });
     })();
   </script>
+  <script src="/assets/VisualMathEngine.js?v=2" defer></script>
+  <script src="/assets/content-pool-viewer.js?v=1" defer></script>
   <script src="/assets/page-transitions.js?v=1" defer></script>
   <script src="/assets/mobile-nav.js?v=1" defer></script>
 </body>
