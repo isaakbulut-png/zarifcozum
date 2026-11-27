@@ -56,38 +56,118 @@
     } catch (_) {}
   }
 
-  /* ── Hareketli Alkışlayan Öğrenci Maskotu SVG (İzle / Alkışla / Kutla) ── */
-  function buildMascotSvg(mood) {
+  /* ── Gerçekçi Alkış Sesi (Web Audio Filtreli Alkış + Melodi) ── */
+  function playApplause() {
+    try {
+      var AC = global.AudioContext || global.webkitAudioContext;
+      if (!AC) return;
+      var ctx = new AC();
+      var now = ctx.currentTime;
+      // 4 yumuşak ritmik alkış vuruşu (bandpass gürültü)
+      [0, 0.13, 0.26, 0.39].forEach(function (offset) {
+        var len = Math.floor(ctx.sampleRate * 0.055);
+        var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+        var data = buf.getChannelData(0);
+        for (var i = 0; i < len; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (len * 0.28));
+        }
+        var src = ctx.createBufferSource();
+        src.buffer = buf;
+        var filter = ctx.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.frequency.value = 1150;
+        filter.Q.value = 1.1;
+        var g = ctx.createGain();
+        g.gain.setValueAtTime(0.14, now + offset);
+        g.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.055);
+        src.connect(filter);
+        filter.connect(g);
+        g.connect(ctx.destination);
+        src.start(now + offset);
+      });
+    } catch (_) {}
+  }
+
+  /* ── Profesyonel, Büyük & Gerçekçi Alkışlayan Öğrenci Karakteri SVG ── */
+  function buildMascotSvg(mood, activeWord) {
     var isCelebrate = mood === "celebrate";
     var isClap = mood === "clap" || isCelebrate;
-    var cls = isCelebrate ? "ks-mascot-jump" : (isClap ? "ks-mascot-clap" : "ks-mascot-idle");
-    var stars = isClap
-      ? '<text x="16" y="34" font-size="18" class="ks-star-pop">✨</text><text x="108" y="32" font-size="18" class="ks-star-pop">⭐</text>' +
-        (isCelebrate ? '<text x="62" y="18" font-size="20" class="ks-star-pop">🏆</text>' : '')
+    var cls = isCelebrate ? "ks-mascot-pro ks-mascot-jump" : (isClap ? "ks-mascot-pro ks-mascot-clap" : "ks-mascot-pro ks-mascot-idle");
+    var badgeWord = esc(activeWord || "Harikasın!");
+
+    var clapBurst = isClap
+      ? '<g class="ks-clap-burst">' +
+          '<line x1="100" y1="108" x2="100" y2="95" stroke="#D97706" stroke-width="2.6" stroke-linecap="round"/>' +
+          '<line x1="87" y1="114" x2="77" y2="105" stroke="#F59E0B" stroke-width="2.4" stroke-linecap="round"/>' +
+          '<line x1="113" y1="114" x2="123" y2="105" stroke="#F59E0B" stroke-width="2.4" stroke-linecap="round"/>' +
+          '<text x="22" y="42" font-size="22" class="ks-star-pop">✨</text>' +
+          '<text x="156" y="38" font-size="22" class="ks-star-pop">⭐</text>' +
+          (isCelebrate ? '<text x="89" y="24" font-size="24" class="ks-star-pop">🏆</text>' : '') +
+        '</g>'
       : '';
+
+    var eyes = isClap
+      ? '<path d="M78 72 Q84 64 90 72" fill="none" stroke="#0F172A" stroke-width="3" stroke-linecap="round"/>' +
+        '<path d="M110 72 Q116 64 122 72" fill="none" stroke="#0F172A" stroke-width="3" stroke-linecap="round"/>'
+      : '<ellipse cx="84" cy="72" rx="4.6" ry="5.4" fill="#0F172A"/><circle cx="85.8" cy="70" r="1.6" fill="#FFFFFF"/>' +
+        '<ellipse cx="116" cy="72" rx="4.6" ry="5.4" fill="#0F172A"/><circle cx="117.8" cy="70" r="1.6" fill="#FFFFFF"/>';
+
     var mouth = isClap
-      ? '<path d="M56 64 Q70 78 84 64 Z" fill="#FFFFFF" stroke="#0F172A" stroke-width="2"/>'
-      : '<path d="M58 66 Q70 74 82 66" fill="none" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round"/>';
-    var leftArm = isClap
-      ? '<path class="ks-arm-l" d="M44 92 Q28 72 48 64" fill="none" stroke="#D97706" stroke-width="9" stroke-linecap="round"/><circle cx="50" cy="64" r="6" fill="#FCD5B5"/>'
-      : '<path d="M44 92 Q32 108 38 118" fill="none" stroke="#D97706" stroke-width="9" stroke-linecap="round"/><circle cx="38" cy="118" r="6" fill="#FCD5B5"/>';
-    var rightArm = isClap
-      ? '<path class="ks-arm-r" d="M96 92 Q112 72 92 64" fill="none" stroke="#D97706" stroke-width="9" stroke-linecap="round"/><circle cx="90" cy="64" r="6" fill="#FCD5B5"/>'
-      : '<path d="M96 92 Q108 108 102 118" fill="none" stroke="#D97706" stroke-width="9" stroke-linecap="round"/><circle cx="102" cy="118" r="6" fill="#FCD5B5"/>';
-    return '<svg class="' + cls + '" viewBox="0 0 140 135" width="126" height="122" xmlns="http://www.w3.org/2000/svg">' +
-      stars +
-      '<ellipse cx="70" cy="126" rx="34" ry="6" fill="rgba(15,23,42,0.12)"/>' +
-      '<rect x="44" y="84" width="52" height="40" rx="16" fill="#0F172A"/>' +
-      '<path d="M58 84 L70 98 L82 84" fill="#FAF8F5"/>' +
-      leftArm + rightArm +
-      '<circle cx="70" cy="54" r="28" fill="#FCD5B5" stroke="#0F172A" stroke-width="2.2"/>' +
-      '<path d="M42 50 Q46 22 70 24 Q94 22 98 50 Q88 34 70 36 Q52 34 42 50 Z" fill="#1E293B"/>' +
-      '<circle cx="60" cy="52" r="3.6" fill="#0F172A"/>' +
-      '<circle cx="80" cy="52" r="3.6" fill="#0F172A"/>' +
-      '<circle cx="52" cy="60" r="4" fill="rgba(244,63,94,0.28)"/>' +
-      '<circle cx="88" cy="60" r="4" fill="rgba(244,63,94,0.28)"/>' +
-      mouth +
-    '</svg>';
+      ? '<path d="M84 88 Q100 106 116 88 Z" fill="#991B1B" stroke="#0F172A" stroke-width="2.2"/>' +
+        '<path d="M88 90 Q100 94 112 90" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>'
+      : '<path d="M88 90 Q100 98 112 90" fill="none" stroke="#0F172A" stroke-width="2.6" stroke-linecap="round"/>';
+
+    var arms = isClap
+      ? // Göğüs önünde gerçek alkış vuruşu yapan sol ve sağ kollar + eller
+        '<g class="ks-arm-l">' +
+          '<path d="M64 124 Q52 132 82 126" fill="none" stroke="#D97706" stroke-width="14" stroke-linecap="round"/>' +
+          '<ellipse cx="92" cy="123" rx="10" ry="12" transform="rotate(-18 92 123)" fill="#FCD5B5" stroke="#0F172A" stroke-width="2"/>' +
+        '</g>' +
+        '<g class="ks-arm-r">' +
+          '<path d="M136 124 Q148 132 118 126" fill="none" stroke="#D97706" stroke-width="14" stroke-linecap="round"/>' +
+          '<ellipse cx="108" cy="123" rx="10" ry="12" transform="rotate(18 108 123)" fill="#FCD5B5" stroke="#0F172A" stroke-width="2"/>' +
+        '</g>'
+      : '<path d="M62 126 Q46 146 56 160" fill="none" stroke="#D97706" stroke-width="13" stroke-linecap="round"/>' +
+        '<circle cx="57" cy="160" r="8" fill="#FCD5B5" stroke="#0F172A" stroke-width="2"/>' +
+        '<path d="M138 126 Q154 146 144 160" fill="none" stroke="#D97706" stroke-width="13" stroke-linecap="round"/>' +
+        '<circle cx="143" cy="160" r="8" fill="#FCD5B5" stroke="#0F172A" stroke-width="2"/>';
+
+    return '<div class="ks-pro-avatar-wrap">' +
+      (isClap ? '<div class="ks-word-pill" data-ks-word-pill>' + badgeWord + '</div>' : '') +
+      '<svg class="' + cls + '" viewBox="0 0 200 185" width="196" height="182" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs>' +
+          '<radialGradient id="ksGlow" cx="50%" cy="50%" r="50%">' +
+            '<stop offset="0%" stop-color="#FEF3C7" stop-opacity="0.95"/>' +
+            '<stop offset="100%" stop-color="#FAF8F5" stop-opacity="0"/>' +
+          '</radialGradient>' +
+        '</defs>' +
+        '<circle cx="100" cy="96" r="82" fill="url(#ksGlow)"/>' +
+        clapBurst +
+        '<ellipse cx="100" cy="174" rx="52" ry="8" fill="rgba(15,23,42,0.12)"/>' +
+        // Gövde (Okul hırkası + yaka)
+        '<path d="M58 170 L62 126 Q64 110 82 110 L118 110 Q136 110 138 126 L142 170 Z" fill="#0F172A" stroke="#0F172A" stroke-width="2"/>' +
+        '<path d="M84 110 L100 132 L116 110 Z" fill="#FFFFFF"/>' +
+        '<circle cx="122" cy="136" r="6" fill="#D97706"/>' +
+        // Boyun & Baş (hafif neşeli baş sallama)
+        '<g class="ks-head-bob">' +
+          '<rect x="91" y="98" width="18" height="16" rx="6" fill="#F4C29F"/>' +
+          '<circle cx="62" cy="76" r="8" fill="#FCD5B5" stroke="#0F172A" stroke-width="2"/>' +
+          '<circle cx="138" cy="76" r="8" fill="#FCD5B5" stroke="#0F172A" stroke-width="2"/>' +
+          '<circle cx="100" cy="74" r="38" fill="#FCD5B5" stroke="#0F172A" stroke-width="2.4"/>' +
+          // Katmanlı saç + parlaklık
+          '<path d="M61 68 Q64 26 100 28 Q136 26 139 68 Q128 46 108 48 Q84 44 61 68 Z" fill="#1E293B" stroke="#0F172A" stroke-width="2"/>' +
+          '<path d="M78 39 Q96 32 116 39" fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round"/>' +
+          // Kaşlar
+          '<path d="M76 61 Q84 57 91 61" fill="none" stroke="#1E293B" stroke-width="2.4" stroke-linecap="round"/>' +
+          '<path d="M109 61 Q116 57 124 61" fill="none" stroke="#1E293B" stroke-width="2.4" stroke-linecap="round"/>' +
+          eyes +
+          '<circle cx="72" cy="83" r="6" fill="rgba(244,63,94,0.24)"/>' +
+          '<circle cx="128" cy="83" r="6" fill="rgba(244,63,94,0.24)"/>' +
+          mouth +
+        '</g>' +
+        arms +
+      '</svg>' +
+    '</div>';
   }
 
   /* ========================================================================
@@ -257,16 +337,43 @@
     var selectedLeft = null;
     var matchedIds = new Set();
     var mistakes = 0;
+    var PRAISE_WORDS = ["Harikasın!", "Başardın!", "Mükemmel!"];
+    var praiseIdx = 0;
+    var praiseTimer = null;
     var mascotMood = "idle";
+    var mascotWord = PRAISE_WORDS[0];
     var mascotMsg = "Soldan bir kavram seç, sonra sağdan doğru eşini bul! Sen yaparsın!";
+
+    function stopPraiseCycle() {
+      if (praiseTimer) { clearInterval(praiseTimer); praiseTimer = null; }
+    }
+
+    function startPraiseCycle() {
+      stopPraiseCycle();
+      praiseTimer = setInterval(function () {
+        praiseIdx = (praiseIdx + 1) % PRAISE_WORDS.length;
+        mascotWord = PRAISE_WORDS[praiseIdx];
+        var pill = container.querySelector("[data-ks-word-pill]");
+        var head = container.querySelector("[data-ks-praise-head]");
+        if (pill) {
+          pill.textContent = mascotWord;
+          pill.classList.remove("ks-word-pop");
+          void pill.offsetWidth;
+          pill.classList.add("ks-word-pop");
+        }
+        if (head && mascotMood !== "idle") {
+          head.textContent = "👏 " + mascotWord;
+        }
+      }, 1500);
+    }
 
     function draw() {
       var done = matchedIds.size === pairs.length;
       var pct = Math.round((matchedIds.size / pairs.length) * 100);
       var confettiHtml = done
-        ? '<div class="ks-confetti-wrap">' + Array.from({ length: 18 }).map(function (_, i) {
+        ? '<div class="ks-confetti-wrap">' + Array.from({ length: 24 }).map(function (_, i) {
             var colors = ["#D97706", "#059669", "#2563EB", "#DC2626", "#7C3AED"];
-            return '<span class="ks-confetti-piece" style="left:' + (4 + i * 5.2) + '%;background:' + colors[i % colors.length] + ';animation-delay:' + ((i % 6) * 0.12) + 's;"></span>';
+            return '<span class="ks-confetti-piece" style="left:' + (2 + i * 4.1) + '%;background:' + colors[i % colors.length] + ';animation-delay:' + ((i % 6) * 0.1) + 's;"></span>';
           }).join("") + '</div>'
         : '';
 
@@ -303,20 +410,26 @@
             '</div>' +
           '</div>' +
 
-          '<div class="ks-mascot-stage' + (done ? ' is-celebrating' : '') + '">' +
-            buildMascotSvg(done ? "celebrate" : mascotMood) +
+          '<div class="ks-mascot-stage' + (done ? ' is-celebrating' : (mascotMood === 'clap' ? ' is-clapping' : '')) + '">' +
+            buildMascotSvg(done ? "celebrate" : mascotMood, mascotWord) +
             '<div class="ks-mascot-speech">' +
-              '<strong>' + (done ? '🎉 Tebrikler Şampiyon! (+' + (pairs.length * 10) + ' XP)' : (mascotMood === 'clap' ? '👏 Harikasın! Tam İsabet!' : '🧭 Zarif Rehber')) + '</strong>' +
-              '<p>' + esc(done ? ('Tüm ' + pairs.length + ' kavramı ' + (mistakes === 0 ? 'sıfır hatayla' : mistakes + ' deneme ile') + ' başarıyla eşleştirdin! Alkışlar sana!') : mascotMsg) + '</p>' +
-              (done ? '<button type="button" class="ks-btn-amber" style="margin-top:8px;" data-m-reset>🔁 Yeni Tur Başlat</button>' : '') +
+              '<strong data-ks-praise-head style="font-size:1.3rem;">' + (done ? ('🎉 ' + mascotWord + ' (+' + (pairs.length * 10) + ' XP)') : (mascotMood === 'clap' ? ('👏 ' + mascotWord) : '🧭 Zarif Rehber')) + '</strong>' +
+              '<p style="font-size:1.02rem;">' + esc(done ? ('Tüm ' + pairs.length + ' kavramı ' + (mistakes === 0 ? 'sıfır hatayla' : mistakes + ' deneme ile') + ' başarıyla eşleştirdin! Alkışlar sana!') : mascotMsg) + '</p>' +
+              (done ? '<button type="button" class="ks-btn-amber" style="margin-top:10px;padding:10px 18px;font-size:0.95rem;" data-m-reset>🔁 Yeni Tur Başlat</button>' : '') +
             '</div>' +
           '</div>' +
         '</div>';
 
+      if (mascotMood === "clap" || done) startPraiseCycle();
+      else stopPraiseCycle();
+
       container.querySelector("[data-m-reset]")?.addEventListener("click", function () {
+        stopPraiseCycle();
         matchedIds.clear();
         selectedLeft = null;
         mistakes = 0;
+        praiseIdx = 0;
+        mascotWord = PRAISE_WORDS[0];
         mascotMood = "idle";
         mascotMsg = "Yeni tur başladı! Soldan bir kavram seçerek devam et.";
         rightShuffled = pairs.slice().sort(function () { return Math.random() - 0.5; });
@@ -340,13 +453,11 @@
           if (rid === selectedLeft) {
             matchedIds.add(rid);
             selectedLeft = null;
+            mascotWord = PRAISE_WORDS[(matchedIds.size - 1) % PRAISE_WORDS.length];
+            praiseIdx = (matchedIds.size - 1) % PRAISE_WORDS.length;
             mascotMood = matchedIds.size === pairs.length ? "celebrate" : "clap";
-            var cheers = [
-              "Süpersin! Tam isabet, alkışlar sana! 👏",
-              "Harika bir eşleştirme! Çok iyi gidiyorsun! ⭐",
-              "Bravo! Kavramı çok güzel yakaladın! 🎉"
-            ];
-            mascotMsg = cheers[matchedIds.size % cheers.length];
+            mascotMsg = mascotWord + " Doğru eşleştirmeyi buldun, böyle devam et!";
+            playApplause();
             playTone(matchedIds.size === pairs.length ? "victory" : "match");
             draw();
           } else {

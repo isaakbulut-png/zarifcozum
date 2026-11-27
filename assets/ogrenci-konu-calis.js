@@ -75,19 +75,28 @@
       .ks-mission-win{margin-top:12px;padding:12px 14px;border-radius:11px;background:#FEF3C7;border:1.5px solid #D97706;color:#92400E;font-weight:800;text-align:center}
       .ks-m-lg{display:flex;align-items:center;gap:12px;min-height:74px;padding:14px 18px !important;font-size:1.08rem !important;line-height:1.45 !important}
       .ks-m-num{width:30px;height:30px;border-radius:9px;background:#0F172A;color:#FFFFFF;display:grid;place-items:center;font-size:0.88rem;font-weight:800;flex-shrink:0}
-      .ks-mascot-stage{margin-top:20px;padding:18px 22px;border-radius:16px;background:linear-gradient(135deg,#FAF8F5 0%,#FFFBEB 100%);border:2px solid #E2DDD5;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
-      .ks-mascot-stage.is-celebrating{border-color:#059669;background:linear-gradient(135deg,#ECFDF5 0%,#FEF3C7 100%)}
-      .ks-mascot-speech{flex:1;min-width:220px}
-      .ks-mascot-speech strong{display:block;font-size:1.12rem;color:#0F172A;margin-bottom:4px}
-      .ks-mascot-speech p{margin:0;font-size:0.98rem;color:#334155;line-height:1.55}
-      .ks-mascot-clap .ks-arm-l,.ks-mascot-jump .ks-arm-l{animation:ksClapL .35s ease-in-out infinite alternate;transform-origin:44px 92px}
-      .ks-mascot-clap .ks-arm-r,.ks-mascot-jump .ks-arm-r{animation:ksClapR .35s ease-in-out infinite alternate;transform-origin:96px 92px}
-      .ks-mascot-jump{animation:ksJump .55s ease-in-out infinite alternate}
-      .ks-star-pop{animation:ksStar .6s ease-in-out infinite alternate}
-      @keyframes ksClapL{from{transform:rotate(-10deg)}to{transform:rotate(14deg)}}
-      @keyframes ksClapR{from{transform:rotate(10deg)}to{transform:rotate(-14deg)}}
+      .ks-mascot-stage{margin-top:20px;padding:18px 26px;border-radius:18px;background:linear-gradient(135deg,#FAF8F5 0%,#FFFBEB 100%);border:2px solid #E2DDD5;display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+      .ks-mascot-stage.is-clapping{border-color:#D97706;background:linear-gradient(135deg,#FFFBEB 0%,#FEF3C7 100%);box-shadow:0 10px 26px rgba(217,119,6,0.14)}
+      .ks-mascot-stage.is-celebrating{border-color:#059669;background:linear-gradient(135deg,#ECFDF5 0%,#FEF3C7 100%);box-shadow:0 12px 30px rgba(5,150,105,0.16)}
+      .ks-pro-avatar-wrap{position:relative;display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+      .ks-word-pill{position:absolute;top:-10px;z-index:3;padding:5px 16px;border-radius:999px;background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);color:#FDE68A;border:2px solid #D97706;font-size:0.96rem;font-weight:900;letter-spacing:0.02em;box-shadow:0 6px 16px rgba(15,23,42,0.22);animation:ksWordPop .4s cubic-bezier(.22,1,.36,1)}
+      .ks-word-pop{animation:ksWordPop .4s cubic-bezier(.22,1,.36,1)}
+      @keyframes ksWordPop{0%{transform:scale(.7) translateY(6px);opacity:0}65%{transform:scale(1.1) translateY(-2px);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
+      .ks-mascot-speech{flex:1;min-width:240px}
+      .ks-mascot-speech strong{display:block;color:#0F172A;margin-bottom:6px}
+      .ks-mascot-speech p{margin:0;color:#334155;line-height:1.6}
+      .ks-mascot-clap .ks-arm-l,.ks-mascot-jump .ks-arm-l{animation:ksClapInL .26s ease-in-out infinite alternate}
+      .ks-mascot-clap .ks-arm-r,.ks-mascot-jump .ks-arm-r{animation:ksClapInR .26s ease-in-out infinite alternate}
+      .ks-mascot-clap .ks-head-bob,.ks-mascot-jump .ks-head-bob{animation:ksHeadNod .52s ease-in-out infinite alternate;transform-origin:100px 104px}
+      .ks-clap-burst{animation:ksBurst .26s ease-in-out infinite alternate;transform-origin:100px 112px}
+      .ks-mascot-jump{animation:ksJump .52s ease-in-out infinite alternate}
+      .ks-star-pop{animation:ksStar .55s ease-in-out infinite alternate}
+      @keyframes ksClapInL{from{transform:translateX(-11px) rotate(-6deg)}to{transform:translateX(3px) rotate(4deg)}}
+      @keyframes ksClapInR{from{transform:translateX(11px) rotate(6deg)}to{transform:translateX(-3px) rotate(-4deg)}}
+      @keyframes ksHeadNod{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+      @keyframes ksBurst{from{opacity:.25;transform:scale(.82)}to{opacity:1;transform:scale(1.14)}}
       @keyframes ksJump{from{transform:translateY(0)}to{transform:translateY(-10px)}}
-      @keyframes ksStar{from{opacity:.5;transform:scale(.9)}to{opacity:1;transform:scale(1.15)}}
+      @keyframes ksStar{from{opacity:.5;transform:scale(.9)}to{opacity:1;transform:scale(1.18)}}
       .ks-confetti-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
       .ks-confetti-piece{position:absolute;top:-14px;width:10px;height:14px;border-radius:3px;animation:ksConfettiFall 2.2s linear infinite}
       @keyframes ksConfettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(420px) rotate(360deg);opacity:0}}
