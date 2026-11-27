@@ -353,13 +353,38 @@ function openEndedSoruSemasi() {
         items: {
           type: 'OBJECT',
           properties: {
+            senaryo: {
+              type: 'STRING',
+              description: 'Yaş grubuna uygun somut günlük hayat bağlamı / hikâye metni.'
+            },
+            soruKoku: {
+              type: 'STRING',
+              description: 'Öğrenciden adım adım gerekçelendirme isteyen net açık uçlu görev/soru cümlesi.'
+            },
             text: {
               type: 'STRING',
               description: 'Türkiye Yüzyılı Maarif Modeli standartlarında, günlük yaşam senaryolu, ezbere dayalı olmayan, kavramsal muhakeme ve akıl yürütme ölçen açık uçlu soru metni. Tüm matematiksel ifadeler tek dolar $...$ içinde ve kaçırılmış LaTeX (\\\\frac, \\\\sqrt) ile yazılmalıdır.'
             },
+            gorsel_tipi: {
+              type: 'STRING',
+              enum: ['geometri', 'sayi_dogrusu_kesir', 'fonksiyon_grafik', 'veri_grafigi', 'cebir_model', 'tablo', 'yok'],
+              description: 'VisualMathEngine için en uygun parametrik görsel türü (geometri/kesir/fonksiyon konularında asla tablo seçme!).'
+            },
+            gorsel_baslik: {
+              type: 'STRING',
+              description: 'Görsel başlığı (gorsel_tipi "yok" ise boş bırak).'
+            },
+            gorsel_parametreleri: {
+              type: 'STRING',
+              description: 'VisualMathEngine için geçerli JSON stringi (metindeki tüm sayılar/harflerle %100 tutarlı). gorsel_tipi "yok" ise "{}" yaz.'
+            },
+            illustrasyon_promptu: {
+              type: 'STRING',
+              description: '5–6. sınıflarda ve gerçek hayat hikayeli açık uçlu görevlerde Imagen 3 için İNGİLİZCE, YAZISIZ ("no text, no letters, no numbers"), sıcak ders kitabı illüstrasyonu tarifi.'
+            },
             svg: {
               type: 'STRING',
-              description: 'Görsel, şema veya tablo gerektiren sorularda geçerli ve sade <svg viewBox="0 0 W H" xmlns="http://www.w3.org/2000/svg">...</svg> kodu; görsel gerekmiyorsa boş metin.'
+              description: 'Yalnızca yukarıdaki 7 parametrik türle çizilemeyen özel bir şekil gerekirse geçerli <svg viewBox="0 0 460 240" xmlns="http://www.w3.org/2000/svg">...</svg>; aksi halde boş metin.'
             },
             solution: {
               type: 'STRING',
@@ -588,8 +613,8 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       },
       tanilayici_hizli: {
         questionType: 'multiple_choice',
-        label: 'Tanılayıcı Hızlı Araçlar (Doğru/Yanlış & Yapılandırılmış Grid)',
-        promptRule: 'ÇALIŞMA TÜRÜ — TANILAYICI HIZLI ARAÇLAR (DOĞRU/YANLIŞ & YAPILANDIRILMIŞ GRİD): Kavram yanılgılarını hızla tespit eden, kısa öncüllü (I, II, III doğru/yanlış veya ızgara/kutucuk seçimli) biçimlendirici tanı soruları üret.'
+        label: 'Tanılayıcı Doğru / Yanlış & Grid',
+        promptRule: 'ÇALIŞMA TÜRÜ — TANILAYICI DOĞRU / YANLIŞ & YAPILANDIRILMIŞ GRİD (ZORUNLU FORMAT): Klasik tek yargılı çoktan seçmeli soru YAZMA! Her soruyu MUTLAKA şu iki tanılayıcı formattan biriyle kur: (1) ÖNCÜLLÜ DOĞRU-YANLIŞ: "I. ...  II. ...  III. ..." şeklinde 3 kısa kavramsal ifade ver ve seçenekleri "D-Y-D", "Y-D-D" veya "Yalnız I", "I ve III" biçiminde kur; YA DA (2) YAPILANDIRILMIŞ GRİD (KUTUCUK SEÇİMİ): 1, 2, 3, 4, 5, 6 numaralı kutucuklar/ifadeler verip belirli özelliğe uyan kutucuk kombinasyonunu (örn. "1, 3 ve 5") sordur. Her ifade bilinen bir öğrenci kavram yanılgısını test etmelidir!'
       },
       performans_gorevi: {
         questionType: 'open_ended',
