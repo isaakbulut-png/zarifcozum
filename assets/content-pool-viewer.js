@@ -274,6 +274,13 @@
         ].filter(Boolean).map((m) => `<span class="zc-pv-chip">${escHtml(m)}</span>`).join('')
       : `<span class="zc-pv-chip">${items.length} İçerik</span>`;
 
+    const sealCode = (window.ZarifBrandSeal && typeof window.ZarifBrandSeal.computeContentCode === 'function')
+      ? window.ZarifBrandSeal.computeContentCode(sheetTitle + dateStr)
+      : `ZC-2026-${Math.abs((sheetTitle.length * 7919) % 65535).toString(16).toUpperCase().padStart(4, '0')}`;
+
+    const wmSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200"><g transform="translate(160,100) rotate(-22)" fill="#2b180d" fill-opacity="0.055" font-family="Inter,Segoe UI,sans-serif" text-anchor="middle"><circle cx="0" cy="-26" r="18" fill="none" stroke="#9a3412" stroke-opacity="0.075" stroke-width="2.2"/><text x="0" y="-20" font-size="16" font-weight="900" fill="#9a3412" fill-opacity="0.085">Z</text><text x="0" y="10" font-size="18" font-weight="800" letter-spacing="3">ZARİFÇÖZÜM</text><text x="0" y="28" font-size="9.5" font-weight="700" letter-spacing="2.2">ÖZGÜN EĞİTİM İÇERİĞİ</text></g></svg>`;
+    const wmBgUri = `url("data:image/svg+xml,${encodeURIComponent(wmSvg)}")`;
+
     const wrapper = document.createElement('div');
     wrapper.className = 'zc-pv-stage';
     wrapper.innerHTML = `
@@ -283,12 +290,40 @@
           left: -99999px;
           top: 0;
           width: 794px;
-          background: #ffffff;
+          background-color: #ffffff;
+          background-image: ${wmBgUri};
+          background-repeat: repeat;
+          background-size: 320px 200px;
           color: #0f172a;
           font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
           padding: 34px 38px 40px;
           box-sizing: border-box;
           line-height: 1.55;
+        }
+        .zc-pv-seal-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 4px 11px 4px 8px;
+          border-radius: 999px;
+          background: linear-gradient(125deg, #2b180d 0%, #7c2d12 50%, #c2410c 100%);
+          color: #fffbeb;
+          font-size: 10.5px;
+          font-weight: 800;
+          letter-spacing: 0.03em;
+          border: 1px solid #f59e0b;
+          margin-bottom: 6px;
+        }
+        .zc-pv-seal-z {
+          width: 17px;
+          height: 17px;
+          line-height: 17px;
+          text-align: center;
+          border-radius: 999px;
+          background: #fbbf24;
+          color: #2b180d;
+          font-size: 10px;
+          font-weight: 900;
         }
         .zc-pv-stage * { box-sizing: border-box; }
         .zc-pv-header {
@@ -492,12 +527,18 @@
           <h1 class="zc-pv-title">${escHtml(sheetTitle)}</h1>
           <div class="zc-pv-chips">${singleMeta}</div>
         </div>
-        <div class="zc-pv-date">${escHtml(dateStr)}</div>
+        <div style="text-align:right;">
+          <div class="zc-pv-seal-pill">
+            <span class="zc-pv-seal-z">Z</span>
+            <span>Özgün Müfredat Mührü · ${escHtml(sealCode)}</span>
+          </div>
+          <div class="zc-pv-date">${escHtml(dateStr)}</div>
+        </div>
       </header>
       <main>${bodyBlocks.join('')}${answerKeyHtml}</main>
-      <footer class="zc-pv-footer">
-        <span>www.zarifcozum.com</span>
-        <span>Merkezi İçerik Havuzu Önizlemesi</span>
+      <footer class="zc-pv-footer" style="background:#faf6f1;padding:10px 14px;border-radius:10px;border:1px solid #eadfd4;color:#5c3d28;">
+        <span>🛡️ <strong>© 2026 ZarifÇözüm</strong> — Tüm hakları saklıdır. İzinsiz kopyalanamaz, çoğaltılamaz ve ticari amaçla paylaşılamaz.</span>
+        <span style="font-weight:800;color:#9a3412;">www.zarifcozum.com · ${escHtml(sealCode)}</span>
       </footer>
     `;
     return wrapper;
