@@ -46,10 +46,13 @@ const soruSchema = new mongoose.Schema({
   license: { type: String, default: 'All Rights Reserved', immutable: true }
 }, { timestamps: true, collection: 'sorular' });
 
-// Otomatik seçenek ve zorluk eşleme
+// Otomatik seçenek, zorluk ve boş imageUrl temizliği
 soruSchema.pre('validate', function() {
   if (this.difficulty && typeof this.difficulty === 'string') {
     this.difficulty = this.difficulty.trim().toLowerCase();
+  }
+  if (this.imageUrl === null || this.imageUrl === '') {
+    this.imageUrl = undefined;
   }
   if (this.options && typeof this.options === 'object' && !Array.isArray(this.options)) {
     this.options = Object.entries(this.options).map(([label, text]) => ({ label, text: String(text) }));
@@ -58,5 +61,30 @@ soruSchema.pre('validate', function() {
 
 soruSchema.index({ grade: 1, topic: 1 });
 soruSchema.index({ ders: 1, siraNo: 1 });
+
+// Eski non-sparse unique imageUrl_1 indeksini güvenli partial unique indekse yükseltir
+let imageUrlIndexCleaned = false;
+soruSchema.statics.ensureCleanImageUrlIndex = async function(force = false) {
+  if (imageUrlIndexCleaned && !force) return;
+  try {
+    const indexes = await this.collection.indexes();
+    const legacy = indexes.find(idx => idx.name === 'imageUrl_1' && idx.unique && !idx.partialFilterExpression);
+    if (legacy) {
+      await this.collection.dropIndex('imageUrl_1');
+      await this.collection.createIndex(
+        { imageUrl: 1 },
+        {
+          name: 'imageUrl_1',
+          unique: true,
+          partialFilterExpression: { imageUrl: { $type: 'string', $gt: '' } }
+        }
+      );
+      console.log('[Soru] Eski imageUrl_1 unique indeksi güvenli partialFilterExpression ile yenilendi.');
+    }
+    imageUrlIndexCleaned = true;
+  } catch (err) {
+    console.warn('[Soru] imageUrl_1 indeks kontrol uyarısı:', err.message);
+  }
+};
 
 module.exports = mongoose.models.Soru || mongoose.model('Soru', soruSchema);

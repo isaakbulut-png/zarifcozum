@@ -1261,6 +1261,11 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       const transferred = [];
       const errors = [];
 
+      // Eski imageUrl_1 unique indeksinin text_svg AI sorularını engellemesini önle
+      if (typeof Soru.ensureCleanImageUrlIndex === 'function') {
+        await Soru.ensureCleanImageUrlIndex();
+      }
+
       for (let idx = 0; idx < draft.questions.length; idx++) {
         if (selectedIndices && !selectedIndices.has(idx)) continue;
         const q = draft.questions[idx];
@@ -1277,22 +1282,38 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
             ? q.svg
             : (q.svg && typeof q.svg === 'object' ? (safeSvg.validate(q.svg) || JSON.stringify(q.svg)) : '');
 
-          const soru = await Soru.create({
+          const soruPayload = {
             format: 'text_svg',
+            questionType: formattedOptions.length >= 2 ? 'multiple_choice' : 'open_ended',
             text: q.text,
             options: formattedOptions,
             explanation: q.explanation || '',
+            solution: q.solution || q.explanation || '',
+            rubric: Array.isArray(q.rubric) ? q.rubric : [],
+            outcomeCode: q.outcomeCode || '',
             svg: svgContent,
             grade: Number(draft.grade) || 8,
             topic: draft.topic || 'Genel',
             difficulty: normalizedDifficulty,
             ders: 'matematik',
-            answer: q.answer || 'A',
+            answer: q.answer || (formattedOptions.length >= 2 ? 'A' : null),
             source: 'ai_generated',
             draftId: draft._id,
             curriculum_node_id: q.curriculum_node_id || null,
             createdBy: userId
-          });
+          };
+
+          let soru;
+          try {
+            soru = await Soru.create(soruPayload);
+          } catch (createErr) {
+            if (createErr && createErr.code === 11000 && String(createErr.message || '').includes('imageUrl_1') && typeof Soru.ensureCleanImageUrlIndex === 'function') {
+              await Soru.ensureCleanImageUrlIndex(true);
+              soru = await Soru.create(soruPayload);
+            } else {
+              throw createErr;
+            }
+          }
 
           // Pinecone Vektör İndeksleme (arka planda)
           indexQuestionInPinecone(soru._id, q.text, {
