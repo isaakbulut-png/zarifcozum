@@ -586,6 +586,7 @@
     }
   </style>
   <link rel="stylesheet" href="/assets/mobile-responsive.css?v=1">
+  <script src="/assets/zarif-dialogs.js?v=1"></script>
 </head>
 <body class="rbac-loading">
   <aside>
@@ -2625,7 +2626,7 @@
               clearBtn.textContent = '🧹 Test Sıfırla';
               clearBtn.title = 'Öğrencinin test ödevlerini ve test sonuçlarını sıfırla';
               clearBtn.addEventListener('click', async () => {
-                if (!confirm(`"${user.name}" adlı öğrencinin tüm test ödevleri ve test sonuçları sıfırlanacaktır. Kullanıcı hesabı silinmeyecektir. Onaylıyor musunuz?`)) return;
+                if (!await window.zcConfirm(`"${user.name}" adlı öğrencinin tüm test ödevleri ve test sonuçları sıfırlanacaktır. Kullanıcı hesabı silinmeyecektir. Onaylıyor musunuz?`)) return;
                 try {
                   const res = await api(`/api/admin/users/${encodeURIComponent(user.id)}/clear-test-data`, { method: 'POST' });
                   $('usersMsg').className = 'msg ok';
@@ -2646,7 +2647,7 @@
               deleteBtn.textContent = '🗑️ Sil';
               deleteBtn.title = 'Kullanıcıyı ve ilişkili tüm test kayıtlarını sistemden tamamen sil';
               deleteBtn.addEventListener('click', async () => {
-                if (!confirm(`"${user.name}" (${user.email}) kullanıcısı ve bu kullanıcıya ait tüm test/ödev kayıtları kalıcı olarak silinecektir. Emin misiniz?`)) return;
+                if (!await window.zcConfirm(`"${user.name}" (${user.email}) kullanıcısı ve bu kullanıcıya ait tüm test/ödev kayıtları kalıcı olarak silinecektir. Emin misiniz?`)) return;
                 try {
                   const res = await api(`/api/admin/users/${encodeURIComponent(user.id)}`, { method: 'DELETE' });
                   $('usersMsg').className = 'msg ok';
@@ -2742,7 +2743,7 @@
             del.className = 'btn sm danger';
             del.textContent = 'Sil';
             del.addEventListener('click', async () => {
-              if (!confirm('Duyuru silinsin mi?')) return;
+              if (!await window.zcConfirm('Duyuru silinsin mi?')) return;
               try {
                 await api(`/api/admin/announcements/${encodeURIComponent(item.id)}`, { method: 'DELETE' });
                 loadAnnouncements();
@@ -2769,7 +2770,7 @@
             delBtn.className = 'btn sm danger';
             delBtn.textContent = 'Sil';
             delBtn.addEventListener('click', async () => {
-              if (!confirm('FAQ silinsin mi?')) return;
+              if (!await window.zcConfirm('FAQ silinsin mi?')) return;
               try {
                 await api(`/api/admin/faqs/${encodeURIComponent(faq.id)}`, { method: 'DELETE' });
                 loadFaqs();
@@ -2815,7 +2816,7 @@
             delBtn.textContent = '🗑️ Sil';
             delBtn.title = 'Testi ve çözümlerini kalıcı olarak sil';
             delBtn.addEventListener('click', async () => {
-              if (!confirm(`"${quiz.title}" testini ve bu teste ait tüm kayıtları silmek istediğinize emin misiniz?`)) return;
+              if (!await window.zcConfirm(`"${quiz.title}" testini ve bu teste ait tüm kayıtları silmek istediğinize emin misiniz?`)) return;
               try {
                 const res = await api(`/api/admin/education/quizzes/${encodeURIComponent(quiz.id)}`, { method: 'DELETE' });
                 $('quizzesMsg').className = 'msg ok';
@@ -2853,7 +2854,7 @@
             delBtn.textContent = '🗑️ Sil';
             delBtn.title = 'Ödevi ve atamasını sil';
             delBtn.addEventListener('click', async () => {
-              if (!confirm(`"${hw.title}" ödevini ve atamasını silmek istediğinize emin misiniz?`)) return;
+              if (!await window.zcConfirm(`"${hw.title}" ödevini ve atamasını silmek istediğinize emin misiniz?`)) return;
               try {
                 const res = await api(`/api/admin/education/homeworks/${encodeURIComponent(hw.id)}`, { method: 'DELETE' });
                 $('homeworksMsg').className = 'msg ok';
@@ -2891,7 +2892,7 @@
             delBtn.textContent = '🗑️ Sil';
             delBtn.title = 'Deneme sınavını sil';
             delBtn.addEventListener('click', async () => {
-              if (!confirm(`"${exam.title}" deneme sınavını silmek istediğinize emin misiniz?`)) return;
+              if (!await window.zcConfirm(`"${exam.title}" deneme sınavını silmek istediğinize emin misiniz?`)) return;
               try {
                 const res = await api(`/api/admin/education/exams/${encodeURIComponent(exam.id)}`, { method: 'DELETE' });
                 $('examsMsg').className = 'msg ok';
@@ -2951,7 +2952,7 @@
       }
 
       window.handleDeleteYazili = async function(id, title) {
-        if (!confirm(`"${title}" adlı yazılı provasını silmek istediğinize emin misiniz?`)) return;
+        if (!await window.zcConfirm(`"${title}" adlı yazılı provasını silmek istediğinize emin misiniz?`)) return;
         try {
           const res = await fetch(`/api/yazili/${id}`, {
             method: 'DELETE',
@@ -2967,14 +2968,14 @@
       };
 
       $('btnAdminNewYazili')?.addEventListener('click', async () => {
-        const title = prompt('Yazılı Provası Başlığı (Örn: 8. Sınıf Matematik 1. Dönem 1. Yazılı Senaryo 1):');
+        const title = await window.zcPrompt('Yazılı Provası Başlığı (Örn: 8. Sınıf Matematik 1. Dönem 1. Yazılı Senaryo 1):');
         if (!title) return;
-        const grade = parseInt(prompt('Sınıf Düzeyi (5-12):', '8'), 10) || 8;
-        const donemSecim = prompt('Dönem Seçiniz:\n1: 1. Dönem 1. Yazılı\n2: 1. Dönem 2. Yazılı\n3: 2. Dönem 1. Yazılı\n4: 2. Dönem 2. Yazılı', '1');
+        const grade = parseInt(await window.zcPrompt('Sınıf Düzeyi (5-12):', '8'), 10) || 8;
+        const donemSecim = await window.zcPrompt('Dönem Seçiniz:\n1: 1. Dönem 1. Yazılı\n2: 1. Dönem 2. Yazılı\n3: 2. Dönem 1. Yazılı\n4: 2. Dönem 2. Yazılı', '1');
         const donemler = { '1': '1_donem_1_yazili', '2': '1_donem_2_yazili', '3': '2_donem_1_yazili', '4': '2_donem_2_yazili' };
         const donem = donemler[donemSecim?.trim()] || '1_donem_1_yazili';
-        const senaryoNo = parseInt(prompt('Senaryo Numarası:', '1'), 10) || 1;
-        const soruSayisi = parseInt(prompt('Açık Uçlu Soru Sayısı (Varsayılan MEB şablonu üretilir):', '5'), 10) || 5;
+        const senaryoNo = parseInt(await window.zcPrompt('Senaryo Numarası:', '1'), 10) || 1;
+        const soruSayisi = parseInt(await window.zcPrompt('Açık Uçlu Soru Sayısı (Varsayılan MEB şablonu üretilir):', '5'), 10) || 5;
 
         const sorular = [];
         for (let i = 1; i <= soruSayisi; i++) {
@@ -3528,7 +3529,7 @@
           btnDel.style.color = '#ef4444';
           btnDel.textContent = '🗑️';
           btnDel.onclick = async () => {
-            if (!confirm('Bu içeriği silmek istediğinize emin misiniz?')) return;
+            if (!await window.zcConfirm('Bu içeriği silmek istediğinize emin misiniz?')) return;
             try {
               await api(`/api/content-library/${itemId}`, { method: 'DELETE' });
               loadContentPool();
@@ -3598,7 +3599,7 @@
             alert('Lütfen R2\'ye arşivlenecek en az bir içerik seçin.');
             return;
           }
-          if (!confirm(`Seçili ${selected.length} içerik Cloudflare R2\'ye arşivlenecek. Devam edilsin mi?`)) return;
+          if (!await window.zcConfirm(`Seçili ${selected.length} içerik Cloudflare R2\'ye arşivlenecek. Devam edilsin mi?`)) return;
           let count = 0;
           for (const id of selected) {
             try {
@@ -3677,7 +3678,7 @@
       });
 
       $('btnDisableBanner')?.addEventListener('click', async () => {
-        if (!confirm('Bilgilendirme panosu yayından kaldırılsın mı? Ziyaretçilere artık gösterilmeyecek.')) return;
+        if (!await window.zcConfirm('Bilgilendirme panosu yayından kaldırılsın mı? Ziyaretçilere artık gösterilmeyecek.')) return;
         const message = $('bannerMsg');
         const button = $('btnDisableBanner');
         message.className = 'msg';
@@ -3866,7 +3867,7 @@
       }
 
       window.handleApproveTeacherModal = async function(userId, userName) {
-        const choice = prompt(
+        const choice = await window.zcPrompt(
           `"${userName}" adlı öğretmeni onaylayarak sisteme ekleyin.\n\nYetki Seviyesi Seçin:\n1: Onaylı Öğretmen (Günlük 15 Soru / 40 Mesaj - Önerilen)\n2: İçerik Üreticisi (⭐ SINIRSIZ Soru ve Mesaj Yetkisi)\n\nSeçiminizi yazın (1 veya 2):`,
           '1'
         );
@@ -3897,7 +3898,7 @@
       };
 
       window.handleRejectTeacher = async function(userId, userName) {
-        if (!confirm(`"${userName}" adlı öğretmenin başvurusunu REDDETMEK istediğinizden emin misiniz?`)) return;
+        if (!await window.zcConfirm(`"${userName}" adlı öğretmenin başvurusunu REDDETMEK istediğinizden emin misiniz?`)) return;
         try {
           const res = await fetch('/api/admin/ogretmen-basvuru-durum-guncelle', {
             method: 'POST',
@@ -4322,7 +4323,7 @@
 
       // 3. Tekil Onayla
       window.handleApprovePayoutSingle = async function(id, teacherName, netAmount) {
-        if (!confirm(`"${teacherName}" hakedişini (₺${Number(netAmount).toLocaleString('tr-TR')}) onaylamak istediğinize emin misiniz?`)) return;
+        if (!await window.zcConfirm(`"${teacherName}" hakedişini (₺${Number(netAmount).toLocaleString('tr-TR')}) onaylamak istediğinize emin misiniz?`)) return;
 
         try {
           const res = await fetch(`/api/admin/teacher-payouts/${id}/approve`, {
@@ -4339,7 +4340,7 @@
 
       // 4. Tekil Ödendi Yap & Kilitle (Kural 3)
       window.handlePayPayoutSingle = async function(id, teacherName, netAmount) {
-        if (!confirm(`"${teacherName}" hakedişini "Ödendi" olarak işaretleyip kilitlemek istiyor musunuz?\n\nTutarlar kilitlenecek ve değiştirilemeyecektir.`)) return;
+        if (!await window.zcConfirm(`"${teacherName}" hakedişini "Ödendi" olarak işaretleyip kilitlemek istiyor musunuz?\n\nTutarlar kilitlenecek ve değiştirilemeyecektir.`)) return;
 
         try {
           const res = await fetch(`/api/admin/teacher-payouts/${id}/pay`, {
@@ -4362,7 +4363,7 @@
           const periodSelect = $('payrollPeriodSelect');
           const period = periodSelect?.value || new Date().toISOString().slice(0, 7);
 
-          if (!confirm(`${period} dönemi için sistemdeki öğretmenlerin ders saatlerini ve hakedişlerini otomatik hesaplamak istiyor musunuz?`)) return;
+          if (!await window.zcConfirm(`${period} dönemi için sistemdeki öğretmenlerin ders saatlerini ve hakedişlerini otomatik hesaplamak istiyor musunuz?`)) return;
 
           try {
             btnCalculate.disabled = true;
@@ -4411,7 +4412,7 @@
         btnBatchApproveEl.addEventListener('click', async () => {
           const ids = Array.from(selectedPayrollIds);
           if (ids.length === 0) return;
-          if (!confirm(`Seçili ${ids.length} öğretmenin hakedişini toplu onaylamak istediğinize emin misiniz?`)) return;
+          if (!await window.zcConfirm(`Seçili ${ids.length} öğretmenin hakedişini toplu onaylamak istediğinize emin misiniz?`)) return;
 
           try {
             const res = await fetch('/api/admin/teacher-payouts/batch-action', {
@@ -4435,7 +4436,7 @@
         btnBatchPayEl.addEventListener('click', async () => {
           const ids = Array.from(selectedPayrollIds);
           if (ids.length === 0) return;
-          if (!confirm(`Seçili ${ids.length} öğretmenin hakedişini "Ödendi" olarak işaretleyip kilitlemek istediğinize emin misiniz?`)) return;
+          if (!await window.zcConfirm(`Seçili ${ids.length} öğretmenin hakedişini "Ödendi" olarak işaretleyip kilitlemek istediğinize emin misiniz?`)) return;
 
           try {
             const res = await fetch('/api/admin/teacher-payouts/batch-action', {
@@ -4790,12 +4791,12 @@
       }
 
       window.handleAiBonus = async function(userId, userName) {
-        if (!confirm(`"${userName}" adlı öğrenciye +20 Bonus AI Mesaj Kredisi tanımlansın mı?`)) return;
+        if (!await window.zcConfirm(`"${userName}" adlı öğrenciye +20 Bonus AI Mesaj Kredisi tanımlansın mı?`)) return;
         await postAiQuotaUpdate({ userId, islem: 'bonus_ekle', bonusMiktar: 20 });
       };
 
       window.handleStudentGradeEdit = async function(userId, userName, currentGrade) {
-        const val = prompt(
+        const val = await window.zcPrompt(
           `"${userName}" için Kayıtlı Sınıf Düzeyini belirleyin (5 - 12):\n(Müfredat konu ve test erişimi bu sınıfa göre kısıtlanır)`,
           currentGrade || '8'
         );
@@ -4809,7 +4810,7 @@
       };
 
       window.handleAgentBonus = async function(userId, userName) {
-        const secim = prompt(
+        const secim = await window.zcPrompt(
           `"${userName}" için Özel Ajan Kredisi Tanımla:\n\n` +
           "1 - Öğretmen İkizi (Farklı Anlatım) Kredisi Ekle\n" +
           "2 - Sokratik AI Mentör (Bana Buldur) Kredisi Ekle\n\n" +
@@ -4825,7 +4826,7 @@
           return;
         }
 
-        const miktarStr = prompt(`Eklenecek ${ajan === 'ogretmen_ikizi' ? 'Öğretmen İkizi' : 'Sokratik Mentör'} hak miktarı:`, "10");
+        const miktarStr = await window.zcPrompt(`Eklenecek ${ajan === 'ogretmen_ikizi' ? 'Öğretmen İkizi' : 'Sokratik Mentör'} hak miktarı:`, "10");
         if (!miktarStr) return;
         const bonusMiktar = parseInt(miktarStr.trim(), 10);
         if (isNaN(bonusMiktar) || bonusMiktar <= 0) {
@@ -4837,7 +4838,7 @@
       };
 
       window.handleTeacherMonthlyQuestionLimitEdit = async function(userId, userName, currentLimit) {
-        const val = prompt(
+        const val = await window.zcPrompt(
           `"${userName}" için Aylık Soru Üretim Kotasını belirleyin:\n(Varsayılan 200 soruya dönmek için boş bırakın veya "null" yazın)\n\nMevcut: ${currentLimit !== null ? currentLimit : '200 (Standart)'}`,
           currentLimit !== null ? currentLimit : ''
         );
@@ -4850,7 +4851,7 @@
       };
 
       window.openBulkBonusModal = async function() {
-        const secim = prompt(
+        const secim = await window.zcPrompt(
           "🏆 BAŞARILI ÖĞRENCİLERE TOPLU BONUS DAĞIT\n\n" +
           "Kriter Seçiniz:\n" +
           "1 - Haftalık Ligde İlk 3'e Girenlere (+50 Kredi)\n" +
@@ -4872,7 +4873,7 @@
           return;
         }
 
-        const miktarStr = prompt(`Verilecek bonus kredi miktarı:`, varsayilanBonus.toString());
+        const miktarStr = await window.zcPrompt(`Verilecek bonus kredi miktarı:`, varsayilanBonus.toString());
         if (!miktarStr) return;
         const bonusMiktar = parseInt(miktarStr.trim(), 10);
         if (isNaN(bonusMiktar) || bonusMiktar <= 0) {
@@ -4907,7 +4908,7 @@
             `${idx + 1}. [${s.sinif}. Sınıf] ${s.baslik} - Durum: ${s.durum} (${s.katilimciSayisi || 0} Katılımcı)`
           ).join('\n');
 
-          const secim = prompt(
+          const secim = await window.zcPrompt(
             "📝 TÜRKİYE GENELİ DENEME YÖNETİMİ & SIRALAMA MOTORU\n\n" +
             (sinavlar.length ? listeMetni + "\n\n" : "Henüz TG Deneme bulunmuyor.\n\n") +
             "Yapmak istediğiniz işlem:\n" +
@@ -4919,11 +4920,11 @@
           if (!secim) return;
 
           if (secim.trim().toUpperCase() === 'Y') {
-            const baslik = prompt("Deneme Sınavı Başlığı (Örn: 2026 1. Türkiye Geneli LGS Matematik):");
+            const baslik = await window.zcPrompt("Deneme Sınavı Başlığı (Örn: 2026 1. Türkiye Geneli LGS Matematik):");
             if (!baslik) return;
-            const sinif = parseInt(prompt("Sınıf Düzeyi (5-12):", "8"), 10) || 8;
-            const soruSayisi = parseInt(prompt("Soru Sayısı:", "20"), 10) || 20;
-            const sureDakika = parseInt(prompt("Sınav Süresi (Dakika):", "40"), 10) || 40;
+            const sinif = parseInt(await window.zcPrompt("Sınıf Düzeyi (5-12):", "8"), 10) || 8;
+            const soruSayisi = parseInt(await window.zcPrompt("Soru Sayısı:", "20"), 10) || 20;
+            const sureDakika = parseInt(await window.zcPrompt("Sınav Süresi (Dakika):", "40"), 10) || 40;
 
             const createRes = await fetch('/api/admin/turkiye-geneli-deneme', {
               method: 'POST',
@@ -4941,7 +4942,7 @@
               return;
             }
             const secilenSinav = sinavlar[idx];
-            if (!confirm(`"${secilenSinav.baslik}" sınavı için Türkiye ve İl geneli sıralamalar, yüzdelik dilimler hesaplansın ve sonuçlar ilan edilsin mi?`)) return;
+            if (!await window.zcConfirm(`"${secilenSinav.baslik}" sınavı için Türkiye ve İl geneli sıralamalar, yüzdelik dilimler hesaplansın ve sonuçlar ilan edilsin mi?`)) return;
 
             const rankRes = await fetch(`/api/admin/turkiye-geneli-sirala/${secilenSinav._id}`, {
               method: 'POST',
@@ -4957,7 +4958,7 @@
       };
 
       window.handleTeacherQuestionLimitEdit = async function(userId, userName, currentLimit) {
-        const val = prompt(
+        const val = await window.zcPrompt(
           `"${userName}" için Günlük Özel Soru Üretim Limiti belirleyin:\n(Varsayılan role dönmek için boş bırakın veya "null" yazın)\n\nMevcut Limit: ${currentLimit !== null ? currentLimit : 'Rol Varsayılanı'}`,
           currentLimit !== null ? currentLimit : ''
         );
@@ -4975,7 +4976,7 @@
           onayli_ogretmen: 'Onaylı Öğretmen (15 Soru / 40 Mesaj)',
           standart_ogretmen: 'Standart Öğretmen (3 Soru / 10 Mesaj)'
         };
-        if (!confirm(`"${userName}" adlı öğretmenin rolünü "${typeLabels[newType] || newType}" olarak değiştirmek istiyor musunuz?`)) {
+        if (!await window.zcConfirm(`"${userName}" adlı öğretmenin rolünü "${typeLabels[newType] || newType}" olarak değiştirmek istiyor musunuz?`)) {
           loadAiAuditUsers(aiAuditCurrentPage);
           return;
         }
@@ -4983,7 +4984,7 @@
       };
 
       window.handleAiLimitEdit = async function(userId, userName, currentLimit) {
-        const val = prompt(
+        const val = await window.zcPrompt(
           `"${userName}" için Özel Günlük Mesaj Limiti belirleyin:\n(Paket varsayılanına dönmek için boş bırakın veya "null" yazın)\n\nMevcut: ${currentLimit !== null ? currentLimit : 'Paket Varsayılanı'}`,
           currentLimit !== null ? currentLimit : ''
         );
@@ -5001,7 +5002,7 @@
 
       window.handleAiAccessToggle = async function(userId, targetBlocked, userName) {
         const actionText = targetBlocked ? 'AI erişimini KİLİTLEMEK' : 'AI erişim engelini KALDIRMAK';
-        if (!confirm(`"${userName}" adlı kullanıcının ${actionText} istediğinizden emin misiniz?`)) return;
+        if (!await window.zcConfirm(`"${userName}" adlı kullanıcının ${actionText} istediğinizden emin misiniz?`)) return;
         await postAiQuotaUpdate({ userId, islem: 'erisim_toggle', aiErisimEngelli: targetBlocked });
       };
 
@@ -5241,7 +5242,7 @@
         if (!btn) return;
         const id = btn.dataset.auditDecide;
         const decision = btn.dataset.decision;
-        const note = decision === 'rejected' ? (prompt('Reddetme gerekçesi / öğretmene not (isteğe bağlı):') || '') : '';
+        const note = decision === 'rejected' ? (await window.zcPrompt('Reddetme gerekçesi / öğretmene not (isteğe bağlı):') || '') : '';
         btn.disabled = true;
         try {
           const res = await fetch('/api/audit/' + encodeURIComponent(id) + '/decision', {

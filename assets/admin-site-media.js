@@ -263,7 +263,7 @@
         delBtn.style.cssText = 'font-size:0.75rem;padding:5px 10px;color:#b91c1c;margin-left:auto;';
         delBtn.textContent = '🗑️ Kaldır';
         delBtn.onclick = async () => {
-          if (!confirm('Bu medya yerleşimini sayfadan kaldırmak istediğinize emin misiniz?')) return;
+          if (!await window.zcConfirm('Bu medya yerleşimini sayfadan kaldırmak istediğinize emin misiniz?')) return;
           delBtn.disabled = true;
           try {
             const delRes = await fetch(`/api/admin/site-media/${encodeURIComponent(p._id)}`, {

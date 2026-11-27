@@ -1011,6 +1011,7 @@ body.teacher-menu-open {
 </style>
 <style>#currProgramBadge{display:inline-block}#currProgramBadge[hidden]{display:none}@media(max-width:760px){#aiCurriculumForm .form-grid{grid-template-columns:1fr!important}}</style>
   <link rel="stylesheet" href="/assets/mobile-responsive.css?v=1">
+  <script src="/assets/zarif-dialogs.js?v=1"></script>
 </head>
 <body data-accent="coral">
 
@@ -2862,7 +2863,7 @@ body.teacher-menu-open {
     const quizId = button.dataset.deleteAiQuiz;
     const quiz = yonetim.quizler.find(item => item.id === quizId && item.aiYayin);
     if (!quiz) return;
-    if (!confirm(`"${quiz.title}" testi içindeki tüm sorularla birlikte öğrencilerin panelinden ve veritabanından kalıcı olarak silinecek. Devam edilsin mi?`)) return;
+    if (!await window.zcConfirm(`"${quiz.title}" testi içindeki tüm sorularla birlikte öğrencilerin panelinden ve veritabanından kalıcı olarak silinecek. Devam edilsin mi?`)) return;
 
     button.disabled = true;
     button.textContent = 'Siliniyor…';
@@ -3221,14 +3222,14 @@ body.teacher-menu-open {
       };
     }
 
-    const startDraw = (e) => {
+    const startDraw = async (e) => {
       const coords = getCanvasCoordinates(e);
       canvasStartX = coords.x;
       canvasStartY = coords.y;
 
       // Metin aracı tıklandığında
       if (canvasTool === 'text') {
-        const text = prompt('Şekle eklemek istediğiniz metin/harfi yazın (Örn: A, B, O, 5 cm):');
+        const text = await window.zcPrompt('Şekle eklemek istediğiniz metin/harfi yazın (Örn: A, B, O, 5 cm):');
         if (text && text.trim()) {
           canvasCtx.fillStyle = canvasColor;
           canvasCtx.font = 'bold 16px Sora, sans-serif';
@@ -3362,8 +3363,8 @@ body.teacher-menu-open {
     // Temizle
     const clearBtn = document.getElementById('btnCanvasClear');
     if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
-        if (confirm('Çizim tahtasındaki tüm şekilleri silmek istediğinize emin misiniz?')) {
+      clearBtn.addEventListener('click', async () => {
+        if (await window.zcConfirm('Çizim tahtasındaki tüm şekilleri silmek istediğinize emin misiniz?')) {
           canvasCtx.fillStyle = '#ffffff';
           canvasCtx.fillRect(0, 0, canvasEl.width, canvasEl.height);
           pushCanvasHistory();
@@ -4295,7 +4296,7 @@ body.teacher-menu-open {
       const idx = Number(delBtn.dataset.idx);
       if (cards[idx]) {
         if (cards.length <= 1) {
-          if (confirm('Sepetteki son soruyu kaldırmak istiyor musunuz?')) {
+          if (await window.zcConfirm('Sepetteki son soruyu kaldırmak istiyor musunuz?')) {
             $('questionList').replaceChildren();
             soruEkle();
             updateQuizBasketUI();
@@ -4370,8 +4371,8 @@ body.teacher-menu-open {
   }
 
   // Sepeti Temizle Butonu
-  $('btnClearBasket')?.addEventListener('click', () => {
-    if (!confirm('Sepetteki tüm soruları temizlemek istediğinize emin misiniz?')) return;
+  $('btnClearBasket')?.addEventListener('click', async () => {
+    if (!await window.zcConfirm('Sepetteki tüm soruları temizlemek istediğinize emin misiniz?')) return;
     $('questionList').replaceChildren();
     soruEkle();
     updateQuizBasketUI();
@@ -5062,7 +5063,7 @@ body.teacher-menu-open {
     const silBtn = event.target.closest('[data-soru-delete]');
     if (!silBtn) return;
     const soruId = silBtn.dataset.soruDelete;
-    if (!confirm('Bu soruyu silmek istediğinize emin misiniz?')) return;
+    if (!await window.zcConfirm('Bu soruyu silmek istediğinize emin misiniz?')) return;
     silBtn.disabled = true;
     silBtn.textContent = 'Siliniyor…';
     try {
@@ -5093,7 +5094,7 @@ body.teacher-menu-open {
       alert('Lütfen silmek istediğiniz soruları kutucukları işaretleyerek seçin.');
       return;
     }
-    if (!confirm(`Seçili ${seciliSorular.size} soruyu silmek istediğinize emin misiniz?`)) return;
+    if (!await window.zcConfirm(`Seçili ${seciliSorular.size} soruyu silmek istediğinize emin misiniz?`)) return;
 
     durumYaz('imageUploadStatus', 'Seçili sorular siliniyor…');
     try {
@@ -5149,7 +5150,7 @@ body.teacher-menu-open {
           method: 'PATCH', body: JSON.stringify({published: yayinDugmesi.dataset.published !== 'true'})
         });
       } else if (sil) {
-        if (!confirm('Deneme silinecek; öğrenci sonuçları korunur. Devam edilsin mi?')) return;
+        if (!await window.zcConfirm('Deneme silinecek; öğrenci sonuçları korunur. Devam edilsin mi?')) return;
         await api(`/api/denemeler/${encodeURIComponent(sil.dataset.examDelete)}`, {method: 'DELETE'});
       } else return;
       await denemeleriYukle();
@@ -5692,7 +5693,7 @@ body.teacher-menu-open {
     }).join('');
   }
 
-  $('teacherPublishedMaarifList')?.addEventListener('click', event => {
+  $('teacherPublishedMaarifList')?.addEventListener('click', async event => {
     const toggleBtn = event.target.closest('[data-pub-toggle]');
     if (toggleBtn && window.ZarifStore?.publishedTests) {
       window.ZarifStore.publishedTests.toggleStatus(toggleBtn.dataset.pubToggle);
@@ -5701,7 +5702,7 @@ body.teacher-menu-open {
     }
     const delBtn = event.target.closest('[data-pub-del]');
     if (delBtn && window.ZarifStore?.publishedTests) {
-      if (!confirm('Bu yayınlanan çalışma kalıcı olarak silinecek. Emin misiniz?')) return;
+      if (!await window.zcConfirm('Bu yayınlanan çalışma kalıcı olarak silinecek. Emin misiniz?')) return;
       window.ZarifStore.publishedTests.remove(delBtn.dataset.pubDel);
       renderTeacherPublishedMaarifList();
     }
@@ -5899,7 +5900,7 @@ body.teacher-menu-open {
     const btn = event.target.closest('[data-delete-announcement-id]');
     if (!btn) return;
     const id = btn.dataset.deleteAnnouncementId;
-    if (!confirm('Bu duyuruyu silmek istediğinizden emin misiniz?\nTüm öğrencilerin panelinden derhal kaldırılacaktır.')) return;
+    if (!await window.zcConfirm('Bu duyuruyu silmek istediğinizden emin misiniz?\nTüm öğrencilerin panelinden derhal kaldırılacaktır.')) return;
     btn.disabled = true;
     try {
       await api('/api/ogretmen/duyurular/' + encodeURIComponent(id), { method: 'DELETE' });
@@ -6259,7 +6260,7 @@ body.teacher-menu-open {
   // ---- Kayıt silme ----
   $('govde').addEventListener('click', async e => {
     const b = e.target.closest('.del'); if (!b) return;
-    if (!confirm('Bu sonuç kaydı kalıcı olarak silinecek. Emin misin?')) return;
+    if (!await window.zcConfirm('Bu sonuç kaydı kalıcı olarak silinecek. Emin misin?')) return;
     try {
       await api('/api/ogretmen/sonuc/' + encodeURIComponent(b.dataset.id), {method: 'DELETE'});
       veri.sonuclar = veri.sonuclar.filter(r => String(r._id) !== b.dataset.id);
@@ -6622,7 +6623,7 @@ body.teacher-menu-open {
     const btn = event.target.closest('[data-delete-doc]');
     if (!btn) return;
     const docId = btn.dataset.deleteDoc;
-    if (!confirm('Bu dokümanı kütüphaneden silmek istediğinize emin misiniz?')) return;
+    if (!await window.zcConfirm('Bu dokümanı kütüphaneden silmek istediğinize emin misiniz?')) return;
     btn.disabled = true;
     try {
       await api('/api/content-library/' + docId, { method: 'DELETE' });
@@ -6757,7 +6758,7 @@ body.teacher-menu-open {
     document.getElementById('deleteAllAiDraftsBtn')?.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!confirm('Kayıtlı TÜM AI soru taslaklarınızı kalıcı olarak silmek istediğinize emin misiniz?')) return;
+      if (!await window.zcConfirm('Kayıtlı TÜM AI soru taslaklarınızı kalıcı olarak silmek istediğinize emin misiniz?')) return;
       const btn = e.currentTarget;
       btn.disabled = true;
       btn.textContent = 'Siliniyor…';
@@ -6868,7 +6869,7 @@ body.teacher-menu-open {
 
       const delBtn = e.target.closest('[data-delete-draft]');
       if (delBtn) {
-        if (!confirm('Bu AI soru taslağını silmek istediğinize emin misiniz?')) return;
+        if (!await window.zcConfirm('Bu AI soru taslağını silmek istediğinize emin misiniz?')) return;
         const id = delBtn.dataset.deleteDraft;
         try {
           await fetchJsonWithTimeout('/api/ai/questions/drafts/' + encodeURIComponent(id), { method: 'DELETE' });
