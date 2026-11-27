@@ -893,24 +893,25 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       'Yalnızca istenen JSON şemasına uyan JSON döndür; Markdown bloğu veya fazladan açıklama metni ekleme.'
     ].filter(Boolean).join('\n');
 
-    // Güvenli Ajan/Model Doğrulaması (İzin verilen güncel modeller)
-    const ALLOWED_MODELS = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-pro', 'gemini-4-argon'];
+    // Güvenli Ajan/Model Doğrulaması (Geçerli güncel Gemini API modelleri)
+    const ALLOWED_MODELS = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'];
     let requestedModel = typeof req.body?.selectedModel === 'string' ? req.body.selectedModel.trim() : '';
-    if (requestedModel === 'gemini-2.5-flash') requestedModel = 'gemini-3.8-flash';
-    if (requestedModel === 'gemini-2.5-flash-lite') requestedModel = 'gemini-3.1-flash-lite';
-    let activeModel = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'gemini-3.8-flash';
+    if (requestedModel === 'gemini-3.8-flash') requestedModel = 'gemini-2.5-flash';
+    if (requestedModel === 'gemini-3.1-flash-lite') requestedModel = 'gemini-2.5-flash-lite';
+    if (requestedModel === 'gemini-4-argon') requestedModel = 'gemini-2.5-pro';
+    let activeModel = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'gemini-2.5-flash';
 
     // Model İzni Denetimi: Pro modeller sadece Admin ve İçerik Üreticisi öğretmenlere açıktır
-    if ((activeModel === 'gemini-2.5-pro' || activeModel === 'gemini-4-argon') && !canUserUseProModel(req.session.user)) {
-      activeModel = 'gemini-3.8-flash'; // Yetkisiz öğretmen otomatik flash modeline düşürülür
+    if (activeModel === 'gemini-2.5-pro' && !canUserUseProModel(req.session.user)) {
+      activeModel = 'gemini-2.5-flash'; // Yetkisiz öğretmen otomatik flash modeline düşürülür
     }
 
-    // Model zinciri: Öğretmenin seçtiği model öncelikli; gerekirse güvenli güncel flash modellerine fallback
+    // Model zinciri: Geçerli hızlı modellerle anında üretim + güvenli fallback
     const candidateModels = [...new Set([
       activeModel,
-      'gemini-3.8-flash',
+      'gemini-2.5-flash',
       'gemini-flash-latest',
-      'gemini-3.1-flash-lite'
+      'gemini-2.5-flash-lite'
     ])].filter(Boolean);
 
     let response = null;
@@ -932,10 +933,10 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
               generationConfig: {
               responseMimeType: 'application/json',
               responseSchema: questionType === 'open_ended' ? openEndedSoruSemasi() : soruSemasi(grade),
-              maxOutputTokens: 4096
+              maxOutputTokens: 8192
             }
           }),
-          signal: AbortSignal.timeout(22000)
+          signal: AbortSignal.timeout(35000)
         }
       );
 
@@ -1054,12 +1055,12 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     questions: preparedQuestions
   };
 
-  // 0. Paralel Hikâye İllüstrasyonu Üretimi (5–6. sınıfta varsayılan açık, 7–12'de öğretmen seçimine bağlı; fail-safe)
+  // 0. Paralel Hikâye İllüstrasyonu Üretimi (14 sn üst sınır ile 502 zaman aşımını önler; fail-safe)
   const wantIllustrations = req.body?.generateIllustrations === true ||
     (req.body?.generateIllustrations !== false && Number(grade) <= 6);
   if (wantIllustrations && preparedQuestions.length) {
     try {
-      await Promise.allSettled(
+      const illBatch = Promise.allSettled(
         preparedQuestions.slice(0, 5).map(async (q, idx) => {
           if (q.imageUrl || !q.illustrasyon_promptu) return;
           const styleHint = Number(grade) <= 6
@@ -1067,25 +1068,30 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
             : 'Clean modern educational textbook illustration, realistic flat editorial style, crisp geometry context, clean ivory background, strictly NO text, NO letters, NO numbers.';
           const fullPrompt = `${q.illustrasyon_promptu}. ${styleHint}`;
           const resImg = await generateIllustration({ prompt: fullPrompt, filename: `q_${grade}_${Date.now()}_${idx}.png` });
-          if (resImg && resImg.url) {
-            q.imageUrl = resImg.url;
+          const resolvedUrl = typeof resImg === 'string' ? resImg : (resImg && resImg.url);
+          if (resolvedUrl) {
+            q.imageUrl = resolvedUrl;
           }
         })
       );
+      await Promise.race([illBatch, new Promise(resolve => setTimeout(resolve, 14000))]);
     } catch (imgErr) {
       console.warn('[AI] Paralel hikâye illüstrasyonu uyarısı:', imgErr.message);
     }
   }
 
-  // Semantik Benzerlik ve Mükerrer Kontrolü
+  // Semantik Benzerlik ve Mükerrer Kontrolü (Paralel + 4 sn üst sınır)
   try {
     const existing = await Soru.find({ grade }).select('text imageFile _id').limit(100).lean();
-    for (const q of preparedQuestions) {
-      const sim = await checkQuestionSimilarity(q.text, existing);
-      q.similarityScore = sim.similarityScore;
-      q.isDuplicate = sim.isDuplicate;
-      q.similarQuestionId = sim.similarQuestionId;
-    }
+    const simBatch = Promise.allSettled(
+      preparedQuestions.map(async (q) => {
+        const sim = await checkQuestionSimilarity(q.text, existing);
+        q.similarityScore = sim.similarityScore;
+        q.isDuplicate = sim.isDuplicate;
+        q.similarQuestionId = sim.similarQuestionId;
+      })
+    );
+    await Promise.race([simBatch, new Promise(resolve => setTimeout(resolve, 4000))]);
   } catch (simErr) {
     console.warn('[AI] Benzerlik kontrolü atlandı:', simErr.message);
   }
@@ -1215,10 +1221,11 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
         : `Educational storybook scene illustrating this ${grade}th grade math context about ${topic}: ${questionText.slice(0, 260)}. ${styleHint}`;
 
       const result = await generateIllustration({ prompt: finalPrompt });
-      if (!result || !result.url) {
-        return res.status(502).json({ mesaj: 'Görsel üretici şu an yanıt veremedi (API kotası veya R2 ayarı kontrol edilmeli).' });
+      const resolvedUrl = typeof result === 'string' ? result : (result && result.url);
+      if (!resolvedUrl) {
+        return res.status(502).json({ mesaj: 'Görsel üretici şu an yanıt veremedi (API kotası veya model erişimi kontrol edilmeli).' });
       }
-      res.json({ success: true, imageUrl: result.url });
+      res.json({ success: true, imageUrl: resolvedUrl });
     } catch (err) {
       console.error('[AI] Tekil illüstrasyon hatası:', err);
       res.status(500).json({ mesaj: err.message || 'Hikâye görseli üretilemedi.' });
