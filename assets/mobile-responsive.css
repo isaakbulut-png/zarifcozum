@@ -1,0 +1,270 @@
+/* ==========================================================================
+   ZarifÇözüm — Global Mobil Uyumluluk & Off-Canvas Hamburger Menü (v1)
+   Marka Paleti: #FAF8F5 (fildişi), #0F172A (gece mavisi), #D97706 (kehribar)
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+img, svg, video, canvas, iframe {
+  max-width: 100%;
+}
+
+.katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+}
+
+/* Mobil Hamburger Butonu (Masaüstünde gizli) */
+.zc-mob-burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  border: 1.5px solid #E2DDD5;
+  background: #FFFFFF;
+  color: #0F172A;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+  transition: border-color 0.16s ease, transform 0.14s ease;
+}
+.zc-mob-burger:hover, .zc-mob-burger:focus-visible {
+  border-color: #D97706;
+  outline: none;
+}
+
+/* Off-Canvas Mobil Çekmece & Arka Plan */
+.zc-mob-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 19980;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.zc-mob-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.zc-mob-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(86vw, 350px);
+  z-index: 19990;
+  background: #FAF8F5;
+  border-left: 2px solid #E2DDD5;
+  box-shadow: -16px 0 42px rgba(15, 23, 42, 0.22);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(104%);
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+.zc-mob-drawer.open {
+  transform: translateX(0);
+}
+
+.zc-mob-head {
+  padding: 16px 18px;
+  background: #0F172A;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 2px solid #D97706;
+}
+.zc-mob-brand {
+  font-weight: 900;
+  font-size: 1.08rem;
+  letter-spacing: -0.01em;
+  color: #FFFFFF;
+}
+.zc-mob-brand span {
+  color: #F59E0B;
+}
+.zc-mob-close {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.zc-mob-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zc-mob-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 46px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #FFFFFF;
+  border: 1.5px solid #E2DDD5;
+  color: #0F172A;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.zc-mob-link:hover {
+  border-color: #D97706;
+  background: #FFFBEB;
+}
+
+/* Giriş Yap Akordeon Bloğu */
+.zc-mob-acc {
+  margin-top: 6px;
+  border-radius: 14px;
+  border: 1.5px solid #CBD5E1;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+.zc-mob-acc-btn {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: none;
+  background: #0F172A;
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.zc-mob-acc-list {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: #FAF8F5;
+}
+.zc-mob-acc.open .zc-mob-acc-list {
+  display: flex;
+}
+.zc-mob-role-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: #FFFFFF;
+  border: 1px solid #E2DDD5;
+  color: #0F172A;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.zc-mob-role-link:hover {
+  border-color: #D97706;
+  background: #FEF3C7;
+}
+
+.zc-mob-cta {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+  color: #FFFFFF !important;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 0.96rem;
+  box-shadow: 0 6px 18px rgba(217, 119, 6, 0.28);
+}
+
+/* ── Tablet & Mobil Kırılımı (≤ 992px): Masaüstü üst menüyü gizle, Hamburgeri aç ── */
+@media (max-width: 992px) {
+  body.zc-has-mob-nav header.site-header nav,
+  body.zc-has-mob-nav header.site-header .nav-links,
+  body.zc-has-mob-nav header.site-header .nav-actions,
+  body.zc-has-mob-nav header.site-header .header-actions,
+  body.zc-has-mob-nav header.site-header .auth-buttons,
+  body.zc-has-mob-nav header.topbar nav,
+  body.zc-has-mob-nav header.topbar .topbar-nav,
+  body.zc-has-mob-nav header.topbar .nav-links,
+  body.zc-has-mob-nav header.topbar .actions,
+  body.zc-has-mob-nav header.header nav,
+  body.zc-has-mob-nav header.zc-kesif-header nav,
+  body.zc-has-mob-nav header.km-navbar nav,
+  body.zc-has-mob-nav .nav-menu,
+  body.zc-has-mob-nav .desktop-only-nav {
+    display: none !important;
+  }
+
+  body.zc-has-mob-nav .zc-mob-burger {
+    display: inline-flex !important;
+  }
+
+  body.zc-has-mob-nav header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ── Mobil Ekran Korumaları (≤ 768px): Taşma Önleme & Ferah Tek Sütun ── */
+@media (max-width: 768px) {
+  body {
+    overflow-x: clip !important;
+  }
+
+  .wrap, .container, main, section, article, .hero, .card, .panel {
+    max-width: 100% !important;
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  input, select, textarea {
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  .hero-grid, .pricing-grid, .cards-grid, .grid-2, .grid-3, .grid-4, .two-col {
+    grid-template-columns: 1fr !important;
+  }
+}
