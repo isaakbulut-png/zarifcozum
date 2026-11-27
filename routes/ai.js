@@ -1193,15 +1193,19 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
   });
 
   // Taslakları Listele
-  router.get('/questions/drafts', requireRole('teacher'), async (req, res) => {
+  router.get('/questions/drafts', requireRole('teacher', 'admin'), async (req, res) => {
     try {
-      const filter = req.session.user.role === 'admin' ? {} : { createdBy: req.session.user.id };
+      const uid = String(req.session.user.id || req.session.user._id || '');
+      const filter = req.session.user.role === 'admin'
+        ? {}
+        : { createdBy: { $in: [uid, req.session.user.id, req.session.user._id].filter(Boolean) } };
       const drafts = await AiQuestionDraft.find(filter)
         .sort({ createdAt: -1 })
         .limit(50)
         .lean();
 
       res.json({
+        success: true,
         drafts: drafts.map(d => ({
           id: d._id.toString(),
           title: d.title,
@@ -1219,8 +1223,22 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     }
   });
 
+  // Tüm Taslakları Toplu Sil
+  router.delete('/questions/drafts', requireRole('teacher', 'admin'), async (req, res) => {
+    try {
+      const uid = String(req.session.user.id || req.session.user._id || '');
+      const filter = req.session.user.role === 'admin'
+        ? {}
+        : { createdBy: { $in: [uid, req.session.user.id, req.session.user._id].filter(Boolean) } };
+      const result = await AiQuestionDraft.deleteMany(filter);
+      res.json({ success: true, deletedCount: result.deletedCount || 0 });
+    } catch (err) {
+      res.status(500).json({ mesaj: 'Taslaklar silinemedi.' });
+    }
+  });
+
   // Belirli Taslağı Getir
-  router.get('/questions/drafts/:id', requireRole('teacher'), async (req, res) => {
+  router.get('/questions/drafts/:id', requireRole('teacher', 'admin'), async (req, res) => {
     try {
       if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ mesaj: 'Geçersiz taslak ID.' });
       const draft = await AiQuestionDraft.findById(req.params.id).lean();
