@@ -2004,10 +2004,11 @@
             <label>4. Dosya<input id="siteMediaFile" type="file" required></label>
             <label>5. Yerleşim Konumu
               <select id="siteMediaPosition">
-                <option value="after">Altına Ekle (Varsayılan)</option>
-                <option value="before">Üstüne Ekle</option>
-                <option value="prepend">İçine Ekle (Başına)</option>
-                <option value="append">İçine Ekle (Sonuna)</option>
+                <option value="prepend">Kartın / Alanın İçine (Üste)</option>
+                <option value="append">Kartın / Alanın İçine (Alta)</option>
+                <option value="overlay">Kartın Üzerine (Köşe / Kaplama)</option>
+                <option value="before">Öğenin Dışına (Üstüne)</option>
+                <option value="after">Öğenin Dışına (Altına)</option>
                 <option value="replace">Mevcut Öğenin Yerine Koy</option>
               </select>
             </label>
@@ -2027,11 +2028,20 @@
           <button class="btn primary sm" type="submit" id="uploadSiteMedia" disabled>✨ Medyayı Yerleştir</button>
           <p class="msg" id="siteMediaMsg" role="alert"></p>
         </form>
+        <div id="siteTextEditorBox" hidden style="margin:14px 0;padding:14px 16px;background:#faf6f1;border:1.5px solid #e7d9cc;border-radius:12px;">
+          <div style="font-size:0.88rem;font-weight:800;color:#2b180d;margin-bottom:6px;">✏️ Seçili Öğenin Yazısını Düzenle</div>
+          <textarea id="siteTextEditorInput" rows="3" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #d6c8bc;font-family:inherit;font-size:0.88rem;resize:vertical;"></textarea>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+            <button type="button" id="saveSiteTextBtn" class="btn primary sm" disabled>💾 Yazıyı Kaydet</button>
+            <span class="msg" id="siteTextMsg" role="alert" style="margin:0;"></span>
+          </div>
+        </div>
         <div id="siteMediaPreviewHint" hidden style="margin-top:12px;padding:8px 12px;background:#0f172a;color:#f8fafc;border-radius:10px 10px 0 0;font-size:0.8rem;font-weight:600;">
           🎯 Canlı Hedef Seçici Aktif — Aşağıdaki sayfada fareyle gezerek turuncu çerçeveli herhangi bir öğeye tıklayın (seçilen öğe yeşil olur).
         </div>
         <iframe id="siteMediaTargetPreview" title="Medya yerleşim hedefi seçme önizlemesi" hidden></iframe>
         <div id="siteMediaCurrent" aria-live="polite"></div>
+        <div id="siteTextCurrent" aria-live="polite"></div>
       </div>
     </section>
 
@@ -2084,7 +2094,7 @@
   <script src="/assets/cozumlu-sorular-admin.js"></script>
   <script src="/assets/rich-content.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js" integrity="sha384-reiVBUvj2HgLgCZalqLFSMBVD9LdtiwGyybRGCq2AfP8Rgebz5DxEnwKp4FpagKV" crossorigin="anonymous"></script>
-  <script src="/assets/site-media-targets.js?v=3"></script>
+  <script src="/assets/site-media-targets.js?v=4"></script>
   <script>
     (() => {
       const $ = id => document.getElementById(id);
@@ -5262,7 +5272,7 @@
   </script>
   <script src="/assets/VisualMathEngine.js?v=2" defer></script>
   <script src="/assets/content-pool-viewer.js?v=1" defer></script>
-  <script src="/assets/admin-site-media.js?v=2" defer></script>
+  <script src="/assets/admin-site-media.js?v=3" defer></script>
   <script src="/assets/page-transitions.js?v=1" defer></script>
   <script src="/assets/mobile-nav.js?v=1" defer></script>
 </body>

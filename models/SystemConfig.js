@@ -67,9 +67,10 @@ const systemConfigSchema = new mongoose.Schema({
   targetKey: {type: String, default: null},
   assetType: {type: String, enum: ['image', 'animation', null], default: null},
   url: {type: String, default: null},
-  position: {type: String, enum: ['after', 'before', 'prepend', 'append', 'replace', null], default: 'after'},
+  position: {type: String, enum: ['after', 'before', 'prepend', 'append', 'replace', 'overlay', null], default: 'after'},
   widthPx: {type: Number, min: 32, max: 900, default: 320},
-  align: {type: String, enum: ['left', 'center', 'right', null], default: 'center'}
+  align: {type: String, enum: ['left', 'center', 'right', null], default: 'center'},
+  customText: {type: String, maxlength: 2000, default: null}
 }, { timestamps: true, collection: 'system_configs', versionKey: false });
 
 systemConfigSchema.statics.getVisitorSettings = async function () {
@@ -129,7 +130,7 @@ systemConfigSchema.statics.saveSiteMediaPlacement = async function ({
   pagePath, targetKey, assetType, url, position = 'after', widthPx = 320, align = 'center'
 }) {
   const id = `site-media-${createHash('sha256').update(`${pagePath}\0${targetKey}`).digest('hex')}`;
-  const cleanPos = ['after', 'before', 'prepend', 'append', 'replace'].includes(position) ? position : 'after';
+  const cleanPos = ['after', 'before', 'prepend', 'append', 'replace', 'overlay'].includes(position) ? position : 'after';
   const cleanWidth = Number.isFinite(Number(widthPx)) ? Math.max(32, Math.min(900, Math.round(Number(widthPx)))) : 320;
   const cleanAlign = ['left', 'center', 'right'].includes(align) ? align : 'center';
   await this.findOneAndUpdate(
@@ -145,6 +146,29 @@ systemConfigSchema.statics.saveSiteMediaPlacement = async function ({
 
 systemConfigSchema.statics.deleteSiteMediaPlacement = async function (id) {
   if (typeof id !== 'string' || !/^site-media-[a-f0-9]{64}$/i.test(id)) return null;
+  return this.findByIdAndDelete(id).lean();
+};
+
+systemConfigSchema.statics.getSiteTextOverrides = function () {
+  return this.find({_id: /^site-text-/})
+    .select('_id pagePath targetKey customText updatedAt')
+    .sort({pagePath: 1, updatedAt: -1})
+    .lean();
+};
+
+systemConfigSchema.statics.saveSiteTextOverride = async function ({pagePath, targetKey, customText}) {
+  const id = `site-text-${createHash('sha256').update(`${pagePath}\0${targetKey}`).digest('hex')}`;
+  const cleanText = String(customText || '').trim().slice(0, 2000);
+  await this.findOneAndUpdate(
+    {_id: id},
+    {$set: {pagePath, targetKey, customText: cleanText}, $setOnInsert: {_id: id}},
+    {upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true}
+  );
+  return this.findById(id).select('_id pagePath targetKey customText updatedAt').lean();
+};
+
+systemConfigSchema.statics.deleteSiteTextOverride = async function (id) {
+  if (typeof id !== 'string' || !/^site-text-[a-f0-9]{64}$/i.test(id)) return null;
   return this.findByIdAndDelete(id).lean();
 };
 

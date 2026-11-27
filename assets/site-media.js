@@ -72,7 +72,8 @@
         pagePath,
         target: {
           tag: found.tag, kind: found.kind, id: found.id, label: found.label,
-          context: found.context, occurrence: found.occurrence, key: found.key
+          context: found.context, occurrence: found.occurrence, key: found.key,
+          currentText: (found.element.innerText || found.element.textContent || '').trim()
         }
       }, window.location.origin);
     }, true);
@@ -86,6 +87,12 @@
         if (selectedElement) {
           selectedElement.classList.add('site-media-target-selected');
           selectedElement.scrollIntoView({behavior: 'smooth', block: 'center'});
+        }
+      }
+      if (event.data?.type === 'site-media-preview-text' && event.data.targetKey) {
+        const found = targets.entries(document).find(item => item.key === event.data.targetKey);
+        if (found?.element && typeof event.data.customText === 'string') {
+          found.element.textContent = event.data.customText;
         }
       }
     });
@@ -145,8 +152,19 @@
   function insertHolder(element, holder, position) {
     const voidTags = new Set(['IMG', 'INPUT', 'BR', 'HR']);
     const isVoid = voidTags.has(element.tagName);
-    const pos = ['after', 'before', 'prepend', 'append', 'replace'].includes(position) ? position : 'after';
+    const pos = ['after', 'before', 'prepend', 'append', 'replace', 'overlay'].includes(position) ? position : 'after';
 
+    if (pos === 'overlay') {
+      const targetBox = isVoid ? element.parentElement : element;
+      if (targetBox) {
+        if (getComputedStyle(targetBox).position === 'static') {
+          targetBox.style.position = 'relative';
+        }
+        holder.classList.add('site-media-overlay');
+        targetBox.append(holder);
+        return;
+      }
+    }
     if (pos === 'replace') {
       element.style.display = 'none';
       element.insertAdjacentElement('afterend', holder);
@@ -221,6 +239,13 @@
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.mesaj || `Sayfa medyaları alınamadı (${response.status}).`);
       const entries = targets.entries(document);
+      for (const override of result.textOverrides || []) {
+        if (!targets.validTargetKey(override.targetKey) || typeof override.customText !== 'string') continue;
+        const target = entries.find(item => item.key === override.targetKey);
+        if (target && target.element) {
+          target.element.textContent = override.customText;
+        }
+      }
       for (const placement of result.placements || []) {
         if (!targets.validTargetKey(placement.targetKey) || !validMedia(placement)) {
           console.error('Geçersiz sayfa medya yerleşimi atlandı.', placement);

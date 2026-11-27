@@ -481,7 +481,10 @@ app.get('/api/site-media', async (req, res) => {
   const pagePath = SiteMediaTargets.normalizePagePath(req.query.page);
   if (!pagePath) return res.status(400).json({mesaj: 'Sayfa medya hedefi geçersiz.'});
   try {
-    const placements = await SystemConfig.getSiteMediaPlacements();
+    const [placements, textOverrides] = await Promise.all([
+      SystemConfig.getSiteMediaPlacements(),
+      SystemConfig.getSiteTextOverrides()
+    ]);
     res.json({
       placements: placements
         .filter(item => item.pagePath === pagePath)
@@ -490,7 +493,10 @@ app.get('/api/site-media', async (req, res) => {
           position: position || 'after',
           widthPx: widthPx || 320,
           align: align || 'center'
-        }))
+        })),
+      textOverrides: textOverrides
+        .filter(item => item.pagePath === pagePath)
+        .map(({targetKey, customText}) => ({targetKey, customText}))
     });
   } catch (error) {
     console.error('Sayfa medyaları alınamadı:', error);

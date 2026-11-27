@@ -10,10 +10,11 @@
   const $ = (id) => document.getElementById(id);
 
   const POS_LABELS = {
-    after: 'Altına Ekle',
-    before: 'Üstüne Ekle',
-    prepend: 'İçine (Başına)',
-    append: 'İçine (Sonuna)',
+    prepend: 'Kartın / Alanın İçine (Üste)',
+    append: 'Kartın / Alanın İçine (Alta)',
+    overlay: 'Kartın Üzerine (Köşe / Kaplama)',
+    before: 'Öğenin Dışına (Üstüne)',
+    after: 'Öğenin Dışına (Altına)',
     replace: 'Mevcut Öğenin Yerine'
   };
 
@@ -334,8 +335,149 @@
     const msgEl = $('siteMediaMsg');
     const iframe = $('siteMediaTargetPreview');
     const previewHint = $('siteMediaPreviewHint');
+    const textEditorBox = $('siteTextEditorBox');
+    const textInput = $('siteTextEditorInput');
+    const saveTextBtn = $('saveSiteTextBtn');
+    const textMsgEl = $('siteTextMsg');
+    const textCurrentEl = $('siteTextCurrent');
 
     if (!form || !pageSelect || !window.SiteMediaTargets) return;
+
+    const loadTextOverrides = async () => {
+      if (!textCurrentEl) return;
+      try {
+        const res = await fetch('/api/admin/site-text', { credentials: 'same-origin' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) return;
+        const list = data.overrides || [];
+        textCurrentEl.replaceChildren();
+        if (!list.length) return;
+
+        const hdr = document.createElement('h4');
+        hdr.style.cssText = 'margin:20px 0 10px;font-size:0.95rem;color:#3a2618;';
+        hdr.textContent = `✏️ Aktif Metin Düzenlemeleri (${list.length})`;
+        textCurrentEl.append(hdr);
+
+        const grid = document.createElement('div');
+        grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;';
+
+        list.forEach((ov) => {
+          const card = document.createElement('div');
+          card.style.cssText = 'background:#fff;border:1px solid #e7d9cc;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;';
+          const pageObj = window.SiteMediaTargets?.PAGES?.find(pg => pg.path === ov.pagePath);
+          const pageLabel = pageObj ? `${pageObj.label} (${ov.pagePath})` : ov.pagePath;
+
+          const meta = document.createElement('div');
+          meta.innerHTML = `
+            <div style="font-size:0.84rem;font-weight:700;color:#0f172a;margin-bottom:4px;">${pageLabel}</div>
+            <div style="font-size:0.76rem;color:#64748b;margin-bottom:6px;"><strong>Orijinal Hedef:</strong> ${parseTargetKeyLabel(ov.targetKey)}</div>
+            <div style="font-size:0.82rem;color:#1e293b;background:#faf6f1;padding:8px 10px;border-radius:8px;border:1px solid #eadfd4;"></div>
+          `;
+          meta.querySelector('div:last-child').textContent = ov.customText;
+          card.append(meta);
+
+          const actions = document.createElement('div');
+          actions.style.cssText = 'display:flex;gap:8px;margin-top:auto;padding-top:6px;border-top:1px solid #f1f5f9;';
+
+          const viewLink = document.createElement('a');
+          viewLink.href = ov.pagePath;
+          viewLink.target = '_blank';
+          viewLink.className = 'btn light';
+          viewLink.style.cssText = 'font-size:0.75rem;padding:5px 10px;text-decoration:none;';
+          viewLink.textContent = '👁️ Sayfada Gör';
+
+          const revertBtn = document.createElement('button');
+          revertBtn.type = 'button';
+          revertBtn.className = 'btn light';
+          revertBtn.style.cssText = 'font-size:0.75rem;padding:5px 10px;color:#b91c1c;margin-left:auto;';
+          revertBtn.textContent = '↩️ Orijinale Dön';
+          revertBtn.onclick = async () => {
+            const ok = window.zcConfirm
+              ? await window.zcConfirm('Bu metin düzenlemesini kaldırıp sayfanın orijinal yazısına dönmek istiyor musunuz?')
+              : true;
+            if (!ok) return;
+            revertBtn.disabled = true;
+            try {
+              const r = await fetch(`/api/admin/site-text/${encodeURIComponent(ov._id)}`, {
+                method: 'DELETE', credentials: 'same-origin'
+              });
+              const d = await r.json().catch(() => ({}));
+              if (!r.ok) throw new Error(d.mesaj || 'Geri alınamadı.');
+              loadTextOverrides();
+            } catch (err) {
+              alert('Hata: ' + err.message);
+              revertBtn.disabled = false;
+            }
+          };
+          actions.append(viewLink, revertBtn);
+          card.append(actions);
+          grid.append(card);
+        });
+        textCurrentEl.append(grid);
+      } catch (_) {}
+    };
+
+    const syncTextEditor = (selected) => {
+      if (!textEditorBox || !textInput || !saveTextBtn) return;
+      const editableTags = ['h1', 'h2', 'h3', 'p', 'a', 'button'];
+      if (selected && editableTags.includes(selected.tag)) {
+        textEditorBox.hidden = false;
+        textInput.value = selected.currentText || selected.label || '';
+        saveTextBtn.disabled = false;
+        setMsg(textMsgEl, '', true);
+      } else {
+        textEditorBox.hidden = true;
+        saveTextBtn.disabled = true;
+      }
+    };
+
+    const applySmartPosition = (selected) => {
+      if (!posSelect || !selected) return;
+      if (['article', 'section', 'div'].includes(selected.tag)) {
+        if (posSelect.value === 'after' || posSelect.value === 'before') {
+          posSelect.value = 'prepend';
+        }
+      }
+    };
+
+    saveTextBtn?.addEventListener('click', async () => {
+      const customText = (textInput?.value || '').trim();
+      if (!pageSelect.value || !targetSelect.value) {
+        return setMsg(textMsgEl, 'Önce sayfa ve bir yazı/başlık hedefi seçin.', false);
+      }
+      if (!customText) {
+        return setMsg(textMsgEl, 'Yazı boş bırakılamaz.', false);
+      }
+      saveTextBtn.disabled = true;
+      setMsg(textMsgEl, 'Yazı kaydediliyor...', true);
+      try {
+        const res = await fetch('/api/admin/site-text', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pagePath: pageSelect.value,
+            targetKey: targetSelect.value,
+            customText
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.mesaj || 'Yazı kaydedilemedi.');
+        setMsg(textMsgEl, '✅ Sayfa yazısı canlı olarak güncellendi.', true);
+        if (iframe?.contentWindow) {
+          iframe.contentWindow.postMessage({
+            type: 'site-media-preview-text',
+            targetKey: targetSelect.value,
+            customText
+          }, window.location.origin);
+        }
+        loadTextOverrides();
+      } catch (err) {
+        setMsg(textMsgEl, err.message, false);
+      } finally {
+        saveTextBtn.disabled = false;
+      }
+    });
 
     // Sayfaları doldur
     if (pageSelect.options.length <= 1) {
@@ -430,6 +572,9 @@
     });
 
     targetSelect.addEventListener('change', () => {
+      const selected = currentTargets.find(t => t.key === targetSelect.value);
+      applySmartPosition(selected);
+      syncTextEditor(selected);
       updateSubmitState();
       updateDescription();
       if (iframe?.contentWindow && targetSelect.value) {
@@ -470,7 +615,10 @@
       }
 
       if (data.type === 'site-media-target-selected' && data.target?.key) {
-        if (!currentTargets.some(t => t.key === data.target.key)) {
+        const existingIdx = currentTargets.findIndex(t => t.key === data.target.key);
+        if (existingIdx >= 0) {
+          currentTargets[existingIdx] = { ...currentTargets[existingIdx], ...data.target };
+        } else {
           currentTargets.push(data.target);
           const opt = document.createElement('option');
           opt.value = data.target.key;
@@ -479,9 +627,16 @@
         }
         targetSelect.disabled = false;
         targetSelect.value = data.target.key;
+        applySmartPosition(data.target);
+        syncTextEditor(data.target);
         updateSubmitState();
         updateDescription();
-        setMsg(msgEl, 'Hedef canlı önizlemeden seçildi. Dosyanızı seçip "Medyayı Yerleştir" butonuna tıklayın.', true);
+        const hintSuffix = ['article', 'section', 'div'].includes(data.target.tag)
+          ? ' Konum otomatik olarak "Kartın / Alanın İçine (Üste)" ayarlandı.'
+          : (['h1', 'h2', 'h3', 'p', 'a', 'button'].includes(data.target.tag)
+            ? ' İsterseniz aşağıdan bu öğenin yazısını da doğrudan düzenleyebilirsiniz.'
+            : '');
+        setMsg(msgEl, 'Hedef canlı önizlemeden seçildi.' + hintSuffix, true);
       }
     });
 
@@ -524,6 +679,7 @@
     });
 
     loadCurrentPlacements();
+    loadTextOverrides();
   }
 
   function boot() {

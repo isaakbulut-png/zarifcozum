@@ -7,6 +7,28 @@
   box-sizing: border-box;
 }
 
+.site-media-placement.site-media-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: auto;
+  max-width: 48%;
+  margin: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.site-media-placement.site-media-overlay[data-align="left"] {
+  left: 12px;
+  right: auto;
+}
+
+.site-media-placement.site-media-overlay[data-align="center"] {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
 .site-media-image {
   display: block;
   width: min(100%, 520px);

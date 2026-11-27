@@ -264,7 +264,7 @@ function createAdminRouter({
     const filename = `${randomUUID()}${extension}`;
     const key = `site-media/${filename}`;
     const publicPath = `/uploads/site-media/${filename}`;
-    const position = ['after', 'before', 'prepend', 'append', 'replace'].includes(req.body?.position)
+    const position = ['after', 'before', 'prepend', 'append', 'replace', 'overlay'].includes(req.body?.position)
       ? req.body.position : 'after';
     const rawW = Number(req.body?.widthPx);
     const widthPx = Number.isFinite(rawW) ? Math.max(32, Math.min(900, Math.round(rawW))) : 320;
@@ -304,6 +304,49 @@ function createAdminRouter({
     } catch (error) {
       console.error('Sayfa medyası silinemedi:', error);
       res.status(500).json({mesaj: 'Sayfa medyası kaldırılamadı.'});
+    }
+  });
+
+  router.get('/site-text', allow('superadmin'), async (req, res) => {
+    try {
+      res.json({overrides: await SystemConfig.getSiteTextOverrides()});
+    } catch (error) {
+      console.error('Sayfa metin düzenlemeleri alınamadı:', error);
+      res.status(500).json({mesaj: 'Sayfa metin düzenlemeleri alınamadı.'});
+    }
+  });
+
+  router.post('/site-text', allow('superadmin'), async (req, res) => {
+    const pagePath = SiteMediaTargets.normalizePagePath(req.body?.pagePath);
+    const targetKey = req.body?.targetKey;
+    const customText = typeof req.body?.customText === 'string' ? req.body.customText.trim() : '';
+    if (!pagePath || !SiteMediaTargets.validTargetKey(targetKey)) {
+      return res.status(400).json({mesaj: 'Geçersiz sayfa veya hedef seçimi.'});
+    }
+    if (!customText || customText.length > 2000) {
+      return res.status(400).json({mesaj: 'Metin 1 ile 2000 karakter arasında olmalıdır.'});
+    }
+    try {
+      const override = await SystemConfig.saveSiteTextOverride({pagePath, targetKey, customText});
+      await audit(req, 'site_text.updated', 'site_text', override._id, {pagePath, targetKey});
+      res.status(201).json({mesaj: 'Sayfa yazısı güncellendi.', override});
+    } catch (error) {
+      console.error('Sayfa metni kaydedilemedi:', error);
+      res.status(500).json({mesaj: 'Sayfa metni kaydedilemedi.'});
+    }
+  });
+
+  router.delete('/site-text/:id', allow('superadmin'), async (req, res) => {
+    try {
+      const deleted = await SystemConfig.deleteSiteTextOverride(req.params.id);
+      if (!deleted) return res.status(404).json({mesaj: 'Metin düzenlemesi bulunamadı.'});
+      await audit(req, 'site_text.deleted', 'site_text', deleted._id, {
+        pagePath: deleted.pagePath, targetKey: deleted.targetKey
+      });
+      res.json({mesaj: 'Orijinal metne geri dönüldü.', deletedId: deleted._id});
+    } catch (error) {
+      console.error('Sayfa metni kaldırılamadı:', error);
+      res.status(500).json({mesaj: 'Sayfa metni kaldırılamadı.'});
     }
   });
 

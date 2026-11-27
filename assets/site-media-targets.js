@@ -38,8 +38,8 @@
     {path: '/pages/test-ve-etkinlikler-tanitim.html', label: 'Test ve Etkinlikler Tanıtımı'}
   ];
 
-  const TARGET_SELECTOR = 'a[href], button, section[id], article, h1, h2, h3, img, .card, .feature-card, .hero-visual, [data-media-slot]';
-  const ALLOWED_TAGS = ['a', 'button', 'section', 'article', 'div', 'h1', 'h2', 'h3', 'img'];
+  const TARGET_SELECTOR = 'a[href], button, section[id], article, h1, h2, h3, p, img, .card, .feature-card, .hero-visual, [data-media-slot]';
+  const ALLOWED_TAGS = ['a', 'button', 'section', 'article', 'div', 'h1', 'h2', 'h3', 'p', 'img'];
 
   const KIND_LABELS = {
     a: 'Bağlantı',
@@ -50,6 +50,7 @@
     h1: 'Ana Başlık',
     h2: 'Başlık',
     h3: 'Alt Başlık',
+    p: 'Paragraf',
     img: 'Görsel'
   };
 
