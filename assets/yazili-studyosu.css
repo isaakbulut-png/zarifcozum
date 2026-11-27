@@ -4,10 +4,25 @@
    ========================================================================== */
 .yz2-shell, .yz2-exam-shell {
   width: 100%;
-  max-width: 1220px;
+  max-width: 1420px;
   margin: 0 auto;
   color: #0F172A;
   font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
+.yz2-fullscreen-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 11800;
+  background: #FAF8F5;
+  overflow-y: auto;
+  padding: 24px 32px 44px;
+}
+
+.yz2-fullscreen-stage .yz2-shell,
+.yz2-fullscreen-stage .yz2-exam-shell {
+  max-width: 1420px;
+  margin: 0 auto;
 }
 
 .yz2-fade { animation: yz2SlideIn 0.28s cubic-bezier(0.22, 1, 0.36, 1); }

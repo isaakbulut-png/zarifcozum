@@ -399,10 +399,10 @@
         return;
       }
 
-      /* ── ADIM 2: HAZIRLIK ANİMASYONU ── */
+      /* ── ADIM 2: HAZIRLIK ANİMASYONU (TAM EKRAN STÜDYO) ── */
       if (state.step === "loading") {
         root.innerHTML =
-          '<div class="yz2-shell yz2-loading-wrap yz2-fade">' +
+          '<div class="yz2-fullscreen-stage"><div class="yz2-shell yz2-loading-wrap yz2-fade">' +
             '<div class="yz2-pen-anim">' +
               '<svg viewBox="0 0 120 110" width="112" height="102" xmlns="http://www.w3.org/2000/svg">' +
                 '<rect x="18" y="14" width="74" height="86" rx="12" fill="#FFFFFF" stroke="#0F172A" stroke-width="2.5"/>' +
@@ -415,14 +415,14 @@
             '<h3>Yazılın hazırlanıyor…</h3>' +
             '<p>Kalemini ve kâğıdını hazırla. MEB senaryo kazanımları yükleniyor.</p>' +
             '<div class="yz2-load-bar"><div class="yz2-load-fill"></div></div>' +
-          '</div>';
+          '</div></div>';
         return;
       }
 
-      /* ── ADIM 3: ÇÖZÜM MODU SEÇİMİ ── */
+      /* ── ADIM 3: ÇÖZÜM MODU SEÇİMİ (TAM EKRAN STÜDYO) ── */
       if (state.step === "mode") {
         root.innerHTML =
-          '<div class="yz2-shell yz2-fade">' +
+          '<div class="yz2-fullscreen-stage"><div class="yz2-shell yz2-fade">' +
             '<div class="yz2-step-header">' +
               '<button type="button" class="yz2-back-btn" data-yz-back="terms">← Dönemlere Dön</button>' +
               '<span class="yz2-crumb">' + state.grade + '. Sınıf Matematik · ' + esc(getTermLabel(state.donem)) + '</span>' +
@@ -446,7 +446,7 @@
                 '<span class="yz2-mode-cta">PDF / Yazdır →</span>' +
               '</button>' +
             '</div>' +
-          '</div>';
+          '</div></div>';
 
         root.querySelector("[data-yz-back]")?.addEventListener("click", function () { state.step = "terms"; SoundEngine.play("click"); render(); });
         root.querySelector("[data-yz-sound]")?.addEventListener("click", function () { SoundEngine.toggleMute(); render(); });
@@ -466,15 +466,15 @@
         return;
       }
 
-      /* ── ADIM 4: SENARYO SEÇİCİ ── */
+      /* ── ADIM 4: SENARYO SEÇİCİ (TAM EKRAN STÜDYO) ── */
       if (state.step === "scenario") {
         var scenarios = [
           { no: 1, ad: "Senaryo 1", alt: "Temel Kazanımlar · 100 Puan", badge: "MEB Temel" },
           { no: 2, ad: "Senaryo 2", alt: "Beceri Temelli · 100 Puan", badge: "Yeni Nesil" },
-          { no: 3, ad: "Senaryo 3", alt: "Karma Prova · 100 Puan", badge: "Dengeli" }
+          { no: 3, ad: "Senaryo 3", alt: "Karma Prova · 100 Puan", badge: "Kapsamlı" }
         ];
         root.innerHTML =
-          '<div class="yz2-shell yz2-fade">' +
+          '<div class="yz2-fullscreen-stage"><div class="yz2-shell yz2-fade">' +
             '<div class="yz2-stepper">' +
               '<span class="yz2-st active"><strong>1</strong> Senaryonu seç</span>' +
               '<span class="yz2-st"><strong>2</strong> Kuralları ve konuları incele</span>' +
@@ -499,7 +499,7 @@
             '<div style="text-align:center;margin-top:20px;">' +
               '<button type="button" class="yz2-back-btn" data-yz-back="mode">← Çözüm Moduna Dön</button>' +
             '</div>' +
-          '</div>';
+          '</div></div>';
 
         root.querySelector("[data-yz-back]")?.addEventListener("click", function () { state.step = "mode"; SoundEngine.play("click"); render(); });
         root.querySelectorAll("[data-yz-pick-sc]").forEach(function (btn) {
@@ -531,7 +531,7 @@
         var activeRuleText = state.openRuleCard ? ruleDetails[state.openRuleCard] : "";
 
         root.innerHTML =
-          '<div class="yz2-shell yz2-fade">' +
+          '<div class="yz2-fullscreen-stage"><div class="yz2-shell yz2-fade">' +
             '<div class="yz2-stepper">' +
               '<span class="yz2-st done">✓ Senaryo seçildi</span>' +
               '<span class="yz2-st active"><strong>2</strong> Kuralları ve konuları incele</span>' +
@@ -575,7 +575,7 @@
                 '</div>' +
               '</div>' +
             '</div>' +
-          '</div>';
+          '</div></div>';
 
         root.querySelectorAll("[data-yz-rule]").forEach(function (btn) {
           btn.addEventListener("click", function () {
@@ -621,9 +621,10 @@
         state.activeQuestions.forEach(function (_, i) { if (!isQuestionAnswered(i)) emptyNums.push(i + 1); });
 
         root.innerHTML =
-          '<div class="yz2-exam-shell yz2-fade">' +
+          '<div class="yz2-fullscreen-stage"><div class="yz2-exam-shell yz2-fade">' +
             '<div class="yz2-exam-topbar">' +
               '<div class="yz2-q-pills">' +
+                '<button type="button" class="yz2-q-pill" data-yz-exit-exam title="Yazılıdan Çık" style="width:auto;padding:0 12px;border-radius:10px;background:#334155;color:#fff;">✕ Çık</button>' +
                 state.activeQuestions.map(function (_, i) {
                   var cls = "yz2-q-pill" + (i === state.qIdx ? " active" : "") + (isQuestionAnswered(i) ? " done" : "");
                   return '<button type="button" class="' + cls + '" data-yz-q="' + i + '">' + (i + 1) + '</button>';
@@ -712,7 +713,7 @@
                 '</div>' +
               '</div>'
             ) : '') +
-          '</div>';
+          '</div></div>';
 
         // Sol Geometri Lab / SVG / Görsel montajı
         var leftMount = root.querySelector("[data-yz-left-mount]");
@@ -793,14 +794,22 @@
           var w = root.querySelector("[data-yz-tab-warn]");
           if (w) w.style.display = "none";
         });
+        root.querySelector("[data-yz-exit-exam]")?.addEventListener("click", function () {
+          if (confirm("Yazılı provasını bırakıp ana ekrana dönmek istiyor musun?")) {
+            stopTimer();
+            state.step = "terms";
+            SoundEngine.play("click");
+            render();
+          }
+        });
         root.querySelector("[data-yz-sound]")?.addEventListener("click", function () { SoundEngine.toggleMute(); render(); });
         return;
       }
 
-      /* ── ADIM 7: SONUÇ KARNESİ & ÇÖZÜM İNCELEME ── */
+      /* ── ADIM 7: SONUÇ KARNESİ & ÇÖZÜM İNCELEME (TAM EKRAN STÜDYO) ── */
       if (state.step === "result") {
         root.innerHTML =
-          '<div class="yz2-shell yz2-fade">' +
+          '<div class="yz2-fullscreen-stage"><div class="yz2-shell yz2-fade">' +
             '<div class="yz2-result-hero">' +
               '<div class="yz2-score-ring"><strong>' + state.lastScore + '</strong><span>/ 100</span></div>' +
               '<div>' +
@@ -826,7 +835,7 @@
                 }).join("") +
               '</div>'
             ) : '') +
-          '</div>';
+          '</div></div>';
 
         root.querySelector("[data-yz-toggle-sol]")?.addEventListener("click", function () {
           state.showSolutions = !state.showSolutions;

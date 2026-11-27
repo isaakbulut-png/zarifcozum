@@ -477,20 +477,113 @@
     }
   };
 
+  function normalize100Points(arr) {
+    var n = arr.length;
+    if (!n) return [];
+    var base = Math.floor(100 / n);
+    var rem = 100 - base * n;
+    return arr.map(function (q, idx) {
+      return Object.assign({}, q, {
+        soruNo: idx + 1,
+        puan: base + (idx < rem ? 1 : 0)
+      });
+    });
+  }
+
+  var EK_BECERI_SORULARI_5 = [
+    {
+      kazanimKodu: "MAT.5.3.3", konu: "Geniş Açı Ölçümü (Açıölçer)", puan: 17,
+      metin: "Soldaki açıölçeri O köşesine hizalayarak geniş KLM açısının ölçüsünü bulunuz ve bütünler açı yorumunu yapınız.",
+      interaktifArac: { tip: "aciolcer", hedefAci: 125, kose: "L", kol1: "K", kol2: "M" },
+      altSorular: [
+        { harf: "a", metin: "m(KLM) açısının ölçüsü kaç derecedir?", tip: "sayi", birim: "°", beklenen: ["125", "125°"] },
+        { harf: "b", metin: "Bu açıyı doğru açıya (180°) tamamlamak için kaç derece daha gerekir?", tip: "sayi", birim: "°", beklenen: ["55", "55°"] }
+      ],
+      ipucu: "Açıölçeri L köşesine hizala, 0°'den mavi ışına kadar 125°'yi oku. 180 − 125 = 55°.",
+      beklenenSonuc: ["125", "55"],
+      yontemAnahtar: ["125", "180", "55"],
+      cozumAdimlari: "a) Açıölçerde m(KLM) = 125° (Geniş açı).\nb) 180° − 125° = 55° gerekir."
+    },
+    {
+      kazanimKodu: "MAT.5.3.1", konu: "Pergel ile 4 cm Yarıçaplı Çember", puan: 17,
+      metin: "Murat, yarıçapı 4 cm olan bir çember çizip içine çap uzunluğunu hesaplamak istiyor. Soldaki pergeli 4 cm'ye ayarlayıp çemberi çiziniz.",
+      interaktifArac: { tip: "pergel", hedefYaricap: 4, referansUzunluk: 4, merkez: "O" },
+      altSorular: [
+        { harf: "a", metin: "Pergel açıklığını 4 cm yapıp O merkezli çemberi çiziniz.", tip: "cizim", beklenen: ["cizildi"] },
+        { harf: "b", metin: "Çizdiğiniz çemberin çapı kaç cm'dir?", tip: "sayi", birim: "cm", beklenen: ["8", "8 cm"] }
+      ],
+      ipucu: "Pergeli 4 cm'ye kaydırıp 'Çemberi Çiz' butonuna bas. Çap = 2 × 4 = 8 cm.",
+      beklenenSonuc: ["8", "8 cm"],
+      yontemAnahtar: ["4", "8"],
+      cozumAdimlari: "a) r = 4 cm çember çizilir.\nb) Çap = 2 × 4 = 8 cm."
+    },
+    {
+      kazanimKodu: "MAT.5.3.5", konu: "Altıgen ve Köşegen Çizimi", puan: 16,
+      metin: "Soldaki 6 kenarlı kapalı çokgeni inceleyiniz, bir köşegen çiziniz ve alt soruları yanıtlayınız.",
+      interaktifArac: { tip: "cokgen", kenarSayisi: 6 },
+      altSorular: [
+        { harf: "a", metin: "Bu çokgenin adı nedir?", tip: "metin", beklenen: ["altıgen", "altigen"] },
+        { harf: "b", metin: "Bu çokgenin kaç kenarı vardır?", tip: "sayi", birim: "kenar", beklenen: ["6"] },
+        { harf: "c", metin: "Sol tahtada komşu olmayan iki köşeye tıklayarak bir köşegen çiziniz.", tip: "cizim", beklenen: ["cizildi"] }
+      ],
+      ipucu: "6 kenarlı çokgene Altıgen denir. A ve D gibi komşu olmayan iki noktaya tıkla.",
+      beklenenSonuc: ["altıgen", "6"],
+      yontemAnahtar: ["6", "altıgen"],
+      cozumAdimlari: "a) Altıgen.\nb) 6 kenarı ve 6 köşesi vardır.\nc) [AD] veya [AC] bir köşegendir."
+    },
+    {
+      kazanimKodu: "MAT.5.2.3", konu: "Bahçe Çevre ve Alan Problemi", puan: 16,
+      metin: "Kenar uzunlukları 14 m ve 8 m olan dikdörtgen şeklindeki bir bahçenin etrafına 2 sıra tel çekilecektir. Kaç metre tel gerekir?",
+      ipucu: "Önce çevre = 2 × (14 + 8) = 44 m; 2 sıra tel için 2 ile çarp.",
+      beklenenSonuc: ["88", "88 m"],
+      yontemAnahtar: ["44", "88", "22"],
+      cozumAdimlari: "Çevre = 2 × (14 + 8) = 44 m.\n2 sıra tel = 2 × 44 = 88 m."
+    }
+  ];
+
   function getSorular(grade, donem, senaryoNo) {
     var g = String(grade || "5");
+    var sc = Number(senaryoNo) || 1;
     var gradePool = HAVUZ[g] || HAVUZ["5"];
-    var list = gradePool[donem] || gradePool["1_donem_1_yazili"] || Object.values(gradePool)[0];
-    var cloned = list.map(function (q, idx) {
-      return Object.assign({}, q, { soruNo: idx + 1 });
+    var baseList = (gradePool[donem] || gradePool["1_donem_1_yazili"] || Object.values(gradePool)[0] || []).slice();
+
+    // Diğer dönemlerden ek havuz (Senaryo 2 ve 3'te farklı soru seti & farklı soru sayısı için)
+    var extraPool = [];
+    Object.keys(gradePool).forEach(function (k) {
+      if (k !== donem && Array.isArray(gradePool[k])) {
+        extraPool = extraPool.concat(gradePool[k]);
+      }
     });
-    // Senaryo 2 veya 3 seçildiğinde soru sırasını ve etiketini çeşitlendir (toplam 100 puan korunur)
-    if (Number(senaryoNo) === 2 && cloned.length > 2) {
-      cloned = cloned.slice(1).concat(cloned.slice(0, 1)).map(function (q, i) { return Object.assign({}, q, { soruNo: i + 1 }); });
-    } else if (Number(senaryoNo) === 3 && cloned.length > 3) {
-      cloned = cloned.slice().reverse().map(function (q, i) { return Object.assign({}, q, { soruNo: i + 1 }); });
+    if (g === "5") {
+      extraPool = EK_BECERI_SORULARI_5.concat(extraPool);
     }
-    return cloned;
+
+    var selected = [];
+    if (sc === 1) {
+      // Senaryo 1 (Temel Kazanımlar): 5 soru · 100 Puan
+      selected = baseList.slice(0, 5);
+    } else if (sc === 2) {
+      // Senaryo 2 (Beceri Temelli): 6 farklı soru · 100 Puan
+      if (g === "5" && donem === "1_donem_1_yazili") {
+        selected = EK_BECERI_SORULARI_5.slice(0, 4).concat(baseList.slice(3, 5));
+      } else {
+        var mix2 = extraPool.slice(0, 3).concat(baseList.slice(0, 4));
+        selected = mix2.slice(0, 6);
+      }
+    } else {
+      // Senaryo 3 (Karma Kapsamlı Prova): 7 soru · 100 Puan
+      var combined = baseList.concat(extraPool);
+      var seen = new Set();
+      combined.forEach(function (q) {
+        var key = String(q.metin || "").slice(0, 45);
+        if (!seen.has(key) && selected.length < 7) {
+          seen.add(key);
+          selected.push(q);
+        }
+      });
+    }
+
+    return normalize100Points(selected);
   }
 
   global.ZARIF_YAZILI_HAVUZU = {
