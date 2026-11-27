@@ -24,6 +24,8 @@
     {path: '/ogrenci-paneli.html', label: 'Öğrenci Paneli'},
     {path: '/ogretmen-paneli.html', label: 'Öğretmen Paneli'},
     {path: '/veli-panel.html', label: 'Veli Paneli'},
+    {path: '/kesif-modu.html', label: 'Keşif Modu'},
+    {path: '/pages/kesif-modu.html', label: 'Keşif Modu (Tanıtım / Pages)'},
     {path: '/pages/asistanla-soru-coz-tanitim.html', label: 'Asistanla Soru Çöz Tanıtımı'},
     {path: '/pages/cozumlu-sorular-tanitim.html', label: 'Çözümlü Sorular Tanıtımı'},
     {path: '/pages/deneme-sinavi-tanitim.html', label: 'Deneme Sınavı Tanıtımı'},
