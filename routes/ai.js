@@ -893,25 +893,24 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
       'Yalnızca istenen JSON şemasına uyan JSON döndür; Markdown bloğu veya fazladan açıklama metni ekleme.'
     ].filter(Boolean).join('\n');
 
-    // Güvenli Ajan/Model Doğrulaması (Geçerli güncel Gemini API modelleri)
-    const ALLOWED_MODELS = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'];
+    // Güvenli Ajan/Model Doğrulaması (API anahtarında aktif güncel Gemini 3.x / 4.x modelleri)
+    const ALLOWED_MODELS = ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-4-argon', 'gemini-2.5-pro'];
     let requestedModel = typeof req.body?.selectedModel === 'string' ? req.body.selectedModel.trim() : '';
-    if (requestedModel === 'gemini-3.8-flash') requestedModel = 'gemini-2.5-flash';
-    if (requestedModel === 'gemini-3.1-flash-lite') requestedModel = 'gemini-2.5-flash-lite';
-    if (requestedModel === 'gemini-4-argon') requestedModel = 'gemini-2.5-pro';
-    let activeModel = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'gemini-2.5-flash';
+    if (requestedModel === 'gemini-2.5-flash') requestedModel = 'gemini-3.8-flash';
+    if (requestedModel === 'gemini-2.5-flash-lite') requestedModel = 'gemini-3.5-flash-lite';
+    let activeModel = ALLOWED_MODELS.includes(requestedModel) ? requestedModel : 'gemini-3.8-flash';
 
-    // Model İzni Denetimi: Pro modeller sadece Admin ve İçerik Üreticisi öğretmenlere açıktır
-    if (activeModel === 'gemini-2.5-pro' && !canUserUseProModel(req.session.user)) {
-      activeModel = 'gemini-2.5-flash'; // Yetkisiz öğretmen otomatik flash modeline düşürülür
+    // Model İzni Denetimi: Pro/Argon modeller sadece Admin ve İçerik Üreticisi öğretmenlere açıktır
+    if ((activeModel === 'gemini-2.5-pro' || activeModel === 'gemini-4-argon') && !canUserUseProModel(req.session.user)) {
+      activeModel = 'gemini-3.8-flash'; // Yetkisiz öğretmen otomatik flash modeline düşürülür
     }
 
-    // Model zinciri: Geçerli hızlı modellerle anında üretim + güvenli fallback
+    // Model zinciri: Aktif Gemini 3.x modelleri öncelikli + güvenli fallback
     const candidateModels = [...new Set([
       activeModel,
-      'gemini-2.5-flash',
-      'gemini-flash-latest',
-      'gemini-2.5-flash-lite'
+      'gemini-3.8-flash',
+      'gemini-3.5-flash-lite',
+      'gemini-flash-latest'
     ])].filter(Boolean);
 
     let response = null;
