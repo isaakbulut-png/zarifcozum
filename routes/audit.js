@@ -1,6 +1,7 @@
 const express = require('express');
 const { ObjectId } = require('mongodb');
 const AuditSubmission = require('../models/AuditSubmission');
+const ContentLibrary = require('../models/ContentLibrary');
 const { auditContent } = require('../lib/content-auditor');
 
 function createAuditRouter({ requireRole, AdminLog }) {
@@ -30,14 +31,60 @@ function createAuditRouter({ requireRole, AdminLog }) {
         submittedBy: String(user.id || user._id || 'teacher'),
         submittedByName: String(user.name || user.email || 'Öğretmen'),
         itemCount: items.length,
-        payload: items.slice(0, 12),
+        payload: items.slice(0, 20),
         auditReport: report,
         adminStatus: 'pending'
       });
 
+      // Konu anlatımı denetime gönderildiğinde otomatik olarak Konu Havuzuna (ContentLibrary: ai_lesson_pool) düşsün
+      let poolId = null;
+      if (contentType === 'lesson') {
+        try {
+          const tp = (req.body?.topicPayload && typeof req.body.topicPayload === 'object') ? req.body.topicPayload : {};
+          const poolDoc = await ContentLibrary.create({
+            title,
+            type: 'ai_lesson_pool',
+            ders: 'matematik',
+            grade,
+            topic,
+            difficulty: 'orta',
+            content: {
+              grade,
+              subject: 'Matematik',
+              themeCode: tp.themeCode || '',
+              themeTitle: tp.themeTitle || tp.unit_topic || topic,
+              subTopicTitle: tp.subTopicTitle || tp.sub_topic || topic,
+              unit_topic: tp.unit_topic || tp.themeTitle || topic,
+              sub_topic: tp.sub_topic || tp.subTopicTitle || topic,
+              outcome_code: tp.outcome_code || '',
+              short_summary: tp.short_summary || '',
+              lessonPages: Array.isArray(tp.lessonPages) && tp.lessonPages.length ? tp.lessonPages : items,
+              practicalNotes: Array.isArray(tp.practicalNotes) ? tp.practicalNotes : [],
+              flashcards: Array.isArray(tp.flashcards) ? tp.flashcards : [],
+              teacherNotes: tp.teacherNotes || ''
+            },
+            metadata: {
+              auditSubmissionId: String(doc._id),
+              auditScore: report?.overallScore || 0,
+              auditVerdict: report?.verdict || 'pending',
+              adminStatus: 'pending',
+              submittedByName: String(user.name || user.email || 'Öğretmen'),
+              pageCount: (Array.isArray(tp.lessonPages) && tp.lessonPages.length ? tp.lessonPages : items).length
+            },
+            status: 'draft',
+            source: 'ai',
+            createdBy: String(user.id || user._id || 'teacher')
+          });
+          poolId = String(poolDoc._id);
+        } catch (poolErr) {
+          console.warn('[ZarifDenetim] Konu havuzuna otomatik kayıt uyarısı:', poolErr.message);
+        }
+      }
+
       res.status(201).json({
         success: true,
         submissionId: String(doc._id),
+        poolId,
         report
       });
     } catch (err) {
@@ -104,6 +151,26 @@ function createAuditRouter({ requireRole, AdminLog }) {
       ).lean();
 
       if (!updated) return res.status(404).json({ mesaj: 'Denetim kaydı bulunamadı.' });
+
+      // Konu denetim kararı verildiğinde Konu Havuzundaki ilgili kaydın durumunu güncelle
+      if (updated.contentType === 'lesson') {
+        try {
+          await ContentLibrary.updateMany(
+            { type: 'ai_lesson_pool', 'metadata.auditSubmissionId': String(updated._id) },
+            {
+              $set: {
+                status: decision === 'approved' ? 'approved' : 'archived',
+                'metadata.adminStatus': decision,
+                'metadata.adminNote': adminNote,
+                'metadata.reviewedBy': String(user.name || user.email || 'Admin'),
+                'metadata.reviewedAt': new Date()
+              }
+            }
+          );
+        } catch (poolSyncErr) {
+          console.warn('[ZarifDenetim] Konu havuzu durum senkronizasyonu uyarısı:', poolSyncErr.message);
+        }
+      }
 
       if (AdminLog) {
         try {

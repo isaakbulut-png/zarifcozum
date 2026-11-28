@@ -689,6 +689,13 @@
           </div>
 
           <div class="kc-tb-col">
+            ${curPage.imageUrl ? `
+              <div class="kc-block-card" style="background:#FFFBF5;border:1.5px solid #FED7AA;">
+                <div class="kc-block-head" style="color:#9A3412;">🎨 Keşif Hikâyesi Sahnesi</div>
+                <img src="${esc(curPage.imageUrl)}" alt="Konu Hikâye İllüstrasyonu" loading="lazy" style="width:100%;max-height:260px;object-fit:cover;border-radius:12px;border:1px solid #FDE68A;display:block;margin-top:6px;">
+              </div>
+            ` : ''}
+
             ${svgCode && svgCode.includes('<svg') ? `
               <div class="kc-block-card kc-block-svg">
                 <div class="kc-block-head">📐 Görsel Matematik Sahnesi</div>

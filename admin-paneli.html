@@ -1342,6 +1342,49 @@
           </table>
         </div>
       </div>
+    
+      <div class="panel" style="margin-top:18px;border:1.5px solid #e7d9cc;background:#fffbf7;">
+        <div class="toolbar" style="justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h3 style="margin:0;">📚 Denetimli Konu Havuzu</h3>
+            <p id="adminLessonPoolSummary" style="margin:2px 0 0;font-size:0.85rem;color:#6a5242">Denetime gönderilen ve onaylanan konular burada birikir; havuzdan tek tıkla öğrencilere yayınlanabilir.</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input type="search" id="adminLessonPoolSearch" placeholder="Havuzda konu ara…" style="padding:7px 11px;border:1px solid #dccab8;border-radius:8px;font-size:0.85rem;min-width:190px;">
+            <select id="adminLessonPoolGrade" style="padding:7px 10px;border:1px solid #dccab8;border-radius:8px;font-size:0.85rem;">
+              <option value="">Tüm Sınıflar</option>
+              <option value="5">5. Sınıf</option><option value="6">6. Sınıf</option>
+              <option value="7">7. Sınıf</option><option value="8">8. Sınıf</option>
+              <option value="9">9. Sınıf</option><option value="10">10. Sınıf</option>
+              <option value="11">11. Sınıf</option><option value="12">12. Sınıf</option>
+            </select>
+            <select id="adminLessonPoolStatus" style="padding:7px 10px;border:1px solid #dccab8;border-radius:8px;font-size:0.85rem;">
+              <option value="">Tüm Durumlar</option>
+              <option value="approved">✅ Onaylı</option>
+              <option value="draft">⏳ Denetimde</option>
+              <option value="archived">❌ Reddedilen</option>
+            </select>
+            <button class="btn sm primary" type="button" id="adminLessonPoolRefresh">↻ Havuzu Yenile</button>
+          </div>
+        </div>
+        <div class="table-wrap" style="margin-top:12px;overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th>Sınıf</th>
+                <th>Konu Başlığı &amp; İçerik</th>
+                <th>Gönderen Öğretmen</th>
+                <th>Denetim Skoru</th>
+                <th>Durum</th>
+                <th style="text-align:right;">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="adminLessonPoolTbody">
+              <tr><td colspan="6" style="text-align:center;padding:20px;color:#6a5242;">Konu havuzu yükleniyor…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
 
     <!-- 9C. İLETİŞİM & DESTEK TALEPLERİ (ZarifStore.contacts) -->
@@ -5317,5 +5360,6 @@
   <script src="/assets/page-transitions.js?v=1" defer></script>
   <script src="/assets/mobile-nav.js?v=1" defer></script>
   <script src="/assets/zarif-brand-seal.js?v=1" defer></script>
+  <script src="/assets/admin-lesson-pool.js?v=1" defer></script>
 </body>
 </html>

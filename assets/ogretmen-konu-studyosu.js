@@ -244,6 +244,8 @@
             svg_kodu: svg,
             visualSvg: svg,
             svgDiagram: svg,
+            imageUrl: typeof p.imageUrl === 'string' ? p.imageUrl.trim() : '',
+            illustrasyon_promptu: typeof p.illustrasyon_promptu === 'string' ? p.illustrasyon_promptu.trim() : '',
             kazanim_kodu: p.kazanim_kodu || topKazanim,
             surec_becerileri: Array.isArray(p.surec_becerileri) && p.surec_becerileri.length ? [...p.surec_becerileri] : [...topSurec],
             content: p.content || story
@@ -425,8 +427,22 @@
                   </div>` : ''}
               </div>
 
-              <!-- Sağ Sütun (%45): Geniş SVG Görsel Sahnesi + Gizli Cevaplı Mini Meydan Okuma -->
+              <!-- Sağ Sütun (%45): Hikâye İllüstrasyonu + Geniş SVG Görsel Sahnesi + Mini Meydan Okuma -->
               <div class="cs-col">
+                <div class="cs-card" style="background:#FFFBF5;border:1.5px solid #FED7AA;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+                    <div class="cs-head" style="margin:0;color:#9A3412;">🎨 Hikâye İllüstrasyonu</div>
+                    <button type="button" id="csGenPageImgBtn" style="padding:5px 11px;border-radius:8px;border:1px solid #FDBA74;background:#FFF7ED;color:#9A3412;font-size:12px;font-weight:800;cursor:pointer;">
+                      ${page.imageUrl ? '🎨 Görseli Yenile' : '🎨 Hikâye Görseli Üret'}
+                    </button>
+                  </div>
+                  <div id="csPageStoryImgBox">
+                    ${page.imageUrl
+                      ? `<img src="${esc(page.imageUrl)}" alt="Konu Hikâye İllüstrasyonu" style="width:100%;max-height:240px;object-fit:cover;border-radius:10px;border:1px solid #FDE68A;display:block;">`
+                      : `<p style="margin:0;font-size:12.5px;color:#78716C;">Bu sayfanın keşif hikâyesine özel renkli ders kitabı görseli üretmek için yukarıdaki butona tıklayın.</p>`}
+                  </div>
+                </div>
+
                 <div class="cs-svg-stage">
                   <div class="cs-head" style="justify-content:center;color:#0F172A;">📐 Görsel Şema Sahnesi</div>
                   <div class="cs-svg-canvas" id="csPageSvgMount"></div>
@@ -480,6 +496,40 @@
           if (!box) return;
           box.hidden = !box.hidden;
           this.textContent = box.hidden ? '👁️ Cevabı Gör' : '🙈 Cevabı Gizle';
+        });
+        $('csGenPageImgBtn')?.addEventListener('click', async function () {
+          const btnImg = this;
+          const p = currentTopic.lessonPages[activePageIdx];
+          if (!p) return;
+          btnImg.disabled = true;
+          const orig = btnImg.textContent;
+          btnImg.textContent = '🎨 Üretiliyor…';
+          try {
+            const r = await apiJson('/api/ai/curriculum-content/generate-page-illustration', {
+              method: 'POST',
+              body: JSON.stringify({
+                grade: currentTopic.grade || 5,
+                topic: currentTopic.subTopicTitle || currentTopic.title || 'Matematik',
+                baslik: p.baslik || p.title || '',
+                kesif_hikayesi: p.kesif_hikayesi || p.storyOrContext || '',
+                illustrasyon_promptu: p.illustrasyon_promptu || '',
+                curriculumId: currentTopic.id || currentTopic._id || '',
+                pageNumber: p.pageNumber || (activePageIdx + 1)
+              })
+            });
+            if (r && r.imageUrl) {
+              p.imageUrl = r.imageUrl;
+              renderStudio();
+              setStatus('✅ Sayfa hikâye görseli üretildi! Yayınla veya Taslak Kaydet ile kalıcı hale getirebilirsiniz.', 'ok');
+            } else {
+              btnImg.textContent = orig;
+            }
+          } catch (err) {
+            alert('Konu hikâye görseli üretilemedi: ' + err.message);
+            btnImg.textContent = orig;
+          } finally {
+            btnImg.disabled = false;
+          }
         });
       }
 
@@ -741,7 +791,8 @@
               grade: currentTopic.grade || 5,
               topic: currentTopic.subTopicTitle || currentTopic.title || 'Konu Anlatımı',
               title: currentTopic.title || `${currentTopic.grade || 5}. Sınıf Konu Anlatımı`,
-              items: currentTopic.lessonPages
+              items: currentTopic.lessonPages,
+              topicPayload: currentTopic
             })
           });
           const rep = res?.report;
@@ -751,7 +802,7 @@
             .slice(0, 4)
             .join(' | ');
           setStatus(
-            `${ok ? '✅' : '⚠️'} Konu Denetim Skoru: %${rep?.overallScore || 0} — Admin Denetim Kuyruğuna gönderildi.${warnSummary ? ' Bulgular: ' + warnSummary : ''}`,
+            `${ok ? '✅' : '⚠️'} Konu Denetim Skoru: %${rep?.overallScore || 0} — Admin Denetim Kuyruğuna ve Konu Havuzuna aktarıldı.${warnSummary ? ' Bulgular: ' + warnSummary : ''}`,
             ok ? 'ok' : 'error'
           );
         } catch (err) {
@@ -761,6 +812,103 @@
           audBtn.textContent = '🛡️ Denetime Gönder';
         }
       });
+
+      // Konu Havuzundan Çek Butonu & Modalı
+      if (!$('pullFromLessonPoolBtn')) {
+        const poolBtn = document.createElement('button');
+        poolBtn.type = 'button';
+        poolBtn.id = 'pullFromLessonPoolBtn';
+        poolBtn.textContent = '📚 Konu Havuzundan Çek';
+        poolBtn.style.cssText = 'padding:9px 14px;border-radius:10px;border:1.5px solid #CBD5E1;background:#FFFFFF;color:#0F172A;font-weight:800;font-size:13px;cursor:pointer;';
+        pubBtn.parentNode.insertBefore(poolBtn, audBtn);
+
+        poolBtn.addEventListener('click', async () => {
+          let modal = $('zcLessonPoolPickerModal');
+          if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'zcLessonPoolPickerModal';
+            modal.style.cssText = 'position:fixed;inset:0;z-index:99990;background:rgba(15,23,42,0.72);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:20px;';
+            modal.innerHTML = `
+              <div style="width:100%;max-width:780px;max-height:85vh;background:#fff;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(15,23,42,0.35);">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#0F172A;color:#fff;">
+                  <strong style="font-size:15px;">📚 Denetimli Konu Havuzu — Stüdyoya Konu Çek</strong>
+                  <button type="button" id="zcLpCloseBtn" style="padding:5px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:#1E293B;color:#fff;font-weight:700;cursor:pointer;">✕ Kapat</button>
+                </div>
+                <div style="padding:12px 18px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;display:flex;gap:8px;flex-wrap:wrap;">
+                  <select id="zcLpGrade" style="padding:7px 10px;border-radius:8px;border:1px solid #CBD5E1;">
+                    <option value="">Tüm Sınıflar</option>
+                    <option value="5">5. Sınıf</option><option value="6">6. Sınıf</option>
+                    <option value="7">7. Sınıf</option><option value="8">8. Sınıf</option>
+                    <option value="9">9. Sınıf</option><option value="10">10. Sınıf</option>
+                    <option value="11">11. Sınıf</option><option value="12">12. Sınıf</option>
+                  </select>
+                  <input id="zcLpSearch" type="search" placeholder="Konu veya başlık ara..." style="flex:1;min-width:180px;padding:7px 11px;border-radius:8px;border:1px solid #CBD5E1;">
+                </div>
+                <div id="zcLpList" style="flex:1;overflow:auto;padding:16px 18px;display:grid;gap:10px;"></div>
+              </div>
+            `;
+            document.body.appendChild(modal);
+            $('zcLpCloseBtn').onclick = () => { modal.style.display = 'none'; };
+            modal.addEventListener('click', (ev) => { if (ev.target === modal) modal.style.display = 'none'; });
+          }
+          modal.style.display = 'flex';
+
+          const loadPoolModalList = async () => {
+            const box = $('zcLpList');
+            box.innerHTML = '<div style="text-align:center;padding:24px;color:#64748B;">Konu havuzu yükleniyor…</div>';
+            try {
+              const p = new URLSearchParams();
+              if ($('zcLpGrade')?.value) p.set('grade', $('zcLpGrade').value);
+              if ($('zcLpSearch')?.value?.trim()) p.set('search', $('zcLpSearch').value.trim());
+              const r = await apiJson('/api/content-library/lesson-pool?' + p.toString());
+              const list = r.items || [];
+              if (!list.length) {
+                box.innerHTML = '<div style="text-align:center;padding:24px;color:#64748B;">Havuzda henüz konu bulunamadı.</div>';
+                return;
+              }
+              box.replaceChildren(...list.map(it => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid #E2E8F0;border-radius:12px;background:#FAF8F5;flex-wrap:wrap;';
+                row.innerHTML = `
+                  <div>
+                    <div style="font-weight:800;color:#0F172A;font-size:14px;">${esc(it.title)}</div>
+                    <div style="font-size:12px;color:#64748B;margin-top:3px;">
+                      ${it.grade}. Sınıf · 📖 ${it.pageCount} Sayfa · ⚡ ${it.noteCount} Hap Not · 🃏 ${it.flashcardCount} 3D Kart · Skor: <strong>%${it.auditScore}</strong> · ${it.status === 'approved' ? '✅ Onaylı' : '⏳ Denetimde'}
+                    </div>
+                  </div>
+                `;
+                const useBtn = document.createElement('button');
+                useBtn.type = 'button';
+                useBtn.textContent = '📥 Stüdyoya Çek';
+                useBtn.style.cssText = 'padding:7px 14px;border-radius:9px;border:none;background:#0F172A;color:#fff;font-weight:800;font-size:12.5px;cursor:pointer;';
+                useBtn.onclick = () => {
+                  const c = it.content || {};
+                  currentTopic = normalizeTopicData({
+                    ...c,
+                    grade: it.grade,
+                    title: it.title,
+                    themeTitle: c.themeTitle || c.unit_topic || it.topic,
+                    subTopicTitle: c.subTopicTitle || c.sub_topic || it.topic
+                  });
+                  activeStudioTab = 'pages';
+                  activePageIdx = 0;
+                  editMode = false;
+                  renderStudio();
+                  modal.style.display = 'none';
+                  setStatus(`✅ "${it.title}" konu havuzundan stüdyoya çekildi! İnceleyip sınıfınıza yayınlayabilirsiniz.`, 'ok');
+                };
+                row.append(useBtn);
+                return row;
+              }));
+            } catch (e) {
+              box.innerHTML = `<div style="color:#B91C1C;padding:16px;">${esc(e.message)}</div>`;
+            }
+          };
+          $('zcLpGrade').onchange = loadPoolModalList;
+          $('zcLpSearch').oninput = () => { clearTimeout(window._zcLpT); window._zcLpT = setTimeout(loadPoolModalList, 250); };
+          loadPoolModalList();
+        });
+      }
     }
     $('publishedTopicsGradeFilter')?.addEventListener('change', loadPublishedList);
     $('refreshPublishedTopicsBtn')?.addEventListener('click', loadPublishedList);

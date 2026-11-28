@@ -13,7 +13,8 @@ const contentLibrarySchema = new mongoose.Schema({
       'ai_study_plan',
       'pdf_document',
       'teacher_upload',
-      'maarif_published_test'
+      'maarif_published_test',
+      'ai_lesson_pool'
     ],
     index: true
   },

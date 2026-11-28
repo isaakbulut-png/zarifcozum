@@ -17,6 +17,8 @@ const lessonPageSchema = new mongoose.Schema({
   altin_kural: { type: String, default: '' },
   visualSvg: { type: String, default: '' },
   svg_kodu: { type: String, default: '' },
+  imageUrl: { type: String, default: '' },
+  illustrasyon_promptu: { type: String, default: '' },
   commonMistakeBox: { type: String, default: '' },
   kavram_yanilgisi: { type: String, default: '' },
   miniChallenge: { type: String, default: '' },

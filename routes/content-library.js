@@ -98,6 +98,53 @@ function createContentLibraryRouter({ requireStaff, mediaStorage, privateDocumen
     }
   });
 
+  // 2B. Konu Havuzu Listesi (Denetimden geçen & üretilen konular — Öğretmen ve Admin havuzdan çekebilir)
+  router.get('/lesson-pool', async (req, res) => {
+    try {
+      const { grade, status, search } = req.query;
+      const filter = { type: 'ai_lesson_pool' };
+      if (grade && grade !== 'all') filter.grade = Number(grade);
+      if (status && status !== 'all') filter.status = status;
+      if (search && search.trim()) {
+        const rx = new RegExp(search.trim(), 'i');
+        filter.$or = [{ title: rx }, { topic: rx }];
+      }
+
+      const poolDocs = await ContentLibrary.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(80)
+        .lean();
+
+      const items = poolDocs.map(d => {
+        const c = (d.content && typeof d.content === 'object') ? d.content : {};
+        const m = d.metadata || {};
+        return {
+          id: String(d._id),
+          _id: String(d._id),
+          title: d.title,
+          grade: d.grade || c.grade || 5,
+          topic: d.topic || c.subTopicTitle || '',
+          themeTitle: c.themeTitle || c.unit_topic || '',
+          subTopicTitle: c.subTopicTitle || c.sub_topic || d.topic || '',
+          status: d.status,
+          auditScore: m.auditScore || 0,
+          adminStatus: m.adminStatus || (d.status === 'approved' ? 'approved' : 'pending'),
+          submittedByName: m.submittedByName || 'Öğretmen',
+          pageCount: Array.isArray(c.lessonPages) ? c.lessonPages.length : (m.pageCount || 0),
+          noteCount: Array.isArray(c.practicalNotes) ? c.practicalNotes.length : 0,
+          flashcardCount: Array.isArray(c.flashcards) ? c.flashcards.length : 0,
+          content: c,
+          createdAt: d.createdAt
+        };
+      });
+
+      res.json({ success: true, total: items.length, items });
+    } catch (err) {
+      console.error('[ContentLibrary] Konu havuzu listeleme hatası:', err);
+      res.status(500).json({ mesaj: 'Konu havuzu yüklenemedi.' });
+    }
+  });
+
   // 3. Dışa Aktar (PDF veya DOCX İndir) - GET ve POST destekler (:id rotasından önce tanımlanmalıdır)
   router.route('/export').all(async (req, res) => {
     try {

@@ -1260,6 +1260,57 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
     }
   });
 
+  // Konu Üret Sayfası İçin Hikâye İllüstrasyonu Üret / Yenile (5–12. Sınıf, kalıcı R2 + CurriculumContent)
+  router.post('/curriculum-content/generate-page-illustration', requireRole('teacher', 'admin'), async (req, res) => {
+    try {
+      const grade = Number(req.body?.grade) || 5;
+      const topic = String(req.body?.topic || 'Matematik').trim();
+      const baslik = String(req.body?.baslik || '').trim();
+      const kesifHikayesi = String(req.body?.kesif_hikayesi || '').trim();
+      const customPrompt = String(req.body?.illustrasyon_promptu || '').trim();
+      if (!customPrompt && !kesifHikayesi && !baslik) {
+        return res.status(400).json({ mesaj: 'Görsel üretmek için sayfa başlığı veya keşif hikâyesi gereklidir.' });
+      }
+      const styleHint = grade <= 6
+        ? 'Warm Turkish 5th-6th grade math textbook storybook illustration, friendly flat vector art, bright inviting pastel colors, clean ivory background, strictly NO text, NO letters, NO numbers, NO watermark.'
+        : 'Modern Turkish math textbook editorial illustration, clean minimal educational art, crisp visual storytelling, clean ivory background, strictly NO text, NO letters, NO numbers, NO watermark.';
+      const sceneBase = customPrompt || `Educational storybook illustration for a ${grade}th grade math lesson about "${topic}" (${baslik}). Context: ${kesifHikayesi.slice(0, 320)}`;
+      const finalPrompt = `${sceneBase}. ${styleHint}`;
+
+      const result = await generateIllustration({ prompt: finalPrompt, filename: `lesson_${grade}_${Date.now()}.png` });
+      const resolvedUrl = typeof result === 'string' ? result : (result && result.url);
+      if (!resolvedUrl) {
+        return res.status(502).json({ mesaj: 'Görsel üretici şu an yanıt veremedi. Lütfen tekrar deneyin.' });
+      }
+
+      let persisted = false;
+      const curriculumId = String(req.body?.curriculumId || '').trim();
+      const pageNumber = Number(req.body?.pageNumber);
+      if (curriculumId && ObjectId.isValid(curriculumId) && Number.isInteger(pageNumber) && pageNumber >= 1) {
+        try {
+          const CurriculumContent = require('../models/CurriculumContent');
+          const doc = await CurriculumContent.findById(curriculumId);
+          if (doc && Array.isArray(doc.lessonPages)) {
+            const targetPage = doc.lessonPages.find(p => Number(p.pageNumber) === pageNumber) || doc.lessonPages[pageNumber - 1];
+            if (targetPage) {
+              targetPage.imageUrl = resolvedUrl;
+              if (customPrompt) targetPage.illustrasyon_promptu = customPrompt;
+              await doc.save();
+              persisted = true;
+            }
+          }
+        } catch (pErr) {
+          console.warn('[AI] Konu sayfası görseli DB kaydı atlandı:', pErr.message);
+        }
+      }
+
+      res.json({ success: true, imageUrl: resolvedUrl, persisted });
+    } catch (err) {
+      console.error('[AI] Konu sayfası illüstrasyon hatası:', err);
+      res.status(500).json({ mesaj: err.message || 'Konu hikâye görseli üretilemedi.' });
+    }
+  });
+
   // Taslakları Listele
   router.get('/questions/drafts', requireRole('teacher', 'admin'), async (req, res) => {
     try {
@@ -1662,6 +1713,8 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
           : (typeof p?.visualSvg === 'string' && p.visualSvg.trim()
               ? p.visualSvg.trim()
               : (typeof p?.svgDiagram === 'string' ? p.svgDiagram.trim() : ''));
+        const imageUrl = typeof p?.imageUrl === 'string' ? p.imageUrl.trim() : '';
+        const illustrasyon_promptu = typeof p?.illustrasyon_promptu === 'string' ? p.illustrasyon_promptu.trim() : '';
         const pageKazanim = String(p?.kazanim_kodu || kazanim_kodu || '').trim();
         const pageBeceriler = Array.isArray(p?.surec_becerileri) && p.surec_becerileri.length
           ? p.surec_becerileri.map(s => String(s || '').trim()).filter(Boolean)
@@ -1675,6 +1728,8 @@ function createAIRouter({ getQuizCollection, requireRole, AdminLog }) {
           mini_soru,
           mini_cevap,
           svg_kodu,
+          imageUrl,
+          illustrasyon_promptu,
           kazanim_kodu: pageKazanim,
           surec_becerileri: pageBeceriler,
           title: baslik,
