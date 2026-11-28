@@ -346,7 +346,12 @@
     const saveTextBtn = $('saveSiteTextBtn');
     const textMsgEl = $('siteTextMsg');
     const textCurrentEl = $('siteTextCurrent');
+    const paintSelectionBtn = $('paintSelectedTextBtn');
+    const stripColorsBtn = $('stripTextColorsBtn');
+    const resetTextPosBtn = $('resetTextPosBtn');
     let selectedTextColor = '';
+    let textOffsetX = 0;
+    let textOffsetY = 0;
 
     const pushLiveTextPreview = () => {
       if (!iframe?.contentWindow || !targetSelect.value) return;
@@ -362,20 +367,69 @@
         fontSizePx: sz >= 10 ? sz : null,
         resetSize: sz < 10,
         fontWeight: textWeightSelect?.value || null,
-        resetWeight: !textWeightSelect?.value
+        resetWeight: !textWeightSelect?.value,
+        offsetX: textOffsetX,
+        offsetY: textOffsetY
       }, window.location.origin);
     };
 
+    const paintSelectedRange = (hexColor) => {
+      if (!textInput || !hexColor) return false;
+      const start = textInput.selectionStart;
+      const end = textInput.selectionEnd;
+      if (typeof start !== 'number' || typeof end !== 'number' || end <= start) return false;
+      const val = textInput.value;
+      const chosen = val.slice(start, end).replace(/\[\[#[0-9a-f]{3,8}\|([^\]]+)\]\]/gi, '$1');
+      if (!chosen) return false;
+      const wrapped = `[[${hexColor}|${chosen}]]`;
+      textInput.value = val.slice(0, start) + wrapped + val.slice(end);
+      textInput.focus();
+      textInput.setSelectionRange(start, start + wrapped.length);
+      pushLiveTextPreview();
+      return true;
+    };
+
     document.querySelectorAll('[data-zc-color-swatch]').forEach((sw) => {
+      sw.addEventListener('mousedown', (e) => e.preventDefault()); // textarea seçimini koru
       sw.addEventListener('click', () => {
-        selectedTextColor = sw.dataset.zcColorSwatch || '';
-        if (textColorInput && selectedTextColor) textColorInput.value = selectedTextColor;
+        const hex = sw.dataset.zcColorSwatch || '';
+        if (textColorInput && hex) textColorInput.value = hex;
+        // Metnin bir kısmı seçiliyse yalnızca seçili kısmı boya (çift renk!)
+        if (hex && paintSelectedRange(hex)) {
+          setMsg(textMsgEl, `🖍️ Seçili metin ${hex} ile boyandı. Kaydetmek için "💾 Yazıyı & Stili Kaydet"e tıklayın.`, true);
+          return;
+        }
+        selectedTextColor = hex;
         document.querySelectorAll('[data-zc-color-swatch]').forEach(b => {
           b.style.outline = b === sw ? '2.5px solid #0f172a' : 'none';
           b.style.outlineOffset = '2px';
         });
         pushLiveTextPreview();
       });
+    });
+
+    paintSelectionBtn?.addEventListener('mousedown', (e) => e.preventDefault());
+    paintSelectionBtn?.addEventListener('click', () => {
+      const hex = textColorInput?.value || selectedTextColor || '#f59e0b';
+      if (!paintSelectedRange(hex)) {
+        setMsg(textMsgEl, 'Önce yukarıdaki yazı kutusunda boyamak istediğiniz kelimeleri fareyle seçin.', false);
+      } else {
+        setMsg(textMsgEl, `🖍️ Seçili kısım ${hex} rengiyle boyandı!`, true);
+      }
+    });
+
+    stripColorsBtn?.addEventListener('click', () => {
+      if (!textInput) return;
+      textInput.value = textInput.value.replace(/\[\[#[0-9a-f]{3,8}\|([^\]]+)\]\]/gi, '$1');
+      pushLiveTextPreview();
+      setMsg(textMsgEl, '🧹 Parçalı renk işaretleri temizlendi.', true);
+    });
+
+    resetTextPosBtn?.addEventListener('click', () => {
+      textOffsetX = 0;
+      textOffsetY = 0;
+      pushLiveTextPreview();
+      setMsg(textMsgEl, '↺ Yazı konumu sıfırlandı (0px, 0px). Kaydetmek için "💾 Yazıyı & Stili Kaydet"e tıklayın.', true);
     });
 
     const onColorPick = () => {
@@ -483,6 +537,8 @@
       if (selected && editableTags.includes(selected.tag)) {
         textEditorBox.hidden = false;
         textInput.value = selected.currentText || selected.label || '';
+        textOffsetX = Number(selected.offsetX) || 0;
+        textOffsetY = Number(selected.offsetY) || 0;
         saveTextBtn.disabled = false;
         setMsg(textMsgEl, '', true);
       } else {
@@ -523,7 +579,9 @@
             textColor: selectedTextColor || null,
             fontFamily: textFontSelect?.value || null,
             fontSizePx: sz >= 10 ? sz : null,
-            fontWeight: textWeightSelect?.value || null
+            fontWeight: textWeightSelect?.value || null,
+            offsetX: textOffsetX,
+            offsetY: textOffsetY
           })
         });
         const data = await res.json().catch(() => ({}));
@@ -696,6 +754,36 @@
             ? ' İsterseniz aşağıdan bu öğenin yazısını da doğrudan düzenleyebilirsiniz.'
             : '');
         setMsg(msgEl, 'Hedef canlı önizlemeden seçildi.' + hintSuffix, true);
+      }
+
+      if (data.type === 'site-text-moved' && data.targetKey) {
+        textOffsetX = Number(data.offsetX) || 0;
+        textOffsetY = Number(data.offsetY) || 0;
+        const customText = (textInput?.value || '').trim();
+        const sz = Number(textSizeInput?.value || 0);
+        if (customText && pageSelect.value) {
+          fetch('/api/admin/site-text', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              pagePath: pageSelect.value,
+              targetKey: data.targetKey,
+              customText,
+              textColor: selectedTextColor || null,
+              fontFamily: textFontSelect?.value || null,
+              fontSizePx: sz >= 10 ? sz : null,
+              fontWeight: textWeightSelect?.value || null,
+              offsetX: textOffsetX,
+              offsetY: textOffsetY
+            })
+          })
+            .then(() => {
+              setMsg(textMsgEl, `✅ Yazı konumu kaydedildi (X: ${textOffsetX}px, Y: ${textOffsetY}px)`, true);
+              loadTextOverrides();
+            })
+            .catch(err => setMsg(textMsgEl, 'Yazı konumu kaydedilemedi: ' + err.message, false));
+        }
       }
 
       if (data.type === 'site-media-transform' && data.id) {

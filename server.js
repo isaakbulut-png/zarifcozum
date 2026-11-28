@@ -499,8 +499,10 @@ app.get('/api/site-media', async (req, res) => {
         })),
       textOverrides: textOverrides
         .filter(item => item.pagePath === pagePath)
-        .map(({targetKey, customText, textColor, fontFamily, fontSizePx, fontWeight}) => ({
-          targetKey, customText, textColor, fontFamily, fontSizePx, fontWeight
+        .map(({targetKey, customText, textColor, fontFamily, fontSizePx, fontWeight, offsetX, offsetY}) => ({
+          targetKey, customText, textColor, fontFamily, fontSizePx, fontWeight,
+          offsetX: Number(offsetX) || 0,
+          offsetY: Number(offsetY) || 0
         }))
     });
   } catch (error) {

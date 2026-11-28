@@ -2072,7 +2072,7 @@
           <p class="msg" id="siteMediaMsg" role="alert"></p>
         </form>
         <div id="siteTextEditorBox" hidden style="margin:14px 0;padding:16px 18px;background:#faf6f1;border:1.5px solid #e7d9cc;border-radius:14px;">
-          <div style="font-size:0.9rem;font-weight:800;color:#2b180d;margin-bottom:8px;">✏️ Seçili Öğenin Yazısını, Fontunu ve Rengini Düzenle</div>
+          <div style="font-size:0.9rem;font-weight:800;color:#2b180d;margin-bottom:8px;">✏️ Seçili Öğenin Yazısını, Fontunu ve Çift Rengini Düzenle <span style="font-weight:500;font-size:0.76rem;color:#6b4f3a;">(Çift renk için kutuda istediğiniz kelimeleri seçip bir renge tıklayın · Taşımak için önizlemedeki ✋ Yazıyı Sürükle etiketinden çekin)</span></div>
           <textarea id="siteTextEditorInput" rows="3" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #d6c8bc;font-family:inherit;font-size:0.88rem;resize:vertical;"></textarea>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px;align-items:end;">
             <label style="font-size:0.78rem;font-weight:700;color:#475569;display:block;">Yazı Tipi (Font)
@@ -2113,7 +2113,10 @@
             <button type="button" data-zc-color-swatch="#dc2626" title="Kırmızı" style="width:24px;height:24px;border-radius:999px;border:1.5px solid #cbd5e1;background:#dc2626;cursor:pointer;"></button>
             <button type="button" data-zc-color-swatch="#94a3b8" title="Açık Gri" style="width:24px;height:24px;border-radius:999px;border:1.5px solid #cbd5e1;background:#94a3b8;cursor:pointer;"></button>
             <input type="color" id="siteTextColor" value="#2b180d" title="Özel Renk Seç" style="width:30px;height:26px;border:none;background:transparent;cursor:pointer;">
-            <button type="button" id="siteTextColorReset" class="btn light" style="font-size:0.72rem;padding:3px 8px;">Rengi Sıfırla</button>
+            <button type="button" id="paintSelectedTextBtn" class="btn light" style="font-size:0.74rem;padding:4px 9px;background:#fff7ed;border-color:#fdba74;color:#9a3412;font-weight:700;">🖍️ Seçili Kısmı Boya</button>
+            <button type="button" id="stripTextColorsBtn" class="btn light" style="font-size:0.72rem;padding:4px 8px;">🧹 Çift Renk Temizle</button>
+            <button type="button" id="siteTextColorReset" class="btn light" style="font-size:0.72rem;padding:4px 8px;">Rengi Sıfırla</button>
+            <button type="button" id="resetTextPosBtn" class="btn light" style="font-size:0.72rem;padding:4px 8px;">↺ Konumu Sıfırla</button>
           </div>
           <div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;">
             <button type="button" id="saveSiteTextBtn" class="btn primary sm" disabled>💾 Yazıyı &amp; Stili Kaydet</button>
@@ -5356,7 +5359,7 @@
   </script>
   <script src="/assets/VisualMathEngine.js?v=2" defer></script>
   <script src="/assets/content-pool-viewer.js?v=2" defer></script>
-  <script src="/assets/admin-site-media.js?v=5" defer></script>
+  <script src="/assets/admin-site-media.js?v=6" defer></script>
   <script src="/assets/page-transitions.js?v=1" defer></script>
   <script src="/assets/mobile-nav.js?v=1" defer></script>
   <script src="/assets/zarif-brand-seal.js?v=1" defer></script>

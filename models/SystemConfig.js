@@ -175,13 +175,14 @@ systemConfigSchema.statics.deleteSiteMediaPlacement = async function (id) {
 
 systemConfigSchema.statics.getSiteTextOverrides = function () {
   return this.find({_id: /^site-text-/})
-    .select('_id pagePath targetKey customText textColor fontFamily fontSizePx fontWeight updatedAt')
+    .select('_id pagePath targetKey customText textColor fontFamily fontSizePx fontWeight offsetX offsetY updatedAt')
     .sort({pagePath: 1, updatedAt: -1})
     .lean();
 };
 
 systemConfigSchema.statics.saveSiteTextOverride = async function ({
-  pagePath, targetKey, customText, textColor = null, fontFamily = null, fontSizePx = null, fontWeight = null
+  pagePath, targetKey, customText, textColor = null, fontFamily = null, fontSizePx = null, fontWeight = null,
+  offsetX = 0, offsetY = 0
 }) {
   const id = `site-text-${createHash('sha256').update(`${pagePath}\0${targetKey}`).digest('hex')}`;
   const cleanText = String(customText || '').trim().slice(0, 2000);
@@ -190,18 +191,21 @@ systemConfigSchema.statics.saveSiteTextOverride = async function ({
   const rawSize = Number(fontSizePx);
   const cleanSize = Number.isFinite(rawSize) && rawSize >= 10 && rawSize <= 96 ? Math.round(rawSize) : null;
   const cleanWeight = ['400', '500', '600', '700', '800'].includes(String(fontWeight || '')) ? String(fontWeight) : null;
+  const cleanX = Number.isFinite(Number(offsetX)) ? Math.max(-1600, Math.min(1600, Math.round(Number(offsetX)))) : 0;
+  const cleanY = Number.isFinite(Number(offsetY)) ? Math.max(-1600, Math.min(1600, Math.round(Number(offsetY)))) : 0;
   await this.findOneAndUpdate(
     {_id: id},
     {
       $set: {
         pagePath, targetKey, customText: cleanText,
-        textColor: cleanColor, fontFamily: cleanFont, fontSizePx: cleanSize, fontWeight: cleanWeight
+        textColor: cleanColor, fontFamily: cleanFont, fontSizePx: cleanSize, fontWeight: cleanWeight,
+        offsetX: cleanX, offsetY: cleanY
       },
       $setOnInsert: {_id: id}
     },
     {upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true}
   );
-  return this.findById(id).select('_id pagePath targetKey customText textColor fontFamily fontSizePx fontWeight updatedAt').lean();
+  return this.findById(id).select('_id pagePath targetKey customText textColor fontFamily fontSizePx fontWeight offsetX offsetY updatedAt').lean();
 };
 
 systemConfigSchema.statics.deleteSiteTextOverride = async function (id) {

@@ -339,6 +339,8 @@ function createAdminRouter({
     const fontFamily = req.body?.fontFamily || null;
     const fontSizePx = req.body?.fontSizePx || null;
     const fontWeight = req.body?.fontWeight || null;
+    const offsetX = Number.isFinite(Number(req.body?.offsetX)) ? Number(req.body.offsetX) : 0;
+    const offsetY = Number.isFinite(Number(req.body?.offsetY)) ? Number(req.body.offsetY) : 0;
     if (!pagePath || !SiteMediaTargets.validTargetKey(targetKey)) {
       return res.status(400).json({mesaj: 'Geçersiz sayfa veya hedef seçimi.'});
     }
@@ -347,7 +349,7 @@ function createAdminRouter({
     }
     try {
       const override = await SystemConfig.saveSiteTextOverride({
-        pagePath, targetKey, customText, textColor, fontFamily, fontSizePx, fontWeight
+        pagePath, targetKey, customText, textColor, fontFamily, fontSizePx, fontWeight, offsetX, offsetY
       });
       await audit(req, 'site_text.updated', 'site_text', override._id, {pagePath, targetKey, textColor, fontFamily});
       res.status(201).json({mesaj: 'Sayfa yazısı ve stili güncellendi.', override});

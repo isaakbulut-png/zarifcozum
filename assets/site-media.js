@@ -15,12 +15,36 @@
   stylesheet.href = '/assets/site-media.css?v=3';
   document.head.append(stylesheet);
 
+  function setRichColoredContent(el, rawText) {
+    const preserved = [...el.children].filter(ch => ch.classList?.contains('site-media-placement'));
+    el.dataset.zcRichText = rawText;
+    el.textContent = '';
+
+    // Güvenli çift/çok renkli metin: [[#RRGGBB|metin]] -> <span style="color:#RRGGBB !important">
+    const tokenRe = /\[\[(#[0-9a-f]{3,8})\|([^\]]+)\]\]/gi;
+    let lastIdx = 0;
+    let m;
+    while ((m = tokenRe.exec(rawText)) !== null) {
+      if (m.index > lastIdx) {
+        el.append(document.createTextNode(rawText.slice(lastIdx, m.index)));
+      }
+      const sp = document.createElement('span');
+      sp.style.setProperty('color', m[1], 'important');
+      sp.style.setProperty('-webkit-text-fill-color', m[1], 'important');
+      sp.textContent = m[2];
+      el.append(sp);
+      lastIdx = m.index + m[0].length;
+    }
+    if (lastIdx < rawText.length) {
+      el.append(document.createTextNode(rawText.slice(lastIdx)));
+    }
+    preserved.forEach(node => el.append(node));
+  }
+
   function applyTextStyle(el, override) {
     if (!el || !override) return;
     if (typeof override.customText === 'string' && override.customText.trim()) {
-      const preserved = [...el.children].filter(ch => ch.classList?.contains('site-media-placement'));
-      el.textContent = override.customText;
-      preserved.forEach(node => el.append(node));
+      setRichColoredContent(el, override.customText);
     }
     if (override.textColor) {
       el.style.setProperty('color', override.textColor, 'important');
@@ -38,6 +62,22 @@
 
     if (override.fontWeight) el.style.setProperty('font-weight', String(override.fontWeight), 'important');
     else if (override.resetWeight) el.style.removeProperty('font-weight');
+
+    if (override.offsetX !== undefined || override.offsetY !== undefined) {
+      const ox = Number.isFinite(Number(override.offsetX)) ? Math.round(Number(override.offsetX)) : 0;
+      const oy = Number.isFinite(Number(override.offsetY)) ? Math.round(Number(override.offsetY)) : 0;
+      el.dataset.zcTextOffsetX = String(ox);
+      el.dataset.zcTextOffsetY = String(oy);
+      if (ox !== 0 || oy !== 0) {
+        el.style.setProperty('transform', `translate(${ox}px, ${oy}px)`, 'important');
+        if (getComputedStyle(el).position === 'static') {
+          el.style.setProperty('position', 'relative');
+        }
+        el.style.setProperty('z-index', '12');
+      } else {
+        el.style.removeProperty('transform');
+      }
+    }
   }
 
   async function loadLottie() {
@@ -328,6 +368,80 @@
     badge.hidden = true;
     document.body.append(badge);
 
+    // Seçili yazı öğesi için fareyle sürükle-bırak tutamacı
+    const textDragHandle = document.createElement('div');
+    textDragHandle.id = 'siteTextDragHandle';
+    textDragHandle.hidden = true;
+    textDragHandle.textContent = '✋ Yazıyı Sürükle';
+    document.body.append(textDragHandle);
+
+    let selectedTargetMeta = null;
+
+    const positionTextDragHandle = (el) => {
+      if (!el || !['H1', 'H2', 'H3', 'P', 'A', 'BUTTON'].includes(el.tagName)) {
+        textDragHandle.hidden = true;
+        return;
+      }
+      const r = el.getBoundingClientRect();
+      textDragHandle.style.left = `${Math.max(8, Math.min(window.innerWidth - 170, r.left))}px`;
+      textDragHandle.style.top = `${Math.max(8, r.top - 30)}px`;
+      textDragHandle.hidden = false;
+    };
+
+    let tDragging = false;
+    let tStartClientX = 0;
+    let tStartClientY = 0;
+    let tStartX = 0;
+    let tStartY = 0;
+    let tCurX = 0;
+    let tCurY = 0;
+
+    textDragHandle.addEventListener('pointerdown', (e) => {
+      if (!selectedElement || !selectedTargetMeta) return;
+      e.preventDefault();
+      e.stopPropagation();
+      tDragging = true;
+      tStartClientX = e.clientX;
+      tStartClientY = e.clientY;
+      tStartX = Number(selectedElement.dataset.zcTextOffsetX) || 0;
+      tStartY = Number(selectedElement.dataset.zcTextOffsetY) || 0;
+      tCurX = tStartX;
+      tCurY = tStartY;
+      textDragHandle.classList.add('is-dragging');
+      textDragHandle.setPointerCapture(e.pointerId);
+    });
+
+    textDragHandle.addEventListener('pointermove', (e) => {
+      if (!tDragging || !selectedElement) return;
+      e.preventDefault();
+      e.stopPropagation();
+      tCurX = Math.max(-1600, Math.min(1600, Math.round(tStartX + (e.clientX - tStartClientX))));
+      tCurY = Math.max(-1600, Math.min(1600, Math.round(tStartY + (e.clientY - tStartClientY))));
+      applyTextStyle(selectedElement, { offsetX: tCurX, offsetY: tCurY });
+      positionTextDragHandle(selectedElement);
+      textDragHandle.textContent = `✋ X: ${tCurX >= 0 ? '+' : ''}${tCurX}px · Y: ${tCurY >= 0 ? '+' : ''}${tCurY}px`;
+    });
+
+    textDragHandle.addEventListener('pointerup', (e) => {
+      if (!tDragging || !selectedElement || !selectedTargetMeta) return;
+      e.preventDefault();
+      e.stopPropagation();
+      tDragging = false;
+      textDragHandle.classList.remove('is-dragging');
+      textDragHandle.textContent = `💾 Kaydedildi (${tCurX}px, ${tCurY}px)`;
+      window.parent.postMessage({
+        type: 'site-text-moved',
+        pagePath,
+        targetKey: selectedTargetMeta.key,
+        offsetX: tCurX,
+        offsetY: tCurY
+      }, window.location.origin);
+    });
+
+    window.addEventListener('scroll', () => {
+      if (selectedElement && !textDragHandle.hidden) positionTextDragHandle(selectedElement);
+    }, { passive: true });
+
     const announce = () => {
       window.parent.postMessage({
         type: 'site-media-targets',
@@ -370,14 +484,17 @@
     }, true);
 
     document.addEventListener('click', event => {
-      if (event.target.closest?.('.site-media-placement')) return;
+      if (event.target.closest?.('.site-media-placement') || event.target.id === 'siteTextDragHandle') return;
       const found = findTargetForNode(event.target);
       if (!found) return;
       event.preventDefault();
       event.stopImmediatePropagation();
       selectedElement?.classList.remove('site-media-target-selected');
       selectedElement = found.element;
+      selectedTargetMeta = found;
       selectedElement.classList.add('site-media-target-selected');
+      textDragHandle.textContent = '✋ Yazıyı Sürükle';
+      positionTextDragHandle(selectedElement);
       const cs = getComputedStyle(found.element);
       window.parent.postMessage({
         type: 'site-media-target-selected',
@@ -386,10 +503,15 @@
           tag: found.tag, kind: found.kind, id: found.id, label: found.label,
           context: found.context, occurrence: found.occurrence, key: found.key,
           currentText: (() => {
+            if (found.element.dataset && typeof found.element.dataset.zcRichText === 'string') {
+              return found.element.dataset.zcRichText;
+            }
             const clone = found.element.cloneNode(true);
             clone.querySelectorAll?.('.site-media-placement, #siteMediaHoverBadge').forEach(n => n.remove());
             return String(clone.textContent || '').replace(/\s+/g, ' ').trim();
           })(),
+          offsetX: Number(found.element.dataset?.zcTextOffsetX) || 0,
+          offsetY: Number(found.element.dataset?.zcTextOffsetY) || 0,
           computedFontSize: parseInt(cs.fontSize, 10) || 16
         }
       }, window.location.origin);
