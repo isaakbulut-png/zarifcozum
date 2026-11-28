@@ -349,9 +349,110 @@
     const paintSelectionBtn = $('paintSelectedTextBtn');
     const stripColorsBtn = $('stripTextColorsBtn');
     const resetTextPosBtn = $('resetTextPosBtn');
+    const undoTextBtn = $('undoSiteTextBtn');
     let selectedTextColor = '';
     let textOffsetX = 0;
     let textOffsetY = 0;
+
+    // Ctrl+Z / Ctrl+Y Geri Al & İleri Al Geçmiş Yığını
+    let textHistory = [];
+    let textHistoryIdx = -1;
+    let textInputDebounce = null;
+
+    const captureTextSnapshot = () => ({
+      customText: textInput?.value || '',
+      textColor: selectedTextColor || '',
+      fontFamily: textFontSelect?.value || '',
+      fontSize: textSizeInput?.value || '9',
+      fontWeight: textWeightSelect?.value || '',
+      offsetX: textOffsetX,
+      offsetY: textOffsetY
+    });
+
+    const snapshotsEqual = (a, b) => a && b &&
+      a.customText === b.customText &&
+      a.textColor === b.textColor &&
+      a.fontFamily === b.fontFamily &&
+      a.fontSize === b.fontSize &&
+      a.fontWeight === b.fontWeight &&
+      a.offsetX === b.offsetX &&
+      a.offsetY === b.offsetY;
+
+    const updateUndoBtnState = () => {
+      if (undoTextBtn) undoTextBtn.disabled = textHistoryIdx <= 0;
+    };
+
+    const pushTextHistory = () => {
+      const snap = captureTextSnapshot();
+      if (textHistoryIdx >= 0 && snapshotsEqual(textHistory[textHistoryIdx], snap)) return;
+      textHistory = textHistory.slice(0, textHistoryIdx + 1);
+      textHistory.push(snap);
+      if (textHistory.length > 40) textHistory.shift();
+      textHistoryIdx = textHistory.length - 1;
+      updateUndoBtnState();
+    };
+
+    const resetTextHistory = () => {
+      textHistory = [captureTextSnapshot()];
+      textHistoryIdx = 0;
+      updateUndoBtnState();
+    };
+
+    const applyTextSnapshot = (snap) => {
+      if (!snap) return;
+      if (textInput) textInput.value = snap.customText;
+      selectedTextColor = snap.textColor || '';
+      if (textColorInput && selectedTextColor) textColorInput.value = selectedTextColor;
+      if (textFontSelect) textFontSelect.value = snap.fontFamily || '';
+      if (textSizeInput) {
+        textSizeInput.value = snap.fontSize || '9';
+        const v = Number(textSizeInput.value || 0);
+        if (textSizeVal) textSizeVal.textContent = v >= 10 ? `${v}px` : 'Varsayılan';
+      }
+      if (textWeightSelect) textWeightSelect.value = snap.fontWeight || '';
+      textOffsetX = Number(snap.offsetX) || 0;
+      textOffsetY = Number(snap.offsetY) || 0;
+      document.querySelectorAll('[data-zc-color-swatch]').forEach(b => {
+        b.style.outline = (selectedTextColor && b.dataset.zcColorSwatch === selectedTextColor) ? '2.5px solid #0f172a' : 'none';
+        b.style.outlineOffset = '2px';
+      });
+      pushLiveTextPreview();
+      updateUndoBtnState();
+    };
+
+    const undoTextChange = () => {
+      if (textHistoryIdx <= 0) return false;
+      textHistoryIdx -= 1;
+      applyTextSnapshot(textHistory[textHistoryIdx]);
+      setMsg(textMsgEl, `↶ Geri alındı (${textHistoryIdx + 1}/${textHistory.length}). Kalıcı olması için "💾 Yazıyı & Stili Kaydet"e tıklayın.`, true);
+      return true;
+    };
+
+    const redoTextChange = () => {
+      if (textHistoryIdx >= textHistory.length - 1) return false;
+      textHistoryIdx += 1;
+      applyTextSnapshot(textHistory[textHistoryIdx]);
+      setMsg(textMsgEl, `↷ İleri alındı (${textHistoryIdx + 1}/${textHistory.length}).`, true);
+      return true;
+    };
+
+    undoTextBtn?.addEventListener('click', undoTextChange);
+
+    document.addEventListener('keydown', (e) => {
+      if (!textEditorBox || textEditorBox.hidden) return;
+      const key = (e.key || '').toLowerCase();
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && key === 'z' && !e.shiftKey) {
+        if (textHistoryIdx > 0) {
+          e.preventDefault();
+          undoTextChange();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && !e.altKey && (key === 'y' || (key === 'z' && e.shiftKey))) {
+        if (textHistoryIdx < textHistory.length - 1) {
+          e.preventDefault();
+          redoTextChange();
+        }
+      }
+    });
 
     const pushLiveTextPreview = () => {
       if (!iframe?.contentWindow || !targetSelect.value) return;
@@ -385,6 +486,7 @@
       textInput.value = val.slice(0, start) + wrapped + val.slice(end);
       textInput.focus();
       textInput.setSelectionRange(start, start + wrapped.length);
+      pushTextHistory();
       pushLiveTextPreview();
       return true;
     };
@@ -404,6 +506,7 @@
           b.style.outline = b === sw ? '2.5px solid #0f172a' : 'none';
           b.style.outlineOffset = '2px';
         });
+        pushTextHistory();
         pushLiveTextPreview();
       });
     });
@@ -421,6 +524,7 @@
     stripColorsBtn?.addEventListener('click', () => {
       if (!textInput) return;
       textInput.value = textInput.value.replace(/\[\[#[0-9a-f]{3,8}\|([^\]]+)\]\]/gi, '$1');
+      pushTextHistory();
       pushLiveTextPreview();
       setMsg(textMsgEl, '🧹 Parçalı renk işaretleri temizlendi.', true);
     });
@@ -428,6 +532,7 @@
     resetTextPosBtn?.addEventListener('click', () => {
       textOffsetX = 0;
       textOffsetY = 0;
+      pushTextHistory();
       pushLiveTextPreview();
       setMsg(textMsgEl, '↺ Yazı konumu sıfırlandı (0px, 0px). Kaydetmek için "💾 Yazıyı & Stili Kaydet"e tıklayın.', true);
     });
@@ -435,6 +540,7 @@
     const onColorPick = () => {
       selectedTextColor = textColorInput.value;
       document.querySelectorAll('[data-zc-color-swatch]').forEach(b => { b.style.outline = 'none'; });
+      pushTextHistory();
       pushLiveTextPreview();
     };
     textColorInput?.addEventListener('input', onColorPick);
@@ -443,17 +549,23 @@
     textColorResetBtn?.addEventListener('click', () => {
       selectedTextColor = '';
       document.querySelectorAll('[data-zc-color-swatch]').forEach(b => { b.style.outline = 'none'; });
+      pushTextHistory();
       pushLiveTextPreview();
     });
 
-    textFontSelect?.addEventListener('change', pushLiveTextPreview);
-    textWeightSelect?.addEventListener('change', pushLiveTextPreview);
-    textInput?.addEventListener('input', pushLiveTextPreview);
+    textFontSelect?.addEventListener('change', () => { pushTextHistory(); pushLiveTextPreview(); });
+    textWeightSelect?.addEventListener('change', () => { pushTextHistory(); pushLiveTextPreview(); });
+    textInput?.addEventListener('input', () => {
+      pushLiveTextPreview();
+      clearTimeout(textInputDebounce);
+      textInputDebounce = setTimeout(pushTextHistory, 350);
+    });
     textSizeInput?.addEventListener('input', () => {
       const v = Number(textSizeInput.value || 0);
       if (textSizeVal) textSizeVal.textContent = v >= 10 ? `${v}px` : 'Varsayılan';
       pushLiveTextPreview();
     });
+    textSizeInput?.addEventListener('change', pushTextHistory);
 
     if (!form || !pageSelect || !window.SiteMediaTargets) return;
 
@@ -540,6 +652,7 @@
         textOffsetX = Number(selected.offsetX) || 0;
         textOffsetY = Number(selected.offsetY) || 0;
         saveTextBtn.disabled = false;
+        resetTextHistory();
         setMsg(textMsgEl, '', true);
       } else {
         textEditorBox.hidden = true;
@@ -759,6 +872,7 @@
       if (data.type === 'site-text-moved' && data.targetKey) {
         textOffsetX = Number(data.offsetX) || 0;
         textOffsetY = Number(data.offsetY) || 0;
+        pushTextHistory();
         const customText = (textInput?.value || '').trim();
         const sz = Number(textSizeInput?.value || 0);
         if (customText && pageSelect.value) {
